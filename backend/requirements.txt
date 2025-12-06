@@ -25,3 +25,4 @@ django-extensions==3.2.3
 pytest==7.4.3
 pytest-django==4.7.0
 djangorestframework-jwt==1.11.0
+pytest-cov==4.1.0
