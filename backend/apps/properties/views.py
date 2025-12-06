@@ -82,8 +82,8 @@ class PropertyViewSet(viewsets.ModelViewSet):
     
     @action(detail=True, methods=['get'], permission_classes=[AllowAny])
     def availability(self, request, pk=None):
-        """Check property availability"""
-        property = self.get_object()
+        """Check property availability for given dates"""
+        property_obj = self.get_object()
         check_in = request.query_params.get('check_in')
         check_out = request.query_params.get('check_out')
         
@@ -93,5 +93,50 @@ class PropertyViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # TODO: Implement availability logic based on bookings
-        return Response({'available': property.is_available})
+        try:
+            from datetime import datetime
+            check_in_date = datetime.strptime(check_in, '%Y-%m-%d').date()
+            check_out_date = datetime.strptime(check_out, '%Y-%m-%d').date()
+        except ValueError:
+            return Response(
+                {'error': 'Invalid date format. Use YYYY-MM-DD'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Check if property is active
+        if property_obj.status != 'active':
+            return Response({
+                'available': False,
+                'reason': 'Property is not active'
+            })
+        
+        # Check booking availability
+        from utils.helpers import is_booking_date_available
+        available = is_booking_date_available(property_obj, check_in_date, check_out_date)
+        
+        response_data = {
+            'available': available,
+            'property_id': property_obj.id,
+            'check_in': check_in,
+            'check_out': check_out,
+        }
+        
+        if available:
+            # Calculate pricing
+            from utils.helpers import calculate_nights, calculate_booking_total
+            nights = calculate_nights(check_in_date, check_out_date)
+            totals = calculate_booking_total(property_obj.price_per_night, nights)
+            response_data.update({
+                'nights': nights,
+                'price_per_night': property_obj.price_per_night,
+                'pricing': {
+                    'nightly_total': str(totals['nightly_total']),
+                    'service_fee': str(totals['service_fee']),
+                    'commission_fee': str(totals['commission_fee']),
+                    'grand_total': str(totals['grand_total']),
+                }
+            })
+        else:
+            response_data['reason'] = 'Property is already booked for these dates'
+        
+        return Response(response_data)

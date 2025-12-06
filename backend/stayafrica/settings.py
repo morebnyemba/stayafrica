@@ -203,6 +203,22 @@ COMMISSION_RATE = float(os.getenv('COMMISSION_RATE', '0.07'))
 SERVICE_FEE = float(os.getenv('SERVICE_FEE', '3.00'))
 DEFAULT_CURRENCY = os.getenv('DEFAULT_CURRENCY', 'USD')
 
+# Email Configuration
+EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
+EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', '587'))
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 'noreply@stayafrica.com')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'StayAfrica <noreply@stayafrica.com>')
+
+# Frontend URL for emails
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')
+
+# Create logs directory if it doesn't exist
+import os as log_os
+log_os.makedirs(BASE_DIR / 'logs', exist_ok=True)
+
 # Logging
 LOGGING = {
     'version': 1,
@@ -212,9 +228,9 @@ LOGGING = {
             'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
             'style': '{',
         },
-        'json': {
-            '()': 'pythonjsonlogger.jsonlogger.JsonFormatter',
-            'format': '%(asctime)s %(name)s %(levelname)s %(message)s',
+        'simple': {
+            'format': '{levelname} {asctime} {message}',
+            'style': '{',
         },
     },
     'handlers': {
@@ -225,7 +241,7 @@ LOGGING = {
         'file': {
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': BASE_DIR / 'logs/stayafrica.log',
-            'formatter': 'json',
+            'formatter': 'simple',
             'maxBytes': 1024 * 1024 * 10,  # 10MB
             'backupCount': 5,
         },
@@ -234,7 +250,46 @@ LOGGING = {
         'handlers': ['console', 'file'],
         'level': 'INFO',
     },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'apps': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'services': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'tasks': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
 }
+
+# Cache Configuration
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+        'LOCATION': os.getenv('REDIS_URL', 'redis://localhost:6379/1'),
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        },
+        'KEY_PREFIX': 'stayafrica',
+        'TIMEOUT': 300,  # 5 minutes default
+    }
+}
+
+# Rate Limiting
+RATELIMIT_ENABLE = os.getenv('RATELIMIT_ENABLE', 'True') == 'True'
+RATELIMIT_USE_CACHE = 'default'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
