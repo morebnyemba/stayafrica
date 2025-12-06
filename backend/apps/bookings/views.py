@@ -104,8 +104,8 @@ class BookingViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # Check if still available (no conflicts)
-        if not is_booking_date_available(booking.property, booking.check_in, booking.check_out):
+        # Check if still available (no conflicts, excluding current booking)
+        if not is_booking_date_available(booking.property, booking.check_in, booking.check_out, exclude_booking_id=booking.id):
             return Response(
                 {'error': 'Booking dates are no longer available'},
                 status=status.HTTP_400_BAD_REQUEST

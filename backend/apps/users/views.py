@@ -166,7 +166,11 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['post'], permission_classes=[AllowAny])
     @api_ratelimit(rate='3/h')
     def request_password_reset(self, request):
-        """Request password reset email"""
+        """
+        Request password reset email
+        NOTE: Full implementation requires token storage (Redis/Database)
+        This is a placeholder that demonstrates the flow
+        """
         email = request.data.get('email', '').lower().strip()
         
         if not email:
@@ -180,10 +184,16 @@ class UserViewSet(viewsets.ModelViewSet):
             
             # Generate reset token
             from utils.helpers import generate_verification_token
+            import hashlib
             reset_token = generate_verification_token()
             
-            # TODO: Store reset token in Redis or database with expiry
-            # For now, just send the email
+            # Create secure user identifier
+            user_hash = hashlib.sha256(f"{user.id}{user.email}".encode()).hexdigest()[:16]
+            
+            # TODO: Store reset token in Redis with 1-hour expiry
+            # from django.core.cache import cache
+            # cache.set(f'reset_{user_hash}', reset_token, timeout=3600)
+            
             from tasks.email_tasks import send_password_reset_email
             send_password_reset_email.delay(user.id, reset_token)
             

@@ -42,17 +42,22 @@ def send_verification_email(user_id):
     """Send email verification link to user"""
     from apps.users.models import User
     from utils.helpers import generate_verification_token
+    import hashlib
     
     try:
         user = User.objects.get(id=user_id)
         token = generate_verification_token()
         
-        # Store token (in production, use Redis or database)
-        # For now, we'll just send the email
+        # Create a hashed user identifier for security
+        user_hash = hashlib.sha256(f"{user.id}{user.email}".encode()).hexdigest()[:16]
+        
+        # Store token (in production, use Redis or database with expiry)
+        # TODO: Implement token storage with Redis
+        # cache.set(f'verify_{user_hash}', token, timeout=86400)  # 24 hours
         
         subject = 'Verify your StayAfrica account'
         message = f'Welcome to StayAfrica! Please verify your account by clicking the link below:\n\n'
-        message += f'{settings.FRONTEND_URL}/verify/{user.id}/{token}\n\n'
+        message += f'{settings.FRONTEND_URL}/verify/{user_hash}/{token}\n\n'
         message += 'This link will expire in 24 hours.\n\n'
         message += 'If you did not create this account, please ignore this email.'
         

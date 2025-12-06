@@ -140,7 +140,13 @@ class PaymentViewSet(viewsets.ModelViewSet):
         )
         
         # Verify webhook signature if available
-        webhook_secret = getattr(settings, f'{provider.upper()}_WEBHOOK_SECRET', None)
+        webhook_secrets = {
+            'paynow': getattr(settings, 'PAYNOW_WEBHOOK_SECRET', None),
+            'payfast': getattr(settings, 'PAYFAST_WEBHOOK_SECRET', None),
+            'stripe': getattr(settings, 'STRIPE_WEBHOOK_SECRET', None),
+            'ozow': getattr(settings, 'OZOW_WEBHOOK_SECRET', None),
+        }
+        webhook_secret = webhook_secrets.get(provider.lower())
         if webhook_secret and signature:
             payload = json.dumps(request.data)
             if not verify_webhook_signature(payload, signature, webhook_secret):

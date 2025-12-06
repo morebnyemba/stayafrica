@@ -25,7 +25,7 @@ def calculate_booking_total(price_per_night, nights, cleaning_fee=0, service_fee
     service_fee = Decimal(str(service_fee))
     
     nightly_total = price_per_night * nights
-    commission_rate = Decimal(str(settings.COMMISSION_RATE))
+    commission_rate = Decimal(str(getattr(settings, 'COMMISSION_RATE', 0.07)))
     commission_fee = (nightly_total + service_fee) * commission_rate
     
     grand_total = nightly_total + service_fee + cleaning_fee
@@ -101,7 +101,7 @@ def paginate_queryset(queryset, page=1, page_size=20):
     return queryset[start:end]
 
 
-def is_booking_date_available(property_obj, check_in, check_out):
+def is_booking_date_available(property_obj, check_in, check_out, exclude_booking_id=None):
     """Check if property is available for given dates"""
     from apps.bookings.models import Booking
     
@@ -113,5 +113,9 @@ def is_booking_date_available(property_obj, check_in, check_out):
         check_in__lt=check_out,
         check_out__gt=check_in
     )
+    
+    # Exclude current booking if provided (for updates)
+    if exclude_booking_id:
+        conflicting_bookings = conflicting_bookings.exclude(id=exclude_booking_id)
     
     return not conflicting_bookings.exists()

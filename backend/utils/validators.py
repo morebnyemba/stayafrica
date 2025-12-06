@@ -1,6 +1,7 @@
 """
 Custom validators for StayAfrica backend
 """
+import re
 from datetime import date, timedelta
 from django.core.exceptions import ValidationError
 from django.utils import timezone
@@ -45,7 +46,6 @@ def validate_booking_dates(check_in, check_out):
 
 def validate_phone_number(value):
     """Validate phone number format"""
-    import re
     pattern = r'^\+?1?\d{9,15}$'
     if not re.match(pattern, value):
         raise ValidationError("Phone number must be between 9 and 15 digits")
