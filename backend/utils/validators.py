@@ -21,9 +21,12 @@ def validate_checkout_after_checkin(check_in, check_out):
 
 def validate_booking_dates(check_in, check_out):
     """Validate booking dates are valid"""
+    from apps.admin_dashboard.models import SystemConfiguration
+    
     today = date.today()
-    max_advance_days = 365  # Max 1 year in advance
-    max_stay_days = 90  # Max 90 days stay
+    config = SystemConfiguration.get_config()
+    max_advance_days = config.max_advance_booking_days
+    max_stay_days = config.max_stay_duration_days
     
     # Check if check-in is not in the past
     if check_in < today:

@@ -139,12 +139,15 @@ class PaymentViewSet(viewsets.ModelViewSet):
             request.headers.get('Stripe-Signature')
         )
         
-        # Verify webhook signature if available
+        # Verify webhook signature if available (from system config)
+        from apps.admin_dashboard.models import SystemConfiguration
+        config = SystemConfiguration.get_config()
+        
         webhook_secrets = {
-            'paynow': getattr(settings, 'PAYNOW_WEBHOOK_SECRET', None),
-            'payfast': getattr(settings, 'PAYFAST_WEBHOOK_SECRET', None),
-            'stripe': getattr(settings, 'STRIPE_WEBHOOK_SECRET', None),
-            'ozow': getattr(settings, 'OZOW_WEBHOOK_SECRET', None),
+            'paynow': config.paynow_webhook_secret,
+            'payfast': config.payfast_webhook_secret,
+            'stripe': config.stripe_webhook_secret,
+            'ozow': '',  # Not configured yet
         }
         webhook_secret = webhook_secrets.get(provider.lower())
         if webhook_secret and signature:

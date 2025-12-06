@@ -4,6 +4,7 @@ Django REST Framework API for the StayAfrica booking platform.
 
 ## Features
 
+- **Admin-Configurable Settings**: Manage charges, payment gateway keys, and business rules via Django Admin
 - **Multi-Regional Payment Processing**: Supports Paynow (Zimbabwe), PayFast (South Africa), Stripe (International), and Cash on Arrival
 - **Geospatial Search**: PostGIS-powered property search by location and radius
 - **Async Task Processing**: Celery for email notifications and image processing
@@ -104,10 +105,20 @@ backend/
    python manage.py createsuperuser
    ```
 
-7. **Run development server**
+7. **Initialize system configuration**
+   ```bash
+   python manage.py init_system_config
+   ```
+
+8. **Run development server**
    ```bash
    python manage.py runserver
    ```
+
+9. **Configure settings in Django Admin**
+   - Navigate to http://localhost:8000/admin/
+   - Go to "System Configuration"
+   - Update pricing, payment gateway keys, and business rules as needed
 
 ### Docker Development
 
@@ -194,6 +205,39 @@ FRONTEND_URL=http://localhost:3000
 # Rate Limiting
 RATELIMIT_ENABLE=True
 ```
+
+## Admin-Configurable Settings
+
+All system settings can be managed through Django Admin without code changes or redeployment:
+
+### Pricing Configuration
+- **Commission Rate**: Platform commission (default: 7%)
+- **Service Fee**: Per-booking service fee (default: $3.00)
+- **Default Currency**: Base currency code (default: USD)
+
+### Payment Gateway Configuration
+Configure API keys and secrets for each payment provider:
+- **Paynow** (Zimbabwe): Integration ID, Key, Webhook Secret
+- **PayFast** (South Africa): Merchant ID, Key, Passphrase, Webhook Secret
+- **Stripe** (International): Secret Key, Publishable Key, Webhook Secret
+
+### Business Rules
+- **Max Advance Booking**: Days ahead bookings allowed (default: 365)
+- **Max Stay Duration**: Maximum nights per booking (default: 90)
+- **Review Window**: Days after checkout to submit review (default: 30)
+- **Review Edit Window**: Days to edit submitted review (default: 7)
+
+### Email Settings
+- **Admin Email**: Notifications email
+- **Support Email**: Customer support address
+
+### Maintenance Mode
+- **Maintenance Mode**: Toggle API to read-only
+- **Maintenance Message**: Display message during maintenance
+
+**To Configure**: Login to Django Admin → System Configuration
+
+**Note**: Settings are cached for 1 hour. After updating, restart the application for immediate effect, or wait for cache expiry.
 
 ## API Endpoints
 

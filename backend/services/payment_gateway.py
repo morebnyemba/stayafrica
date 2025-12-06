@@ -21,8 +21,11 @@ class PaymentGatewayService:
     }
     
     def __init__(self):
-        self.commission_rate = settings.COMMISSION_RATE
-        self.service_fee = Decimal(str(settings.SERVICE_FEE))
+        from apps.admin_dashboard.models import SystemConfiguration
+        config = SystemConfiguration.get_config()
+        self.commission_rate = config.commission_rate
+        self.service_fee = Decimal(str(config.service_fee))
+        self.config = config
     
     def get_available_providers(self, user_country):
         """Get available payment providers for a specific country"""
@@ -52,12 +55,40 @@ class PaymentGatewayService:
             'host_payout': base_price + cleaning_fee - commission,
         }
     
+    def get_provider_credentials(self, provider):
+        """Get credentials for a specific payment provider"""
+        credentials = {}
+        
+        if provider == 'paynow':
+            credentials = {
+                'integration_id': self.config.paynow_integration_id,
+                'integration_key': self.config.paynow_integration_key,
+                'webhook_secret': self.config.paynow_webhook_secret,
+            }
+        elif provider == 'payfast':
+            credentials = {
+                'merchant_id': self.config.payfast_merchant_id,
+                'merchant_key': self.config.payfast_merchant_key,
+                'passphrase': self.config.payfast_passphrase,
+                'webhook_secret': self.config.payfast_webhook_secret,
+            }
+        elif provider == 'stripe':
+            credentials = {
+                'secret_key': self.config.stripe_secret_key,
+                'publishable_key': self.config.stripe_publishable_key,
+                'webhook_secret': self.config.stripe_webhook_secret,
+            }
+        
+        return credentials
+    
     def initiate_payment(self, booking, provider):
         """Initiate payment with specified provider"""
-        # This will be implemented with actual provider SDKs
+        credentials = self.get_provider_credentials(provider)
+        # This will be implemented with actual provider SDKs using credentials
         pass
     
     def handle_webhook(self, provider, data):
         """Handle webhook from payment provider"""
-        # This will be implemented with webhook handlers
+        credentials = self.get_provider_credentials(provider)
+        # This will be implemented with webhook handlers using credentials
         pass

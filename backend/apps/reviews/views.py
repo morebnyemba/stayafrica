@@ -89,8 +89,11 @@ class ReviewViewSet(viewsets.ModelViewSet):
         if booking.check_out > date.today():
             raise ValidationError('Can only review after checkout date')
         
-        # Check review window (e.g., within 30 days of checkout)
-        max_review_days = 30
+        # Check review window (configurable via admin)
+        from apps.admin_dashboard.models import SystemConfiguration
+        config = SystemConfiguration.get_config()
+        max_review_days = config.review_window_days
+        
         if (date.today() - booking.check_out).days > max_review_days:
             raise ValidationError(f'Review period has expired. Reviews must be submitted within {max_review_days} days of checkout')
         
@@ -135,8 +138,11 @@ class ReviewViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_403_FORBIDDEN
             )
         
-        # Check if within update window (7 days)
-        update_window_days = 7
+        # Check if within update window (configurable via admin)
+        from apps.admin_dashboard.models import SystemConfiguration
+        config = SystemConfiguration.get_config()
+        update_window_days = config.review_edit_window_days
+        
         if (date.today() - review.created_at.date()).days > update_window_days:
             return Response(
                 {'error': f'Reviews can only be updated within {update_window_days} days of creation'},

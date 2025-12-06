@@ -18,14 +18,22 @@ def calculate_nights(check_in, check_out):
     return (check_out - check_in).days
 
 
-def calculate_booking_total(price_per_night, nights, cleaning_fee=0, service_fee=3):
+def calculate_booking_total(price_per_night, nights, cleaning_fee=0, service_fee=None):
     """Calculate total booking cost"""
+    from apps.admin_dashboard.models import SystemConfiguration
+    
+    config = SystemConfiguration.get_config()
+    
     price_per_night = Decimal(str(price_per_night))
     cleaning_fee = Decimal(str(cleaning_fee))
+    
+    # Use service fee from config if not provided
+    if service_fee is None:
+        service_fee = config.service_fee
     service_fee = Decimal(str(service_fee))
     
     nightly_total = price_per_night * nights
-    commission_rate = Decimal(str(getattr(settings, 'COMMISSION_RATE', 0.07)))
+    commission_rate = Decimal(str(config.commission_rate))
     commission_fee = (nightly_total + service_fee) * commission_rate
     
     grand_total = nightly_total + service_fee + cleaning_fee
