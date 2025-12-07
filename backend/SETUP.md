@@ -1,31 +1,31 @@
 # Backend Development Setup Guide
 
+## Overview
+
+This guide covers setting up the StayAfrica Django backend with Python 3.13.9 and all the latest compatibility fixes.
+
 ## Prerequisites
 
-### Python Version
-- **Required:** Python 3.11 or higher
-- **Tested:** Python 3.13.9
-- **Download:** https://www.python.org/downloads/
+### System Requirements
+- **OS:** Windows, macOS, or Linux
+- **Python:** 3.11+ (tested with 3.13.9)
+- **Database:** PostgreSQL 15+ (optional - uses local SQLite for development)
+- **Redis:** 7.0+ (optional - for Celery tasks)
 
-### Windows-Specific Setup
-
-If you encounter issues installing `psycopg2-binary` on Windows:
-
-```bash
-# Option 1: Use pre-built wheel (Recommended)
-pip install psycopg2 --only-binary psycopg2
-
-# Option 2: Use conda (if available)
-conda install psycopg2
-
-# Option 3: Install from binary wheels
-pip install --only-binary :all: psycopg2-binary
-```
+### Download & Install
+1. **Python:** https://www.python.org/downloads/ (choose 3.12 or 3.13)
+2. **PostgreSQL:** https://www.postgresql.org/download/
+3. **Redis:** https://redis.io/download (Windows: use WSL2 or Docker)
 
 ## Installation Steps
 
-### 1. Create Virtual Environment
+### 1. Clone Repository
+```bash
+git clone https://github.com/morebnyemba/stayafrica.git
+cd stayafrica/backend
+```
 
+### 2. Create Virtual Environment
 ```bash
 # Windows
 python -m venv venv
@@ -36,245 +36,376 @@ python3 -m venv venv
 source venv/bin/activate
 ```
 
-### 2. Upgrade pip and build tools
-
+### 3. Upgrade pip and Tools
 ```bash
 pip install --upgrade pip setuptools wheel
 ```
 
-### 3. Install Dependencies
-
+### 4. Install Core Dependencies
 ```bash
-# For core development (Recommended for Windows)
+# Uses psycopg3 and compatible versions
 pip install -r requirements.txt
+```
 
-# For full development with optional packages
+**What's included in core requirements:**
+- Django 5.0.0
+- Django REST Framework 3.14.0
+- psycopg[binary] 3.1.18 (PostgreSQL driver - Windows compatible)
+- Celery 5.3.4 (async tasks)
+- Redis 5.0.1 (caching & message broker)
+- djangorestframework-simplejwt 5.5.1 (JWT authentication)
+- All other core dependencies
+
+### 5. (Optional) Install Development Dependencies
+```bash
+# For image processing, AWS S3, error tracking, etc.
 pip install -r requirements-dev.txt
 ```
 
-### 4. Install PostgreSQL with PostGIS
+**What's included in dev requirements:**
+- Pillow >= 10.2.0 (image processing)
+- django-imagekit 5.0.2 (image resizing)
+- django-storages 1.14.2 (AWS S3 storage)
+- boto3 1.34.0 (AWS SDK)
+- sentry-sdk 1.39.1 (error tracking)
 
-**Using Docker (Recommended):**
+### 6. Configure Environment Variables
 ```bash
-docker run --name stayafrica-db \
-  -e POSTGRES_PASSWORD=postgres \
-  -e POSTGRES_DB=stayafrica \
-  -p 5432:5432 \
-  -v pgdata:/var/lib/postgresql/data \
-  postgis/postgis:15
+# Create .env file in backend/ directory
+copy .env.example .env  # Windows
+# or
+cp .env.example .env    # macOS/Linux
 ```
 
-**Or use docker-compose:**
-```bash
-docker-compose up -d db
+**Edit `.env` with:**
 ```
-
-### 5. Create Environment File
-
-```bash
-cp .env.example .env
-```
-
-Edit `.env` with your configuration:
-```env
 DEBUG=True
-SECRET_KEY=your-secret-key-here
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/stayafrica
-ALLOWED_HOSTS=localhost,127.0.0.1
+SECRET_KEY=your-secret-key-here-change-in-production
+
+# Database (use PostgreSQL in production)
+DATABASE_ENGINE=django.contrib.gis.db.backends.postgis
+DATABASE_NAME=stayafrica_db
+DATABASE_USER=postgres
+DATABASE_PASSWORD=postgres
+DATABASE_HOST=localhost
+DATABASE_PORT=5432
+
+# Cache & Message Broker
+REDIS_URL=redis://localhost:6379/1
+CELERY_BROKER_URL=redis://localhost:6379/0
+
+# Frontend URL for email links
+FRONTEND_URL=http://localhost:3000
+
+# Email (uses console backend in development)
+EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
+
+# Optional: Sentry for error tracking
+SENTRY_DSN=https://your-sentry-dsn@sentry.io/your-project-id
 ```
 
-### 6. Run Migrations
-
+### 7. Run Migrations
 ```bash
 python manage.py migrate
 ```
 
-### 7. Create Superuser
-
+### 8. Create Superuser
 ```bash
 python manage.py createsuperuser
+# Follow the prompts to create admin account
 ```
 
-### 8. Start Development Server
+### 9. Collect Static Files
+```bash
+python manage.py collectstatic --noinput
+```
 
+### 10. Start Development Server
 ```bash
 python manage.py runserver
 ```
 
-Visit: http://localhost:8000
-
-## Docker Setup (Alternative)
-
-If using Docker, the setup is much simpler:
-
-```bash
-# From project root
-docker-compose up -d
-
-# Wait for services to start (10-15 seconds)
-
-# Run migrations
-docker-compose exec web python manage.py migrate
-
-# Create superuser
-docker-compose exec web python manage.py createsuperuser
-
-# Access API
-# http://localhost:8000
-# http://localhost:8000/api/docs/
-```
-
-## Troubleshooting
-
-### Issue: `ModuleNotFoundError: No module named 'psycopg2'`
-
-**Solution:**
-```bash
-# Try binary installation
-pip install psycopg2-binary --only-binary psycopg2-binary
-
-# Or use pre-built wheel on Windows
-pip install psycopg2==2.9.9 --only-binary :all:
-```
-
-### Issue: `Failed to build 'Pillow'`
-
-**Solution:** Pillow is optional and not required for core functionality. It's commented out in `requirements.txt`. If you need image processing, install pre-built wheel:
-
-```bash
-pip install Pillow --only-binary :all:
-```
-
-### Issue: Database connection failed
-
-**Solution:** Make sure PostgreSQL is running:
-
-```bash
-# Docker
-docker-compose up -d db
-docker-compose logs db
-
-# Or check PostgreSQL service on Windows
-# Services > PostgreSQL > Status
-```
-
-### Issue: `FATAL: role "postgres" does not exist`
-
-**Solution:** Create the default postgres role:
-
-```bash
-# Using docker-compose
-docker-compose exec db psql -U postgres -c "CREATE DATABASE stayafrica;"
-```
-
-## Development Workflow
-
-### Run Tests
-
-```bash
-pytest
-pytest --cov=apps  # With coverage
-```
-
-### Run Linting
-
-```bash
-# Using flake8
-flake8 apps/
-
-# Using pylint
-pylint apps/
-```
-
-### Format Code
-
-```bash
-# Using black
-black .
-
-# Using isort
-isort .
-```
-
-### Database Migrations
-
-```bash
-# Create new migration
-python manage.py makemigrations
-
-# Apply migrations
-python manage.py migrate
-
-# Show migration status
-python manage.py showmigrations
-```
+Server runs at: http://localhost:8000
 
 ## API Documentation
 
-Once running, access API documentation:
+### Swagger UI
+- **URL:** http://localhost:8000/api/docs/
+- **Interactive API exploration and testing**
 
-- **Swagger UI:** http://localhost:8000/api/docs/
-- **ReDoc:** http://localhost:8000/api/redoc/
-- **OpenAPI Schema:** http://localhost:8000/api/schema/
+### ReDoc
+- **URL:** http://localhost:8000/api/redoc/
+- **API documentation in ReDoc format**
 
-## Common Commands
+### OpenAPI Schema
+- **URL:** http://localhost:8000/api/schema/
 
-| Command | Purpose |
-|---------|---------|
-| `python manage.py runserver` | Start dev server |
-| `python manage.py migrate` | Apply migrations |
-| `python manage.py makemigrations` | Create migrations |
-| `python manage.py createsuperuser` | Create admin user |
-| `python manage.py collectstatic` | Collect static files |
-| `python manage.py shell` | Interactive Python shell |
-| `python manage.py test` | Run tests |
-| `pytest` | Run tests with pytest |
+## Database Setup
 
-## Requirements Files
+### Using PostgreSQL (Recommended for Production)
 
-### requirements.txt
-- Core dependencies for backend
-- PostgreSQL, Redis, Celery
-- Django and DRF
-- JWT authentication
-- No optional packages (safe for Windows)
+```bash
+# 1. Install PostgreSQL
+# https://www.postgresql.org/download/
 
-### requirements-dev.txt
-- All of requirements.txt PLUS
-- Optional packages like Pillow
-- Development tools
-- Image processing libraries
+# 2. Create database and user
+psql -U postgres
+CREATE DATABASE stayafrica_db;
+CREATE USER stayafrica WITH PASSWORD 'secure_password';
+ALTER ROLE stayafrica SET client_encoding TO 'utf8';
+ALTER ROLE stayafrica SET default_transaction_isolation TO 'read committed';
+ALTER ROLE stayafrica SET default_transaction_deferrable TO on;
+ALTER ROLE stayafrica SET timezone TO 'UTC';
+GRANT ALL PRIVILEGES ON DATABASE stayafrica_db TO stayafrica;
+\q
 
-## Python Version Support
+# 3. Install PostGIS for geographic queries
+psql -U postgres -d stayafrica_db -c "CREATE EXTENSION postgis;"
+psql -U postgres -d stayafrica_db -c "CREATE EXTENSION postgis_topology;"
 
-- ✅ Python 3.11
-- ✅ Python 3.12
-- ✅ Python 3.13 (Tested with 3.13.9)
+# 4. Update .env with PostgreSQL credentials
+```
+
+### Using SQLite (Development Only)
+
+SQLite is configured automatically in development:
+```
+DATABASE_ENGINE=django.db.backends.sqlite3
+DATABASE_NAME=db.sqlite3
+```
+
+**Note:** SQLite doesn't support PostGIS, so location queries won't work. Use PostgreSQL for full functionality.
+
+## Async Tasks (Celery)
+
+### Starting Celery Worker
+```bash
+# In a new terminal, activate venv first
+celery -A stayafrica worker -l info
+```
+
+### Starting Celery Beat (Scheduled Tasks)
+```bash
+# In another new terminal
+celery -A stayafrica beat -l info
+```
+
+## Testing
+
+### Run All Tests
+```bash
+pytest
+```
+
+### Run Tests with Coverage
+```bash
+pytest --cov=apps --cov-report=html
+```
+
+### Run Specific Test File
+```bash
+pytest apps/users/tests/test_views.py
+```
+
+### Run Specific Test Case
+```bash
+pytest apps/users/tests/test_views.py::UserTestCase::test_user_registration
+```
+
+## Common Issues & Solutions
+
+### Issue 1: `ModuleNotFoundError: No module named 'django_filters'`
+
+**Cause:** Incomplete or interrupted installation
+
+**Solution:**
+```bash
+pip install --force-reinstall -r requirements.txt
+```
+
+### Issue 2: `psycopg compilation error` on Windows
+
+**Cause:** Missing Visual C++ build tools or incompatible binary
+
+**Solution:** Already fixed! We use `psycopg[binary]` 3.1.18 which includes pre-built binaries for Windows.
+
+```bash
+pip install -r requirements.txt
+```
+
+### Issue 3: `djangorestframework-simplejwt` version not found
+
+**Cause:** Old requirements used non-existent version 5.3.2
+
+**Solution:** Already fixed! Requirements now use valid version 5.5.1.
+
+Verify:
+```bash
+pip show djangorestframework-simplejwt
+# Should show 5.5.1
+```
+
+### Issue 4: `ImportError: No module named 'sentry_sdk'`
+
+**Cause:** Sentry is optional but was hard-required in settings
+
+**Solution:** Already fixed! Settings.py now makes sentry optional.
+
+If you want error tracking:
+```bash
+pip install sentry-sdk
+# Then set SENTRY_DSN in .env
+```
+
+### Issue 5: PostgreSQL connection refused
+
+**Cause:** PostgreSQL service not running
+
+**Solution:**
+```bash
+# Windows
+net start postgresql-x64-15  # or your version
+
+# macOS
+brew services start postgresql
+
+# Linux
+sudo systemctl start postgresql
+```
+
+### Issue 6: Redis connection refused
+
+**Cause:** Redis service not running
+
+**Solution:**
+```bash
+# Windows (with WSL2)
+wsl redis-server
+
+# or use Docker
+docker run -d -p 6379:6379 redis:7
+
+# macOS
+brew services start redis
+
+# Linux
+sudo systemctl start redis-server
+```
+
+## Docker Setup (Alternative)
+
+If you don't want to install PostgreSQL and Redis locally, use Docker:
+
+```bash
+# Start PostgreSQL and Redis with Docker Compose
+docker-compose up -d
+
+# Run migrations
+python manage.py migrate
+
+# Start dev server
+python manage.py runserver
+```
+
+## Project Structure
+
+```
+backend/
+├── stayafrica/              # Django project settings
+│   ├── settings.py          # Main settings
+│   ├── urls.py              # URL routing
+│   ├── wsgi.py              # WSGI configuration
+│   └── celery.py            # Celery configuration
+├── apps/                    # Django applications
+│   ├── users/               # User management & authentication
+│   ├── properties/          # Property listings
+│   ├── bookings/            # Booking management
+│   ├── payments/            # Payment processing
+│   ├── reviews/             # Reviews & ratings
+│   ├── messaging/           # Messaging system
+│   └── admin_dashboard/     # Admin dashboard
+├── services/                # Business logic layer
+│   ├── payment_gateway.py   # Payment integration
+│   ├── email_service.py     # Email handling
+│   ├── image_processor.py   # Image processing
+│   └── audit_logger.py      # Audit logging
+├── tests/                   # Test suite
+├── manage.py                # Django management script
+├── requirements.txt         # Core dependencies
+├── requirements-dev.txt     # Optional dependencies
+└── SETUP.md                 # This file
+```
+
+## Key Files
+
+### `requirements.txt` (Core Dependencies)
+Only essential packages that work on all platforms:
+- Django 5.0.0
+- djangorestframework 3.14.0
+- psycopg[binary] 3.1.18 (Windows compatible)
+- Celery, Redis, PostgreSQL driver
+- JWT, CORS, filtering, documentation
+
+### `requirements-dev.txt` (Optional)
+Additional packages for advanced features:
+- Pillow, django-imagekit (image processing)
+- django-storages, boto3 (AWS S3)
+- sentry-sdk (error tracking)
+- Testing tools (pytest, coverage)
+
+### `stayafrica/settings.py` (Configuration)
+- All imports are conditional (optional packages)
+- Environment variables for all secrets
+- Database, cache, and async task configuration
+- Email and storage backends
+- API documentation enabled
+
+## Useful Commands
+
+```bash
+# Database
+python manage.py makemigrations          # Create migrations
+python manage.py migrate                 # Run migrations
+python manage.py migrate --fake-initial  # Fake initial migration
+python manage.py dbshell                 # Open database shell
+
+# Admin
+python manage.py createsuperuser         # Create admin user
+python manage.py changepassword username # Change user password
+
+# Static files
+python manage.py collectstatic           # Collect static files
+
+# Shell
+python manage.py shell                   # Interactive Python shell
+
+# Debugging
+python manage.py runserver --reload      # Auto-reload on file changes
+python manage.py runserver 0.0.0.0:8001  # Accessible from network
+
+# Celery
+celery -A stayafrica worker -l debug     # Debug mode
+celery -A stayafrica beat -l info        # Scheduled tasks
+celery -A stayafrica purge               # Clear message queue
+```
 
 ## Next Steps
 
-1. Run migrations: `python manage.py migrate`
-2. Create superuser: `python manage.py createsuperuser`
-3. Start server: `python manage.py runserver`
-4. Visit http://localhost:8000/admin/
-5. Start developing!
+1. **Frontend Development:** See `../../web/README.md`
+2. **Mobile Development:** See `../../mobile/README.md`
+3. **API Documentation:** Visit http://localhost:8000/api/docs/
+4. **Feature Implementation:** Check the service layer in `services/`
 
-## Resources
+## Support
 
-- [Django Documentation](https://docs.djangoproject.com/)
-- [Django REST Framework](https://www.django-rest-framework.org/)
-- [PostgreSQL PostGIS](https://postgis.net/)
-- [Celery Documentation](https://docs.celeryproject.io/)
-
-## Getting Help
-
-If you encounter issues:
-
-1. Check this guide for troubleshooting
-2. Review error messages carefully
-3. Check Django/DRF documentation
-4. Open an issue in the repository
+For issues or questions:
+1. Check this guide's troubleshooting section
+2. Review Django documentation: https://docs.djangoproject.com/
+3. Check DRF documentation: https://www.django-rest-framework.org/
+4. Open an issue on GitHub
 
 ---
 
-**Happy coding! 🚀**
+**Last Updated:** December 7, 2025
+**Python Version Tested:** 3.13.9
+**Django Version:** 5.0.0
