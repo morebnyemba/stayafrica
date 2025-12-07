@@ -1,8 +1,14 @@
 import os
 from pathlib import Path
 from dotenv import load_dotenv
-import sentry_sdk
-from sentry_sdk.integrations.django import DjangoIntegration
+
+# Optional: Sentry error tracking (install sentry-sdk separately)
+try:
+    import sentry_sdk
+    from sentry_sdk.integrations.django import DjangoIntegration
+    HAS_SENTRY = True
+except ImportError:
+    HAS_SENTRY = False
 
 load_dotenv()
 
@@ -28,8 +34,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'django_filters',
-    'imagekit',
-    'storages',
     'unfold',
     'unfold.contrib.filters',
     'unfold.contrib.import_export',
@@ -113,20 +117,23 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# AWS S3 Configuration
+# AWS S3 Configuration (Optional: install django-storages and boto3 separately)
 USE_S3 = os.getenv('USE_S3', 'False') == 'True'
 if USE_S3:
-    AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
-    AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
-    AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
-    AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME', 'us-east-1')
-    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
-    STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
-    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
-    STORAGES = {
-        'default': 'storages.backends.s3boto3.S3Boto3Storage',
-        'staticfiles': 'storages.backends.s3boto3.S3StaticStorage',
-    }
+    try:
+        AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
+        AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+        AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
+        AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME', 'us-east-1')
+        AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+        STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
+        MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
+        STORAGES = {
+            'default': 'storages.backends.s3boto3.S3Boto3Storage',
+            'staticfiles': 'storages.backends.s3boto3.S3StaticStorage',
+        }
+    except Exception as e:
+        print(f'Warning: S3 configuration error. Using local storage. Error: {e}')
 
 # Custom User Model
 AUTH_USER_MODEL = 'users.User'
@@ -183,20 +190,26 @@ CELERY_BEAT_SCHEDULE = {
     },
 }
 
-# Sentry Configuration
+# Sentry Configuration (Optional)
 SENTRY_DSN = os.getenv('SENTRY_DSN')
-if SENTRY_DSN:
-    sentry_sdk.init(
-        dsn=SENTRY_DSN,
-        integrations=[DjangoIntegration()],
-        traces_sample_rate=0.1,
-        send_default_pii=False,
-    )
+if SENTRY_DSN and HAS_SENTRY:
+    try:
+        sentry_sdk.init(
+            dsn=SENTRY_DSN,
+            integrations=[DjangoIntegration()],
+            traces_sample_rate=0.1,
+            send_default_pii=False,
+        )
+    except Exception as e:
+        print(f'Warning: Sentry initialization failed. Error: {e}')
 
-# ImageKit Configuration
-IMAGEKIT_DEFAULT_CACHEFILE_DIR = 'CACHE/images'
-IMAGEKIT_SPEC_CACHEFILE_DIR = 'CACHE/images/%s/%s'
-IMAGEKIT_PILLOW_DEFAULT_OPTIONS = {'quality': 92}
+# ImageKit Configuration (Optional: install pillow and django-imagekit separately)
+try:
+    IMAGEKIT_DEFAULT_CACHEFILE_DIR = 'CACHE/images'
+    IMAGEKIT_SPEC_CACHEFILE_DIR = 'CACHE/images/%s/%s'
+    IMAGEKIT_PILLOW_DEFAULT_OPTIONS = {'quality': 92}
+except Exception as e:
+    print(f'Warning: ImageKit not available. Install pillow and django-imagekit. Error: {e}')
 
 # Application Settings
 COMMISSION_RATE = float(os.getenv('COMMISSION_RATE', '0.07'))
