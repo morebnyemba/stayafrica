@@ -2,9 +2,19 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from django.core.exceptions import ValidationError
+from django.db import transaction
 from apps.bookings.models import Booking
 from apps.bookings.serializers import BookingSerializer
 from services.payment_gateway import PaymentGatewayService
+from utils.validators import validate_booking_dates
+from utils.helpers import is_booking_date_available, calculate_nights, calculate_booking_total
+from utils.decorators import api_ratelimit, log_action
+from tasks.email_tasks import send_booking_confirmation_email
+from services.audit_logger import AuditLoggerService
+import logging
+
+logger = logging.getLogger(__name__)
 
 class BookingViewSet(viewsets.ModelViewSet):
     serializer_class = BookingSerializer
@@ -14,40 +24,185 @@ class BookingViewSet(viewsets.ModelViewSet):
         """Return bookings for current user"""
         user = self.request.user
         if user.is_host:
-            return Booking.objects.filter(property__host=user)
-        return Booking.objects.filter(guest=user)
+            return Booking.objects.filter(property__host=user).select_related('guest', 'property')
+        return Booking.objects.filter(guest=user).select_related('property__host')
     
+    @transaction.atomic
+    @api_ratelimit(rate='10/m')
+    @log_action('create_booking')
     def perform_create(self, serializer):
-        """Create booking and calculate fees"""
-        booking = serializer.save(guest=self.request.user)
+        """Create booking with comprehensive validation and fee calculation"""
+        property_obj = serializer.validated_data['property']
+        check_in = serializer.validated_data['check_in']
+        check_out = serializer.validated_data['check_out']
         
-        # Calculate fees
-        payment_service = PaymentGatewayService()
-        fees = payment_service.calculate_fees(
-            booking.nightly_total,
-            booking.cleaning_fee
+        # Validate booking dates
+        try:
+            validate_booking_dates(check_in, check_out)
+        except ValidationError as e:
+            logger.error(f"Date validation failed: {str(e)}")
+            raise ValidationError(str(e))
+        
+        # Check availability
+        if not is_booking_date_available(property_obj, check_in, check_out):
+            logger.warning(f"Property {property_obj.id} not available for {check_in} to {check_out}")
+            raise ValidationError("Property is not available for the selected dates")
+        
+        # Check if property is active
+        if property_obj.status != 'active':
+            raise ValidationError("Property is not available for booking")
+        
+        # Calculate totals
+        nights = calculate_nights(check_in, check_out)
+        totals = calculate_booking_total(
+            property_obj.price_per_night,
+            nights,
+            cleaning_fee=serializer.validated_data.get('cleaning_fee', 0)
         )
         
-        booking.commission_fee = fees['commission_fee']
-        booking.grand_total = booking.nightly_total + booking.service_fee + booking.cleaning_fee
-        booking.save()
+        # Create booking with calculated values
+        booking = serializer.save(
+            guest=self.request.user,
+            nightly_total=totals['nightly_total'],
+            service_fee=totals['service_fee'],
+            commission_fee=totals['commission_fee'],
+            grand_total=totals['grand_total'],
+            currency=property_obj.currency
+        )
+        
+        # Log the action
+        AuditLoggerService.log_action(
+            user=self.request.user,
+            action='create',
+            model=Booking,
+            object_id=booking.id,
+            changes={'booking_ref': booking.booking_ref, 'property': property_obj.title}
+        )
+        
+        # Send confirmation email asynchronously
+        send_booking_confirmation_email.delay(booking.id)
+        
+        logger.info(f"Booking created: {booking.booking_ref}")
     
     @action(detail=True, methods=['post'])
+    @api_ratelimit(rate='20/h')
+    @log_action('confirm_booking')
     def confirm(self, request, pk=None):
-        """Confirm a pending booking"""
+        """Confirm a pending booking (host only)"""
         booking = self.get_object()
-        if booking.status == 'pending':
+        
+        # Only host can confirm
+        if request.user != booking.property.host and not request.user.is_admin_user:
+            return Response(
+                {'error': 'Only the host can confirm bookings'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        if booking.status != 'pending':
+            return Response(
+                {'error': 'Can only confirm pending bookings'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Check if still available (no conflicts, excluding current booking)
+        if not is_booking_date_available(booking.property, booking.check_in, booking.check_out, exclude_booking_id=booking.id):
+            return Response(
+                {'error': 'Booking dates are no longer available'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        with transaction.atomic():
             booking.status = 'confirmed'
             booking.save()
-            return Response({'status': 'confirmed'})
-        return Response({'error': 'Can only confirm pending bookings'}, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Log the action
+            AuditLoggerService.log_action(
+                user=request.user,
+                action='confirm',
+                model=Booking,
+                object_id=booking.id,
+                changes={'status': 'confirmed'}
+            )
+        
+        logger.info(f"Booking confirmed: {booking.booking_ref}")
+        return Response({'status': 'confirmed', 'booking_ref': booking.booking_ref})
     
     @action(detail=True, methods=['post'])
+    @api_ratelimit(rate='20/h')
+    @log_action('cancel_booking')
     def cancel(self, request, pk=None):
         """Cancel a booking"""
         booking = self.get_object()
-        if booking.status in ['pending', 'confirmed']:
+        
+        # Check permissions
+        if request.user != booking.guest and request.user != booking.property.host and not request.user.is_admin_user:
+            return Response(
+                {'error': 'You do not have permission to cancel this booking'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        if booking.status not in ['pending', 'confirmed']:
+            return Response(
+                {'error': 'Cannot cancel completed or cancelled bookings'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        with transaction.atomic():
+            old_status = booking.status
             booking.status = 'cancelled'
             booking.save()
-            return Response({'status': 'cancelled'})
-        return Response({'error': 'Cannot cancel completed or cancelled bookings'}, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Log the action
+            AuditLoggerService.log_action(
+                user=request.user,
+                action='cancel',
+                model=Booking,
+                object_id=booking.id,
+                changes={'status': old_status + ' -> cancelled'}
+            )
+        
+        logger.info(f"Booking cancelled: {booking.booking_ref}")
+        return Response({'status': 'cancelled', 'booking_ref': booking.booking_ref})
+    
+    @action(detail=True, methods=['post'])
+    @log_action('complete_booking')
+    def complete(self, request, pk=None):
+        """Mark booking as completed (after checkout)"""
+        booking = self.get_object()
+        
+        # Only host or admin can mark as complete
+        if request.user != booking.property.host and not request.user.is_admin_user:
+            return Response(
+                {'error': 'Only the host can complete bookings'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        if booking.status != 'confirmed':
+            return Response(
+                {'error': 'Can only complete confirmed bookings'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Check if past checkout date
+        from datetime import date
+        if booking.check_out > date.today():
+            return Response(
+                {'error': 'Cannot complete booking before checkout date'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        with transaction.atomic():
+            booking.status = 'completed'
+            booking.save()
+            
+            # Log the action
+            AuditLoggerService.log_action(
+                user=request.user,
+                action='complete',
+                model=Booking,
+                object_id=booking.id,
+                changes={'status': 'completed'}
+            )
+        
+        logger.info(f"Booking completed: {booking.booking_ref}")
+        return Response({'status': 'completed', 'booking_ref': booking.booking_ref})
