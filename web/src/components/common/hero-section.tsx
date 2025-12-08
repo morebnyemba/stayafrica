@@ -1,6 +1,6 @@
 'use client';
 
-import { Star, Heart } from 'lucide-react';
+
 
 export function HeroSection() {
   return (

@@ -1,1 +1,2 @@
-import '@/styles/globals.css';
+/* This file is imported by layout.tsx and references the actual styles in src/styles/globals.css */
+@import '../styles/globals.css';
