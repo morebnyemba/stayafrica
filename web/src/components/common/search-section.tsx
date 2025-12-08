@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { ChevronDown, MapPin, Calendar, Users } from 'lucide-react';
+import { useState, FormEvent } from 'react';
+import { MapPin, Calendar, Users } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export function SearchSection() {
@@ -11,7 +11,7 @@ export function SearchSection() {
   const [checkOut, setCheckOut] = useState('');
   const [guests, setGuests] = useState('2');
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
     const params = new URLSearchParams();
@@ -24,13 +24,16 @@ export function SearchSection() {
   };
 
   return (
-    <div className="bg-gradient-to-r from-primary-600 to-primary-700 py-12 -mt-32 relative z-20">
+    <div className="bg-gradient-to-r from-primary-900 via-primary-800 to-primary-700 py-12 -mt-32 relative z-20 text-sand-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <form onSubmit={handleSearch} className="bg-white rounded-lg shadow-elevated p-6">
+        <form
+          onSubmit={handleSearch}
+          className="bg-ivory/95 backdrop-blur rounded-3xl shadow-elevated border border-primary-200 p-6 md:p-8"
+        >
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {/* Location */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-primary-800 mb-2">
                 <MapPin className="w-4 h-4 inline mr-2" />
                 Location
               </label>
@@ -45,7 +48,7 @@ export function SearchSection() {
 
             {/* Check-in */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-primary-800 mb-2">
                 <Calendar className="w-4 h-4 inline mr-2" />
                 Check-in
               </label>
@@ -59,7 +62,7 @@ export function SearchSection() {
 
             {/* Check-out */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-primary-800 mb-2">
                 <Calendar className="w-4 h-4 inline mr-2" />
                 Check-out
               </label>
@@ -73,7 +76,7 @@ export function SearchSection() {
 
             {/* Guests */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-primary-800 mb-2">
                 <Users className="w-4 h-4 inline mr-2" />
                 Guests
               </label>
@@ -88,12 +91,21 @@ export function SearchSection() {
           </div>
 
           {/* Submit Button */}
-          <div className="mt-4 flex gap-4">
-            <button
-              type="submit"
-              className="flex-1 md:flex-none md:w-auto btn-primary"
-            >
+          <div className="mt-6 flex flex-col md:flex-row gap-4">
+            <button type="submit" className="flex-1 md:flex-none md:w-auto btn-primary">
               Search
+            </button>
+            <button
+              type="button"
+              className="flex-1 md:flex-none md:w-auto btn-secondary"
+              onClick={() => {
+                setLocation('');
+                setCheckIn('');
+                setCheckOut('');
+                setGuests('2');
+              }}
+            >
+              Clear Filters
             </button>
           </div>
         </form>

@@ -1,6 +1,13 @@
 import os
 from pathlib import Path
+from django.templatetags.static import static
 from dotenv import load_dotenv
+
+# Set GDAL library path for GeoDjango
+GDAL_LIBRARY_PATH = r"C:\Users\Administrator\AppData\Local\Programs\Python\Python313\Lib\site-packages\osgeo\gdal.dll"
+
+# Set GEOS library path for GeoDjango
+GEOS_LIBRARY_PATH = r"C:\Users\Administrator\AppData\Local\Programs\Python\Python313\Lib\site-packages\osgeo\geos_c.dll"
 
 # Optional: Sentry error tracking (install sentry-sdk separately)
 try:
@@ -22,6 +29,12 @@ ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 # Application definition
 INSTALLED_APPS = [
+    # Unfold must be before django.contrib.admin
+    'unfold',
+    'unfold.contrib.filters',
+    'unfold.contrib.import_export',
+    
+    # Django apps
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -34,9 +47,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'django_filters',
-    'unfold',
-    'unfold.contrib.filters',
-    'unfold.contrib.import_export',
     'drf_spectacular',
     'django_celery_beat',
     'django_celery_results',
@@ -67,7 +77,7 @@ ROOT_URLCONF = 'stayafrica.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
+        'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -83,16 +93,27 @@ TEMPLATES = [
 WSGI_APPLICATION = 'stayafrica.wsgi.application'
 
 # Database
-DATABASES = {
-    'default': {
-        'ENGINE': os.getenv('DATABASE_ENGINE', 'django.contrib.gis.db.backends.postgis'),
-        'NAME': os.getenv('DATABASE_NAME', 'stayafrica_db'),
-        'USER': os.getenv('DATABASE_USER', 'postgres'),
-        'PASSWORD': os.getenv('DATABASE_PASSWORD', 'postgres'),
-        'HOST': os.getenv('DATABASE_HOST', 'localhost'),
-        'PORT': os.getenv('DATABASE_PORT', '5432'),
+# Use SQLite for development, PostgreSQL for production
+if DEBUG:
+    # Development: SQLite
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.contrib.gis.db.backends.spatialite',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
-}
+else:
+    # Production: PostgreSQL with GIS support
+    DATABASES = {
+        'default': {
+            'ENGINE': os.getenv('DATABASE_ENGINE', 'django.contrib.gis.db.backends.postgis'),
+            'NAME': os.getenv('DATABASE_NAME', 'stayafrica_db'),
+            'USER': os.getenv('DATABASE_USER', 'postgres'),
+            'PASSWORD': os.getenv('DATABASE_PASSWORD', 'postgres'),
+            'HOST': os.getenv('DATABASE_HOST', 'localhost'),
+            'PORT': os.getenv('DATABASE_PORT', '5432'),
+        }
+    }
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -306,3 +327,193 @@ RATELIMIT_USE_CACHE = 'default'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Django Unfold Configuration - StayAfrica Brand Colors
+UNFOLD = {
+    "SITE_TITLE": "StayAfrica Admin",
+    "SITE_HEADER": "StayAfrica Administration",
+    "SITE_URL": "/",
+    "SITE_ICON": None,  # Add your logo path here
+    "SITE_LOGO": None,  # Add your logo path here
+    "SITE_SYMBOL": "travel_explore",  # Material icon
+    "SHOW_HISTORY": True,
+    "SHOW_VIEW_ON_SITE": True,
+    "STYLES": [],
+    "COLORS": {
+        "primary": {
+            "50": "250 248 245",   # Off-white/Ivory Sand - very light
+            "100": "245 239 229",  # Light Ivory Sand
+            "200": "235 215 185",  # Light Safari Gold
+            "300": "225 190 145",  # Medium Safari Gold #D9B168
+            "400": "210 170 100",  # Deep Safari Gold
+            "500": "58 92 80",     # Moss Green #3A5C50 (brand primary)
+            "600": "40 65 55",     # Dark Moss Green
+            "700": "25 50 40",     # Darker Moss Green
+            "800": "18 47 38",     # Deep Forest #122F26 (brand dark)
+            "900": "10 26 21",     # Savanna Text #0A1A15 (brand darkest)
+            "950": "5 15 12",      # Almost Black
+        },
+    },
+    "EXTENSIONS": {
+        "modeltranslation": {
+            "flags": {
+                "en": "🇬🇧",
+                "fr": "🇫🇷",
+                "sw": "🇹🇿",
+            },
+        },
+    },
+    "SIDEBAR": {
+        "show_search": True,
+        "show_all_applications": True,
+        "navigation": [
+            {
+                "title": "Dashboard",
+                "separator": False,
+                "items": [
+                    {
+                        "title": "Overview",
+                        "icon": "dashboard",
+                        "link": "/admin/",
+                    },
+                ],
+            },
+            {
+                "title": "User Management",
+                "separator": True,
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": "Users",
+                        "icon": "people",
+                        "link": "/admin/users/user/",
+                    },
+                ],
+            },
+            {
+                "title": "Property Management",
+                "separator": True,
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": "Properties",
+                        "icon": "home",
+                        "link": "/admin/properties/property/",
+                    },
+                    {
+                        "title": "Amenities",
+                        "icon": "star",
+                        "link": "/admin/properties/amenity/",
+                    },
+                    {
+                        "title": "Property Images",
+                        "icon": "photo_library",
+                        "link": "/admin/properties/propertyimage/",
+                    },
+                ],
+            },
+            {
+                "title": "Bookings & Payments",
+                "separator": True,
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": "Bookings",
+                        "icon": "calendar_today",
+                        "link": "/admin/bookings/booking/",
+                    },
+                    {
+                        "title": "Payments",
+                        "icon": "payments",
+                        "link": "/admin/payments/payment/",
+                    },
+                ],
+            },
+            {
+                "title": "Communication",
+                "separator": True,
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": "Messages",
+                        "icon": "mail",
+                        "link": "/admin/messaging/message/",
+                    },
+                    {
+                        "title": "Reviews",
+                        "icon": "rate_review",
+                        "link": "/admin/reviews/review/",
+                    },
+                ],
+            },
+            {
+                "title": "System",
+                "separator": True,
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": "Configuration",
+                        "icon": "settings",
+                        "link": "/admin/admin_dashboard/systemconfiguration/",
+                    },
+                    {
+                        "title": "Audit Logs",
+                        "icon": "history",
+                        "link": "/admin/admin_dashboard/auditlog/",
+                    },
+                    {
+                        "title": "Statistics",
+                        "icon": "analytics",
+                        "link": "/admin/admin_dashboard/adminstats/",
+                    },
+                ],
+            },
+        ],
+    },
+    "TABS": [
+        {
+            "models": [
+                "users.user",
+            ],
+            "items": [
+                {
+                    "title": "User Details",
+                    "link": "/admin/users/user/{id}/change/",
+                    "permission": lambda request: True,
+                },
+                {
+                    "title": "Bookings",
+                    "link": "/admin/bookings/booking/?guest__id__exact={id}",
+                    "permission": lambda request: True,
+                },
+                {
+                    "title": "Reviews",
+                    "link": "/admin/reviews/review/?guest__id__exact={id}",
+                    "permission": lambda request: True,
+                },
+            ],
+        },
+        {
+            "models": [
+                "properties.property",
+            ],
+            "items": [
+                {
+                    "title": "Property Details",
+                    "link": "/admin/properties/property/{id}/change/",
+                    "permission": lambda request: True,
+                },
+                {
+                    "title": "Images",
+                    "link": "/admin/properties/propertyimage/?property__id__exact={id}",
+                    "permission": lambda request: True,
+                },
+                {
+                    "title": "Bookings",
+                    "link": "/admin/bookings/booking/?rental_property__id__exact={id}",
+                    "permission": lambda request: True,
+                },
+            ],
+        },
+    ],
+}

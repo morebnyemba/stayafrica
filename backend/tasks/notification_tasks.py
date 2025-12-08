@@ -44,7 +44,7 @@ def send_booking_reminder(booking_id):
         # Check if check-in is tomorrow
         if booking.check_in == date.today() + timedelta(days=1):
             title = "Check-in Tomorrow!"
-            message = f"Your stay at {booking.property.title} starts tomorrow. Safe travels!"
+            message = f"Your stay at {booking.rental_property.title} starts tomorrow. Safe travels!"
             
             # Send push notification
             send_push_notification.delay(
@@ -113,7 +113,7 @@ def send_review_request(booking_id):
                 # Check if review doesn't exist
                 if not hasattr(booking, 'review'):
                     title = "How was your stay?"
-                    message = f"Please share your experience at {booking.property.title}"
+                    message = f"Please share your experience at {booking.rental_property.title}"
                     
                     send_push_notification.delay(
                         booking.guest.id,

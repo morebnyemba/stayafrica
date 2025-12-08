@@ -80,7 +80,7 @@ def send_booking_confirmation_email(booking_id):
         # Email to guest
         guest_subject = f'Booking Confirmed - {booking.booking_ref}'
         guest_message = f'Dear {booking.guest.first_name or booking.guest.email},\n\n'
-        guest_message += f'Your booking for {booking.property.title} has been confirmed!\n\n'
+        guest_message += f'Your booking for {booking.rental_property.title} has been confirmed!\n\n'
         guest_message += f'Booking Reference: {booking.booking_ref}\n'
         guest_message += f'Check-in: {booking.check_in}\n'
         guest_message += f'Check-out: {booking.check_out}\n'
@@ -90,9 +90,9 @@ def send_booking_confirmation_email(booking_id):
         send_email_async.delay(guest_subject, guest_message, [booking.guest.email])
         
         # Email to host
-        host_subject = f'New Booking - {booking.property.title}'
-        host_message = f'Dear {booking.property.host.first_name or booking.property.host.email},\n\n'
-        host_message += f'You have a new booking for {booking.property.title}!\n\n'
+        host_subject = f'New Booking - {booking.rental_property.title}'
+        host_message = f'Dear {booking.rental_property.host.first_name or booking.rental_property.host.email},\n\n'
+        host_message += f'You have a new booking for {booking.rental_property.title}!\n\n'
         host_message += f'Booking Reference: {booking.booking_ref}\n'
         host_message += f'Guest: {booking.guest.email}\n'
         host_message += f'Check-in: {booking.check_in}\n'
@@ -100,7 +100,7 @@ def send_booking_confirmation_email(booking_id):
         host_message += f'Nights: {booking.nights}\n\n'
         host_message += 'Please ensure the property is ready for your guest.'
         
-        send_email_async.delay(host_subject, host_message, [booking.property.host.email])
+        send_email_async.delay(host_subject, host_message, [booking.rental_property.host.email])
         
         logger.info(f"Booking confirmation emails queued for {booking.booking_ref}")
     except Booking.DoesNotExist:
@@ -123,7 +123,7 @@ def send_payment_receipt_email(payment_id):
         message += f'Payment Reference: {payment.gateway_ref}\n'
         message += f'Booking Reference: {payment.booking.booking_ref}\n'
         message += f'Amount: {payment.currency} {payment.amount}\n'
-        message += f'Property: {payment.booking.property.title}\n'
+        message += f'Property: {payment.booking.rental_property.title}\n'
         message += f'Payment Method: {payment.get_provider_display()}\n\n'
         message += 'Thank you for your payment!'
         

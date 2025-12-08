@@ -18,7 +18,7 @@ class EmailService:
     def send_booking_confirmation(booking):
         """Send booking confirmation email"""
         subject = f'Booking Confirmed - {booking.booking_ref}'
-        message = f'Your booking for {booking.property.title} is confirmed'
+        message = f'Your booking for {booking.rental_property.title} is confirmed'
         send_mail(subject, message, settings.EMAIL_HOST_USER, [booking.guest.email])
     
     @staticmethod
@@ -31,9 +31,9 @@ class EmailService:
     @staticmethod
     def send_host_notification(booking):
         """Send host notification for new booking"""
-        subject = f'New Booking Request - {booking.property.title}'
+        subject = f'New Booking Request - {booking.rental_property.title}'
         message = f'{booking.guest.email} has booked your property'
-        send_mail(subject, message, settings.EMAIL_HOST_USER, [booking.property.host.email])
+        send_mail(subject, message, settings.EMAIL_HOST_USER, [booking.rental_property.host.email])
 
 @shared_task
 def send_email_async(subject, message, recipient):

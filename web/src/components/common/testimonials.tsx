@@ -1,5 +1,7 @@
 'use client';
 
+import { Star } from 'lucide-react';
+
 export function Testimonials() {
   const testimonials = [
     {
@@ -22,30 +24,53 @@ export function Testimonials() {
     },
   ];
 
+  const renderStars = (rating: number) => {
+    return Array.from({ length: 5 }).map((_, index) => {
+      const isFilled = rating >= index + 1;
+      const isHalf = rating > index && rating < index + 1;
+
+      return (
+        <Star
+          key={index}
+          className={`w-4 h-4 ${isFilled ? 'text-secondary-300' : 'text-secondary-200/40'}`}
+          fill={isFilled || isHalf ? 'currentColor' : 'none'}
+          strokeWidth={isHalf ? 1 : 2}
+        />
+      );
+    });
+  };
+
   return (
-    <section className="py-16 bg-gray-50">
+    <section className="py-20 bg-gradient-to-b from-primary-900 via-primary-800 to-primary-900 text-sand-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">What Our Users Say</h2>
-          <p className="text-gray-600 text-lg">Join thousands of happy travelers and hosts</p>
+        <div className="text-center max-w-2xl mx-auto mb-14">
+          <span className="inline-flex items-center justify-center rounded-full bg-secondary-500/10 text-secondary-100 px-4 py-1 text-sm font-semibold tracking-wide uppercase mb-4">
+            Testimonials
+          </span>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">Voices From Our Community</h2>
+          <p className="text-lg text-secondary-100">
+            Guests and hosts trust StayAfrica for authentic stays, seamless bookings, and warm hospitality.
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {testimonials.map((testimonial, index) => (
-            <div key={index} className="card">
-              <div className="flex items-center space-x-1 mb-4">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <span key={i} className={i < Math.floor(testimonial.rating) ? '⭐' : '☆'}>
-                    {' '}
-                  </span>
-                ))}
-              </div>
-              <p className="text-gray-700 mb-4">"{testimonial.text}"</p>
+            <article
+              key={index}
+              className="card bg-primary-900/40 border border-primary-700/60 backdrop-blur h-full p-8 flex flex-col justify-between"
+            >
               <div>
-                <p className="font-semibold text-gray-900">{testimonial.name}</p>
-                <p className="text-sm text-gray-600">{testimonial.role}</p>
+                <div className="flex items-center gap-2 mb-6">
+                  <div className="flex items-center gap-1">{renderStars(testimonial.rating)}</div>
+                  <span className="text-secondary-200 text-sm font-semibold">{testimonial.rating.toFixed(1)}/5</span>
+                </div>
+                <p className="text-lg leading-relaxed text-secondary-50/90">“{testimonial.text}”</p>
               </div>
-            </div>
+              <div className="mt-6 pt-6 border-t border-primary-700/60">
+                <p className="font-semibold text-secondary-50">{testimonial.name}</p>
+                <p className="text-sm text-secondary-200/80">{testimonial.role}</p>
+              </div>
+            </article>
           ))}
         </div>
       </div>

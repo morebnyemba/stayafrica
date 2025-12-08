@@ -14,7 +14,7 @@ class Booking(models.Model):
     
     booking_ref = models.CharField(max_length=50, unique=True, db_index=True)
     guest = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bookings')
-    property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name='bookings')
+    rental_property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name='bookings')
     
     check_in = models.DateField()
     check_out = models.DateField()
@@ -37,7 +37,7 @@ class Booking(models.Model):
         ordering = ['-created_at']
         indexes = [
             models.Index(fields=['guest']),
-            models.Index(fields=['property']),
+            models.Index(fields=['rental_property']),
             models.Index(fields=['status']),
             models.Index(fields=['booking_ref']),
         ]

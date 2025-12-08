@@ -24,15 +24,15 @@ class BookingViewSet(viewsets.ModelViewSet):
         """Return bookings for current user"""
         user = self.request.user
         if user.is_host:
-            return Booking.objects.filter(property__host=user).select_related('guest', 'property')
-        return Booking.objects.filter(guest=user).select_related('property__host')
+            return Booking.objects.filter(rental_property__host=user).select_related('guest', 'rental_property')
+        return Booking.objects.filter(guest=user).select_related('rental_property__host')
     
     @transaction.atomic
     @api_ratelimit(rate='10/m')
     @log_action('create_booking')
     def perform_create(self, serializer):
         """Create booking with comprehensive validation and fee calculation"""
-        property_obj = serializer.validated_data['property']
+        property_obj = serializer.validated_data['rental_property']
         check_in = serializer.validated_data['check_in']
         check_out = serializer.validated_data['check_out']
         
@@ -92,7 +92,7 @@ class BookingViewSet(viewsets.ModelViewSet):
         booking = self.get_object()
         
         # Only host can confirm
-        if request.user != booking.property.host and not request.user.is_admin_user:
+        if request.user != booking.rental_property.host and not request.user.is_admin_user:
             return Response(
                 {'error': 'Only the host can confirm bookings'},
                 status=status.HTTP_403_FORBIDDEN
@@ -105,7 +105,7 @@ class BookingViewSet(viewsets.ModelViewSet):
             )
         
         # Check if still available (no conflicts, excluding current booking)
-        if not is_booking_date_available(booking.property, booking.check_in, booking.check_out, exclude_booking_id=booking.id):
+        if not is_booking_date_available(booking.rental_property, booking.check_in, booking.check_out, exclude_booking_id=booking.id):
             return Response(
                 {'error': 'Booking dates are no longer available'},
                 status=status.HTTP_400_BAD_REQUEST
@@ -135,7 +135,7 @@ class BookingViewSet(viewsets.ModelViewSet):
         booking = self.get_object()
         
         # Check permissions
-        if request.user != booking.guest and request.user != booking.property.host and not request.user.is_admin_user:
+        if request.user != booking.guest and request.user != booking.rental_property.host and not request.user.is_admin_user:
             return Response(
                 {'error': 'You do not have permission to cancel this booking'},
                 status=status.HTTP_403_FORBIDDEN
@@ -171,7 +171,7 @@ class BookingViewSet(viewsets.ModelViewSet):
         booking = self.get_object()
         
         # Only host or admin can mark as complete
-        if request.user != booking.property.host and not request.user.is_admin_user:
+        if request.user != booking.rental_property.host and not request.user.is_admin_user:
             return Response(
                 {'error': 'Only the host can complete bookings'},
                 status=status.HTTP_403_FORBIDDEN

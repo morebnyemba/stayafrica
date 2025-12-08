@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import type { ReactNode } from 'react';
 import './globals.css';
 import { Providers } from '@/context/providers';
 import { Navigation } from '@/components/common/navigation';
@@ -16,11 +17,11 @@ export const metadata: Metadata = {
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="bg-white text-gray-900 antialiased">
+      <body className="antialiased bg-sand-100 text-primary-900">
         <Providers>
           <div className="flex flex-col min-h-screen">
             <Navigation />

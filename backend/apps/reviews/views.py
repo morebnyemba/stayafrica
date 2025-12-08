@@ -105,7 +105,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
         review = serializer.save(
             booking=booking,
             guest=self.request.user,
-            host=booking.property.host,
+            host=booking.rental_property.host,
             text=sanitized_text
         )
         
@@ -118,7 +118,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
             changes={
                 'booking_ref': booking.booking_ref,
                 'rating': rating,
-                'host': booking.property.host.email
+                'host': booking.rental_property.host.email
             }
         )
         

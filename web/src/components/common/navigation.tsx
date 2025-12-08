@@ -1,9 +1,10 @@
 'use client';
 
+import React from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/auth-context';
 import { useRouter } from 'next/navigation';
-import { Menu, Search, User, LogOut, Home } from 'lucide-react';
+import { Menu, User, LogOut, Home } from 'lucide-react';
 import { useState } from 'react';
 
 export function Navigation() {
@@ -17,24 +18,24 @@ export function Navigation() {
   };
 
   return (
-    <nav className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
+    <nav className="sticky top-0 z-50 bg-primary-800/95 backdrop-blur border-b border-primary-700 text-sand-100 shadow-lg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2">
-            <Home className="w-6 h-6 text-primary-600" />
-            <span className="text-xl font-bold text-gray-900">StayAfrica</span>
+          <Link href="/" className="flex items-center space-x-2 text-sand-100">
+            <Home className="w-6 h-6 text-secondary-400" />
+            <span className="text-xl font-bold tracking-wide">StayAfrica</span>
           </Link>
 
           {/* Center Navigation - Desktop */}
           <div className="hidden md:flex items-center space-x-8">
-            <Link href="/explore" className="text-gray-700 hover:text-primary-600 transition">
+            <Link href="/explore" className="text-sand-200 hover:text-secondary-300 transition">
               Explore
             </Link>
-            <Link href="/bookings" className="text-gray-700 hover:text-primary-600 transition">
+            <Link href="/bookings" className="text-sand-200 hover:text-secondary-300 transition">
               Bookings
             </Link>
-            <Link href="/messages" className="text-gray-700 hover:text-primary-600 transition">
+            <Link href="/messages" className="text-sand-200 hover:text-secondary-300 transition">
               Messages
             </Link>
           </div>
@@ -54,13 +55,13 @@ export function Navigation() {
                       className="w-8 h-8 rounded-full"
                     />
                   ) : (
-                    <User className="w-5 h-5 text-gray-700" />
+                    <User className="w-5 h-5 text-sand-200" />
                   )}
-                  <span className="text-gray-700">{user?.first_name}</span>
+                  <span className="text-sand-100">{user?.first_name}</span>
                 </Link>
                 <button
                   onClick={handleLogout}
-                  className="text-gray-700 hover:text-red-600 transition flex items-center space-x-1"
+                  className="text-sand-200 hover:text-secondary-400 transition flex items-center space-x-1"
                 >
                   <LogOut className="w-4 h-4" />
                   <span>Logout</span>
@@ -81,7 +82,7 @@ export function Navigation() {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 rounded-lg hover:bg-gray-100"
+            className="md:hidden p-2 rounded-lg text-sand-100 hover:bg-primary-700/60"
           >
             <Menu className="w-6 h-6" />
           </button>
@@ -89,14 +90,14 @@ export function Navigation() {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t border-gray-200 py-4 space-y-4">
-            <Link href="/explore" className="block text-gray-700 hover:text-primary-600">
+          <div className="md:hidden border-t border-primary-700 py-4 space-y-4 bg-primary-800/95 text-sand-100">
+            <Link href="/explore" className="block text-sand-200 hover:text-secondary-300">
               Explore
             </Link>
-            <Link href="/bookings" className="block text-gray-700 hover:text-primary-600">
+            <Link href="/bookings" className="block text-sand-200 hover:text-secondary-300">
               Bookings
             </Link>
-            <Link href="/messages" className="block text-gray-700 hover:text-primary-600">
+            <Link href="/messages" className="block text-sand-200 hover:text-secondary-300">
               Messages
             </Link>
             {isAuthenticated ? (
@@ -106,7 +107,7 @@ export function Navigation() {
                 </Link>
                 <button
                   onClick={handleLogout}
-                  className="block w-full text-left text-gray-700 hover:text-red-600"
+                  className="block w-full text-left text-sand-200 hover:text-secondary-400"
                 >
                   Logout
                 </button>
