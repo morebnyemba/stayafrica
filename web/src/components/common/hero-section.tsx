@@ -1,7 +1,5 @@
 'use client';
 
-import { Star, Heart } from 'lucide-react';
-
 export function HeroSection() {
   return (
     <div className="relative overflow-hidden bg-gradient-to-r from-primary-900 via-primary-800 to-primary-700 text-sand-50 py-20 md:py-32">
