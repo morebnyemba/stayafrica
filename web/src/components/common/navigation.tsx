@@ -4,8 +4,9 @@ import React from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/auth-context';
 import { useRouter } from 'next/navigation';
-import { Menu, User, LogOut, Home } from 'lucide-react';
+import { Menu, User, LogOut, Home, Building } from 'lucide-react';
 import { useState } from 'react';
+import { ThemeToggle } from './theme-toggle';
 
 export function Navigation() {
   const { user, isAuthenticated, logout } = useAuth();
@@ -38,12 +39,20 @@ export function Navigation() {
             <Link href="/messages" className="text-sand-200 hover:text-secondary-300 transition">
               Messages
             </Link>
+            <Link href="/about" className="text-sand-200 hover:text-secondary-300 transition">
+              About
+            </Link>
           </div>
 
           {/* Right Side - Desktop */}
           <div className="hidden md:flex items-center space-x-4">
+            <ThemeToggle />
             {isAuthenticated ? (
               <>
+                <Link href="/host" className="text-sand-200 hover:text-secondary-300 transition flex items-center space-x-1">
+                  <Building className="w-4 h-4" />
+                  <span>Become a Host</span>
+                </Link>
                 <Link href="/dashboard" className="btn-secondary">
                   Dashboard
                 </Link>
@@ -69,6 +78,10 @@ export function Navigation() {
               </>
             ) : (
               <>
+                <Link href="/host" className="text-sand-200 hover:text-secondary-300 transition flex items-center space-x-1">
+                  <Building className="w-4 h-4" />
+                  <span>Become a Host</span>
+                </Link>
                 <Link href="/login" className="btn-secondary">
                   Login
                 </Link>
@@ -100,6 +113,16 @@ export function Navigation() {
             <Link href="/messages" className="block text-sand-200 hover:text-secondary-300">
               Messages
             </Link>
+            <Link href="/about" className="block text-sand-200 hover:text-secondary-300">
+              About
+            </Link>
+            <Link href="/host" className="block text-sand-200 hover:text-secondary-300">
+              Become a Host
+            </Link>
+            <div className="flex items-center justify-between">
+              <span className="text-sand-200">Theme</span>
+              <ThemeToggle />
+            </div>
             {isAuthenticated ? (
               <>
                 <Link href="/dashboard" className="block btn-secondary w-full text-center">
