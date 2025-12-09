@@ -47,6 +47,9 @@
       "@/utils/*": [
         "./src/utils/*"
       ],
+      "@/lib/*": [
+        "./src/lib/*"
+      ],
       "@/styles/*": [
         "./src/styles/*"
       ]
