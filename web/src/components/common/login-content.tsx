@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/auth-context';
 import Link from 'next/link';
-import { Mail, Lock, Eye, EyeOff, Loader2, Home } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { validateEmail, validatePassword } from '@/lib/validation';
 
@@ -61,9 +61,8 @@ export function LoginContent() {
       <div className="w-full max-w-md">
         {/* Logo/Branding */}
         <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center space-x-2 text-primary-900 dark:text-sand-100">
-            <Home className="w-8 h-8 text-secondary-500" />
-            <span className="text-2xl font-bold">StayAfrica</span>
+          <Link href="/" className="inline-flex items-center justify-center">
+            <img src="/logo.svg" alt="StayAfrica" className="h-24 w-auto" />
           </Link>
           <p className="text-primary-600 dark:text-sand-300 mt-2">
             Welcome back! Sign in to continue

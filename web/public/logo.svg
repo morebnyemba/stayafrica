@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 900" fill="none">
+  <!-- Elephant Head -->
+  <path d="M400 150 C450 150 500 180 520 230 C540 280 530 330 510 370 C490 410 460 440 430 460 L430 500 C430 520 420 540 400 550 C380 540 370 520 370 500 L370 460 C340 440 310 410 290 370 C270 330 260 280 280 230 C300 180 350 150 400 150 Z" fill="#D9B168"/>
+  
+  <!-- Elephant Ear -->
+  <ellipse cx="520" cy="280" rx="60" ry="100" fill="#D9B168" opacity="0.8"/>
+  
+  <!-- Elephant Trunk -->
+  <path d="M380 460 Q360 500 340 540 Q320 580 330 620 Q335 640 350 650 C365 660 380 655 390 640 Q400 625 395 605 Q390 585 400 570 Q410 555 415 535 L415 500" stroke="#D9B168" stroke-width="25" fill="none" stroke-linecap="round"/>
+  
+  <!-- Elephant Eye -->
+  <circle cx="460" cy="260" r="12" fill="white"/>
+  <circle cx="460" cy="260" r="6" fill="#122F26"/>
+  
+  <!-- Tusk -->
+  <path d="M350 380 Q330 390 320 410 Q315 420 320 425" stroke="#F4F1EA" stroke-width="8" fill="none" stroke-linecap="round"/>
+  
+  <!-- Text: STAYAFRICA -->
+  <text x="400" y="750" font-family="serif" font-size="90" font-weight="bold" text-anchor="middle" fill="#D9B168" letter-spacing="8">STAYAFRICA</text>
+</svg>

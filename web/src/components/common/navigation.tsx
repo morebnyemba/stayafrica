@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/auth-context';
 import { useRouter } from 'next/navigation';
-import { Menu, User, LogOut, Home } from 'lucide-react';
+import { Menu, User, LogOut } from 'lucide-react';
 import { useState } from 'react';
 import { ThemeToggle } from './theme-toggle';
 
@@ -24,8 +24,7 @@ export function Navigation() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2 text-sand-100">
-            <Home className="w-6 h-6 text-secondary-400" />
-            <span className="text-xl font-bold tracking-wide">StayAfrica</span>
+            <img src="/logo.svg" alt="StayAfrica" className="h-10 w-auto" />
           </Link>
 
           {/* Center Navigation - Desktop */}
