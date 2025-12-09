@@ -3,6 +3,7 @@
 import { useState, FormEvent } from 'react';
 import { Search } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export function HeroSection() {
   const router = useRouter();
@@ -108,7 +109,7 @@ export function HeroSection() {
 
         {/* Host CTA */}
         <div className="mt-8 text-center">
-          <a 
+          <Link 
             href="/host"
             className="inline-flex items-center gap-2 text-sand-100 hover:text-secondary-300 transition font-medium text-sm"
           >
@@ -116,7 +117,7 @@ export function HeroSection() {
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
-          </a>
+          </Link>
         </div>
       </div>
     </div>
