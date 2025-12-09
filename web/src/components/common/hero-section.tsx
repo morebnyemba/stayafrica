@@ -1,47 +1,110 @@
 'use client';
 
-
+import { useState, FormEvent } from 'react';
+import { Search } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 export function HeroSection() {
+  const router = useRouter();
+  const [location, setLocation] = useState('');
+  const [checkIn, setCheckIn] = useState('');
+  const [checkOut, setCheckOut] = useState('');
+  const [guests, setGuests] = useState('2');
+
+  const handleSearch = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    
+    const params = new URLSearchParams();
+    if (location) params.append('city', location);
+    if (checkIn) params.append('check_in', checkIn);
+    if (checkOut) params.append('check_out', checkOut);
+    if (guests) params.append('guests', guests);
+
+    router.push(`/explore?${params.toString()}`);
+  };
+
   return (
-    <div className="relative overflow-hidden bg-gradient-to-br from-primary-900 via-primary-800 to-primary-700 text-sand-50 py-20 md:py-32">
+    <div className="relative overflow-hidden bg-gradient-to-br from-primary-900 via-primary-800 to-primary-700 text-sand-50 py-16 md:py-24">
       <div className="absolute inset-0 pointer-events-none" aria-hidden>
         <div className="absolute -top-20 right-20 h-64 w-64 rounded-full bg-secondary-500/20 blur-3xl" />
         <div className="absolute bottom-0 left-10 h-48 w-48 rounded-full bg-secondary-400/10 blur-2xl" />
       </div>
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h1 className="text-4xl md:text-6xl font-bold mb-4 animate-fade-in tracking-tight text-sand-50">
-          Discover Your Next Adventure in Africa
-        </h1>
-        
-        <p className="text-xl md:text-2xl text-sand-100 mb-8 max-w-2xl mx-auto">
-          Find unique accommodations, connect with local hosts, and create unforgettable memories across the continent.
-        </p>
-
-        <div className="flex flex-col sm:flex-row justify-center gap-4 mb-12">
-          <button className="btn-primary px-8 py-3 text-lg font-semibold">
-            Explore Now
-          </button>
-          <button className="btn-secondary px-8 py-3 border-2 text-lg font-semibold text-sand-100 border-sand-100 hover:bg-sand-100/10">
-            Become a Host
-          </button>
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl md:text-5xl font-bold mb-3 animate-fade-in tracking-tight text-sand-50">
+            Find your next stay in Africa
+          </h1>
+          <p className="text-lg md:text-xl text-sand-100 max-w-2xl mx-auto">
+            Discover unique homes across the continent
+          </p>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-4 md:gap-8 max-w-2xl mx-auto">
-          <div>
-            <div className="text-3xl md:text-4xl font-bold text-secondary-300">500+</div>
-            <div className="text-sand-200 text-sm md:text-base">Properties</div>
+        {/* Airbnb-style Search Bar */}
+        <form
+          onSubmit={handleSearch}
+          className="bg-ivory/95 backdrop-blur rounded-full shadow-elevated border border-primary-200 p-2 max-w-4xl mx-auto"
+        >
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-2 items-center">
+            {/* Location */}
+            <div className="px-4 py-3 hover:bg-sand-100/50 rounded-full cursor-pointer transition">
+              <div className="text-xs font-semibold text-primary-900">Where</div>
+              <input
+                type="text"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                placeholder="Search destinations"
+                className="w-full bg-transparent border-none text-sm text-primary-800 placeholder-primary-500 focus:outline-none p-0"
+              />
+            </div>
+
+            {/* Check-in */}
+            <div className="px-4 py-3 hover:bg-sand-100/50 rounded-full cursor-pointer transition border-l border-primary-200">
+              <div className="text-xs font-semibold text-primary-900">Check in</div>
+              <input
+                type="date"
+                value={checkIn}
+                onChange={(e) => setCheckIn(e.target.value)}
+                className="w-full bg-transparent border-none text-sm text-primary-800 focus:outline-none p-0"
+              />
+            </div>
+
+            {/* Check-out */}
+            <div className="px-4 py-3 hover:bg-sand-100/50 rounded-full cursor-pointer transition border-l border-primary-200">
+              <div className="text-xs font-semibold text-primary-900">Check out</div>
+              <input
+                type="date"
+                value={checkOut}
+                onChange={(e) => setCheckOut(e.target.value)}
+                className="w-full bg-transparent border-none text-sm text-primary-800 focus:outline-none p-0"
+              />
+            </div>
+
+            {/* Guests + Search Button */}
+            <div className="flex items-center gap-2 pl-4">
+              <div className="flex-1 hover:bg-sand-100/50 rounded-full px-4 py-3 cursor-pointer transition border-l border-primary-200">
+                <div className="text-xs font-semibold text-primary-900">Guests</div>
+                <select 
+                  value={guests} 
+                  onChange={(e) => setGuests(e.target.value)} 
+                  className="w-full bg-transparent border-none text-sm text-primary-800 focus:outline-none p-0 cursor-pointer"
+                >
+                  {[1, 2, 3, 4, 5, 6, 8, 10].map((num) => (
+                    <option key={num} value={num}>
+                      {num} {num === 1 ? 'guest' : 'guests'}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <button 
+                type="submit" 
+                className="bg-secondary-500 hover:bg-secondary-600 text-primary-900 p-4 rounded-full transition-colors"
+                aria-label="Search"
+              >
+                <Search className="w-5 h-5" />
+              </button>
+            </div>
           </div>
-          <div>
-            <div className="text-3xl md:text-4xl font-bold text-secondary-300">10K+</div>
-            <div className="text-sand-200 text-sm md:text-base">Happy Guests</div>
-          </div>
-          <div>
-            <div className="text-3xl md:text-4xl font-bold text-secondary-300">4.8★</div>
-            <div className="text-sand-200 text-sm md:text-base">Average Rating</div>
-          </div>
-        </div>
+        </form>
       </div>
     </div>
   );

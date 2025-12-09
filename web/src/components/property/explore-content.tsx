@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
 import { MapPin, Star, Filter, Search } from 'lucide-react';
+import { PropertyListSkeleton } from './property-card-skeleton';
 
 export function ExploreContent() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -82,16 +83,7 @@ export function ExploreContent() {
 
         {/* Properties Grid */}
         {isLoading ? (
-          <div className="grid md:grid-cols-3 gap-8">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="card p-6 animate-pulse">
-                <div className="h-48 bg-primary-200 dark:bg-primary-700 rounded-lg mb-4"></div>
-                <div className="h-6 bg-primary-200 dark:bg-primary-700 rounded mb-3"></div>
-                <div className="h-4 bg-primary-200 dark:bg-primary-700 rounded mb-2"></div>
-                <div className="h-4 bg-primary-200 dark:bg-primary-700 rounded w-2/3"></div>
-              </div>
-            ))}
-          </div>
+          <PropertyListSkeleton count={9} />
         ) : error ? (
           <div className="card p-12 text-center">
             <p className="text-primary-600 dark:text-sand-300 mb-4">
@@ -112,7 +104,7 @@ export function ExploreContent() {
             </p>
           </div>
         ) : (
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-6">
             {properties.map((property: any) => (
               <article
                 key={property.id}
