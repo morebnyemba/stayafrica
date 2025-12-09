@@ -44,7 +44,7 @@ export function Navigation() {
             {isAuthenticated ? (
               <>
                 <Link href="/host" className="text-sand-200 hover:text-sand-50 transition font-medium rounded-full px-4 py-2 hover:bg-primary-700/60">
-                  StayAfrica your home
+                  Become a Host
                 </Link>
                 <Link href="/dashboard" className="text-sand-200 hover:text-sand-50 transition font-medium">
                   Dashboard
@@ -72,7 +72,7 @@ export function Navigation() {
             ) : (
               <>
                 <Link href="/host" className="text-sand-200 hover:text-sand-50 transition font-medium rounded-full px-4 py-2 hover:bg-primary-700/60">
-                  StayAfrica your home
+                  Become a Host
                 </Link>
                 <Link href="/login" className="text-sand-200 hover:text-sand-50 transition font-medium">
                   Login
@@ -103,7 +103,7 @@ export function Navigation() {
               Experiences
             </Link>
             <Link href="/host" className="block text-sand-200 hover:text-secondary-300 px-4 py-2">
-              StayAfrica your home
+              Become a Host
             </Link>
             <div className="flex items-center justify-between px-4 py-2">
               <span className="text-sand-200">Theme</span>
