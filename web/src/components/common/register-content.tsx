@@ -390,7 +390,7 @@ export function RegisterContent() {
                       <div className="text-center">
                         <div className="text-2xl mb-2">🏖️</div>
                         <div className="font-semibold text-primary-900 dark:text-sand-100">Book Stays</div>
-                        <div className="text-sm text-primary-600 dark:text-sand-300">I'm looking for places to stay</div>
+                        <div className="text-sm text-primary-600 dark:text-sand-300">I&apos;m looking for places to stay</div>
                       </div>
                     </button>
                     <button

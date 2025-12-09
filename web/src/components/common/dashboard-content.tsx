@@ -1,7 +1,6 @@
 'use client';
 
 import { useAuth } from '@/context/auth-context';
-import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
 import Link from 'next/link';
@@ -11,12 +10,9 @@ import {
   MapPin,
   User,
   CreditCard,
-  Star,
   Clock,
-  TrendingUp,
   CheckCircle,
   XCircle,
-  AlertCircle,
   Home,
   MessageSquare,
 } from 'lucide-react';
@@ -24,7 +20,6 @@ import { ProtectedRoute } from '@/components/auth/protected-route';
 
 export function DashboardContent() {
   const { user, isAuthenticated } = useAuth();
-  const router = useRouter();
 
   // Fetch upcoming bookings
   const { data: upcomingBookings, isLoading: loadingBookings } = useQuery({
@@ -122,7 +117,7 @@ export function DashboardContent() {
               Welcome back, {user?.first_name}! 👋
             </h1>
             <p className="text-lg text-primary-600 dark:text-sand-300">
-              Here's what's happening with your travels
+              Here&apos;s what&apos;s happening with your travels
             </p>
           </div>
 

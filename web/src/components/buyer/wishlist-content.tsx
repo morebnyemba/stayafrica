@@ -1,17 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import { useAuth } from '@/context/auth-context';
 import { ProtectedRoute } from '@/components/auth/protected-route';
 import Link from 'next/link';
 import { Heart, MapPin, Star, Users, Bed, DollarSign, Trash2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 export function WishlistContent() {
-  const { isAuthenticated } = useAuth();
   // This will be replaced with actual API call when wishlist backend is ready
   const [wishlistItems, setWishlistItems] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading] = useState(false);
 
   const removeFromWishlist = (id: string) => {
     setWishlistItems(wishlistItems.filter(item => item.id !== id));
@@ -28,7 +26,7 @@ export function WishlistContent() {
               My Wishlist
             </h1>
             <p className="text-lg text-primary-600 dark:text-sand-200">
-              Properties you've saved for later
+              Properties you&apos;ve saved for later
             </p>
           </div>
 
