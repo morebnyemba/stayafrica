@@ -31,12 +31,49 @@ export function DashboardContent() {
     enabled: isAuthenticated,
   });
 
-  // Fetch recent bookings
+  // Fetch total bookings count
+  const { data: totalBookingsData } = useQuery({
+    queryKey: ['bookings', 'total'],
+    queryFn: async () => {
+      const response = await apiClient.getBookings({});
+      return response.data || { results: [], count: 0 };
+    },
+    enabled: isAuthenticated,
+  });
+
+  // Fetch recent bookings for activity
   const { data: recentBookings } = useQuery({
     queryKey: ['bookings', 'recent'],
     queryFn: async () => {
       const response = await apiClient.getBookings({});
       return response.data?.results?.slice(0, 3) || [];
+    },
+    enabled: isAuthenticated,
+  });
+
+  // Fetch unread messages count
+  const { data: unreadMessages } = useQuery({
+    queryKey: ['messages', 'unread'],
+    queryFn: async () => {
+      const response = await apiClient.getUnreadCount();
+      return response.data?.unread_count || 0;
+    },
+    enabled: isAuthenticated,
+    refetchInterval: 30000, // Refetch every 30 seconds
+  });
+
+  // Fetch saved properties count
+  const { data: savedPropertiesData } = useQuery({
+    queryKey: ['properties', 'saved'],
+    queryFn: async () => {
+      try {
+        const response = await apiClient.getSavedProperties();
+        return response.data?.results || [];
+      } catch (error) {
+        // If endpoint not implemented yet, return empty array
+        console.warn('Saved properties endpoint not available yet');
+        return [];
+      }
     },
     enabled: isAuthenticated,
   });
@@ -52,7 +89,7 @@ export function DashboardContent() {
     },
     {
       title: 'Saved Properties',
-      value: 0, // Will be implemented with wishlist
+      value: savedPropertiesData?.length || 0,
       icon: Heart,
       color: 'text-red-600 dark:text-red-400',
       bgColor: 'bg-red-100 dark:bg-red-900/30',
@@ -60,7 +97,7 @@ export function DashboardContent() {
     },
     {
       title: 'Total Bookings',
-      value: recentBookings?.length || 0,
+      value: totalBookingsData?.count || totalBookingsData?.results?.length || 0,
       icon: CheckCircle,
       color: 'text-green-600 dark:text-green-400',
       bgColor: 'bg-green-100 dark:bg-green-900/30',
@@ -68,7 +105,7 @@ export function DashboardContent() {
     },
     {
       title: 'Messages',
-      value: 0, // Will be connected to messaging
+      value: unreadMessages || 0,
       icon: MessageSquare,
       color: 'text-purple-600 dark:text-purple-400',
       bgColor: 'bg-purple-100 dark:bg-purple-900/30',

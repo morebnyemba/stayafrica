@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from apps.properties.models import Property, Amenity, PropertyImage
+from apps.properties.models import Property, Amenity, PropertyImage, SavedProperty
 
 class AmenitySerializer(serializers.ModelSerializer):
     class Meta:
@@ -39,3 +39,17 @@ class PropertyListSerializer(serializers.ModelSerializer):
             'currency', 'main_image', 'bedrooms', 'bathrooms', 'max_guests',
             'amenities', 'status'
         ]
+
+
+class SavedPropertySerializer(serializers.ModelSerializer):
+    property = PropertyListSerializer(read_only=True)
+    property_id = serializers.IntegerField(write_only=True)
+    
+    class Meta:
+        model = SavedProperty
+        fields = ['id', 'user', 'property', 'property_id', 'created_at']
+        read_only_fields = ['id', 'user', 'created_at']
+    
+    def create(self, validated_data):
+        validated_data['user'] = self.context['request'].user
+        return super().create(validated_data)

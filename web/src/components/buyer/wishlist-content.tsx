@@ -1,19 +1,46 @@
 'use client';
 
 import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiClient } from '@/services/api-client';
+import { useRouter } from 'next/navigation';
 import { ProtectedRoute } from '@/components/auth/protected-route';
 import Link from 'next/link';
-import { Heart, MapPin, Star, Users, Bed, DollarSign, Trash2 } from 'lucide-react';
+import { Heart, MapPin, Star, Users, Bed, DollarSign, Trash2, X } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 export function WishlistContent() {
-  // This will be replaced with actual API call when wishlist backend is ready
-  const [wishlistItems, setWishlistItems] = useState<any[]>([]);
-  const [isLoading] = useState(false);
+  const router = useRouter();
+  const queryClient = useQueryClient();
 
-  const removeFromWishlist = (id: string) => {
-    setWishlistItems(wishlistItems.filter(item => item.id !== id));
-    toast.success('Removed from wishlist');
+  const { data: savedPropertiesData, isLoading, error } = useQuery({
+    queryKey: ['properties', 'saved'],
+    queryFn: async () => {
+      const response = await apiClient.getSavedProperties();
+      return response.data?.results || [];
+    },
+  });
+
+  const unsaveMutation = useMutation({
+    mutationFn: (propertyId: string) => apiClient.unsaveProperty(propertyId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['properties', 'saved'] });
+      toast.success('Removed from wishlist');
+    },
+    onError: () => {
+      toast.error('Failed to remove from wishlist');
+    },
+  });
+
+  const removeFromWishlist = (propertyId: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    if (confirm('Remove this property from your wishlist?')) {
+      unsaveMutation.mutate(propertyId);
+    }
+  };
+
+  const handlePropertyClick = (propertyId: string) => {
+    router.push(`/property?id=${propertyId}`);
   };
 
   return (
@@ -44,7 +71,19 @@ export function WishlistContent() {
                 </div>
               ))}
             </div>
-          ) : wishlistItems.length === 0 ? (
+          ) : error ? (
+            <div className="card p-12 text-center">
+              <p className="text-primary-600 dark:text-sand-300 mb-4">
+                Unable to load your wishlist. Please try again later.
+              </p>
+              <button
+                onClick={() => queryClient.invalidateQueries({ queryKey: ['properties', 'saved'] })}
+                className="btn-primary px-6 py-2"
+              >
+                Retry
+              </button>
+            </div>
+          ) : savedPropertiesData?.length === 0 ? (
             <div className="card p-12 text-center">
               <Heart className="w-20 h-20 text-primary-300 dark:text-primary-700 mx-auto mb-4" />
               <h3 className="text-2xl font-semibold text-primary-900 dark:text-sand-50 mb-2">
@@ -58,74 +97,103 @@ export function WishlistContent() {
               </Link>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {wishlistItems.map((property) => (
-                <article key={property.id} className="card overflow-hidden group">
-                  {/* Property Image */}
-                  <div className="relative h-48 overflow-hidden">
-                    <img
-                      src={property.image || '/placeholder-property.jpg'}
-                      alt={property.title}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                    />
-                    <button
-                      onClick={() => removeFromWishlist(property.id)}
-                      className="absolute top-3 right-3 p-2 bg-white/90 dark:bg-primary-800/90 rounded-full hover:bg-white dark:hover:bg-primary-800 transition"
+            <>
+              <div className="mb-6 text-primary-600 dark:text-sand-300">
+                {savedPropertiesData?.length} {savedPropertiesData?.length === 1 ? 'property' : 'properties'} saved
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {savedPropertiesData?.map((saved: any) => {
+                  const property = saved.property;
+                  return (
+                    <article
+                      key={saved.id}
+                      onClick={() => handlePropertyClick(property.id)}
+                      className="card overflow-hidden group cursor-pointer hover:shadow-lg transition"
                     >
-                      <Trash2 className="w-5 h-5 text-red-600 dark:text-red-400" />
-                    </button>
-                    <div className="absolute top-3 left-3 px-3 py-1 bg-white/90 dark:bg-primary-800/90 backdrop-blur rounded-full">
-                      <div className="flex items-center gap-1">
-                        <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                        <span className="text-sm font-semibold text-primary-900 dark:text-sand-50">
-                          {property.rating || '4.8'}
-                        </span>
+                      {/* Property Image */}
+                      <div className="relative h-48 overflow-hidden">
+                        <img
+                          src={
+                            property.main_image ||
+                            property.images?.[0]?.image_url ||
+                            'https://images.unsplash.com/photo-5129917774080-9991f1c52e1d'
+                          }
+                          alt={property.title}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                        />
+                        <button
+                          onClick={(e) => removeFromWishlist(property.id, e)}
+                          className="absolute top-3 right-3 p-2 bg-white/90 dark:bg-primary-800/90 rounded-full hover:bg-red-50 dark:hover:bg-red-900/30 transition z-10"
+                          title="Remove from wishlist"
+                        >
+                          <X className="w-5 h-5 text-red-600 dark:text-red-400" />
+                        </button>
+                        {property.average_rating && (
+                          <div className="absolute top-3 left-3 px-3 py-1 bg-white/90 dark:bg-primary-800/90 backdrop-blur rounded-full">
+                            <div className="flex items-center gap-1">
+                              <Star className="w-4 h-4 text-yellow-500 fill-current" />
+                              <span className="text-sm font-semibold text-primary-900 dark:text-sand-50">
+                                {property.average_rating.toFixed(1)}
+                              </span>
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    </div>
-                  </div>
 
-                  {/* Property Info */}
-                  <div className="p-4">
-                    <h3 className="font-semibold text-lg text-primary-900 dark:text-sand-50 mb-2 line-clamp-1">
-                      {property.title}
-                    </h3>
-                    
-                    <div className="flex items-center gap-2 text-primary-600 dark:text-sand-300 text-sm mb-3">
-                      <MapPin className="w-4 h-4" />
-                      <span className="line-clamp-1">
-                        {property.city}, {property.country}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-4 text-sm text-primary-600 dark:text-sand-300 mb-4">
-                      <div className="flex items-center gap-1">
-                        <Users className="w-4 h-4" />
-                        <span>{property.maxGuests || 4} guests</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Bed className="w-4 h-4" />
-                        <span>{property.bedrooms || 2} beds</span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between pt-3 border-t border-primary-200 dark:border-primary-700">
-                      <div>
-                        <div className="flex items-center gap-1">
-                          <DollarSign className="w-4 h-4 text-primary-600 dark:text-sand-300" />
-                          <span className="text-2xl font-bold text-primary-900 dark:text-sand-50">
-                            {property.price || 120}
+                      {/* Property Info */}
+                      <div className="p-4">
+                        <h3 className="font-semibold text-lg text-primary-900 dark:text-sand-50 mb-2 line-clamp-1">
+                          {property.title}
+                        </h3>
+                        
+                        <div className="flex items-center gap-2 text-primary-600 dark:text-sand-300 text-sm mb-3">
+                          <MapPin className="w-4 h-4" />
+                          <span className="line-clamp-1">
+                            {property.city}, {property.country}
                           </span>
                         </div>
-                        <span className="text-xs text-primary-600 dark:text-sand-400">per night</span>
+
+                        {(property.max_guests || property.bedrooms) && (
+                          <div className="flex items-center gap-4 text-sm text-primary-600 dark:text-sand-300 mb-4">
+                            {property.max_guests && (
+                              <div className="flex items-center gap-1">
+                                <Users className="w-4 h-4" />
+                                <span>{property.max_guests} guests</span>
+                              </div>
+                            )}
+                            {property.bedrooms && (
+                              <div className="flex items-center gap-1">
+                                <Bed className="w-4 h-4" />
+                                <span>{property.bedrooms} beds</span>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        <div className="flex items-center justify-between pt-3 border-t border-primary-200 dark:border-primary-700">
+                          <div>
+                            <div className="flex items-center gap-1">
+                              <span className="text-2xl font-bold text-primary-900 dark:text-sand-50">
+                                ${property.price_per_night}
+                              </span>
+                            </div>
+                            <span className="text-xs text-primary-600 dark:text-sand-400">per night</span>
+                          </div>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handlePropertyClick(property.id);
+                            }}
+                            className="btn-primary px-4 py-2 text-sm"
+                          >
+                            View Details
+                          </button>
+                        </div>
+
+                        <div className="text-xs text-primary-500 dark:text-sand-500 pt-2 mt-2 border-t border-primary-100 dark:border-primary-700">
+                          Saved {new Date(saved.created_at).toLocaleDateString()}
+                        </div>
                       </div>
-                      <Link
-                        href={`/properties/${property.id}`}
-                        className="btn-primary px-4 py-2 text-sm"
-                      >
-                        View Details
-                      </Link>
-                    </div>
-                  </div>
                 </article>
               ))}
             </div>

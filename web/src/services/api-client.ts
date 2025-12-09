@@ -141,6 +141,10 @@ class ApiClient {
     return this.client.get('/messages/unread/');
   }
 
+  async markMessageAsRead(messageId: string) {
+    return this.client.patch(`/messages/${messageId}/`, { is_read: true });
+  }
+
   // Users
   async getUserProfile() {
     return this.client.get('/users/profile/');
@@ -152,6 +156,33 @@ class ApiClient {
 
   async changePassword(data: any) {
     return this.client.post('/users/change_password/', data);
+  }
+
+  // Wishlist
+  async getSavedProperties() {
+    return this.client.get('/properties/saved/');
+  }
+
+  async saveProperty(propertyId: string) {
+    return this.client.post('/properties/saved/', { property_id: propertyId });
+  }
+
+  async unsaveProperty(propertyId: string) {
+    return this.client.delete(`/properties/saved/${propertyId}/`);
+  }
+
+  // Reviews - User specific
+  async getReviewsWritten(params?: any) {
+    return this.client.get('/reviews/', { params: { ...params, written_by_user: true } });
+  }
+
+  async getReviewsReceived(params?: any) {
+    return this.client.get('/reviews/', { params: { ...params, received_by_user: true } });
+  }
+
+  // Payments - User specific
+  async getPaymentHistory(params?: any) {
+    return this.client.get('/payments/', { params });
   }
 
   // Admin

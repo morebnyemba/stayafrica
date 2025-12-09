@@ -5,12 +5,14 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from django_filters.rest_framework import DjangoFilterBackend
 from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.geos import Point
-from apps.properties.models import Property, Amenity, PropertyImage
+from django.db import IntegrityError
+from apps.properties.models import Property, Amenity, PropertyImage, SavedProperty
 from apps.properties.serializers import (
     PropertySerializer,
     PropertyDetailSerializer,
     PropertyListSerializer,
-    AmenitySerializer
+    AmenitySerializer,
+    SavedPropertySerializer
 )
 
 class AmenityViewSet(viewsets.ReadOnlyModelViewSet):
@@ -140,3 +142,51 @@ class PropertyViewSet(viewsets.ModelViewSet):
             response_data['reason'] = 'Property is already booked for these dates'
         
         return Response(response_data)
+    
+    @action(detail=False, methods=['get', 'post'], permission_classes=[IsAuthenticated])
+    def saved(self, request):
+        """Get or save user's wishlist properties"""
+        if request.method == 'GET':
+            # Get saved properties
+            saved = SavedProperty.objects.filter(user=request.user).select_related('property')
+            serializer = SavedPropertySerializer(saved, many=True)
+            return Response({'results': serializer.data, 'count': saved.count()})
+        
+        elif request.method == 'POST':
+            # Save a property
+            serializer = SavedPropertySerializer(data=request.data, context={'request': request})
+            if serializer.is_valid():
+                try:
+                    serializer.save()
+                    return Response(serializer.data, status=status.HTTP_201_CREATED)
+                except IntegrityError:
+                    return Response(
+                        {'error': 'Property already saved'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    @action(detail=True, methods=['delete'], permission_classes=[IsAuthenticated], url_path='saved')
+    def unsave_property(self, request, pk=None):
+        """Remove property from wishlist"""
+        try:
+            saved = SavedProperty.objects.get(user=request.user, property_id=pk)
+            saved.delete()
+            return Response(
+                {'message': 'Property removed from wishlist'},
+                status=status.HTTP_204_NO_CONTENT
+            )
+        except SavedProperty.DoesNotExist:
+            return Response(
+                {'error': 'Property not in wishlist'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+    
+    @action(detail=True, methods=['get'], permission_classes=[IsAuthenticated])
+    def is_saved(self, request, pk=None):
+        """Check if property is saved by user"""
+        is_saved = SavedProperty.objects.filter(
+            user=request.user,
+            property_id=pk
+        ).exists()
+        return Response({'is_saved': is_saved})

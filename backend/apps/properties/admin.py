@@ -1,5 +1,5 @@
 from django.contrib import admin
-from apps.properties.models import Property, Amenity, PropertyImage
+from apps.properties.models import Property, Amenity, PropertyImage, SavedProperty
 
 @admin.register(Amenity)
 class AmenityAdmin(admin.ModelAdmin):
@@ -32,3 +32,12 @@ class PropertyImageAdmin(admin.ModelAdmin):
     list_display = ['property', 'order', 'created_at']
     list_filter = ['property', 'created_at']
     ordering = ['property', 'order']
+
+
+@admin.register(SavedProperty)
+class SavedPropertyAdmin(admin.ModelAdmin):
+    list_display = ['user', 'property', 'created_at']
+    list_filter = ['created_at']
+    search_fields = ['user__email', 'property__title']
+    readonly_fields = ['created_at']
+    ordering = ['-created_at']
