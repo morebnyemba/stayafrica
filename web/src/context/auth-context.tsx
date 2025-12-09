@@ -23,6 +23,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Check for existing session/token on mount
     const token = localStorage.getItem('access_token');
     if (token) {
+      // Set cookie for middleware
+      document.cookie = `access_token=${token}; path=/; max-age=86400; SameSite=Lax`;
       // Verify token and fetch user profile
       fetchUserProfile(token);
     } else {
@@ -65,6 +67,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const { access, refresh, user: userData } = await response.json();
         localStorage.setItem('access_token', access);
         localStorage.setItem('refresh_token', refresh);
+        // Set cookie for middleware
+        document.cookie = `access_token=${access}; path=/; max-age=86400; SameSite=Lax`;
         setUser(userData);
       } else {
         throw new Error('Login failed');
@@ -86,6 +90,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const { access, refresh, user: newUser } = await response.json();
         localStorage.setItem('access_token', access);
         localStorage.setItem('refresh_token', refresh);
+        // Set cookie for middleware
+        document.cookie = `access_token=${access}; path=/; max-age=86400; SameSite=Lax`;
         setUser(newUser);
       } else {
         throw new Error('Registration failed');
@@ -98,6 +104,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = () => {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
+    // Clear cookie
+    document.cookie = 'access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
     setUser(null);
   };
 

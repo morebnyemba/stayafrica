@@ -36,6 +36,11 @@ export function Navigation() {
             <Link href="/experiences" className="text-sand-200 hover:text-secondary-300 transition font-medium">
               Experiences
             </Link>
+            {isAuthenticated && (
+              <Link href="/wishlist" className="text-sand-200 hover:text-secondary-300 transition font-medium">
+                Wishlist
+              </Link>
+            )}
           </div>
 
           {/* Right Side - Desktop */}
