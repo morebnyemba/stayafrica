@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/auth-context';
 import { ProtectedRoute } from '@/components/auth/protected-route';
 import { User, Mail, Phone, MapPin, CreditCard, Shield, Bell, Camera, Save, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { WORLD_COUNTRIES } from '@/lib/countries';
 
 type Tab = 'profile' | 'security' | 'payments' | 'notifications';
 
@@ -204,17 +205,11 @@ export function ProfileContent() {
                           className="w-full pl-10 pr-4 py-3 bg-sand-50 dark:bg-primary-700 border border-primary-200 dark:border-primary-600 rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent text-primary-900 dark:text-sand-100"
                         >
                           <option value="">Select your country</option>
-                          <option value="Zimbabwe">Zimbabwe</option>
-                          <option value="South Africa">South Africa</option>
-                          <option value="Kenya">Kenya</option>
-                          <option value="Nigeria">Nigeria</option>
-                          <option value="Ghana">Ghana</option>
-                          <option value="Tanzania">Tanzania</option>
-                          <option value="Uganda">Uganda</option>
-                          <option value="Botswana">Botswana</option>
-                          <option value="Namibia">Namibia</option>
-                          <option value="Zambia">Zambia</option>
-                          <option value="Other">Other</option>
+                          {WORLD_COUNTRIES.map((country) => (
+                            <option key={country} value={country}>
+                              {country}
+                            </option>
+                          ))}
                         </select>
                       </div>
                     </div>

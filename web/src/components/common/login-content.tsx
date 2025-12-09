@@ -62,7 +62,7 @@ export function LoginContent() {
         {/* Logo/Branding */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center justify-center">
-            <img src="/logo.svg" alt="StayAfrica" className="h-24 w-auto" />
+            <img src="/logo.png" alt="StayAfrica" className="h-28 w-auto" />
           </Link>
           <p className="text-primary-600 dark:text-sand-300 mt-2">
             Welcome back! Sign in to continue

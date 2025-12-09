@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/auth-context';
 import Link from 'next/link';
 import { Mail, Lock, Eye, EyeOff, Loader2, User, Phone, MapPin, CheckCircle2, ArrowRight, ArrowLeft } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { validatePassword, validateEmail, validatePhoneNumber } from '@/lib/validation';
+import { getCountriesByContext, getUserCountryByLocation } from '@/lib/countries';
 
 type Step = 1 | 2 | 3;
 
@@ -17,6 +18,8 @@ export function RegisterContent() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [currentStep, setCurrentStep] = useState<Step>(1);
+  const [availableCountries, setAvailableCountries] = useState<string[]>([]);
+  const [userLocation, setUserLocation] = useState<string>('');
   const [formData, setFormData] = useState({
     // Step 1
     email: '',
@@ -31,6 +34,24 @@ export function RegisterContent() {
     role: 'guest' as 'guest' | 'host',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Update available countries based on role
+  useEffect(() => {
+    const countries = getCountriesByContext(formData.role);
+    setAvailableCountries(countries);
+  }, [formData.role]);
+
+  // Get user's current location if they select "host"
+  useEffect(() => {
+    if (formData.role === 'host') {
+      getUserCountryByLocation().then((country) => {
+        if (country && availableCountries.includes(country)) {
+          setUserLocation(country);
+          setFormData((prev) => ({ ...prev, country_of_residence: country }));
+        }
+      });
+    }
+  }, [formData.role, availableCountries]);
 
   const validateStep1 = () => {
     const newErrors: Record<string, string> = {};
@@ -144,7 +165,7 @@ export function RegisterContent() {
         {/* Logo/Branding */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center justify-center">
-            <img src="/logo.svg" alt="StayAfrica" className="h-24 w-auto" />
+            <img src="/logo.png" alt="StayAfrica" className="h-28 w-auto" />
           </Link>
           <p className="text-primary-600 dark:text-sand-300 mt-2">
             Join us and discover amazing stays across Africa
@@ -352,17 +373,11 @@ export function RegisterContent() {
                       } text-primary-900 dark:text-sand-100`}
                     >
                       <option value="">Select your country</option>
-                      <option value="Zimbabwe">Zimbabwe</option>
-                      <option value="South Africa">South Africa</option>
-                      <option value="Kenya">Kenya</option>
-                      <option value="Nigeria">Nigeria</option>
-                      <option value="Ghana">Ghana</option>
-                      <option value="Tanzania">Tanzania</option>
-                      <option value="Uganda">Uganda</option>
-                      <option value="Botswana">Botswana</option>
-                      <option value="Namibia">Namibia</option>
-                      <option value="Zambia">Zambia</option>
-                      <option value="Other">Other</option>
+                      {availableCountries.map((country) => (
+                        <option key={country} value={country}>
+                          {country}
+                        </option>
+                      ))}
                     </select>
                   </div>
                   {errors.country_of_residence && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.country_of_residence}</p>}

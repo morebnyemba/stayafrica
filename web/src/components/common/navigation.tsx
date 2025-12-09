@@ -24,7 +24,7 @@ export function Navigation() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2 text-sand-100">
-            <img src="/logo.svg" alt="StayAfrica" className="h-10 w-auto" />
+            <img src="/logo.png" alt="StayAfrica" className="h-16 w-auto" />
           </Link>
 
           {/* Center Navigation - Desktop */}
