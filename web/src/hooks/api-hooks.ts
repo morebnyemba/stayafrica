@@ -5,131 +5,175 @@ import { apiClient } from '@/services/api-client';
 
 // Properties
 export function useProperties(filters?: any) {
-  return useQuery(['properties', filters], () => apiClient.getProperties(filters));
+  return useQuery({
+    queryKey: ['properties', filters],
+    queryFn: () => apiClient.getProperties(filters),
+  });
 }
 
 export function useProperty(id: string) {
-  return useQuery(['property', id], () => apiClient.getPropertyById(id));
+  return useQuery({
+    queryKey: ['property', id],
+    queryFn: () => apiClient.getPropertyById(id),
+  });
 }
 
 export function useNearbyProperties(latitude: number, longitude: number, radius: number = 10) {
-  return useQuery(
-    ['properties-nearby', latitude, longitude, radius],
-    () => apiClient.searchNearby(latitude, longitude, radius)
-  );
+  return useQuery({
+    queryKey: ['properties-nearby', latitude, longitude, radius],
+    queryFn: () => apiClient.searchNearby(latitude, longitude, radius),
+  });
 }
 
 export function useCreateProperty() {
   const queryClient = useQueryClient();
-  return useMutation((data: any) => apiClient.createProperty(data), {
+  return useMutation({
+    mutationFn: (data: any) => apiClient.createProperty(data),
     onSuccess: () => {
-      queryClient.invalidateQueries('properties');
+      queryClient.invalidateQueries({ queryKey: ['properties'] });
     },
   });
 }
 
 // Bookings
 export function useBookings(filters?: any) {
-  return useQuery(['bookings', filters], () => apiClient.getBookings(filters));
+  return useQuery({
+    queryKey: ['bookings', filters],
+    queryFn: () => apiClient.getBookings(filters),
+  });
 }
 
 export function useBooking(id: string) {
-  return useQuery(['booking', id], () => apiClient.getBookingById(id));
+  return useQuery({
+    queryKey: ['booking', id],
+    queryFn: () => apiClient.getBookingById(id),
+  });
 }
 
 export function useCreateBooking() {
   const queryClient = useQueryClient();
-  return useMutation((data: any) => apiClient.createBooking(data), {
+  return useMutation({
+    mutationFn: (data: any) => apiClient.createBooking(data),
     onSuccess: () => {
-      queryClient.invalidateQueries('bookings');
+      queryClient.invalidateQueries({ queryKey: ['bookings'] });
     },
   });
 }
 
 export function useConfirmBooking() {
   const queryClient = useQueryClient();
-  return useMutation((id: string) => apiClient.confirmBooking(id), {
+  return useMutation({
+    mutationFn: (id: string) => apiClient.confirmBooking(id),
     onSuccess: () => {
-      queryClient.invalidateQueries('bookings');
+      queryClient.invalidateQueries({ queryKey: ['bookings'] });
     },
   });
 }
 
 export function useCancelBooking() {
   const queryClient = useQueryClient();
-  return useMutation((id: string) => apiClient.cancelBooking(id), {
+  return useMutation({
+    mutationFn: (id: string) => apiClient.cancelBooking(id),
     onSuccess: () => {
-      queryClient.invalidateQueries('bookings');
+      queryClient.invalidateQueries({ queryKey: ['bookings'] });
     },
   });
 }
 
 // Payments
 export function useInitiatePayment() {
-  return useMutation((data: { bookingId: string; provider: string }) =>
-    apiClient.initiatePayment(data.bookingId, data.provider)
-  );
+  return useMutation({
+    mutationFn: (data: { bookingId: string; provider: string }) =>
+      apiClient.initiatePayment(data.bookingId, data.provider),
+  });
 }
 
 export function usePaymentStatus(paymentId: string) {
-  return useQuery(['payment', paymentId], () => apiClient.getPaymentStatus(paymentId));
+  return useQuery({
+    queryKey: ['payment', paymentId],
+    queryFn: () => apiClient.getPaymentStatus(paymentId),
+  });
 }
 
 // Reviews
 export function useReviews(params?: any) {
-  return useQuery(['reviews', params], () => apiClient.getReviews(params));
+  return useQuery({
+    queryKey: ['reviews', params],
+    queryFn: () => apiClient.getReviews(params),
+  });
 }
 
 export function useCreateReview() {
   const queryClient = useQueryClient();
-  return useMutation((data: any) => apiClient.createReview(data), {
+  return useMutation({
+    mutationFn: (data: any) => apiClient.createReview(data),
     onSuccess: () => {
-      queryClient.invalidateQueries('reviews');
+      queryClient.invalidateQueries({ queryKey: ['reviews'] });
     },
   });
 }
 
 // Messages
 export function useMessages(params?: any) {
-  return useQuery(['messages', params], () => apiClient.getMessages(params));
+  return useQuery({
+    queryKey: ['messages', params],
+    queryFn: () => apiClient.getMessages(params),
+  });
 }
 
 export function useSendMessage() {
   const queryClient = useQueryClient();
-  return useMutation((data: any) => apiClient.sendMessage(data), {
+  return useMutation({
+    mutationFn: (data: any) => apiClient.sendMessage(data),
     onSuccess: () => {
-      queryClient.invalidateQueries('messages');
+      queryClient.invalidateQueries({ queryKey: ['messages'] });
     },
   });
 }
 
 export function useConversations() {
-  return useQuery(['conversations'], () => apiClient.getConversations());
+  return useQuery({
+    queryKey: ['conversations'],
+    queryFn: () => apiClient.getConversations(),
+  });
 }
 
 export function useUnreadCount() {
-  return useQuery(['unread-count'], () => apiClient.getUnreadCount());
+  return useQuery({
+    queryKey: ['unread-count'],
+    queryFn: () => apiClient.getUnreadCount(),
+  });
 }
 
 // Users
 export function useUserProfile() {
-  return useQuery(['user-profile'], () => apiClient.getUserProfile());
+  return useQuery({
+    queryKey: ['user-profile'],
+    queryFn: () => apiClient.getUserProfile(),
+  });
 }
 
 export function useUpdateProfile() {
   const queryClient = useQueryClient();
-  return useMutation((data: any) => apiClient.updateUserProfile(data), {
+  return useMutation({
+    mutationFn: (data: any) => apiClient.updateUserProfile(data),
     onSuccess: () => {
-      queryClient.invalidateQueries('user-profile');
+      queryClient.invalidateQueries({ queryKey: ['user-profile'] });
     },
   });
 }
 
 // Admin
 export function useAdminStats() {
-  return useQuery(['admin-stats'], () => apiClient.getAdminStats());
+  return useQuery({
+    queryKey: ['admin-stats'],
+    queryFn: () => apiClient.getAdminStats(),
+  });
 }
 
 export function useAuditLogs(params?: any) {
-  return useQuery(['audit-logs', params], () => apiClient.getAuditLogs(params));
+  return useQuery({
+    queryKey: ['audit-logs', params],
+    queryFn: () => apiClient.getAuditLogs(params),
+  });
 }

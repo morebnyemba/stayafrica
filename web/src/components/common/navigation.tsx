@@ -6,6 +6,7 @@ import { useAuth } from '@/context/auth-context';
 import { useRouter } from 'next/navigation';
 import { Menu, User, LogOut, Home } from 'lucide-react';
 import { useState } from 'react';
+import { ThemeToggle } from './theme-toggle';
 
 export function Navigation() {
   const { user, isAuthenticated, logout } = useAuth();
@@ -29,22 +30,23 @@ export function Navigation() {
 
           {/* Center Navigation - Desktop */}
           <div className="hidden md:flex items-center space-x-8">
-            <Link href="/explore" className="text-sand-200 hover:text-secondary-300 transition">
-              Explore
+            <Link href="/explore" className="text-sand-200 hover:text-secondary-300 transition font-medium">
+              Stays
             </Link>
-            <Link href="/bookings" className="text-sand-200 hover:text-secondary-300 transition">
-              Bookings
-            </Link>
-            <Link href="/messages" className="text-sand-200 hover:text-secondary-300 transition">
-              Messages
+            <Link href="/experiences" className="text-sand-200 hover:text-secondary-300 transition font-medium">
+              Experiences
             </Link>
           </div>
 
           {/* Right Side - Desktop */}
           <div className="hidden md:flex items-center space-x-4">
+            <ThemeToggle />
             {isAuthenticated ? (
               <>
-                <Link href="/dashboard" className="btn-secondary">
+                <Link href="/host" className="text-sand-200 hover:text-sand-50 transition font-medium rounded-full px-4 py-2 hover:bg-primary-700/60">
+                  Become a Host
+                </Link>
+                <Link href="/dashboard" className="text-sand-200 hover:text-sand-50 transition font-medium">
                   Dashboard
                 </Link>
                 <Link href="/profile" className="flex items-center space-x-2">
@@ -69,10 +71,13 @@ export function Navigation() {
               </>
             ) : (
               <>
-                <Link href="/login" className="btn-secondary">
+                <Link href="/host" className="text-sand-200 hover:text-sand-50 transition font-medium rounded-full px-4 py-2 hover:bg-primary-700/60">
+                  Become a Host
+                </Link>
+                <Link href="/login" className="text-sand-200 hover:text-sand-50 transition font-medium">
                   Login
                 </Link>
-                <Link href="/register" className="btn-primary">
+                <Link href="/register" className="btn-primary rounded-full">
                   Sign Up
                 </Link>
               </>
@@ -91,15 +96,19 @@ export function Navigation() {
         {/* Mobile Menu */}
         {mobileMenuOpen && (
           <div className="md:hidden border-t border-primary-700 py-4 space-y-4 bg-primary-800/95 text-sand-100">
-            <Link href="/explore" className="block text-sand-200 hover:text-secondary-300">
-              Explore
+            <Link href="/explore" className="block text-sand-200 hover:text-secondary-300 px-4 py-2">
+              Stays
             </Link>
-            <Link href="/bookings" className="block text-sand-200 hover:text-secondary-300">
-              Bookings
+            <Link href="/experiences" className="block text-sand-200 hover:text-secondary-300 px-4 py-2">
+              Experiences
             </Link>
-            <Link href="/messages" className="block text-sand-200 hover:text-secondary-300">
-              Messages
+            <Link href="/host" className="block text-sand-200 hover:text-secondary-300 px-4 py-2">
+              Become a Host
             </Link>
+            <div className="flex items-center justify-between px-4 py-2">
+              <span className="text-sand-200">Theme</span>
+              <ThemeToggle />
+            </div>
             {isAuthenticated ? (
               <>
                 <Link href="/dashboard" className="block btn-secondary w-full text-center">
