@@ -6,6 +6,7 @@ import { useAuth } from '@/context/auth-context';
 import Link from 'next/link';
 import { Mail, Lock, Eye, EyeOff, Loader2, Home } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { validateEmail, validatePassword } from '@/lib/validation';
 
 export function LoginContent() {
   const router = useRouter();
@@ -21,16 +22,14 @@ export function LoginContent() {
   const validateForm = () => {
     const newErrors: { email?: string; password?: string } = {};
     
-    if (!formData.email) {
-      newErrors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email is invalid';
+    const emailValidation = validateEmail(formData.email);
+    if (!emailValidation.isValid) {
+      newErrors.email = emailValidation.error;
     }
     
-    if (!formData.password) {
-      newErrors.password = 'Password is required';
-    } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
+    const passwordValidation = validatePassword(formData.password);
+    if (!passwordValidation.isValid) {
+      newErrors.password = passwordValidation.error;
     }
     
     setErrors(newErrors);

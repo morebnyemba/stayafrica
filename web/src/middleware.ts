@@ -8,6 +8,7 @@ const protectedRoutes = [
   '/profile',
   '/messages',
   '/host',
+  '/wishlist',
 ];
 
 // Define auth routes (redirect to dashboard if already logged in)

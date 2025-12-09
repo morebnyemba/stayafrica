@@ -24,7 +24,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const token = localStorage.getItem('access_token');
     if (token) {
       // Set cookie for middleware
-      document.cookie = `access_token=${token}; path=/; max-age=86400; SameSite=Lax`;
+      const isSecure = window.location.protocol === 'https:';
+      document.cookie = `access_token=${token}; path=/; max-age=86400; SameSite=Lax${isSecure ? '; Secure' : ''}`;
       // Verify token and fetch user profile
       fetchUserProfile(token);
     } else {
@@ -68,7 +69,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         localStorage.setItem('access_token', access);
         localStorage.setItem('refresh_token', refresh);
         // Set cookie for middleware
-        document.cookie = `access_token=${access}; path=/; max-age=86400; SameSite=Lax`;
+        const isSecure = window.location.protocol === 'https:';
+        document.cookie = `access_token=${access}; path=/; max-age=86400; SameSite=Lax${isSecure ? '; Secure' : ''}`;
         setUser(userData);
       } else {
         throw new Error('Login failed');
@@ -91,7 +93,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         localStorage.setItem('access_token', access);
         localStorage.setItem('refresh_token', refresh);
         // Set cookie for middleware
-        document.cookie = `access_token=${access}; path=/; max-age=86400; SameSite=Lax`;
+        const isSecure = window.location.protocol === 'https:';
+        document.cookie = `access_token=${access}; path=/; max-age=86400; SameSite=Lax${isSecure ? '; Secure' : ''}`;
         setUser(newUser);
       } else {
         throw new Error('Registration failed');

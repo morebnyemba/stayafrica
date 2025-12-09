@@ -6,6 +6,7 @@ import { useAuth } from '@/context/auth-context';
 import Link from 'next/link';
 import { Mail, Lock, Eye, EyeOff, Loader2, Home, User, Phone, MapPin, CheckCircle2, ArrowRight, ArrowLeft } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { validatePassword, validateEmail, validatePhoneNumber } from '@/lib/validation';
 
 type Step = 1 | 2 | 3;
 
@@ -34,18 +35,14 @@ export function RegisterContent() {
   const validateStep1 = () => {
     const newErrors: Record<string, string> = {};
     
-    if (!formData.email) {
-      newErrors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email is invalid';
+    const emailValidation = validateEmail(formData.email);
+    if (!emailValidation.isValid) {
+      newErrors.email = emailValidation.error!;
     }
     
-    if (!formData.password) {
-      newErrors.password = 'Password is required';
-    } else if (formData.password.length < 8) {
-      newErrors.password = 'Password must be at least 8 characters';
-    } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password)) {
-      newErrors.password = 'Password must contain uppercase, lowercase, and number';
+    const passwordValidation = validatePassword(formData.password);
+    if (!passwordValidation.isValid) {
+      newErrors.password = passwordValidation.error!;
     }
     
     if (formData.password !== formData.confirmPassword) {
@@ -67,10 +64,9 @@ export function RegisterContent() {
       newErrors.last_name = 'Last name is required';
     }
     
-    if (!formData.phone_number) {
-      newErrors.phone_number = 'Phone number is required';
-    } else if (!/^\+?[\d\s-()]+$/.test(formData.phone_number)) {
-      newErrors.phone_number = 'Invalid phone number format';
+    const phoneValidation = validatePhoneNumber(formData.phone_number);
+    if (!phoneValidation.isValid) {
+      newErrors.phone_number = phoneValidation.error!;
     }
     
     setErrors(newErrors);
