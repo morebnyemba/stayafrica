@@ -143,6 +143,37 @@ export function HomeProperties() {
           ))}
         </div>
       </section>
+
+      {/* Become a Host CTA Section */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-primary-200 dark:border-primary-700">
+        <div className="card overflow-hidden">
+          <div className="grid md:grid-cols-2 gap-0">
+            <div className="relative h-64 md:h-auto">
+              <img
+                src="https://images.unsplash.com/photo-1560185007-cde436f6a4d0?w=800"
+                alt="Become a host"
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="p-8 md:p-12 flex flex-col justify-center bg-gradient-to-br from-primary-800 to-primary-700 text-sand-50">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                Become a Host
+              </h2>
+              <p className="text-lg text-sand-100 mb-6">
+                Share your space and earn extra income. Join thousands of hosts welcoming guests from around the world.
+              </p>
+              <div>
+                <Link
+                  href="/host"
+                  className="inline-block btn-primary px-8 py-3 text-lg font-semibold"
+                >
+                  Learn More
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

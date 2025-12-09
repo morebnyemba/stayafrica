@@ -105,6 +105,19 @@ export function HeroSection() {
             </div>
           </div>
         </form>
+
+        {/* Host CTA */}
+        <div className="mt-8 text-center">
+          <a 
+            href="/host"
+            className="inline-flex items-center gap-2 text-sand-100 hover:text-secondary-300 transition font-medium text-sm"
+          >
+            <span>StayAfrica your home</span>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </a>
+        </div>
       </div>
     </div>
   );
