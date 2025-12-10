@@ -15,6 +15,7 @@ import {
   XCircle,
   Home,
   MessageSquare,
+  Star,
 } from 'lucide-react';
 import { ProtectedRoute } from '@/components/auth/protected-route';
 
@@ -41,15 +42,80 @@ export function DashboardContent() {
     enabled: isAuthenticated,
   });
 
-  // Fetch recent bookings for activity
+
+  // Fetch recent bookings
   const { data: recentBookings } = useQuery({
     queryKey: ['bookings', 'recent'],
     queryFn: async () => {
       const response = await apiClient.getBookings({});
-      return response.data?.results?.slice(0, 3) || [];
+      return response.data?.results?.map((b: any) => ({
+        type: 'booking',
+        id: b.id,
+        status: b.status,
+        property: b.property,
+        created_at: b.created_at,
+      })) || [];
     },
     enabled: isAuthenticated,
   });
+
+  // Fetch recent reviews written
+  const { data: recentReviews } = useQuery({
+    queryKey: ['reviews', 'recent'],
+    queryFn: async () => {
+      const response = await apiClient.getReviews({ written_by_user: true });
+      return response.data?.results?.map((r: any) => ({
+        type: 'review',
+        id: r.id,
+        rating: r.rating,
+        text: r.text,
+        created_at: r.created_at,
+        property: r.property,
+      })) || [];
+    },
+    enabled: isAuthenticated,
+  });
+
+  // Fetch recent payments
+  const { data: recentPayments } = useQuery({
+    queryKey: ['payments', 'recent'],
+    queryFn: async () => {
+      const response = await apiClient.getPaymentHistory();
+      return response.data?.results?.map((p: any) => ({
+        type: 'payment',
+        id: p.id,
+        status: p.status,
+        amount: p.amount,
+        provider: p.provider,
+        created_at: p.created_at,
+        booking: p.booking,
+      })) || [];
+    },
+    enabled: isAuthenticated,
+  });
+
+  // Fetch recent wishlist changes (saved/unsaved)
+  const { data: recentWishlist } = useQuery({
+    queryKey: ['wishlist', 'recent'],
+    queryFn: async () => {
+      const response = await apiClient.getSavedProperties();
+      return response.data?.results?.map((w: any) => ({
+        type: 'wishlist',
+        id: w.id,
+        property: w.property,
+        created_at: w.created_at,
+      })) || [];
+    },
+    enabled: isAuthenticated,
+  });
+
+  // Merge and sort all activities by date
+  const allActivities = [
+    ...(recentBookings || []),
+    ...(recentReviews || []),
+    ...(recentPayments || []),
+    ...(recentWishlist || []),
+  ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 8);
 
   // Fetch unread messages count
   const { data: unreadMessages } = useQuery({
@@ -141,6 +207,20 @@ export function DashboardContent() {
       icon: CreditCard,
       link: '/profile?tab=payments',
       color: 'bg-purple-500',
+    },
+    {
+      title: 'Payment History',
+      description: 'View all your payments',
+      icon: CreditCard,
+      link: '/payments',
+      color: 'bg-yellow-500',
+    },
+    {
+      title: 'My Reviews',
+      description: 'See reviews you wrote and received',
+      icon: Star,
+      link: '/reviews',
+      color: 'bg-pink-500',
     },
   ];
 
@@ -303,43 +383,74 @@ export function DashboardContent() {
             <h2 className="text-2xl font-bold text-primary-900 dark:text-sand-50 mb-6">
               Recent Activity
             </h2>
-            {recentBookings && recentBookings.length > 0 ? (
+            {allActivities.length > 0 ? (
               <div className="space-y-4">
-                {recentBookings.map((booking: any) => (
+                {allActivities.map((activity: any) => (
                   <div
-                    key={booking.id}
+                    key={activity.type + '-' + activity.id}
                     className="flex items-center gap-4 p-4 border border-primary-200 dark:border-primary-700 rounded-lg"
                   >
                     <div className={`p-2 rounded-full ${
-                      booking.status === 'CONFIRMED'
-                        ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400'
-                        : booking.status === 'PENDING'
-                        ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400'
-                        : 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
+                      activity.type === 'booking' ?
+                        activity.status === 'CONFIRMED'
+                          ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400'
+                          : activity.status === 'PENDING'
+                          ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400'
+                          : 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
+                      : activity.type === 'review' ? 'bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400'
+                      : activity.type === 'payment' ?
+                        activity.status === 'success'
+                          ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+                          : activity.status === 'pending'
+                          ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400'
+                          : 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
+                      : 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400'
                     }`}>
-                      {booking.status === 'CONFIRMED' ? (
-                        <CheckCircle className="w-5 h-5" />
-                      ) : booking.status === 'PENDING' ? (
-                        <Clock className="w-5 h-5" />
+                      {activity.type === 'booking' ? (
+                        activity.status === 'CONFIRMED' ? <CheckCircle className="w-5 h-5" />
+                        : activity.status === 'PENDING' ? <Clock className="w-5 h-5" />
+                        : <XCircle className="w-5 h-5" />
+                      ) : activity.type === 'review' ? (
+                        <Star className="w-5 h-5" />
+                      ) : activity.type === 'payment' ? (
+                        activity.status === 'success' ? <CheckCircle className="w-5 h-5" />
+                        : activity.status === 'pending' ? <Clock className="w-5 h-5" />
+                        : <XCircle className="w-5 h-5" />
                       ) : (
-                        <XCircle className="w-5 h-5" />
+                        <Heart className="w-5 h-5" />
                       )}
                     </div>
                     <div className="flex-1">
-                      <p className="font-semibold text-primary-900 dark:text-sand-50">
-                        Booking {booking.status.toLowerCase()} - {booking.property?.title}
-                      </p>
+                      {activity.type === 'booking' ? (
+                        <p className="font-semibold text-primary-900 dark:text-sand-50">
+                          Booking {activity.status.toLowerCase()} - {activity.property?.title}
+                        </p>
+                      ) : activity.type === 'review' ? (
+                        <p className="font-semibold text-primary-900 dark:text-sand-50">
+                          Review {activity.rating}★ - {activity.property?.title}
+                        </p>
+                      ) : activity.type === 'payment' ? (
+                        <p className="font-semibold text-primary-900 dark:text-sand-50">
+                          Payment {activity.status} - {activity.provider} ${activity.amount}
+                        </p>
+                      ) : (
+                        <p className="font-semibold text-primary-900 dark:text-sand-50">
+                          Saved property - {activity.property?.title}
+                        </p>
+                      )}
                       <p className="text-sm text-primary-600 dark:text-sand-400">
-                        {new Date(booking.created_at).toLocaleDateString()} at{' '}
-                        {new Date(booking.created_at).toLocaleTimeString()}
+                        {new Date(activity.created_at).toLocaleDateString()} at {new Date(activity.created_at).toLocaleTimeString()}
                       </p>
                     </div>
-                    <Link
-                      href={`/bookings`}
-                      className="text-secondary-600 dark:text-secondary-400 hover:underline text-sm font-medium"
-                    >
-                      View Details
-                    </Link>
+                    {activity.type === 'booking' ? (
+                      <Link href={`/bookings`} className="text-secondary-600 dark:text-secondary-400 hover:underline text-sm font-medium">View Details</Link>
+                    ) : activity.type === 'review' ? (
+                      <Link href={`/reviews`} className="text-secondary-600 dark:text-secondary-400 hover:underline text-sm font-medium">View Reviews</Link>
+                    ) : activity.type === 'payment' ? (
+                      <Link href={`/payments`} className="text-secondary-600 dark:text-secondary-400 hover:underline text-sm font-medium">View Payments</Link>
+                    ) : (
+                      <Link href={`/wishlist`} className="text-secondary-600 dark:text-secondary-400 hover:underline text-sm font-medium">View Wishlist</Link>
+                    )}
                   </div>
                 ))}
               </div>

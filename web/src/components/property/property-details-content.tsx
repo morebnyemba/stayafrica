@@ -2,30 +2,50 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useQuery } from '@tanstack/react-query';
-import { apiClient } from '@/services/api-client';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import apiClient from '@/services/api-client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PropertyImageCarousel } from '@/components/property/property-image-carousel';
 import { PropertyAmenities } from '@/components/property/property-amenities';
 import { PropertyHostCard } from '@/components/property/property-host-card';
 import { AvailabilityCalendar } from '@/components/property/availability-calendar';
 import { BookingCard } from '@/components/booking/booking-card';
-import { Heart, Share2, MapPin, Star } from 'lucide-react';
+import { Heart, Star } from 'lucide-react';
 import Link from 'next/link';
 
 export function PropertyDetailsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const propertyId = searchParams.get('id');
+  const propertyId = searchParams.get('id') ?? '';
   const [isSaved, setIsSaved] = useState(false);
+  const [checkingSaved, setCheckingSaved] = useState(true);
+
+  // Check if property is saved on mount
+  useEffect(() => {
+    if (!propertyId) return;
+    setCheckingSaved(true);
+    apiClient.isPropertySaved(propertyId)
+      .then((isSaved: boolean) => setIsSaved(isSaved))
+      .catch(() => setIsSaved(false))
+      .finally(() => setCheckingSaved(false));
+  }, [propertyId]);
+
+  // Save/Unsave mutations
+  const saveMutation = useMutation({
+    mutationFn: async () => apiClient.saveProperty(propertyId),
+    onSuccess: () => setIsSaved(true),
+  });
+  const unsaveMutation = useMutation({
+    mutationFn: async () => apiClient.unsaveProperty(propertyId),
+    onSuccess: () => setIsSaved(false),
+  });
 
   // Fetch property details
   const { data: property, isLoading, error } = useQuery({
     queryKey: ['property', propertyId],
     queryFn: async () => {
       if (!propertyId) throw new Error('Property ID not found');
-      const response = await apiClient.get(`/api/v1/properties/${propertyId}/`);
-      return response.data;
+      return apiClient.getPropertyDetails(propertyId);
     },
     enabled: !!propertyId,
   });
@@ -35,8 +55,7 @@ export function PropertyDetailsContent() {
     queryKey: ['property-reviews', propertyId],
     queryFn: async () => {
       if (!propertyId) throw new Error('Property ID not found');
-      const response = await apiClient.get(`/api/v1/properties/${propertyId}/reviews/`);
-      return response.data?.results || [];
+      return apiClient.getPropertyReviews(propertyId);
     },
     enabled: !!propertyId,
   });
@@ -59,6 +78,12 @@ export function PropertyDetailsContent() {
       <div className="min-h-screen bg-sand-100 dark:bg-primary-900 flex items-center justify-center">
         <div className="text-center">
           <p className="text-red-600 dark:text-red-400 mb-4">Error loading property</p>
+          <button
+            className="btn-primary px-6 py-2 mb-4"
+            onClick={() => window.location.reload()}
+          >
+            Retry
+          </button>
           <Link href="/explore" className="text-secondary-600 hover:text-secondary-700">
             Back to explore
           </Link>
@@ -102,12 +127,19 @@ export function PropertyDetailsContent() {
           </button>
           <div className="flex items-center space-x-4">
             <button
-              onClick={() => setIsSaved(!isSaved)}
+              disabled={checkingSaved || saveMutation.isLoading || unsaveMutation.isLoading}
+              onClick={() => {
+                if (isSaved) {
+                  unsaveMutation.mutate();
+                } else {
+                  saveMutation.mutate();
+                }
+              }}
               className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition ${
                 isSaved
                   ? 'bg-secondary-100 dark:bg-secondary-900/30 text-secondary-600'
                   : 'bg-sand-100 dark:bg-primary-700 text-primary-600 dark:text-sand-300'
-              }`}
+              } ${checkingSaved ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               <Heart className={`w-5 h-5 ${isSaved ? 'fill-current' : ''}`} />
               <span>{isSaved ? 'Saved' : 'Save'}</span>
@@ -232,7 +264,7 @@ export function PropertyDetailsContent() {
                           ))}
                         </div>
                       </div>
-                      <p className="text-primary-700 dark:text-sand-200">{review.comment}</p>
+                      <p className="text-primary-700 dark:text-sand-200">{review.text}</p>
                     </div>
                   ))}
                 </div>
