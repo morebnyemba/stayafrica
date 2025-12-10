@@ -149,7 +149,7 @@ class HostAnalyticsService:
         
         return [
             {
-                'period': item['period'].strftime('%Y-%m-%d'),
+                'period': item['period'].strftime('%Y-%m' if period == 'month' else '%Y-W%W'),
                 'earnings': float(item['total_earnings'] or 0),
                 'bookings': item['booking_count']
             }
@@ -187,10 +187,6 @@ class HostAnalyticsService:
             reviews = Review.objects.filter(booking__rental_property=prop)
             avg_rating = reviews.aggregate(avg=Avg('rating'))['avg'] or 0.0
             
-            # Views/impressions (would need a separate tracking mechanism)
-            # For now, using a placeholder
-            views = 0  # TODO: Implement view tracking
-            
             performance_data.append({
                 'property_id': prop.id,
                 'property_title': prop.title,
@@ -200,7 +196,6 @@ class HostAnalyticsService:
                 'total_earnings': float(earnings),
                 'average_rating': round(avg_rating, 2),
                 'review_count': reviews.count(),
-                'views': views,
             })
         
         return performance_data

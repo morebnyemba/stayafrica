@@ -124,9 +124,9 @@ export function PropertyForm({ initialData, isEdit = false }: PropertyFormProps)
         },
         price_per_night: parseFloat(formData.price_per_night),
         currency: formData.currency,
-        bedrooms: parseInt(formData.bedrooms as any),
-        bathrooms: parseInt(formData.bathrooms as any),
-        max_guests: parseInt(formData.max_guests as any),
+        bedrooms: Math.max(1, parseInt(String(formData.bedrooms)) || 1),
+        bathrooms: Math.max(1, parseInt(String(formData.bathrooms)) || 1),
+        max_guests: Math.max(1, parseInt(String(formData.max_guests)) || 1),
         status: 'pending_approval',
       };
 

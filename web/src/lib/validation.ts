@@ -20,6 +20,9 @@ export function validatePassword(password: string): { valid: boolean; message?: 
 }
 
 export function validatePhoneNumber(phone: string): boolean {
-  const phoneRegex = /^\+?[1-9]\d{9,14}$/;
-  return phoneRegex.test(phone.replace(/[\s-]/g, ''));
+  // More flexible pattern that allows various international formats
+  // Allows: +, optional country code (1-3 digits), and 9-15 total digits
+  const cleaned = phone.replace(/[\s\-\(\)]/g, '');
+  const phoneRegex = /^\+?[0-9]{9,15}$/;
+  return phoneRegex.test(cleaned);
 }

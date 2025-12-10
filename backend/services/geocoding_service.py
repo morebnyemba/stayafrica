@@ -1,6 +1,13 @@
 """
 Geocoding Service for StayAfrica
 Provides accurate location services using GDAL/PostGIS
+
+Note: This service uses synchronous HTTP requests. For production use with
+high traffic, consider:
+1. Implementing async/await for non-blocking operations
+2. Using Celery tasks for bulk geocoding operations
+3. Implementing caching to reduce API calls
+4. Rate limiting to respect Nominatim usage policy
 """
 from django.contrib.gis.geos import Point
 from django.contrib.gis.measure import D
@@ -42,7 +49,16 @@ class GeocodingService:
             }
             
             if country:
-                params['countrycodes'] = country.lower()[:2]  # ISO country code
+                # Map country name to ISO code if needed
+                country_code_map = {
+                    'Zimbabwe': 'ZW',
+                    'South Africa': 'ZA',
+                    'Botswana': 'BW',
+                    'Namibia': 'NA',
+                    'Zambia': 'ZM',
+                }
+                country_code = country_code_map.get(country, country)
+                params['countrycodes'] = country_code.upper()[:2]  # ISO country code
             
             response = requests.get(
                 f"{cls.NOMINATIM_BASE_URL}/search",
