@@ -197,6 +197,57 @@ class ApiClient {
   async getAuditLogs(params?: any) {
     return this.client.get('/admin/audit-logs/', { params });
   }
+
+  // Geocoding & Location Services
+  async geocodeAddress(address: string, country?: string) {
+    return this.client.post('/properties/geocode/', { address, country });
+  }
+
+  async reverseGeocode(latitude: number, longitude: number) {
+    return this.client.post('/properties/reverse_geocode/', { latitude, longitude });
+  }
+
+  async getLocationSuggestions(query: string, country?: string, limit?: number) {
+    return this.client.get('/properties/location_suggestions/', {
+      params: { q: query, country, limit },
+    });
+  }
+
+  // Host Dashboard & Analytics
+  async getHostProperties() {
+    return this.client.get('/properties/host_properties/');
+  }
+
+  async getHostAnalytics() {
+    return this.client.get('/properties/host_analytics/');
+  }
+
+  async getHostEarnings(period: string = 'month') {
+    return this.client.get('/properties/host_earnings/', { params: { period } });
+  }
+
+  async getPropertyPerformance() {
+    return this.client.get('/properties/property_performance/');
+  }
+
+  async getBookingCalendar(propertyId: string, start?: string, end?: string) {
+    return this.client.get(`/properties/${propertyId}/booking_calendar/`, {
+      params: { start, end },
+    });
+  }
+
+  async getUpcomingCheckins(days: number = 7) {
+    return this.client.get('/properties/upcoming_checkins/', { params: { days } });
+  }
+
+  async getPendingActions() {
+    return this.client.get('/properties/pending_actions/');
+  }
+
+  // Host Booking Management
+  async getHostBookings(params?: any) {
+    return this.client.get('/bookings/', { params });
+  }
 }
 
 export const apiClient = new ApiClient();

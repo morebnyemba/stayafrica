@@ -14,6 +14,8 @@ from apps.properties.serializers import (
     AmenitySerializer,
     SavedPropertySerializer
 )
+from services.geocoding_service import GeocodingService
+from services.host_analytics import HostAnalyticsService
 
 class AmenityViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Amenity.objects.all()
@@ -190,3 +192,230 @@ class PropertyViewSet(viewsets.ModelViewSet):
             property_id=pk
         ).exists()
         return Response({'is_saved': is_saved})
+    
+    @action(detail=False, methods=['post'], permission_classes=[AllowAny])
+    def geocode(self, request):
+        """
+        Geocode an address to get coordinates
+        POST /api/v1/properties/geocode/
+        Body: {"address": "123 Main St, Harare, Zimbabwe", "country": "ZW"}
+        """
+        address = request.data.get('address')
+        country = request.data.get('country')
+        
+        if not address:
+            return Response(
+                {'error': 'Address is required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        result = GeocodingService.geocode_address(address, country)
+        
+        if result:
+            return Response(result)
+        else:
+            return Response(
+                {'error': 'Could not geocode address'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+    
+    @action(detail=False, methods=['post'], permission_classes=[AllowAny])
+    def reverse_geocode(self, request):
+        """
+        Reverse geocode coordinates to get address
+        POST /api/v1/properties/reverse_geocode/
+        Body: {"latitude": -17.8252, "longitude": 31.0335}
+        """
+        lat = request.data.get('latitude')
+        lon = request.data.get('longitude')
+        
+        if lat is None or lon is None:
+            return Response(
+                {'error': 'Both latitude and longitude are required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            lat = float(lat)
+            lon = float(lon)
+        except (TypeError, ValueError):
+            return Response(
+                {'error': 'Invalid coordinate values'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        if not GeocodingService.validate_coordinates(lat, lon):
+            return Response(
+                {'error': 'Coordinates out of valid range'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        result = GeocodingService.reverse_geocode(lat, lon)
+        
+        if result:
+            return Response(result)
+        else:
+            return Response(
+                {'error': 'Could not reverse geocode coordinates'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+    
+    @action(detail=False, methods=['get'], permission_classes=[AllowAny])
+    def location_suggestions(self, request):
+        """
+        Get location autocomplete suggestions
+        GET /api/v1/properties/location_suggestions/?q=harare&country=ZW&limit=5
+        """
+        query = request.query_params.get('q', '')
+        country = request.query_params.get('country')
+        limit = int(request.query_params.get('limit', 5))
+        
+        if not query or len(query) < 2:
+            return Response(
+                {'error': 'Query must be at least 2 characters'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        suggestions = GeocodingService.get_location_suggestions(query, country, limit)
+        return Response({'suggestions': suggestions})
+    
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    def host_properties(self, request):
+        """
+        Get all properties for the authenticated host
+        GET /api/v1/properties/host_properties/
+        """
+        if not request.user.is_host:
+            return Response(
+                {'error': 'Only hosts can access this endpoint'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        properties = Property.objects.filter(host=request.user).order_by('-created_at')
+        serializer = PropertyListSerializer(properties, many=True)
+        return Response({
+            'results': serializer.data,
+            'count': properties.count()
+        })
+    
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    def host_analytics(self, request):
+        """
+        Get comprehensive analytics for host
+        GET /api/v1/properties/host_analytics/
+        """
+        if not request.user.is_host:
+            return Response(
+                {'error': 'Only hosts can access this endpoint'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        overview = HostAnalyticsService.get_host_overview(request.user)
+        return Response(overview)
+    
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    def host_earnings(self, request):
+        """
+        Get earnings breakdown by period
+        GET /api/v1/properties/host_earnings/?period=month
+        """
+        if not request.user.is_host:
+            return Response(
+                {'error': 'Only hosts can access this endpoint'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        period = request.query_params.get('period', 'month')
+        earnings = HostAnalyticsService.get_earnings_breakdown(request.user, period)
+        return Response({'earnings': earnings})
+    
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    def property_performance(self, request):
+        """
+        Get performance metrics for all host properties
+        GET /api/v1/properties/property_performance/
+        """
+        if not request.user.is_host:
+            return Response(
+                {'error': 'Only hosts can access this endpoint'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        performance = HostAnalyticsService.get_property_performance(request.user)
+        return Response({'properties': performance})
+    
+    @action(detail=True, methods=['get'], permission_classes=[IsAuthenticated])
+    def booking_calendar(self, request, pk=None):
+        """
+        Get booking calendar for a specific property
+        GET /api/v1/properties/{id}/booking_calendar/?start=2024-01-01&end=2024-03-31
+        """
+        property_obj = self.get_object()
+        
+        # Only host or admin can view calendar
+        if not (request.user == property_obj.host or request.user.is_admin_user):
+            return Response(
+                {'error': 'You do not have permission to view this calendar'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        from datetime import datetime
+        start_date_str = request.query_params.get('start')
+        end_date_str = request.query_params.get('end')
+        
+        start_date = None
+        end_date = None
+        
+        if start_date_str:
+            try:
+                start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+            except ValueError:
+                return Response(
+                    {'error': 'Invalid start date format. Use YYYY-MM-DD'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        
+        if end_date_str:
+            try:
+                end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+            except ValueError:
+                return Response(
+                    {'error': 'Invalid end date format. Use YYYY-MM-DD'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        
+        calendar_data = HostAnalyticsService.get_booking_calendar(
+            property_obj.id, start_date, end_date
+        )
+        return Response(calendar_data)
+    
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    def upcoming_checkins(self, request):
+        """
+        Get upcoming check-ins for host
+        GET /api/v1/properties/upcoming_checkins/?days=7
+        """
+        if not request.user.is_host:
+            return Response(
+                {'error': 'Only hosts can access this endpoint'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        days = int(request.query_params.get('days', 7))
+        check_ins = HostAnalyticsService.get_upcoming_check_ins(request.user, days)
+        return Response({'upcoming_checkins': check_ins})
+    
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    def pending_actions(self, request):
+        """
+        Get pending actions requiring host attention
+        GET /api/v1/properties/pending_actions/
+        """
+        if not request.user.is_host:
+            return Response(
+                {'error': 'Only hosts can access this endpoint'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        pending = HostAnalyticsService.get_pending_actions(request.user)
+        return Response(pending)
