@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { DashboardContent } from '@/components/common/dashboard-content';
+import { DashboardRouter } from '@/components/common/dashboard-router';
 
 export const metadata: Metadata = {
   title: 'Dashboard - StayAfrica',
@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function DashboardPage() {
-  return <DashboardContent />;
+  return <DashboardRouter />;
 }
