@@ -4,7 +4,7 @@ import { useAuth } from '@/context/auth-context';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
 import Link from 'next/link';
-import { Building, Plus, Edit, Trash2, Eye, Calendar, DollarSign } from 'lucide-react';
+import { Building, Plus, Edit, Trash2, Eye, Calendar, DollarSign, Star, TrendingUp, Users } from 'lucide-react';
 import { ProtectedRoute } from '@/components/auth/protected-route';
 import { useState } from 'react';
 
@@ -50,20 +50,20 @@ export function HostPropertiesContent() {
       <div className="min-h-screen bg-sand-100 dark:bg-primary-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Header */}
-          <div className="flex items-center justify-between mb-8">
+          <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold text-primary-900 dark:text-sand-50 mb-2">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary-900 dark:text-sand-50 mb-2">
                 My Properties
               </h1>
-              <p className="text-lg text-primary-600 dark:text-sand-300">
+              <p className="text-base sm:text-lg text-primary-600 dark:text-sand-300">
                 Manage your property listings
               </p>
             </div>
-            <Link href="/host/properties/new" className="btn-primary px-6 py-3 flex items-center gap-2">
+            <Link href="/host/properties/new" className="btn-primary px-4 sm:px-6 py-3 flex items-center justify-center gap-2 min-h-[44px]" aria-label="Add new property">
               <Plus className="w-5 h-5" />
-              Add Property
+              <span>Add Property</span>
             </Link>
-          </div>
+          </header>
 
           {/* Properties Grid */}
           {isLoading ? (
@@ -79,7 +79,7 @@ export function HostPropertiesContent() {
           ) : properties.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {properties.map((property: any) => (
-                <div key={property.id} className="card overflow-hidden hover:shadow-lg transition-shadow">
+                <article key={property.id} className="card overflow-hidden hover:shadow-lg transition-shadow" aria-label={`Property: ${property.title}`}>
                   {/* Property Image */}
                   <div className="relative h-48 bg-primary-200 dark:bg-primary-700">
                     {property.main_image ? (
@@ -90,7 +90,7 @@ export function HostPropertiesContent() {
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
-                        <Building className="w-16 h-16 text-primary-400" />
+                        <Building className="w-16 h-16 text-primary-400" aria-hidden="true" />
                       </div>
                     )}
                     
@@ -104,18 +104,40 @@ export function HostPropertiesContent() {
                             ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300'
                             : 'bg-gray-100 dark:bg-gray-900/30 text-gray-800 dark:text-gray-300'
                         }`}
+                        role="status"
+                        aria-label={`Status: ${property.status.replace('_', ' ')}`}
                       >
                         {property.status.replace('_', ' ')}
                       </span>
                     </div>
+                    
+                    {/* Quick Stats Overlay */}
+                    {property.status === 'active' && (
+                      <div className="absolute bottom-3 left-3 right-3 bg-white/90 dark:bg-primary-900/90 backdrop-blur-sm rounded-lg p-2">
+                        <div className="flex items-center justify-around text-xs">
+                          <div className="flex items-center gap-1 text-primary-900 dark:text-sand-50">
+                            <Star className="w-3 h-3 text-yellow-500 fill-current" aria-hidden="true" />
+                            <span className="font-semibold">{property.average_rating?.toFixed(1) || 'N/A'}</span>
+                          </div>
+                          <div className="flex items-center gap-1 text-primary-900 dark:text-sand-50">
+                            <Calendar className="w-3 h-3" aria-hidden="true" />
+                            <span className="font-semibold">{property.total_bookings || 0} bookings</span>
+                          </div>
+                          <div className="flex items-center gap-1 text-green-600 dark:text-green-400">
+                            <TrendingUp className="w-3 h-3" aria-hidden="true" />
+                            <span className="font-semibold">${property.total_earnings?.toFixed(0) || 0}</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Property Details */}
                   <div className="p-4">
-                    <h3 className="text-lg font-bold text-primary-900 dark:text-sand-50 mb-2">
+                    <h3 className="text-base sm:text-lg font-bold text-primary-900 dark:text-sand-50 mb-2 truncate">
                       {property.title}
                     </h3>
-                    <p className="text-sm text-primary-600 dark:text-sand-300 mb-3">
+                    <p className="text-xs sm:text-sm text-primary-600 dark:text-sand-300 mb-3 truncate">
                       {property.city}, {property.country}
                     </p>
 
