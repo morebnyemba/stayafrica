@@ -2,6 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from django.db.models import Q
 from apps.messaging.models import Message
 from apps.messaging.serializers import MessageSerializer
 
@@ -12,7 +13,7 @@ class MessageViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """Return messages for current user"""
         user = self.request.user
-        return Message.objects.filter(sender=user) | Message.objects.filter(receiver=user)
+        return Message.objects.filter(Q(sender=user) | Q(receiver=user))
     
     def perform_create(self, serializer):
         """Create message from current user"""
@@ -21,8 +22,6 @@ class MessageViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def conversations(self, request):
         """Get list of conversations for current user"""
-        from django.db.models import Q, F
-        
         user = request.user
         messages = Message.objects.filter(Q(sender=user) | Q(receiver=user))
         
