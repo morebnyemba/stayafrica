@@ -100,13 +100,16 @@ WSGI_APPLICATION = 'stayafrica.wsgi.application'
 # Database
 # Check for explicit DATABASE_ENGINE env var first, then fallback to DEBUG-based logic
 # This allows Docker to use PostgreSQL even with DEBUG=True
-USE_POSTGRES = os.getenv('DATABASE_ENGINE') or not DEBUG
+DATABASE_ENGINE = os.getenv('DATABASE_ENGINE', '')
+USE_POSTGRES = DATABASE_ENGINE.startswith('django.contrib.gis.db.backends.postgis') or \
+               (DATABASE_ENGINE and 'postgres' in DATABASE_ENGINE.lower()) or \
+               not DEBUG
 
 if USE_POSTGRES:
     # Production/Docker: PostgreSQL with GIS support
     DATABASES = {
         'default': {
-            'ENGINE': os.getenv('DATABASE_ENGINE', 'django.contrib.gis.db.backends.postgis'),
+            'ENGINE': DATABASE_ENGINE or 'django.contrib.gis.db.backends.postgis',
             'NAME': os.getenv('DATABASE_NAME', 'stayafrica_db'),
             'USER': os.getenv('DATABASE_USER', 'postgres'),
             'PASSWORD': os.getenv('DATABASE_PASSWORD', 'postgres'),
