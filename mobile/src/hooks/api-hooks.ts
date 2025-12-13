@@ -2,6 +2,13 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
 
 // Properties
+export function useProperties() {
+  return useQuery({
+    queryKey: ['properties'],
+    queryFn: () => apiClient.getProperties(),
+  });
+}
+
 export function useNearbyProperties(latitude: number, longitude: number, radius: number) {
   return useQuery({
     queryKey: ['properties', 'nearby', latitude, longitude, radius],

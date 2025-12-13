@@ -1,9 +1,9 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAdminUser, IsAuthenticated
-from apps.admin_dashboard.models import AuditLog, AdminStats
-from apps.admin_dashboard.serializers import AuditLogSerializer, AdminStatsSerializer
+from rest_framework.permissions import IsAdminUser, IsAuthenticated, AllowAny
+from apps.admin_dashboard.models import AuditLog, AdminStats, SystemConfiguration
+from apps.admin_dashboard.serializers import AuditLogSerializer, AdminStatsSerializer, SystemConfigurationSerializer
 from django.db.models import Sum, Count, Q
 from apps.bookings.models import Booking
 from apps.users.models import User
@@ -56,3 +56,14 @@ class AdminStatsViewSet(viewsets.ViewSet):
         """Process bulk payouts to hosts"""
         # TODO: Implement bulk payout logic
         return Response({'status': 'payout processing'})
+
+class SystemConfigurationViewSet(viewsets.ViewSet):
+    """Public endpoint for system configuration"""
+    permission_classes = [AllowAny]
+    
+    @action(detail=False, methods=['get'])
+    def fees(self, request):
+        """Get fee configuration for booking calculations"""
+        config = SystemConfiguration.get_config()
+        serializer = SystemConfigurationSerializer(config)
+        return Response(serializer.data)

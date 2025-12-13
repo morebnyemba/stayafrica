@@ -77,11 +77,11 @@ export function RegisterContent() {
   const validateStep2 = () => {
     const newErrors: Record<string, string> = {};
     
-    if (!formData.first_name) {
+    if (!formData.first_name.trim()) {
       newErrors.first_name = 'First name is required';
     }
     
-    if (!formData.last_name) {
+    if (!formData.last_name.trim()) {
       newErrors.last_name = 'Last name is required';
     }
     
@@ -208,7 +208,14 @@ export function RegisterContent() {
             }
           </p>
 
-          <form onSubmit={currentStep === 3 ? handleSubmit : (e) => { e.preventDefault(); handleNext(); }} className="space-y-6">
+          <form onSubmit={(e) => {
+            e.preventDefault();
+            if (currentStep === 3) {
+              handleSubmit(e);
+            } else {
+              handleNext();
+            }
+          }} className="space-y-6">
             {/* Step 1: Credentials */}
             {currentStep === 1 && (
               <>

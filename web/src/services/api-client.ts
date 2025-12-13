@@ -198,6 +198,16 @@ class ApiClient {
     return this.client.get('/admin/audit-logs/', { params });
   }
 
+  // System Configuration
+  async getFeeConfiguration() {
+    return this.client.get('/admin/config/fees/');
+  }
+
+  // Get available payment providers based on user country
+  async getAvailableProviders(country?: string) {
+    return this.client.get('/payments/providers/', { params: { country } });
+  }
+
   // Geocoding & Location Services
   async geocodeAddress(address: string, country?: string) {
     return this.client.post('/properties/geocode/', { address, country });

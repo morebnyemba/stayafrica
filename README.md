@@ -126,6 +126,26 @@ docker-compose exec web python manage.py createsuperuser
 
 ---
 
+## 🎨 NEW: UX/Design Improvements Documentation
+
+> **Want to improve your web app's design and user experience?**  
+> We've created comprehensive documentation with **18 actionable prompts** you can copy-paste to AI coding agents!
+
+**📖 Start Here:**
+- **[QUICK_UX_GUIDE.md](./QUICK_UX_GUIDE.md)** - Quick overview and 4-week implementation plan
+- **[UX_DESIGN_IMPROVEMENT_PROMPTS.md](./UX_DESIGN_IMPROVEMENT_PROMPTS.md)** - Detailed prompts for each improvement
+- **[UX_README.md](./UX_README.md)** - Complete documentation overview
+
+**What's Included:**
+- 🔴 3 Critical fixes (Mobile nav, Search bar, Loading states)
+- 🟠 6 High-priority improvements (Forms, Filters, Booking flow)
+- 🟡 6 Medium-priority enhancements (Footer, Dark mode, Wishlist)
+- 🟢 3 Low-priority optimizations (Performance, Accessibility, Advanced search)
+
+**Ready to use with:** Cursor, GitHub Copilot, Claude, ChatGPT, or any AI coding assistant
+
+---
+
 ## 📚 Documentation
 
 | Document | Purpose |
@@ -137,6 +157,9 @@ docker-compose exec web python manage.py createsuperuser
 | **MOBILE_SCAFFOLD.md** | Mobile app structure and progress tracking |
 | **COMPLETION_SUMMARY.md** | Full-stack completion summary |
 | **QUICK_REFERENCE.md** | API endpoints, debugging, common tasks |
+| **[UX_README.md](./UX_README.md)** | 🎨 **NEW!** UX/Design improvements overview and guide |
+| **[QUICK_UX_GUIDE.md](./QUICK_UX_GUIDE.md)** | 🚀 Quick reference for 18 UX improvements (start here!) |
+| **[UX_DESIGN_IMPROVEMENT_PROMPTS.md](./UX_DESIGN_IMPROVEMENT_PROMPTS.md)** | 📋 Detailed copy-paste prompts for AI coding agents |
 | **README.md** | This file - project overview |
 
 ---

@@ -34,7 +34,6 @@ class UserViewSet(viewsets.ModelViewSet):
         return super().get_permissions()
     
     @action(detail=False, methods=['get', 'put', 'patch'], permission_classes=[IsAuthenticated])
-    @api_ratelimit(rate='20/h')
     def profile(self, request):
         """Get or update current user profile"""
         user = request.user
@@ -70,7 +69,6 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
-    @api_ratelimit(rate='5/h')
     @log_action('change_password')
     def change_password(self, request):
         """Change password with validation"""
@@ -117,7 +115,6 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response({'status': 'password changed successfully'})
     
     @action(detail=False, methods=['post'], permission_classes=[AllowAny])
-    @api_ratelimit(rate='3/h')
     @log_action('register_user')
     def register(self, request):
         """Register new user with validation"""
@@ -164,7 +161,6 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     @action(detail=False, methods=['post'], permission_classes=[AllowAny])
-    @api_ratelimit(rate='3/h')
     def request_password_reset(self, request):
         """
         Request password reset email

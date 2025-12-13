@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/auth-context';
-import { AvailabilityCalendar } from './availability-calendar';
+import { useFeeConfiguration, calculateBookingCost } from '@/hooks/use-fees';
 import { Star, AlertCircle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
@@ -14,6 +14,7 @@ interface BookingCardProps {
     currency: string;
     average_rating?: number;
     booked_dates?: string[];
+    cleaning_fee?: number;
   };
 }
 
@@ -24,14 +25,19 @@ export function BookingCard({ property }: BookingCardProps) {
   const [checkOut, setCheckOut] = useState<string>('');
   const [guests, setGuests] = useState(1);
 
+  // Fetch fee configuration
+  const { data: feeConfig } = useFeeConfiguration();
+
   if (!property) {
     return null;
   }
 
   const nights = checkIn && checkOut ? Math.ceil((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / (1000 * 60 * 60 * 24)) : 0;
-  const subtotal = nights * property.price_per_night;
-  const serviceFee = Math.ceil(subtotal * 0.05); // 5% service fee
-  const total = subtotal + serviceFee;
+  
+  // Calculate costs using the fee configuration
+  const costs = feeConfig && nights > 0
+    ? calculateBookingCost(property.price_per_night, nights, feeConfig, property.cleaning_fee)
+    : { basePrice: 0, serviceFee: 0, commissionFee: 0, commissionRate: 0, cleaningFee: 0, total: 0 };
 
   const handleBooking = () => {
     if (!isAuthenticated) {
@@ -121,21 +127,31 @@ export function BookingCard({ property }: BookingCardProps) {
       </div>
 
       {/* Cost breakdown */}
-      {nights > 0 && (
+      {nights > 0 && feeConfig && (
         <div className="mb-6 pb-6 border-b border-primary-200 dark:border-primary-700 space-y-2 text-sm">
           <div className="flex justify-between text-primary-700 dark:text-sand-200">
             <span>
               {property.currency} {property.price_per_night} × {nights} {nights === 1 ? 'night' : 'nights'}
             </span>
-            <span>{property.currency} {subtotal}</span>
+            <span>{property.currency} {costs.basePrice.toFixed(2)}</span>
           </div>
           <div className="flex justify-between text-primary-700 dark:text-sand-200">
             <span>Service fee</span>
-            <span>{property.currency} {serviceFee}</span>
+            <span>{property.currency} {costs.serviceFee.toFixed(2)}</span>
           </div>
+          <div className="flex justify-between text-primary-700 dark:text-sand-200">
+            <span>Commission fee ({(costs.commissionRate * 100).toFixed(1)}%)</span>
+            <span>{property.currency} {costs.commissionFee.toFixed(2)}</span>
+          </div>
+          {costs.cleaningFee > 0 && (
+            <div className="flex justify-between text-primary-700 dark:text-sand-200">
+              <span>Cleaning fee</span>
+              <span>{property.currency} {costs.cleaningFee.toFixed(2)}</span>
+            </div>
+          )}
           <div className="flex justify-between font-semibold text-primary-900 dark:text-sand-50 pt-2">
             <span>Total</span>
-            <span>{property.currency} {total}</span>
+            <span>{property.currency} {costs.total.toFixed(2)}</span>
           </div>
         </div>
       )}
