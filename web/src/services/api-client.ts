@@ -3,10 +3,6 @@ import axios, { AxiosInstance } from 'axios';
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
 class ApiClient {
-    // Reply to review
-    async replyToReview(reviewId: string, reply: string) {
-      return this.client.post(`/reviews/${reviewId}/reply/`, { reply });
-    }
   private client: AxiosInstance;
 
   constructor() {
@@ -257,6 +253,11 @@ class ApiClient {
   // Host Booking Management
   async getHostBookings(params?: any) {
     return this.client.get('/bookings/', { params });
+  }
+
+  // Reply to review
+  async replyToReview(reviewId: string, reply: string) {
+    return this.client.post(`/reviews/${reviewId}/reply/`, { reply });
   }
 }
 

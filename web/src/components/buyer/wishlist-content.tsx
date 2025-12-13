@@ -194,9 +194,11 @@ export function WishlistContent() {
                           Saved {new Date(saved.created_at).toLocaleDateString()}
                         </div>
                       </div>
-                </article>
-              ))}
-            </div>
+                    </article>
+                  );
+                })}
+              </div>
+            </>
           )}
 
           {/* Stats */}

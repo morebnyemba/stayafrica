@@ -51,6 +51,7 @@ out/
 build/
 dist/
 .cache/
+*.tsbuildinfo
 
 # React Native / Expo
 .expo/

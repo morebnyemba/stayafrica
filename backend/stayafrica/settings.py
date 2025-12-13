@@ -1,13 +1,17 @@
 import os
 from pathlib import Path
-from django.templatetags.static import static
 from dotenv import load_dotenv
 
-# Set GDAL library path for GeoDjango
-GDAL_LIBRARY_PATH = r"C:\Users\Administrator\AppData\Local\Programs\Python\Python313\Lib\site-packages\osgeo\gdal.dll"
 
-# Set GEOS library path for GeoDjango
-GEOS_LIBRARY_PATH = r"C:\Users\Administrator\AppData\Local\Programs\Python\Python313\Lib\site-packages\osgeo\geos_c.dll"
+# Set GDAL and GEOS library paths for GeoDjango (platform-independent)
+# These are only needed on Windows and should be set via environment variables or auto-detected
+# The paths below are examples - actual paths should be configured via .env file if needed
+if os.name == 'nt':  # Only set on Windows
+    # Try to get from environment variables first
+    GDAL_LIBRARY_PATH = os.getenv('GDAL_LIBRARY_PATH')
+    GEOS_LIBRARY_PATH = os.getenv('GEOS_LIBRARY_PATH')
+    # If not set, GDAL/GEOS will try to auto-detect
+    # For production, use PostGIS in Docker which includes these libraries
 
 # Optional: Sentry error tracking (install sentry-sdk separately)
 try:
@@ -59,6 +63,7 @@ INSTALLED_APPS = [
     'apps.reviews',
     'apps.messaging',
     'apps.admin_dashboard',
+    'apps.health',
 ]
 
 MIDDLEWARE = [
@@ -93,25 +98,31 @@ TEMPLATES = [
 WSGI_APPLICATION = 'stayafrica.wsgi.application'
 
 # Database
-# Use SQLite for development, PostgreSQL for production
-if DEBUG:
-    # Development: SQLite
+# Check for explicit DATABASE_ENGINE env var first, then fallback to DEBUG-based logic
+# This allows Docker to use PostgreSQL even with DEBUG=True
+DATABASE_ENGINE = os.getenv('DATABASE_ENGINE', '')
+USE_POSTGRES = DATABASE_ENGINE.startswith('django.contrib.gis.db.backends.postgis') or \
+               (DATABASE_ENGINE and 'postgres' in DATABASE_ENGINE.lower()) or \
+               not DEBUG
+
+if USE_POSTGRES:
+    # Production/Docker: PostgreSQL with GIS support
     DATABASES = {
         'default': {
-            'ENGINE': 'django.contrib.gis.db.backends.spatialite',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
-else:
-    # Production: PostgreSQL with GIS support
-    DATABASES = {
-        'default': {
-            'ENGINE': os.getenv('DATABASE_ENGINE', 'django.contrib.gis.db.backends.postgis'),
+            'ENGINE': DATABASE_ENGINE or 'django.contrib.gis.db.backends.postgis',
             'NAME': os.getenv('DATABASE_NAME', 'stayafrica_db'),
             'USER': os.getenv('DATABASE_USER', 'postgres'),
             'PASSWORD': os.getenv('DATABASE_PASSWORD', 'postgres'),
             'HOST': os.getenv('DATABASE_HOST', 'localhost'),
             'PORT': os.getenv('DATABASE_PORT', '5432'),
+        }
+    }
+else:
+    # Local Development: SQLite (only when DATABASE_ENGINE is not set and DEBUG=True)
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.contrib.gis.db.backends.spatialite',
+            'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
 
