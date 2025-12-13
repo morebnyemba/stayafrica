@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from apps.admin_dashboard.models import AuditLog, AdminStats
+from apps.admin_dashboard.models import AuditLog, AdminStats, SystemConfiguration
 
 class AuditLogSerializer(serializers.ModelSerializer):
     user_email = serializers.CharField(source='user.email', read_only=True)
@@ -17,3 +17,12 @@ class AdminStatsSerializer(serializers.ModelSerializer):
             'total_properties', 'last_updated'
         ]
         read_only_fields = ['last_updated']
+
+class SystemConfigurationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SystemConfiguration
+        fields = [
+            'commission_rate', 'service_fee', 'default_currency',
+            'max_advance_booking_days', 'max_stay_duration_days', 'review_window_days'
+        ]
+        read_only_fields = ['id']

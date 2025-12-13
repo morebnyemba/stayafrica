@@ -128,6 +128,10 @@ class APIClient {
   }
 
   // Properties
+  async getProperties(): Promise<any> {
+    return (await this.client.get('/properties/')).data;
+  }
+
   async getNearbyProperties(
     latitude: number,
     longitude: number,
