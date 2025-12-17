@@ -1,5 +1,7 @@
 # Mobile App Dependency Compatibility Guide
 
+> **⚠️ Important Note**: This app uses `react-native-reanimated` v3.17.4 instead of v4.1.1 (Expo SDK 54's default) because NativeWind v4 is not yet compatible with Reanimated v4. This is an intentional choice for stability. See "Why These Versions?" section below for details.
+
 ## Overview
 This document explains the dependency configuration for the StayAfrica mobile app, which uses Expo SDK 54 with NativeWind v4 for styling.
 
@@ -42,7 +44,9 @@ module.exports = function(api) {
 
 **Key Changes:**
 - `nativewind/babel` is in `presets` array, NOT in `plugins` array
-- Added `jsxImportSource: 'nativewind'` to `babel-preset-expo` for proper JSX transformation
+- Added `jsxImportSource: 'nativewind'` to `babel-preset-expo` for proper JSX transformation with NativeWind
+  - This doesn't break standard React JSX - it only changes the import source for styled components
+  - Regular React components without NativeWind styles continue to work normally
 - This fixes the "`.plugins is not a valid Plugin property`" error
 
 ### metro.config.js
@@ -99,6 +103,9 @@ import '../global.css'; // Must be first import
 ```bash
 cd mobile
 npm install
+
+# For clean native builds (important after config changes)
+npx expo prebuild --clean
 ```
 
 ### Updating Dependencies
@@ -135,8 +142,8 @@ npx expo start --clear
 **Fix:** Move it to `presets` array as shown in babel.config.js above
 
 ### Issue 2: react-native-reanimated version warning
-**Warning:** "react-native-reanimated@3.15.0 - expected version: ~4.1.1"
-**Explanation:** This warning can be ignored. We intentionally use v3.17.4 for NativeWind compatibility
+**Warning:** "react-native-reanimated@3.17.4 - expected version: ~4.1.1"
+**Explanation:** This warning can be ignored. We intentionally use v3.17.4 instead of v4.1.1 for NativeWind v4 compatibility
 **Alternative:** If you don't use NativeWind, upgrade to `~4.1.1` and add `react-native-worklets@~0.5.1`
 
 ### Issue 3: Testing library peer dependency errors
