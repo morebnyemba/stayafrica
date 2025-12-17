@@ -181,11 +181,11 @@ Uses **NativeWind** (Tailwind CSS for React Native):
 
 ### Color Scheme
 ```
-Primary:   #0ea5e9 (Cyan)
-Secondary: #a855f7 (Purple)
-Accent:    #f97316 (Orange)
-Success:   #10b981 (Green)
-Error:     #ef4444 (Red)
+Primary:    #122f26 (Deep Forest)
+Secondary:  #d9b168 (Safari Gold)
+Background: #f4f1ea (Ivory Sand)
+Accent:     #3a5c50 (Moss Green)
+Text:       #0a1a15 (Savanna)
 ```
 
 ## 🔒 Security

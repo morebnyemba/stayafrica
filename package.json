@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "react-native-worklets": "^0.7.1",
+    "react-native-worklets-core": "^1.6.2"
+  }
+}

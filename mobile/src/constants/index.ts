@@ -27,11 +27,17 @@ export const API_ENDPOINTS = {
 };
 
 export const COLORS = {
-  primary: '#0ea5e9',
-  primaryDark: '#0284c7',
-  primaryLight: '#e0f2fe',
-  secondary: '#a855f7',
-  accent: '#f97316',
+  primary: '#122f26',
+  primaryDark: '#0a1a15',
+  primaryLight: '#e3ece7',
+  secondary: '#d9b168',
+  secondaryDark: '#967c38',
+  secondaryLight: '#f8e8c4',
+  accent: '#3a5c50',
+  background: '#f4f1ea',
+  surface: '#ffffff',
+  text: '#0a1a15',
+  mutedText: '#3a5c50',
   success: '#10b981',
   error: '#ef4444',
   warning: '#f59e0b',
@@ -72,4 +78,5 @@ export const STORAGE_KEYS = {
   REFRESH_TOKEN: 'refreshToken',
   USER_PREFERENCES: 'userPreferences',
   FAVORITES: 'favorites',
+  PUSH_TOKEN: 'pushToken',
 };
