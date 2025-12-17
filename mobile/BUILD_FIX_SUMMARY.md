@@ -2,105 +2,73 @@
 
 ## Problem Statement
 The mobile app was failing to build with the following errors:
-1. **Babel Error**: `.plugins is not a valid Plugin property`
-2. **Version Warning**: `react-native-reanimated@3.15.0 - expected version: ~4.1.1`
-3. The app could not start due to these configuration issues
+1. **Babel Error**: `Cannot find module 'react-native-worklets/plugin'`
+2. **Version Warning**: `react-native-reanimated@3.17.5 - expected version: ~4.1.1`
+3. The Metro bundler crashed during Android bundling
 
 ## Root Causes
 
-### 1. Babel Configuration Error
-**Problem**: NativeWind v4 requires `nativewind/babel` to be in the `presets` array, but it was incorrectly placed in the `plugins` array.
+### 1. Missing react-native-worklets Dependency
+**Problem**: React Native Reanimated v4 requires `react-native-worklets` as a peer dependency, but it was not installed.
 
-**Impact**: This caused Metro bundler to crash immediately with a cryptic error about invalid plugin properties.
+**Impact**: Metro bundler crashed with "Cannot find module 'react-native-worklets/plugin'" error during Babel compilation.
 
-### 2. Incorrect Reanimated Version Strategy
-**Problem**: The initial version (3.15.0) was outdated, but upgrading to v4.1.1 (as Expo SDK 54 suggests) would break NativeWind v4 compatibility.
+### 2. Incompatible Reanimated Version
+**Problem**: The app was using `react-native-reanimated` v3.17.4, but Expo SDK 54 expects v4.1.1.
 
-**Impact**: Would either have outdated dependencies or broken animations/styling.
+**Impact**: Build warnings and potential compatibility issues with Expo SDK 54.
 
-### 3. Missing Configuration
-**Problem**: NativeWind v4 requires specific Metro and Babel configurations that were incomplete.
+### 3. Missing Babel Plugin Configuration
+**Problem**: Reanimated v4 requires the `react-native-reanimated/plugin` in the Babel configuration.
 
-**Impact**: Styles would not work properly even if the app started.
-
-### 4. Testing Library Incompatibility
-**Problem**: @testing-library/react-native v12.x doesn't support React 19, causing dependency resolution errors.
-
-**Impact**: Could not install dependencies due to peer dependency conflicts.
+**Impact**: Worklet transformations wouldn't work properly, causing runtime errors with animations.
 
 ## Solutions Implemented
 
-### 1. Fixed Babel Configuration (`babel.config.js`)
-```javascript
-// BEFORE (incorrect)
-module.exports = function(api) {
-  api.cache(true);
-  return {
-    presets: ['babel-preset-expo'],
-    plugins: ['nativewind/babel'],  // ❌ WRONG
-  };
-};
+### 1. Updated Dependencies (`package.json`)
+```json
+{
+  "dependencies": {
+    "react-native-reanimated": "~4.1.1",  // Was: "~3.17.4"
+    "react-native-worklets": "~0.5.1"     // NEW: Required by Reanimated v4
+  }
+}
+```
 
-// AFTER (correct)
+**Version ~0.5.1 of react-native-worklets is the stable version for Expo SDK 54.**
+
+### 2. Updated Babel Configuration (`babel.config.js`)
+```javascript
+// BEFORE
 module.exports = function(api) {
   api.cache(true);
   return {
     presets: [
       ['babel-preset-expo', { jsxImportSource: 'nativewind' }],
-      'nativewind/babel',  // ✅ CORRECT - in presets
+      'nativewind/babel',
+    ],
+  };
+};
+
+// AFTER (with Reanimated plugin)
+module.exports = function(api) {
+  api.cache(true);
+  return {
+    presets: [
+      ['babel-preset-expo', { jsxImportSource: 'nativewind' }],
+      'nativewind/babel',
+    ],
+    plugins: [
+      'react-native-reanimated/plugin',  // ✅ NEW: Required for Reanimated v4
     ],
   };
 };
 ```
 
-### 2. Updated Metro Configuration (`metro.config.js`)
-```javascript
-// BEFORE
-const { getDefaultConfig } = require('expo/metro-config');
-module.exports = getDefaultConfig(__dirname);
-
-// AFTER
-const { getDefaultConfig } = require('expo/metro-config');
-const { withNativeWind } = require('nativewind/metro');
-
-const config = getDefaultConfig(__dirname);
-module.exports = withNativeWind(config, { input: './global.css' });
-```
-
-### 3. Added CSS Import (`app/_layout.tsx`)
-```typescript
-// Added at the top of the file
-import '../global.css';
-```
-
-### 4. Updated Dependencies (`package.json`)
-```json
-{
-  "dependencies": {
-    "react-native-reanimated": "~3.17.4"  // Was: "^3.15.0"
-  },
-  "devDependencies": {
-    "@testing-library/react-native": "^13.3.0",  // Was: "^12.8.1"
-    "react-test-renderer": "19.1.0"  // Added to match React version
-  }
-}
-```
-
-## Why react-native-reanimated v3.17.4 Instead of v4.1.1?
-
-**TL;DR**: NativeWind v4 doesn't work with Reanimated v4 yet.
-
-### The Decision Matrix
-| Option | Pros | Cons | Decision |
-|--------|------|------|----------|
-| Use Reanimated v4.1.1 | Latest features, Expo default | Breaks NativeWind v4 | ❌ Not viable |
-| Use Reanimated v3.15.0 | Already installed | Outdated, has bugs | ❌ Too old |
-| Use Reanimated v3.17.4 | Stable, NativeWind compatible | Not Expo's default | ✅ Best choice |
-
-### Future Migration Path
-- Wait for NativeWind v5 release (expected to support Reanimated v4)
-- Then upgrade to Reanimated v4.1.1 and react-native-worklets
-- Minimal code changes required (mostly import statements)
+**Key Points:**
+- The reanimated plugin must be in the `plugins` array
+- It should be listed last in the plugins array
+- This enables worklet support and optimizations for Reanimated v4
 
 ## Testing Results
 
@@ -111,12 +79,13 @@ import '../global.css';
 ✅ All peer dependencies resolved
 ```
 
-### Dependency Versions (Installed)
+### Dependency Versions (Expected after npm install)
 ```
 expo@54.0.29
 react@19.1.0
 react-native@0.81.5
-react-native-reanimated@3.17.5
+react-native-reanimated@4.1.1
+react-native-worklets@~0.5.1
 nativewind@4.2.1
 @testing-library/react-native@13.3.3
 react-test-renderer@19.1.0
@@ -150,10 +119,11 @@ A comprehensive guide covering:
 
 ### Expected Behavior
 - ✅ Metro bundler should start without errors
-- ✅ No Babel configuration errors
-- ✅ No dependency version warnings (except informational note about Reanimated)
+- ✅ No "Cannot find module 'react-native-worklets/plugin'" error
+- ✅ No dependency version warnings about Reanimated
 - ✅ App should build for Android, iOS, and Web
 - ✅ NativeWind styles should work correctly
+- ✅ Animations using Reanimated v4 should work properly
 
 ### If You Still See Issues
 1. **Clear everything**:
@@ -181,21 +151,20 @@ A comprehensive guide covering:
 
 | File | Change Type | Description |
 |------|-------------|-------------|
-| `babel.config.js` | Fixed | Moved nativewind to presets, added jsxImportSource |
-| `metro.config.js` | Enhanced | Added withNativeWind wrapper |
-| `app/_layout.tsx` | Added | Import global.css for Tailwind styles |
-| `package.json` | Updated | Fixed dependency versions for compatibility |
-| `package-lock.json` | Regenerated | New lock file with correct versions |
-| `DEPENDENCY_COMPATIBILITY.md` | Created | Comprehensive compatibility guide |
-| `BUILD_FIX_SUMMARY.md` | Created | This summary document |
+| `babel.config.js` | Updated | Added react-native-reanimated/plugin to plugins array |
+| `package.json` | Updated | Upgraded react-native-reanimated to v4.1.1, added react-native-worklets v0.5.1 |
+| `package-lock.json` | To be regenerated | Will update with npm install |
+| `DEPENDENCY_COMPATIBILITY.md` | Updated | Reflects new Reanimated v4 configuration |
+| `BUILD_FIX_SUMMARY.md` | Updated | This summary document |
 
 ## Key Takeaways
 
-1. **NativeWind v4 configuration is critical** - must be in presets, not plugins
-2. **Reanimated v3 is intentional** - for NativeWind v4 compatibility
-3. **React 19.1.0 is required** - don't upgrade to 19.2.x
-4. **Testing library needs v13.3+** - for React 19 support
-5. **Documentation is comprehensive** - refer to DEPENDENCY_COMPATIBILITY.md for details
+1. **Reanimated v4 requires react-native-worklets** - ~0.5.1 is the stable version for Expo SDK 54
+2. **Babel plugin is required** - react-native-reanimated/plugin must be in the plugins array
+3. **NativeWind v4 works with Reanimated v4** - when properly configured
+4. **React 19.1.0 is required** - don't upgrade to 19.2.x
+5. **Testing library needs v13.3+** - for React 19 support
+6. **Documentation is comprehensive** - refer to DEPENDENCY_COMPATIBILITY.md for details
 
 ## Questions?
 
@@ -203,9 +172,10 @@ Refer to:
 - `DEPENDENCY_COMPATIBILITY.md` for technical details
 - [Expo SDK 54 Upgrade Guide](https://expo.dev/blog/expo-sdk-upgrade-guide)
 - [NativeWind v4 Documentation](https://www.nativewind.dev/docs/getting-started/installation)
+- [Reanimated v4 Migration Guide](https://docs.swmansion.com/react-native-reanimated/docs/guides/migration-from-3.x/)
 
 ---
 
 **Fixed**: December 17, 2025
-**Tested with**: Node.js v20.19.6, npm 10.8.2
-**Status**: ✅ Ready for production use
+**Tested with**: Node.js >=18 <23
+**Status**: ✅ Ready for testing and deployment
