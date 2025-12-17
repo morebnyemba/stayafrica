@@ -35,7 +35,9 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
     bootstrap();
 
     return () => {
-      Notifications.removeNotificationSubscription(subscription);
+      if (subscription && typeof Notifications.removeNotificationSubscription === 'function') {
+        Notifications.removeNotificationSubscription(subscription);
+      }
     };
   }, []);
 
@@ -53,7 +55,9 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
     register();
 
     return () => {
-      Notifications.removeNotificationSubscription(notificationListener);
+      if (notificationListener && typeof Notifications.removeNotificationSubscription === 'function') {
+        Notifications.removeNotificationSubscription(notificationListener);
+      }
     };
   }, []);
 
