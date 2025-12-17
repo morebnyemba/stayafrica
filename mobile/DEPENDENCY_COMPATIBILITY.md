@@ -18,9 +18,9 @@ This document explains the dependency configuration for the StayAfrica mobile ap
   - ✅ Now using v4.1.1 as recommended by Expo
   - Requires `react-native-worklets` v0.5.1 as a peer dependency
   - Requires the reanimated plugin in babel configuration
-- **react-native-worklets**: `0.5.1`
+- **react-native-worklets**: `~0.5.1`
   - Required by react-native-reanimated v4.x
-  - Version 0.5.1 is the stable version for Expo SDK 54
+  - Version ~0.5.1 is the stable version for Expo SDK 54
 - **NativeWind**: `^4.2.1`
   - Provides Tailwind CSS-like styling for React Native
 
@@ -142,7 +142,7 @@ npx expo start --clear
 | react | 19.1.0 | ✅ | ✅ | Exact version required |
 | react-native | 0.81.5 | ✅ | ✅ | Bundled with Expo |
 | react-native-reanimated | ~4.1.1 | ✅ | ✅ | v4 as recommended by Expo SDK 54 |
-| react-native-worklets | 0.5.1 | ✅ | ✅ | Required by Reanimated v4 |
+| react-native-worklets | ~0.5.1 | ✅ | ✅ | Required by Reanimated v4 |
 | nativewind | ^4.2.1 | ✅ | ✅ | v4 requires specific config |
 | @testing-library/react-native | ^13.3.0 | ✅ | ✅ | v13.3+ for React 19 |
 | react-test-renderer | 19.1.0 | ✅ | ✅ | Must match React version |
@@ -152,7 +152,7 @@ npx expo start --clear
 ### Issue 1: "Cannot find module 'react-native-worklets/plugin'" Error
 **Cause:** React Native Reanimated v4 requires `react-native-worklets` as a peer dependency
 **Fix:** 
-1. Install `react-native-worklets@0.5.1` (as done in current package.json)
+1. Install `react-native-worklets@~0.5.1` (as done in current package.json)
 2. Add `react-native-reanimated/plugin` to babel.config.js plugins array
 3. Clear cache with `npm start -- --clear`
 

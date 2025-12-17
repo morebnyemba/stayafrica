@@ -30,12 +30,12 @@ The mobile app was failing to build with the following errors:
 {
   "dependencies": {
     "react-native-reanimated": "~4.1.1",  // Was: "~3.17.4"
-    "react-native-worklets": "0.5.1"     // NEW: Required by Reanimated v4
+    "react-native-worklets": "~0.5.1"     // NEW: Required by Reanimated v4
   }
 }
 ```
 
-**Version 0.5.1 of react-native-worklets is the stable version for Expo SDK 54.**
+**Version ~0.5.1 of react-native-worklets is the stable version for Expo SDK 54.**
 
 ### 2. Updated Babel Configuration (`babel.config.js`)
 ```javascript
@@ -85,7 +85,7 @@ expo@54.0.29
 react@19.1.0
 react-native@0.81.5
 react-native-reanimated@4.1.1
-react-native-worklets@0.5.1
+react-native-worklets@~0.5.1
 nativewind@4.2.1
 @testing-library/react-native@13.3.3
 react-test-renderer@19.1.0
@@ -159,7 +159,7 @@ A comprehensive guide covering:
 
 ## Key Takeaways
 
-1. **Reanimated v4 requires react-native-worklets** - v0.5.1 is the stable version for Expo SDK 54
+1. **Reanimated v4 requires react-native-worklets** - ~0.5.1 is the stable version for Expo SDK 54
 2. **Babel plugin is required** - react-native-reanimated/plugin must be in the plugins array
 3. **NativeWind v4 works with Reanimated v4** - when properly configured
 4. **React 19.1.0 is required** - don't upgrade to 19.2.x
