@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 try:
     from tasks.email_tasks import send_verification_email
     CELERY_AVAILABLE = True
-except Exception as e:
+except (ImportError, ModuleNotFoundError) as e:
     logger.warning(f"Celery tasks not available: {e}")
     CELERY_AVAILABLE = False
     send_verification_email = None

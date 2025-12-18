@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 try:
     from tasks.email_tasks import send_booking_confirmation_email
     CELERY_AVAILABLE = True
-except Exception as e:
+except (ImportError, ModuleNotFoundError) as e:
     logger.warning(f"Celery tasks not available: {e}")
     CELERY_AVAILABLE = False
     send_booking_confirmation_email = None
@@ -100,7 +100,6 @@ class BookingViewSet(viewsets.ModelViewSet):
         logger.info(f"Booking created: {booking.booking_ref}")
     
     @action(detail=True, methods=['post'])
-    @api_ratelimit(rate='20/h')
     @log_action('confirm_booking')
     def confirm(self, request, pk=None):
         """Confirm a pending booking (host only)"""
@@ -131,10 +130,12 @@ class BookingViewSet(viewsets.ModelViewSet):
             booking.save()
             
             # Log the action
+            from django.contrib.contenttypes.models import ContentType
+            content_type = ContentType.objects.get_for_model(Booking)
             AuditLoggerService.log_action(
                 user=request.user,
                 action='confirm',
-                model=Booking,
+                content_type=content_type,
                 object_id=booking.id,
                 changes={'status': 'confirmed'}
             )
@@ -143,7 +144,6 @@ class BookingViewSet(viewsets.ModelViewSet):
         return Response({'status': 'confirmed', 'booking_ref': booking.booking_ref})
     
     @action(detail=True, methods=['post'])
-    @api_ratelimit(rate='20/h')
     @log_action('cancel_booking')
     def cancel(self, request, pk=None):
         """Cancel a booking"""
@@ -168,10 +168,12 @@ class BookingViewSet(viewsets.ModelViewSet):
             booking.save()
             
             # Log the action
+            from django.contrib.contenttypes.models import ContentType
+            content_type = ContentType.objects.get_for_model(Booking)
             AuditLoggerService.log_action(
                 user=request.user,
                 action='cancel',
-                model=Booking,
+                content_type=content_type,
                 object_id=booking.id,
                 changes={'status': old_status + ' -> cancelled'}
             )
@@ -211,10 +213,12 @@ class BookingViewSet(viewsets.ModelViewSet):
             booking.save()
             
             # Log the action
+            from django.contrib.contenttypes.models import ContentType
+            content_type = ContentType.objects.get_for_model(Booking)
             AuditLoggerService.log_action(
                 user=request.user,
                 action='complete',
-                model=Booking,
+                content_type=content_type,
                 object_id=booking.id,
                 changes={'status': 'completed'}
             )
