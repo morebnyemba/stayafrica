@@ -10,11 +10,19 @@ from services.payment_gateway import PaymentGatewayService
 from utils.validators import validate_booking_dates
 from utils.helpers import is_booking_date_available, calculate_nights, calculate_booking_total
 from utils.decorators import api_ratelimit, log_action
-from tasks.email_tasks import send_booking_confirmation_email
 from services.audit_logger import AuditLoggerService
 import logging
 
 logger = logging.getLogger(__name__)
+
+# Try to import Celery tasks, but gracefully handle if Celery isn't available
+try:
+    from tasks.email_tasks import send_booking_confirmation_email
+    CELERY_AVAILABLE = True
+except Exception as e:
+    logger.warning(f"Celery tasks not available: {e}")
+    CELERY_AVAILABLE = False
+    send_booking_confirmation_email = None
 
 class BookingViewSet(viewsets.ModelViewSet):
     serializer_class = BookingSerializer
@@ -80,8 +88,14 @@ class BookingViewSet(viewsets.ModelViewSet):
             changes={'booking_ref': booking.booking_ref, 'property': property_obj.title}
         )
         
-        # Send confirmation email asynchronously
-        send_booking_confirmation_email.delay(booking.id)
+        # Send confirmation email if Celery is available
+        if CELERY_AVAILABLE and send_booking_confirmation_email:
+            try:
+                send_booking_confirmation_email.delay(booking.id)
+            except Exception as e:
+                logger.warning(f"Could not queue booking confirmation email: {e}")
+        else:
+            logger.info("Celery not available, skipping confirmation email")
         
         logger.info(f"Booking created: {booking.booking_ref}")
     
