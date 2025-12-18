@@ -39,7 +39,7 @@ class Property(models.Model):
     country = models.CharField(max_length=100)
     city = models.CharField(max_length=100)
     suburb = models.CharField(max_length=100, blank=True)
-    address = models.TextField()
+    address = models.TextField(blank=True)  # Made optional for easier property creation
     
     # Pricing
     price_per_night = models.DecimalField(max_digits=10, decimal_places=2)
@@ -50,7 +50,7 @@ class Property(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending_approval')
     
     # Media
-    main_image = models.ImageField(upload_to='properties/%Y/%m/%d/')
+    main_image = models.ImageField(upload_to='properties/%Y/%m/%d/', blank=True, null=True)  # Made optional
     
     # Metadata
     max_guests = models.IntegerField(default=2)

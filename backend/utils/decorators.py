@@ -51,10 +51,25 @@ def log_action(action_name):
     """Decorator to log actions"""
     def decorator(view_func):
         @wraps(view_func)
-        def wrapper(request, *args, **kwargs):
-            logger.info(f"Action: {action_name}, User: {request.user}, Args: {args}, Kwargs: {kwargs}")
+        def wrapper(*args, **kwargs):
+            # Handle both ViewSet methods (self, request, ...) and function-based views (request, ...)
+            if len(args) > 0:
+                if hasattr(args[0], 'user'):
+                    # Function-based view: first arg is request
+                    request = args[0]
+                    user = request.user
+                elif len(args) > 1 and hasattr(args[1], 'user'):
+                    # ViewSet method: second arg is request
+                    request = args[1]
+                    user = request.user
+                else:
+                    user = 'Unknown'
+            else:
+                user = 'Unknown'
+            
+            logger.info(f"Action: {action_name}, User: {user}")
             try:
-                response = view_func(request, *args, **kwargs)
+                response = view_func(*args, **kwargs)
                 logger.info(f"Action {action_name} completed successfully")
                 return response
             except Exception as e:

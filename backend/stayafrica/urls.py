@@ -23,7 +23,7 @@ urlpatterns = [
     path('api/v1/', include('apps.payments.urls', namespace='payments')),
     path('api/v1/', include('apps.reviews.urls', namespace='reviews')),
     path('api/v1/', include('apps.messaging.urls', namespace='messaging')),
-    path('api/v1/admin/', include('apps.admin_dashboard.urls', namespace='admin')),
+    path('api/v1/admin/', include('apps.admin_dashboard.urls', namespace='admin_dashboard')),
 ]
 
 if settings.DEBUG:
