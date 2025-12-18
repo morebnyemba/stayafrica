@@ -14,4 +14,4 @@ class BookingSerializer(serializers.ModelSerializer):
             'commission_fee', 'cleaning_fee', 'grand_total', 'currency', 'status',
             'special_requests', 'created_at', 'updated_at'
         ]
-        read_only_fields = ['id', 'booking_ref', 'guest', 'commission_fee', 'grand_total', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'booking_ref', 'guest', 'nightly_total', 'service_fee', 'commission_fee', 'grand_total', 'currency', 'created_at', 'updated_at']

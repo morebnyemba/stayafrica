@@ -115,7 +115,7 @@ def is_booking_date_available(property_obj, check_in, check_out, exclude_booking
     
     # Get all confirmed bookings for this property
     conflicting_bookings = Booking.objects.filter(
-        property=property_obj,
+        rental_property=property_obj,
         status__in=['confirmed', 'pending']
     ).filter(
         check_in__lt=check_out,

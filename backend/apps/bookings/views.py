@@ -28,7 +28,6 @@ class BookingViewSet(viewsets.ModelViewSet):
         return Booking.objects.filter(guest=user).select_related('rental_property__host')
     
     @transaction.atomic
-    @api_ratelimit(rate='10/m')
     @log_action('create_booking')
     def perform_create(self, serializer):
         """Create booking with comprehensive validation and fee calculation"""
@@ -71,10 +70,12 @@ class BookingViewSet(viewsets.ModelViewSet):
         )
         
         # Log the action
+        from django.contrib.contenttypes.models import ContentType
+        content_type = ContentType.objects.get_for_model(Booking)
         AuditLoggerService.log_action(
             user=self.request.user,
             action='create',
-            model=Booking,
+            content_type=content_type,
             object_id=booking.id,
             changes={'booking_ref': booking.booking_ref, 'property': property_obj.title}
         )

@@ -309,18 +309,28 @@ LOGGING = {
     },
 }
 
-# Cache Configuration
+# Cache Configuration  
+# Using local memory cache for development (Redis for production)
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
-        'LOCATION': os.getenv('REDIS_URL', 'redis://localhost:6379/1'),
-        'OPTIONS': {
-            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-        },
-        'KEY_PREFIX': 'stayafrica',
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'stayafrica',
         'TIMEOUT': 300,  # 5 minutes default
     }
 }
+
+# For production with Redis, use:
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django_redis.cache.RedisCache',
+#         'LOCATION': os.getenv('REDIS_URL', 'redis://localhost:6379/1'),
+#         'OPTIONS': {
+#             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+#         },
+#         'KEY_PREFIX': 'stayafrica',
+#         'TIMEOUT': 300,
+#     }
+# }
 
 # Rate Limiting
 RATELIMIT_ENABLE = os.getenv('RATELIMIT_ENABLE', 'True') == 'True'
