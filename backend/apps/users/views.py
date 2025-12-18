@@ -14,11 +14,19 @@ from apps.users.serializers import (
 )
 from utils.decorators import api_ratelimit, log_action
 from utils.helpers import sanitize_input
-from tasks.email_tasks import send_verification_email
 from services.audit_logger import AuditLoggerService
 import logging
 
 logger = logging.getLogger(__name__)
+
+# Try to import Celery tasks, but gracefully handle if Celery isn't available
+try:
+    from tasks.email_tasks import send_verification_email
+    CELERY_AVAILABLE = True
+except Exception as e:
+    logger.warning(f"Celery tasks not available: {e}")
+    CELERY_AVAILABLE = False
+    send_verification_email = None
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
@@ -144,14 +152,22 @@ class UserViewSet(viewsets.ModelViewSet):
             with transaction.atomic():
                 user = serializer.save()
                 
-                # Send verification email
-                send_verification_email.delay(user.id)
+                # Send verification email if Celery is available
+                if CELERY_AVAILABLE and send_verification_email:
+                    try:
+                        send_verification_email.delay(user.id)
+                    except Exception as e:
+                        logger.warning(f"Could not queue verification email: {e}")
+                else:
+                    logger.info("Celery not available, skipping verification email")
                 
                 # Log the action
+                from django.contrib.contenttypes.models import ContentType
+                content_type = ContentType.objects.get_for_model(User)
                 AuditLoggerService.log_action(
                     user=user,
                     action='register',
-                    model=User,
+                    content_type=content_type,
                     object_id=user.id,
                     changes={'email': user.email, 'role': user.role}
                 )

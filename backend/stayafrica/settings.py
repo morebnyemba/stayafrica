@@ -3,11 +3,12 @@ from pathlib import Path
 from django.templatetags.static import static
 from dotenv import load_dotenv
 
-# Set GDAL library path for GeoDjango
-GDAL_LIBRARY_PATH = r"C:\Users\Administrator\AppData\Local\Programs\Python\Python313\Lib\site-packages\osgeo\gdal.dll"
-
-# Set GEOS library path for GeoDjango
-GEOS_LIBRARY_PATH = r"C:\Users\Administrator\AppData\Local\Programs\Python\Python313\Lib\site-packages\osgeo\geos_c.dll"
+# Set GDAL library path for GeoDjango (only for Windows development)
+# For Linux/production, these libraries should be installed system-wide
+import platform
+if platform.system() == 'Windows':
+    GDAL_LIBRARY_PATH = r"C:\Users\Administrator\AppData\Local\Programs\Python\Python313\Lib\site-packages\osgeo\gdal.dll"
+    GEOS_LIBRARY_PATH = r"C:\Users\Administrator\AppData\Local\Programs\Python\Python313\Lib\site-packages\osgeo\geos_c.dll"
 
 # Optional: Sentry error tracking (install sentry-sdk separately)
 try:
