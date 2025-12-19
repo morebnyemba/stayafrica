@@ -3,6 +3,9 @@ const nextConfig = {
   output: 'standalone',
   reactStrictMode: true,
   swcMinify: true,
+  experimental: {
+    turbopack: true,
+  },
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },
