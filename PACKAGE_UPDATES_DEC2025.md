@@ -181,6 +181,16 @@ The following build errors existed before the package updates and are unrelated 
 
 These issues need to be fixed separately from the package updates.
 
+### Packages with Breaking Changes (Not Currently Used)
+
+The following packages have major version upgrades with breaking changes, but they are **not currently used** in the codebase:
+
+1. **mapbox-gl** (2.15.0 → 3.17.0) - Listed in dependencies but no imports found
+2. **react-map-gl** (7.1.7 → 8.1.0) - Listed in dependencies but no imports found  
+3. **react-datepicker** (4.28.0 → 9.1.0) - Listed in dependencies but no imports found
+
+When these packages are eventually used in the code, developers should follow the migration guides in the references section below.
+
 ---
 
 ## Migration Guide
