@@ -27,8 +27,8 @@ COPY . .
 RUN python manage.py collectstatic --noinput
 
 # Entrypoint handles migrations + app start
-RUN chmod +x /app/entrypoint.sh
+RUN chmod 755 /app/entrypoint.sh
 
 EXPOSE 8000
 
-ENTRYPOINT ["/app/entrypoint.sh"]
+ENTRYPOINT ["sh", "/app/entrypoint.sh"]
