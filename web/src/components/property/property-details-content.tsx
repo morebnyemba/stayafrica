@@ -3,14 +3,13 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import apiClient from '@/services/api-client';
+import { apiClient } from '@/services/api-client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PropertyImageCarousel } from '@/components/property/property-image-carousel';
 import { PropertyAmenities } from '@/components/property/property-amenities';
 import { PropertyHostCard } from '@/components/property/property-host-card';
-import { AvailabilityCalendar } from '@/components/property/availability-calendar';
 import { BookingCard } from '@/components/booking/booking-card';
-import { Heart, Star } from 'lucide-react';
+import { Heart, MapPin, Share2, Star } from 'lucide-react';
 import Link from 'next/link';
 
 export function PropertyDetailsContent() {
@@ -45,7 +44,8 @@ export function PropertyDetailsContent() {
     queryKey: ['property', propertyId],
     queryFn: async () => {
       if (!propertyId) throw new Error('Property ID not found');
-      return apiClient.getPropertyDetails(propertyId);
+      const response = await apiClient.getPropertyDetails(propertyId);
+      return response.data;
     },
     enabled: !!propertyId,
   });
@@ -55,7 +55,8 @@ export function PropertyDetailsContent() {
     queryKey: ['property-reviews', propertyId],
     queryFn: async () => {
       if (!propertyId) throw new Error('Property ID not found');
-      return apiClient.getPropertyReviews(propertyId);
+      const response = await apiClient.getPropertyReviews(propertyId);
+      return response.data;
     },
     enabled: !!propertyId,
   });

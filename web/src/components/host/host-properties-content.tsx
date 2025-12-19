@@ -194,7 +194,7 @@ export function HostPropertiesContent() {
                       </Link>
                     </div>
                   </div>
-                </div>
+                </article>
               ))}
             </div>
           ) : (

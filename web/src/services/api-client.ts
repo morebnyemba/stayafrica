@@ -3,11 +3,12 @@ import axios, { AxiosInstance } from 'axios';
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
 class ApiClient {
-    // Reply to review
-    async replyToReview(reviewId: string, reply: string) {
-      return this.client.post(`/reviews/${reviewId}/reply/`, { reply });
-    }
   private client: AxiosInstance;
+
+  // Reply to review
+  async replyToReview(reviewId: string, reply: string) {
+    return this.client.post(`/reviews/${reviewId}/reply/`, { reply });
+  }
 
   constructor() {
     this.client = axios.create({
@@ -66,6 +67,10 @@ class ApiClient {
 
   async getPropertyById(id: string) {
     return this.client.get(`/properties/${id}/`);
+  }
+
+  async getPropertyDetails(id: string) {
+    return this.getPropertyById(id);
   }
 
   async searchNearby(latitude: number, longitude: number, radiusKm: number = 10) {
@@ -128,6 +133,10 @@ class ApiClient {
     return this.client.post('/reviews/', data);
   }
 
+  async getPropertyReviews(propertyId: string) {
+    return this.client.get(`/properties/${propertyId}/reviews/`);
+  }
+
   // Messages
   async getMessages(params?: any) {
     return this.client.get('/messages/', { params });
@@ -165,6 +174,15 @@ class ApiClient {
   // Wishlist
   async getSavedProperties() {
     return this.client.get('/properties/saved/');
+  }
+
+  async isPropertySaved(propertyId: string) {
+    const response = await this.getSavedProperties();
+    const results = response.data?.results ?? response.data ?? [];
+
+    return Array.isArray(results)
+      ? results.some((item: any) => item?.property?.id === propertyId || item?.property_id === propertyId)
+      : false;
   }
 
   async saveProperty(propertyId: string) {

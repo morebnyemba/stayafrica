@@ -1,13 +1,12 @@
 'use client';
 
-import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 const ProtectedRoute = dynamic(() => import('@/components/auth/protected-route').then(m => m.ProtectedRoute), { ssr: false });
 import Link from 'next/link';
-import { Heart, MapPin, Star, Users, Bed, DollarSign, Trash2, X } from 'lucide-react';
+import { Heart, MapPin, Star, Users, Bed, X } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 export function WishlistContent() {
@@ -105,6 +104,7 @@ export function WishlistContent() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {savedPropertiesData?.map((saved: any) => {
                   const property = saved.property;
+
                   return (
                     <article
                       key={saved.id}
@@ -146,7 +146,7 @@ export function WishlistContent() {
                         <h3 className="font-semibold text-lg text-primary-900 dark:text-sand-50 mb-2 line-clamp-1">
                           {property.title}
                         </h3>
-                        
+
                         <div className="flex items-center gap-2 text-primary-600 dark:text-sand-300 text-sm mb-3">
                           <MapPin className="w-4 h-4" />
                           <span className="line-clamp-1">
@@ -195,26 +195,11 @@ export function WishlistContent() {
                           Saved {new Date(saved.created_at).toLocaleDateString()}
                         </div>
                       </div>
-                </article>
-              ))}
-            </div>
-          )}
-
-          {/* Stats */}
-          {wishlistItems.length > 0 && (
-            <div className="mt-8 card p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-primary-600 dark:text-sand-400 mb-1">
-                    Total Saved Properties
-                  </p>
-                  <p className="text-3xl font-bold text-primary-900 dark:text-sand-50">
-                    {wishlistItems.length}
-                  </p>
-                </div>
-                <Heart className="w-12 h-12 text-red-500 fill-current opacity-20" />
+                    </article>
+                  );
+                })}
               </div>
-            </div>
+            </>
           )}
         </div>
       </div>
