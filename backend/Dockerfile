@@ -1,27 +1,34 @@
 FROM python:3.11-slim
 
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1
+
 WORKDIR /app
 
-# Install system dependencies
+# Install system dependencies for GeoDjango + Postgres
 RUN apt-get update && apt-get install -y \
-    postgresql-client \
+    build-essential \
+    libpq-dev \
     gdal-bin \
     libgdal-dev \
-    libpq-dev \
+    libproj-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --upgrade pip \
+    && pip install --no-cache-dir -r requirements.txt
 
 # Copy project
 COPY . .
 
-# Run migrations and collect static files
+# Collect static assets at build time (safe for local/static storage)
 RUN python manage.py collectstatic --noinput
 
-# Expose port
+# Entrypoint handles migrations + app start
+RUN chmod +x /app/entrypoint.sh
+
 EXPOSE 8000
 
-# Run gunicorn
-CMD ["gunicorn", "stayafrica.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "4"]
+ENTRYPOINT ["/app/entrypoint.sh"]

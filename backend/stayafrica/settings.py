@@ -7,8 +7,21 @@ from dotenv import load_dotenv
 # For Linux/production, these libraries should be installed system-wide
 import platform
 if platform.system() == 'Windows':
-    GDAL_LIBRARY_PATH = r"C:\Users\Administrator\AppData\Local\Programs\Python\Python313\Lib\site-packages\osgeo\gdal.dll"
-    GEOS_LIBRARY_PATH = r"C:\Users\Administrator\AppData\Local\Programs\Python\Python313\Lib\site-packages\osgeo\geos_c.dll"
+    # Resolve GDAL/GEOS from the installed osgeo package instead of hardcoding user paths
+    try:
+        import osgeo  # provided by the GDAL wheel
+        _OSGEO_DIR = Path(osgeo.__file__).parent
+        GDAL_LIBRARY_PATH = str(_OSGEO_DIR / 'gdal.dll')
+        GEOS_LIBRARY_PATH = str(_OSGEO_DIR / 'geos_c.dll')
+        # Helpful environment hints for runtime data (if present in the wheel)
+        gdal_data = _OSGEO_DIR / 'data'
+        proj_dir = _OSGEO_DIR / 'proj'
+        if gdal_data.exists():
+            os.environ.setdefault('GDAL_DATA', str(gdal_data))
+        if proj_dir.exists():
+            os.environ.setdefault('PROJ_LIB', str(proj_dir))
+    except Exception as e:
+        print(f"Warning: Could not initialize GDAL/GEOS from osgeo: {e}")
 
 # Optional: Sentry error tracking (install sentry-sdk separately)
 try:
@@ -103,6 +116,10 @@ if DEBUG:
             'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
+    # Optional: path to SpatiaLite DLL on Windows (required for Spatialite backend)
+    # Set SPATIALITE_LIBRARY_PATH env var to the full DLL path, e.g.
+    # C:\OSGeo4W\bin\mod_spatialite.dll
+    SPATIALITE_LIBRARY_PATH = os.getenv('SPATIALITE_LIBRARY_PATH', 'mod_spatialite')
 else:
     # Production: PostgreSQL with GIS support
     DATABASES = {
