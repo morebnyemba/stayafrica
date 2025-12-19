@@ -34,8 +34,8 @@ services:
     container_name: stayafrica_web
     build:
       context: ./backend
-      dockerfile: Dockerfile
-    image: stayafrica-backend:latest
+        backend:
+          container_name: stayafrica_backend
     env_file:
       - ./backend/.env.prod
     environment:
@@ -54,6 +54,25 @@ services:
         condition: service_healthy
     ports:
       - "8000:8000"
+    restart: unless-stopped
+
+          ports:
+            - "8000:8000"
+          restart: unless-stopped
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    env_file:
+      - ./web/.env.prod
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: http://web:8000/api
+      NEXT_PUBLIC_API_VERSION: v1
+      NODE_ENV: production
+            NEXT_PUBLIC_API_BASE_URL: http://backend:8000/api
+      web:
+        condition: service_started
+    ports:
+            backend:
     restart: unless-stopped
 
   celery:
@@ -76,7 +95,7 @@ services:
       web:
         condition: service_started
     command: ["celery", "-A", "stayafrica", "worker", "--loglevel=info", "--concurrency=4"]
-    restart: unless-stopped
+            backend:
 
   celery-beat:
     container_name: stayafrica_celery_beat
@@ -98,10 +117,11 @@ services:
       web:
         condition: service_started
     command: ["celery", "-A", "stayafrica", "beat", "--loglevel=info"]
-    restart: unless-stopped
+            backend:
 
 volumes:
   postgres_data:
+  portainer_data:
 
 networks:
   default:
