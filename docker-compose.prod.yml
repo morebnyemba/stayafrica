@@ -39,6 +39,7 @@ services:
     env_file:
       - ./backend/.env.prod
     environment:
+      DEBUG: "False"
       DATABASE_HOST: db
       DATABASE_PORT: 5432
       DATABASE_ENGINE: django.contrib.gis.db.backends.postgis
@@ -80,6 +81,7 @@ services:
     env_file:
       - ./backend/.env.prod
     environment:
+      DEBUG: "False"
       DATABASE_HOST: db
       DATABASE_PORT: 5432
       DATABASE_ENGINE: django.contrib.gis.db.backends.postgis
@@ -102,6 +104,7 @@ services:
     env_file:
       - ./backend/.env.prod
     environment:
+      DEBUG: "False"
       DATABASE_HOST: db
       DATABASE_PORT: 5432
       DATABASE_ENGINE: django.contrib.gis.db.backends.postgis
