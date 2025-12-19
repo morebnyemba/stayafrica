@@ -4,7 +4,8 @@ import React from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
 import { Star, MessageSquare } from 'lucide-react';
-import { ProtectedRoute } from '@/components/auth/protected-route';
+import dynamic from 'next/dynamic';
+const ProtectedRoute = dynamic(() => import('@/components/auth/protected-route').then(m => m.ProtectedRoute), { ssr: false });
 
 export function ReviewsDashboard() {
   const queryClient = useQueryClient();

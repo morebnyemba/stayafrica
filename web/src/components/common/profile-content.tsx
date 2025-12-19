@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/auth-context';
-import { ProtectedRoute } from '@/components/auth/protected-route';
+import dynamic from 'next/dynamic';
+const ProtectedRoute = dynamic(() => import('@/components/auth/protected-route').then(m => m.ProtectedRoute), { ssr: false });
 import { User, Mail, Phone, MapPin, CreditCard, Shield, Bell, Camera, Save, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { WORLD_COUNTRIES } from '@/lib/countries';

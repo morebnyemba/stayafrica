@@ -3,7 +3,8 @@
 import { useAuth } from '@/context/auth-context';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
-import { ProtectedRoute } from '@/components/auth/protected-route';
+import dynamic from 'next/dynamic';
+const ProtectedRoute = dynamic(() => import('@/components/auth/protected-route').then(m => m.ProtectedRoute), { ssr: false });
 import { useState } from 'react';
 import {
   DollarSign,

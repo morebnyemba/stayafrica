@@ -1,7 +1,8 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { ProtectedRoute } from '@/components/auth/protected-route';
+import dynamic from 'next/dynamic';
+const ProtectedRoute = dynamic(() => import('@/components/auth/protected-route').then(m => m.ProtectedRoute), { ssr: false });
 import { XCircle, Home, RefreshCcw, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 

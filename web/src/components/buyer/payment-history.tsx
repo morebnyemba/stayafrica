@@ -3,7 +3,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
 import { CreditCard, CheckCircle, XCircle, Clock } from 'lucide-react';
-import { ProtectedRoute } from '@/components/auth/protected-route';
+import dynamic from 'next/dynamic';
+const ProtectedRoute = dynamic(() => import('@/components/auth/protected-route').then(m => m.ProtectedRoute), { ssr: false });
 
 export function PaymentHistory() {
   const { data, isLoading, error } = useQuery({

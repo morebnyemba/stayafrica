@@ -14,7 +14,8 @@ import {
   MessageSquare,
   BarChart3,
 } from 'lucide-react';
-import { ProtectedRoute } from '@/components/auth/protected-route';
+import dynamic from 'next/dynamic';
+const ProtectedRoute = dynamic(() => import('@/components/auth/protected-route').then(m => m.ProtectedRoute), { ssr: false });
 
 export function HostDashboard() {
   const { user, isAuthenticated } = useAuth();
