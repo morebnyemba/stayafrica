@@ -18,7 +18,7 @@
     "countries-list": "^3.2.2",
     "date-fns": "^4.1.0",
     "lucide-react": "^0.469.0",
-    "mapbox-gl": "^2.16.0",
+    "mapbox-gl": "^2.15.0",
     "next": "^16.0.3",
     "next-auth": "^4.24.0",
     "react": "^18.3.0",
