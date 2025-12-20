@@ -128,7 +128,7 @@ export function PropertyDetailsContent() {
           </button>
           <div className="flex items-center space-x-4">
             <button
-              disabled={checkingSaved || saveMutation.isLoading || unsaveMutation.isLoading}
+              disabled={checkingSaved || saveMutation.isPending || unsaveMutation.isPending}
               onClick={() => {
                 if (isSaved) {
                   unsaveMutation.mutate();
