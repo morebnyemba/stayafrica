@@ -1,4 +1,16 @@
 services:
+  nginx-proxy-manager:
+    image: jc21/nginx-proxy-manager:latest
+    container_name: stayafrica_npm
+    ports:
+      - "80:80"
+      - "443:443"
+      - "81:81"
+    volumes:
+      - npm_data:/data
+      - npm_letsencrypt:/etc/letsencrypt
+    restart: unless-stopped
+
   db:
     image: postgis/postgis:15-3.3
     container_name: stayafrica_db
@@ -53,8 +65,11 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    ports:
-      - "8000:8000"
+    volumes:
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    expose:
+      - "8000"
     restart: unless-stopped
 
   frontend:
@@ -65,14 +80,14 @@ services:
     env_file:
       - ./web/.env.prod
     environment:
-      NEXT_PUBLIC_API_BASE_URL: http://backend:8000/api
+      NEXT_PUBLIC_API_BASE_URL: https://api.zimlegend.online
       NEXT_PUBLIC_API_VERSION: v1
       NODE_ENV: production
     depends_on:
       backend:
         condition: service_started
-    ports:
-      - "3000:3000"
+    expose:
+      - "3000"
     restart: unless-stopped
 
   celery:
@@ -123,7 +138,10 @@ services:
 
 volumes:
   postgres_data:
-  portainer_data:
+  static_volume:
+  media_volume:
+  npm_data:
+  npm_letsencrypt:
 
 networks:
   default:
