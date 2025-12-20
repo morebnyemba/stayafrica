@@ -19,7 +19,6 @@ export function RegisterContent() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [currentStep, setCurrentStep] = useState<Step>(1);
   const [availableCountries, setAvailableCountries] = useState<string[]>([]);
-  const [userLocation, setUserLocation] = useState<string>('');
   const [formData, setFormData] = useState({
     // Step 1
     email: '',
@@ -46,7 +45,6 @@ export function RegisterContent() {
     if (formData.role === 'host') {
       getUserCountryByLocation().then((country) => {
         if (country && availableCountries.includes(country)) {
-          setUserLocation(country);
           setFormData((prev) => ({ ...prev, country_of_residence: country }));
         }
       });
