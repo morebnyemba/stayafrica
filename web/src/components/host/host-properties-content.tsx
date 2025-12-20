@@ -4,7 +4,7 @@ import { useAuth } from '@/context/auth-context';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
 import Link from 'next/link';
-import { Building, Plus, Edit, Trash2, Eye, Calendar, DollarSign, Star, TrendingUp, Users } from 'lucide-react';
+import { Building, Plus, Edit, Trash2, Eye, Calendar, DollarSign, Star, TrendingUp } from 'lucide-react';
 import dynamic from 'next/dynamic';
 const ProtectedRoute = dynamic(() => import('@/components/auth/protected-route').then(m => m.ProtectedRoute), { ssr: false });
 import { useState } from 'react';
