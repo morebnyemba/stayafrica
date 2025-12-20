@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.contrib.gis.geos import Point
 from apps.properties.models import Property, Amenity, PropertyImage, SavedProperty
 
 class AmenitySerializer(serializers.ModelSerializer):
@@ -25,6 +26,37 @@ class PropertySerializer(serializers.ModelSerializer):
             'bedrooms', 'bathrooms', 'images', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'host', 'created_at', 'updated_at']
+
+    def _coerce_location(self, value):
+        if value is None:
+            return None
+        # Accept dicts with lat/lng or latitude/longitude
+        if isinstance(value, dict):
+            lat = value.get('lat') or value.get('latitude')
+            lng = value.get('lng') or value.get('lon') or value.get('longitude')
+            if lat is not None and lng is not None:
+                return Point(float(lng), float(lat))
+            raise serializers.ValidationError({'location': 'Invalid location dict; expected lat/lng.'})
+        # Accept [lat, lng] or (lat, lng)
+        if isinstance(value, (list, tuple)) and len(value) == 2:
+            lat, lng = value
+            return Point(float(lng), float(lat))
+        # Pass through if already a GEOS Point
+        if isinstance(value, Point):
+            return value
+        raise serializers.ValidationError({'location': 'Invalid location format.'})
+
+    def create(self, validated_data):
+        loc = validated_data.pop('location', None)
+        if loc is not None:
+            validated_data['location'] = self._coerce_location(loc)
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        loc = validated_data.pop('location', None)
+        if loc is not None:
+            validated_data['location'] = self._coerce_location(loc)
+        return super().update(instance, validated_data)
 
 class PropertyDetailSerializer(PropertySerializer):
     pass

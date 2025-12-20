@@ -24,8 +24,8 @@ class PaymentViewSet(viewsets.ModelViewSet):
         """Return payments for current user"""
         user = self.request.user
         if user.is_admin_user:
-            return Payment.objects.all().select_related('booking__guest', 'booking__property')
-        return Payment.objects.filter(booking__guest=user).select_related('booking__property')
+            return Payment.objects.all().select_related('booking__guest', 'booking__rental_property')
+        return Payment.objects.filter(booking__guest=user).select_related('booking__rental_property')
     
     @action(detail=False, methods=['post'])
     @api_ratelimit(rate='5/m')
@@ -43,7 +43,7 @@ class PaymentViewSet(viewsets.ModelViewSet):
         
         try:
             from apps.bookings.models import Booking
-            booking = Booking.objects.select_related('property').get(
+            booking = Booking.objects.select_related('rental_property').get(
                 id=booking_id,
                 guest=request.user
             )
