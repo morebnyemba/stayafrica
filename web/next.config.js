@@ -1,4 +1,7 @@
 /** @type {import('next').NextConfig} */
+const isProd = process.env.NODE_ENV === 'production';
+const defaultApiBase = isProd ? 'https://api.zimlegend.online' : 'http://localhost:8000';
+
 const nextConfig = {
   output: 'standalone',
   reactStrictMode: true,
@@ -22,7 +25,7 @@ const nextConfig = {
   },
 
   env: {
-    NEXT_PUBLIC_API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000',
+    NEXT_PUBLIC_API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL || defaultApiBase,
     NEXT_PUBLIC_MAPBOX_TOKEN: process.env.NEXT_PUBLIC_MAPBOX_TOKEN,
   },
 
