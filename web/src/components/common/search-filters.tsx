@@ -100,7 +100,7 @@ export function SearchFilters({ onFilterChange, onSearch }: SearchFiltersProps) 
     (filters.amenities?.length || 0) +
     (filters.propertyType ? 1 : 0) +
     ((filters.minRating || 0) > 0 ? 1 : 0) +
-    (filters.guests > 1 ? 1 : 0);
+    ((filters.guests || 0) > 1 ? 1 : 0);
 
   return (
     <div className="space-y-4">
