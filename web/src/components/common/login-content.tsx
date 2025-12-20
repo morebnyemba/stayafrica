@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/auth-context';
 import Link from 'next/link';
 import { Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react';
@@ -9,7 +8,6 @@ import { toast } from 'react-hot-toast';
 import { validateEmail, validatePassword } from '@/lib/validation';
 
 export function LoginContent() {
-  const router = useRouter();
   const { login } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
