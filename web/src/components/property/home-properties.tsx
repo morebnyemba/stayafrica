@@ -4,7 +4,9 @@ import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
 import { MapPin, Star } from 'lucide-react';
 import { PropertyListSkeleton } from './property-card-skeleton';
+import { PROPERTY_TYPES } from '@/types/property-types';
 import Link from 'next/link';
+import * as LucideIcons from 'lucide-react';
 
 export function HomeProperties() {
   const { data: propertiesData, isLoading } = useQuery({
@@ -135,20 +137,28 @@ export function HomeProperties() {
           </p>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-          {['BNB', 'APARTMENT', 'HOTEL', 'LODGE', 'VILLA', 'VILLA', 'GUESTHOUSE', 'RESORT', 'COTTAGE', 'HOUSE'].map((type) => (
-            <Link
-              key={type}
-              href={`/explore?type=${type}`}
-              className="card p-6 hover:shadow-xl hover:scale-105 transition duration-200 cursor-pointer group"
-            >
-              <h3 className="text-lg font-semibold text-primary-900 dark:text-sand-50 group-hover:text-secondary-600 transition">
-                {type === 'BNB' ? 'B&Bs' : type.charAt(0) + type.slice(1).toLowerCase() + (type.length > 1 ? 's' : '')}
-              </h3>
-              <p className="text-sm text-primary-600 dark:text-sand-400 mt-2">
-                Browse {type.toLowerCase()} properties
-              </p>
-            </Link>
-          ))}
+          {Object.entries(PROPERTY_TYPES).map(([key, config]) => {
+            const IconComponent = (LucideIcons as any)[config.icon];
+            return (
+              <Link
+                key={key}
+                href={`/explore?type=${key}`}
+                className="card p-6 hover:shadow-xl hover:scale-105 transition duration-200 cursor-pointer group"
+              >
+                {IconComponent && (
+                  <div className={`${config.bgColor} w-12 h-12 rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition`}>
+                    <IconComponent className={`w-6 h-6 text-${config.color}`} />
+                  </div>
+                )}
+                <h3 className="text-lg font-semibold text-primary-900 dark:text-sand-50 group-hover:text-secondary-600 transition">
+                  {config.label}
+                </h3>
+                <p className="text-sm text-primary-600 dark:text-sand-400 mt-2">
+                  {config.description}
+                </p>
+              </Link>
+            );
+          })}
         </div>
       </section>
 
