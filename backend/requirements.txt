@@ -40,6 +40,9 @@ cryptography==41.0.7
 # HTTP
 requests==2.31.0
 
+# Images
+Pillow>=10.2.0
+
 # Development Tools
 django-extensions==3.2.3
 pytest==7.4.3
