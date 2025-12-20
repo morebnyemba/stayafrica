@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '@/services/api-client';
-import { MapPin, DollarSign, Home, Image as ImageIcon, Search } from 'lucide-react';
+import { MapPin, DollarSign, Home, Search } from 'lucide-react';
 
 interface PropertyFormProps {
   initialData?: any;
