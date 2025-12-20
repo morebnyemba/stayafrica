@@ -12,6 +12,14 @@ import { BookingCard } from '@/components/booking/booking-card';
 import { Heart, MapPin, Share2, Star } from 'lucide-react';
 import Link from 'next/link';
 
+type Review = {
+  id: string;
+  guest?: { first_name?: string; last_name?: string };
+  rating: number;
+  text: string;
+  created_at: string;
+};
+
 export function PropertyDetailsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -51,12 +59,12 @@ export function PropertyDetailsContent() {
   });
 
   // Fetch property reviews
-  const { data: reviews } = useQuery({
+  const { data: reviews } = useQuery<Review[]>({
     queryKey: ['property-reviews', propertyId],
     queryFn: async () => {
       if (!propertyId) throw new Error('Property ID not found');
       const response = await apiClient.getPropertyReviews(propertyId);
-      return response.data;
+      return response.data as Review[];
     },
     enabled: !!propertyId,
   });
@@ -241,7 +249,7 @@ export function PropertyDetailsContent() {
                   Reviews
                 </h2>
                 <div className="space-y-4">
-                  {reviews.map((review) => (
+                  {reviews.map((review: Review) => (
                     <div key={review.id} className="bg-white dark:bg-primary-800 p-6 rounded-lg border border-primary-200 dark:border-primary-700">
                       <div className="flex items-start justify-between mb-2">
                         <div>
