@@ -4,7 +4,7 @@ import { useState, FormEvent } from 'react';
 import { Search, Home, Building2, Building, TreePine, Castle, Wind, Users, Palmtree, Tent, Anchor } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Typewriter } from 'react-type-animation';
+import { TypeAnimation } from 'react-type-animation';
 import { FEATURED_PROPERTY_TYPES, PROPERTY_TYPES } from '@/types/property-types';
 
 const iconMap: Record<string, any> = {
@@ -71,13 +71,13 @@ export function HeroSection() {
           <div className="text-xl md:text-2xl text-sand-100 max-w-3xl mx-auto min-h-16 flex items-center justify-center">
             <span>From </span>
             <span className="ml-2 text-secondary-300 font-semibold">
-              <Typewriter
+              <TypeAnimation
                 sequence={typingSequence}
                 wrapper="span"
                 cursor
                 repeat={Infinity}
                 speed={80}
-                deleteSpeed={60}
+                deletionSpeed={60}
               />
             </span>
           </div>
