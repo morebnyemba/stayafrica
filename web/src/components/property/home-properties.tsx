@@ -2,11 +2,9 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
-import { MapPin, Star } from 'lucide-react';
+import { MapPin, Star, Home, Users, Building2, Trees, Shield, UtensilsCrossed, Tent, Waves } from 'lucide-react';
 import { PropertyListSkeleton } from './property-card-skeleton';
-import { PROPERTY_TYPES } from '@/types/property-types';
 import Link from 'next/link';
-import * as LucideIcons from 'lucide-react';
 
 export function HomeProperties() {
   const { data: propertiesData, isLoading } = useQuery({
@@ -137,24 +135,33 @@ export function HomeProperties() {
           </p>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-          {Object.entries(PROPERTY_TYPES).map(([key, config]) => {
-            const IconComponent = (LucideIcons as any)[config.icon];
+          {[
+            { type: 'BNB', label: 'B&Bs', icon: Home },
+            { type: 'APARTMENT', label: 'Apartments', icon: Building2 },
+            { type: 'HOTEL', label: 'Hotels', icon: UtensilsCrossed },
+            { type: 'LODGE', label: 'Lodges', icon: Trees },
+            { type: 'VILLA', label: 'Villas', icon: Shield },
+            { type: 'GUESTHOUSE', label: 'Guesthouses', icon: Users },
+            { type: 'RESORT', label: 'Resorts', icon: Waves },
+            { type: 'COTTAGE', label: 'Cottages', icon: Home },
+            { type: 'HOUSE', label: 'Houses', icon: Building2 },
+            { type: 'CAMPGROUND', label: 'Campgrounds', icon: Tent },
+          ].map((item) => {
+            const IconComponent = item.icon;
             return (
               <Link
-                key={key}
-                href={`/explore?type=${key}`}
+                key={item.type}
+                href={`/explore?type=${item.type}`}
                 className="card p-6 hover:shadow-xl hover:scale-105 transition duration-200 cursor-pointer group"
               >
-                {IconComponent && (
-                  <div className={`${config.bgColor} w-12 h-12 rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition`}>
-                    <IconComponent className={`w-6 h-6 text-${config.color}`} />
-                  </div>
-                )}
+                <div className="bg-secondary-100 dark:bg-secondary-900/30 w-12 h-12 rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition">
+                  <IconComponent className="w-6 h-6 text-secondary-600" />
+                </div>
                 <h3 className="text-lg font-semibold text-primary-900 dark:text-sand-50 group-hover:text-secondary-600 transition">
-                  {config.label}
+                  {item.label}
                 </h3>
                 <p className="text-sm text-primary-600 dark:text-sand-400 mt-2">
-                  {config.description}
+                  Browse {item.label.toLowerCase()}
                 </p>
               </Link>
             );
