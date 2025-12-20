@@ -148,7 +148,8 @@ export function RegisterContent() {
         role: formData.role,
       });
       toast.success('Account created successfully!');
-      router.push('/dashboard');
+      // Force a full-page navigation so middleware/SSR see the new cookie
+      window.location.replace('/dashboard');
     } catch (error) {
       toast.error('Registration failed. Please try again.');
       console.error('Registration error:', error);

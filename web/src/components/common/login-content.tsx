@@ -48,11 +48,9 @@ export function LoginContent() {
       await login(formData.email, formData.password);
       toast.success('Welcome back!');
       
-      // Wait a brief moment for the cookie to be set before redirecting
-      // This ensures middleware can verify the token
-      setTimeout(() => {
-        router.push('/dashboard');
-      }, 300);
+      // Force a full-page navigation so middleware/SSR see the new cookie
+      // This avoids needing a manual refresh after login
+      window.location.replace('/dashboard');
     } catch (error) {
       toast.error('Invalid email or password');
       console.error('Login error:', error);
