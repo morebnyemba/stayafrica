@@ -68,9 +68,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const { access, refresh, user: userData } = await response.json();
         localStorage.setItem('access_token', access);
         localStorage.setItem('refresh_token', refresh);
-        // Set cookie for middleware
-        const isSecure = window.location.protocol === 'https:';
-        document.cookie = `access_token=${access}; path=/; max-age=86400; SameSite=Lax${isSecure ? '; Secure' : ''}`;
+        // Set cookie server-side so middleware/SSR see it immediately
+        try {
+          await fetch('/api/auth/set-cookie', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: access, maxAge: 60 * 60 * 24 }),
+          });
+        } catch (e) {
+          // Fallback: set client cookie
+          const isSecure = window.location.protocol === 'https:';
+          document.cookie = `access_token=${access}; path=/; max-age=86400; SameSite=Lax${isSecure ? '; Secure' : ''}`;
+        }
         setUser(userData);
       } else {
         throw new Error('Login failed');
@@ -92,9 +101,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const { access, refresh, user: newUser } = await response.json();
         localStorage.setItem('access_token', access);
         localStorage.setItem('refresh_token', refresh);
-        // Set cookie for middleware
-        const isSecure = window.location.protocol === 'https:';
-        document.cookie = `access_token=${access}; path=/; max-age=86400; SameSite=Lax${isSecure ? '; Secure' : ''}`;
+        // Set cookie server-side so middleware/SSR see it immediately
+        try {
+          await fetch('/api/auth/set-cookie', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: access, maxAge: 60 * 60 * 24 }),
+          });
+        } catch (e) {
+          // Fallback: set client cookie
+          const isSecure = window.location.protocol === 'https:';
+          document.cookie = `access_token=${access}; path=/; max-age=86400; SameSite=Lax${isSecure ? '; Secure' : ''}`;
+        }
         setUser(newUser);
       } else {
         throw new Error('Registration failed');
