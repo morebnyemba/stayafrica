@@ -207,8 +207,8 @@ export function ProfileContent() {
                         >
                           <option value="">Select your country</option>
                           {WORLD_COUNTRIES.map((country) => (
-                            <option key={country} value={country}>
-                              {country}
+                            <option key={country.code} value={country.name}>
+                              {country.name}
                             </option>
                           ))}
                         </select>
