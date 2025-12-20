@@ -124,21 +124,29 @@ export function HomeProperties() {
         )}
       </section>
 
-      {/* Categories Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 border-t border-primary-200 dark:border-primary-700">
-        <h2 className="text-2xl md:text-3xl font-bold text-primary-900 dark:text-sand-50 mb-8">
-          Browse by property type
-        </h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {['Houses', 'Apartments', 'Villas', 'Lodges'].map((type) => (
+      {/* Categories Section - Property Types */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-primary-200 dark:border-primary-700">
+        <div className="mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold text-primary-900 dark:text-sand-50 mb-4">
+            Explore by Property Type
+          </h2>
+          <p className="text-lg text-primary-600 dark:text-sand-300">
+            Find your perfect accommodation, from luxury villas to cozy bed & breakfasts
+          </p>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          {['BNB', 'APARTMENT', 'HOTEL', 'LODGE', 'VILLA', 'VILLA', 'GUESTHOUSE', 'RESORT', 'COTTAGE', 'HOUSE'].map((type) => (
             <Link
               key={type}
-              href={`/explore?type=${type.toUpperCase()}`}
-              className="card p-6 hover:shadow-lg transition cursor-pointer group"
+              href={`/explore?type=${type}`}
+              className="card p-6 hover:shadow-xl hover:scale-105 transition duration-200 cursor-pointer group"
             >
               <h3 className="text-lg font-semibold text-primary-900 dark:text-sand-50 group-hover:text-secondary-600 transition">
-                {type}
+                {type === 'BNB' ? 'B&Bs' : type.charAt(0) + type.slice(1).toLowerCase() + (type.length > 1 ? 's' : '')}
               </h3>
+              <p className="text-sm text-primary-600 dark:text-sand-400 mt-2">
+                Browse {type.toLowerCase()} properties
+              </p>
             </Link>
           ))}
         </div>

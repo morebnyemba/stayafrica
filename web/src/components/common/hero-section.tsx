@@ -1,9 +1,24 @@
 'use client';
 
 import { useState, FormEvent } from 'react';
-import { Search } from 'lucide-react';
+import { Search, Home, Building2, Building, TreePine, Castle, Wind, Users, Palmtree, Tent, Anchor } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { Typewriter } from 'react-type-animation';
+import { FEATURED_PROPERTY_TYPES, PROPERTY_TYPES } from '@/types/property-types';
+
+const iconMap: Record<string, any> = {
+  Home,
+  Building2,
+  Building,
+  TreePine,
+  Castle,
+  Wind,
+  Users,
+  Palmtree,
+  Tent,
+  Anchor,
+};
 
 export function HeroSection() {
   const router = useRouter();
@@ -11,6 +26,7 @@ export function HeroSection() {
   const [checkIn, setCheckIn] = useState('');
   const [checkOut, setCheckOut] = useState('');
   const [guests, setGuests] = useState('2');
+  const [selectedType, setSelectedType] = useState('');
 
   const handleSearch = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -20,24 +36,79 @@ export function HeroSection() {
     if (checkIn) params.append('check_in', checkIn);
     if (checkOut) params.append('check_out', checkOut);
     if (guests) params.append('guests', guests);
+    if (selectedType) params.append('type', selectedType);
 
     router.push(`/explore?${params.toString()}`);
   };
 
+  // Create typing sequence for property types
+  const typingSequence = [
+    'luxury villas',
+    2000,
+    'cozy B&Bs',
+    2000,
+    'modern apartments',
+    2000,
+    'eco-lodges',
+    2000,
+    'beachfront hotels',
+    2000,
+    'mountain resorts',
+    2000,
+  ];
+
   return (
-    <div className="relative overflow-hidden bg-gradient-to-br from-primary-900 via-primary-800 to-primary-700 text-sand-50 py-16 md:py-24">
+    <div className="relative overflow-hidden bg-gradient-to-br from-primary-900 via-primary-800 to-primary-700 text-sand-50 py-20 md:py-32">
       <div className="absolute inset-0 pointer-events-none" aria-hidden>
-        <div className="absolute -top-20 right-20 h-64 w-64 rounded-full bg-secondary-500/20 blur-3xl" />
-        <div className="absolute bottom-0 left-10 h-48 w-48 rounded-full bg-secondary-400/10 blur-2xl" />
+        <div className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-secondary-500/10 blur-3xl" />
+        <div className="absolute -bottom-32 -left-32 h-64 w-64 rounded-full bg-secondary-400/10 blur-2xl" />
       </div>
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl md:text-5xl font-bold mb-3 animate-fade-in tracking-tight text-sand-50">
-            Find your next stay in Africa
+        <div className="text-center mb-12">
+          <h1 className="text-4xl md:text-6xl font-bold mb-4 tracking-tight text-sand-50">
+            Discover Unique Places in Africa
           </h1>
-          <p className="text-lg md:text-xl text-sand-100 max-w-2xl mx-auto">
-            Discover unique homes across the continent
+          <div className="text-xl md:text-2xl text-sand-100 max-w-3xl mx-auto min-h-16 flex items-center justify-center">
+            <span>From </span>
+            <span className="ml-2 text-secondary-300 font-semibold">
+              <Typewriter
+                sequence={typingSequence}
+                wrapper="span"
+                cursor
+                repeat={Infinity}
+                speed={80}
+                deleteSpeed={60}
+              />
+            </span>
+          </div>
+          <p className="text-sand-200 mt-4">
+            Explore diverse accommodation types across the continent
           </p>
+        </div>
+
+        {/* Property Type Quick Select */}
+        <div className="mb-8">
+          <p className="text-center text-sand-100 mb-4 text-sm font-medium">Browse by type:</p>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 mb-8">
+            {FEATURED_PROPERTY_TYPES.map((typeId) => {
+              const typeConfig = PROPERTY_TYPES[typeId];
+              const Icon = iconMap[typeConfig.icon];
+              return (
+                <button
+                  key={typeId}
+                  onClick={() => setSelectedType(typeId)}
+                  className={`p-4 rounded-xl transition-all duration-200 flex flex-col items-center gap-2 ${
+                    selectedType === typeId
+                      ? 'bg-secondary-500 text-primary-900 shadow-lg scale-105'
+                      : 'bg-primary-700/50 hover:bg-primary-600/70 text-sand-50 border border-sand-200/20'
+                  }`}
+                >
+                  {Icon && <Icon className="w-6 h-6" />}
+                  <span className="text-sm font-semibold">{typeConfig.label}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* Airbnb-style Search Bar */}
@@ -123,3 +194,4 @@ export function HeroSection() {
     </div>
   );
 }
+

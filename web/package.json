@@ -29,6 +29,7 @@
     "recharts": "^2.15.4",
     "stripe": "^14.25.0",
     "tailwind-merge": "^2.6.0",
+    "react-type-animation": "^3.2.0",
     "zustand": "^4.5.7"
   },
   "devDependencies": {
