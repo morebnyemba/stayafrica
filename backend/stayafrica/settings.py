@@ -212,7 +212,22 @@ CORS_ALLOWED_ORIGINS = [
     'http://127.0.0.1:3000',
     'https://zimlegend.online',
     'https://www.zimlegend.online',
+    'https://api.zimlegend.online',
 ]
+
+# CSRF trusted origins must include the full scheme + domain.
+CSRF_TRUSTED_ORIGINS = os.getenv(
+    'CSRF_TRUSTED_ORIGINS',
+    'https://api.zimlegend.online,https://zimlegend.online,https://www.zimlegend.online'
+).split(',')
+
+# Ensure Django recognizes HTTPS forwarded by Nginx Proxy Manager
+USE_X_FORWARDED_HOST = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Secure cookies in production
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
 
 # Celery Configuration
 CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379/0')
