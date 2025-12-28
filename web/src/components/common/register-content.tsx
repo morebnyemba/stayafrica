@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/auth-context';
 import Link from 'next/link';
 import { Mail, Lock, Eye, EyeOff, Loader2, User, Phone, MapPin, CheckCircle2, ArrowRight, ArrowLeft } from 'lucide-react';
-import { FormField, Input, Select } from '@/components/ui/form';
 import { toast } from 'react-hot-toast';
 import { validatePassword, validateEmail, validatePhoneNumber } from '@/lib/validation';
 import { getCountriesByContext, getUserCountryByLocation } from '@/lib/countries';
@@ -153,6 +152,45 @@ export function RegisterContent() {
     }
   };
 
+  return (
+    <div className="min-h-screen bg-primary-50 dark:bg-primary-950 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-3xl mx-auto">
+        <div className="flex items-center justify-between mb-6">
+          <Link href="/" className="text-secondary-600 dark:text-secondary-400 hover:underline font-medium">
+            Home
+          </Link>
+          <Link href="/login" className="text-secondary-600 dark:text-secondary-400 hover:underline font-medium">
+            Have an account? Sign in
+          </Link>
+        </div>
+
+        <div className="bg-white dark:bg-primary-900 rounded-2xl shadow-xl border border-primary-100 dark:border-primary-800 p-6 sm:p-10">
+          <div className="flex items-center justify-center gap-2 mb-4 text-secondary-600 dark:text-secondary-400">
+            {[1, 2, 3].map((step) => (
+              <div key={step} className="flex items-center">
+                <div
+                  className={`w-9 h-9 rounded-full border-2 flex items-center justify-center text-sm font-semibold transition ${
+                    currentStep > step
+                      ? 'border-secondary-500 bg-secondary-50 text-secondary-700'
+                      : currentStep === step
+                        ? 'border-secondary-500 text-secondary-700'
+                        : 'border-primary-200 dark:border-primary-700 text-primary-400'
+                  }`}
+                  aria-label={`Step ${step}`}
+                >
+                  {currentStep > step ? <CheckCircle2 className="w-5 h-5" /> : step}
+                </div>
+                {step < 3 && (
+                  <div
+                    className={`w-12 h-1 mx-2 rounded-full transition ${
+                      currentStep > step ? 'bg-secondary-500' : 'bg-primary-200 dark:bg-primary-700'
+                    }`}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+
           <h1 className="text-3xl font-bold mb-2 text-center text-primary-900 dark:text-sand-50">
             Create Your Account
           </h1>
@@ -164,14 +202,17 @@ export function RegisterContent() {
             }
           </p>
 
-          <form onSubmit={(e) => {
-            e.preventDefault();
-            if (currentStep === 3) {
-              handleSubmit(e);
-            } else {
-              handleNext();
-            }
-          }} className="space-y-6">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (currentStep === 3) {
+                handleSubmit(e);
+              } else {
+                handleNext();
+              }
+            }}
+            className="space-y-6"
+          >
             {/* Step 1: Credentials */}
             {currentStep === 1 && (
               <>
@@ -215,6 +256,7 @@ export function RegisterContent() {
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-primary-400 dark:text-sand-400"
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
                     >
                       {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
@@ -242,6 +284,7 @@ export function RegisterContent() {
                       type="button"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-primary-400 dark:text-sand-400"
+                      aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
                     >
                       {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
@@ -254,7 +297,7 @@ export function RegisterContent() {
             {/* Step 2: Personal Info */}
             {currentStep === 2 && (
               <>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label htmlFor="first_name" className="block text-sm font-medium text-primary-900 dark:text-sand-100 mb-2">
                       First Name
@@ -387,7 +430,7 @@ export function RegisterContent() {
             )}
 
             {/* Navigation Buttons */}
-            <div className="flex gap-4 pt-4">
+            <div className="flex flex-col sm:flex-row gap-4 pt-4">
               {currentStep > 1 && (
                 <button
                   type="button"
@@ -398,7 +441,7 @@ export function RegisterContent() {
                   <span>Back</span>
                 </button>
               )}
-              
+
               <button
                 type="submit"
                 disabled={isLoading}
