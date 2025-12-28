@@ -3,6 +3,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -235,3 +236,37 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response({'status': 'Account verified successfully'})
         
         return Response({'status': 'Account already verified'})
+
+    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
+    @log_action('upgrade_to_host')
+    def upgrade_to_host(self, request):
+        """Allow an authenticated guest to become a host and issue fresh tokens."""
+        user = request.user
+
+        if user.role == 'host':
+            return Response({'status': 'already_host', 'role': user.role})
+
+        with transaction.atomic():
+            user.role = 'host'
+            user.save(update_fields=['role'])
+
+            AuditLoggerService.log_action(
+                user=user,
+                action='upgrade_role',
+                model=User,
+                object_id=user.id,
+                changes={'role': 'host'}
+            )
+
+        # Issue fresh tokens so the new role claim is reflected immediately
+        refresh = RefreshToken.for_user(user)
+        access = refresh.access_token
+
+        profile = UserProfileSerializer(user).data
+
+        return Response({
+            'status': 'upgraded',
+            'user': profile,
+            'access': str(access),
+            'refresh': str(refresh),
+        }, status=status.HTTP_200_OK)

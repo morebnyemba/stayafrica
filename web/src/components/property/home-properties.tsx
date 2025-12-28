@@ -2,11 +2,18 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
-import { MapPin, Star, Home, Users, Building2, Trees, Shield, UtensilsCrossed, Tent, Waves } from 'lucide-react';
+import { MapPin, Star, Home, Users, Building2, Trees, Shield, UtensilsCrossed, Tent, Waves, Loader2 } from 'lucide-react';
 import { PropertyListSkeleton } from './property-card-skeleton';
 import Link from 'next/link';
+import { useAuth } from '@/context/auth-context';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 export function HomeProperties() {
+  const { user, isAuthenticated, upgradeToHost } = useAuth();
+  const router = useRouter();
+  const [hostLoading, setHostLoading] = useState(false);
+
   const { data: propertiesData, isLoading } = useQuery({
     queryKey: ['home-properties'],
     queryFn: async () => {
@@ -24,6 +31,29 @@ export function HomeProperties() {
     { name: 'Zanzibar, Tanzania', image: 'https://images.unsplash.com/photo-1568454537842-d933259bb258' },
     { name: 'Marrakech, Morocco', image: 'https://images.unsplash.com/photo-1597212618440-806262de4f6b' },
   ];
+
+  const handleHostUpgrade = async () => {
+    if (!isAuthenticated) {
+      router.push('/host');
+      return;
+    }
+
+    if (user?.role === 'host') {
+      router.push('/dashboard/host');
+      return;
+    }
+
+    try {
+      setHostLoading(true);
+      await upgradeToHost();
+      router.push('/dashboard/host');
+    } catch (error) {
+      console.error('Failed to upgrade to host:', error);
+      router.push('/host');
+    } finally {
+      setHostLoading(false);
+    }
+  };
 
   return (
     <div className="bg-sand-100 dark:bg-primary-900">
@@ -188,12 +218,14 @@ export function HomeProperties() {
                 Share your space and earn extra income. Join thousands of hosts welcoming guests from around the world.
               </p>
               <div>
-                <Link
-                  href="/host"
-                  className="inline-block btn-primary px-6 sm:px-8 py-2 sm:py-3 text-base sm:text-lg font-semibold"
+                <button
+                  onClick={handleHostUpgrade}
+                  className="inline-flex items-center gap-2 btn-primary px-6 sm:px-8 py-2 sm:py-3 text-base sm:text-lg font-semibold"
+                  disabled={hostLoading}
                 >
-                  Learn More
-                </Link>
+                  {hostLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : null}
+                  <span>Learn More</span>
+                </button>
               </div>
             </div>
           </div>

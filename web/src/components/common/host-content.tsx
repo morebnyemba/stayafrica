@@ -1,8 +1,38 @@
 'use client';
 
-import { Building, DollarSign, Calendar, TrendingUp, CheckCircle } from 'lucide-react';
+import { Building, DollarSign, Calendar, TrendingUp, CheckCircle, Loader2 } from 'lucide-react';
+import { useAuth } from '@/context/auth-context';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 export function HostContent() {
+  const { user, isAuthenticated, upgradeToHost } = useAuth();
+  const router = useRouter();
+  const [hostLoading, setHostLoading] = useState(false);
+
+  const handleGetStarted = async () => {
+    if (!isAuthenticated) {
+      router.push('/register');
+      return;
+    }
+
+    if (user?.role === 'host') {
+      router.push('/dashboard/host');
+      return;
+    }
+
+    try {
+      setHostLoading(true);
+      await upgradeToHost();
+      router.push('/dashboard/host');
+    } catch (error) {
+      console.error('Failed to upgrade to host:', error);
+      router.push('/host');
+    } finally {
+      setHostLoading(false);
+    }
+  };
+
   return (
     <div className="bg-sand-100 dark:bg-primary-900">
       {/* Hero Section */}
@@ -16,8 +46,13 @@ export function HostContent() {
               <p className="text-xl text-sand-100 mb-8">
                 Share your space with travelers from around the world and earn extra income while showcasing the beauty of Africa.
               </p>
-              <button className="btn-primary px-8 py-4 text-lg font-semibold">
-                Get Started
+              <button
+                onClick={handleGetStarted}
+                className="btn-primary px-8 py-4 text-lg font-semibold inline-flex items-center gap-2"
+                disabled={hostLoading}
+              >
+                {hostLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : null}
+                <span>Get Started</span>
               </button>
             </div>
             <div className="card p-8">

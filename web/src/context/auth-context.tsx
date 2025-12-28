@@ -11,6 +11,7 @@ interface AuthContextType {
   register: (userData: any) => Promise<void>;
   logout: () => void;
   updateProfile: (userData: Partial<User>) => Promise<void>;
+  upgradeToHost: () => Promise<User>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -18,6 +19,24 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const API_BASE = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1`;
+
+  const setSession = async (access: string, refresh: string) => {
+    localStorage.setItem('access_token', access);
+    localStorage.setItem('refresh_token', refresh);
+    // Set cookie server-side so middleware/SSR see it immediately
+    try {
+      await fetch('/api/auth/set-cookie', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: access, maxAge: 60 * 60 * 24 }),
+      });
+    } catch (e) {
+      // Fallback: set client cookie
+      const isSecure = window.location.protocol === 'https:';
+      document.cookie = `access_token=${access}; path=/; max-age=86400; SameSite=Lax${isSecure ? '; Secure' : ''}`;
+    }
+  };
 
   useEffect(() => {
     // Check for existing session/token on mount
@@ -35,7 +54,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const fetchUserProfile = async (token: string) => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/users/profile/`, {
+      const response = await fetch(`${API_BASE}/users/profile/`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -58,7 +77,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (email: string, password: string) => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/auth/login/`, {
+      const response = await fetch(`${API_BASE}/auth/login/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -66,20 +85,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (response.ok) {
         const { access, refresh, user: userData } = await response.json();
-        localStorage.setItem('access_token', access);
-        localStorage.setItem('refresh_token', refresh);
-        // Set cookie server-side so middleware/SSR see it immediately
-        try {
-          await fetch('/api/auth/set-cookie', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ token: access, maxAge: 60 * 60 * 24 }),
-          });
-        } catch (e) {
-          // Fallback: set client cookie
-          const isSecure = window.location.protocol === 'https:';
-          document.cookie = `access_token=${access}; path=/; max-age=86400; SameSite=Lax${isSecure ? '; Secure' : ''}`;
-        }
+        await setSession(access, refresh);
         setUser(userData);
       } else {
         throw new Error('Login failed');
@@ -91,7 +97,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const register = async (userData: any) => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/users/register/`, {
+      const response = await fetch(`${API_BASE}/users/register/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(userData),
@@ -99,20 +105,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (response.ok) {
         const { access, refresh, user: newUser } = await response.json();
-        localStorage.setItem('access_token', access);
-        localStorage.setItem('refresh_token', refresh);
-        // Set cookie server-side so middleware/SSR see it immediately
-        try {
-          await fetch('/api/auth/set-cookie', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ token: access, maxAge: 60 * 60 * 24 }),
-          });
-        } catch (e) {
-          // Fallback: set client cookie
-          const isSecure = window.location.protocol === 'https:';
-          document.cookie = `access_token=${access}; path=/; max-age=86400; SameSite=Lax${isSecure ? '; Secure' : ''}`;
-        }
+        await setSession(access, refresh);
         setUser(newUser);
       } else {
         throw new Error('Registration failed');
@@ -133,7 +126,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const updateProfile = async (userData: Partial<User>) => {
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/users/profile/`, {
+      const response = await fetch(`${API_BASE}/users/profile/`, {
         method: 'PUT',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -153,6 +146,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const upgradeToHost = async () => {
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+      throw new Error('Not authenticated');
+    }
+
+    const response = await fetch(`${API_BASE}/users/upgrade_to_host/`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Upgrade failed');
+    }
+
+    const data = await response.json();
+    if (data.access && data.refresh) {
+      await setSession(data.access, data.refresh);
+    }
+    const updatedUser = data.user || data;
+    setUser(updatedUser);
+    return updatedUser;
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -163,6 +183,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         register,
         logout,
         updateProfile,
+        upgradeToHost,
       }}
     >
       {children}

@@ -3,19 +3,43 @@
 import Link from 'next/link';
 import { useAuth } from '@/context/auth-context';
 import { useRouter } from 'next/navigation';
-import { Menu, User, LogOut } from 'lucide-react';
+import { Menu, User, LogOut, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { ThemeToggle } from './theme-toggle';
 import { MobileSearchBar } from './mobile-search-bar';
 
 export function Navigation() {
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, logout, upgradeToHost } = useAuth();
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [hostLoading, setHostLoading] = useState(false);
 
   const handleLogout = () => {
     logout();
     router.push('/');
+  };
+
+  const handleBecomeHost = async () => {
+    if (!isAuthenticated) {
+      router.push('/host');
+      return;
+    }
+
+    if (user?.role === 'host') {
+      router.push('/dashboard/host');
+      return;
+    }
+
+    try {
+      setHostLoading(true);
+      await upgradeToHost();
+      router.push('/dashboard/host');
+    } catch (error) {
+      console.error('Failed to upgrade to host:', error);
+      router.push('/host');
+    } finally {
+      setHostLoading(false);
+    }
   };
 
   return (
@@ -48,9 +72,14 @@ export function Navigation() {
             <ThemeToggle />
             {isAuthenticated ? (
               <>
-                <Link href="/host" className="text-sand-200 hover:text-sand-50 transition font-medium rounded-full px-4 py-2 hover:bg-primary-700/60">
-                  Become a Host
-                </Link>
+                <button
+                  onClick={handleBecomeHost}
+                  className="text-sand-200 hover:text-sand-50 transition font-medium rounded-full px-4 py-2 hover:bg-primary-700/60 flex items-center gap-2"
+                  disabled={hostLoading}
+                >
+                  {hostLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                  <span>Become a Host</span>
+                </button>
                 <Link href="/dashboard" className="text-sand-200 hover:text-sand-50 transition font-medium">
                   Dashboard
                 </Link>
@@ -76,9 +105,14 @@ export function Navigation() {
               </>
             ) : (
               <>
-                <Link href="/host" className="text-sand-200 hover:text-sand-50 transition font-medium rounded-full px-4 py-2 hover:bg-primary-700/60">
-                  Become a Host
-                </Link>
+                <button
+                  onClick={handleBecomeHost}
+                  className="text-sand-200 hover:text-sand-50 transition font-medium rounded-full px-4 py-2 hover:bg-primary-700/60 flex items-center gap-2"
+                  disabled={hostLoading}
+                >
+                  {hostLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                  <span>Become a Host</span>
+                </button>
                 <Link href="/login" className="text-sand-200 hover:text-sand-50 transition font-medium">
                   Login
                 </Link>
@@ -107,9 +141,14 @@ export function Navigation() {
             <Link href="/experiences" className="block text-sand-200 hover:text-secondary-300 px-4 py-2">
               Experiences
             </Link>
-            <Link href="/host" className="block text-sand-200 hover:text-secondary-300 px-4 py-2">
-              Become a Host
-            </Link>
+            <button
+              onClick={handleBecomeHost}
+              className="block text-left w-full text-sand-200 hover:text-secondary-300 px-4 py-2 flex items-center gap-2"
+              disabled={hostLoading}
+            >
+              {hostLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+              <span>Become a Host</span>
+            </button>
             <div className="flex items-center justify-between px-4 py-2">
               <span className="text-sand-200">Theme</span>
               <ThemeToggle />
