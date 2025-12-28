@@ -22,8 +22,8 @@ export function MobileSearchBar() {
 
   return (
     <>
-      {/* Sticky Search Bar - Mobile Only */}
-      <div className="sticky top-16 md:hidden z-40 bg-primary-800/95 backdrop-blur border-b border-primary-700 shadow-md">
+      {/* Fixed, top-of-screen mobile search bar (Airbnb-like) */}
+      <div className="fixed top-0 left-0 right-0 md:hidden z-50 bg-primary-800/95 backdrop-blur border-b border-primary-700 shadow-md">
         <div className="px-3 py-2">
           {isExpanded ? (
             // Expanded search form
@@ -58,14 +58,19 @@ export function MobileSearchBar() {
             // Collapsed search button
             <button
               onClick={() => setIsExpanded(true)}
-              className="w-full flex items-center gap-2 px-4 py-2 bg-primary-700/50 hover:bg-primary-600/70 rounded-lg text-sand-300 text-sm transition"
+              className="w-full flex items-center gap-2 px-4 py-2 bg-primary-700/50 hover:bg-primary-600/70 rounded-full text-sand-300 text-sm transition"
             >
               <Search className="w-4 h-4 flex-shrink-0" />
-              <span>Where to go?</span>
+              <span className="truncate">Where to?</span>
             </button>
           )}
         </div>
       </div>
+
+      {/* Fullscreen overlay when expanded (simple, mobile-first) */}
+      {isExpanded && (
+        <div className="fixed inset-0 md:hidden z-40 bg-black/40" onClick={() => setIsExpanded(false)} aria-hidden />
+      )}
     </>
   );
 }

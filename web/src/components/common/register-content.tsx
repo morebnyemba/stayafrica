@@ -102,30 +102,35 @@ export function RegisterContent() {
     return Object.keys(newErrors).length === 0;
   };
 
+  const handleBack = () => {
+    if (currentStep > 1) {
+      setCurrentStep((currentStep - 1) as Step);
+    }
+  };
+
   const handleNext = () => {
     let isValid = false;
-    
     switch (currentStep) {
-                <FormField label="Email Address" error={errors.email}>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-primary-400 dark:text-sand-400" />
-                    <Input
-                      id="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="pl-10"
-                      placeholder="you@example.com"
-                      aria-invalid={!!errors.email}
-                    />
-                  </div>
-                </FormField>
+      case 1:
+        isValid = validateStep1();
+        break;
+      case 2:
+        isValid = validateStep2();
+        break;
+      case 3:
+        isValid = validateStep3();
+        break;
+    }
+    if (isValid && currentStep < 3) {
+      setCurrentStep((currentStep + 1) as Step);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!validateStep3()) {
       return;
     }
-
     setIsLoading(true);
     try {
       await register({
@@ -143,40 +148,10 @@ export function RegisterContent() {
     } catch (error) {
       toast.error('Registration failed. Please try again.');
       console.error('Registration error:', error);
-                <FormField label="Password" error={errors.password}>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-primary-400 dark:text-sand-400" />
-                    <Input
-                      id="password"
-                      type={showPassword ? 'text' : 'password'}
-                      value={formData.password}
-                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                      className="pl-10 pr-12"
-                      placeholder="••••••••"
-                      aria-invalid={!!errors.password}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-primary-400 dark:text-sand-400 hover:text-primary-600 dark:hover:text-sand-200 transition"
-                      aria-label={showPassword ? 'Hide password' : 'Show password'}
-                    >
-                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                    </button>
-                  </div>
-                </FormField>
-                  {step < currentStep ? <CheckCircle2 className="w-6 h-6" /> : step}
-                </div>
-                {step < 3 && (
-                  <div className={`flex-1 h-1 mx-2 transition ${
-                    step < currentStep 
-                      ? 'bg-secondary-500' 
-                      : 'bg-primary-200 dark:bg-primary-700'
-                  }`} />
-                )}
-              </div>
-            ))}
-          </div>
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
           <h1 className="text-3xl font-bold mb-2 text-center text-primary-900 dark:text-sand-50">
             Create Your Account
