@@ -215,6 +215,30 @@ CORS_ALLOWED_ORIGINS = [
     'https://api.zimlegend.online',
 ]
 
+# Allow sending of credentials/authorization from browser
+CORS_ALLOW_CREDENTIALS = True
+
+# Be explicit about allowed methods and headers to ensure preflight success
+CORS_ALLOW_METHODS = [
+    'GET',
+    'POST',
+    'PUT',
+    'PATCH',
+    'DELETE',
+    'OPTIONS',
+]
+
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
+
 # CSRF trusted origins must include the full scheme + domain.
 CSRF_TRUSTED_ORIGINS = os.getenv(
     'CSRF_TRUSTED_ORIGINS',

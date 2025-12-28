@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/auth-context';
 import Link from 'next/link';
 import { Mail, Lock, Eye, EyeOff, Loader2, User, Phone, MapPin, CheckCircle2, ArrowRight, ArrowLeft } from 'lucide-react';
+import { FormField, Input, Select } from '@/components/ui/form';
 import { toast } from 'react-hot-toast';
 import { validatePassword, validateEmail, validatePhoneNumber } from '@/lib/validation';
 import { getCountriesByContext, getUserCountryByLocation } from '@/lib/countries';
@@ -105,29 +106,20 @@ export function RegisterContent() {
     let isValid = false;
     
     switch (currentStep) {
-      case 1:
-        isValid = validateStep1();
-        break;
-      case 2:
-        isValid = validateStep2();
-        break;
-      case 3:
-        isValid = validateStep3();
-        break;
-    }
-    
-    if (isValid && currentStep < 3) {
-      setCurrentStep((currentStep + 1) as Step);
-    }
-  };
-
-  const handleBack = () => {
-    if (currentStep > 1) {
-      setCurrentStep((currentStep - 1) as Step);
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
+                <FormField label="Email Address" error={errors.email}>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-primary-400 dark:text-sand-400" />
+                    <Input
+                      id="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      className="pl-10"
+                      placeholder="you@example.com"
+                      aria-invalid={!!errors.email}
+                    />
+                  </div>
+                </FormField>
     e.preventDefault();
     
     if (!validateStep3()) {
@@ -151,36 +143,28 @@ export function RegisterContent() {
     } catch (error) {
       toast.error('Registration failed. Please try again.');
       console.error('Registration error:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  return (
-    <div className="min-h-screen flex items-center justify-center py-12 px-4 bg-gradient-to-br from-sand-100 via-secondary-50 to-primary-50 dark:from-primary-900 dark:via-primary-800 dark:to-primary-900">
-      <div className="w-full max-w-2xl">
-        {/* Logo/Branding */}
-        <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center justify-center">
-            <img src="/logo.png" alt="StayAfrica" className="h-28 w-auto" />
-          </Link>
-          <p className="text-primary-600 dark:text-sand-300 mt-2">
-            Join us and discover amazing stays across Africa
-          </p>
-        </div>
-
-        <div className="bg-white dark:bg-primary-800 rounded-2xl shadow-elevated p-8 border border-primary-100 dark:border-primary-700">
-          {/* Progress Steps */}
-          <div className="flex items-center justify-between mb-8">
-            {[1, 2, 3].map((step) => (
-              <div key={step} className="flex items-center flex-1">
-                <div className={`flex items-center justify-center w-10 h-10 rounded-full font-semibold transition ${
-                  step < currentStep 
-                    ? 'bg-secondary-500 text-primary-900' 
-                    : step === currentStep
-                    ? 'bg-secondary-500 text-primary-900 ring-4 ring-secondary-200 dark:ring-secondary-900'
-                    : 'bg-primary-200 dark:bg-primary-700 text-primary-500 dark:text-sand-400'
-                }`}>
+                <FormField label="Password" error={errors.password}>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-primary-400 dark:text-sand-400" />
+                    <Input
+                      id="password"
+                      type={showPassword ? 'text' : 'password'}
+                      value={formData.password}
+                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                      className="pl-10 pr-12"
+                      placeholder="••••••••"
+                      aria-invalid={!!errors.password}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-primary-400 dark:text-sand-400 hover:text-primary-600 dark:hover:text-sand-200 transition"
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    >
+                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    </button>
+                  </div>
+                </FormField>
                   {step < currentStep ? <CheckCircle2 className="w-6 h-6" /> : step}
                 </div>
                 {step < 3 && (

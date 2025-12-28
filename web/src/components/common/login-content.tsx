@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useAuth } from '@/context/auth-context';
 import Link from 'next/link';
 import { Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { FormField, Input } from '@/components/ui/form';
 import { toast } from 'react-hot-toast';
 import { validateEmail, validatePassword } from '@/lib/validation';
 
@@ -77,63 +78,46 @@ export function LoginContent() {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Email Field */}
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-primary-900 dark:text-sand-100 mb-2">
-                Email Address
-              </label>
+            <FormField label="Email Address" error={errors.email}>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-primary-400 dark:text-sand-400" />
-                <input
+                <Input
                   id="email"
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className={`w-full pl-10 pr-4 py-3 bg-sand-50 dark:bg-primary-700 border rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent transition ${
-                    errors.email 
-                      ? 'border-red-500 dark:border-red-400' 
-                      : 'border-primary-200 dark:border-primary-600'
-                  } text-primary-900 dark:text-sand-100 placeholder-primary-400 dark:placeholder-sand-400`}
+                  className="pl-10"
                   placeholder="you@example.com"
                   disabled={isLoading}
+                  aria-invalid={!!errors.email}
                 />
               </div>
-              {errors.email && (
-                <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.email}</p>
-              )}
-            </div>
+            </FormField>
 
             {/* Password Field */}
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-primary-900 dark:text-sand-100 mb-2">
-                Password
-              </label>
+            <FormField label="Password" error={errors.password}>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-primary-400 dark:text-sand-400" />
-                <input
+                <Input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className={`w-full pl-10 pr-12 py-3 bg-sand-50 dark:bg-primary-700 border rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent transition ${
-                    errors.password 
-                      ? 'border-red-500 dark:border-red-400' 
-                      : 'border-primary-200 dark:border-primary-600'
-                  } text-primary-900 dark:text-sand-100 placeholder-primary-400 dark:placeholder-sand-400`}
+                  className="pl-10 pr-12"
                   placeholder="••••••••"
                   disabled={isLoading}
+                  aria-invalid={!!errors.password}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-primary-400 dark:text-sand-400 hover:text-primary-600 dark:hover:text-sand-200 transition"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
-              {errors.password && (
-                <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.password}</p>
-              )}
-            </div>
+            </FormField>
 
             {/* Remember Me & Forgot Password */}
             <div className="flex items-center justify-between">
