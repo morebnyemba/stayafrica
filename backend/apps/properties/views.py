@@ -1,7 +1,7 @@
 from rest_framework import viewsets, status, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated, AllowAny, BasePermission
 from django_filters.rest_framework import DjangoFilterBackend
 from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.geos import Point
@@ -17,6 +17,26 @@ from apps.properties.serializers import (
 from services.geocoding_service import GeocodingService
 from services.host_analytics import HostAnalyticsService
 
+
+class IsHostOrReadOnly(BasePermission):
+    """
+    Permission to allow hosts to create/edit/delete properties.
+    Everyone can read.
+    """
+    def has_permission(self, request, view):
+        # Allow GET requests to anyone
+        if request.method in ['GET', 'HEAD', 'OPTIONS']:
+            return True
+        # Only authenticated users can create, update, delete
+        return request.user and request.user.is_authenticated
+    
+    def has_object_permission(self, request, view, obj):
+        # Allow GET requests to anyone
+        if request.method in ['GET', 'HEAD', 'OPTIONS']:
+            return True
+        # Only the property host can modify
+        return obj.host == request.user
+
 class AmenityViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Amenity.objects.all()
     serializer_class = AmenitySerializer
@@ -25,17 +45,12 @@ class AmenityViewSet(viewsets.ReadOnlyModelViewSet):
 class PropertyViewSet(viewsets.ModelViewSet):
     queryset = Property.objects.all()
     serializer_class = PropertySerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsHostOrReadOnly]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['country', 'city', 'property_type', 'status']
     search_fields = ['title', 'description', 'city', 'suburb']
     ordering_fields = ['price_per_night', 'created_at']
     ordering = ['-created_at']
-    
-    def get_permissions(self):
-        if self.action == 'list' or self.action == 'retrieve':
-            return [AllowAny()]
-        return super().get_permissions()
     
     def get_serializer_class(self):
         if self.action == 'retrieve':
@@ -44,15 +59,37 @@ class PropertyViewSet(viewsets.ModelViewSet):
             return PropertyListSerializer
         return PropertySerializer
     
+    def create(self, request, *args, **kwargs):
+        """Override create to ensure user is a host"""
+        if not request.user.is_host:
+            return Response(
+                {'error': 'Only hosts can create properties. Please upgrade to host first.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        return super().create(request, *args, **kwargs)
+    
     def perform_create(self, serializer):
         """Set host to current user"""
         serializer.save(host=self.request.user)
     
+    def perform_update(self, serializer):
+        """Ensure only the host can update their own property"""
+        if serializer.instance.host != self.request.user:
+            raise PermissionError('You can only update your own properties')
+        serializer.save()
+    
+    def perform_destroy(self, instance):
+        """Ensure only the host can delete their own property"""
+        if instance.host != self.request.user:
+            raise PermissionError('You can only delete your own properties')
+        instance.delete()
+    
     def get_queryset(self):
-        """Filter properties by status"""
-        if self.request.user.is_authenticated and self.request.user.is_host:
-            return Property.objects.filter(host=self.request.user)
-        return Property.objects.filter(status='active')
+        """
+        Return all properties for list/retrieve.
+        Filtering by ownership is handled by object-level permissions.
+        """
+        return Property.objects.all()
     
     @action(detail=False, methods=['get'], permission_classes=[AllowAny])
     def search_nearby(self, request):

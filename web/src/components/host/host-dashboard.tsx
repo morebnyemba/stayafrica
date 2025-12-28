@@ -122,7 +122,7 @@ export function HostDashboard() {
       icon: Star,
       color: 'text-purple-600 dark:text-purple-400',
       bgColor: 'bg-purple-100 dark:bg-purple-900/30',
-      link: '/host/reviews',
+      link: '#reviews',
     },
   ];
 
@@ -156,10 +156,10 @@ export function HostDashboard() {
       color: 'bg-purple-500',
     },
     {
-      title: 'Analytics',
+      title: 'View Analytics',
       description: 'Performance insights',
       icon: BarChart3,
-      link: '/host/analytics',
+      link: '/host/earnings',
       color: 'bg-pink-500',
     },
     {
