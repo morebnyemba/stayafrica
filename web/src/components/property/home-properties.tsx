@@ -28,26 +28,26 @@ export function HomeProperties() {
   return (
     <div className="bg-sand-100 dark:bg-primary-900">
       {/* Inspiration Section - Popular Locations */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <h2 className="text-2xl md:text-3xl font-bold text-primary-900 dark:text-sand-50 mb-8">
+      <section className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-primary-900 dark:text-sand-50 mb-6 sm:mb-8">
           Inspiration for your next trip
         </h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4">
           {locations.map((location) => (
             <Link
               key={location.name}
               href={`/explore?city=${encodeURIComponent(location.name)}`}
               className="group cursor-pointer"
             >
-              <div className="relative h-64 md:h-72 rounded-2xl overflow-hidden mb-3">
+              <div className="relative h-40 sm:h-48 md:h-64 lg:h-72 rounded-lg sm:rounded-2xl overflow-hidden mb-2 sm:mb-3">
                 <img
                   src={location.image}
                   alt={location.name}
                   className="w-full h-full object-cover transition duration-300 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-primary-900/70 via-primary-900/20 to-transparent" />
-                <div className="absolute bottom-4 left-4 text-white">
-                  <h3 className="text-lg font-semibold">{location.name}</h3>
+                <div className="absolute bottom-2 sm:bottom-4 left-2 sm:left-4 text-white">
+                  <h3 className="text-sm sm:text-base md:text-lg font-semibold line-clamp-2">{location.name}</h3>
                 </div>
               </div>
             </Link>
@@ -56,14 +56,14 @@ export function HomeProperties() {
       </section>
 
       {/* Featured Properties */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="flex justify-between items-center mb-8">
-          <h2 className="text-2xl md:text-3xl font-bold text-primary-900 dark:text-sand-50">
+      <section className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <div className="flex justify-between items-center mb-6 sm:mb-8">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-primary-900 dark:text-sand-50">
             Stays nearby
           </h2>
           <Link 
             href="/explore" 
-            className="text-secondary-600 hover:text-secondary-700 font-semibold underline"
+            className="text-secondary-600 hover:text-secondary-700 font-semibold underline text-xs sm:text-sm"
           >
             Show all
           </Link>
@@ -72,50 +72,50 @@ export function HomeProperties() {
         {isLoading ? (
           <PropertyListSkeleton count={6} />
         ) : properties.length === 0 ? (
-          <div className="card p-12 text-center">
-            <MapPin className="w-16 h-16 text-primary-400 dark:text-sand-500 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-primary-900 dark:text-sand-50 mb-2">
+          <div className="card p-8 sm:p-12 text-center">
+            <MapPin className="w-12 sm:w-16 h-12 sm:h-16 text-primary-400 dark:text-sand-500 mx-auto mb-4" />
+            <h3 className="text-lg sm:text-xl font-semibold text-primary-900 dark:text-sand-50 mb-2">
               No Properties Available
             </h3>
-            <p className="text-primary-600 dark:text-sand-300">
+            <p className="text-sm sm:text-base text-primary-600 dark:text-sand-300">
               Check back soon for amazing stays!
             </p>
           </div>
         ) : (
-          <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
             {properties.slice(0, 8).map((property: any) => (
               <Link
                 key={property.id}
                 href={`/properties/${property.id}`}
                 className="group cursor-pointer"
               >
-                <div className="relative h-64 rounded-2xl overflow-hidden mb-3">
+                <div className="relative h-40 sm:h-48 md:h-56 lg:h-64 rounded-lg sm:rounded-2xl overflow-hidden mb-2 sm:mb-3">
                   <img
                     src={property.images?.[0]?.image_url || 'https://images.unsplash.com/photo-1512917774080-9991f1c52e1d'}
                     alt={property.title}
                     className="w-full h-full object-cover transition duration-300 group-hover:scale-105"
                   />
                   {property.average_rating && (
-                    <div className="absolute top-3 right-3 flex items-center gap-1 bg-white/90 backdrop-blur px-2 py-1 rounded-lg text-sm font-semibold">
-                      <Star className="w-4 h-4 text-primary-900" fill="currentColor" />
+                    <div className="absolute top-2 sm:top-3 right-2 sm:right-3 flex items-center gap-1 bg-white/90 backdrop-blur px-2 py-1 rounded-lg text-xs sm:text-sm font-semibold">
+                      <Star className="w-3 h-3 sm:w-4 sm:h-4 text-primary-900" fill="currentColor" />
                       <span className="text-primary-900">{property.average_rating.toFixed(1)}</span>
                     </div>
                   )}
                 </div>
                 <div className="space-y-1">
                   <div className="flex items-start justify-between gap-2">
-                    <h3 className="font-semibold text-primary-900 dark:text-sand-50 group-hover:text-secondary-600 transition line-clamp-1">
+                    <h3 className="font-semibold text-sm sm:text-base text-primary-900 dark:text-sand-50 group-hover:text-secondary-600 transition line-clamp-1">
                       {property.city}, {property.country}
                     </h3>
                   </div>
-                  <p className="text-sm text-primary-600 dark:text-sand-300 line-clamp-1">
+                  <p className="text-xs sm:text-sm text-primary-600 dark:text-sand-300 line-clamp-1">
                     {property.title}
                   </p>
                   <div className="flex items-baseline gap-1">
-                    <span className="font-semibold text-primary-900 dark:text-sand-50">
+                    <span className="font-semibold text-sm sm:text-base text-primary-900 dark:text-sand-50">
                       ${property.price_per_night}
                     </span>
-                    <span className="text-sm text-primary-600 dark:text-sand-300">night</span>
+                    <span className="text-xs sm:text-sm text-primary-600 dark:text-sand-300">night</span>
                   </div>
                 </div>
               </Link>
@@ -125,16 +125,16 @@ export function HomeProperties() {
       </section>
 
       {/* Categories Section - Property Types */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-primary-200 dark:border-primary-700">
-        <div className="mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-primary-900 dark:text-sand-50 mb-4">
+      <section className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-8 sm:py-16 border-t border-primary-200 dark:border-primary-700">
+        <div className="mb-8 sm:mb-12">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary-900 dark:text-sand-50 mb-2 sm:mb-4">
             Explore by Property Type
           </h2>
-          <p className="text-lg text-primary-600 dark:text-sand-300">
+          <p className="text-base sm:text-lg text-primary-600 dark:text-sand-300">
             Find your perfect accommodation, from luxury villas to cozy bed & breakfasts
           </p>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-4">
           {[
             { type: 'BNB', label: 'B&Bs', icon: Home },
             { type: 'APARTMENT', label: 'Apartments', icon: Building2 },
@@ -152,15 +152,15 @@ export function HomeProperties() {
               <Link
                 key={item.type}
                 href={`/explore?type=${item.type}`}
-                className="card p-6 hover:shadow-xl hover:scale-105 transition duration-200 cursor-pointer group"
+                className="card p-3 sm:p-6 hover:shadow-xl hover:scale-105 transition duration-200 cursor-pointer group"
               >
-                <div className="bg-secondary-100 dark:bg-secondary-900/30 w-12 h-12 rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition">
-                  <IconComponent className="w-6 h-6 text-secondary-600" />
+                <div className="bg-secondary-100 dark:bg-secondary-900/30 w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center mb-2 sm:mb-3 group-hover:scale-110 transition">
+                  <IconComponent className="w-5 h-5 sm:w-6 sm:h-6 text-secondary-600" />
                 </div>
-                <h3 className="text-lg font-semibold text-primary-900 dark:text-sand-50 group-hover:text-secondary-600 transition">
+                <h3 className="text-sm sm:text-lg font-semibold text-primary-900 dark:text-sand-50 group-hover:text-secondary-600 transition">
                   {item.label}
                 </h3>
-                <p className="text-sm text-primary-600 dark:text-sand-400 mt-2">
+                <p className="text-xs sm:text-sm text-primary-600 dark:text-sand-400 mt-1 sm:mt-2 line-clamp-2">
                   Browse {item.label.toLowerCase()}
                 </p>
               </Link>
@@ -170,27 +170,27 @@ export function HomeProperties() {
       </section>
 
       {/* Become a Host CTA Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-primary-200 dark:border-primary-700">
+      <section className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-8 sm:py-16 border-t border-primary-200 dark:border-primary-700">
         <div className="card overflow-hidden">
-          <div className="grid md:grid-cols-2 gap-0">
-            <div className="relative h-64 md:h-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
+            <div className="relative h-40 sm:h-64 md:h-auto min-h-48">
               <img
                 src="https://images.unsplash.com/photo-1560185007-cde436f6a4d0?w=800"
                 alt="Become a host"
                 className="w-full h-full object-cover"
               />
             </div>
-            <div className="p-8 md:p-12 flex flex-col justify-center bg-gradient-to-br from-primary-800 to-primary-700 text-sand-50">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            <div className="p-6 sm:p-8 md:p-12 flex flex-col justify-center bg-gradient-to-br from-primary-800 to-primary-700 text-sand-50">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4">
                 Become a Host
               </h2>
-              <p className="text-lg text-sand-100 mb-6">
+              <p className="text-base sm:text-lg text-sand-100 mb-4 sm:mb-6">
                 Share your space and earn extra income. Join thousands of hosts welcoming guests from around the world.
               </p>
               <div>
                 <Link
                   href="/host"
-                  className="inline-block btn-primary px-8 py-3 text-lg font-semibold"
+                  className="inline-block btn-primary px-6 sm:px-8 py-2 sm:py-3 text-base sm:text-lg font-semibold"
                 >
                   Learn More
                 </Link>
