@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Menu, User, LogOut } from 'lucide-react';
 import { useState } from 'react';
 import { ThemeToggle } from './theme-toggle';
+import { MobileSearchBar } from './mobile-search-bar';
 
 export function Navigation() {
   const { user, isAuthenticated, logout } = useAuth();
@@ -18,9 +19,10 @@ export function Navigation() {
   };
 
   return (
-    <nav className="sticky top-0 z-50 bg-primary-800/95 backdrop-blur border-b border-primary-700 text-sand-100 shadow-lg">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+    <>
+      <nav className="sticky top-0 z-50 bg-primary-800/95 backdrop-blur border-b border-primary-700 text-sand-100 shadow-lg">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2 text-sand-100">
             <img src="/logo.png" alt="StayAfrica" className="h-16 w-auto" />
@@ -138,5 +140,7 @@ export function Navigation() {
         )}
       </div>
     </nav>
+    <MobileSearchBar />
+    </>
   );
 }
