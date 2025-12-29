@@ -9,9 +9,9 @@ import os, sys, psycopg
 try:
     conn = psycopg.connect(
         host=os.getenv('DATABASE_HOST', 'db'),
-        port=os.getenv('DATABASE_PORT', '5432'),
+        port=int(os.getenv('DATABASE_PORT', '5432')),
         user=os.getenv('DATABASE_USER', 'postgres'),
-        password=os.getenv('DATABASE_PASSWORD', 'postgres'),
+        password=os.getenv('DATABASE_PASSWORD', ''),
         dbname=os.getenv('DATABASE_NAME', 'stayafrica_db'),
         connect_timeout=3
     )
