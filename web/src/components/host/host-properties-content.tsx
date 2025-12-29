@@ -44,7 +44,7 @@ export function HostPropertiesContent() {
     }
   };
 
-  const properties = propertiesData?.results || [];
+  const properties = (propertiesData?.results || []).filter((p: any) => p?.id);
 
   return (
     <ProtectedRoute>

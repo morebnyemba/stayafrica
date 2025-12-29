@@ -270,9 +270,12 @@ export function HostDashboard() {
                       </div>
                     ))}
                   </div>
-                ) : propertiesData?.results && propertiesData.results.length > 0 ? (
+                ) : propertiesData?.results && propertiesData.results.filter((p: any) => p?.id).length > 0 ? (
                   <div className="space-y-4">
-                    {propertiesData.results.slice(0, 3).map((property: any) => (
+                    {propertiesData.results
+                      .filter((p: any) => p?.id)
+                      .slice(0, 3)
+                      .map((property: any) => (
                       <div
                         key={property.id}
                         className="p-4 border border-primary-200 dark:border-primary-700 rounded-lg hover:border-secondary-500 transition"

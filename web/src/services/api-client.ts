@@ -5,6 +5,11 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || (process.env.NODE_E
 class ApiClient {
   private client: AxiosInstance;
 
+  private assertId(id: string | undefined | null, label = 'ID') {
+    if (!id) throw new Error(`${label} is required`);
+    return id;
+  }
+
   // Reply to review
   async replyToReview(reviewId: string, reply: string) {
     return this.client.post(`/reviews/${reviewId}/reply/`, { reply });
@@ -66,11 +71,13 @@ class ApiClient {
   }
 
   async getPropertyById(id: string) {
-    return this.client.get(`/properties/${id}/`);
+    const safeId = this.assertId(id, 'Property ID');
+    return this.client.get(`/properties/${safeId}/`);
   }
 
   async getPropertyDetails(id: string) {
-    return this.getPropertyById(id);
+    const safeId = this.assertId(id, 'Property ID');
+    return this.getPropertyById(safeId);
   }
 
   async searchNearby(latitude: number, longitude: number, radiusKm: number = 10) {
@@ -84,11 +91,13 @@ class ApiClient {
   }
 
   async updateProperty(id: string, data: any) {
-    return this.client.put(`/properties/${id}/`, data);
+    const safeId = this.assertId(id, 'Property ID');
+    return this.client.put(`/properties/${safeId}/`, data);
   }
 
   async uploadPropertyImages(propertyId: string, formData: FormData) {
-    return this.client.post(`/properties/${propertyId}/upload_images/`, formData, {
+    const safeId = this.assertId(propertyId, 'Property ID');
+    return this.client.post(`/properties/${safeId}/upload_images/`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -96,7 +105,8 @@ class ApiClient {
   }
 
   async deleteProperty(id: string) {
-    return this.client.delete(`/properties/${id}/`);
+    const safeId = this.assertId(id, 'Property ID');
+    return this.client.delete(`/properties/${safeId}/`);
   }
 
   // Bookings
@@ -105,7 +115,8 @@ class ApiClient {
   }
 
   async getBookingById(id: string) {
-    return this.client.get(`/bookings/${id}/`);
+    const safeId = this.assertId(id, 'Booking ID');
+    return this.client.get(`/bookings/${safeId}/`);
   }
 
   async createBooking(data: any) {
@@ -129,7 +140,8 @@ class ApiClient {
   }
 
   async getPaymentStatus(paymentId: string) {
-    return this.client.get(`/payments/${paymentId}/`);
+    const safeId = this.assertId(paymentId, 'Payment ID');
+    return this.client.get(`/payments/${safeId}/`);
   }
 
   // Reviews
@@ -142,7 +154,8 @@ class ApiClient {
   }
 
   async getPropertyReviews(propertyId: string) {
-    return this.client.get(`/properties/${propertyId}/reviews/`);
+    const safeId = this.assertId(propertyId, 'Property ID');
+    return this.client.get(`/properties/${safeId}/reviews/`);
   }
 
   // Messages
@@ -185,20 +198,23 @@ class ApiClient {
   }
 
   async isPropertySaved(propertyId: string) {
+    const safeId = this.assertId(propertyId, 'Property ID');
     const response = await this.getSavedProperties();
     const results = response.data?.results ?? response.data ?? [];
 
     return Array.isArray(results)
-      ? results.some((item: any) => item?.property?.id === propertyId || item?.property_id === propertyId)
+      ? results.some((item: any) => item?.property?.id === safeId || item?.property_id === safeId)
       : false;
   }
 
   async saveProperty(propertyId: string) {
-    return this.client.post('/properties/saved/', { property_id: propertyId });
+    const safeId = this.assertId(propertyId, 'Property ID');
+    return this.client.post('/properties/saved/', { property_id: safeId });
   }
 
   async unsaveProperty(propertyId: string) {
-    return this.client.delete(`/properties/saved/${propertyId}/`);
+    const safeId = this.assertId(propertyId, 'Property ID');
+    return this.client.delete(`/properties/saved/${safeId}/`);
   }
 
   // Reviews - User specific
