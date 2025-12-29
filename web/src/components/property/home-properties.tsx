@@ -39,14 +39,14 @@ export function HomeProperties() {
     }
 
     if (user?.role === 'host') {
-      router.push('/dashboard/host');
+      router.push('/host/dashboard');
       return;
     }
 
     try {
       setHostLoading(true);
       await upgradeToHost();
-      router.push('/dashboard/host');
+      router.push('/host/dashboard');
     } catch (error) {
       console.error('Failed to upgrade to host:', error);
       router.push('/host');
