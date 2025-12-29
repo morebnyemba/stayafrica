@@ -31,10 +31,18 @@ try:
 except ImportError:
     HAS_SENTRY = False
 
+# Load environment variables
+# 1) Load from default .env if present
 load_dotenv()
 
 # Build paths
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# 2) Additionally load from .env.prod if present (without overriding existing env)
+try:
+    load_dotenv(dotenv_path=BASE_DIR / '.env.prod', override=False)
+except Exception:
+    pass
 
 # Security
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-dev-key-change-in-production')
