@@ -106,12 +106,23 @@ class PropertyViewSet(viewsets.ModelViewSet):
         - Hosts see all their own properties (for management)
         - Other users only see active/published properties
         """
+        # For detail retrieval, widen queryset to avoid 404s caused by owner filter
+        # Object-level permissions and UI will gate editing appropriately.
+        action = getattr(self, 'action', None)
+        if action == 'retrieve':
+            qs = Property.objects.all()
+            # Public users should not see non-active properties
+            if not (self.request.user.is_authenticated and self.request.user.is_host):
+                qs = qs.filter(status='active')
+            return qs
+        
+        # List and other actions: apply role-based filtering
         if self.request.user.is_authenticated and self.request.user.is_host:
             # Hosts see all their own properties
             return Property.objects.filter(host=self.request.user)
-        else:
-            # Public/buyers only see active properties
-            return Property.objects.filter(status='active')
+        
+        # Public/buyers only see active properties
+        return Property.objects.filter(status='active')
     
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
     def upload_images(self, request, pk=None):
