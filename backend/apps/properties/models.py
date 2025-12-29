@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.gis.db import models as gis_models
 from apps.users.models import User
+import random
 
 class Amenity(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -30,6 +31,7 @@ class Property(models.Model):
     ]
     
     host = models.ForeignKey(User, on_delete=models.CASCADE, related_name='properties')
+    id = models.CharField(max_length=10, primary_key=True, editable=False)
     title = models.CharField(max_length=255)
     description = models.TextField()
     property_type = models.CharField(max_length=20, choices=PROPERTY_TYPE_CHOICES)
@@ -71,6 +73,16 @@ class Property(models.Model):
     
     def __str__(self):
         return f'{self.title} - {self.city}, {self.country}'
+    
+    def save(self, *args, **kwargs):
+        if not self.id:
+            # Generate 10-digit unique ID
+            while True:
+                new_id = ''.join([str(random.randint(0, 9)) for _ in range(10)])
+                if not Property.objects.filter(id=new_id).exists():
+                    self.id = new_id
+                    break
+        super().save(*args, **kwargs)
     
     @property
     def is_available(self):

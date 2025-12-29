@@ -81,7 +81,7 @@ class PropertyListSerializer(serializers.ModelSerializer):
 
 class SavedPropertySerializer(serializers.ModelSerializer):
     property = PropertyListSerializer(read_only=True)
-    property_id = serializers.IntegerField(write_only=True)
+    property_id = serializers.CharField(max_length=10, write_only=True)
     
     class Meta:
         model = SavedProperty
