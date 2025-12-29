@@ -7,3 +7,5 @@ class BookingAdmin(admin.ModelAdmin):
     list_filter = ['status', 'created_at', 'check_in']
     search_fields = ['booking_ref', 'guest__email', 'rental_property__title']
     readonly_fields = ['booking_ref', 'commission_fee', 'grand_total', 'created_at', 'updated_at']
+    raw_id_fields = ['rental_property', 'guest']
+    readonly_fields = ['booking_ref', 'commission_fee', 'grand_total', 'created_at', 'updated_at']

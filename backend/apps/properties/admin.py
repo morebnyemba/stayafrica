@@ -30,7 +30,8 @@ class PropertyAdmin(admin.ModelAdmin):
 @admin.register(PropertyImage)
 class PropertyImageAdmin(admin.ModelAdmin):
     list_display = ['property', 'order', 'created_at']
-    list_filter = ['property', 'created_at']
+    list_filter = ['created_at']
+    search_fields = ['property__title']
     ordering = ['property', 'order']
 
 
