@@ -12,7 +12,8 @@ from apps.properties.serializers import (
     PropertyDetailSerializer,
     PropertyListSerializer,
     AmenitySerializer,
-    SavedPropertySerializer
+    SavedPropertySerializer,
+    PropertyImageSerializer,
 )
 from services.geocoding_service import GeocodingService
 from services.host_analytics import HostAnalyticsService
