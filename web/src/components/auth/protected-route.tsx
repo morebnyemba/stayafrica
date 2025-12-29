@@ -8,17 +8,25 @@ import { Skeleton } from '@/components/ui/skeleton';
 interface ProtectedRouteProps {
   children: React.ReactNode;
   requireAuth?: boolean;
+  requiredRole?: string;
 }
 
-export function ProtectedRoute({ children, requireAuth = true }: ProtectedRouteProps) {
-  const { isAuthenticated, isLoading } = useAuth();
+export function ProtectedRoute({ children, requireAuth = true, requiredRole }: ProtectedRouteProps) {
+  const { isAuthenticated, isLoading, user } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoading && requireAuth && !isAuthenticated) {
+    if (isLoading) return;
+
+    if (requireAuth && !isAuthenticated) {
       router.push('/login');
+      return;
     }
-  }, [isAuthenticated, isLoading, requireAuth, router]);
+
+    if (requiredRole && user?.role !== requiredRole) {
+      router.push(requiredRole === 'host' ? '/host' : '/');
+    }
+  }, [isAuthenticated, isLoading, requireAuth, requiredRole, router, user?.role]);
 
   if (isLoading) {
     return (
@@ -34,6 +42,10 @@ export function ProtectedRoute({ children, requireAuth = true }: ProtectedRouteP
   }
 
   if (requireAuth && !isAuthenticated) {
+    return null;
+  }
+
+  if (requiredRole && user?.role !== requiredRole) {
     return null;
   }
 
