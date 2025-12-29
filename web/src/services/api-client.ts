@@ -283,7 +283,8 @@ class ApiClient {
   }
 
   async getBookingCalendar(propertyId: string, start?: string, end?: string) {
-    return this.client.get(`/properties/${propertyId}/booking_calendar/`, {
+    const safeId = this.assertId(propertyId, 'Property ID');
+    return this.client.get(`/properties/${safeId}/booking_calendar/`, {
       params: { start, end },
     });
   }
