@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '@/services/api-client';
-import { MapPin, DollarSign, Home, Search } from 'lucide-react';
+import { MapPin, DollarSign, Home, Search, Image as ImageIcon, X, Upload } from 'lucide-react';
 
 interface PropertyFormProps {
   initialData?: any;
@@ -34,9 +34,40 @@ export function PropertyForm({ initialData, isEdit = false }: PropertyFormProps)
     max_guests: initialData?.max_guests || 2,
   });
 
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleImageSelection = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    const newFiles = [...imageFiles, ...files];
+    const maxImages = 10;
+
+    if (newFiles.length > maxImages) {
+      setError(`Maximum ${maxImages} images allowed`);
+      return;
+    }
+
+    setImageFiles(newFiles);
+    setError('');
+
+    // Generate previews
+    const newPreviews = files.map(file => URL.createObjectURL(file));
+    setImagePreviews([...imagePreviews, ...newPreviews]);
+  };
+
+  const removeImage = (index: number) => {
+    setImageFiles(prev => prev.filter((_, i) => i !== index));
+    setImagePreviews(prev => {
+      URL.revokeObjectURL(prev[index]);
+      return prev.filter((_, i) => i !== index);
+    });
   };
 
   const handleLocationSearch = async (query: string) => {
@@ -130,10 +161,29 @@ export function PropertyForm({ initialData, isEdit = false }: PropertyFormProps)
         status: 'pending_approval',
       };
 
+      let propertyId = initialData?.id;
+      
       if (isEdit && initialData?.id) {
         await apiClient.updateProperty(initialData.id, propertyData);
       } else {
-        await apiClient.createProperty(propertyData);
+        const response = await apiClient.createProperty(propertyData);
+        propertyId = response.data?.id;
+      }
+
+      // Upload images if provided
+      if (imageFiles.length > 0 && propertyId) {
+        const formDataImages = new FormData();
+        imageFiles.forEach((file, index) => {
+          formDataImages.append('images', file);
+          formDataImages.append(`image_order_${index}`, index.toString());
+        });
+
+        try {
+          await apiClient.uploadPropertyImages(propertyId, formDataImages);
+        } catch (imgErr) {
+          console.error('Error uploading images:', imgErr);
+          // Don't fail the entire property creation if image upload fails
+        }
       }
 
       router.push('/host/properties');
@@ -407,6 +457,72 @@ export function PropertyForm({ initialData, isEdit = false }: PropertyFormProps)
             <p className="font-medium mb-1">📍 Location powered by GDAL/PostGIS</p>
             <p>Search for your property or enter the address, then click "Find Coordinates" to automatically geocode the location with high accuracy.</p>
           </div>
+        </div>
+      </div>
+
+      {/* Images */}
+      <div className="card p-6">
+        <h3 className="text-xl font-bold text-primary-900 dark:text-sand-50 mb-4 flex items-center gap-2">
+          <ImageIcon className="w-5 h-5" />
+          Property Images
+        </h3>
+        
+        <div className="space-y-4">
+          <p className="text-sm text-primary-600 dark:text-sand-400">
+            Add up to 10 images of your property. The first image will be used as the main thumbnail.
+          </p>
+
+          {/* Image Upload Area */}
+          <div className="border-2 border-dashed border-primary-300 dark:border-primary-600 rounded-lg p-8 text-center hover:border-secondary-500 dark:hover:border-secondary-400 transition cursor-pointer"
+            onClick={() => document.getElementById('image-input')?.click()}
+          >
+            <input
+              id="image-input"
+              type="file"
+              multiple
+              accept="image/*"
+              onChange={handleImageSelection}
+              className="hidden"
+              disabled={imageFiles.length >= 10}
+            />
+            <Upload className="w-8 h-8 text-primary-400 mx-auto mb-2" />
+            <p className="font-medium text-primary-900 dark:text-sand-50 mb-1">
+              Click to upload images
+            </p>
+            <p className="text-sm text-primary-600 dark:text-sand-400">
+              or drag and drop (JPG, PNG, WebP up to 5MB each)
+            </p>
+            <p className="text-xs text-primary-500 dark:text-sand-400 mt-2">
+              {imageFiles.length}/10 images added
+            </p>
+          </div>
+
+          {/* Image Previews */}
+          {imagePreviews.length > 0 && (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+              {imagePreviews.map((preview, index) => (
+                <div key={index} className="relative group">
+                  <img
+                    src={preview}
+                    alt={`Preview ${index + 1}`}
+                    className="w-full h-32 object-cover rounded-lg border border-primary-200 dark:border-primary-700"
+                  />
+                  {index === 0 && (
+                    <span className="absolute top-2 left-2 bg-secondary-600 text-white text-xs font-semibold px-2 py-1 rounded">
+                      Main
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => removeImage(index)}
+                    className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 

@@ -107,6 +107,71 @@ class PropertyViewSet(viewsets.ModelViewSet):
         """
         return Property.objects.all()
     
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    def upload_images(self, request, pk=None):
+        """Upload multiple images for a property"""
+        property_obj = self.get_object()
+        
+        # Check if user is the owner
+        if property_obj.host_id != request.user.id:
+            return Response(
+                {'error': 'You can only upload images for your own properties'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        files = request.FILES.getlist('images')
+        if not files:
+            return Response(
+                {'error': 'No images provided'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        if len(files) > 10:
+            return Response(
+                {'error': 'Maximum 10 images per property'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        created_images = []
+        try:
+            for idx, file in enumerate(files):
+                # Validate file size (5MB max)
+                if file.size > 5 * 1024 * 1024:
+                    return Response(
+                        {'error': f'Image {idx + 1} exceeds 5MB limit'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+                
+                # Validate file type
+                if not file.content_type.startswith('image/'):
+                    return Response(
+                        {'error': f'File {idx + 1} is not an image'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+                
+                property_image = PropertyImage.objects.create(
+                    property=property_obj,
+                    image=file,
+                    order=idx
+                )
+                created_images.append(property_image)
+            
+            # Queue image processing task
+            from tasks.image_tasks import process_property_images
+            process_property_images.delay(property_obj.id)
+            
+            serializer = PropertyImageSerializer(created_images, many=True)
+            return Response(
+                {'images': serializer.data, 'message': f'{len(created_images)} images uploaded successfully'},
+                status=status.HTTP_201_CREATED
+            )
+        except Exception as e:
+            logger.error(f'Error uploading images for property {pk}: {str(e)}')
+            return Response(
+                {'error': 'Error uploading images'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
     @action(detail=False, methods=['get'], permission_classes=[AllowAny])
     def search_nearby(self, request):
         """Search for properties within a radius"""

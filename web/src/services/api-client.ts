@@ -87,6 +87,14 @@ class ApiClient {
     return this.client.put(`/properties/${id}/`, data);
   }
 
+  async uploadPropertyImages(propertyId: string, formData: FormData) {
+    return this.client.post(`/properties/${propertyId}/upload_images/`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  }
+
   async deleteProperty(id: string) {
     return this.client.delete(`/properties/${id}/`);
   }
