@@ -30,30 +30,36 @@ class PropertySerializer(serializers.ModelSerializer):
     def _coerce_location(self, value):
         if value is None:
             return None
-        # Accept dicts with lat/lng or latitude/longitude
+        # Accept GeoJSON format: {"type": "Point", "coordinates": [lng, lat]}
         if isinstance(value, dict):
+            if value.get('type') == 'Point' and 'coordinates' in value:
+                coords = value['coordinates']
+                if isinstance(coords, (list, tuple)) and len(coords) == 2:
+                    lng, lat = coords
+                    return Point(float(lng), float(lat))
+            # Accept dicts with lat/lng or latitude/longitude
             lat = value.get('lat') or value.get('latitude')
             lng = value.get('lng') or value.get('lon') or value.get('longitude')
             if lat is not None and lng is not None:
                 return Point(float(lng), float(lat))
-            raise serializers.ValidationError({'location': 'Invalid location dict; expected lat/lng.'})
-        # Accept [lat, lng] or (lat, lng)
+            raise serializers.ValidationError({'location': f'Invalid location dict format: {value}'})
+        # Accept [lng, lat] or (lng, lat) - Note: GeoJSON order is [longitude, latitude]
         if isinstance(value, (list, tuple)) and len(value) == 2:
-            lat, lng = value
+            lng, lat = value
             return Point(float(lng), float(lat))
         # Pass through if already a GEOS Point
         if isinstance(value, Point):
             return value
-        raise serializers.ValidationError({'location': 'Invalid location format.'})
+        raise serializers.ValidationError({'location': f'Invalid location format: {type(value)}'})
 
     def create(self, validated_data):
-        loc = validated_data.pop('location', None)
+        loc = validated_data.get('location')
         if loc is not None:
             validated_data['location'] = self._coerce_location(loc)
         return super().create(validated_data)
 
     def update(self, instance, validated_data):
-        loc = validated_data.pop('location', None)
+        loc = validated_data.get('location')
         if loc is not None:
             validated_data['location'] = self._coerce_location(loc)
         return super().update(instance, validated_data)

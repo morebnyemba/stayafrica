@@ -16,6 +16,9 @@ from apps.properties.serializers import (
 )
 from services.geocoding_service import GeocodingService
 from services.host_analytics import HostAnalyticsService
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class IsHostOrReadOnly(BasePermission):
@@ -60,17 +63,30 @@ class PropertyViewSet(viewsets.ModelViewSet):
         return PropertySerializer
     
     def create(self, request, *args, **kwargs):
-        """Override create to ensure user is a host"""
+        """Override create to ensure user is a host and log validation errors"""
         if not request.user.is_host:
             return Response(
                 {'error': 'Only hosts can create properties. Please upgrade to host first.'},
                 status=status.HTTP_403_FORBIDDEN
             )
-        return super().create(request, *args, **kwargs)
+        
+        # Log incoming data for debugging
+        logger.info(f"Property creation attempt by user {request.user.id}: {request.data}")
+        
+        try:
+            return super().create(request, *args, **kwargs)
+        except Exception as e:
+            logger.error(f"Property creation failed for user {request.user.id}: {str(e)}", exc_info=True)
+            raise
     
     def perform_create(self, serializer):
         """Set host to current user"""
-        serializer.save(host=self.request.user)
+        try:
+            serializer.save(host=self.request.user)
+            logger.info(f"Property created successfully by user {self.request.user.id}")
+        except Exception as e:
+            logger.error(f"Error in perform_create: {str(e)}", exc_info=True)
+            raise
     
     def perform_update(self, serializer):
         """Ensure only the host can update their own property"""
