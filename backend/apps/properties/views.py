@@ -102,10 +102,16 @@ class PropertyViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         """
-        Return all properties for list/retrieve.
-        Filtering by ownership is handled by object-level permissions.
+        Return properties based on user role:
+        - Hosts see all their own properties (for management)
+        - Other users only see active/published properties
         """
-        return Property.objects.all()
+        if self.request.user.is_authenticated and self.request.user.is_host:
+            # Hosts see all their own properties
+            return Property.objects.filter(host=self.request.user)
+        else:
+            # Public/buyers only see active properties
+            return Property.objects.filter(status='active')
     
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
     def upload_images(self, request, pk=None):

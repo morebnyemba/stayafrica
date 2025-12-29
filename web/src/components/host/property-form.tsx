@@ -8,9 +8,11 @@ import { MapPin, DollarSign, Home, Search, Image as ImageIcon, X, Upload } from 
 interface PropertyFormProps {
   initialData?: any;
   isEdit?: boolean;
+  propertyId?: string;
+  onSuccess?: () => void;
 }
 
-export function PropertyForm({ initialData, isEdit = false }: PropertyFormProps) {
+export function PropertyForm({ initialData, isEdit = false, propertyId, onSuccess }: PropertyFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -161,17 +163,17 @@ export function PropertyForm({ initialData, isEdit = false }: PropertyFormProps)
         status: 'pending_approval',
       };
 
-      let propertyId = initialData?.id;
+      let propertyId_local = propertyId || initialData?.id;
       
-      if (isEdit && initialData?.id) {
-        await apiClient.updateProperty(initialData.id, propertyData);
+      if (isEdit && propertyId_local) {
+        await apiClient.updateProperty(propertyId_local, propertyData);
       } else {
         const response = await apiClient.createProperty(propertyData);
-        propertyId = response.data?.id;
+        propertyId_local = response.data?.id;
       }
 
       // Upload images if provided
-      if (imageFiles.length > 0 && propertyId) {
+      if (imageFiles.length > 0 && propertyId_local) {
         const formDataImages = new FormData();
         imageFiles.forEach((file, index) => {
           formDataImages.append('images', file);
@@ -179,14 +181,19 @@ export function PropertyForm({ initialData, isEdit = false }: PropertyFormProps)
         });
 
         try {
-          await apiClient.uploadPropertyImages(propertyId, formDataImages);
+          await apiClient.uploadPropertyImages(propertyId_local, formDataImages);
         } catch (imgErr) {
           console.error('Error uploading images:', imgErr);
           // Don't fail the entire property creation if image upload fails
         }
       }
 
-      router.push('/host/properties');
+      // Call onSuccess callback if provided, otherwise redirect
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        router.push('/host/properties');
+      }
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to save property');
     } finally {
