@@ -44,6 +44,12 @@ try:
 except Exception:
     pass
 
+# 3) Also try to load a root .env one directory up (Compose-level .env)
+try:
+    load_dotenv(dotenv_path=BASE_DIR.parent / '.env', override=False)
+except Exception:
+    pass
+
 # Security
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-dev-key-change-in-production')
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
