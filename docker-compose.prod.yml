@@ -14,17 +14,19 @@ services:
   db:
     image: postgis/postgis:15-3.3
     container_name: stayafrica_db
+    env_file:
+      - .env
     environment:
-      POSTGRES_DB: stayafrica_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ${DATABASE_NAME}
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./docker/db-init:/docker-entrypoint-initdb.d
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -43,45 +45,38 @@ services:
       retries: 5
     restart: unless-stopped
 
+  # Migration service - runs once and exits
+  migrate:
+    container_name: stayafrica_migrate
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: stayafrica-backend:latest
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: ["python", "manage.py", "migrate", "--noinput"]
+    restart: "no"
+
   backend:
     container_name: stayafrica_backend
     build:
       context: ./backend
       dockerfile: Dockerfile
     image: stayafrica-backend:latest
-    environment:
-      # Django Core
-      SECRET_KEY: ${SECRET_KEY:-change-this-to-a-secure-key-in-production}
-      DEBUG: "False"
-      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-api.zimlegend.online,zimlegend.online,localhost,127.0.0.1}
-      
-      # Database - MUST match db service exactly
-      DATABASE_ENGINE: django.contrib.gis.db.backends.postgis
-      DATABASE_HOST: db
-      DATABASE_PORT: "5432"
-      DATABASE_USER: postgres
-      DATABASE_PASSWORD: postgres
-      DATABASE_NAME: stayafrica_db
-      
-      # Redis/Celery
-      REDIS_URL: redis://redis:6379/0
-      CELERY_BROKER_URL: redis://redis:6379/0
-      CELERY_RESULT_BACKEND: redis://redis:6379/0
-      
-      # JWT
-      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-change-this-jwt-secret-key}
-      JWT_EXPIRATION_HOURS: ${JWT_EXPIRATION_HOURS:-24}
-      JWT_REFRESH_EXPIRATION_DAYS: ${JWT_REFRESH_EXPIRATION_DAYS:-7}
-      JWT_ALGORITHM: ${JWT_ALGORITHM:-HS256}
-      
-      # Gunicorn
-      GUNICORN_WORKERS: 4
-      GUNICORN_TIMEOUT: 60
+    env_file:
+      - .env
     depends_on:
       db:
         condition: service_healthy
       redis:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     volumes:
       - static_volume:/app/staticfiles
       - media_volume:/app/media
@@ -95,13 +90,13 @@ services:
       context: ./web
       dockerfile: Dockerfile
       args:
-        NEXT_PUBLIC_API_BASE_URL: "https://api.zimlegend.online"
-        NEXT_PUBLIC_API_VERSION: "v1"
+        NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL}
+        NEXT_PUBLIC_API_VERSION: ${NEXT_PUBLIC_API_VERSION}
     env_file:
-      - ./web/.env.prod
+      - .env
     environment:
-      NEXT_PUBLIC_API_BASE_URL: https://api.zimlegend.online
-      NEXT_PUBLIC_API_VERSION: v1
+      NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL}
+      NEXT_PUBLIC_API_VERSION: ${NEXT_PUBLIC_API_VERSION}
       NODE_ENV: production
     depends_on:
       backend:
@@ -114,23 +109,14 @@ services:
     container_name: stayafrica_celery
     image: stayafrica-backend:latest
     env_file:
-      - ./backend/.env.prod
-    environment:
-      DEBUG: "False"
-      DATABASE_HOST: db
-      DATABASE_PORT: "5432"
-      DATABASE_USER: postgres
-      DATABASE_PASSWORD: postgres
-      DATABASE_NAME: stayafrica_db
-      DATABASE_ENGINE: django.contrib.gis.db.backends.postgis
-      REDIS_URL: redis://redis:6379/0
-      CELERY_BROKER_URL: redis://redis:6379/0
-      CELERY_RESULT_BACKEND: redis://redis:6379/0
+      - .env
     depends_on:
       db:
         condition: service_healthy
       redis:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
       backend:
         condition: service_started
     command: ["celery", "-A", "stayafrica", "worker", "--loglevel=info", "--concurrency=4"]
@@ -140,23 +126,14 @@ services:
     container_name: stayafrica_celery_beat
     image: stayafrica-backend:latest
     env_file:
-      - ./backend/.env.prod
-    environment:
-      DEBUG: "False"
-      DATABASE_HOST: db
-      DATABASE_PORT: "5432"
-      DATABASE_USER: postgres
-      DATABASE_PASSWORD: postgres
-      DATABASE_NAME: stayafrica_db
-      DATABASE_ENGINE: django.contrib.gis.db.backends.postgis
-      REDIS_URL: redis://redis:6379/0
-      CELERY_BROKER_URL: redis://redis:6379/0
-      CELERY_RESULT_BACKEND: redis://redis:6379/0
+      - .env
     depends_on:
       db:
         condition: service_healthy
       redis:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
       backend:
         condition: service_started
     command: ["celery", "-A", "stayafrica", "beat", "--loglevel=info"]

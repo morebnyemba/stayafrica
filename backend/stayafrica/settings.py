@@ -120,6 +120,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'stayafrica.wsgi.application'
+ASGI_APPLICATION = 'stayafrica.asgi.application'
 
 # Database
 # Use SQLite for development, PostgreSQL for production
