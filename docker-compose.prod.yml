@@ -118,7 +118,10 @@ services:
     environment:
       DEBUG: "False"
       DATABASE_HOST: db
-      DATABASE_PORT: 5432
+      DATABASE_PORT: "5432"
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: postgres
+      DATABASE_NAME: stayafrica_db
       DATABASE_ENGINE: django.contrib.gis.db.backends.postgis
       REDIS_URL: redis://redis:6379/0
       CELERY_BROKER_URL: redis://redis:6379/0
@@ -141,7 +144,10 @@ services:
     environment:
       DEBUG: "False"
       DATABASE_HOST: db
-      DATABASE_PORT: 5432
+      DATABASE_PORT: "5432"
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: postgres
+      DATABASE_NAME: stayafrica_db
       DATABASE_ENGINE: django.contrib.gis.db.backends.postgis
       REDIS_URL: redis://redis:6379/0
       CELERY_BROKER_URL: redis://redis:6379/0
