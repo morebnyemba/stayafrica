@@ -49,20 +49,32 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     image: stayafrica-backend:latest
-    env_file:
-      - ./backend/.env.prod
     environment:
+      # Django Core
+      SECRET_KEY: ${SECRET_KEY:-change-this-to-a-secure-key-in-production}
       DEBUG: "False"
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-api.zimlegend.online,zimlegend.online,localhost,127.0.0.1}
+      
+      # Database - from root .env
+      DATABASE_ENGINE: django.contrib.gis.db.backends.postgis
       DATABASE_HOST: db
       DATABASE_PORT: 5432
-      # Ensure backend gets the same DB creds as the DB service
       DATABASE_USER: ${DATABASE_USER:-postgres}
       DATABASE_PASSWORD: ${DATABASE_PASSWORD:-postgres}
       DATABASE_NAME: ${DATABASE_NAME:-stayafrica_db}
-      DATABASE_ENGINE: django.contrib.gis.db.backends.postgis
+      
+      # Redis/Celery
       REDIS_URL: redis://redis:6379/0
       CELERY_BROKER_URL: redis://redis:6379/0
       CELERY_RESULT_BACKEND: redis://redis:6379/0
+      
+      # JWT
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-change-this-jwt-secret-key}
+      JWT_EXPIRATION_HOURS: ${JWT_EXPIRATION_HOURS:-24}
+      JWT_REFRESH_EXPIRATION_DAYS: ${JWT_REFRESH_EXPIRATION_DAYS:-7}
+      JWT_ALGORITHM: ${JWT_ALGORITHM:-HS256}
+      
+      # Gunicorn
       GUNICORN_WORKERS: 4
       GUNICORN_TIMEOUT: 60
     depends_on:
