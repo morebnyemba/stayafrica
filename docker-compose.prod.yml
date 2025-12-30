@@ -15,9 +15,9 @@ services:
     image: postgis/postgis:15-3.3
     container_name: stayafrica_db
     environment:
-      POSTGRES_DB: ${DATABASE_NAME:-stayafrica_db}
-      POSTGRES_USER: ${DATABASE_USER:-postgres}
-      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-postgres}
+      POSTGRES_DB: stayafrica_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./docker/db-init:/docker-entrypoint-initdb.d
@@ -55,13 +55,13 @@ services:
       DEBUG: "False"
       ALLOWED_HOSTS: ${ALLOWED_HOSTS:-api.zimlegend.online,zimlegend.online,localhost,127.0.0.1}
       
-      # Database - from root .env
+      # Database - MUST match db service exactly
       DATABASE_ENGINE: django.contrib.gis.db.backends.postgis
       DATABASE_HOST: db
-      DATABASE_PORT: 5432
-      DATABASE_USER: ${DATABASE_USER:-postgres}
-      DATABASE_PASSWORD: ${DATABASE_PASSWORD:-postgres}
-      DATABASE_NAME: ${DATABASE_NAME:-stayafrica_db}
+      DATABASE_PORT: "5432"
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: postgres
+      DATABASE_NAME: stayafrica_db
       
       # Redis/Celery
       REDIS_URL: redis://redis:6379/0
