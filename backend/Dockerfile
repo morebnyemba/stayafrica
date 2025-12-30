@@ -19,6 +19,7 @@ RUN apt-get update && apt-get install -y \
     liblcms2-dev \
     libopenjp2-7-dev \
     libtiff-dev \
+    postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
@@ -32,9 +33,8 @@ COPY . .
 # Collect static assets at build time (safe for local/static storage)
 RUN python manage.py collectstatic --noinput
 
-# Entrypoint handles migrations + app start
-RUN chmod 755 /app/entrypoint.sh
-
 EXPOSE 8000
 
-ENTRYPOINT ["sh", "/app/entrypoint.sh"]
+# Use Daphne ASGI server directly
+# Migrations are handled by docker-compose depends_on and a separate command
+CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "stayafrica.asgi:application"]
