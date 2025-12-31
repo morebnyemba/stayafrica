@@ -5,7 +5,8 @@ from rest_framework.permissions import IsAuthenticated, AllowAny, BasePermission
 from django_filters.rest_framework import DjangoFilterBackend
 from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.geos import Point
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
+from django.core.exceptions import ValidationError
 from apps.properties.models import Property, Amenity, PropertyImage, SavedProperty
 from apps.properties.serializers import (
     PropertySerializer,
@@ -15,11 +16,13 @@ from apps.properties.serializers import (
     SavedPropertySerializer,
     PropertyImageSerializer,
 )
+from apps.properties.validators import validate_image_file
 from services.geocoding_service import GeocodingService
 from services.host_analytics import HostAnalyticsService
 import logging
 
 logger = logging.getLogger(__name__)
+MAX_PROPERTY_IMAGES = 20
 
 
 class IsHostOrReadOnly(BasePermission):
@@ -149,39 +152,41 @@ class PropertyViewSet(viewsets.ModelViewSet):
                 {'error': 'Maximum 10 images per property'},
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+        existing_count = property_obj.images.count()
+        if existing_count + len(files) > MAX_PROPERTY_IMAGES:
+            return Response(
+                {'error': f'Maximum {MAX_PROPERTY_IMAGES} images per property. Remove some images before uploading more.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         
         created_images = []
         try:
-            for idx, file in enumerate(files):
-                # Validate file size (5MB max)
-                if file.size > 5 * 1024 * 1024:
-                    return Response(
-                        {'error': f'Image {idx + 1} exceeds 5MB limit'},
-                        status=status.HTTP_400_BAD_REQUEST
+            with transaction.atomic():
+                for idx, file in enumerate(files):
+                    # Centralized validation (size, dimensions, format)
+                    validate_image_file(file)
+
+                    property_image = PropertyImage.objects.create(
+                        property=property_obj,
+                        image=file,
+                        order=existing_count + idx
                     )
-                
-                # Validate file type
-                if not file.content_type.startswith('image/'):
-                    return Response(
-                        {'error': f'File {idx + 1} is not an image'},
-                        status=status.HTTP_400_BAD_REQUEST
-                    )
-                
-                property_image = PropertyImage.objects.create(
-                    property=property_obj,
-                    image=file,
-                    order=idx
-                )
-                created_images.append(property_image)
+                    created_images.append(property_image)
             
             # Queue image processing task
             from tasks.image_tasks import process_property_images
             process_property_images.delay(property_obj.id)
             
-            serializer = PropertyImageSerializer(created_images, many=True)
+            serializer = PropertyImageSerializer(created_images, many=True, context={'request': request})
             return Response(
                 {'images': serializer.data, 'message': f'{len(created_images)} images uploaded successfully'},
                 status=status.HTTP_201_CREATED
+            )
+        except ValidationError as exc:
+            return Response(
+                {'error': exc.message if hasattr(exc, 'message') else str(exc)},
+                status=status.HTTP_400_BAD_REQUEST
             )
         except Exception as e:
             logger.error(f'Error uploading images for property {pk}: {str(e)}')

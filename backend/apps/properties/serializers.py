@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from django.contrib.gis.geos import Point
 from apps.properties.models import Property, Amenity, PropertyImage, SavedProperty
+from apps.properties.validators import validate_image_file
 
 class AmenitySerializer(serializers.ModelSerializer):
     class Meta:
@@ -8,24 +9,45 @@ class AmenitySerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'icon', 'description']
 
 class PropertyImageSerializer(serializers.ModelSerializer):
+    image_url = serializers.SerializerMethodField()
+
     class Meta:
         model = PropertyImage
-        fields = ['id', 'image', 'caption', 'order']
+        fields = ['id', 'image', 'image_url', 'caption', 'order']
+
+    def get_image_url(self, obj):
+        if not obj.image:
+            return None
+        request = self.context.get('request') if hasattr(self, 'context') else None
+        url = getattr(obj.image, 'url', None)
+        if not url:
+            return None
+        return request.build_absolute_uri(url) if request else url
 
 class PropertySerializer(serializers.ModelSerializer):
     amenities = AmenitySerializer(many=True, read_only=True)
     images = PropertyImageSerializer(many=True, read_only=True)
     host_email = serializers.CharField(source='host.email', read_only=True)
+    main_image_url = serializers.SerializerMethodField()
     
     class Meta:
         model = Property
         fields = [
             'id', 'host', 'host_email', 'title', 'description', 'property_type',
             'location', 'country', 'city', 'suburb', 'address', 'price_per_night',
-            'currency', 'amenities', 'status', 'main_image', 'max_guests',
+            'currency', 'amenities', 'status', 'main_image', 'main_image_url', 'max_guests',
             'bedrooms', 'bathrooms', 'images', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'host', 'created_at', 'updated_at']
+
+    def _absolute_media_url(self, file_field):
+        if not file_field:
+            return None
+        url = getattr(file_field, 'url', None)
+        if not url:
+            return None
+        request = self.context.get('request') if hasattr(self, 'context') else None
+        return request.build_absolute_uri(url) if request else url
 
     def _coerce_location(self, value):
         if value is None:
@@ -64,19 +86,41 @@ class PropertySerializer(serializers.ModelSerializer):
             validated_data['location'] = self._coerce_location(loc)
         return super().update(instance, validated_data)
 
+    def validate_main_image(self, value):
+        if value is None:
+            return value
+        validate_image_file(value)
+        return value
+
+    def get_main_image_url(self, obj):
+        return self._absolute_media_url(obj.main_image)
+
 class PropertyDetailSerializer(PropertySerializer):
     pass
 
 class PropertyListSerializer(serializers.ModelSerializer):
     amenities = AmenitySerializer(many=True, read_only=True)
+    main_image_url = serializers.SerializerMethodField()
     
     class Meta:
         model = Property
         fields = [
             'id', 'title', 'location', 'country', 'city', 'price_per_night',
-            'currency', 'main_image', 'bedrooms', 'bathrooms', 'max_guests',
+            'currency', 'main_image', 'main_image_url', 'bedrooms', 'bathrooms', 'max_guests',
             'amenities', 'status'
         ]
+
+    def _absolute_media_url(self, file_field):
+        if not file_field:
+            return None
+        url = getattr(file_field, 'url', None)
+        if not url:
+            return None
+        request = self.context.get('request') if hasattr(self, 'context') else None
+        return request.build_absolute_uri(url) if request else url
+
+    def get_main_image_url(self, obj):
+        return self._absolute_media_url(obj.main_image)
 
 
 class SavedPropertySerializer(serializers.ModelSerializer):
