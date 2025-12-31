@@ -24,6 +24,17 @@ class PaymentAdmin(UnfoldModelAdmin):
         queryset.update(status='failed')
     mark_failed.short_description = 'Mark selected payments as failed'
 
+    @admin.display(description='Status')
+    def status_badge(self, obj):
+        colors = {
+            'initiated': 'bg-amber-100 text-amber-700',
+            'pending': 'bg-blue-100 text-blue-700',
+            'success': 'bg-green-100 text-green-700',
+            'failed': 'bg-red-100 text-red-700',
+        }
+        klass = colors.get(obj.status, 'bg-gray-100 text-gray-700')
+        return format_html('<span class="{} px-2 py-1 rounded">{}</span>', klass, obj.get_status_display())
+
     def has_add_permission(self, request):
         return False
 
