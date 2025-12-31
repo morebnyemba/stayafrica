@@ -1,12 +1,25 @@
 services:
-  npm:
+  web_deps:
     image: node:20-alpine
-    container_name: stayafrica_npm
+    container_name: stayafrica_web_deps
     working_dir: /app
     volumes:
       - ./web:/app
     command: npm install --legacy-peer-deps
     restart: "no"
+
+  npm:
+    image: jc21/nginx-proxy-manager:latest
+    container_name: stayafrica_npm
+    ports:
+      - "80:80"
+      - "443:443"
+      - "81:81"
+    volumes:
+      - npm_data:/data
+      - npm_letsencrypt:/etc/letsencrypt
+      - media_volume:/srv/www/media
+    restart: unless-stopped
 
   db:
     image: postgis/postgis:15-3.3
@@ -49,8 +62,8 @@ services:
     depends_on:
       - db
       - redis
-    ports:
-      - "8000:8000"
+    expose:
+      - "8000"
     volumes:
       - static_volume:/app/staticfiles
       - media_volume:/app/media
@@ -115,16 +128,18 @@ services:
       NEXT_PUBLIC_API_VERSION: v1
       NODE_ENV: production
     depends_on:
-      - npm
+      - web_deps
       - backend
-    ports:
-      - "3000:3000"
+    expose:
+      - "3000"
     restart: unless-stopped
 
 volumes:
   postgres_data:
   static_volume:
   media_volume:
+  npm_data:
+  npm_letsencrypt:
 
 networks:
   default:
