@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '@/services/api-client';
 import { MapPin, DollarSign, Home, Search, Image as ImageIcon, X, Upload } from 'lucide-react';
@@ -38,6 +38,14 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
 
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [existingImages, setExistingImages] = useState<any[]>([]);
+
+  // Load existing images when editing
+  useEffect(() => {
+    if (isEdit && initialData?.images && Array.isArray(initialData.images)) {
+      setExistingImages(initialData.images);
+    }
+  }, [isEdit, initialData]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -70,6 +78,19 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
       URL.revokeObjectURL(prev[index]);
       return prev.filter((_, i) => i !== index);
     });
+  };
+
+  const removeExistingImage = async (imageId: number) => {
+    if (!window.confirm('Are you sure you want to delete this image?')) return;
+    
+    try {
+      // You may need to implement this endpoint on the backend
+      // await apiClient.deletePropertyImage(propertyId, imageId);
+      setExistingImages(prev => prev.filter(img => img.id !== imageId));
+    } catch (err) {
+      console.error('Failed to delete image:', err);
+      setError('Failed to delete image');
+    }
   };
 
   const handleLocationSearch = async (query: string) => {
@@ -504,30 +525,63 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
             </p>
           </div>
 
-          {/* Image Previews */}
+          {/* Existing Images (when editing) */}
+          {existingImages.length > 0 && (
+            <div className="mb-4">
+              <p className="text-sm font-medium text-primary-900 dark:text-sand-50 mb-2">
+                Current Images ({existingImages.length})
+              </p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                {existingImages.map((image, index) => (
+                  <div key={image.id} className="relative group">
+                    <img
+                      src={image.image_url || image.image}
+                      alt={`Current ${index + 1}`}
+                      className="w-full h-32 object-cover rounded-lg border border-primary-200 dark:border-primary-700"
+                    />
+                    {index === 0 && (
+                      <span className="absolute top-2 left-2 bg-secondary-600 text-white text-xs font-semibold px-2 py-1 rounded">
+                        Main
+                      </span>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => removeExistingImage(image.id)}
+                      className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition"
+                      title="Delete image"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* New Image Previews */}
           {imagePreviews.length > 0 && (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-              {imagePreviews.map((preview, index) => (
-                <div key={index} className="relative group">
-                  <img
-                    src={preview}
-                    alt={`Preview ${index + 1}`}
-                    className="w-full h-32 object-cover rounded-lg border border-primary-200 dark:border-primary-700"
-                  />
-                  {index === 0 && (
-                    <span className="absolute top-2 left-2 bg-secondary-600 text-white text-xs font-semibold px-2 py-1 rounded">
-                      Main
-                    </span>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => removeImage(index)}
-                    className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              ))}
+            <div>
+              <p className="text-sm font-medium text-primary-900 dark:text-sand-50 mb-2">
+                New Images ({imagePreviews.length})
+              </p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                {imagePreviews.map((preview, index) => (
+                  <div key={index} className="relative group">
+                    <img
+                      src={preview}
+                      alt={`Preview ${index + 1}`}
+                      className="w-full h-32 object-cover rounded-lg border border-primary-200 dark:border-primary-700"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeImage(index)}
+                      className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </div>

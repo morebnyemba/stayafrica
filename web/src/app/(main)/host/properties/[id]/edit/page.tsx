@@ -37,7 +37,8 @@ export default function EditPropertyPage({ params }: { params: { id: string } })
   return (
     <ProtectedRoute requiredRole="host">
       <div className="max-w-4xl mx-auto px-4 py-12">
-        <h1 className="text-3xl font-bold mb-8">Edit Property</h1>
+        <h1 className="text-3xl font-bold text-primary-900 dark:text-sand-50 mb-2">Edit Property</h1>
+        {property && <p className="text-lg text-primary-600 dark:text-sand-300 mb-8">{property.title}</p>}
 
         {loading && (
           <div className="bg-white rounded-lg p-8 border border-gray-200 dark:bg-primary-900 dark:border-primary-700">
