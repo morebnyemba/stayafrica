@@ -26,8 +26,8 @@ services:
     container_name: stayafrica_db
     environment:
       POSTGRES_DB: stayafrica_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: stayafrica_user
+      POSTGRES_PASSWORD: StayAfr1ca$2025!Secure
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
@@ -49,8 +49,8 @@ services:
     container_name: stayafrica_backend
     environment:
       DB_NAME: stayafrica_db
-      DB_USER: postgres
-      DB_PASSWORD: postgres
+      DB_USER: stayafrica_user
+      DB_PASSWORD: StayAfr1ca$2025!Secure
       DB_HOST: db
       DB_PORT: 5432
       REDIS_URL: redis://redis:6379/0
@@ -77,8 +77,8 @@ services:
     command: celery -A stayafrica worker --loglevel=info --concurrency=4
     environment:
       DB_NAME: stayafrica_db
-      DB_USER: postgres
-      DB_PASSWORD: postgres
+      DB_USER: stayafrica_user
+      DB_PASSWORD: StayAfr1ca$2025!Secure
       DB_HOST: db
       DB_PORT: 5432
       REDIS_URL: redis://redis:6379/0
@@ -100,8 +100,8 @@ services:
     command: celery -A stayafrica beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
     environment:
       DB_NAME: stayafrica_db
-      DB_USER: postgres
-      DB_PASSWORD: postgres
+      DB_USER: stayafrica_user
+      DB_PASSWORD: StayAfr1ca$2025!Secure
       DB_HOST: db
       DB_PORT: 5432
       REDIS_URL: redis://redis:6379/0

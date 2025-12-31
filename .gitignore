@@ -36,7 +36,7 @@ db.sqlite3-journal
 /static
 
 # Environment variables
-.env
+# .env (temporarily unignored for deployment - remember to re-ignore after push)
 .env.local
 .env.*.local
 
