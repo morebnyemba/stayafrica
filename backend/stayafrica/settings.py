@@ -140,12 +140,12 @@ else:
     # Production: PostgreSQL with GIS support
     DATABASES = {
         'default': {
-            'ENGINE': os.getenv('DATABASE_ENGINE', 'django.contrib.gis.db.backends.postgis'),
-            'NAME': os.getenv('DATABASE_NAME', 'stayafrica_db'),
-            'USER': os.getenv('DATABASE_USER', 'postgres'),
-            'PASSWORD': os.getenv('DATABASE_PASSWORD', 'postgres'),
-            'HOST': os.getenv('DATABASE_HOST', 'localhost'),
-            'PORT': os.getenv('DATABASE_PORT', '5432'),
+            'ENGINE': os.getenv('DB_ENGINE', 'django.contrib.gis.db.backends.postgis'),
+            'NAME': os.getenv('DB_NAME', 'stayafrica_db'),
+            'USER': os.getenv('DB_USER', 'postgres'),
+            'PASSWORD': os.getenv('DB_PASSWORD', 'postgres'),
+            'HOST': os.getenv('DB_HOST', 'localhost'),
+            'PORT': os.getenv('DB_PORT', '5432'),
         }
     }
 
