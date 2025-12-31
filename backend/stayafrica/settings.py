@@ -214,8 +214,9 @@ REST_FRAMEWORK = {
         'rest_framework.throttling.UserRateThrottle',
     ],
     'DEFAULT_THROTTLE_RATES': {
-        'anon': '100/hour',  # Anonymous users: 100 requests per hour
-        'user': '1000/hour',  # Authenticated users: 1000 requests per hour
+        'anon': '100/day',   # Anonymous users: 100 requests per day
+        'user': '1000/day',  # Authenticated users: 1000 requests per day
+        'login': '10/minute',  # Stricter scope for login to prevent brute force
     },
 }
 

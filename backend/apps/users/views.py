@@ -3,6 +3,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from apps.users.throttles import LoginRateThrottle, AnonLoginRateThrottle
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
@@ -31,6 +32,7 @@ except (ImportError, ModuleNotFoundError) as e:
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
+    throttle_classes = [LoginRateThrottle, AnonLoginRateThrottle]
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()

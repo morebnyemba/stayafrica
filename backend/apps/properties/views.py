@@ -7,6 +7,8 @@ from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.geos import Point
 from django.db import IntegrityError, transaction
 from django.core.exceptions import ValidationError
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from apps.properties.models import Property, Amenity, PropertyImage, SavedProperty
 from apps.properties.serializers import (
     PropertySerializer,
@@ -49,6 +51,7 @@ class AmenityViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = AmenitySerializer
     permission_classes = [AllowAny]
 
+@method_decorator(cache_page(60 * 15, key_prefix='property_list'), name='list')
 class PropertyViewSet(viewsets.ModelViewSet):
     queryset = Property.objects.all()
     serializer_class = PropertySerializer
