@@ -209,6 +209,14 @@ REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '100/hour',  # Anonymous users: 100 requests per hour
+        'user': '1000/hour',  # Authenticated users: 1000 requests per hour
+    },
 }
 
 # JWT Configuration
@@ -383,21 +391,50 @@ LOGGING = {
     },
 }
 
-# Cache Configuration  
-# Using local memory cache for development (Redis for production)
+# Cache Configuration
+# Using Redis for both development and production
+REDIS_URL = os.getenv('REDIS_URL', 'redis://localhost:6379')
+
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'stayafrica',
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': f'{REDIS_URL}/1',  # DB 1 for general cache
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            'PARSER_CLASS': 'redis.connection.HiredisParser',
+            'CONNECTION_POOL_KWARGS': {'max_connections': 50},
+            'COMPRESSOR': 'django_redis.compressors.zlib.ZlibCompressor',
+            'IGNORE_EXCEPTIONS': True,  # Don't crash if Redis is down
+        },
+        'KEY_PREFIX': 'stayafrica',
         'TIMEOUT': 300,  # 5 minutes default
-    }
+    },
+    # Separate cache for sessions (faster, no compression)
+    'session': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': f'{REDIS_URL}/2',  # DB 2 for sessions
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            'CONNECTION_POOL_KWARGS': {'max_connections': 50},
+        },
+        'KEY_PREFIX': 'session',
+        'TIMEOUT': 86400,  # 24 hours
+    },
+    # Cache for rate limiting
+    'ratelimit': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': f'{REDIS_URL}/3',  # DB 3 for rate limits
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        },
+        'KEY_PREFIX': 'rl',
+        'TIMEOUT': 60,  # 1 minute
+    },
 }
 
-# For production with Redis, use:
-# CACHES = {
-#     'default': {
-#         'BACKEND': 'django_redis.cache.RedisCache',
-#         'LOCATION': os.getenv('REDIS_URL', 'redis://localhost:6379/1'),
+# Use Redis for session storage (faster than database)
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+SESSION_CACHE_ALIAS = 'session'
 #         'OPTIONS': {
 #             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
 #         },
