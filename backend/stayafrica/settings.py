@@ -402,7 +402,6 @@ CACHES = {
         'LOCATION': f'{REDIS_URL}/1',  # DB 1 for general cache
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-            'PARSER_CLASS': 'redis.connection.HiredisParser',
             'CONNECTION_POOL_KWARGS': {'max_connections': 50},
             'COMPRESSOR': 'django_redis.compressors.zlib.ZlibCompressor',
             'IGNORE_EXCEPTIONS': True,  # Don't crash if Redis is down
