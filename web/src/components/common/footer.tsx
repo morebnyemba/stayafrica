@@ -98,31 +98,41 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-primary-700/60 pt-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-          <p className="text-sm text-secondary-200/70">
-            &copy; {currentYear} StayAfrica. All rights reserved.
-          </p>
-          <div className="flex items-center gap-6 text-secondary-200/70 text-sm">
-            <a href="#" className="hover:text-secondary-50 transition">
-              Privacy
-            </a>
-            <a href="#" className="hover:text-secondary-50 transition">
-              Cookies
-            </a>
-            <a href="#" className="hover:text-secondary-50 transition">
-              Accessibility
-            </a>
+        <div className="border-t border-primary-700/60 pt-8">
+          {/* Top Footer */}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 pb-6">
+            <p className="text-sm text-secondary-200/70">
+              &copy; {currentYear} <span className="font-semibold">StayAfrica Property</span>. All rights reserved.
+            </p>
+            <div className="flex items-center gap-6 text-secondary-200/70 text-sm">
+              <a href="#" className="hover:text-secondary-50 transition">
+                Privacy
+              </a>
+              <a href="#" className="hover:text-secondary-50 transition">
+                Cookies
+              </a>
+              <a href="#" className="hover:text-secondary-50 transition">
+                Accessibility
+              </a>
+            </div>
+            <div className="flex items-center gap-4">
+              <a href="#" aria-label="StayAfrica on Facebook" className="text-secondary-200/70 hover:text-secondary-50 transition">
+                <Facebook className="w-5 h-5" />
+              </a>
+              <a href="#" aria-label="StayAfrica on Instagram" className="text-secondary-200/70 hover:text-secondary-50 transition">
+                <Instagram className="w-5 h-5" />
+              </a>
+              <a href="#" aria-label="StayAfrica on Twitter" className="text-secondary-200/70 hover:text-secondary-50 transition">
+                <Twitter className="w-5 h-5" />
+              </a>
+            </div>
           </div>
-          <div className="flex items-center gap-4">
-            <a href="#" aria-label="StayAfrica on Facebook" className="text-secondary-200/70 hover:text-secondary-50 transition">
-              <Facebook className="w-5 h-5" />
-            </a>
-            <a href="#" aria-label="StayAfrica on Instagram" className="text-secondary-200/70 hover:text-secondary-50 transition">
-              <Instagram className="w-5 h-5" />
-            </a>
-            <a href="#" aria-label="StayAfrica on Twitter" className="text-secondary-200/70 hover:text-secondary-50 transition">
-              <Twitter className="w-5 h-5" />
-            </a>
+
+          {/* Credits */}
+          <div className="border-t border-primary-700/40 pt-6 mt-6">
+            <p className="text-xs text-secondary-200/60 text-center">
+              Design, Development & Maintenance by <a href="https://slykertech.co.zw" target="_blank" rel="noopener noreferrer" className="font-semibold text-secondary-200/80 hover:text-secondary-100 transition">Slyker Tech Web Services</a>
+            </p>
           </div>
         </div>
       </div>
