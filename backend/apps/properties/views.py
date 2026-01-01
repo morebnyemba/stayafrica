@@ -2,10 +2,12 @@ from rest_framework import viewsets, status, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny, BasePermission
+from rest_framework.views import APIView
 from django_filters.rest_framework import DjangoFilterBackend
 from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.geos import Point
 from django.db import IntegrityError, transaction
+from django.db.models import Q
 from django.core.exceptions import ValidationError
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
@@ -17,8 +19,12 @@ from apps.properties.serializers import (
     AmenitySerializer,
     SavedPropertySerializer,
     PropertyImageSerializer,
+    HostPropertyListSerializer,
 )
 from apps.properties.validators import validate_image_file
+from apps.reviews.models import Review
+from apps.reviews.serializers import ReviewSerializer
+from apps.bookings.models import Booking
 from services.geocoding_service import GeocodingService
 from services.host_analytics import HostAnalyticsService
 import logging
@@ -436,7 +442,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
             )
         
         properties = Property.objects.filter(host=request.user).order_by('-created_at')
-        serializer = PropertyListSerializer(properties, many=True)
+        serializer = HostPropertyListSerializer(properties, many=True, context={'request': request})
         return Response({
             'results': serializer.data,
             'count': properties.count()
@@ -578,3 +584,147 @@ class PropertyViewSet(viewsets.ModelViewSet):
         
         pending = HostAnalyticsService.get_pending_actions(request.user)
         return Response(pending)
+    
+    @action(detail=True, methods=['get'], permission_classes=[AllowAny])
+    def reviews(self, request, pk=None):
+        """
+        Get all reviews for a specific property
+        GET /api/v1/properties/{id}/reviews/
+        """
+        property_obj = self.get_object()
+        
+        # Get all bookings for this property that have reviews
+        bookings = Booking.objects.filter(rental_property=property_obj)
+        reviews = Review.objects.filter(booking__in=bookings).select_related(
+            'guest', 'booking'
+        ).order_by('-created_at')
+        
+        serializer = ReviewSerializer(reviews, many=True, context={'request': request})
+        return Response(serializer.data)
+
+
+# Additional view classes for search and filtering
+
+class PropertySearchView(APIView):
+    """
+    Search properties by title, description, city, etc.
+    GET /api/v1/properties/search/?q=searchterm
+    """
+    permission_classes = [AllowAny]
+    
+    def get(self, request):
+        query = request.query_params.get('q', '')
+        
+        if not query or len(query) < 2:
+            return Response(
+                {'error': 'Search query must be at least 2 characters'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        properties = Property.objects.filter(
+            status='active'
+        ).filter(
+            Q(title__icontains=query) |
+            Q(description__icontains=query) |
+            Q(city__icontains=query) |
+            Q(country__icontains=query) |
+            Q(suburb__icontains=query)
+        )
+        
+        serializer = PropertyListSerializer(properties, many=True, context={'request': request})
+        return Response({
+            'results': serializer.data,
+            'count': properties.count()
+        })
+
+
+class PropertyFilterView(APIView):
+    """
+    Filter properties by various criteria
+    GET /api/v1/properties/filter/?property_type=house&min_price=50&max_price=200
+    """
+    permission_classes = [AllowAny]
+    
+    def get(self, request):
+        properties = Property.objects.filter(status='active')
+        
+        # Filter by property type
+        property_type = request.query_params.get('property_type')
+        if property_type:
+            properties = properties.filter(property_type=property_type)
+        
+        # Filter by price range
+        min_price = request.query_params.get('min_price')
+        max_price = request.query_params.get('max_price')
+        try:
+            if min_price:
+                properties = properties.filter(price_per_night__gte=float(min_price))
+            if max_price:
+                properties = properties.filter(price_per_night__lte=float(max_price))
+        except (ValueError, TypeError):
+            return Response(
+                {'error': 'Invalid price value'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Filter by bedrooms
+        bedrooms = request.query_params.get('bedrooms')
+        try:
+            if bedrooms:
+                properties = properties.filter(bedrooms__gte=int(bedrooms))
+        except (ValueError, TypeError):
+            return Response(
+                {'error': 'Invalid bedrooms value'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Filter by guests
+        guests = request.query_params.get('guests')
+        try:
+            if guests:
+                properties = properties.filter(max_guests__gte=int(guests))
+        except (ValueError, TypeError):
+            return Response(
+                {'error': 'Invalid guests value'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Filter by country
+        country = request.query_params.get('country')
+        if country:
+            properties = properties.filter(country__iexact=country)
+        
+        # Filter by city
+        city = request.query_params.get('city')
+        if city:
+            properties = properties.filter(city__icontains=city)
+        
+        serializer = PropertyListSerializer(properties, many=True, context={'request': request})
+        return Response({
+            'results': serializer.data,
+            'count': properties.count()
+        })
+
+
+class FeaturedPropertiesView(APIView):
+    """
+    Get featured/popular properties
+    GET /api/v1/properties/featured/
+    """
+    permission_classes = [AllowAny]
+    
+    def get(self, request):
+        from django.db.models import Count, Avg
+        from apps.reviews.models import Review
+        from apps.bookings.models import Booking
+        
+        # Get properties with most bookings and high ratings
+        properties = Property.objects.filter(status='active').annotate(
+            booking_count=Count('bookings')
+        ).order_by('-booking_count')[:10]
+        
+        serializer = PropertyListSerializer(properties, many=True, context={'request': request})
+        return Response({
+            'results': serializer.data,
+            'count': properties.count()
+        })

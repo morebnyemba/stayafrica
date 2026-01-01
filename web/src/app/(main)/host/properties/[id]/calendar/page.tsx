@@ -1,19 +1,26 @@
-import type { Metadata } from 'next';
+'use client';
+
+import { useEffect, useState } from 'react';
 import { ProtectedRoute } from '@/components/auth/protected-route';
 
-export const metadata: Metadata = {
-  title: 'Manage Calendar - StayAfrica',
-  description: 'Manage property availability calendar',
-};
+export default function PropertyCalendarPage({ params }: { params: Promise<{ id: string }> }) {
+  const [propertyId, setPropertyId] = useState<string | null>(null);
 
-export default function PropertyCalendarPage({ params }: { params: { id: string } }) {
+  useEffect(() => {
+    async function initializeParams() {
+      const resolvedParams = await params;
+      setPropertyId(resolvedParams.id);
+    }
+    initializeParams();
+  }, [params]);
+
   return (
     <ProtectedRoute requiredRole="host">
       <div className="max-w-4xl mx-auto px-4 py-12">
         <h1 className="text-3xl font-bold mb-8">Manage Calendar</h1>
         <div className="bg-white rounded-lg p-8 border border-gray-200 dark:bg-primary-900 dark:border-primary-700">
           <p className="text-gray-600 dark:text-gray-400">
-            Calendar management for property {params.id} - coming soon...
+            {propertyId ? `Calendar management for property ${propertyId} - coming soon...` : 'Loading...'}
           </p>
         </div>
       </div>

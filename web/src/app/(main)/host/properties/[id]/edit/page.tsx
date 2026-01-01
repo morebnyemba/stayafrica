@@ -6,17 +6,28 @@ import { ProtectedRoute } from '@/components/auth/protected-route';
 import { PropertyForm } from '@/components/host/property-form';
 import { apiClient } from '@/services/api-client';
 
-export default function EditPropertyPage({ params }: { params: { id: string } }) {
+export default function EditPropertyPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
   const [property, setProperty] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [propertyId, setPropertyId] = useState<string | null>(null);
 
   useEffect(() => {
+    async function initializeParams() {
+      const resolvedParams = await params;
+      setPropertyId(resolvedParams.id);
+    }
+    initializeParams();
+  }, [params]);
+
+  useEffect(() => {
+    if (!propertyId) return;
+    
     async function loadProperty() {
       try {
         setLoading(true);
-        const response = await apiClient.getHostPropertyById(params.id);
+        const response = await apiClient.getHostPropertyById(propertyId!);
         setProperty(response.data);
         setError(null);
       } catch (err) {
@@ -28,7 +39,7 @@ export default function EditPropertyPage({ params }: { params: { id: string } })
     }
 
     loadProperty();
-  }, [params.id]);
+  }, [propertyId]);
 
   const handleSuccess = () => {
     router.push(`/host/properties`);
@@ -52,10 +63,10 @@ export default function EditPropertyPage({ params }: { params: { id: string } })
           </div>
         )}
 
-        {property && !loading && (
+        {property && !loading && propertyId && (
           <PropertyForm
             initialData={property}
-            propertyId={params.id}
+            propertyId={propertyId}
             onSuccess={handleSuccess}
             isEdit={true}
           />
