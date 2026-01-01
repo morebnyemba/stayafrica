@@ -2,10 +2,12 @@ from rest_framework import viewsets, status, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny, BasePermission
+from rest_framework.views import APIView
 from django_filters.rest_framework import DjangoFilterBackend
 from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.geos import Point
 from django.db import IntegrityError, transaction
+from django.db.models import Q
 from django.core.exceptions import ValidationError
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
@@ -17,8 +19,12 @@ from apps.properties.serializers import (
     AmenitySerializer,
     SavedPropertySerializer,
     PropertyImageSerializer,
+    HostPropertyListSerializer,
 )
 from apps.properties.validators import validate_image_file
+from apps.reviews.models import Review
+from apps.reviews.serializers import ReviewSerializer
+from apps.bookings.models import Booking
 from services.geocoding_service import GeocodingService
 from services.host_analytics import HostAnalyticsService
 import logging
@@ -435,7 +441,6 @@ class PropertyViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_403_FORBIDDEN
             )
         
-        from apps.properties.serializers import HostPropertyListSerializer
         properties = Property.objects.filter(host=request.user).order_by('-created_at')
         serializer = HostPropertyListSerializer(properties, many=True, context={'request': request})
         return Response({
@@ -586,10 +591,6 @@ class PropertyViewSet(viewsets.ModelViewSet):
         Get all reviews for a specific property
         GET /api/v1/properties/{id}/reviews/
         """
-        from apps.reviews.models import Review
-        from apps.reviews.serializers import ReviewSerializer
-        from apps.bookings.models import Booking
-        
         property_obj = self.get_object()
         
         # Get all bookings for this property that have reviews
@@ -603,8 +604,6 @@ class PropertyViewSet(viewsets.ModelViewSet):
 
 
 # Additional view classes for search and filtering
-from rest_framework.views import APIView
-from django.db.models import Q
 
 class PropertySearchView(APIView):
     """

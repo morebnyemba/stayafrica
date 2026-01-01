@@ -103,17 +103,22 @@ class PropertyDetailSerializer(PropertySerializer):
     class Meta(PropertySerializer.Meta):
         fields = PropertySerializer.Meta.fields + ['average_rating', 'review_count']
     
+    def _get_review_stats(self, obj):
+        """Cache review stats to avoid duplicate queries"""
+        if not hasattr(self, '_review_stats_cache'):
+            self._review_stats_cache = {}
+        if obj.id not in self._review_stats_cache:
+            from apps.properties.utils import get_property_review_stats
+            self._review_stats_cache[obj.id] = get_property_review_stats(obj)
+        return self._review_stats_cache[obj.id]
+    
     def get_average_rating(self, obj):
         """Calculate average rating from reviews"""
-        from apps.properties.utils import get_property_review_stats
-        stats = get_property_review_stats(obj)
-        return stats['average_rating']
+        return self._get_review_stats(obj)['average_rating']
     
     def get_review_count(self, obj):
         """Count total reviews for this property"""
-        from apps.properties.utils import get_property_review_stats
-        stats = get_property_review_stats(obj)
-        return stats['review_count']
+        return self._get_review_stats(obj)['review_count']
     
     def get_host(self, obj):
         """Include host details"""
@@ -152,17 +157,22 @@ class PropertyListSerializer(serializers.ModelSerializer):
     def get_main_image_url(self, obj):
         return self._absolute_media_url(obj.main_image)
     
+    def _get_review_stats(self, obj):
+        """Cache review stats to avoid duplicate queries"""
+        if not hasattr(self, '_review_stats_cache'):
+            self._review_stats_cache = {}
+        if obj.id not in self._review_stats_cache:
+            from apps.properties.utils import get_property_review_stats
+            self._review_stats_cache[obj.id] = get_property_review_stats(obj)
+        return self._review_stats_cache[obj.id]
+    
     def get_average_rating(self, obj):
         """Calculate average rating from reviews"""
-        from apps.properties.utils import get_property_review_stats
-        stats = get_property_review_stats(obj)
-        return stats['average_rating']
+        return self._get_review_stats(obj)['average_rating']
     
     def get_review_count(self, obj):
         """Count total reviews for this property"""
-        from apps.properties.utils import get_property_review_stats
-        stats = get_property_review_stats(obj)
-        return stats['review_count']
+        return self._get_review_stats(obj)['review_count']
 
 
 class HostPropertyListSerializer(PropertyListSerializer):
