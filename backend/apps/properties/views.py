@@ -657,20 +657,38 @@ class PropertyFilterView(APIView):
         # Filter by price range
         min_price = request.query_params.get('min_price')
         max_price = request.query_params.get('max_price')
-        if min_price:
-            properties = properties.filter(price_per_night__gte=float(min_price))
-        if max_price:
-            properties = properties.filter(price_per_night__lte=float(max_price))
+        try:
+            if min_price:
+                properties = properties.filter(price_per_night__gte=float(min_price))
+            if max_price:
+                properties = properties.filter(price_per_night__lte=float(max_price))
+        except (ValueError, TypeError):
+            return Response(
+                {'error': 'Invalid price value'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         
         # Filter by bedrooms
         bedrooms = request.query_params.get('bedrooms')
-        if bedrooms:
-            properties = properties.filter(bedrooms__gte=int(bedrooms))
+        try:
+            if bedrooms:
+                properties = properties.filter(bedrooms__gte=int(bedrooms))
+        except (ValueError, TypeError):
+            return Response(
+                {'error': 'Invalid bedrooms value'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         
         # Filter by guests
         guests = request.query_params.get('guests')
-        if guests:
-            properties = properties.filter(max_guests__gte=int(guests))
+        try:
+            if guests:
+                properties = properties.filter(max_guests__gte=int(guests))
+        except (ValueError, TypeError):
+            return Response(
+                {'error': 'Invalid guests value'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         
         # Filter by country
         country = request.query_params.get('country')

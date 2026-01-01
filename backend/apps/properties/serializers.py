@@ -105,24 +105,15 @@ class PropertyDetailSerializer(PropertySerializer):
     
     def get_average_rating(self, obj):
         """Calculate average rating from reviews"""
-        from django.db.models import Avg
-        from apps.reviews.models import Review
-        from apps.bookings.models import Booking
-        
-        # Get all bookings for this property that have reviews
-        bookings = Booking.objects.filter(rental_property=obj)
-        reviews = Review.objects.filter(booking__in=bookings)
-        
-        avg_rating = reviews.aggregate(Avg('rating'))['rating__avg']
-        return round(avg_rating, 1) if avg_rating else None
+        from apps.properties.utils import get_property_review_stats
+        stats = get_property_review_stats(obj)
+        return stats['average_rating']
     
     def get_review_count(self, obj):
         """Count total reviews for this property"""
-        from apps.reviews.models import Review
-        from apps.bookings.models import Booking
-        
-        bookings = Booking.objects.filter(rental_property=obj)
-        return Review.objects.filter(booking__in=bookings).count()
+        from apps.properties.utils import get_property_review_stats
+        stats = get_property_review_stats(obj)
+        return stats['review_count']
     
     def get_host(self, obj):
         """Include host details"""
@@ -163,24 +154,15 @@ class PropertyListSerializer(serializers.ModelSerializer):
     
     def get_average_rating(self, obj):
         """Calculate average rating from reviews"""
-        from django.db.models import Avg
-        from apps.reviews.models import Review
-        from apps.bookings.models import Booking
-        
-        # Get all bookings for this property that have reviews
-        bookings = Booking.objects.filter(rental_property=obj)
-        reviews = Review.objects.filter(booking__in=bookings)
-        
-        avg_rating = reviews.aggregate(Avg('rating'))['rating__avg']
-        return round(avg_rating, 1) if avg_rating else None
+        from apps.properties.utils import get_property_review_stats
+        stats = get_property_review_stats(obj)
+        return stats['average_rating']
     
     def get_review_count(self, obj):
         """Count total reviews for this property"""
-        from apps.reviews.models import Review
-        from apps.bookings.models import Booking
-        
-        bookings = Booking.objects.filter(rental_property=obj)
-        return Review.objects.filter(booking__in=bookings).count()
+        from apps.properties.utils import get_property_review_stats
+        stats = get_property_review_stats(obj)
+        return stats['review_count']
 
 
 class HostPropertyListSerializer(PropertyListSerializer):
