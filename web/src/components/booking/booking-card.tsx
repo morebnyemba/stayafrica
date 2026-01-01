@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/context/auth-context';
+import { useAuth } from '@/store/auth-store';
 import { useFeeConfiguration, calculateBookingCost } from '@/hooks/use-fees';
 import { Star, AlertCircle } from 'lucide-react';
 import { toast } from 'react-hot-toast';

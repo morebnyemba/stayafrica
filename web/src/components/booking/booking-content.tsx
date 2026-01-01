@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
 import { Calendar, MapPin } from 'lucide-react';
-import { useAuth } from '@/context/auth-context';
+import { useAuth } from '@/store/auth-store';
 
 export function BookingContent() {
   const { isAuthenticated } = useAuth();
