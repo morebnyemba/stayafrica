@@ -17,7 +17,10 @@ echo "Step 3: Obtain SSL certificates (standalone mode)"
 echo "==================================================="
 
 # Get certificate for main domain (zimlegend.online + www)
-docker compose -f docker-compose.prod.yml run --rm -p 80:80 -p 443:443 certbot certonly \
+docker compose -f docker-compose.prod.yml run --rm -p 80:80 -p 443:443 \
+    -v ./nginx/certbot/conf:/etc/letsencrypt \
+    -v ./nginx/certbot/www:/var/www/certbot \
+    certbot certonly \
     --standalone \
     --email mnyemba123@gmail.com \
     --agree-tos \
@@ -27,7 +30,10 @@ docker compose -f docker-compose.prod.yml run --rm -p 80:80 -p 443:443 certbot c
     -d www.zimlegend.online
 
 # Get certificate for API domain
-docker compose -f docker-compose.prod.yml run --rm -p 80:80 -p 443:443 certbot certonly \
+docker compose -f docker-compose.prod.yml run --rm -p 80:80 -p 443:443 \
+    -v ./nginx/certbot/conf:/etc/letsencrypt \
+    -v ./nginx/certbot/www:/var/www/certbot \
+    certbot certonly \
     --standalone \
     --email mnyemba123@gmail.com \
     --agree-tos \
