@@ -96,18 +96,57 @@ class PropertySerializer(serializers.ModelSerializer):
         return self._absolute_media_url(obj.main_image)
 
 class PropertyDetailSerializer(PropertySerializer):
-    pass
+    average_rating = serializers.SerializerMethodField()
+    review_count = serializers.SerializerMethodField()
+    host = serializers.SerializerMethodField()
+    
+    class Meta(PropertySerializer.Meta):
+        fields = PropertySerializer.Meta.fields + ['average_rating', 'review_count']
+    
+    def get_average_rating(self, obj):
+        """Calculate average rating from reviews"""
+        from django.db.models import Avg
+        from apps.reviews.models import Review
+        from apps.bookings.models import Booking
+        
+        # Get all bookings for this property that have reviews
+        bookings = Booking.objects.filter(rental_property=obj)
+        reviews = Review.objects.filter(booking__in=bookings)
+        
+        avg_rating = reviews.aggregate(Avg('rating'))['rating__avg']
+        return round(avg_rating, 1) if avg_rating else None
+    
+    def get_review_count(self, obj):
+        """Count total reviews for this property"""
+        from apps.reviews.models import Review
+        from apps.bookings.models import Booking
+        
+        bookings = Booking.objects.filter(rental_property=obj)
+        return Review.objects.filter(booking__in=bookings).count()
+    
+    def get_host(self, obj):
+        """Include host details"""
+        if not obj.host:
+            return None
+        return {
+            'id': obj.host.id,
+            'first_name': getattr(obj.host, 'first_name', ''),
+            'last_name': getattr(obj.host, 'last_name', ''),
+            'email': obj.host.email,
+        }
 
 class PropertyListSerializer(serializers.ModelSerializer):
     amenities = AmenitySerializer(many=True, read_only=True)
     main_image_url = serializers.SerializerMethodField()
+    average_rating = serializers.SerializerMethodField()
+    review_count = serializers.SerializerMethodField()
     
     class Meta:
         model = Property
         fields = [
             'id', 'title', 'location', 'country', 'city', 'price_per_night',
             'currency', 'main_image', 'main_image_url', 'bedrooms', 'bathrooms', 'max_guests',
-            'amenities', 'status'
+            'amenities', 'status', 'average_rating', 'review_count'
         ]
 
     def _absolute_media_url(self, file_field):
@@ -121,6 +160,27 @@ class PropertyListSerializer(serializers.ModelSerializer):
 
     def get_main_image_url(self, obj):
         return self._absolute_media_url(obj.main_image)
+    
+    def get_average_rating(self, obj):
+        """Calculate average rating from reviews"""
+        from django.db.models import Avg
+        from apps.reviews.models import Review
+        from apps.bookings.models import Booking
+        
+        # Get all bookings for this property that have reviews
+        bookings = Booking.objects.filter(rental_property=obj)
+        reviews = Review.objects.filter(booking__in=bookings)
+        
+        avg_rating = reviews.aggregate(Avg('rating'))['rating__avg']
+        return round(avg_rating, 1) if avg_rating else None
+    
+    def get_review_count(self, obj):
+        """Count total reviews for this property"""
+        from apps.reviews.models import Review
+        from apps.bookings.models import Booking
+        
+        bookings = Booking.objects.filter(rental_property=obj)
+        return Review.objects.filter(booking__in=bookings).count()
 
 
 class SavedPropertySerializer(serializers.ModelSerializer):
