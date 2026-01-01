@@ -19,7 +19,7 @@ echo "==================================================="
 # Get certificate for main domain (zimlegend.online + www)
 docker compose -f docker-compose.prod.yml run --rm -p 80:80 -p 443:443 certbot certonly \
     --standalone \
-    --email admin@zimlegend.online \
+    --email mnyemba123@gmail.com \
     --agree-tos \
     --no-eff-email \
     --force-renewal \
@@ -29,7 +29,7 @@ docker compose -f docker-compose.prod.yml run --rm -p 80:80 -p 443:443 certbot c
 # Get certificate for API domain
 docker compose -f docker-compose.prod.yml run --rm -p 80:80 -p 443:443 certbot certonly \
     --standalone \
-    --email admin@zimlegend.online \
+    --email mnyemba123@gmail.com \
     --agree-tos \
     --no-eff-email \
     --force-renewal \
