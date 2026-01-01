@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function HostPropertyViewPage({ params }: { params: { id: string } }) {
-  return <PropertyDetailContent propertyId={params.id} />;
+  return <PropertyDetailContent propertyId={params.id} useHostEndpoint />;
 }

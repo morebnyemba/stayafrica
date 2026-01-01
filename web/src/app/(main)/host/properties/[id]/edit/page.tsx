@@ -16,7 +16,7 @@ export default function EditPropertyPage({ params }: { params: { id: string } })
     async function loadProperty() {
       try {
         setLoading(true);
-        const response = await apiClient.getPropertyById(params.id);
+        const response = await apiClient.getHostPropertyById(params.id);
         setProperty(response.data);
         setError(null);
       } catch (err) {

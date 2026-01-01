@@ -80,6 +80,11 @@ class ApiClient {
     return this.getPropertyById(safeId);
   }
 
+  async getHostPropertyById(id: string) {
+    const safeId = this.assertId(id, 'Property ID');
+    return this.client.get(`/properties/${safeId}/host_detail/`);
+  }
+
   async searchNearby(latitude: number, longitude: number, radiusKm: number = 10) {
     return this.client.get('/properties/search_nearby/', {
       params: { latitude, longitude, radius_km: radiusKm },

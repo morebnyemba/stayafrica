@@ -442,6 +442,21 @@ class PropertyViewSet(viewsets.ModelViewSet):
             'count': properties.count()
         })
     
+    @action(detail=True, methods=['get'], permission_classes=[IsAuthenticated])
+    def host_detail(self, request, pk=None):
+        """
+        Host-only detail that bypasses public status filtering.
+        GET /api/v1/properties/{id}/host_detail/
+        """
+        property_obj = self.get_object()
+        if not (request.user == property_obj.host or getattr(request.user, 'is_admin_user', False)):
+            return Response(
+                {'error': 'You do not have permission to view this property'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        serializer = PropertyDetailSerializer(property_obj, context={'request': request})
+        return Response(serializer.data)
+    
     @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
     def host_analytics(self, request):
         """

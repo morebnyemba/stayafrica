@@ -18,12 +18,19 @@ type Review = {
   created_at: string;
 };
 
-export function PropertyDetailContent({ propertyId }: { propertyId: string }) {
+type PropertyDetailContentProps = {
+  propertyId: string;
+  useHostEndpoint?: boolean;
+};
+
+export function PropertyDetailContent({ propertyId, useHostEndpoint = false }: PropertyDetailContentProps) {
   const { data: property, isLoading, error } = useQuery({
-    queryKey: ['property', propertyId],
+    queryKey: ['property', propertyId, useHostEndpoint],
     queryFn: async () => {
       if (!propertyId) throw new Error('Property ID not found');
-      const response = await apiClient.getPropertyDetails(propertyId);
+      const response = useHostEndpoint
+        ? await apiClient.getHostPropertyById(propertyId)
+        : await apiClient.getPropertyDetails(propertyId);
       return response.data;
     },
     enabled: !!propertyId,
