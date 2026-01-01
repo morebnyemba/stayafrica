@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface PropertyImageCarouselProps {
-  images: Array<{ id: string; url: string; alt?: string }>;
+  images: Array<{ id: string; image_url?: string; url?: string; caption?: string; alt?: string }>;
   title: string;
 }
 
@@ -28,13 +28,14 @@ export function PropertyImageCarousel({ images, title }: PropertyImageCarouselPr
   };
 
   const currentImage = images[currentIndex];
+  const imageUrl = currentImage.image_url || currentImage.url;
 
   return (
     <div className="relative w-full h-96 rounded-2xl overflow-hidden group">
       {/* Main image */}
       <img
-        src={currentImage.url}
-        alt={currentImage.alt || title}
+        src={imageUrl}
+        alt={currentImage.caption || currentImage.alt || title}
         className="w-full h-full object-cover"
       />
 
