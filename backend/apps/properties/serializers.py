@@ -183,6 +183,34 @@ class PropertyListSerializer(serializers.ModelSerializer):
         return Review.objects.filter(booking__in=bookings).count()
 
 
+class HostPropertyListSerializer(PropertyListSerializer):
+    """Extended serializer for host property listings with performance metrics"""
+    total_bookings = serializers.SerializerMethodField()
+    total_earnings = serializers.SerializerMethodField()
+    
+    class Meta(PropertyListSerializer.Meta):
+        fields = PropertyListSerializer.Meta.fields + ['total_bookings', 'total_earnings']
+    
+    def get_total_bookings(self, obj):
+        """Count total bookings for this property"""
+        from apps.bookings.models import Booking
+        return Booking.objects.filter(rental_property=obj).count()
+    
+    def get_total_earnings(self, obj):
+        """Calculate total earnings from completed bookings"""
+        from django.db.models import Sum, F
+        from apps.bookings.models import Booking
+        
+        earnings = Booking.objects.filter(
+            rental_property=obj,
+            status='completed'
+        ).aggregate(
+            total=Sum(F('nightly_total') + F('cleaning_fee') - F('commission_fee'))
+        )['total'] or 0
+        
+        return float(earnings)
+
+
 class SavedPropertySerializer(serializers.ModelSerializer):
     property = PropertyListSerializer(read_only=True)
     property_id = serializers.CharField(max_length=10, write_only=True)

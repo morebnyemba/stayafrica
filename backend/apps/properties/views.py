@@ -435,8 +435,9 @@ class PropertyViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_403_FORBIDDEN
             )
         
+        from apps.properties.serializers import HostPropertyListSerializer
         properties = Property.objects.filter(host=request.user).order_by('-created_at')
-        serializer = PropertyListSerializer(properties, many=True)
+        serializer = HostPropertyListSerializer(properties, many=True, context={'request': request})
         return Response({
             'results': serializer.data,
             'count': properties.count()

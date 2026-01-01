@@ -150,7 +150,7 @@ class HostAnalyticsService:
         return [
             {
                 'period': item['period'].strftime('%Y-%m' if period == 'month' else '%Y-W%W'),
-                'earnings': float(item['total_earnings'] or 0),
+                'total': float(item['total_earnings'] or 0),
                 'bookings': item['booking_count']
             }
             for item in earnings_by_period
