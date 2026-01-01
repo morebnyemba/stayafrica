@@ -116,7 +116,7 @@ ALLOWED_HOSTS: zimlegend.online,api.zimlegend.online
 ### 3. nginx/nginx.conf (Optional)
 ```nginx
 # Update domain names if not using zimlegend.online
-server_name zimlegend.online www.zimlegend.online;
+server_name zimlegend.online;
 server_name api.zimlegend.online;
 ```
 

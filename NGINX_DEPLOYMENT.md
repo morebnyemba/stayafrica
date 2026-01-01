@@ -82,7 +82,6 @@ Edit `setup-ssl.sh` and replace `your-email@example.com` with your actual email:
 
 This will obtain SSL certificates from Let's Encrypt for:
 - `zimlegend.online`
-- `www.zimlegend.online`
 - `api.zimlegend.online`
 
 ### 3. Deploy

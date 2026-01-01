@@ -235,7 +235,6 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:3001',
     'http://127.0.0.1:3000',
     'https://zimlegend.online',
-    'https://www.zimlegend.online',
     'https://api.zimlegend.online',
 ]
 
@@ -266,7 +265,7 @@ CORS_ALLOW_HEADERS = [
 # CSRF trusted origins must include the full scheme + domain.
 CSRF_TRUSTED_ORIGINS = os.getenv(
     'CSRF_TRUSTED_ORIGINS',
-    'https://api.zimlegend.online,https://zimlegend.online,https://www.zimlegend.online'
+    'https://api.zimlegend.online,https://zimlegend.online'
 ).split(',')
 
 # Ensure Django recognizes HTTPS forwarded by Nginx Proxy Manager

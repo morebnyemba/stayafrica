@@ -47,7 +47,6 @@
 - Sets up auto-renewal via certbot
 - Covers all domains:
   - zimlegend.online
-  - www.zimlegend.online
   - api.zimlegend.online
 
 ### 5. Documentation

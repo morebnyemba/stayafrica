@@ -19,7 +19,7 @@
 ### 1. Frontend (zimlegend.online)
 
 **Add Proxy Host:**
-- **Domain Names:** `zimlegend.online`, `www.zimlegend.online`
+- **Domain Names:** `zimlegend.online`
 - **Scheme:** `http`
 - **Forward Hostname/IP:** `frontend`
 - **Forward Port:** `3000`
@@ -79,7 +79,6 @@ Before requesting SSL certificates, ensure your domains point to your server:
 
 ```
 zimlegend.online        A    YOUR_SERVER_IP
-www.zimlegend.online    A    YOUR_SERVER_IP
 api.zimlegend.online    A    YOUR_SERVER_IP
 ```
 

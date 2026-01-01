@@ -92,7 +92,7 @@ nano docker-compose.prod.yml
 # Change these 3 lines:
 SECRET_KEY: <generate-random-string-here>
 POSTGRES_PASSWORD: <strong-password>
-ALLOWED_HOSTS: zimlegend.online,api.zimlegend.online,www.zimlegend.online
+ALLOWED_HOSTS: zimlegend.online,api.zimlegend.online
 ```
 
 ### Optional - Edit nginx/nginx.conf

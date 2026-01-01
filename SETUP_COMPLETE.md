@@ -75,7 +75,6 @@ chmod +x setup-ssl.sh
 ```
 This takes 2-3 minutes and obtains certificates for:
 - zimlegend.online
-- www.zimlegend.online
 - api.zimlegend.online
 
 ### DEPLOYMENT (Actually Deploy)
@@ -195,8 +194,7 @@ This tests:
 ```
 nginx/certbot/conf/live/
 ├── zimlegend.online/
-├── api.zimlegend.online/
-└── www.zimlegend.online/
+└── api.zimlegend.online/
 ```
 
 ### Media Files
