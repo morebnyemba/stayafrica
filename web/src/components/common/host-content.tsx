@@ -1,7 +1,7 @@
 'use client';
 
 import { Building, DollarSign, Calendar, TrendingUp, CheckCircle, Loader2 } from 'lucide-react';
-import { useAuth } from '@/context/auth-context';
+import { useAuth } from '@/store/auth-store';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 

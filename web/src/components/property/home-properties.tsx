@@ -5,7 +5,7 @@ import { apiClient } from '@/services/api-client';
 import { MapPin, Star, Home, Users, Building2, Trees, Shield, UtensilsCrossed, Tent, Waves, Loader2 } from 'lucide-react';
 import { PropertyListSkeleton } from './property-card-skeleton';
 import Link from 'next/link';
-import { useAuth } from '@/context/auth-context';
+import { useAuth } from '@/store/auth-store';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 

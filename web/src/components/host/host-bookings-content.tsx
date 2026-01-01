@@ -1,6 +1,6 @@
 'use client';
 
-import { useAuth } from '@/context/auth-context';
+import { useAuth } from '@/store/auth-store';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
 import { Calendar, MapPin, User, CheckCircle, XCircle, Clock, DollarSign, List } from 'lucide-react';

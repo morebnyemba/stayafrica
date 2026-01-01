@@ -1,6 +1,6 @@
 'use client';
 
-import { useAuth } from '@/context/auth-context';
+import { useAuth } from '@/store/auth-store';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
 import Link from 'next/link';

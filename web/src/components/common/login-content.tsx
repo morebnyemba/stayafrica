@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useAuth } from '@/context/auth-context';
+import { useAuth } from '@/store/auth-store';
 import Link from 'next/link';
 import { Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { FormField, Input } from '@/components/ui/form';

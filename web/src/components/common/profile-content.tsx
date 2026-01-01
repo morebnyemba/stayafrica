@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useAuth } from '@/context/auth-context';
+import { useAuth } from '@/store/auth-store';
 import dynamic from 'next/dynamic';
 const ProtectedRoute = dynamic(() => import('@/components/auth/protected-route').then(m => m.ProtectedRoute), { ssr: false });
 import { User, Mail, Phone, MapPin, CreditCard, Shield, Bell, Camera, Save, Loader2 } from 'lucide-react';

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/context/auth-context';
+import { useAuth } from '@/store/auth-store';
 import Link from 'next/link';
 import { Mail, Lock, Eye, EyeOff, Loader2, User, Phone, MapPin, CheckCircle2, ArrowRight, ArrowLeft } from 'lucide-react';
 import { toast } from 'react-hot-toast';
