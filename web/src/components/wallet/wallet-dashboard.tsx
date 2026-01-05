@@ -430,8 +430,6 @@ function WithdrawModal({ wallet, bankAccounts, onClose }: { wallet: any; bankAcc
     });
   };
 
-  const primaryBank = bankAccounts.find((b: any) => b.is_primary);
-
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" onClick={onClose}>
       <div className="bg-white dark:bg-primary-800 rounded-xl p-6 max-w-md w-full" onClick={(e) => e.stopPropagation()}>
