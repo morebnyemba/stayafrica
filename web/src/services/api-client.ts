@@ -163,25 +163,84 @@ class ApiClient {
     return this.client.get(`/properties/${safeId}/reviews/`);
   }
 
-  // Messages
-  async getMessages(params?: any) {
-    return this.client.get('/messages/', { params });
+  // Messages & Conversations
+  async getConversations(params?: any) {
+    return this.client.get('/messaging/conversations/', { params });
   }
 
-  async sendMessage(data: any) {
-    return this.client.post('/messages/', data);
+  async getConversation(conversationId: string) {
+    const safeId = this.assertId(conversationId, 'Conversation ID');
+    return this.client.get(`/messaging/conversations/${safeId}/`);
   }
 
-  async getConversations() {
-    return this.client.get('/messages/conversations/');
+  async createConversation(data: {
+    participants: number[];
+    property?: number;
+    booking?: number;
+    subject?: string;
+  }) {
+    return this.client.post('/messaging/conversations/', data);
   }
 
-  async getUnreadCount() {
-    return this.client.get('/messages/unread/');
+  async markConversationAsRead(conversationId: string) {
+    const safeId = this.assertId(conversationId, 'Conversation ID');
+    return this.client.post(`/messaging/conversations/${safeId}/mark_as_read/`);
+  }
+
+  async archiveConversation(conversationId: string) {
+    const safeId = this.assertId(conversationId, 'Conversation ID');
+    return this.client.post(`/messaging/conversations/${safeId}/archive/`);
+  }
+
+  async getConversationMessages(conversationId: string, params?: any) {
+    return this.client.get('/messaging/messages/', { 
+      params: { ...params, conversation: conversationId } 
+    });
+  }
+
+  async sendMessage(data: {
+    conversation: number;
+    receiver: number;
+    text: string;
+    message_type?: string;
+    metadata?: any;
+  }) {
+    return this.client.post('/messaging/messages/', data);
   }
 
   async markMessageAsRead(messageId: string) {
-    return this.client.patch(`/messages/${messageId}/`, { is_read: true });
+    const safeId = this.assertId(messageId, 'Message ID');
+    return this.client.post(`/messaging/messages/${safeId}/mark_as_read/`);
+  }
+
+  async editMessage(messageId: string, text: string) {
+    const safeId = this.assertId(messageId, 'Message ID');
+    return this.client.put(`/messaging/messages/${safeId}/edit/`, { text });
+  }
+
+  async deleteMessage(messageId: string) {
+    const safeId = this.assertId(messageId, 'Message ID');
+    return this.client.delete(`/messaging/messages/${safeId}/`);
+  }
+
+  async getUnreadMessagesCount() {
+    return this.client.get('/messaging/messages/unread/');
+  }
+
+  async getTotalUnreadCount() {
+    return this.client.get('/messaging/conversations/unread_count/');
+  }
+
+  async getMessageTemplates() {
+    return this.client.get('/messaging/templates/');
+  }
+
+  async getMessages(params?: any) {
+    return this.client.get('/messaging/messages/', { params });
+  }
+
+  async getUnreadCount() {
+    return this.client.get('/messaging/conversations/unread_count/');
   }
 
   // Users
