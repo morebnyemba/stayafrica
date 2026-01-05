@@ -1,0 +1,15 @@
+{application, messaging_service,
+ [{description, "StayAfrica Messaging Service - Erlang/OTP based messaging with high concurrency and fault tolerance"},
+  {vsn, "1.0.0"},
+  {registered, [messaging_service_sup, message_router, message_queue_manager]},
+  {applications, [kernel, stdlib, crypto, inets, jsx]},
+  {mod, {messaging_service_app, []}},
+  {env, [
+    {http_port, 8765},
+    {max_connections, 10000},
+    {message_queue_max_size, 100000},
+    {message_retention_days, 30},
+    {django_api_url, "http://backend:8000"},
+    {django_api_token, ""}
+  ]}
+ ]}.
