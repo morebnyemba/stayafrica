@@ -149,8 +149,23 @@ class MessageViewSet(viewsets.ModelViewSet):
         return queryset.order_by('-created_at')
     
     def perform_create(self, serializer):
-        """Set the sender to the current user"""
-        serializer.save(sender=self.request.user)
+        """Set the sender to the current user and route through Erlang if available"""
+        message = serializer.save(sender=self.request.user)
+        
+        # Try to route through Erlang for real-time delivery
+        try:
+            from services.erlang_messaging import erlang_client
+            erlang_client.send_message(
+                conversation_id=message.conversation.id,
+                sender_id=message.sender.id,
+                receiver_id=message.receiver.id,
+                text=message.text,
+                message_type=message.message_type,
+                priority='high' if message.message_type == 'system' else 'normal',
+                metadata=message.metadata
+            )
+        except Exception as e:
+            logger.warning(f"Failed to route message through Erlang: {str(e)}")
     
     def destroy(self, request, *args, **kwargs):
         """Soft delete message"""
@@ -238,3 +253,102 @@ class MessageTemplateViewSet(viewsets.ReadOnlyModelViewSet):
                 {'error': f'Missing variable: {str(e)}'},
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
+from django.conf import settings
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])  # Auth handled by custom verification
+def erlang_persist_messages(request):
+    """
+    Endpoint for Erlang service to persist messages back to Django
+    Protected by X-Erlang-Service header and optional shared secret
+    """
+    # Verify request is from Erlang service
+    erlang_header = request.headers.get('X-Erlang-Service')
+    if erlang_header != 'messaging':
+        logger.warning("Unauthorized Erlang persistence attempt")
+        return Response(
+            {'error': 'Unauthorized'},
+            status=status.HTTP_403_FORBIDDEN
+        )
+    
+    # Additional security: check shared secret if configured
+    shared_secret = getattr(settings, 'ERLANG_SHARED_SECRET', None)
+    if shared_secret:
+        provided_secret = request.headers.get('X-Erlang-Secret')
+        if provided_secret != shared_secret:
+            logger.warning("Invalid Erlang shared secret")
+            return Response(
+                {'error': 'Unauthorized'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+    
+    messages = request.data.get('messages', [])
+    
+    if not messages:
+        return Response(
+            {'error': 'No messages provided'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    persisted_count = 0
+    errors = []
+    
+    for msg_data in messages:
+        try:
+            # Get or create conversation
+            conversation_id = msg_data.get('conversation_id')
+            conversation = Conversation.objects.get(id=conversation_id)
+            
+            # Get users
+            sender = User.objects.get(id=msg_data.get('sender_id'))
+            receiver = User.objects.get(id=msg_data.get('receiver_id'))
+            
+            # Create message if it doesn't exist
+            Message.objects.get_or_create(
+                conversation=conversation,
+                sender=sender,
+                receiver=receiver,
+                text=msg_data.get('text'),
+                message_type=msg_data.get('message_type', 'text'),
+                defaults={
+                    'metadata': msg_data.get('metadata', {})
+                }
+            )
+            persisted_count += 1
+            
+        except Exception as e:
+            errors.append({
+                'message': msg_data,
+                'error': str(e)
+            })
+            logger.error(f"Failed to persist message from Erlang: {str(e)}")
+    
+    return Response({
+        'persisted': persisted_count,
+        'errors': errors
+    })
+
+
+@api_view(['GET'])
+def erlang_health(request):
+    """Check Erlang service health"""
+    from services.erlang_messaging import erlang_client
+    
+    is_healthy = erlang_client.health_check()
+    
+    if is_healthy:
+        stats = erlang_client.get_stats()
+        return Response({
+            'status': 'healthy',
+            'erlang_stats': stats
+        })
+    else:
+        return Response({
+            'status': 'unhealthy',
+            'message': 'Erlang service is not responding'
+        }, status=status.HTTP_503_SERVICE_UNAVAILABLE)

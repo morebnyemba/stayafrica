@@ -230,3 +230,241 @@ class PaymentViewSet(viewsets.ModelViewSet):
             'currency': payment.currency,
             'created_at': payment.created_at,
         })
+
+
+class WalletViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing user wallets"""
+    permission_classes = [IsAuthenticated]
+    
+    def get_serializer_class(self):
+        from apps.payments.serializers import WalletSerializer
+        return WalletSerializer
+    
+    def get_queryset(self):
+        """Return wallet for current user or all if admin"""
+        from apps.payments.models import Wallet
+        user = self.request.user
+        if user.is_admin_user:
+            return Wallet.objects.all().select_related('user')
+        return Wallet.objects.filter(user=user)
+    
+    @action(detail=False, methods=['get'])
+    def my_wallet(self, request):
+        """Get current user's wallet"""
+        from services.transaction_service import TransactionService
+        wallet = TransactionService.create_wallet(request.user)
+        serializer = self.get_serializer(wallet)
+        return Response(serializer.data)
+    
+    @action(detail=True, methods=['get'])
+    def balance(self, request, pk=None):
+        """Get wallet balance"""
+        wallet = self.get_object()
+        return Response({
+            'balance': wallet.balance,
+            'currency': wallet.currency,
+            'status': wallet.status
+        })
+    
+    @action(detail=True, methods=['get'])
+    @api_ratelimit(rate='20/m')
+    def transactions(self, request, pk=None):
+        """Get wallet transactions"""
+        from apps.payments.models import WalletTransaction
+        from apps.payments.serializers import WalletTransactionSerializer
+        
+        wallet = self.get_object()
+        transactions = WalletTransaction.objects.filter(wallet=wallet).order_by('-created_at')
+        
+        # Apply filters
+        txn_type = request.query_params.get('type')
+        if txn_type:
+            transactions = transactions.filter(txn_type=txn_type)
+        
+        txn_status = request.query_params.get('status')
+        if txn_status:
+            transactions = transactions.filter(status=txn_status)
+        
+        # Paginate
+        from rest_framework.pagination import PageNumberPagination
+        paginator = PageNumberPagination()
+        paginator.page_size = 20
+        page = paginator.paginate_queryset(transactions, request)
+        
+        serializer = WalletTransactionSerializer(page, many=True)
+        return paginator.get_paginated_response(serializer.data)
+
+
+class WalletTransactionViewSet(viewsets.ReadOnlyModelViewSet):
+    """ViewSet for viewing wallet transactions"""
+    permission_classes = [IsAuthenticated]
+    
+    def get_serializer_class(self):
+        from apps.payments.serializers import WalletTransactionSerializer
+        return WalletTransactionSerializer
+    
+    def get_queryset(self):
+        """Return transactions for current user's wallet"""
+        from apps.payments.models import WalletTransaction
+        user = self.request.user
+        if user.is_admin_user:
+            return WalletTransaction.objects.all().select_related('wallet__user', 'booking')
+        return WalletTransaction.objects.filter(wallet__user=user).select_related('wallet', 'booking')
+
+
+class BankAccountViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing bank accounts"""
+    permission_classes = [IsAuthenticated]
+    
+    def get_serializer_class(self):
+        from apps.payments.serializers import BankAccountSerializer
+        return BankAccountSerializer
+    
+    def get_queryset(self):
+        """Return bank accounts for current user"""
+        from apps.payments.models import BankAccount
+        return BankAccount.objects.filter(user=self.request.user)
+    
+    def perform_create(self, serializer):
+        """Set user to current user"""
+        serializer.save(user=self.request.user)
+    
+    @action(detail=True, methods=['post'])
+    def set_primary(self, request, pk=None):
+        """Set bank account as primary"""
+        from apps.payments.models import BankAccount
+        account = self.get_object()
+        
+        # Unset other primary accounts
+        with transaction.atomic():
+            BankAccount.objects.filter(user=request.user, is_primary=True).update(is_primary=False)
+            account.is_primary = True
+            account.save(update_fields=['is_primary', 'updated_at'])
+        
+        logger.info(f"Set bank account {account.id} as primary for user {request.user.id}")
+        serializer = self.get_serializer(account)
+        return Response(serializer.data)
+
+
+class WithdrawalViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing withdrawals"""
+    permission_classes = [IsAuthenticated]
+    http_method_names = ['get', 'post', 'head', 'options']  # No update/delete
+    
+    def get_serializer_class(self):
+        from apps.payments.serializers import WithdrawalSerializer, WithdrawalCreateSerializer
+        if self.action == 'create':
+            return WithdrawalCreateSerializer
+        return WithdrawalSerializer
+    
+    def get_queryset(self):
+        """Return withdrawals for current user or all if admin"""
+        from apps.payments.models import Withdrawal
+        user = self.request.user
+        if user.is_admin_user:
+            return Withdrawal.objects.all().select_related('wallet__user', 'bank_account')
+        return Withdrawal.objects.filter(wallet__user=user).select_related('wallet', 'bank_account')
+    
+    @transaction.atomic
+    @api_ratelimit(rate='5/m')
+    @log_action('initiate_withdrawal')
+    def create(self, request, *args, **kwargs):
+        """Initiate a withdrawal"""
+        from services.transaction_service import TransactionService, TransactionError, InsufficientBalanceError
+        
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        wallet = serializer.validated_data['wallet']
+        bank_account = serializer.validated_data['bank_account']
+        amount = serializer.validated_data['amount']
+        
+        # Verify wallet belongs to user
+        if wallet.user != request.user:
+            return Response(
+                {'error': 'You can only withdraw from your own wallet'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        try:
+            withdrawal = TransactionService.initiate_withdrawal(wallet, bank_account, amount)
+            
+            # Log the action
+            from django.contrib.contenttypes.models import ContentType
+            from apps.payments.models import Withdrawal
+            content_type = ContentType.objects.get_for_model(Withdrawal)
+            AuditLoggerService.log_action(
+                user=request.user,
+                action='initiate_withdrawal',
+                content_type=content_type,
+                object_id=withdrawal.id,
+                changes={
+                    'amount': str(amount),
+                    'reference': withdrawal.reference
+                }
+            )
+            
+            from apps.payments.serializers import WithdrawalSerializer
+            result_serializer = WithdrawalSerializer(withdrawal)
+            return Response(result_serializer.data, status=status.HTTP_201_CREATED)
+            
+        except InsufficientBalanceError as e:
+            logger.warning(f"Insufficient balance for withdrawal: {str(e)}")
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except TransactionError as e:
+            logger.error(f"Withdrawal error: {str(e)}")
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+    
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    @log_action('complete_withdrawal')
+    def complete(self, request, pk=None):
+        """Complete a withdrawal (admin only)"""
+        if not request.user.is_admin_user:
+            return Response(
+                {'error': 'Only admins can complete withdrawals'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        from services.transaction_service import TransactionService, TransactionError
+        
+        notes = request.data.get('notes', '')
+        
+        try:
+            withdrawal = TransactionService.complete_withdrawal(pk, notes)
+            serializer = self.get_serializer(withdrawal)
+            return Response(serializer.data)
+        except TransactionError as e:
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+    
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    @log_action('fail_withdrawal')
+    def fail(self, request, pk=None):
+        """Fail a withdrawal and reverse transaction (admin only)"""
+        if not request.user.is_admin_user:
+            return Response(
+                {'error': 'Only admins can fail withdrawals'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        from services.transaction_service import TransactionService, TransactionError
+        
+        reason = request.data.get('reason', '')
+        
+        try:
+            withdrawal = TransactionService.fail_withdrawal(pk, reason)
+            serializer = self.get_serializer(withdrawal)
+            return Response(serializer.data)
+        except TransactionError as e:
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )

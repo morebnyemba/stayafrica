@@ -163,25 +163,84 @@ class ApiClient {
     return this.client.get(`/properties/${safeId}/reviews/`);
   }
 
-  // Messages
-  async getMessages(params?: any) {
-    return this.client.get('/messages/', { params });
+  // Messages & Conversations
+  async getConversations(params?: any) {
+    return this.client.get('/messaging/conversations/', { params });
   }
 
-  async sendMessage(data: any) {
-    return this.client.post('/messages/', data);
+  async getConversation(conversationId: string) {
+    const safeId = this.assertId(conversationId, 'Conversation ID');
+    return this.client.get(`/messaging/conversations/${safeId}/`);
   }
 
-  async getConversations() {
-    return this.client.get('/messages/conversations/');
+  async createConversation(data: {
+    participants: number[];
+    property?: number;
+    booking?: number;
+    subject?: string;
+  }) {
+    return this.client.post('/messaging/conversations/', data);
   }
 
-  async getUnreadCount() {
-    return this.client.get('/messages/unread/');
+  async markConversationAsRead(conversationId: string) {
+    const safeId = this.assertId(conversationId, 'Conversation ID');
+    return this.client.post(`/messaging/conversations/${safeId}/mark_as_read/`);
+  }
+
+  async archiveConversation(conversationId: string) {
+    const safeId = this.assertId(conversationId, 'Conversation ID');
+    return this.client.post(`/messaging/conversations/${safeId}/archive/`);
+  }
+
+  async getConversationMessages(conversationId: string, params?: any) {
+    return this.client.get('/messaging/messages/', { 
+      params: { ...params, conversation: conversationId } 
+    });
+  }
+
+  async sendMessage(data: {
+    conversation: number;
+    receiver: number;
+    text: string;
+    message_type?: string;
+    metadata?: any;
+  }) {
+    return this.client.post('/messaging/messages/', data);
   }
 
   async markMessageAsRead(messageId: string) {
-    return this.client.patch(`/messages/${messageId}/`, { is_read: true });
+    const safeId = this.assertId(messageId, 'Message ID');
+    return this.client.post(`/messaging/messages/${safeId}/mark_as_read/`);
+  }
+
+  async editMessage(messageId: string, text: string) {
+    const safeId = this.assertId(messageId, 'Message ID');
+    return this.client.put(`/messaging/messages/${safeId}/edit/`, { text });
+  }
+
+  async deleteMessage(messageId: string) {
+    const safeId = this.assertId(messageId, 'Message ID');
+    return this.client.delete(`/messaging/messages/${safeId}/`);
+  }
+
+  async getUnreadMessagesCount() {
+    return this.client.get('/messaging/messages/unread/');
+  }
+
+  async getTotalUnreadCount() {
+    return this.client.get('/messaging/conversations/unread_count/');
+  }
+
+  async getMessageTemplates() {
+    return this.client.get('/messaging/templates/');
+  }
+
+  async getMessages(params?: any) {
+    return this.client.get('/messaging/messages/', { params });
+  }
+
+  async getUnreadCount() {
+    return this.client.get('/messaging/conversations/unread_count/');
   }
 
   // Users
@@ -305,6 +364,72 @@ class ApiClient {
   // Host Booking Management
   async getHostBookings(params?: any) {
     return this.client.get('/bookings/', { params });
+  }
+
+  // Wallet Management
+  async getMyWallet() {
+    return this.client.get('/payments/wallets/my_wallet/');
+  }
+
+  async getWalletBalance(walletId: string) {
+    const safeId = this.assertId(walletId, 'Wallet ID');
+    return this.client.get(`/payments/wallets/${safeId}/balance/`);
+  }
+
+  async getWalletTransactions(walletId: string, params?: any) {
+    const safeId = this.assertId(walletId, 'Wallet ID');
+    return this.client.get(`/payments/wallets/${safeId}/transactions/`, { params });
+  }
+
+  // Bank Account Management
+  async getBankAccounts() {
+    return this.client.get('/payments/bank-accounts/');
+  }
+
+  async createBankAccount(data: {
+    bank_name: string;
+    account_name: string;
+    account_number: string;
+    branch_code?: string;
+    country?: string;
+    is_primary?: boolean;
+  }) {
+    return this.client.post('/payments/bank-accounts/', data);
+  }
+
+  async updateBankAccount(accountId: string, data: any) {
+    const safeId = this.assertId(accountId, 'Bank Account ID');
+    return this.client.patch(`/payments/bank-accounts/${safeId}/`, data);
+  }
+
+  async deleteBankAccount(accountId: string) {
+    const safeId = this.assertId(accountId, 'Bank Account ID');
+    return this.client.delete(`/payments/bank-accounts/${safeId}/`);
+  }
+
+  async setPrimaryBankAccount(accountId: string) {
+    const safeId = this.assertId(accountId, 'Bank Account ID');
+    return this.client.post(`/payments/bank-accounts/${safeId}/set_primary/`);
+  }
+
+  // Withdrawal Management
+  async getWithdrawals(params?: any) {
+    return this.client.get('/payments/withdrawals/', { params });
+  }
+
+  async initiateWithdrawal(data: {
+    wallet: string;
+    bank_account: string;
+    amount: string;
+    currency: string;
+    notes?: string;
+  }) {
+    return this.client.post('/payments/withdrawals/', data);
+  }
+
+  // Transaction History
+  async getTransactions(params?: any) {
+    return this.client.get('/payments/transactions/', { params });
   }
 }
 
