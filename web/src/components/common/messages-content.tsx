@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
-import { Send, MessageSquare, Search, MoreVertical, Archive, Trash2, Edit2, Check, X } from 'lucide-react';
+import { Send, MessageSquare, Search, Archive, Trash2, Edit2, Check, X } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useState, useEffect, useRef } from 'react';
 const ProtectedRoute = dynamic(() => import('@/components/auth/protected-route').then(m => m.ProtectedRoute), { ssr: false });
