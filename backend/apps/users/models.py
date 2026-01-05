@@ -26,6 +26,8 @@ class User(AbstractUser):
     is_verified = models.BooleanField(default=False)
     profile_picture = models.ImageField(upload_to='profile_pictures/%Y/%m/%d/', null=True, blank=True)
     bio = models.TextField(blank=True, null=True)
+    is_online = models.BooleanField(default=False)
+    last_seen = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     

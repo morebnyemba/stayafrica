@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { User, Star, CheckCircle } from 'lucide-react';
+import { User, Star, CheckCircle, MessageCircle } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
 
 interface PropertyHostCardProps {
   host?: {
@@ -14,6 +15,8 @@ interface PropertyHostCardProps {
     total_listings?: number;
     response_rate?: number;
     response_time?: string;
+    is_online?: boolean;
+    last_seen?: string;
   };
 }
 
@@ -21,6 +24,19 @@ export function PropertyHostCard({ host }: PropertyHostCardProps) {
   if (!host) {
     return null;
   }
+
+  const getOnlineStatus = () => {
+    if (host.is_online) {
+      return { text: 'Online now', color: 'text-green-600 dark:text-green-400' };
+    }
+    if (host.last_seen) {
+      const lastSeenText = formatDistanceToNow(new Date(host.last_seen), { addSuffix: true });
+      return { text: `Active ${lastSeenText}`, color: 'text-primary-600 dark:text-sand-400' };
+    }
+    return null;
+  };
+
+  const onlineStatus = getOnlineStatus();
 
   return (
     <div>
@@ -31,19 +47,25 @@ export function PropertyHostCard({ host }: PropertyHostCardProps) {
         {/* Host profile */}
         <div className="flex items-start justify-between mb-6 pb-6 border-b border-primary-200 dark:border-primary-700">
           <div className="flex items-start space-x-4">
-            {host.profile_picture ? (
-              <img
-                src={host.profile_picture}
-                alt={`${host.first_name} ${host.last_name}`}
-                className="w-16 h-16 rounded-full object-cover"
-              />
-            ) : (
-              <div className="w-16 h-16 rounded-full bg-primary-200 dark:bg-primary-700 flex items-center justify-center">
-                <User className="w-8 h-8 text-primary-600 dark:text-sand-300" />
-              </div>
-            )}
+            <div className="relative">
+              {host.profile_picture ? (
+                <img
+                  src={host.profile_picture}
+                  alt={`${host.first_name} ${host.last_name}`}
+                  className="w-16 h-16 rounded-full object-cover"
+                />
+              ) : (
+                <div className="w-16 h-16 rounded-full bg-primary-200 dark:bg-primary-700 flex items-center justify-center">
+                  <User className="w-8 h-8 text-primary-600 dark:text-sand-300" />
+                </div>
+              )}
+              {/* Online indicator */}
+              {host.is_online && (
+                <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 border-2 border-white dark:border-primary-800 rounded-full"></div>
+              )}
+            </div>
             <div className="flex-1">
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 mb-1">
                 <h3 className="text-lg font-semibold text-primary-900 dark:text-sand-50">
                   {host.first_name} {host.last_name}
                 </h3>
@@ -51,6 +73,11 @@ export function PropertyHostCard({ host }: PropertyHostCardProps) {
                   <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
                 )}
               </div>
+              {onlineStatus && (
+                <p className={`text-sm ${onlineStatus.color} mb-1`}>
+                  {onlineStatus.text}
+                </p>
+              )}
               <p className="text-sm text-primary-600 dark:text-sand-400">
                 Hosting since 2023
               </p>
@@ -99,9 +126,10 @@ export function PropertyHostCard({ host }: PropertyHostCardProps) {
         {/* Contact button */}
         <Link
           href={`/messages?host=${host.id}`}
-          className="w-full inline-block text-center bg-secondary-600 hover:bg-secondary-700 dark:bg-secondary-700 dark:hover:bg-secondary-600 text-white font-medium py-3 px-4 rounded-lg transition"
+          className="w-full inline-flex items-center justify-center gap-2 bg-secondary-600 hover:bg-secondary-700 dark:bg-secondary-700 dark:hover:bg-secondary-600 text-white font-medium py-3 px-4 rounded-lg transition"
         >
-          Contact Host
+          <MessageCircle className="w-5 h-5" />
+          <span>Contact Host</span>
         </Link>
       </div>
     </div>

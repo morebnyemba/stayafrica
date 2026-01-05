@@ -1,7 +1,7 @@
 'use client';
 
 import { useAuth } from '@/store/auth-store';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
 import dynamic from 'next/dynamic';
 const ProtectedRoute = dynamic(() => import('@/components/auth/protected-route').then(m => m.ProtectedRoute), { ssr: false });
@@ -16,7 +16,12 @@ import {
   CreditCard,
   Clock,
   CheckCircle,
+  Plus,
+  Trash2,
+  Edit2,
+  Building2,
 } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 
 type Period = 'week' | 'month' | 'year';
 
@@ -24,6 +29,18 @@ export function HostEarningsContent() {
   const { user, isAuthenticated } = useAuth();
   const [period, setPeriod] = useState<Period>('month');
   const [showFilters, setShowFilters] = useState(false);
+  const [showBankAccountForm, setShowBankAccountForm] = useState(false);
+  const [editingAccount, setEditingAccount] = useState<any>(null);
+  const queryClient = useQueryClient();
+
+  const [bankFormData, setBankFormData] = useState({
+    bank_name: '',
+    account_name: '',
+    account_number: '',
+    branch_code: '',
+    country: '',
+    is_primary: false,
+  });
 
   // Fetch earnings data
   const { data: earningsData, isLoading: loadingEarnings } = useQuery({
@@ -45,6 +62,71 @@ export function HostEarningsContent() {
     enabled: isAuthenticated && user?.role === 'host',
   });
 
+  // Fetch bank accounts
+  const { data: bankAccountsData, isLoading: loadingBankAccounts } = useQuery({
+    queryKey: ['bank-accounts'],
+    queryFn: async () => {
+      const response = await apiClient.getBankAccounts();
+      return response.data;
+    },
+    enabled: isAuthenticated && user?.role === 'host',
+  });
+
+  // Create bank account mutation
+  const createBankAccountMutation = useMutation({
+    mutationFn: (data: any) => apiClient.createBankAccount(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['bank-accounts'] });
+      toast.success('Bank account added successfully');
+      setShowBankAccountForm(false);
+      resetBankForm();
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Failed to add bank account');
+    },
+  });
+
+  // Update bank account mutation
+  const updateBankAccountMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: any }) => 
+      apiClient.updateBankAccount(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['bank-accounts'] });
+      toast.success('Bank account updated successfully');
+      setShowBankAccountForm(false);
+      setEditingAccount(null);
+      resetBankForm();
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Failed to update bank account');
+    },
+  });
+
+  // Delete bank account mutation
+  const deleteBankAccountMutation = useMutation({
+    mutationFn: (id: string) => apiClient.deleteBankAccount(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['bank-accounts'] });
+      toast.success('Bank account deleted successfully');
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Failed to delete bank account');
+    },
+  });
+
+  // Set primary bank account mutation
+  const setPrimaryBankAccountMutation = useMutation({
+    mutationFn: (id: string) => apiClient.setPrimaryBankAccount(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['bank-accounts'] });
+      toast.success('Primary bank account updated');
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Failed to set primary account');
+    },
+  });
+
+  const bankAccounts = bankAccountsData?.results || bankAccountsData || [];
   const earnings = earningsData?.earnings || [];
   
   // Calculate totals and trends
@@ -56,6 +138,51 @@ export function HostEarningsContent() {
   const trend = lastPeriod && prevPeriod 
     ? ((parseFloat(lastPeriod.total) - parseFloat(prevPeriod.total)) / parseFloat(prevPeriod.total)) * 100
     : 0;
+
+  const resetBankForm = () => {
+    setBankFormData({
+      bank_name: '',
+      account_name: '',
+      account_number: '',
+      branch_code: '',
+      country: '',
+      is_primary: false,
+    });
+  };
+
+  const handleAddBankAccount = () => {
+    setEditingAccount(null);
+    resetBankForm();
+    setShowBankAccountForm(true);
+  };
+
+  const handleEditBankAccount = (account: any) => {
+    setEditingAccount(account);
+    setBankFormData({
+      bank_name: account.bank_name,
+      account_name: account.account_name,
+      account_number: account.account_number,
+      branch_code: account.branch_code || '',
+      country: account.country || '',
+      is_primary: account.is_primary,
+    });
+    setShowBankAccountForm(true);
+  };
+
+  const handleSubmitBankAccount = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (editingAccount) {
+      updateBankAccountMutation.mutate({ id: editingAccount.id, data: bankFormData });
+    } else {
+      createBankAccountMutation.mutate(bankFormData);
+    }
+  };
+
+  const handleDeleteBankAccount = (id: string) => {
+    if (confirm('Are you sure you want to delete this bank account?')) {
+      deleteBankAccountMutation.mutate(id);
+    }
+  };
 
   const summaryCards = [
     {
@@ -266,7 +393,7 @@ export function HostEarningsContent() {
           </section>
 
           {/* Payout Information */}
-          <section aria-labelledby="payout-info-heading" className="card p-4 sm:p-6">
+          <section aria-labelledby="payout-info-heading" className="card p-4 sm:p-6 mb-8">
             <h2 id="payout-info-heading" className="text-xl sm:text-2xl font-bold text-primary-900 dark:text-sand-50 mb-4">
               Payout Information
             </h2>
@@ -318,6 +445,224 @@ export function HostEarningsContent() {
                 </div>
               </div>
             </div>
+          </section>
+
+          {/* Bank Accounts Section */}
+          <section aria-labelledby="bank-accounts-heading" className="card p-4 sm:p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 id="bank-accounts-heading" className="text-xl sm:text-2xl font-bold text-primary-900 dark:text-sand-50 mb-1">
+                  Disbursement Details
+                </h2>
+                <p className="text-sm text-primary-600 dark:text-sand-300">
+                  Manage your bank accounts for receiving payouts
+                </p>
+              </div>
+              <button
+                onClick={handleAddBankAccount}
+                className="btn-primary px-4 py-2 flex items-center gap-2"
+              >
+                <Plus className="w-4 h-4" />
+                <span className="hidden sm:inline">Add Account</span>
+              </button>
+            </div>
+
+            {/* Bank Account Form */}
+            {showBankAccountForm && (
+              <form onSubmit={handleSubmitBankAccount} className="mb-6 p-4 bg-sand-50 dark:bg-primary-700 rounded-lg border border-primary-200 dark:border-primary-600">
+                <h3 className="font-semibold text-primary-900 dark:text-sand-50 mb-4">
+                  {editingAccount ? 'Edit' : 'Add'} Bank Account
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-primary-900 dark:text-sand-100 mb-2">
+                      Bank Name *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={bankFormData.bank_name}
+                      onChange={(e) => setBankFormData({ ...bankFormData, bank_name: e.target.value })}
+                      className="w-full px-3 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-50 focus:ring-2 focus:ring-secondary-500"
+                      placeholder="e.g., First National Bank"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-primary-900 dark:text-sand-100 mb-2">
+                      Account Name *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={bankFormData.account_name}
+                      onChange={(e) => setBankFormData({ ...bankFormData, account_name: e.target.value })}
+                      className="w-full px-3 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-50 focus:ring-2 focus:ring-secondary-500"
+                      placeholder="Account holder name"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-primary-900 dark:text-sand-100 mb-2">
+                      Account Number *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={bankFormData.account_number}
+                      onChange={(e) => setBankFormData({ ...bankFormData, account_number: e.target.value })}
+                      className="w-full px-3 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-50 focus:ring-2 focus:ring-secondary-500"
+                      placeholder="Account number"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-primary-900 dark:text-sand-100 mb-2">
+                      Branch Code
+                    </label>
+                    <input
+                      type="text"
+                      value={bankFormData.branch_code}
+                      onChange={(e) => setBankFormData({ ...bankFormData, branch_code: e.target.value })}
+                      className="w-full px-3 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-50 focus:ring-2 focus:ring-secondary-500"
+                      placeholder="Branch code (optional)"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-primary-900 dark:text-sand-100 mb-2">
+                      Country
+                    </label>
+                    <input
+                      type="text"
+                      value={bankFormData.country}
+                      onChange={(e) => setBankFormData({ ...bankFormData, country: e.target.value })}
+                      className="w-full px-3 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-50 focus:ring-2 focus:ring-secondary-500"
+                      placeholder="Country (optional)"
+                    />
+                  </div>
+                  <div className="flex items-center pt-6">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={bankFormData.is_primary}
+                        onChange={(e) => setBankFormData({ ...bankFormData, is_primary: e.target.checked })}
+                        className="w-4 h-4 text-secondary-600 border-primary-300 rounded focus:ring-secondary-500"
+                      />
+                      <span className="text-sm text-primary-900 dark:text-sand-100">Set as primary account</span>
+                    </label>
+                  </div>
+                </div>
+                <div className="flex gap-3 mt-4">
+                  <button
+                    type="submit"
+                    disabled={createBankAccountMutation.isPending || updateBankAccountMutation.isPending}
+                    className="btn-primary px-4 py-2 disabled:opacity-50"
+                  >
+                    {editingAccount ? 'Update' : 'Add'} Account
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowBankAccountForm(false);
+                      setEditingAccount(null);
+                      resetBankForm();
+                    }}
+                    className="btn-secondary px-4 py-2"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {/* Bank Accounts List */}
+            {loadingBankAccounts ? (
+              <div className="space-y-3">
+                {[1, 2].map(i => (
+                  <div key={i} className="animate-pulse h-20 bg-primary-100 dark:bg-primary-700 rounded-lg"></div>
+                ))}
+              </div>
+            ) : bankAccounts.length > 0 ? (
+              <div className="space-y-3">
+                {bankAccounts.map((account: any) => (
+                  <div
+                    key={account.id}
+                    className="p-4 border border-primary-200 dark:border-primary-700 rounded-lg hover:bg-primary-50 dark:hover:bg-primary-800 transition"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-start gap-3">
+                        <div className="p-2 bg-secondary-100 dark:bg-secondary-900/30 rounded-lg">
+                          <Building2 className="w-5 h-5 text-secondary-600" />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <h4 className="font-semibold text-primary-900 dark:text-sand-50">
+                              {account.bank_name}
+                            </h4>
+                            {account.is_primary && (
+                              <span className="px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 text-xs font-medium rounded">
+                                Primary
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-sm text-primary-600 dark:text-sand-300">
+                            {account.account_name}
+                          </p>
+                          <p className="text-sm text-primary-500 dark:text-sand-400">
+                            ****{account.account_number.slice(-4)}
+                          </p>
+                          {account.branch_code && (
+                            <p className="text-xs text-primary-400 dark:text-sand-500">
+                              Branch: {account.branch_code}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {!account.is_primary && (
+                          <button
+                            onClick={() => setPrimaryBankAccountMutation.mutate(account.id)}
+                            disabled={setPrimaryBankAccountMutation.isPending}
+                            className="p-2 hover:bg-primary-100 dark:hover:bg-primary-700 rounded-lg transition text-xs"
+                            title="Set as primary"
+                          >
+                            <CheckCircle className="w-4 h-4 text-primary-600 dark:text-sand-400" />
+                          </button>
+                        )}
+                        <button
+                          onClick={() => handleEditBankAccount(account)}
+                          className="p-2 hover:bg-primary-100 dark:hover:bg-primary-700 rounded-lg transition"
+                          title="Edit account"
+                        >
+                          <Edit2 className="w-4 h-4 text-primary-600 dark:text-sand-400" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteBankAccount(account.id)}
+                          disabled={deleteBankAccountMutation.isPending}
+                          className="p-2 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition"
+                          title="Delete account"
+                        >
+                          <Trash2 className="w-4 h-4 text-red-600 dark:text-red-400" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <Building2 className="w-12 h-12 text-primary-300 dark:text-primary-700 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-primary-900 dark:text-sand-50 mb-2">
+                  No Bank Accounts
+                </h3>
+                <p className="text-primary-600 dark:text-sand-300 mb-4">
+                  Add a bank account to receive your earnings
+                </p>
+                <button
+                  onClick={handleAddBankAccount}
+                  className="btn-primary px-6 py-2"
+                >
+                  Add Bank Account
+                </button>
+              </div>
+            )}
           </section>
         </div>
       </div>
