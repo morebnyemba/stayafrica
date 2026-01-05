@@ -306,6 +306,72 @@ class ApiClient {
   async getHostBookings(params?: any) {
     return this.client.get('/bookings/', { params });
   }
+
+  // Wallet Management
+  async getMyWallet() {
+    return this.client.get('/payments/wallets/my_wallet/');
+  }
+
+  async getWalletBalance(walletId: string) {
+    const safeId = this.assertId(walletId, 'Wallet ID');
+    return this.client.get(`/payments/wallets/${safeId}/balance/`);
+  }
+
+  async getWalletTransactions(walletId: string, params?: any) {
+    const safeId = this.assertId(walletId, 'Wallet ID');
+    return this.client.get(`/payments/wallets/${safeId}/transactions/`, { params });
+  }
+
+  // Bank Account Management
+  async getBankAccounts() {
+    return this.client.get('/payments/bank-accounts/');
+  }
+
+  async createBankAccount(data: {
+    bank_name: string;
+    account_name: string;
+    account_number: string;
+    branch_code?: string;
+    country?: string;
+    is_primary?: boolean;
+  }) {
+    return this.client.post('/payments/bank-accounts/', data);
+  }
+
+  async updateBankAccount(accountId: string, data: any) {
+    const safeId = this.assertId(accountId, 'Bank Account ID');
+    return this.client.patch(`/payments/bank-accounts/${safeId}/`, data);
+  }
+
+  async deleteBankAccount(accountId: string) {
+    const safeId = this.assertId(accountId, 'Bank Account ID');
+    return this.client.delete(`/payments/bank-accounts/${safeId}/`);
+  }
+
+  async setPrimaryBankAccount(accountId: string) {
+    const safeId = this.assertId(accountId, 'Bank Account ID');
+    return this.client.post(`/payments/bank-accounts/${safeId}/set_primary/`);
+  }
+
+  // Withdrawal Management
+  async getWithdrawals(params?: any) {
+    return this.client.get('/payments/withdrawals/', { params });
+  }
+
+  async initiateWithdrawal(data: {
+    wallet: string;
+    bank_account: string;
+    amount: string;
+    currency: string;
+    notes?: string;
+  }) {
+    return this.client.post('/payments/withdrawals/', data);
+  }
+
+  // Transaction History
+  async getTransactions(params?: any) {
+    return this.client.get('/payments/transactions/', { params });
+  }
 }
 
 export const apiClient = new ApiClient();
