@@ -38,11 +38,6 @@ export default function BookingConfirmPage() {
     // Calculate nights
     const nights = checkIn && checkOut ? Math.ceil((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / (1000 * 60 * 60 * 24)) : 0;
 
-  // Calculate costs (after property is defined)
-  let costs = { basePrice: 0, serviceFee: 0, commissionFee: 0, commissionRate: 0, cleaningFee: 0, total: 0 };
-  if (property && feeConfig && nights > 0) {
-    costs = calculateBookingCost(property.price_per_night, nights, feeConfig, property.cleaning_fee);
-  }
 
   // Fetch property details
   const { data: property, isLoading: loadingProperty } = useQuery({
@@ -55,6 +50,11 @@ export default function BookingConfirmPage() {
     enabled: !!propertyId,
   });
 
+  // Calculate costs (after property is defined)
+  let costs = { basePrice: 0, serviceFee: 0, commissionFee: 0, commissionRate: 0, cleaningFee: 0, total: 0 };
+  if (property && feeConfig && nights > 0) {
+    costs = calculateBookingCost(property.price_per_night, nights, feeConfig, property.cleaning_fee);
+  }
   // Fetch available payment providers based on user's country
   const userCountry = user ? user.country_of_residence : undefined;
   const { data: providersData, isLoading: loadingProviders } = useQuery({
