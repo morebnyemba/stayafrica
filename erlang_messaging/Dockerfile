@@ -8,7 +8,6 @@ RUN apk add --no-cache git
 # Copy application files
 COPY rebar.config .
 COPY src/ src/
-COPY include/ include/
 
 # Download dependencies and compile
 RUN rebar3 compile
