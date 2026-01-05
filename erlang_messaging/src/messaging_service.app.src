@@ -2,7 +2,7 @@
  [{description, "StayAfrica Messaging Service - Erlang/OTP based messaging with high concurrency and fault tolerance"},
   {vsn, "1.0.0"},
   {registered, [messaging_service_sup, message_router, message_queue_manager]},
-  {applications, [kernel, stdlib, crypto, inets, jsx]},
+  {applications, [kernel, stdlib, crypto, inets, jsx, cowboy, lager]},
   {mod, {messaging_service_app, []}},
   {env, [
     {http_port, 8765},

@@ -3,7 +3,7 @@ FROM erlang:24-alpine
 WORKDIR /app
 
 # Install build tools
-RUN apk add --no-cache git
+RUN apk add --no-cache git curl
 
 # Copy application files
 COPY rebar.config .
