@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.db.models import Q, Prefetch
 from django.utils import timezone
+from django.contrib.auth import get_user_model
 from apps.messaging.models import Message, Conversation, MessageTemplate
 from apps.messaging.serializers import (
     MessageSerializer, ConversationSerializer, ConversationDetailSerializer,
@@ -12,6 +13,8 @@ from apps.messaging.serializers import (
 import logging
 
 logger = logging.getLogger(__name__)
+
+User = get_user_model()
 
 
 class ConversationViewSet(viewsets.ModelViewSet):

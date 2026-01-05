@@ -442,6 +442,10 @@ SESSION_CACHE_ALIAS = 'session'
 #     }
 # }
 
+# Erlang Messaging Service Configuration
+ERLANG_MESSAGING_URL = os.getenv('ERLANG_MESSAGING_URL', 'http://erlang-messaging:8765')
+ERLANG_SHARED_SECRET = os.getenv('ERLANG_SHARED_SECRET', None)
+
 # Rate Limiting
 RATELIMIT_ENABLE = os.getenv('RATELIMIT_ENABLE', 'True') == 'True'
 RATELIMIT_USE_CACHE = 'default'
