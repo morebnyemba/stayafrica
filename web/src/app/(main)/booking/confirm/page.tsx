@@ -18,105 +18,58 @@ interface PaymentProvider {
   description: string;
   icon?: any;
 }
-  const [selectedProvider, setSelectedProvider] = useState<string>('');
-  // Fetch available payment providers based on user's country
-  const { data: providersData, isLoading: loadingProviders } = useQuery({
-    queryKey: ['providers', user?.country_of_residence],
-    queryFn: async () => {
-      if (!user?.country_of_residence) return [];
-      const response = await apiClient.getAvailableProviders(user.country_of_residence);
-      return response.data;
-    },
-    enabled: !!user?.country_of_residence,
-  });
 
 export default function BookingConfirmPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user } = useAuth();
-  
+
   const propertyId = searchParams.get('propertyId');
   const checkIn = searchParams.get('checkIn');
   const checkOut = searchParams.get('checkOut');
   const guests = parseInt(searchParams.get('guests') || '1');
 
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [selectedProvider, setSelectedProvider] = useState<string>('');
 
-  // Fetch property details
-  const { data: property, isLoading: loadingProperty } = useQuery({
-    queryKey: ['property', propertyId],
+  // Fetch available payment providers based on user's country
+  const userCountry = user ? user.country_of_residence : undefined;
+  const { data: providersData, isLoading: loadingProviders } = useQuery({
+    queryKey: ['providers', userCountry],
     queryFn: async () => {
-      const response = await apiClient.getPropertyById(propertyId!);
+      if (!userCountry) return [];
+      const response = await apiClient.getAvailableProviders(userCountry);
       return response.data;
     },
-    enabled: !!propertyId,
+    enabled: !!userCountry,
   });
 
-  // Fetch fee configuration
-  const { data: feeConfig, isLoading: loadingFees } = useFeeConfiguration();
-
-  // Calculate costs
-  const nights = checkIn && checkOut 
-    ? Math.ceil((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / (1000 * 60 * 60 * 24)) 
-    : 0;
-  
-  const costs = property && feeConfig && nights > 0
-    ? calculateBookingCost(property.price_per_night, nights, feeConfig, property.cleaning_fee)
-    : { basePrice: 0, serviceFee: 0, commissionFee: 0, commissionRate: 0, cleaningFee: 0, total: 0 };
-
-  // Create booking mutation
-
-  const createBookingMutation = useMutation({
-    mutationFn: async () => {
-      const response = await apiClient.createBooking({
-        rental_property: propertyId,
-        check_in: checkIn,
-        check_out: checkOut,
-        number_of_guests: guests,
+  // Contact Host logic
+  const [contactingHost, setContactingHost] = useState(false);
+  const contactHost = async () => {
+    if (!property?.host_id || !user?.id) {
+      toast.error('Host or user information missing');
+      return;
+    }
+    setContactingHost(true);
+    try {
+      // Create a new conversation with the host
+      const response = await apiClient.createConversation({
+        participants: [property.host_id, user.id],
+        property: property.id,
+        subject: `Inquiry about ${property.title}`,
       });
-      return response.data;
-    },
-    onSuccess: (data) => {
-      toast.success('Booking created successfully!');
-      // Redirect to payment page, pass selected provider
-      router.push(`/booking/payment?bookingId=${data.id}&provider=${selectedProvider}`);
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.error || 'Failed to create booking');
-    },
-  });
-
-  const handleConfirmBooking = () => {
-    if (!agreedToTerms) {
-      toast.error('Please agree to the terms and conditions');
-      return;
+      const conversationId = response.data.id;
+      toast.success('Conversation started!');
+      // Redirect to messaging panel for this conversation
+      router.push(`/messaging/conversations/${conversationId}`);
+    } catch (error: any) {
+      toast.error(error.response?.data?.error || 'Failed to start conversation');
+    } finally {
+      setContactingHost(false);
     }
-    if (!selectedProvider) {
-      toast.error('Please select a payment method');
-      return;
-    }
-    createBookingMutation.mutate();
   };
 
-  if (!propertyId || !checkIn || !checkOut) {
-    return (
-      <ProtectedRoute>
-        <div className="min-h-screen bg-sand-100 dark:bg-primary-900 flex items-center justify-center">
-          <div className="card p-8 text-center max-w-md">
-            <h2 className="text-2xl font-bold text-primary-900 dark:text-sand-50 mb-4">
-              Invalid Booking Details
-            </h2>
-            <p className="text-primary-600 dark:text-sand-300 mb-6">
-              Please select dates and property to continue.
-            </p>
-            <Link href="/explore" className="btn-primary px-6 py-3">
-              Browse Properties
-            </Link>
-          </div>
-        </div>
-      </ProtectedRoute>
-    );
-  }
 
   if (loadingProperty || loadingFees || loadingProviders) {
     return (
@@ -212,6 +165,27 @@ export default function BookingConfirmPage() {
                     </div>
                   </div>
                 </div>
+              </section>
+
+              {/* Contact Host Button */}
+              <section className="card p-6">
+                <button
+                  onClick={contactHost}
+                  disabled={contactingHost}
+                  className="w-full bg-primary-700 hover:bg-primary-800 dark:bg-primary-800 dark:hover:bg-primary-700 text-white font-medium py-3 px-4 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {contactingHost ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      Contacting Host...
+                    </>
+                  ) : (
+                    <>
+                      <Users className="w-5 h-5" />
+                      Contact Host
+                    </>
+                  )}
+                </button>
               </section>
 
               {/* Trip details */}

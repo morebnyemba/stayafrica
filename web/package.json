@@ -11,6 +11,10 @@
     "format": "prettier --write \"src/**/*.{ts,tsx,json,md}\""
   },
   "dependencies": {
+    "next": "^16.1.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "lucide-react": "^0.292.0",
     "@tanstack/react-query": "^5.90.12",
     "axios": "^1.7.9",
     "class-variance-authority": "^0.7.1",
