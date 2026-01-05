@@ -12,9 +12,9 @@ class UserSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'email', 'username', 'first_name', 'last_name', 'phone_number',
             'role', 'country_of_residence', 'is_verified', 'profile_picture',
-            'bio', 'password', 'created_at', 'updated_at'
+            'bio', 'password', 'is_online', 'last_seen', 'created_at', 'updated_at'
         ]
-        read_only_fields = ['id', 'created_at', 'updated_at', 'is_verified']
+        read_only_fields = ['id', 'created_at', 'updated_at', 'is_verified', 'is_online', 'last_seen']
     
     def create(self, validated_data):
         password = validated_data.pop('password')
@@ -39,7 +39,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'id', 'email', 'username', 'first_name', 'last_name', 'phone_number',
-            'role', 'country_of_residence', 'is_verified', 'profile_picture', 'bio'
+            'role', 'country_of_residence', 'is_verified', 'profile_picture', 'bio',
+            'is_online', 'last_seen'
         ]
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):

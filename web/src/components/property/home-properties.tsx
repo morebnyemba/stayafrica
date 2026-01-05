@@ -119,33 +119,51 @@ export function HomeProperties() {
                 href={`/properties/${property.id}`}
                 className="group cursor-pointer"
               >
-                <div className="relative h-40 sm:h-48 md:h-56 lg:h-64 rounded-lg sm:rounded-2xl overflow-hidden mb-2 sm:mb-3">
-                  <img
-                    src={property.images?.[0]?.image_url || 'https://images.unsplash.com/photo-1512917774080-9991f1c52e1d'}
-                    alt={property.title}
-                    className="w-full h-full object-cover transition duration-300 group-hover:scale-105"
-                  />
-                  {property.average_rating && (
-                    <div className="absolute top-2 sm:top-3 right-2 sm:right-3 flex items-center gap-1 bg-white/90 backdrop-blur px-2 py-1 rounded-lg text-xs sm:text-sm font-semibold">
-                      <Star className="w-3 h-3 sm:w-4 sm:h-4 text-primary-900" fill="currentColor" />
-                      <span className="text-primary-900">{property.average_rating.toFixed(1)}</span>
-                    </div>
-                  )}
-                </div>
-                <div className="space-y-1">
-                  <div className="flex items-start justify-between gap-2">
-                    <h3 className="font-semibold text-sm sm:text-base text-primary-900 dark:text-sand-50 group-hover:text-secondary-600 transition line-clamp-1">
-                      {property.city}, {property.country}
-                    </h3>
+                <div className="bg-white dark:bg-primary-800 rounded-xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 border border-primary-100 dark:border-primary-700">
+                  {/* Image Container */}
+                  <div className="relative h-48 sm:h-52 md:h-60 overflow-hidden">
+                    <img
+                      src={property.images?.[0]?.image_url || property.main_image || 'https://images.unsplash.com/photo-1512917774080-9991f1c52e1d'}
+                      alt={property.title}
+                      className="w-full h-full object-cover transition duration-500 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    {property.average_rating && (
+                      <div className="absolute top-3 right-3 flex items-center gap-1 bg-white/95 dark:bg-primary-900/95 backdrop-blur-sm px-2.5 py-1.5 rounded-lg shadow-lg">
+                        <Star className="w-3.5 h-3.5 text-secondary-500" fill="currentColor" />
+                        <span className="text-sm font-bold text-primary-900 dark:text-sand-50">{property.average_rating.toFixed(1)}</span>
+                      </div>
+                    )}
                   </div>
-                  <p className="text-xs sm:text-sm text-primary-600 dark:text-sand-300 line-clamp-1">
-                    {property.title}
-                  </p>
-                  <div className="flex items-baseline gap-1">
-                    <span className="font-semibold text-sm sm:text-base text-primary-900 dark:text-sand-50">
-                      ${property.price_per_night}
-                    </span>
-                    <span className="text-xs sm:text-sm text-primary-600 dark:text-sand-300">night</span>
+                  
+                  {/* Content */}
+                  <div className="p-4">
+                    <div className="mb-2">
+                      <h3 className="font-bold text-base text-primary-900 dark:text-sand-50 group-hover:text-secondary-600 dark:group-hover:text-secondary-400 transition line-clamp-1 mb-1">
+                        {property.city}, {property.country}
+                      </h3>
+                      <p className="text-sm text-primary-600 dark:text-sand-300 line-clamp-1">
+                        {property.title}
+                      </p>
+                    </div>
+                    
+                    {/* Property details */}
+                    {(property.bedrooms || property.max_guests) && (
+                      <div className="flex items-center gap-3 text-xs text-primary-500 dark:text-sand-400 mb-3">
+                        {property.bedrooms && <span>{property.bedrooms} bed{property.bedrooms > 1 ? 's' : ''}</span>}
+                        {property.bedrooms && property.max_guests && <span>•</span>}
+                        {property.max_guests && <span>{property.max_guests} guest{property.max_guests > 1 ? 's' : ''}</span>}
+                      </div>
+                    )}
+                    
+                    <div className="flex items-baseline justify-between">
+                      <div>
+                        <span className="font-bold text-lg text-primary-900 dark:text-sand-50">
+                          ${property.price_per_night}
+                        </span>
+                        <span className="text-sm text-primary-600 dark:text-sand-300 ml-1">/ night</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </Link>
