@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
 import { useAuth } from '@/store/auth-store';
+import { useFeeConfiguration, calculateBookingCost } from '@/hooks/use-fees';
 import dynamic from 'next/dynamic';
 const ProtectedRoute = dynamic(() => import('@/components/auth/protected-route').then(m => m.ProtectedRoute), { ssr: false });
 import { MapPin, Calendar, Users, CreditCard, ArrowLeft, Loader2, AlertCircle, CheckCircle } from 'lucide-react';
@@ -31,6 +32,29 @@ export default function BookingConfirmPage() {
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [selectedProvider, setSelectedProvider] = useState<string>('');
 
+    // Fetch fee configuration
+    const { data: feeConfig, isLoading: loadingFees } = useFeeConfiguration();
+
+    // Calculate nights
+    const nights = checkIn && checkOut ? Math.ceil((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / (1000 * 60 * 60 * 24)) : 0;
+
+  // Calculate costs (after property is defined)
+  let costs = { basePrice: 0, serviceFee: 0, commissionFee: 0, commissionRate: 0, cleaningFee: 0, total: 0 };
+  if (property && feeConfig && nights > 0) {
+    costs = calculateBookingCost(property.price_per_night, nights, feeConfig, property.cleaning_fee);
+  }
+
+  // Fetch property details
+  const { data: property, isLoading: loadingProperty } = useQuery({
+    queryKey: ['property', propertyId],
+    queryFn: async () => {
+      if (!propertyId) return null;
+      const response = await apiClient.getPropertyDetails(propertyId);
+      return response.data;
+    },
+    enabled: !!propertyId,
+  });
+
   // Fetch available payment providers based on user's country
   const userCountry = user ? user.country_of_residence : undefined;
   const { data: providersData, isLoading: loadingProviders } = useQuery({
@@ -46,7 +70,7 @@ export default function BookingConfirmPage() {
   // Contact Host logic
   const [contactingHost, setContactingHost] = useState(false);
   const contactHost = async () => {
-    if (!property?.host_id || !user?.id) {
+    if (!property || !property.host_id || !user?.id) {
       toast.error('Host or user information missing');
       return;
     }
@@ -144,7 +168,7 @@ export default function BookingConfirmPage() {
                   Property Details
                 </h2>
                 <div className="flex gap-4">
-                  {property.images?.[0] && (
+                  {property?.images?.[0] && (
                     <img
                       src={property.images[0].image}
                       alt={property.title}
@@ -153,14 +177,14 @@ export default function BookingConfirmPage() {
                   )}
                   <div className="flex-1">
                     <h3 className="font-semibold text-primary-900 dark:text-sand-50 mb-2">
-                      {property.title}
+                      {property?.title}
                     </h3>
                     <div className="flex items-center gap-2 text-primary-600 dark:text-sand-300 text-sm mb-1">
                       <MapPin className="w-4 h-4" />
-                      <span>{property.city}, {property.country}</span>
+                      <span>{property?.city}, {property?.country}</span>
                     </div>
                     <div className="text-sm text-primary-600 dark:text-sand-300">
-                      {property.property_type}
+                      {property?.property_type}
                     </div>
                   </div>
                 </div>
@@ -287,29 +311,29 @@ export default function BookingConfirmPage() {
                 <div className="space-y-3 mb-6 pb-6 border-b border-primary-200 dark:border-primary-700">
                   <div className="flex justify-between text-sm">
                     <span className="text-primary-700 dark:text-sand-200">
-                      {property.currency} {property.price_per_night} × {nights} {nights === 1 ? 'night' : 'nights'}
+                      {property?.currency} {property?.price_per_night} × {nights} {nights === 1 ? 'night' : 'nights'}
                     </span>
                     <span className="font-medium text-primary-900 dark:text-sand-50">
-                      {property.currency} {costs.basePrice.toFixed(2)}
+                      {property?.currency} {costs.basePrice.toFixed(2)}
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-primary-700 dark:text-sand-200">Service fee</span>
                     <span className="font-medium text-primary-900 dark:text-sand-50">
-                      {property.currency} {costs.serviceFee.toFixed(2)}
+                      {property?.currency} {costs.serviceFee.toFixed(2)}
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-primary-700 dark:text-sand-200">Commission fee ({(costs.commissionRate * 100).toFixed(1)}%)</span>
                     <span className="font-medium text-primary-900 dark:text-sand-50">
-                      {property.currency} {costs.commissionFee.toFixed(2)}
+                      {property?.currency} {costs.commissionFee.toFixed(2)}
                     </span>
                   </div>
                   {costs.cleaningFee > 0 && (
                     <div className="flex justify-between text-sm">
                       <span className="text-primary-700 dark:text-sand-200">Cleaning fee</span>
                       <span className="font-medium text-primary-900 dark:text-sand-50">
-                        {property.currency} {costs.cleaningFee.toFixed(2)}
+                        {property?.currency} {costs.cleaningFee.toFixed(2)}
                       </span>
                     </div>
                   )}
@@ -318,7 +342,7 @@ export default function BookingConfirmPage() {
                 <div className="flex justify-between text-lg font-semibold mb-6">
                   <span className="text-primary-900 dark:text-sand-50">Total</span>
                   <span className="text-primary-900 dark:text-sand-50">
-                    {property.currency} {costs.total.toFixed(2)}
+                    {property?.currency} {costs.total.toFixed(2)}
                   </span>
                 </div>
 
