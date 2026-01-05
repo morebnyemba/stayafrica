@@ -5,7 +5,6 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
 import { useAuth } from '@/store/auth-store';
-import { useFeeConfiguration, calculateBookingCost } from '@/hooks/use-fees';
 import dynamic from 'next/dynamic';
 const ProtectedRoute = dynamic(() => import('@/components/auth/protected-route').then(m => m.ProtectedRoute), { ssr: false });
 import { MapPin, Calendar, Users, CreditCard, ArrowLeft, Loader2, AlertCircle, CheckCircle } from 'lucide-react';
