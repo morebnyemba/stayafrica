@@ -128,8 +128,16 @@ handle_message(Message) ->
     %% Store in receiver's queue
     message_queue_manager:enqueue(ReceiverId, Message),
     
-    %% Persist to Django backend
-    message_persistence:persist(Message),
+    %% Persist to Django backend (use spawn_link for better error handling)
+    spawn_link(fun() ->
+        try
+            message_persistence:persist(Message)
+        catch
+            Error:Reason ->
+                io:format("Message persistence failed: ~p:~p~n", [Error, Reason]),
+                stats_collector:increment_counter(persistence_errors)
+        end
+    end),
     
     %% Notify receiver if online (would integrate with WebSocket here)
     io:format("Message routed: ~p -> ~p~n", [SenderId, ReceiverId]).

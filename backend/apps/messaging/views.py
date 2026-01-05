@@ -257,21 +257,35 @@ class MessageTemplateViewSet(viewsets.ReadOnlyModelViewSet):
 
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
+from django.conf import settings
 
 
 @api_view(['POST'])
-@permission_classes([AllowAny])  # Protected by custom header check
+@permission_classes([AllowAny])  # Auth handled by custom verification
 def erlang_persist_messages(request):
     """
     Endpoint for Erlang service to persist messages back to Django
-    Protected by X-Erlang-Service header
+    Protected by X-Erlang-Service header and optional shared secret
     """
     # Verify request is from Erlang service
-    if request.headers.get('X-Erlang-Service') != 'messaging':
+    erlang_header = request.headers.get('X-Erlang-Service')
+    if erlang_header != 'messaging':
+        logger.warning("Unauthorized Erlang persistence attempt")
         return Response(
             {'error': 'Unauthorized'},
             status=status.HTTP_403_FORBIDDEN
         )
+    
+    # Additional security: check shared secret if configured
+    shared_secret = getattr(settings, 'ERLANG_SHARED_SECRET', None)
+    if shared_secret:
+        provided_secret = request.headers.get('X-Erlang-Secret')
+        if provided_secret != shared_secret:
+            logger.warning("Invalid Erlang shared secret")
+            return Response(
+                {'error': 'Unauthorized'},
+                status=status.HTTP_403_FORBIDDEN
+            )
     
     messages = request.data.get('messages', [])
     

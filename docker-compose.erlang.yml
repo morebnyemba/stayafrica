@@ -1,0 +1,33 @@
+# Erlang Messaging Service Integration
+
+version: '3.8'
+
+services:
+  erlang-messaging:
+    build: 
+      context: ./erlang_messaging
+      dockerfile: Dockerfile
+    container_name: stayafrica-erlang-messaging
+    ports:
+      - "8765:8765"
+    environment:
+      - DJANGO_API_URL=http://backend:8000
+      - HTTP_PORT=8765
+      - MAX_CONNECTIONS=10000
+      - MESSAGE_QUEUE_MAX_SIZE=100000
+      - MESSAGE_RETENTION_DAYS=30
+    networks:
+      - stayafrica-network
+    depends_on:
+      - backend
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8765/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  stayafrica-network:
+    external: true

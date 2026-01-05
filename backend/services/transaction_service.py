@@ -144,11 +144,18 @@ class TransactionService:
     
     @staticmethod
     @transaction.atomic
-    def reverse_transaction(txn_reference, reason=''):
+    def reverse_transaction(txn_reference, reason='System reversal'):
         """
         Reverse a completed transaction
         Creates a reversal transaction and updates wallet balance
+        
+        Args:
+            txn_reference: Reference of the transaction to reverse
+            reason: Reason for reversal (required for audit trail)
         """
+        if not reason or not reason.strip():
+            raise TransactionError('Reason is required for transaction reversal')
+        
         try:
             # Find original transaction
             original_txn = WalletTransaction.objects.select_for_update().get(
@@ -198,10 +205,20 @@ class TransactionService:
             logger.info(f"Reversed transaction {txn_reference}, new txn: {reversal_txn.reference}")
             return reversal_txn
             
-        except Exception as e:
+        except InsufficientBalanceError as e:
             reversal_txn.status = 'failed'
             reversal_txn.save(update_fields=['status', 'updated_at'])
             logger.error(f"Failed to reverse transaction {txn_reference}: {str(e)}")
+            raise
+        except TransactionError as e:
+            reversal_txn.status = 'failed'
+            reversal_txn.save(update_fields=['status', 'updated_at'])
+            logger.error(f"Failed to reverse transaction {txn_reference}: {str(e)}")
+            raise
+        except Exception as e:
+            reversal_txn.status = 'failed'
+            reversal_txn.save(update_fields=['status', 'updated_at'])
+            logger.error(f"Unexpected error reversing transaction {txn_reference}: {str(e)}")
             raise TransactionError(f"Failed to reverse transaction: {str(e)}")
     
     @staticmethod

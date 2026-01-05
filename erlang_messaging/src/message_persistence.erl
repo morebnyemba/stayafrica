@@ -107,14 +107,17 @@ send_to_django(Messages, DjangoUrl) ->
     JsonMessages = lists:map(fun message_to_json/1, Messages),
     Body = jsx:encode(#{<<"messages">> => JsonMessages}),
     
-    %% Send HTTP POST to Django
+    %% Send HTTP POST to Django with timeout
     Url = DjangoUrl ++ "/api/messaging/erlang/persist/",
     Headers = [
         {"Content-Type", "application/json"},
         {"X-Erlang-Service", "messaging"}
     ],
     
-    case httpc:request(post, {Url, Headers, "application/json", Body}, [], []) of
+    HTTPOptions = [{timeout, 5000}, {connect_timeout, 3000}],
+    Options = [],
+    
+    case httpc:request(post, {Url, Headers, "application/json", Body}, HTTPOptions, Options) of
         {ok, {{_, 200, _}, _, _}} ->
             io:format("Persisted ~p messages to Django~n", [length(Messages)]),
             stats_collector:increment_counter(messages_persisted, length(Messages)),
