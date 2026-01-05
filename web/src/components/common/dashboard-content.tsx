@@ -298,26 +298,26 @@ export function DashboardContent() {
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
                             <h3 className="font-semibold text-primary-900 dark:text-sand-50 mb-1">
-                              {booking.property?.title || 'Property'}
+                              {booking.property?.title || booking.property_title || 'Property'}
                             </h3>
                             <div className="flex items-center gap-2 text-sm text-primary-600 dark:text-sand-300 mb-2">
                               <MapPin className="w-4 h-4" />
                               <span>
-                                {booking.property?.city}, {booking.property?.country}
+                                {booking.property?.city || 'Unknown'}, {booking.property?.country || 'Unknown'}
                               </span>
                             </div>
                             <div className="flex items-center gap-4 text-sm">
                               <div className="flex items-center gap-1">
                                 <Calendar className="w-4 h-4 text-primary-400" />
                                 <span className="text-primary-700 dark:text-sand-200">
-                                  {new Date(booking.check_in_date).toLocaleDateString()}
+                                  {new Date(booking.check_in).toLocaleDateString()}
                                 </span>
                               </div>
                               <span className="text-primary-400">→</span>
                               <div className="flex items-center gap-1">
                                 <Calendar className="w-4 h-4 text-primary-400" />
                                 <span className="text-primary-700 dark:text-sand-200">
-                                  {new Date(booking.check_out_date).toLocaleDateString()}
+                                  {new Date(booking.check_out).toLocaleDateString()}
                                 </span>
                               </div>
                             </div>

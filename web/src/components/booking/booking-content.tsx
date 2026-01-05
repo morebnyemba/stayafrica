@@ -157,7 +157,7 @@ export function BookingContent() {
                     <div className="flex-1 mb-4 md:mb-0">
                       <div className="flex items-center gap-3 mb-2">
                         <h3 className="text-xl font-semibold text-primary-900 dark:text-sand-50">
-                          {booking.property?.title || 'Property'}
+                          {booking.property?.title || booking.property_title || 'Property'}
                         </h3>
                         <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(booking.status)}`}>
                           {booking.status}
@@ -165,12 +165,12 @@ export function BookingContent() {
                       </div>
                       <div className="flex items-center gap-2 text-primary-600 dark:text-sand-300 text-sm mb-2">
                         <MapPin className="w-4 h-4" />
-                        <span>{booking.property?.city}, {booking.property?.country}</span>
+                        <span>{booking.property?.city || 'Unknown'}, {booking.property?.country || 'Unknown'}</span>
                       </div>
                     </div>
                     <div className="text-right">
                       <div className="text-2xl font-bold text-primary-900 dark:text-sand-50">
-                        ${booking.total_price}
+                        ${booking.grand_total}
                       </div>
                       <div className="text-sm text-primary-600 dark:text-sand-300">
                         Total Amount
@@ -182,19 +182,19 @@ export function BookingContent() {
                     <div>
                       <div className="text-sm text-primary-600 dark:text-sand-400 mb-1">Check-in</div>
                       <div className="font-semibold text-primary-900 dark:text-sand-50">
-                        {new Date(booking.check_in_date).toLocaleDateString()}
+                        {new Date(booking.check_in).toLocaleDateString()}
                       </div>
                     </div>
                     <div>
                       <div className="text-sm text-primary-600 dark:text-sand-400 mb-1">Check-out</div>
                       <div className="font-semibold text-primary-900 dark:text-sand-50">
-                        {new Date(booking.check_out_date).toLocaleDateString()}
+                        {new Date(booking.check_out).toLocaleDateString()}
                       </div>
                     </div>
                     <div>
-                      <div className="text-sm text-primary-600 dark:text-sand-400 mb-1">Guests</div>
+                      <div className="text-sm text-primary-600 dark:text-sand-400 mb-1">Nights</div>
                       <div className="font-semibold text-primary-900 dark:text-sand-50">
-                        {booking.number_of_guests}
+                        {booking.nights}
                       </div>
                     </div>
                   </div>

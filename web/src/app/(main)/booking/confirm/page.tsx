@@ -8,9 +8,27 @@ import { useAuth } from '@/store/auth-store';
 import { useFeeConfiguration, calculateBookingCost } from '@/hooks/use-fees';
 import dynamic from 'next/dynamic';
 const ProtectedRoute = dynamic(() => import('@/components/auth/protected-route').then(m => m.ProtectedRoute), { ssr: false });
-import { MapPin, Calendar, Users, CreditCard, ArrowLeft } from 'lucide-react';
+import { MapPin, Calendar, Users, CreditCard, ArrowLeft, Loader2, AlertCircle, CheckCircle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import Link from 'next/link';
+
+interface PaymentProvider {
+  id: string;
+  name: string;
+  description: string;
+  icon?: any;
+}
+  const [selectedProvider, setSelectedProvider] = useState<string>('');
+  // Fetch available payment providers based on user's country
+  const { data: providersData, isLoading: loadingProviders } = useQuery({
+    queryKey: ['providers', user?.country_of_residence],
+    queryFn: async () => {
+      if (!user?.country_of_residence) return [];
+      const response = await apiClient.getAvailableProviders(user.country_of_residence);
+      return response.data;
+    },
+    enabled: !!user?.country_of_residence,
+  });
 
 export default function BookingConfirmPage() {
   const router = useRouter();
@@ -47,6 +65,7 @@ export default function BookingConfirmPage() {
     : { basePrice: 0, serviceFee: 0, commissionFee: 0, commissionRate: 0, cleaningFee: 0, total: 0 };
 
   // Create booking mutation
+
   const createBookingMutation = useMutation({
     mutationFn: async () => {
       const response = await apiClient.createBooking({
@@ -59,8 +78,8 @@ export default function BookingConfirmPage() {
     },
     onSuccess: (data) => {
       toast.success('Booking created successfully!');
-      // Redirect to payment page
-      router.push(`/booking/payment?bookingId=${data.id}`);
+      // Redirect to payment page, pass selected provider
+      router.push(`/booking/payment?bookingId=${data.id}&provider=${selectedProvider}`);
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.error || 'Failed to create booking');
@@ -70,6 +89,10 @@ export default function BookingConfirmPage() {
   const handleConfirmBooking = () => {
     if (!agreedToTerms) {
       toast.error('Please agree to the terms and conditions');
+      return;
+    }
+    if (!selectedProvider) {
+      toast.error('Please select a payment method');
       return;
     }
     createBookingMutation.mutate();
@@ -95,16 +118,13 @@ export default function BookingConfirmPage() {
     );
   }
 
-  if (loadingProperty || loadingFees) {
+  if (loadingProperty || loadingFees || loadingProviders) {
     return (
       <ProtectedRoute>
-        <div className="min-h-screen bg-sand-100 dark:bg-primary-900">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="animate-pulse space-y-6">
-              <div className="h-8 bg-primary-200 dark:bg-primary-700 rounded w-1/3"></div>
-              <div className="h-64 bg-primary-200 dark:bg-primary-700 rounded"></div>
-              <div className="h-48 bg-primary-200 dark:bg-primary-700 rounded"></div>
-            </div>
+        <div className="min-h-screen bg-sand-100 dark:bg-primary-900 flex items-center justify-center">
+          <div className="text-center">
+            <Loader2 className="w-12 h-12 text-secondary-600 dark:text-secondary-400 animate-spin mx-auto mb-4" />
+            <p className="text-primary-700 dark:text-sand-200">Loading booking details...</p>
           </div>
         </div>
       </ProtectedRoute>
@@ -131,6 +151,41 @@ export default function BookingConfirmPage() {
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Left column - Booking details */}
             <div className="lg:col-span-2 space-y-6">
+                            {/* Payment method selection */}
+                            <section className="card p-6">
+                              <h2 className="text-xl font-semibold text-primary-900 dark:text-sand-50 mb-4">
+                                Payment Method
+                              </h2>
+                              {providersData && providersData.length > 0 ? (
+                                <div className="space-y-3">
+                                  {providersData.map((provider: PaymentProvider) => (
+                                    <button
+                                      key={provider.id}
+                                      type="button"
+                                      onClick={() => setSelectedProvider(provider.id)}
+                                      className={`w-full flex items-center gap-4 p-4 rounded-lg border transition focus:outline-none ${
+                                        selectedProvider === provider.id
+                                          ? 'border-secondary-500 bg-secondary-50 dark:bg-secondary-900/20'
+                                          : 'border-primary-200 dark:border-primary-700'
+                                      }`}
+                                    >
+                                      <div className="flex-1 text-left">
+                                        <div className="font-semibold text-primary-900 dark:text-sand-50">{provider.name}</div>
+                                        <div className="text-sm text-primary-600 dark:text-sand-300">{provider.description}</div>
+                                      </div>
+                                      {selectedProvider === provider.id && (
+                                        <CheckCircle className="w-5 h-5 text-secondary-600 dark:text-secondary-400" />
+                                      )}
+                                    </button>
+                                  ))}
+                                </div>
+                              ) : (
+                                <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
+                                  <AlertCircle className="w-5 h-5" />
+                                  <span>No payment methods available for your region.</span>
+                                </div>
+                              )}
+                            </section>
               {/* Property card */}
               <section className="card p-6">
                 <h2 className="text-xl font-semibold text-primary-900 dark:text-sand-50 mb-4">

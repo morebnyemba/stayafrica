@@ -133,6 +133,7 @@ class PropertyDetailSerializer(PropertySerializer):
 
 class PropertyListSerializer(serializers.ModelSerializer):
     amenities = AmenitySerializer(many=True, read_only=True)
+    images = PropertyImageSerializer(many=True, read_only=True)
     main_image_url = serializers.SerializerMethodField()
     average_rating = serializers.SerializerMethodField()
     review_count = serializers.SerializerMethodField()
@@ -142,7 +143,7 @@ class PropertyListSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'title', 'location', 'country', 'city', 'price_per_night',
             'currency', 'main_image', 'main_image_url', 'bedrooms', 'bathrooms', 'max_guests',
-            'amenities', 'status', 'average_rating', 'review_count'
+            'amenities', 'images', 'status', 'average_rating', 'review_count'
         ]
 
     def _absolute_media_url(self, file_field):

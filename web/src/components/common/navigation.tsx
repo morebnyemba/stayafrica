@@ -61,9 +61,14 @@ export function Navigation() {
               Experiences
             </Link>
             {isAuthenticated && (
-              <Link href="/wishlist" className="text-sand-200 hover:text-secondary-300 transition font-medium">
-                Wishlist
-              </Link>
+              <>
+                <Link href="/wishlist" className="text-sand-200 hover:text-secondary-300 transition font-medium">
+                  Wishlist
+                </Link>
+                <Link href="/messages" className="text-sand-200 hover:text-secondary-300 transition font-medium">
+                  Messages
+                </Link>
+              </>
             )}
           </div>
 
@@ -141,6 +146,16 @@ export function Navigation() {
             <Link href="/experiences" className="block text-sand-200 hover:text-secondary-300 px-4 py-2">
               Experiences
             </Link>
+            {isAuthenticated && (
+              <>
+                <Link href="/wishlist" className="block text-sand-200 hover:text-secondary-300 px-4 py-2">
+                  Wishlist
+                </Link>
+                <Link href="/messages" className="block text-sand-200 hover:text-secondary-300 px-4 py-2">
+                  Messages
+                </Link>
+              </>
+            )}
             <button
               onClick={handleBecomeHost}
               className="block text-left w-full text-sand-200 hover:text-secondary-300 px-4 py-2 flex items-center gap-2"
