@@ -347,21 +347,11 @@ export default function BookingConfirmPage() {
                 </div>
 
                 <button
-                  onClick={handleConfirmBooking}
-                  disabled={!agreedToTerms || createBookingMutation.isPending}
+                  disabled={!agreedToTerms}
                   className="w-full bg-secondary-600 hover:bg-secondary-700 dark:bg-secondary-700 dark:hover:bg-secondary-600 text-white font-medium py-3 px-4 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                  {createBookingMutation.isPending ? (
-                    <>
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      Processing...
-                    </>
-                  ) : (
-                    <>
-                      <CreditCard className="w-5 h-5" />
-                      Confirm and Pay
-                    </>
-                  )}
+                  <CreditCard className="w-5 h-5" />
+                  Confirm and Pay
                 </button>
 
                 <p className="text-xs text-center text-primary-600 dark:text-sand-400 mt-4">
