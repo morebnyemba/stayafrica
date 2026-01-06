@@ -92,8 +92,8 @@ export default function BookingConfirmPage() {
     try {
       // Create a new conversation with the host
       const response = await apiClient.createConversation({
-        participants: [property.host_id, user.id],
-        property: property.id,
+        participants: [parseInt(property.host_id), parseInt(user.id)],
+        property: parseInt(property.id),
         subject: `Inquiry about ${property.title}`,
       });
       const conversationId = response.data.id;
