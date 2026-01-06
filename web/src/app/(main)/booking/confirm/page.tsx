@@ -91,7 +91,7 @@ export default function BookingConfirmPage() {
     setContactingHost(true);
     try {
       // Create a new conversation with the host
-      const response = await apiClient.createConversation({
+      await apiClient.createConversation({
         participants: [parseInt(property.host_id), parseInt(user.id)],
         property: parseInt(property.id),
         subject: `Inquiry about ${property.title}`,
