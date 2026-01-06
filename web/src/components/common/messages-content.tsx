@@ -267,7 +267,7 @@ export function MessagesContent() {
                 </div>
 
                 {/* Messages */}
-                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gradient-to-b from-primary-50 to-white dark:from-primary-900 dark:to-primary-800">
                   {messagesLoading ? (
                     <div className="space-y-3">
                       {[1, 2, 3].map(i => (
@@ -280,89 +280,145 @@ export function MessagesContent() {
                       <p className="text-primary-600 dark:text-sand-400">No messages yet. Start the conversation!</p>
                     </div>
                   ) : (
-                    messages.map((message: any) => {
-                      const isOwnMessage = message.is_sent_by_current_user;
-                      const isEditing = editingMessageId === message.id;
+                    <>
+                      {messages.map((message: any, idx: number) => {
+                        const isOwnMessage = message.is_sent_by_current_user;
+                        const isEditing = editingMessageId === message.id;
+                        const prevMessage = idx > 0 ? messages[idx - 1] : null;
+                        const nextMessage = idx < messages.length - 1 ? messages[idx + 1] : null;
+                        const sameUserAsPrev = prevMessage && prevMessage.is_sent_by_current_user === isOwnMessage;
+                        const sameUserAsNext = nextMessage && nextMessage.is_sent_by_current_user === isOwnMessage;
+                        const senderName = isOwnMessage ? 'You' : (selectedConversation.other_participant?.email || 'Unknown');
+                        const senderInitial = isOwnMessage 
+                          ? '?' 
+                          : (selectedConversation.other_participant?.email?.[0]?.toUpperCase() || '?');
+                        
+                        // Show sender info when changing from one person to another
+                        const showSenderInfo = !sameUserAsPrev;
+                        
+                        // Format time with date if it's a new day
+                        const messageTime = new Date(message.created_at);
+                        const prevTime = prevMessage ? new Date(prevMessage.created_at) : null;
+                        const isNewDay = !prevTime || messageTime.toDateString() !== prevTime.toDateString();
 
-                      return (
-                        <div
-                          key={message.id}
-                          className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`}
-                        >
-                          <div className={`max-w-md lg:max-w-lg xl:max-w-xl group ${isOwnMessage ? 'text-right' : ''}`}>
-                            {isEditing ? (
-                              <div className="bg-white dark:bg-primary-900 border-2 border-primary-500 rounded-lg p-3">
-                                <textarea
-                                  value={editText}
-                                  onChange={(e) => setEditText(e.target.value)}
-                                  className="w-full px-3 py-2 border border-primary-300 dark:border-primary-600 rounded bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-50 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 resize-none"
-                                  rows={2}
-                                  autoFocus
-                                />
-                                <div className="flex gap-2 mt-2 justify-end">
-                                  <button
-                                    onClick={handleCancelEdit}
-                                    className="p-2 hover:bg-primary-100 dark:hover:bg-primary-700 rounded transition"
-                                  >
-                                    <X className="w-4 h-4" />
-                                  </button>
-                                  <button
-                                    onClick={() => handleSaveEdit(message.id)}
-                                    disabled={editMessageMutation.isPending}
-                                    className="p-2 bg-primary-600 text-white rounded hover:bg-primary-700 transition disabled:opacity-50"
-                                  >
-                                    <Check className="w-4 h-4" />
-                                  </button>
-                                </div>
-                              </div>
-                            ) : (
-                              <div
-                                className={`inline-block px-4 py-2 rounded-lg ${
-                                  isOwnMessage
-                                    ? 'bg-primary-600 text-white'
-                                    : 'bg-primary-100 dark:bg-primary-700 text-primary-900 dark:text-sand-50'
-                                }`}
-                              >
-                                <p className="whitespace-pre-wrap break-words">{message.text}</p>
-                                {message.edited_at && (
-                                  <p className="text-xs mt-1 opacity-70">(edited)</p>
-                                )}
+                        return (
+                          <div key={message.id}>
+                            {isNewDay && (
+                              <div className="flex justify-center my-4">
+                                <span className="text-xs text-primary-500 dark:text-sand-600 bg-white dark:bg-primary-700 px-3 py-1 rounded-full">
+                                  {messageTime.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' })}
+                                </span>
                               </div>
                             )}
-                            <div className="flex items-center gap-2 mt-1 text-xs text-primary-500 dark:text-sand-500">
-                              <span>
-                                {new Date(message.created_at).toLocaleTimeString([], { 
-                                  hour: '2-digit', 
-                                  minute: '2-digit' 
-                                })}
-                              </span>
-                              {isOwnMessage && !isEditing && (
-                                <div className="opacity-0 group-hover:opacity-100 transition flex gap-1">
-                                  <button
-                                    onClick={() => handleEditMessage(message.id, message.text)}
-                                    className="p-1 hover:bg-primary-100 dark:hover:bg-primary-700 rounded"
-                                    title="Edit message"
-                                  >
-                                    <Edit2 className="w-3 h-3" />
-                                  </button>
-                                  <button
-                                    onClick={() => {
-                                      if (confirm('Delete this message?')) {
-                                        deleteMessageMutation.mutate(message.id);
-                                      }
-                                    }}
-                                    className="p-1 hover:bg-red-100 dark:hover:bg-red-900 rounded"
-                                    title="Delete message"
-                                  >
-                                    <Trash2 className="w-3 h-3" />
-                                  </button>
+                            
+                            <div className={`flex gap-3 ${isOwnMessage ? 'justify-end' : 'justify-start'}`}>
+                              {/* Avatar - only show for other user and when sender info should display */}
+                              {!isOwnMessage && showSenderInfo && (
+                                <div className="w-8 h-8 rounded-full bg-primary-600 text-white text-xs flex items-center justify-center font-bold flex-shrink-0">
+                                  {senderInitial}
                                 </div>
                               )}
+                              {!isOwnMessage && !showSenderInfo && (
+                                <div className="w-8 h-8" />
+                              )}
+
+                              {/* Message Content */}
+                              <div className={`flex flex-col max-w-md ${isOwnMessage ? 'items-end' : 'items-start'}`}>
+                                {/* Sender name - shown when conversation starts or user changes */}
+                                {showSenderInfo && (
+                                  <span className={`text-xs font-semibold mb-1 ${
+                                    isOwnMessage 
+                                      ? 'text-primary-700 dark:text-sand-300' 
+                                      : 'text-primary-600 dark:text-sand-400'
+                                  }`}>
+                                    {senderName}
+                                  </span>
+                                )}
+
+                                {/* Message Bubble */}
+                                {isEditing ? (
+                                  <div className="bg-white dark:bg-primary-900 border-2 border-primary-500 rounded-2xl p-3 w-full">
+                                    <textarea
+                                      value={editText}
+                                      onChange={(e) => setEditText(e.target.value)}
+                                      className="w-full px-3 py-2 border border-primary-300 dark:border-primary-600 rounded bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-50 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 resize-none"
+                                      rows={2}
+                                      autoFocus
+                                    />
+                                    <div className="flex gap-2 mt-2 justify-end">
+                                      <button
+                                        onClick={handleCancelEdit}
+                                        className="p-2 hover:bg-primary-100 dark:hover:bg-primary-700 rounded transition"
+                                      >
+                                        <X className="w-4 h-4" />
+                                      </button>
+                                      <button
+                                        onClick={() => handleSaveEdit(message.id)}
+                                        disabled={editMessageMutation.isPending}
+                                        className="p-2 bg-primary-600 text-white rounded hover:bg-primary-700 transition disabled:opacity-50"
+                                      >
+                                        <Check className="w-4 h-4" />
+                                      </button>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div className="group flex flex-col">
+                                    <div
+                                      className={`px-4 py-2 rounded-2xl shadow-sm transition-shadow ${
+                                        isOwnMessage
+                                          ? 'bg-primary-600 text-white rounded-br-sm'
+                                          : 'bg-primary-100 dark:bg-primary-700 text-primary-900 dark:text-sand-50 rounded-bl-sm'
+                                      }`}
+                                    >
+                                      <p className="whitespace-pre-wrap break-words">{message.text}</p>
+                                      {message.edited_at && (
+                                        <p className="text-xs mt-1 opacity-70">(edited)</p>
+                                      )}
+                                    </div>
+
+                                    {/* Time and Actions */}
+                                    <div className={`flex items-center gap-2 mt-1.5 text-xs ${
+                                      isOwnMessage 
+                                        ? 'text-primary-600 dark:text-sand-500 flex-row-reverse' 
+                                        : 'text-primary-500 dark:text-sand-600'
+                                    }`}>
+                                      <span>
+                                        {messageTime.toLocaleTimeString([], { 
+                                          hour: '2-digit', 
+                                          minute: '2-digit' 
+                                        })}
+                                      </span>
+                                      {isOwnMessage && !isEditing && (
+                                        <div className="opacity-0 group-hover:opacity-100 transition flex gap-1">
+                                          <button
+                                            onClick={() => handleEditMessage(message.id, message.text)}
+                                            className="p-1 hover:bg-primary-500 hover:text-white rounded transition"
+                                            title="Edit message"
+                                          >
+                                            <Edit2 className="w-3 h-3" />
+                                          </button>
+                                          <button
+                                            onClick={() => {
+                                              if (confirm('Delete this message?')) {
+                                                deleteMessageMutation.mutate(message.id);
+                                              }
+                                            }}
+                                            className="p-1 hover:bg-red-500 hover:text-white rounded transition"
+                                            title="Delete message"
+                                          >
+                                            <Trash2 className="w-3 h-3" />
+                                          </button>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      );
-                    })
+                        );
+                      })}
+                    </>
                   )}
                   <div ref={messagesEndRef} />
                 </div>
