@@ -53,12 +53,11 @@ export function PropertyHostCard({ host, propertyId }: PropertyHostCardProps) {
     }
     setContactingHost(true);
     try {
-      const response = await apiClient.createConversation({
+      await apiClient.createConversation({
         participants: [parseInt(host.id), parseInt(user.id)],
         property: propertyId ? parseInt(propertyId) : undefined,
         subject: `Inquiry from interested guest`,
       });
-      const conversationId = response.data.id;
       toast.success('Conversation started!');
       router.push(`/messages`);
     } catch (error: any) {
