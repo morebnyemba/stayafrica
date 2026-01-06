@@ -81,12 +81,11 @@ export function PropertyDetailsContent() {
     }
     setContactingHost(true);
     try {
-      const response = await apiClient.createConversation({
+      await apiClient.createConversation({
         participants: [property.host_id, user.id],
         property: property.id,
         subject: `Inquiry about ${property.title}`,
       });
-      const conversationId = response.data.id;
       toast.success('Conversation started!');
       router.push(`/messages`);
     } catch (error: any) {
