@@ -29,6 +29,18 @@ export default function BookingConfirmPage() {
   const checkOut = searchParams.get('checkOut');
   const guests = parseInt(searchParams.get('guests') || '1');
 
+  const checkInDate = checkIn ? new Date(checkIn) : null;
+  const checkOutDate = checkOut ? new Date(checkOut) : null;
+
+  const formatDate = (value: string | null) => {
+    if (!value) return '—';
+    return new Date(value).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+  };
+
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [selectedProvider, setSelectedProvider] = useState<string>('');
 
@@ -36,7 +48,9 @@ export default function BookingConfirmPage() {
     const { data: feeConfig, isLoading: loadingFees } = useFeeConfiguration();
 
     // Calculate nights
-    const nights = checkIn && checkOut ? Math.ceil((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / (1000 * 60 * 60 * 24)) : 0;
+    const nights = checkInDate && checkOutDate
+      ? Math.ceil((checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24))
+      : 0;
 
 
   // Fetch property details
@@ -222,15 +236,7 @@ export default function BookingConfirmPage() {
                     <div>
                       <div className="font-medium text-primary-900 dark:text-sand-50">Dates</div>
                       <div className="text-sm text-primary-600 dark:text-sand-300">
-                        {new Date(checkIn).toLocaleDateString('en-US', { 
-                          month: 'short', 
-                          day: 'numeric', 
-                          year: 'numeric' 
-                        })} - {new Date(checkOut).toLocaleDateString('en-US', { 
-                          month: 'short', 
-                          day: 'numeric', 
-                          year: 'numeric' 
-                        })}
+                        {formatDate(checkIn)} - {formatDate(checkOut)}
                       </div>
                       <div className="text-sm text-primary-600 dark:text-sand-300">
                         {nights} {nights === 1 ? 'night' : 'nights'}
