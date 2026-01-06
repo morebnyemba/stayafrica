@@ -53,7 +53,7 @@ except Exception:
 # Security
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-dev-key-change-in-production')
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,api.zimlegend.online,zimlegend.online').split(',')
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,backend,api.zimlegend.online,zimlegend.online').split(',')
 
 # Application definition
 INSTALLED_APPS = [
@@ -235,6 +235,7 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
     'http://localhost:3001',
     'http://127.0.0.1:3000',
+    'http://backend:8000',
     'https://zimlegend.online',
     'https://api.zimlegend.online',
 ]
@@ -266,7 +267,7 @@ CORS_ALLOW_HEADERS = [
 # CSRF trusted origins must include the full scheme + domain.
 CSRF_TRUSTED_ORIGINS = os.getenv(
     'CSRF_TRUSTED_ORIGINS',
-    'https://api.zimlegend.online,https://zimlegend.online'
+    'https://api.zimlegend.online,https://zimlegend.online,http://backend:8000'
 ).split(',')
 
 # Ensure Django recognizes HTTPS forwarded by Nginx Proxy Manager
