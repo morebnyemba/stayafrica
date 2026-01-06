@@ -285,9 +285,7 @@ export function MessagesContent() {
                         const isOwnMessage = message.is_sent_by_current_user;
                         const isEditing = editingMessageId === message.id;
                         const prevMessage = idx > 0 ? messages[idx - 1] : null;
-                        const nextMessage = idx < messages.length - 1 ? messages[idx + 1] : null;
                         const sameUserAsPrev = prevMessage && prevMessage.is_sent_by_current_user === isOwnMessage;
-                        const sameUserAsNext = nextMessage && nextMessage.is_sent_by_current_user === isOwnMessage;
                         const senderName = isOwnMessage ? 'You' : (selectedConversation.other_participant?.email || 'Unknown');
                         const senderInitial = isOwnMessage 
                           ? '?' 
