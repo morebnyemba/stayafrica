@@ -60,7 +60,7 @@ export function PropertyHostCard({ host, propertyId }: PropertyHostCardProps) {
       });
       const conversationId = response.data.id;
       toast.success('Conversation started!');
-      router.push(`/messaging/conversations/${conversationId}`);
+      router.push(`/messages`);
     } catch (error: any) {
       toast.error(error.response?.data?.error || 'Failed to start conversation');
     } finally {

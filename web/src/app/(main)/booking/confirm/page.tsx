@@ -99,7 +99,7 @@ export default function BookingConfirmPage() {
       const conversationId = response.data.id;
       toast.success('Conversation started!');
       // Redirect to messaging panel for this conversation
-      router.push(`/messaging/conversations/${conversationId}`);
+      router.push(`/messages`);
     } catch (error: any) {
       toast.error(error.response?.data?.error || 'Failed to start conversation');
     } finally {
