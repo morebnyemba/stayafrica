@@ -1,8 +1,12 @@
 'use client';
 
-import Link from 'next/link';
-import { User, Star, CheckCircle, MessageCircle } from 'lucide-react';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { User, Star, CheckCircle, MessageCircle, Loader2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { toast } from 'react-hot-toast';
+import { apiClient } from '@/services/api-client';
+import { useAuth } from '@/store/auth-store';
 
 interface PropertyHostCardProps {
   host?: {
@@ -18,9 +22,13 @@ interface PropertyHostCardProps {
     is_online?: boolean;
     last_seen?: string;
   };
+  propertyId?: string;
 }
 
-export function PropertyHostCard({ host }: PropertyHostCardProps) {
+export function PropertyHostCard({ host, propertyId }: PropertyHostCardProps) {
+  const router = useRouter();
+  const { user } = useAuth();
+  const [contactingHost, setContactingHost] = useState(false);
   if (!host) {
     return null;
   }
@@ -37,6 +45,28 @@ export function PropertyHostCard({ host }: PropertyHostCardProps) {
   };
 
   const onlineStatus = getOnlineStatus();
+
+  const contactHost = async () => {
+    if (!host || !user?.id) {
+      toast.error('Host or user information missing');
+      return;
+    }
+    setContactingHost(true);
+    try {
+      const response = await apiClient.createConversation({
+        participants: [host.id, user.id],
+        property: propertyId,
+        subject: `Inquiry from interested guest`,
+      });
+      const conversationId = response.data.id;
+      toast.success('Conversation started!');
+      router.push(`/messaging/conversations/${conversationId}`);
+    } catch (error: any) {
+      toast.error(error.response?.data?.error || 'Failed to start conversation');
+    } finally {
+      setContactingHost(false);
+    }
+  };
 
   return (
     <div>
@@ -124,13 +154,23 @@ export function PropertyHostCard({ host }: PropertyHostCardProps) {
         )}
 
         {/* Contact button */}
-        <Link
-          href={`/messages?host=${host.id}`}
-          className="w-full inline-flex items-center justify-center gap-2 bg-secondary-600 hover:bg-secondary-700 dark:bg-secondary-700 dark:hover:bg-secondary-600 text-white font-medium py-3 px-4 rounded-lg transition"
+        <button
+          onClick={contactHost}
+          disabled={contactingHost}
+          className="w-full inline-flex items-center justify-center gap-2 bg-secondary-600 hover:bg-secondary-700 dark:bg-secondary-700 dark:hover:bg-secondary-600 text-white font-medium py-3 px-4 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <MessageCircle className="w-5 h-5" />
-          <span>Contact Host</span>
-        </Link>
+          {contactingHost ? (
+            <>
+              <Loader2 className="w-5 h-5 animate-spin" />
+              <span>Contacting...</span>
+            </>
+          ) : (
+            <>
+              <MessageCircle className="w-5 h-5" />
+              <span>Contact Host</span>
+            </>
+          )}
+        </button>
       </div>
     </div>
   );

@@ -4,13 +4,15 @@ import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
+import { useAuth } from '@/store/auth-store';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PropertyImageCarousel } from '@/components/property/property-image-carousel';
 import { PropertyAmenities } from '@/components/property/property-amenities';
 import { PropertyHostCard } from '@/components/property/property-host-card';
 import { BookingCard } from '@/components/booking/booking-card';
-import { Heart, MapPin, Share2, Star } from 'lucide-react';
+import { Heart, MapPin, Share2, Star, Users, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { toast } from 'react-hot-toast';
 
 type Review = {
   id: string;
@@ -23,9 +25,11 @@ type Review = {
 export function PropertyDetailsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { user } = useAuth();
   const propertyId = searchParams.get('id') ?? '';
   const [isSaved, setIsSaved] = useState(false);
   const [checkingSaved, setCheckingSaved] = useState(true);
+  const [contactingHost, setContactingHost] = useState(false);
 
   // Check if property is saved on mount
   useEffect(() => {
@@ -68,6 +72,29 @@ export function PropertyDetailsContent() {
     },
     enabled: !!propertyId,
   });
+
+  // Contact Host logic
+  const contactHost = async () => {
+    if (!property || !property.host_id || !user?.id) {
+      toast.error('Host or user information missing');
+      return;
+    }
+    setContactingHost(true);
+    try {
+      const response = await apiClient.createConversation({
+        participants: [property.host_id, user.id],
+        property: property.id,
+        subject: `Inquiry about ${property.title}`,
+      });
+      const conversationId = response.data.id;
+      toast.success('Conversation started!');
+      router.push(`/messaging/conversations/${conversationId}`);
+    } catch (error: any) {
+      toast.error(error.response?.data?.error || 'Failed to start conversation');
+    } finally {
+      setContactingHost(false);
+    }
+  };
 
   if (!propertyId) {
     return (
@@ -157,6 +184,25 @@ export function PropertyDetailsContent() {
               <Share2 className="w-5 h-5" />
               <span>Share</span>
             </button>
+            {user && (
+              <button
+                onClick={contactHost}
+                disabled={contactingHost}
+                className="flex items-center space-x-2 px-4 py-2 bg-secondary-600 hover:bg-secondary-700 dark:bg-secondary-700 dark:hover:bg-secondary-600 text-white rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {contactingHost ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <span>Contacting...</span>
+                  </>
+                ) : (
+                  <>
+                    <Users className="w-5 h-5" />
+                    <span>Contact Host</span>
+                  </>
+                )}
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -240,7 +286,7 @@ export function PropertyDetailsContent() {
             )}
 
             {/* Host info */}
-            <PropertyHostCard host={property?.host} />
+            <PropertyHostCard host={property?.host} propertyId={propertyId} />
 
             {/* Reviews section */}
             {reviews && reviews.length > 0 && (
