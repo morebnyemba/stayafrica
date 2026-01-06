@@ -1,14 +1,18 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
 import { Calendar, MapPin } from 'lucide-react';
 import { useAuth } from '@/store/auth-store';
+import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 
 export function BookingContent() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
+  const router = useRouter();
   const [statusFilter, setStatusFilter] = useState('');
+  const [contactingHost, setContactingHost] = useState<string | null>(null);
 
   const { data: bookingsData, isLoading, error } = useQuery({
     queryKey: ['bookings', statusFilter],
@@ -22,6 +26,35 @@ export function BookingContent() {
   });
 
   const bookings = bookingsData?.results || [];
+
+  const contactHostMutation = useMutation({
+    mutationFn: async (booking: any) => {
+      if (!user) throw new Error('User not authenticated');
+      
+      const response = await apiClient.createConversation({
+        participants: [parseInt(booking.property?.host_id || booking.host_id), parseInt(user.id)],
+        property: parseInt(booking.property?.id || booking.property_id),
+        booking: parseInt(booking.id),
+        subject: `Booking inquiry for ${booking.property?.title || booking.property_title}`,
+      });
+      return response.data;
+    },
+    onSuccess: () => {
+      toast.success('Conversation started!');
+      router.push('/messages');
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.error || 'Failed to start conversation');
+    },
+    onSettled: () => {
+      setContactingHost(null);
+    },
+  });
+
+  const handleContactHost = (booking: any) => {
+    setContactingHost(booking.id);
+    contactHostMutation.mutate(booking);
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -204,8 +237,12 @@ export function BookingContent() {
                       View Details
                     </button>
                     {booking.status === 'CONFIRMED' && (
-                      <button className="btn-primary px-6 py-2 text-sm">
-                        Contact Host
+                      <button 
+                        onClick={() => handleContactHost(booking)}
+                        disabled={contactingHost === booking.id}
+                        className="btn-primary px-6 py-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {contactingHost === booking.id ? 'Starting...' : 'Contact Host'}
                       </button>
                     )}
                   </div>
