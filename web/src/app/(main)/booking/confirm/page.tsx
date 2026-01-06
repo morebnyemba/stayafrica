@@ -96,7 +96,6 @@ export default function BookingConfirmPage() {
         property: parseInt(property.id),
         subject: `Inquiry about ${property.title}`,
       });
-      const conversationId = response.data.id;
       toast.success('Conversation started!');
       // Redirect to messaging panel for this conversation
       router.push(`/messages`);
