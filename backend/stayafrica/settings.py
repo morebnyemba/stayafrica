@@ -53,7 +53,10 @@ except Exception:
 # Security
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-dev-key-change-in-production')
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,backend,api.zimlegend.online,zimlegend.online').split(',')
+ALLOWED_HOSTS = os.getenv(
+    'ALLOWED_HOSTS',
+    'localhost,127.0.0.1,backend,api.zimlegend.online,zimlegend.online,stayafrica.app,www.stayafrica.app,api.stayafrica.app'
+).split(',')
 
 # Application definition
 INSTALLED_APPS = [
@@ -238,6 +241,9 @@ CORS_ALLOWED_ORIGINS = [
     'http://backend:8000',
     'https://zimlegend.online',
     'https://api.zimlegend.online',
+    'https://stayafrica.app',
+    'https://www.stayafrica.app',
+    'https://api.stayafrica.app',
 ]
 
 # Allow sending of credentials/authorization from browser
@@ -267,7 +273,7 @@ CORS_ALLOW_HEADERS = [
 # CSRF trusted origins must include the full scheme + domain.
 CSRF_TRUSTED_ORIGINS = os.getenv(
     'CSRF_TRUSTED_ORIGINS',
-    'https://api.zimlegend.online,https://zimlegend.online,http://backend:8000'
+    'https://api.zimlegend.online,https://zimlegend.online,https://stayafrica.app,https://www.stayafrica.app,https://api.stayafrica.app,http://backend:8000'
 ).split(',')
 
 # Ensure Django recognizes HTTPS forwarded by Nginx Proxy Manager
