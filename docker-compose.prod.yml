@@ -134,11 +134,11 @@ services:
       context: ./web
       dockerfile: Dockerfile
       args:
-        NEXT_PUBLIC_API_BASE_URL: https://api.zimlegend.online
+        NEXT_PUBLIC_API_BASE_URL: https://api.stayafrica.app
         NEXT_PUBLIC_API_VERSION: v1
     container_name: stayafrica_frontend
     environment:
-      NEXT_PUBLIC_API_BASE_URL: https://api.zimlegend.online
+      NEXT_PUBLIC_API_BASE_URL: https://api.stayafrica.app
       NEXT_PUBLIC_API_VERSION: v1
       NODE_ENV: production
     depends_on:
