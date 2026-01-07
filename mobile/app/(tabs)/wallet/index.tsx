@@ -3,12 +3,21 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/context/auth-context';
+import type { Transaction } from '@/types';
+
+interface TransactionItemProps {
+  icon: keyof typeof Ionicons.glyphMap;
+  title: string;
+  amount: number;
+  date: string;
+  type: 'credit' | 'debit';
+}
 
 export default function WalletScreen() {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
   const [balance, setBalance] = useState(0);
-  const [transactions, setTransactions] = useState<any[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   if (!isAuthenticated) {
@@ -29,7 +38,7 @@ export default function WalletScreen() {
     );
   }
 
-  const TransactionItem = ({ icon, title, amount, date, type }: any) => (
+  const TransactionItem = ({ icon, title, amount, date, type }: TransactionItemProps) => (
     <View className="bg-white rounded-xl p-4 mb-3 shadow-sm border border-gray-100 flex-row items-center">
       <View className={`w-12 h-12 rounded-full items-center justify-center ${
         type === 'credit' ? 'bg-green-100' : 'bg-red-100'

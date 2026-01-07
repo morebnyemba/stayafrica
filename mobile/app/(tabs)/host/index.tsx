@@ -1,13 +1,26 @@
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/context/auth-context';
 
+interface StatCardProps {
+  icon: keyof typeof Ionicons.glyphMap;
+  label: string;
+  value: string;
+  color: string;
+}
+
+interface MenuItemProps {
+  icon: keyof typeof Ionicons.glyphMap;
+  title: string;
+  description: string;
+  onPress: () => void;
+  color?: string;
+}
+
 export default function HostScreen() {
   const router = useRouter();
-  const { user, isAuthenticated } = useAuth();
-  const [isLoading, setIsLoading] = useState(false);
+  const { isAuthenticated } = useAuth();
 
   if (!isAuthenticated) {
     return (
@@ -27,7 +40,7 @@ export default function HostScreen() {
     );
   }
 
-  const StatCard = ({ icon, label, value, color }: any) => (
+  const StatCard = ({ icon, label, value, color }: StatCardProps) => (
     <View className={`flex-1 bg-white rounded-xl p-4 m-2 shadow-sm border border-gray-100`}>
       <View className={`w-10 h-10 rounded-full items-center justify-center mb-2`} style={{ backgroundColor: `${color}20` }}>
         <Ionicons name={icon} size={20} color={color} />
@@ -37,7 +50,7 @@ export default function HostScreen() {
     </View>
   );
 
-  const MenuItem = ({ icon, title, description, onPress, color = '#3A5C50' }: any) => (
+  const MenuItem = ({ icon, title, description, onPress, color = '#3A5C50' }: MenuItemProps) => (
     <TouchableOpacity
       className="bg-white rounded-xl p-4 mb-3 shadow-sm border border-gray-100 flex-row items-center"
       onPress={onPress}

@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/context/auth-context';
 import { useHostProperties } from '@/hooks/api-hooks';
+import type { Property } from '@/types';
 
 export default function HostPropertiesScreen() {
   const router = useRouter();
@@ -28,7 +29,7 @@ export default function HostPropertiesScreen() {
     );
   }
 
-  const PropertyItem = ({ property }: any) => (
+  const PropertyItem = ({ property }: { property: Property }) => (
     <TouchableOpacity
       className="bg-white rounded-xl mb-3 shadow-sm border border-gray-100 overflow-hidden"
       onPress={() => router.push(`/host/properties/${property.id}`)}

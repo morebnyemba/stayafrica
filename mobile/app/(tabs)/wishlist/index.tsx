@@ -4,11 +4,12 @@ import { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/context/auth-context';
 import { PropertyCard } from '@/components/property/PropertyCard';
+import type { Property } from '@/types';
 
 export default function WishlistScreen() {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
-  const [wishlistProperties, setWishlistProperties] = useState<any[]>([]);
+  const [wishlistProperties, setWishlistProperties] = useState<Property[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   if (!isAuthenticated) {

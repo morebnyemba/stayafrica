@@ -5,6 +5,7 @@ import { useAuth } from '@/context/auth-context';
 import { useHostBookings } from '@/hooks/api-hooks';
 import { format } from 'date-fns';
 import { COLORS } from '@/constants';
+import type { Booking } from '@/types';
 
 export default function HostBookingsScreen() {
   const router = useRouter();
@@ -52,7 +53,7 @@ export default function HostBookingsScreen() {
     return icons[status] || 'help-circle';
   };
 
-  const BookingItem = ({ booking }: any) => {
+  const BookingItem = ({ booking }: { booking: Booking }) => {
     const statusColors = getStatusColor(booking.status);
     const statusIcon = getStatusIcon(booking.status);
     

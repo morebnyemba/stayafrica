@@ -1,14 +1,15 @@
 import { View, Text, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/context/auth-context';
-import { useState } from 'react';
 import { format } from 'date-fns';
+import type { Review } from '@/types';
 
 export default function ReviewsScreen() {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
-  const [reviews, setReviews] = useState<any[]>([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   if (!isAuthenticated) {
@@ -42,7 +43,7 @@ export default function ReviewsScreen() {
     </View>
   );
 
-  const ReviewItem = ({ review }: any) => (
+  const ReviewItem = ({ review }: { review: Review }) => (
     <View className="bg-white rounded-xl p-4 mb-3 shadow-sm border border-gray-100">
       {/* Property Info */}
       <Text className="text-base font-bold text-gray-900 mb-2">
