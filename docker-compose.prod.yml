@@ -72,7 +72,7 @@ services:
       CELERY_RESULT_BACKEND: redis://redis:6379/0
       SECRET_KEY: change-this-to-a-secure-key-in-production
       DEBUG: "False"
-      ALLOWED_HOSTS: localhost,127.0.0.1,api.zimlegend.online,zimlegend.online
+      ALLOWED_HOSTS: stayafrica.app,www.stayafrica.app,api.stayafrica.app,backend,localhost,127.0.0.1
     depends_on:
       - db
       - redis
