@@ -1,53 +1,56 @@
-# Deployment Guide: Centralized Configuration & ASGI Server
+# StayAfrica Deployment Guide
 
-## Problem Summary
-The application was experiencing database authentication issues between backend and workers (celery/celery-beat) due to:
-- Scattered environment configuration across multiple `.env.prod` files
-- Inconsistent database credentials between services
-- Complex entrypoint scripts creating potential for credential mismatches
+Quick reference for deploying StayAfrica to production.
 
-Error example:
-```
-FATAL: password authentication failed for user "postgres"
-```
+## Prerequisites
 
-## Solution Applied
-1. **Centralized Configuration**: All environment variables now in single root-level `.env` file
-2. **ASGI Server**: Migrated from Gunicorn (WSGI) to Daphne (ASGI) for better async support
-3. **Simplified Docker**: Removed entrypoint scripts, using direct Docker Compose configuration
-4. **Dedicated Migration Service**: Ensures migrations run before application starts
+- Ubuntu/Debian server with SSH access
+- Domain records pointing to server (195.201.101.41):
+  - `stayafrica.app`
+  - `www.stayafrica.app`
+  - `api.stayafrica.app`
+- Ports 80, 443 open for HTTPS and Let's Encrypt
 
-## Deployment Steps
+## Quick Start
 
-### Prerequisites
-- SSH access to the production server
-- Docker and Docker Compose installed
-- Current working directory: `~/stayafrica/`
-
-### Step 1: Pull the Latest Changes
-
+### 1. Connect to Server
 ```bash
-cd ~/stayafrica
-git pull origin copilot/use-env-for-db-credentials
+ssh root@195.201.101.41
 ```
 
-### Step 2: Create/Update Root .env File
-
-**CRITICAL**: This is the single source of truth for all configuration.
-
+### 2. Clone Repository
 ```bash
-# Copy the example file
-cp .env.example .env
-
-# Edit with your production values
-nano .env
+git clone <your-repo-url>
+cd stayafrica
 ```
 
-**Required Changes in .env**:
+### 3. Run Setup Script
 ```bash
-# Django Core
-SECRET_KEY=your-secure-random-key-here  # Generate a new one!
-DEBUG=False
+chmod +x deploy-setup.sh
+sudo bash deploy-setup.sh
+```
+
+When prompted:
+- Install Portainer? **y** (optional but recommended)
+- Generate certificates? **y**
+- Enter email for Let's Encrypt
+
+### 4. Deploy Stack
+```bash
+chmod +x deploy-stack.sh
+sudo bash deploy-stack.sh docker-compose.prod.yml
+```
+
+### 5. Access Services
+
+- **Frontend**: https://stayafrica.app
+- **API**: https://api.stayafrica.app
+- **Admin**: https://api.stayafrica.app/admin/
+- **Portainer**: https://195.201.101.41:9443
+
+## Configuration
+
+All environment variables are in `.env.prod`. Key settings for stayafrica.app:
 ALLOWED_HOSTS=api.zimlegend.online,zimlegend.online,localhost,127.0.0.1
 
 # Database - MUST match db service
