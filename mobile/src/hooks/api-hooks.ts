@@ -1,5 +1,19 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
+import type {
+  User,
+  Property,
+  Booking,
+  Review,
+  UpdateProfileRequest,
+  CreateBookingRequest,
+  CreatePropertyRequest,
+  UpdatePropertyRequest,
+  SubmitReviewRequest,
+  WalletBalance,
+  Transaction,
+  HostEarnings,
+} from '@/types';
 
 // Properties
 export function useProperties() {
@@ -27,7 +41,7 @@ export function usePropertyById(id: string) {
 
 // Bookings
 export function useBookings(status?: string) {
-  return useQuery({
+  return useQuery<{ results: Booking[] }>({
     queryKey: ['bookings', status],
     queryFn: () => apiClient.getBookings(status),
   });
@@ -35,8 +49,8 @@ export function useBookings(status?: string) {
 
 export function useCreateBooking() {
   const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (data: any) => apiClient.createBooking(data),
+  return useMutation<Booking, Error, CreateBookingRequest>({
+    mutationFn: (data: CreateBookingRequest) => apiClient.createBooking(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bookings'] });
     },
@@ -55,7 +69,7 @@ export function useCancelBooking() {
 
 // User
 export function useUserProfile() {
-  return useQuery({
+  return useQuery<User>({
     queryKey: ['user', 'profile'],
     queryFn: () => apiClient.getUserProfile(),
   });
@@ -63,8 +77,8 @@ export function useUserProfile() {
 
 export function useUpdateProfile() {
   const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (data: any) => apiClient.updateUserProfile(data),
+  return useMutation<User, Error, UpdateProfileRequest>({
+    mutationFn: (data: UpdateProfileRequest) => apiClient.updateUserProfile(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user', 'profile'] });
     },
@@ -93,9 +107,9 @@ export function useSendMessage() {
 // Reviews
 export function useSubmitReview() {
   const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: ({ bookingId, data }: { bookingId: string; data: any }) =>
-      apiClient.submitReview(bookingId, data),
+  return useMutation<Review, Error, SubmitReviewRequest>({
+    mutationFn: (data: SubmitReviewRequest) =>
+      apiClient.submitReview(data.booking_id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bookings'] });
     },
@@ -140,7 +154,7 @@ export function useRemoveFromWishlist() {
 
 // Host - Properties
 export function useHostProperties() {
-  return useQuery({
+  return useQuery<{ results: Property[] }>({
     queryKey: ['host', 'properties'],
     queryFn: () => apiClient.getHostProperties(),
   });
@@ -148,8 +162,8 @@ export function useHostProperties() {
 
 export function useCreateProperty() {
   const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (data: any) => apiClient.createProperty(data),
+  return useMutation<Property, Error, CreatePropertyRequest>({
+    mutationFn: (data: CreatePropertyRequest) => apiClient.createProperty(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['host', 'properties'] });
     },
@@ -158,8 +172,9 @@ export function useCreateProperty() {
 
 export function useUpdateProperty() {
   const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: any }) => apiClient.updateProperty(id, data),
+  return useMutation<Property, Error, { id: string; data: UpdatePropertyRequest }>({
+    mutationFn: ({ id, data }: { id: string; data: UpdatePropertyRequest }) => 
+      apiClient.updateProperty(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['host', 'properties'] });
     },
@@ -194,14 +209,14 @@ export function useHostEarnings() {
 
 // Wallet/Payments
 export function useWalletBalance() {
-  return useQuery({
+  return useQuery<WalletBalance>({
     queryKey: ['wallet', 'balance'],
     queryFn: () => apiClient.getWalletBalance(),
   });
 }
 
 export function useTransactions() {
-  return useQuery({
+  return useQuery<{ results: Transaction[] }>({
     queryKey: ['wallet', 'transactions'],
     queryFn: () => apiClient.getTransactions(),
   });
@@ -209,7 +224,7 @@ export function useTransactions() {
 
 export function useWithdrawFunds() {
   const queryClient = useQueryClient();
-  return useMutation({
+  return useMutation<void, Error, number>({
     mutationFn: (amount: number) => apiClient.withdrawFunds(amount),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['wallet'] });

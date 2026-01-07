@@ -17,8 +17,8 @@ export default function TabsLayout() {
             iconName = 'heart';
           } else if (route.name === 'host') {
             iconName = 'home';
-          } else if (route.name === 'messages') {
-            iconName = 'chatbubbles';
+          } else if (route.name === 'wallet') {
+            iconName = 'wallet';
           } else if (route.name === 'profile') {
             iconName = 'person';
           }
@@ -55,6 +55,13 @@ export default function TabsLayout() {
         options={{
           title: 'Host',
           tabBarLabel: 'Host',
+        }}
+      />
+      <Tabs.Screen
+        name="wallet"
+        options={{
+          title: 'Wallet',
+          tabBarLabel: 'Wallet',
         }}
       />
       <Tabs.Screen

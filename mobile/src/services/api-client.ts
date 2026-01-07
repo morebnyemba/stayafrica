@@ -1,6 +1,20 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
+import type {
+  User,
+  Property,
+  Booking,
+  Review,
+  UpdateProfileRequest,
+  CreateBookingRequest,
+  CreatePropertyRequest,
+  UpdatePropertyRequest,
+  SubmitReviewRequest,
+  WalletBalance,
+  Transaction,
+  HostEarnings,
+} from '@/types';
 
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:8000/api/v1';
 
@@ -166,11 +180,11 @@ class APIClient {
   }
 
   // User
-  async getUserProfile(): Promise<any> {
+  async getUserProfile(): Promise<User> {
     return (await this.client.get('/users/profile/')).data;
   }
 
-  async updateUserProfile(data: any): Promise<any> {
+  async updateUserProfile(data: UpdateProfileRequest): Promise<User> {
     return (await this.client.patch('/users/profile/', data)).data;
   }
 
@@ -210,19 +224,19 @@ class APIClient {
   }
 
   // Host - Properties
-  async getHostProperties(): Promise<any> {
+  async getHostProperties(): Promise<{ results: Property[] }> {
     return (await this.client.get('/properties/host/')).data;
   }
 
-  async createProperty(data: any): Promise<any> {
+  async createProperty(data: CreatePropertyRequest): Promise<Property> {
     return (await this.client.post('/properties/', data)).data;
   }
 
-  async updateProperty(id: string, data: any): Promise<any> {
+  async updateProperty(id: string, data: UpdatePropertyRequest): Promise<Property> {
     return (await this.client.patch(`/properties/${id}/`, data)).data;
   }
 
-  async deleteProperty(id: string): Promise<any> {
+  async deleteProperty(id: string): Promise<void> {
     return (await this.client.delete(`/properties/${id}/`)).data;
   }
 
