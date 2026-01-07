@@ -170,6 +170,10 @@ class APIClient {
     return (await this.client.get('/users/profile/')).data;
   }
 
+  async updateUserProfile(data: any): Promise<any> {
+    return (await this.client.patch('/users/profile/', data)).data;
+  }
+
   // Messages
   async getConversations(): Promise<any> {
     return (await this.client.get('/messaging/conversations/')).data;
@@ -186,6 +190,63 @@ class APIClient {
   // Reviews
   async submitReview(bookingId: string, data: any): Promise<any> {
     return (await this.client.post(`/reviews/`, { booking_id: bookingId, ...data })).data;
+  }
+
+  async getPropertyReviews(propertyId: string): Promise<any> {
+    return (await this.client.get(`/reviews/`, { params: { property_id: propertyId } })).data;
+  }
+
+  // Wishlist
+  async getWishlist(): Promise<any> {
+    return (await this.client.get('/users/wishlist/')).data;
+  }
+
+  async addToWishlist(propertyId: string): Promise<any> {
+    return (await this.client.post('/users/wishlist/', { property_id: propertyId })).data;
+  }
+
+  async removeFromWishlist(propertyId: string): Promise<any> {
+    return (await this.client.delete(`/users/wishlist/${propertyId}/`)).data;
+  }
+
+  // Host - Properties
+  async getHostProperties(): Promise<any> {
+    return (await this.client.get('/properties/host/')).data;
+  }
+
+  async createProperty(data: any): Promise<any> {
+    return (await this.client.post('/properties/', data)).data;
+  }
+
+  async updateProperty(id: string, data: any): Promise<any> {
+    return (await this.client.patch(`/properties/${id}/`, data)).data;
+  }
+
+  async deleteProperty(id: string): Promise<any> {
+    return (await this.client.delete(`/properties/${id}/`)).data;
+  }
+
+  // Host - Bookings
+  async getHostBookings(): Promise<any> {
+    return (await this.client.get('/bookings/host/')).data;
+  }
+
+  // Host - Earnings
+  async getHostEarnings(): Promise<any> {
+    return (await this.client.get('/payments/earnings/')).data;
+  }
+
+  // Wallet/Payments
+  async getWalletBalance(): Promise<any> {
+    return (await this.client.get('/payments/wallet/')).data;
+  }
+
+  async getTransactions(): Promise<any> {
+    return (await this.client.get('/payments/transactions/')).data;
+  }
+
+  async withdrawFunds(amount: number): Promise<any> {
+    return (await this.client.post('/payments/withdraw/', { amount })).data;
   }
 
   // Generic request method

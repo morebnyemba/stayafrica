@@ -13,6 +13,10 @@ export default function TabsLayout() {
             iconName = 'search';
           } else if (route.name === 'bookings') {
             iconName = 'calendar';
+          } else if (route.name === 'wishlist') {
+            iconName = 'heart';
+          } else if (route.name === 'host') {
+            iconName = 'home';
           } else if (route.name === 'messages') {
             iconName = 'chatbubbles';
           } else if (route.name === 'profile') {
@@ -21,7 +25,7 @@ export default function TabsLayout() {
 
           return <Ionicons name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: '#0ea5e9',
+        tabBarActiveTintColor: '#3A5C50', // Moss Green
         tabBarInactiveTintColor: '#999',
       })}
     >
@@ -33,6 +37,13 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="wishlist"
+        options={{
+          title: 'Wishlist',
+          tabBarLabel: 'Wishlist',
+        }}
+      />
+      <Tabs.Screen
         name="bookings"
         options={{
           title: 'Bookings',
@@ -40,10 +51,10 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="messages"
+        name="host"
         options={{
-          title: 'Messages',
-          tabBarLabel: 'Messages',
+          title: 'Host',
+          tabBarLabel: 'Host',
         }}
       />
       <Tabs.Screen

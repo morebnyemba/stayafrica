@@ -1,12 +1,12 @@
 import { View, Text, ScrollView, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { usePropertyDetails } from '@/hooks/api-hooks';
+import { usePropertyById } from '@/hooks/api-hooks';
 
 export default function PropertyDetailsScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams();
-  const { data: property, isLoading } = usePropertyDetails(id as string);
+  const { data: property, isLoading } = usePropertyById(id as string);
 
   if (isLoading) {
     return (

@@ -61,6 +61,16 @@ export function useUserProfile() {
   });
 }
 
+export function useUpdateProfile() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: any) => apiClient.updateUserProfile(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user', 'profile'] });
+    },
+  });
+}
+
 // Messages
 export function useConversations() {
   return useQuery({
@@ -88,6 +98,121 @@ export function useSubmitReview() {
       apiClient.submitReview(bookingId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bookings'] });
+    },
+  });
+}
+
+export function usePropertyReviews(propertyId: string) {
+  return useQuery({
+    queryKey: ['reviews', 'property', propertyId],
+    queryFn: () => apiClient.getPropertyReviews(propertyId),
+    enabled: !!propertyId,
+  });
+}
+
+// Wishlist
+export function useWishlist() {
+  return useQuery({
+    queryKey: ['wishlist'],
+    queryFn: () => apiClient.getWishlist(),
+  });
+}
+
+export function useAddToWishlist() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (propertyId: string) => apiClient.addToWishlist(propertyId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['wishlist'] });
+    },
+  });
+}
+
+export function useRemoveFromWishlist() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (propertyId: string) => apiClient.removeFromWishlist(propertyId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['wishlist'] });
+    },
+  });
+}
+
+// Host - Properties
+export function useHostProperties() {
+  return useQuery({
+    queryKey: ['host', 'properties'],
+    queryFn: () => apiClient.getHostProperties(),
+  });
+}
+
+export function useCreateProperty() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: any) => apiClient.createProperty(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['host', 'properties'] });
+    },
+  });
+}
+
+export function useUpdateProperty() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: any }) => apiClient.updateProperty(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['host', 'properties'] });
+    },
+  });
+}
+
+export function useDeleteProperty() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => apiClient.deleteProperty(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['host', 'properties'] });
+    },
+  });
+}
+
+// Host - Bookings
+export function useHostBookings() {
+  return useQuery({
+    queryKey: ['host', 'bookings'],
+    queryFn: () => apiClient.getHostBookings(),
+  });
+}
+
+// Host - Earnings
+export function useHostEarnings() {
+  return useQuery({
+    queryKey: ['host', 'earnings'],
+    queryFn: () => apiClient.getHostEarnings(),
+  });
+}
+
+// Wallet/Payments
+export function useWalletBalance() {
+  return useQuery({
+    queryKey: ['wallet', 'balance'],
+    queryFn: () => apiClient.getWalletBalance(),
+  });
+}
+
+export function useTransactions() {
+  return useQuery({
+    queryKey: ['wallet', 'transactions'],
+    queryFn: () => apiClient.getTransactions(),
+  });
+}
+
+export function useWithdrawFunds() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (amount: number) => apiClient.withdrawFunds(amount),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['wallet'] });
     },
   });
 }
