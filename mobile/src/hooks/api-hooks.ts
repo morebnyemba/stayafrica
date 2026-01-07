@@ -224,7 +224,7 @@ export function useTransactions() {
 
 export function useWithdrawFunds() {
   const queryClient = useQueryClient();
-  return useMutation<void, Error, number>({
+  return useMutation<{ message: string; balance: number }, Error, number>({
     mutationFn: (amount: number) => apiClient.withdrawFunds(amount),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['wallet'] });
