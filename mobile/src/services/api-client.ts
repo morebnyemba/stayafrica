@@ -206,20 +206,20 @@ class APIClient {
     return (await this.client.post(`/reviews/`, { booking_id: bookingId, ...data })).data;
   }
 
-  async getPropertyReviews(propertyId: string): Promise<any> {
+  async getPropertyReviews(propertyId: string): Promise<{ results: Review[] }> {
     return (await this.client.get(`/reviews/`, { params: { property_id: propertyId } })).data;
   }
 
   // Wishlist
-  async getWishlist(): Promise<any> {
+  async getWishlist(): Promise<{ results: Property[] }> {
     return (await this.client.get('/users/wishlist/')).data;
   }
 
-  async addToWishlist(propertyId: string): Promise<any> {
+  async addToWishlist(propertyId: string): Promise<{ message: string }> {
     return (await this.client.post('/users/wishlist/', { property_id: propertyId })).data;
   }
 
-  async removeFromWishlist(propertyId: string): Promise<any> {
+  async removeFromWishlist(propertyId: string): Promise<void> {
     return (await this.client.delete(`/users/wishlist/${propertyId}/`)).data;
   }
 
@@ -241,25 +241,25 @@ class APIClient {
   }
 
   // Host - Bookings
-  async getHostBookings(): Promise<any> {
+  async getHostBookings(): Promise<{ results: Booking[] }> {
     return (await this.client.get('/bookings/host/')).data;
   }
 
   // Host - Earnings
-  async getHostEarnings(): Promise<any> {
+  async getHostEarnings(): Promise<HostEarnings> {
     return (await this.client.get('/payments/earnings/')).data;
   }
 
   // Wallet/Payments
-  async getWalletBalance(): Promise<any> {
+  async getWalletBalance(): Promise<WalletBalance> {
     return (await this.client.get('/payments/wallet/')).data;
   }
 
-  async getTransactions(): Promise<any> {
+  async getTransactions(): Promise<{ results: Transaction[] }> {
     return (await this.client.get('/payments/transactions/')).data;
   }
 
-  async withdrawFunds(amount: number): Promise<any> {
+  async withdrawFunds(amount: number): Promise<{ message: string; balance: number }> {
     return (await this.client.post('/payments/withdraw/', { amount })).data;
   }
 

@@ -117,7 +117,7 @@ export function useSubmitReview() {
 }
 
 export function usePropertyReviews(propertyId: string) {
-  return useQuery({
+  return useQuery<{ results: Review[] }>({
     queryKey: ['reviews', 'property', propertyId],
     queryFn: () => apiClient.getPropertyReviews(propertyId),
     enabled: !!propertyId,
@@ -126,7 +126,7 @@ export function usePropertyReviews(propertyId: string) {
 
 // Wishlist
 export function useWishlist() {
-  return useQuery({
+  return useQuery<{ results: Property[] }>({
     queryKey: ['wishlist'],
     queryFn: () => apiClient.getWishlist(),
   });
@@ -134,7 +134,7 @@ export function useWishlist() {
 
 export function useAddToWishlist() {
   const queryClient = useQueryClient();
-  return useMutation({
+  return useMutation<{ message: string }, Error, string>({
     mutationFn: (propertyId: string) => apiClient.addToWishlist(propertyId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['wishlist'] });
@@ -144,7 +144,7 @@ export function useAddToWishlist() {
 
 export function useRemoveFromWishlist() {
   const queryClient = useQueryClient();
-  return useMutation({
+  return useMutation<void, Error, string>({
     mutationFn: (propertyId: string) => apiClient.removeFromWishlist(propertyId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['wishlist'] });
@@ -193,7 +193,7 @@ export function useDeleteProperty() {
 
 // Host - Bookings
 export function useHostBookings() {
-  return useQuery({
+  return useQuery<{ results: Booking[] }>({
     queryKey: ['host', 'bookings'],
     queryFn: () => apiClient.getHostBookings(),
   });
@@ -201,7 +201,7 @@ export function useHostBookings() {
 
 // Host - Earnings
 export function useHostEarnings() {
-  return useQuery({
+  return useQuery<HostEarnings>({
     queryKey: ['host', 'earnings'],
     queryFn: () => apiClient.getHostEarnings(),
   });
