@@ -5,9 +5,11 @@ import { Property } from '@/types';
 interface PropertyCardProps {
   property: Property;
   onPress: (id: string) => void;
+  showRemoveButton?: boolean;
+  onRemove?: () => void;
 }
 
-export function PropertyCard({ property, onPress }: PropertyCardProps) {
+export function PropertyCard({ property, onPress, showRemoveButton = false, onRemove }: PropertyCardProps) {
   return (
     <TouchableOpacity
       className="mb-6 rounded-2xl overflow-hidden bg-white shadow-lg border border-gray-100"
@@ -25,6 +27,19 @@ export function PropertyCard({ property, onPress }: PropertyCardProps) {
         <View className="w-full h-44 bg-gray-100 items-center justify-center">
           <Ionicons name="image-outline" size={48} color="#d1d5db" />
         </View>
+      )}
+
+      {/* Wishlist Remove Button */}
+      {showRemoveButton && onRemove && (
+        <TouchableOpacity
+          className="absolute top-3 right-3 bg-white/90 rounded-full p-2 shadow-md"
+          onPress={(e) => {
+            e.stopPropagation();
+            onRemove();
+          }}
+        >
+          <Ionicons name="heart" size={24} color="#EF4444" />
+        </TouchableOpacity>
       )}
 
       <View className="p-4">
