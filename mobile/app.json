@@ -45,13 +45,6 @@
           "photosPermission": "Allow StayAfrica to access your photos to upload property images.",
           "cameraPermission": "Allow StayAfrica to use your camera."
         }
-      ],
-      [
-        "expo-notifications",
-        {
-          "icon": "./assets/notification-icon.png",
-          "color": "#d9b168"
-        }
       ]
     ],
     "scheme": "stayafrica",
