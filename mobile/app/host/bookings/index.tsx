@@ -30,18 +30,18 @@ export default function HostBookingsScreen() {
   }
 
   const getStatusColor = (status: string) => {
-    const colors: Record<string, { bg: string; text: string }> = {
-      pending: { bg: 'bg-yellow-100', text: 'text-yellow-800' },
-      confirmed: { bg: 'bg-green-100', text: 'text-green-800' },
-      checked_in: { bg: 'bg-blue-100', text: 'text-blue-800' },
-      checked_out: { bg: 'bg-gray-100', text: 'text-gray-800' },
-      cancelled: { bg: 'bg-red-100', text: 'text-red-800' },
+    const colors: Record<string, { bg: string; text: string; hex: string }> = {
+      pending: { bg: 'bg-yellow-100', text: 'text-yellow-800', hex: '#92400E' },
+      confirmed: { bg: 'bg-green-100', text: 'text-green-800', hex: '#166534' },
+      checked_in: { bg: 'bg-blue-100', text: 'text-blue-800', hex: '#1E40AF' },
+      checked_out: { bg: 'bg-gray-100', text: 'text-gray-800', hex: '#1F2937' },
+      cancelled: { bg: 'bg-red-100', text: 'text-red-800', hex: '#991B1B' },
     };
-    return colors[status] || { bg: 'bg-gray-100', text: 'text-gray-800' };
+    return colors[status] || { bg: 'bg-gray-100', text: 'text-gray-800', hex: '#1F2937' };
   };
 
-  const getStatusIcon = (status: string) => {
-    const icons: Record<string, string> = {
+  const getStatusIcon = (status: string): keyof typeof Ionicons.glyphMap => {
+    const icons: Record<string, keyof typeof Ionicons.glyphMap> = {
       pending: 'time-outline',
       confirmed: 'checkmark-circle',
       checked_in: 'enter',
@@ -97,7 +97,7 @@ export default function HostBookingsScreen() {
         {/* Status and Price */}
         <View className="flex-row items-center justify-between">
           <View className={`px-3 py-1 rounded-full flex-row items-center ${statusColors.bg}`}>
-            <Ionicons name={statusIcon as any} size={14} color={statusColors.text.replace('text-', '#')} />
+            <Ionicons name={statusIcon} size={14} color={statusColors.hex} />
             <Text className={`text-xs font-semibold ml-1 ${statusColors.text}`}>
               {booking.status?.replace('_', ' ').toUpperCase()}
             </Text>
