@@ -87,5 +87,4 @@ export const STORAGE_KEYS = {
   REFRESH_TOKEN: 'refreshToken',
   USER_PREFERENCES: 'userPreferences',
   FAVORITES: 'favorites',
-  PUSH_TOKEN: 'pushToken',
 };
