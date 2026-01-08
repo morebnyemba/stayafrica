@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { Mail, Lock } from 'lucide-react';
 import { Input, Button } from '@/components/ui';
 import { toast } from 'react-hot-toast';
-import { validateEmail, validatePassword } from '@/lib/validation';
+import { validateEmail, validatePassword } from '@/lib/form-validation';
 
 export function LoginContent() {
   const { login } = useAuth();
