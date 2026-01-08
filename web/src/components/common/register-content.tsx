@@ -447,7 +447,7 @@ export function RegisterContent() {
                 variant="primary"
                 size="lg"
                 fullWidth={currentStep === 1}
-                loading={isLoading}
+                isLoading={isLoading}
                 disabled={isLoading}
                 className={currentStep > 1 ? 'flex-1' : ''}
               >
