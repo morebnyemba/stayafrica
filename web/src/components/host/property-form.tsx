@@ -19,6 +19,10 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
   const [error, setError] = useState('');
   const [searchingLocation, setSearchingLocation] = useState(false);
   const [locationSuggestions, setLocationSuggestions] = useState<any[]>([]);
+  const [usingCurrentLocation, setUsingCurrentLocation] = useState(false);
+  const [premisesStatus, setPremisesStatus] = useState<{ isOnPremises: boolean | null; distanceKm: number | null; message: string }>(
+    { isOnPremises: null, distanceKm: null, message: '' }
+  );
   
   const [formData, setFormData] = useState({
     title: initialData?.title || '',
@@ -121,6 +125,9 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
       longitude: suggestion.longitude.toString(),
     }));
     setLocationSuggestions([]);
+
+    // Reset premises status when selecting from suggestions
+    setPremisesStatus({ isOnPremises: null, distanceKm: null, message: '' });
   };
 
   const handleGeocodeAddress = async () => {
@@ -138,12 +145,118 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
           suburb: response.data.suburb || prev.suburb,
           country: response.data.country || prev.country,
         }));
+
+        // If we already captured current location, update premises status against geocoded coords
+        if (premisesStatus.distanceKm !== null) {
+          const dist = haversineDistance(
+            currentLatLng.lat,
+            currentLatLng.lng,
+            Number(response.data.latitude),
+            Number(response.data.longitude)
+          );
+          const isOnPrem = dist <= 0.1; // within 100m considered on-premises
+          setPremisesStatus({
+            isOnPremises: isOnPrem,
+            distanceKm: Number(dist.toFixed(3)),
+            message: isOnPrem
+              ? 'You appear to be on the property premises.'
+              : `You are approximately ${dist.toFixed(3)} km from the entered property location.`
+          });
+        }
       }
     } catch (err: any) {
       setError('Could not find location. Please check the address.');
     } finally {
       setSearchingLocation(false);
     }
+  };
+
+  // Track current captured coordinates for premises calculation
+  const [currentLatLng, setCurrentLatLng] = useState<{ lat: number; lng: number }>({ lat: 0, lng: 0 });
+
+  // Haversine distance in kilometers
+  const haversineDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+    const toRad = (deg: number) => (deg * Math.PI) / 180;
+    const R = 6371; // Earth radius in km
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+              Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+              Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  };
+
+  const handleUseCurrentLocation = async () => {
+    if (!navigator.geolocation) {
+      setError('Geolocation is not supported by your browser.');
+      return;
+    }
+
+    setUsingCurrentLocation(true);
+    setError('');
+    setPremisesStatus({ isOnPremises: null, distanceKm: null, message: '' });
+
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        setCurrentLatLng({ lat, lng });
+
+        // If form already has coordinates, compute distance; otherwise fill them
+        const existingLat = Number(formData.latitude);
+        const existingLng = Number(formData.longitude);
+        if (!isNaN(existingLat) && !isNaN(existingLng) && formData.latitude && formData.longitude) {
+          const dist = haversineDistance(lat, lng, existingLat, existingLng);
+          const isOnPrem = dist <= 0.1; // within 100m considered on-premises
+          setPremisesStatus({
+            isOnPremises: isOnPrem,
+            distanceKm: Number(dist.toFixed(3)),
+            message: isOnPrem
+              ? 'You appear to be on the property premises.'
+              : `You are approximately ${dist.toFixed(3)} km from the entered property location.`
+          });
+        } else {
+          setFormData(prev => ({
+            ...prev,
+            latitude: lat.toString(),
+            longitude: lng.toString(),
+          }));
+
+          // Reverse geocode to fill address/city/suburb/country if available
+          try {
+            const resp = await apiClient.reverseGeocode(lat, lng);
+            const data = resp.data || {};
+            setFormData(prev => ({
+              ...prev,
+              address: data.address || prev.address,
+              city: data.city || prev.city,
+              suburb: data.suburb || prev.suburb,
+              country: data.country || prev.country,
+            }));
+          } catch (_) {
+            // Non-blocking if reverse geocode fails
+          }
+
+          // If we filled from current location, we are on premises by definition
+          setPremisesStatus({
+            isOnPremises: true,
+            distanceKm: 0,
+            message: 'Based on your current location, you are on the property premises.'
+          });
+        }
+        setUsingCurrentLocation(false);
+      },
+      (err) => {
+        setUsingCurrentLocation(false);
+        if (err.code === err.PERMISSION_DENIED) {
+          setError('Location permission denied. Please allow access to use current location.');
+        } else {
+          setError('Unable to retrieve your location.');
+        }
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -381,6 +494,16 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
                   {searchingLocation ? 'Searching...' : 'Find Coordinates'}
                 </Button>
               </div>
+              <div className="flex items-end">
+                <Button
+                  type="button"
+                  onClick={handleUseCurrentLocation}
+                  disabled={usingCurrentLocation}
+                  variant="secondary"
+                >
+                  {usingCurrentLocation ? 'Locating...' : 'Use Current Location'}
+                </Button>
+              </div>
             </div>
           </div>
 
@@ -449,9 +572,20 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
             </div>
           </div>
 
-          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 text-sm text-blue-800 dark:text-blue-200">
-            <p className="font-medium mb-1">📍 Location powered by GDAL/PostGIS</p>
-            <p>Search for your property or enter the address, then click "Find Coordinates" to automatically geocode the location with high accuracy.</p>
+          <div className="space-y-3">
+            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 text-sm text-blue-800 dark:text-blue-200">
+              <p className="font-medium mb-1">📍 Location powered by GDAL/PostGIS</p>
+              <p>Search for your property or enter the address, then click "Find Coordinates" or "Use Current Location" to populate coordinates.</p>
+            </div>
+            {premisesStatus.isOnPremises !== null && (
+              <div className={`rounded-lg p-4 text-sm border ${premisesStatus.isOnPremises ? 'bg-green-50 border-green-200 text-green-800 dark:bg-green-900/20 dark:border-green-800 dark:text-green-200' : 'bg-yellow-50 border-yellow-200 text-yellow-800 dark:bg-yellow-900/20 dark:border-yellow-800 dark:text-yellow-200'}`}>
+                <p className="font-medium">Premises Check</p>
+                <p className="mt-1">{premisesStatus.message}</p>
+                {premisesStatus.distanceKm !== null && !premisesStatus.isOnPremises && (
+                  <p className="mt-1">Distance from property: {premisesStatus.distanceKm} km</p>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
