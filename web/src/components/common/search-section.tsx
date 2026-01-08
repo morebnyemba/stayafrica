@@ -40,12 +40,8 @@ export function SearchSection() {
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 placeholder="Where to?"
-                label={
-                  <span className="flex items-center gap-2 text-primary-800">
-                    <MapPin className="w-4 h-4" />
-                    Location
-                  </span>
-                }
+                label="Location"
+                icon={<MapPin className="w-4 h-4" />}
               />
             </div>
 
@@ -55,12 +51,8 @@ export function SearchSection() {
                 type="date"
                 value={checkIn}
                 onChange={(e) => setCheckIn(e.target.value)}
-                label={
-                  <span className="flex items-center gap-2 text-primary-800">
-                    <Calendar className="w-4 h-4" />
-                    Check-in
-                  </span>
-                }
+                label="Check-in"
+                icon={<Calendar className="w-4 h-4" />}
               />
             </div>
 
@@ -70,12 +62,8 @@ export function SearchSection() {
                 type="date"
                 value={checkOut}
                 onChange={(e) => setCheckOut(e.target.value)}
-                label={
-                  <span className="flex items-center gap-2 text-primary-800">
-                    <Calendar className="w-4 h-4" />
-                    Check-out
-                  </span>
-                }
+                label="Check-out"
+                icon={<Calendar className="w-4 h-4" />}
               />
             </div>
 
@@ -85,12 +73,8 @@ export function SearchSection() {
                 select
                 value={guests}
                 onChange={(e) => setGuests(e.target.value)}
-                label={
-                  <span className="flex items-center gap-2 text-primary-800">
-                    <Users className="w-4 h-4" />
-                    Guests
-                  </span>
-                }
+                label="Guests"
+                icon={<Users className="w-4 h-4" />}
                 options={[1, 2, 3, 4, 5, 6, 8, 10].map((num) => ({
                   value: String(num),
                   label: `${num} guest${num > 1 ? 's' : ''}`,
