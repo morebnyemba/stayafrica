@@ -28,7 +28,7 @@ interface SelectOption {
   label: string;
 }
 
-interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type'>,
+interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type' | 'onChange'>,
   VariantProps<typeof inputVariants> {
   label?: string;
   error?: string;
@@ -40,6 +40,7 @@ interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, '
   rows?: number;
   select?: boolean;
   options?: SelectOption[];
+  onChange?: React.ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>;
 }
 
 export const Input = React.forwardRef<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement, InputProps>(
