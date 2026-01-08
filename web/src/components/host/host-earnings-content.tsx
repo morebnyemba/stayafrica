@@ -529,7 +529,7 @@ export function HostEarningsContent() {
                     <Input
                       type="checkbox"
                       checked={bankFormData.is_primary}
-                      onChange={(e) => setBankFormData({ ...bankFormData, is_primary: e.target.checked })}
+                      onChange={(e) => setBankFormData({ ...bankFormData, is_primary: (e as React.ChangeEvent<HTMLInputElement>).target.checked })}
                       label="Set as primary account"
                       helpText="Use this account for payouts by default."
                       className="!w-auto"
