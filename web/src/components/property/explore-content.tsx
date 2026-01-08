@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
 import { Filter } from 'lucide-react';
@@ -10,7 +9,6 @@ import { PropertyListSkeleton } from './property-card-skeleton';
 import { SearchFilters, type FilterOptions } from '@/components/common/search-filters';
 
 export function ExploreContent() {
-  const router = useRouter();
   const [filters, setFilters] = useState<FilterOptions>({
     priceMin: 0,
     priceMax: 1000,

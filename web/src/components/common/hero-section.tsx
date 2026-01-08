@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { TypeAnimation } from 'react-type-animation';
 import { FEATURED_PROPERTY_TYPES, PROPERTY_TYPES } from '@/types/property-types';
 import { Input } from '@/components/ui/Input';
+import { LocationPicker } from '@/components/common/location-picker';
 
 const iconMap: Record<string, any> = {
   Home,
@@ -28,6 +29,17 @@ export function HeroSection() {
   const [checkOut, setCheckOut] = useState('');
   const [guests, setGuests] = useState('2');
   const [selectedType, setSelectedType] = useState('');
+  const [showLocationPicker, setShowLocationPicker] = useState(false);
+
+  const handleLocationDetected = (locationData: { lat: number; lng: number; address?: string }) => {
+    // Extract city name from address if available
+    if (locationData.address) {
+      const addressParts = locationData.address.split(',');
+      const city = addressParts.length > 1 ? addressParts[0].trim() : locationData.address;
+      setLocation(city);
+    }
+    setShowLocationPicker(false);
+  };
 
   const handleSearch = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -171,6 +183,27 @@ export function HeroSection() {
             </div>
           </div>
         </form>
+
+        {/* Location Picker */}
+        <div className="mt-4 max-w-4xl mx-auto">
+          {!showLocationPicker ? (
+            <div className="text-center">
+              <button
+                type="button"
+                onClick={() => setShowLocationPicker(true)}
+                className="text-sand-200 hover:text-sand-50 text-xs sm:text-sm underline transition"
+              >
+                Or use my current location
+              </button>
+            </div>
+          ) : (
+            <LocationPicker
+              onLocationSelect={handleLocationDetected}
+              showMap={true}
+              className="bg-white/90 dark:bg-primary-800/90 backdrop-blur rounded-xl p-4 border border-primary-200 dark:border-primary-700"
+            />
+          )}
+        </div>
 
         {/* Host CTA */}
         <div className="mt-6 sm:mt-8 text-center">
