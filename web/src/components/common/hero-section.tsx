@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent, ChangeEvent } from 'react';
 import { Search, Home, Building2, Building, TreePine, Castle, Wind, Users, Palmtree, Tent, Anchor } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -156,7 +156,7 @@ export function HeroSection() {
                 <Input
                   select
                   value={guests}
-                  onChange={(e) => setGuests((e.target as HTMLSelectElement).value)}
+                  onChange={(e: ChangeEvent<HTMLSelectElement>) => setGuests(e.target.value)}
                   label="Guests"
                   options={[1,2,3,4,5,6,8,10].map((n) => ({ value: String(n), label: String(n) }))}
                 />
