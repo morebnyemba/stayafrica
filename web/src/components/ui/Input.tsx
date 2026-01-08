@@ -62,6 +62,30 @@ export const Input = React.forwardRef<HTMLInputElement | HTMLTextAreaElement | H
     ref
   ) => {
     const variantClass = error ? 'error' : variant;
+    const isCheckbox = type === 'checkbox';
+
+    if (isCheckbox) {
+      return (
+        <div className="w-full">
+          <label className={cn('inline-flex items-center gap-2 cursor-pointer', className)}>
+            <input
+              ref={ref as React.Ref<HTMLInputElement>}
+              type="checkbox"
+              className="h-5 w-5 rounded border-2 border-neutral-300 bg-white text-primary-600 focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-white transition dark:border-neutral-600 dark:bg-primary-800 dark:text-secondary-300 dark:focus:ring-primary-400 dark:focus:ring-offset-primary-900"
+              {...(props as React.InputHTMLAttributes<HTMLInputElement>)}
+            />
+            {label && (
+              <span className="text-sm font-medium text-neutral-700 dark:text-neutral-100">
+                {label}
+                {props.required && <span className="ml-1 text-error-500">*</span>}
+              </span>
+            )}
+          </label>
+          {error && <p className="mt-1 text-sm text-error-500">{error}</p>}
+          {helpText && !error && <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-300">{helpText}</p>}
+        </div>
+      );
+    }
 
     return (
       <div className="w-full">

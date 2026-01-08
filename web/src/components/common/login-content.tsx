@@ -3,15 +3,14 @@
 import { useState } from 'react';
 import { useAuth } from '@/store/auth-store';
 import Link from 'next/link';
-import { Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { Mail, Lock } from 'lucide-react';
 import { Input, Button } from '@/components/ui';
 import { toast } from 'react-hot-toast';
-import { validateEmail, validatePassword } from '@/lib/form-validation';
+import { validateEmail, validatePassword } from '@/lib/validation';
 
 export function LoginContent() {
   const { login } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -91,14 +90,13 @@ export function LoginContent() {
             {/* Password Field */}
             <Input
               label="Password"
-              type={showPassword ? 'text' : 'password'}
+              type="password"
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               placeholder="••••••••"
               disabled={isLoading}
               error={errors.password}
               icon={<Lock className="w-5 h-5" />}
-              onIconClick={() => setShowPassword(!showPassword)}
               required
             />
 
@@ -124,7 +122,7 @@ export function LoginContent() {
               type="submit"
               fullWidth
               size="lg"
-              loading={isLoading}
+              isLoading={isLoading}
               disabled={isLoading}
             >
               {isLoading ? 'Signing In...' : 'Sign In'}
@@ -145,16 +143,12 @@ export function LoginContent() {
 
           {/* Sign Up Link */}
           <div className="text-center">
-            <Button
-              asChild
-              variant="secondary"
-              size="lg"
-              fullWidth
+            <Link
+              href="/register"
+              className="inline-flex w-full items-center justify-center rounded-lg bg-secondary-500 px-6 py-3 text-lg font-medium text-neutral-900 hover:bg-secondary-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-secondary-500"
             >
-              <Link href="/register">
-                Create an Account
-              </Link>
-            </Button>
+              Create an Account
+            </Link>
           </div>
         </div>
 

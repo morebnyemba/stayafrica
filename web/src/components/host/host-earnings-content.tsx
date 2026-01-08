@@ -525,20 +525,15 @@ export function HostEarningsContent() {
                       placeholder="Country (optional)"
                     />
                   </div>
-                  <div className="flex items-center justify-between md:col-span-2 pt-6">
-                    <div>
-                      <p className="text-sm font-semibold text-primary-900 dark:text-sand-50">Set as primary account</p>
-                      <p className="text-xs text-primary-600 dark:text-sand-300">Use this account for payouts by default.</p>
-                    </div>
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        className="sr-only peer"
-                        checked={bankFormData.is_primary}
-                        onChange={(e) => setBankFormData({ ...bankFormData, is_primary: e.target.checked })}
-                      />
-                      <div className="w-11 h-6 bg-primary-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-secondary-300 dark:peer-focus:ring-secondary-800 rounded-full peer dark:bg-primary-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-primary-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-primary-600 peer-checked:bg-secondary-500"></div>
-                    </label>
+                  <div className="md:col-span-2 pt-6">
+                    <Input
+                      type="checkbox"
+                      checked={bankFormData.is_primary}
+                      onChange={(e) => setBankFormData({ ...bankFormData, is_primary: e.target.checked })}
+                      label="Set as primary account"
+                      helpText="Use this account for payouts by default."
+                      className="!w-auto"
+                    />
                   </div>
                 </div>
                 <div className="flex gap-3 mt-4">

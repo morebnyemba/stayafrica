@@ -6,6 +6,7 @@ import { CreditCard, CheckCircle, XCircle, Clock } from 'lucide-react';
 import dynamic from 'next/dynamic';
 const ProtectedRoute = dynamic(() => import('@/components/auth/protected-route').then(m => m.ProtectedRoute), { ssr: false });
 import { Button } from '@/components/ui/Button';
+import { Skeleton } from '@/components/ui';
 
 export function PaymentHistory() {
   const { data, isLoading, error } = useQuery({
@@ -24,9 +25,24 @@ export function PaymentHistory() {
             <h1 className="text-2xl sm:text-3xl font-bold text-primary-900 dark:text-sand-50">Payment History</h1>
           </header>
           {isLoading ? (
-            <div className="space-y-4">
-              {[1,2,3].map(i => (
-                <div key={i} className="animate-pulse h-16 bg-primary-200 dark:bg-primary-700 rounded-lg" />
+            <div className="space-y-4" aria-busy="true" aria-live="polite">
+              {[1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="bg-white dark:bg-primary-800 p-4 sm:p-6 rounded-lg border border-primary-100 dark:border-primary-700"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1 space-y-2">
+                      <Skeleton variant="text" className="h-5 w-1/2" />
+                      <Skeleton variant="text" className="h-4 w-3/4" />
+                      <Skeleton variant="text" className="h-4 w-1/3" />
+                    </div>
+                    <div className="w-24 flex flex-col items-end gap-2">
+                      <Skeleton variant="text" className="h-5 w-12" />
+                      <Skeleton variant="circle" className="h-8 w-8" />
+                    </div>
+                  </div>
+                </div>
               ))}
             </div>
           ) : error ? (
