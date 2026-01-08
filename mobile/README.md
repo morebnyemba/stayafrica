@@ -21,7 +21,6 @@ A modern React Native/Expo mobile application for the StayAfrica property rental
 - 💳 **Payment Ready** - Stripe React Native configured
 - 📍 **Location Services** - Built-in geolocation
 - 📸 **Image Handling** - Image picker and gallery support
-- 🔔 **Push Notifications** - Expo Notifications configured
 - 💾 **Secure Storage** - expo-secure-store for tokens
 
 ## 🚀 Quick Start
@@ -218,7 +217,6 @@ Text:       #0a1a15 (Savanna)
 ### Services
 - expo-location: ~16.2.1
 - expo-image-picker: ~14.3.1
-- expo-notifications: ~0.23.0
 - @stripe/stripe-react-native: 12.2.0
 - mapbox-gl: 2.15.0
 

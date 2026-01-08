@@ -51,6 +51,15 @@ export const COLORS = {
   gray700: '#374151',
   gray800: '#1f2937',
   gray900: '#111827',
+  // Status colors (matching Tailwind)
+  yellow100: '#fef3c7',
+  yellow800: '#92400e',
+  green100: '#dcfce7',
+  green800: '#166534',
+  blue100: '#dbeafe',
+  blue800: '#1e40af',
+  red100: '#fee2e2',
+  red800: '#991b1b',
 };
 
 export const SIZES = {
@@ -78,5 +87,4 @@ export const STORAGE_KEYS = {
   REFRESH_TOKEN: 'refreshToken',
   USER_PREFERENCES: 'userPreferences',
   FAVORITES: 'favorites',
-  PUSH_TOKEN: 'pushToken',
 };
