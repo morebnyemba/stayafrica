@@ -199,3 +199,17 @@ export function Navigation() {
     </>
   );
 }
+
+// Simple mobile bottom navigation placeholder to prevent build errors
+export function BottomNav() {
+  return null;
+}
+
+// Placeholder header and breadcrumbs for legacy imports
+export function Header() {
+  return null;
+}
+
+export function Breadcrumbs() {
+  return null;
+}

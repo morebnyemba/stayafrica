@@ -2,10 +2,9 @@ import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import './globals.css';
 import { Providers } from '@/context/providers';
-import { Navigation } from '@/components/common/Navigation';
-import { Footer } from '@/components/common/Footer';
+import { Navigation, BottomNav } from '@/components/common/navigation';
+import { Footer } from '@/components/common/footer';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
-import { BottomNav } from '@/components/common/Navigation';
 
 export const metadata: Metadata = {
   title: 'StayAfrica - Unique Accommodations Across Africa',

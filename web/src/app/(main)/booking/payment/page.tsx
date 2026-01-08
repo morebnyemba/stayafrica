@@ -10,7 +10,6 @@ const ProtectedRoute = dynamic(() => import('@/components/auth/protected-route')
 import { CreditCard, Wallet, DollarSign, CheckCircle, ArrowLeft, AlertCircle, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import Link from 'next/link';
-import { Button } from '@/components/ui/Button';
 import { Button } from '@/components/ui';
 
 interface PaymentProvider {

@@ -4,6 +4,6 @@
 
 export { ErrorBoundary } from './ErrorBoundary';
 export { NotFound, ServerError } from './ErrorPages';
-export { Header, Breadcrumbs, BottomNav } from './Navigation';
-export { Footer } from './Footer';
+export { Header, Breadcrumbs, BottomNav, Navigation } from './navigation';
+export { Footer } from './footer';
 export { OptimizedImage } from './OptimizedImage';
