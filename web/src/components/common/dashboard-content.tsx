@@ -17,6 +17,7 @@ import {
   MessageSquare,
   Star,
 } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
 import dynamic from 'next/dynamic';
 const ProtectedRoute = dynamic(() => import('@/components/auth/protected-route').then(m => m.ProtectedRoute), { ssr: false });
 
@@ -340,8 +341,8 @@ export function DashboardContent() {
                     <p className="text-primary-600 dark:text-sand-300 mb-4">
                       Time to plan your next adventure!
                     </p>
-                    <Link href="/explore" className="btn-primary px-6 py-2">
-                      Explore Properties
+                    <Link href="/explore">
+                      <Button variant="primary" size="lg">Explore Properties</Button>
                     </Link>
                   </div>
                 )}

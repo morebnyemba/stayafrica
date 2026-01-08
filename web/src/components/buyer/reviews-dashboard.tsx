@@ -6,6 +6,7 @@ import { apiClient } from '@/services/api-client';
 import { Star, MessageSquare } from 'lucide-react';
 import dynamic from 'next/dynamic';
 const ProtectedRoute = dynamic(() => import('@/components/auth/protected-route').then(m => m.ProtectedRoute), { ssr: false });
+import { Button } from '@/components/ui/Button';
 
 export function ReviewsDashboard() {
   const queryClient = useQueryClient();
@@ -58,7 +59,7 @@ export function ReviewsDashboard() {
             ) : errorWritten ? (
               <div className="bg-white dark:bg-primary-800 p-6 sm:p-8 rounded-lg text-center border border-primary-200 dark:border-primary-700" role="alert">
                 <p className="text-primary-600 dark:text-sand-300 mb-4">Unable to load your reviews.</p>
-                <button className="btn-primary px-6 py-2 min-h-[44px]" onClick={() => window.location.reload()} aria-label="Retry loading reviews">Retry</button>
+                <Button variant="primary" size="lg" onClick={() => window.location.reload()} aria-label="Retry loading reviews">Retry</Button>
               </div>
             ) : writtenReviews.length === 0 ? (
               <div className="bg-white dark:bg-primary-800 p-6 sm:p-8 rounded-lg text-center border border-primary-200 dark:border-primary-700">
@@ -91,7 +92,7 @@ export function ReviewsDashboard() {
             ) : errorReceived ? (
               <div className="bg-white dark:bg-primary-800 p-6 sm:p-8 rounded-lg text-center border border-primary-200 dark:border-primary-700" role="alert">
                 <p className="text-primary-600 dark:text-sand-300 mb-4">Unable to load received reviews.</p>
-                <button className="btn-primary px-6 py-2 min-h-[44px]" onClick={() => window.location.reload()} aria-label="Retry loading reviews">Retry</button>
+                <Button variant="primary" size="lg" onClick={() => window.location.reload()} aria-label="Retry loading reviews">Retry</Button>
               </div>
             ) : receivedReviews.length === 0 ? (
               <div className="bg-white dark:bg-primary-800 p-6 sm:p-8 rounded-lg text-center border border-primary-200 dark:border-primary-700">
@@ -120,14 +121,15 @@ export function ReviewsDashboard() {
                         aria-label={`Reply to review ${review.id}`}
                         placeholder="Write your reply here..."
                       />
-                      <button
-                        className="btn-primary px-4 sm:px-6 py-2 text-sm sm:text-base min-h-[44px]"
+                      <Button
+                        variant="primary"
+                        size="md"
                         disabled={replyMutation.isPending || !replyFields[review.id]?.trim()}
                         onClick={() => replyMutation.mutate({ reviewId: review.id, reply: replyFields[review.id] })}
                         aria-label={`Submit reply to review ${review.id}`}
                       >
                         {replyMutation.isPending ? 'Submitting...' : 'Submit Reply'}
-                      </button>
+                      </Button>
                       {review.reply && (
                         <div className="mt-3 p-3 bg-primary-50 dark:bg-primary-700 rounded-lg text-primary-600 dark:text-sand-300 text-sm">
                           <span className="font-semibold">Your reply:</span> {review.reply}

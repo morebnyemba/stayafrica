@@ -7,6 +7,7 @@ import { PropertyAmenities } from '@/components/property/property-amenities';
 import { PropertyHostCard } from '@/components/property/property-host-card';
 import { BookingCard } from '@/components/booking/booking-card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui';
 import { Heart, MapPin, Share2, Star } from 'lucide-react';
 import Link from 'next/link';
 
@@ -65,12 +66,12 @@ export function PropertyDetailContent({ propertyId, useHostEndpoint = false }: P
       <div className="max-w-7xl mx-auto px-4 py-12">
         <div className="text-center">
           <p className="text-red-600 dark:text-red-400 mb-4">Error loading property</p>
-          <button
-            className="btn-primary px-6 py-2 mb-4"
+          <Button
             onClick={() => window.location.reload()}
+            className="mb-4"
           >
             Retry
-          </button>
+          </Button>
           <Link href="/explore" className="text-secondary-600 hover:text-secondary-700">
             Back to explore
           </Link>

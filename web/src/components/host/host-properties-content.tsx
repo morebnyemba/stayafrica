@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
 import Link from 'next/link';
 import { Building, Plus, Edit, Trash2, Eye, Calendar, DollarSign, Star, TrendingUp } from 'lucide-react';
+import { Button } from '@/components/ui';
 import dynamic from 'next/dynamic';
 const ProtectedRoute = dynamic(() => import('@/components/auth/protected-route').then(m => m.ProtectedRoute), { ssr: false });
 import { useState } from 'react';
@@ -60,9 +61,11 @@ export function HostPropertiesContent() {
                 Manage your property listings
               </p>
             </div>
-            <Link href="/host/properties/new" className="btn-primary px-4 sm:px-6 py-3 flex items-center justify-center gap-2 min-h-[44px]" aria-label="Add new property">
-              <Plus className="w-5 h-5" />
-              <span>Add Property</span>
+            <Link href="/host/properties/new" className="inline-block" aria-label="Add new property">
+              <Button className="flex items-center justify-center gap-2">
+                <Plus className="w-5 h-5" />
+                <span>Add Property</span>
+              </Button>
             </Link>
           </header>
 
@@ -162,17 +165,21 @@ export function HostPropertiesContent() {
                     <div className="flex gap-2">
                       <Link
                         href={`/property/${property.id}`}
-                        className="flex-1 btn-secondary py-2 text-sm flex items-center justify-center gap-1"
+                        className="flex-1 inline-block"
                       >
-                        <Eye className="w-4 h-4" />
-                        View
+                        <Button variant="secondary" size="sm" className="w-full flex items-center justify-center gap-1">
+                          <Eye className="w-4 h-4" />
+                          View
+                        </Button>
                       </Link>
                       <Link
                         href={`/host/properties/${property.id}/edit`}
-                        className="flex-1 btn-primary py-2 text-sm flex items-center justify-center gap-1"
+                        className="flex-1 inline-block"
                       >
-                        <Edit className="w-4 h-4" />
-                        Edit
+                        <Button size="sm" className="w-full flex items-center justify-center gap-1">
+                          <Edit className="w-4 h-4" />
+                          Edit
+                        </Button>
                       </Link>
                       <button
                         onClick={() => handleDelete(property.id)}
@@ -206,9 +213,11 @@ export function HostPropertiesContent() {
               <p className="text-primary-600 dark:text-sand-300 mb-6 max-w-md mx-auto">
                 Start earning by listing your first property on StayAfrica. It only takes a few minutes!
               </p>
-              <Link href="/host/properties/new" className="btn-primary px-8 py-3 inline-flex items-center gap-2">
-                <Plus className="w-5 h-5" />
-                List Your First Property
+              <Link href="/host/properties/new" className="inline-block">
+                <Button className="inline-flex items-center gap-2">
+                  <Plus className="w-5 h-5" />
+                  List Your First Property
+                </Button>
               </Link>
             </div>
           )}

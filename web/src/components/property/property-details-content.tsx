@@ -6,11 +6,12 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
 import { useAuth } from '@/store/auth-store';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui';
 import { PropertyImageCarousel } from '@/components/property/property-image-carousel';
 import { PropertyAmenities } from '@/components/property/property-amenities';
 import { PropertyHostCard } from '@/components/property/property-host-card';
-import { BookingCard } from '@/components/booking/booking-card';
-import { Heart, MapPin, Share2, Star, Users, Loader2 } from 'lucide-react';
+import { BookingPanel } from '@/components/booking';
+import { Heart, MapPin, Share2, Star, Users } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
 
@@ -113,12 +114,12 @@ export function PropertyDetailsContent() {
       <div className="min-h-screen bg-sand-100 dark:bg-primary-900 flex items-center justify-center">
         <div className="text-center">
           <p className="text-red-600 dark:text-red-400 mb-4">Error loading property</p>
-          <button
-            className="btn-primary px-6 py-2 mb-4"
+          <Button
             onClick={() => window.location.reload()}
+            className="mb-4"
           >
             Retry
-          </button>
+          </Button>
           <Link href="/explore" className="text-secondary-600 hover:text-secondary-700">
             Back to explore
           </Link>
@@ -326,9 +327,20 @@ export function PropertyDetailsContent() {
             )}
           </div>
 
-          {/* Sidebar - Booking card */}
+          {/* Sidebar - Booking panel */}
           <div className="lg:col-span-1">
-            <BookingCard property={property} />
+            {property && (
+              <BookingPanel
+                propertyId={property.id}
+                pricePerNight={property.price_per_night}
+                currency={property.currency}
+                maxGuests={property.max_guests}
+                minStay={property.min_stay_nights || 1}
+                hostVerified={property.host?.is_verified || false}
+                hostRating={property.average_rating || 0}
+                cleaningFee={property.cleaning_fee || 0}
+              />
+            )}
           </div>
         </div>
       </div>

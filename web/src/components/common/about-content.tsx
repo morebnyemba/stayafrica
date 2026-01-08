@@ -1,6 +1,7 @@
 'use client';
 
 import { Globe, Shield, Heart, Award } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
 
 export function AboutContent() {
   return (
@@ -117,11 +118,17 @@ export function AboutContent() {
             Join thousands of travelers who have discovered the magic of Africa through StayAfrica.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <a href="/explore" className="btn-primary px-8 py-3 text-lg">
-              Explore Properties
+            <a href="/explore">
+              <Button variant="primary" size="lg">Explore Properties</Button>
             </a>
-            <a href="/host" className="btn-secondary px-8 py-3 text-lg border-2 text-sand-100 border-sand-100 hover:bg-sand-100/10">
-              Become a Host
+            <a href="/host">
+              <Button
+                variant="secondary"
+                size="lg"
+                className="border-2 text-sand-100 border-sand-100 hover:bg-sand-100/10"
+              >
+                Become a Host
+              </Button>
             </a>
           </div>
         </div>

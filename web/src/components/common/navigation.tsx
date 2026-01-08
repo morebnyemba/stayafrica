@@ -7,6 +7,7 @@ import { Menu, User, LogOut, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { ThemeToggle } from './theme-toggle';
 import { MobileSearchBar } from './mobile-search-bar';
+import { Button } from '@/components/ui/Button';
 
 export function Navigation() {
   const { user, isAuthenticated, logout, upgradeToHost } = useAuth();
@@ -121,8 +122,8 @@ export function Navigation() {
                 <Link href="/login" className="text-sand-200 hover:text-sand-50 transition font-medium">
                   Login
                 </Link>
-                <Link href="/register" className="btn-primary rounded-full">
-                  Sign Up
+                <Link href="/register" className="inline-block">
+                  <Button>Sign Up</Button>
                 </Link>
               </>
             )}
@@ -158,7 +159,7 @@ export function Navigation() {
             )}
             <button
               onClick={handleBecomeHost}
-              className="block text-left w-full text-sand-200 hover:text-secondary-300 px-4 py-2 flex items-center gap-2"
+              className="w-full text-left text-sand-200 hover:text-secondary-300 px-4 py-2 flex items-center gap-2"
               disabled={hostLoading}
             >
               {hostLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
@@ -170,8 +171,8 @@ export function Navigation() {
             </div>
             {isAuthenticated ? (
               <>
-                <Link href="/dashboard" className="block btn-secondary w-full text-center">
-                  Dashboard
+                <Link href="/dashboard" className="block w-full">
+                  <Button variant="secondary" className="w-full">Dashboard</Button>
                 </Link>
                 <button
                   onClick={handleLogout}
@@ -182,11 +183,11 @@ export function Navigation() {
               </>
             ) : (
               <>
-                <Link href="/login" className="block btn-secondary w-full text-center">
-                  Login
+                <Link href="/login" className="block w-full">
+                  <Button variant="secondary" className="w-full">Login</Button>
                 </Link>
-                <Link href="/register" className="block btn-primary w-full text-center">
-                  Sign Up
+                <Link href="/register" className="block w-full">
+                  <Button className="w-full">Sign Up</Button>
                 </Link>
               </>
             )}

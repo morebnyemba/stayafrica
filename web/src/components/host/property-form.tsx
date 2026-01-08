@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '@/services/api-client';
-import { MapPin, DollarSign, Home, Search, Image as ImageIcon, X, Upload } from 'lucide-react';
+import { Input, Button } from '@/components/ui';
+import { MapPin, DollarSign, Home, Image as ImageIcon, X, Upload } from 'lucide-react';
 
 interface PropertyFormProps {
   initialData?: any;
@@ -239,96 +240,81 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
         
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-primary-900 dark:text-sand-50 mb-2">
-              Property Title *
-            </label>
-            <input
+            <Input
+              label="Property Title *"
               type="text"
               name="title"
               value={formData.title}
               onChange={handleInputChange}
               required
-              className="w-full px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-50"
               placeholder="e.g., Beautiful 3BR Villa in Harare"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-primary-900 dark:text-sand-50 mb-2">
-              Description *
-            </label>
-            <textarea
+            <Input
+              label="Description *"
+              multiline
+              rows={4}
               name="description"
               value={formData.description}
               onChange={handleInputChange}
               required
-              rows={4}
-              className="w-full px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-50"
               placeholder="Describe your property, its features, and what makes it special..."
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-primary-900 dark:text-sand-50 mb-2">
-              Property Type *
-            </label>
-            <select
+            <Input
+              label="Property Type *"
+              select
               name="property_type"
               value={formData.property_type}
               onChange={handleInputChange}
               required
-              className="w-full px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-50"
-            >
-              <option value="house">House</option>
-              <option value="apartment">Apartment</option>
-              <option value="villa">Villa</option>
-              <option value="cottage">Cottage</option>
-              <option value="lodge">Lodge</option>
-              <option value="room">Room</option>
-            </select>
+              options={[
+                { value: 'house', label: 'House' },
+                { value: 'apartment', label: 'Apartment' },
+                { value: 'villa', label: 'Villa' },
+                { value: 'cottage', label: 'Cottage' },
+                { value: 'lodge', label: 'Lodge' },
+                { value: 'room', label: 'Room' },
+              ]}
+            />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-primary-900 dark:text-sand-50 mb-2">
-                Bedrooms *
-              </label>
-              <input
+              <Input
+                label="Bedrooms *"
                 type="number"
                 name="bedrooms"
                 value={formData.bedrooms}
                 onChange={handleInputChange}
                 required
                 min="1"
-                className="w-full px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-50"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-primary-900 dark:text-sand-50 mb-2">
-                Bathrooms *
-              </label>
-              <input
+              <Input
+                label="Bathrooms *"
                 type="number"
                 name="bathrooms"
                 value={formData.bathrooms}
                 onChange={handleInputChange}
                 required
                 min="1"
-                className="w-full px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-50"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-primary-900 dark:text-sand-50 mb-2">
-                Max Guests *
-              </label>
-              <input
+              <Input
+                label="Max Guests *"
                 type="number"
                 name="max_guests"
                 value={formData.max_guests}
                 onChange={handleInputChange}
                 required
                 min="1"
-                className="w-full px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-50"
               />
             </div>
           </div>
@@ -344,138 +330,120 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
         
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-primary-900 dark:text-sand-50 mb-2">
-              Search Location
-            </label>
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search for your property location..."
-                onChange={(e) => handleLocationSearch(e.target.value)}
-                className="w-full px-4 py-2 pr-10 border border-primary-300 dark:border-primary-600 rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-50"
-              />
-              <Search className="absolute right-3 top-3 w-5 h-5 text-primary-400" />
-              
-              {locationSuggestions.length > 0 && (
-                <div className="absolute z-10 w-full mt-1 bg-white dark:bg-primary-800 border border-primary-300 dark:border-primary-600 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                  {locationSuggestions.map((suggestion, index) => (
-                    <button
-                      key={index}
-                      type="button"
-                      onClick={() => handleSelectLocation(suggestion)}
-                      className="w-full text-left px-4 py-3 hover:bg-secondary-50 dark:hover:bg-secondary-900/10 border-b border-primary-100 dark:border-primary-700 last:border-b-0"
-                    >
-                      <div className="font-medium text-primary-900 dark:text-sand-50">
-                        {suggestion.display_name}
-                      </div>
-                      <div className="text-sm text-primary-600 dark:text-sand-400">
-                        {suggestion.type}
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+            <Input
+              label="Search Location"
+              type="text"
+              placeholder="Search for your property location..."
+              onChange={(e) => handleLocationSearch(e.target.value)}
+            />
+            
+            {locationSuggestions.length > 0 && (
+              <div className="absolute z-10 w-full mt-1 bg-white dark:bg-primary-800 border border-primary-300 dark:border-primary-600 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                {locationSuggestions.map((suggestion, index) => (
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={() => handleSelectLocation(suggestion)}
+                    className="w-full text-left px-4 py-3 hover:bg-secondary-50 dark:hover:bg-secondary-900/10 border-b border-primary-100 dark:border-primary-700 last:border-b-0"
+                  >
+                    <div className="font-medium text-primary-900 dark:text-sand-50">
+                      {suggestion.display_name}
+                    </div>
+                    <div className="text-sm text-primary-600 dark:text-sand-400">
+                      {suggestion.type}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-primary-900 dark:text-sand-50 mb-2">
-              Full Address *
-            </label>
             <div className="flex gap-2">
-              <input
-                type="text"
-                name="address"
-                value={formData.address}
-                onChange={handleInputChange}
-                required
-                className="flex-1 px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-50"
-                placeholder="123 Main Street, Harare"
-              />
-              <button
-                type="button"
-                onClick={handleGeocodeAddress}
-                disabled={searchingLocation}
-                className="btn-secondary px-4 py-2 whitespace-nowrap"
-              >
-                {searchingLocation ? 'Searching...' : 'Find Coordinates'}
-              </button>
+              <div className="flex-1">
+                <Input
+                  label="Full Address *"
+                  type="text"
+                  name="address"
+                  value={formData.address}
+                  onChange={handleInputChange}
+                  required
+                  placeholder="123 Main Street, Harare"
+                />
+              </div>
+              <div className="flex items-end">
+                <Button
+                  type="button"
+                  onClick={handleGeocodeAddress}
+                  disabled={searchingLocation}
+                  variant="secondary"
+                >
+                  {searchingLocation ? 'Searching...' : 'Find Coordinates'}
+                </Button>
+              </div>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-primary-900 dark:text-sand-50 mb-2">
-                City *
-              </label>
-              <input
+              <Input
+                label="City *"
                 type="text"
                 name="city"
                 value={formData.city}
                 onChange={handleInputChange}
                 required
-                className="w-full px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-50"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-primary-900 dark:text-sand-50 mb-2">
-                Suburb
-              </label>
-              <input
+              <Input
+                label="Suburb"
                 type="text"
                 name="suburb"
                 value={formData.suburb}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-50"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-primary-900 dark:text-sand-50 mb-2">
-                Country *
-              </label>
-              <select
+              <Input
+                label="Country *"
+                select
                 name="country"
                 value={formData.country}
                 onChange={handleInputChange}
                 required
-                className="w-full px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-50"
-              >
-                <option value="">Select Country</option>
-                <option value="Zimbabwe">Zimbabwe</option>
-                <option value="South Africa">South Africa</option>
-                <option value="Botswana">Botswana</option>
-                <option value="Namibia">Namibia</option>
-                <option value="Zambia">Zambia</option>
-              </select>
+                options={[
+                  { value: '', label: 'Select Country' },
+                  { value: 'Zimbabwe', label: 'Zimbabwe' },
+                  { value: 'South Africa', label: 'South Africa' },
+                  { value: 'Botswana', label: 'Botswana' },
+                  { value: 'Namibia', label: 'Namibia' },
+                  { value: 'Zambia', label: 'Zambia' },
+                ]}
+              />
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-primary-900 dark:text-sand-50 mb-2">
-                Latitude *
-              </label>
-              <input
+              <Input
+                label="Latitude *"
                 type="text"
                 name="latitude"
                 value={formData.latitude}
                 onChange={handleInputChange}
                 required
-                className="w-full px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-50"
                 placeholder="-17.8252"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-primary-900 dark:text-sand-50 mb-2">
-                Longitude *
-              </label>
-              <input
+              <Input
+                label="Longitude *"
                 type="text"
                 name="longitude"
                 value={formData.longitude}
                 onChange={handleInputChange}
                 required
-                className="w-full px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-50"
                 placeholder="31.0335"
               />
             </div>
@@ -596,10 +564,8 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-primary-900 dark:text-sand-50 mb-2">
-              Price per Night *
-            </label>
-            <input
+            <Input
+              label="Price per Night *"
               type="number"
               name="price_per_night"
               value={formData.price_per_night}
@@ -607,47 +573,45 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
               required
               min="1"
               step="0.01"
-              className="w-full px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-50"
               placeholder="50.00"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-primary-900 dark:text-sand-50 mb-2">
-              Currency *
-            </label>
-            <select
+            <Input
+              label="Currency *"
+              select
               name="currency"
               value={formData.currency}
               onChange={handleInputChange}
               required
-              className="w-full px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-50"
-            >
-              <option value="USD">USD ($)</option>
-              <option value="ZWL">ZWL (Z$)</option>
-              <option value="ZAR">ZAR (R)</option>
-              <option value="BWP">BWP (P)</option>
-            </select>
+              options={[
+                { value: 'USD', label: 'USD ($)' },
+                { value: 'ZWL', label: 'ZWL (Z$)' },
+                { value: 'ZAR', label: 'ZAR (R)' },
+                { value: 'BWP', label: 'BWP (P)' },
+              ]}
+            />
           </div>
         </div>
       </div>
 
       {/* Submit */}
       <div className="flex gap-4">
-        <button
+        <Button
           type="button"
           onClick={() => router.back()}
-          className="btn-secondary px-6 py-3"
+          variant="secondary"
           disabled={loading}
         >
           Cancel
-        </button>
-        <button
+        </Button>
+        <Button
           type="submit"
-          className="btn-primary px-6 py-3 flex-1"
           disabled={loading}
+          className="flex-1"
         >
           {loading ? 'Saving...' : isEdit ? 'Update Property' : 'Create Property'}
-        </button>
+        </Button>
       </div>
     </form>
   );

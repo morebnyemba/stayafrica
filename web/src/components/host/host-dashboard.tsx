@@ -14,6 +14,7 @@ import {
   MessageSquare,
   BarChart3,
 } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
 import dynamic from 'next/dynamic';
 const ProtectedRoute = dynamic(() => import('@/components/auth/protected-route').then(m => m.ProtectedRoute), { ssr: false });
 
@@ -32,8 +33,8 @@ export function HostDashboard() {
           <p className="text-primary-600 dark:text-sand-300 mb-6">
             You need to have a host account to access this dashboard.
           </p>
-          <Link href="/host" className="btn-primary px-6 py-2">
-            Become a Host
+          <Link href="/host">
+            <Button variant="primary" size="lg">Become a Host</Button>
           </Link>
         </div>
       </div>
@@ -318,8 +319,8 @@ export function HostDashboard() {
                     <p className="text-primary-600 dark:text-sand-300 mb-4">
                       Start earning by listing your first property!
                     </p>
-                    <Link href="/host/properties/new" className="btn-primary px-6 py-2">
-                      Add Property
+                    <Link href="/host/properties/new">
+                      <Button variant="primary" size="lg">Add Property</Button>
                     </Link>
                   </div>
                 )}
@@ -333,9 +334,9 @@ export function HostDashboard() {
                   Quick Actions
                 </h2>
                 <div className="space-y-3">
-                  {quickActions.map((action, index) => (
+                  {quickActions.map((action) => (
                     <Link
-                      key={index}
+                      key={action.title}
                       href={action.link}
                       className="flex items-center gap-4 p-4 border border-primary-200 dark:border-primary-700 rounded-lg hover:border-secondary-500 hover:bg-secondary-50 dark:hover:bg-secondary-900/10 transition group"
                     >

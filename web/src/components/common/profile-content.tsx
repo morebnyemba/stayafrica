@@ -7,6 +7,7 @@ const ProtectedRoute = dynamic(() => import('@/components/auth/protected-route')
 import { User, Mail, Phone, MapPin, CreditCard, Shield, Bell, Camera, Save, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { WORLD_COUNTRIES } from '@/lib/countries';
+import { Button } from '@/components/ui/Button';
 
 type Tab = 'profile' | 'security' | 'payments' | 'notifications';
 
@@ -216,10 +217,12 @@ export function ProfileContent() {
                     </div>
 
                     <div className="flex gap-4 pt-6">
-                      <button
+                      <Button
                         type="submit"
+                        variant="primary"
+                        size="lg"
                         disabled={isLoading}
-                        className="btn-primary px-6 py-3 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="gap-2"
                       >
                         {isLoading ? (
                           <>
@@ -232,13 +235,10 @@ export function ProfileContent() {
                             <span>Save Changes</span>
                           </>
                         )}
-                      </button>
-                      <button
-                        type="button"
-                        className="btn-secondary px-6 py-3"
-                      >
+                      </Button>
+                      <Button type="button" variant="secondary" size="lg">
                         Cancel
-                      </button>
+                      </Button>
                     </div>
                   </form>
                 </div>
@@ -258,9 +258,9 @@ export function ProfileContent() {
                       <p className="text-sm text-primary-600 dark:text-sand-300 mb-4">
                         Update your password to keep your account secure
                       </p>
-                      <button className="btn-secondary px-4 py-2">
+                      <Button variant="secondary" size="sm">
                         Update Password
-                      </button>
+                      </Button>
                     </div>
 
                     <div className="p-6 bg-sand-50 dark:bg-primary-700 rounded-lg">
@@ -270,9 +270,9 @@ export function ProfileContent() {
                       <p className="text-sm text-primary-600 dark:text-sand-300 mb-4">
                         Add an extra layer of security to your account
                       </p>
-                      <button className="btn-primary px-4 py-2">
+                      <Button variant="primary" size="sm">
                         Enable 2FA
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -292,9 +292,9 @@ export function ProfileContent() {
                     <p className="text-primary-600 dark:text-sand-300 mb-6">
                       Add a payment method to make bookings easier
                     </p>
-                    <button className="btn-primary px-6 py-3">
+                    <Button variant="primary" size="lg">
                       Add Payment Method
-                    </button>
+                    </Button>
                   </div>
                 </div>
               )}

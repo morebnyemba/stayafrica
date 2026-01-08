@@ -7,6 +7,7 @@ import dynamic from 'next/dynamic';
 const ProtectedRoute = dynamic(() => import('@/components/auth/protected-route').then(m => m.ProtectedRoute), { ssr: false });
 import { CheckCircle, Home, FileText, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { Button } from '@/components/ui';
 
 export default function BookingSuccessPage() {
   const searchParams = useSearchParams();
@@ -32,8 +33,8 @@ export default function BookingSuccessPage() {
             <h2 className="text-2xl font-bold text-primary-900 dark:text-sand-50 mb-4">
               Invalid Request
             </h2>
-            <Link href="/explore" className="btn-primary px-6 py-3">
-              Browse Properties
+            <Link href="/explore" className="inline-block">
+              <Button>Browse Properties</Button>
             </Link>
           </div>
         </div>
@@ -176,17 +177,21 @@ export default function BookingSuccessPage() {
           <div className="grid md:grid-cols-2 gap-4">
             <Link 
               href="/bookings"
-              className="btn-primary px-6 py-3 text-center flex items-center justify-center gap-2"
+              className="inline-block w-full"
             >
-              <FileText className="w-5 h-5" />
-              View My Bookings
+              <Button className="w-full flex items-center justify-center gap-2">
+                <FileText className="w-5 h-5" />
+                View My Bookings
+              </Button>
             </Link>
             <Link 
               href="/"
-              className="btn-secondary px-6 py-3 text-center flex items-center justify-center gap-2"
+              className="inline-block w-full"
             >
-              <Home className="w-5 h-5" />
-              Back to Home
+              <Button variant="secondary" className="w-full flex items-center justify-center gap-2">
+                <Home className="w-5 h-5" />
+                Back to Home
+              </Button>
             </Link>
           </div>
         </div>

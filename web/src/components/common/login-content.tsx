@@ -4,9 +4,9 @@ import { useState } from 'react';
 import { useAuth } from '@/store/auth-store';
 import Link from 'next/link';
 import { Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react';
-import { FormField, Input } from '@/components/ui/form';
+import { Input, Button } from '@/components/ui';
 import { toast } from 'react-hot-toast';
-import { validateEmail, validatePassword } from '@/lib/validation';
+import { validateEmail, validatePassword } from '@/lib/form-validation';
 
 export function LoginContent() {
   const { login } = useAuth();
@@ -21,14 +21,12 @@ export function LoginContent() {
   const validateForm = () => {
     const newErrors: { email?: string; password?: string } = {};
     
-    const emailValidation = validateEmail(formData.email);
-    if (!emailValidation.isValid) {
-      newErrors.email = emailValidation.error;
+    if (!validateEmail(formData.email)) {
+      newErrors.email = 'Please enter a valid email address';
     }
     
-    const passwordValidation = validatePassword(formData.password);
-    if (!passwordValidation.isValid) {
-      newErrors.password = passwordValidation.error;
+    if (!validatePassword(formData.password)) {
+      newErrors.password = 'Password must be at least 8 characters';
     }
     
     setErrors(newErrors);
@@ -78,46 +76,31 @@ export function LoginContent() {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Email Field */}
-            <FormField label="Email Address" error={errors.email}>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-primary-400 dark:text-sand-400" />
-                <Input
-                  id="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="pl-10"
-                  placeholder="you@example.com"
-                  disabled={isLoading}
-                  aria-invalid={!!errors.email}
-                />
-              </div>
-            </FormField>
+            <Input
+              label="Email Address"
+              type="email"
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              placeholder="you@example.com"
+              disabled={isLoading}
+              error={errors.email}
+              icon={<Mail className="w-5 h-5" />}
+              required
+            />
 
             {/* Password Field */}
-            <FormField label="Password" error={errors.password}>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-primary-400 dark:text-sand-400" />
-                <Input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="pl-10 pr-12"
-                  placeholder="••••••••"
-                  disabled={isLoading}
-                  aria-invalid={!!errors.password}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-primary-400 dark:text-sand-400 hover:text-primary-600 dark:hover:text-sand-200 transition"
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
-                >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
-              </div>
-            </FormField>
+            <Input
+              label="Password"
+              type={showPassword ? 'text' : 'password'}
+              value={formData.password}
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              placeholder="••••••••"
+              disabled={isLoading}
+              error={errors.password}
+              icon={<Lock className="w-5 h-5" />}
+              onIconClick={() => setShowPassword(!showPassword)}
+              required
+            />
 
             {/* Remember Me & Forgot Password */}
             <div className="flex items-center justify-between">
@@ -137,20 +120,15 @@ export function LoginContent() {
             </div>
 
             {/* Submit Button */}
-            <button
+            <Button
               type="submit"
+              fullWidth
+              size="lg"
+              loading={isLoading}
               disabled={isLoading}
-              className="w-full btn-primary py-3 text-base font-semibold rounded-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  <span>Signing In...</span>
-                </>
-              ) : (
-                <span>Sign In</span>
-              )}
-            </button>
+              {isLoading ? 'Signing In...' : 'Sign In'}
+            </Button>
           </form>
 
           {/* Divider */}
@@ -167,12 +145,16 @@ export function LoginContent() {
 
           {/* Sign Up Link */}
           <div className="text-center">
-            <Link 
-              href="/register" 
-              className="btn-secondary w-full py-3 text-base font-semibold rounded-lg inline-block"
+            <Button
+              asChild
+              variant="secondary"
+              size="lg"
+              fullWidth
             >
-              Create an Account
-            </Link>
+              <Link href="/register">
+                Create an Account
+              </Link>
+            </Button>
           </div>
         </div>
 

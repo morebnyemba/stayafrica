@@ -10,6 +10,8 @@ const ProtectedRoute = dynamic(() => import('@/components/auth/protected-route')
 import { CreditCard, Wallet, DollarSign, CheckCircle, ArrowLeft, AlertCircle, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import Link from 'next/link';
+import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui';
 
 interface PaymentProvider {
   id: string;
@@ -130,8 +132,8 @@ export default function BookingPaymentPage() {
             <p className="text-primary-600 dark:text-sand-300 mb-6">
               Please create a booking first.
             </p>
-            <Link href="/explore" className="btn-primary px-6 py-3">
-              Browse Properties
+            <Link href="/explore">
+              <Button variant="primary" size="lg">Browse Properties</Button>
             </Link>
           </div>
         </div>

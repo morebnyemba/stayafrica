@@ -3,6 +3,7 @@
 import { useState, FormEvent } from 'react';
 import { Search } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { Input } from '@/components/ui/Input';
 
 export function MobileSearchBar() {
   const router = useRouter();
@@ -28,14 +29,15 @@ export function MobileSearchBar() {
           {isExpanded ? (
             // Expanded search form
             <form onSubmit={handleSearch} className="flex gap-2">
-              <input
-                type="text"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                placeholder="Where to go?"
-                className="flex-1 px-4 py-2 rounded-lg bg-ivory text-primary-900 placeholder-primary-500 text-sm focus:outline-none focus:ring-2 focus:ring-secondary-500"
-                autoFocus
-              />
+              <div className="flex-1">
+                <Input
+                  type="text"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  placeholder="Where to go?"
+                  autoFocus
+                />
+              </div>
               <button
                 type="submit"
                 className="bg-secondary-500 hover:bg-secondary-600 text-primary-900 px-3 py-2 rounded-lg transition-colors"

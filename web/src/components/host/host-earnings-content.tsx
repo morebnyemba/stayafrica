@@ -22,6 +22,8 @@ import {
   Building2,
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { Button } from '@/components/ui';
+import { Input } from '@/components/ui/Input';
 
 type Period = 'week' | 'month' | 'year';
 
@@ -237,21 +239,22 @@ export function HostEarningsContent() {
               </div>
               
               <div className="flex items-center gap-3">
-                <button
+                <Button
                   onClick={() => setShowFilters(!showFilters)}
-                  className="btn-secondary px-4 py-2 flex items-center gap-2"
+                  variant="secondary"
+                  size="sm"
                   aria-label="Toggle filters"
                 >
                   <Filter className="w-4 h-4" />
                   <span className="hidden sm:inline">Filters</span>
-                </button>
-                <button
-                  className="btn-primary px-4 py-2 flex items-center gap-2"
+                </Button>
+                <Button
+                  size="sm"
                   aria-label="Download earnings report"
                 >
                   <Download className="w-4 h-4" />
                   <span className="hidden sm:inline">Export</span>
-                </button>
+                </Button>
               </div>
             </div>
           </header>
@@ -458,13 +461,13 @@ export function HostEarningsContent() {
                   Manage your bank accounts for receiving payouts
                 </p>
               </div>
-              <button
+              <Button
                 onClick={handleAddBankAccount}
-                className="btn-primary px-4 py-2 flex items-center gap-2"
+                size="sm"
               >
                 <Plus className="w-4 h-4" />
                 <span className="hidden sm:inline">Add Account</span>
-              </button>
+              </Button>
             </div>
 
             {/* Bank Account Form */}
@@ -475,99 +478,90 @@ export function HostEarningsContent() {
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-primary-900 dark:text-sand-100 mb-2">
-                      Bank Name *
-                    </label>
-                    <input
+                    <Input
                       type="text"
                       required
                       value={bankFormData.bank_name}
                       onChange={(e) => setBankFormData({ ...bankFormData, bank_name: e.target.value })}
-                      className="w-full px-3 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-50 focus:ring-2 focus:ring-secondary-500"
+                      label="Bank Name *"
                       placeholder="e.g., First National Bank"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-primary-900 dark:text-sand-100 mb-2">
-                      Account Name *
-                    </label>
-                    <input
+                    <Input
                       type="text"
                       required
                       value={bankFormData.account_name}
                       onChange={(e) => setBankFormData({ ...bankFormData, account_name: e.target.value })}
-                      className="w-full px-3 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-50 focus:ring-2 focus:ring-secondary-500"
+                      label="Account Name *"
                       placeholder="Account holder name"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-primary-900 dark:text-sand-100 mb-2">
-                      Account Number *
-                    </label>
-                    <input
+                    <Input
                       type="text"
                       required
                       value={bankFormData.account_number}
                       onChange={(e) => setBankFormData({ ...bankFormData, account_number: e.target.value })}
-                      className="w-full px-3 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-50 focus:ring-2 focus:ring-secondary-500"
+                      label="Account Number *"
                       placeholder="Account number"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-primary-900 dark:text-sand-100 mb-2">
-                      Branch Code
-                    </label>
-                    <input
+                    <Input
                       type="text"
                       value={bankFormData.branch_code}
                       onChange={(e) => setBankFormData({ ...bankFormData, branch_code: e.target.value })}
-                      className="w-full px-3 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-50 focus:ring-2 focus:ring-secondary-500"
+                      label="Branch Code"
                       placeholder="Branch code (optional)"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-primary-900 dark:text-sand-100 mb-2">
-                      Country
-                    </label>
-                    <input
+                    <Input
                       type="text"
                       value={bankFormData.country}
                       onChange={(e) => setBankFormData({ ...bankFormData, country: e.target.value })}
-                      className="w-full px-3 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-50 focus:ring-2 focus:ring-secondary-500"
+                      label="Country"
                       placeholder="Country (optional)"
                     />
                   </div>
-                  <div className="flex items-center pt-6">
-                    <label className="flex items-center gap-2 cursor-pointer">
+                  <div className="flex items-center justify-between md:col-span-2 pt-6">
+                    <div>
+                      <p className="text-sm font-semibold text-primary-900 dark:text-sand-50">Set as primary account</p>
+                      <p className="text-xs text-primary-600 dark:text-sand-300">Use this account for payouts by default.</p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
                       <input
                         type="checkbox"
+                        className="sr-only peer"
                         checked={bankFormData.is_primary}
                         onChange={(e) => setBankFormData({ ...bankFormData, is_primary: e.target.checked })}
-                        className="w-4 h-4 text-secondary-600 border-primary-300 rounded focus:ring-secondary-500"
                       />
-                      <span className="text-sm text-primary-900 dark:text-sand-100">Set as primary account</span>
+                      <div className="w-11 h-6 bg-primary-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-secondary-300 dark:peer-focus:ring-secondary-800 rounded-full peer dark:bg-primary-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-primary-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-primary-600 peer-checked:bg-secondary-500"></div>
                     </label>
                   </div>
                 </div>
                 <div className="flex gap-3 mt-4">
-                  <button
+                  <Button
                     type="submit"
+                    variant="primary"
+                    size="sm"
                     disabled={createBankAccountMutation.isPending || updateBankAccountMutation.isPending}
-                    className="btn-primary px-4 py-2 disabled:opacity-50"
                   >
                     {editingAccount ? 'Update' : 'Add'} Account
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     type="button"
+                    variant="secondary"
+                    size="sm"
                     onClick={() => {
                       setShowBankAccountForm(false);
                       setEditingAccount(null);
                       resetBankForm();
                     }}
-                    className="btn-secondary px-4 py-2"
                   >
                     Cancel
-                  </button>
+                  </Button>
                 </div>
               </form>
             )}
@@ -655,12 +649,13 @@ export function HostEarningsContent() {
                 <p className="text-primary-600 dark:text-sand-300 mb-4">
                   Add a bank account to receive your earnings
                 </p>
-                <button
+                <Button
                   onClick={handleAddBankAccount}
-                  className="btn-primary px-6 py-2"
+                  variant="primary"
+                  size="lg"
                 >
                   Add Bank Account
-                </button>
+                </Button>
               </div>
             )}
           </section>

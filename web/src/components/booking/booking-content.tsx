@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
+import { Button } from '@/components/ui';
 import { Calendar, MapPin } from 'lucide-react';
 import { useAuth } from '@/store/auth-store';
 import { useRouter } from 'next/navigation';
@@ -80,8 +81,8 @@ export function BookingContent() {
             <p className="text-primary-600 dark:text-sand-300 mb-8">
               Please sign in to view your bookings.
             </p>
-            <a href="/login" className="btn-primary px-8 py-3">
-              Sign In
+            <a href="/login" className="inline-block">
+              <Button variant="secondary">Sign In</Button>
             </a>
           </div>
         </div>
@@ -105,46 +106,34 @@ export function BookingContent() {
         {/* Filters */}
         <div className="card p-6 mb-8">
           <div className="flex flex-wrap gap-4">
-            <button
+            <Button
               onClick={() => setStatusFilter('')}
-              className={`px-4 py-2 rounded-lg font-medium transition ${
-                statusFilter === ''
-                  ? 'bg-secondary-500 text-primary-900'
-                  : 'bg-primary-100 dark:bg-primary-700 text-primary-700 dark:text-sand-200 hover:bg-secondary-100'
-              }`}
+              variant={statusFilter === '' ? 'primary' : 'outline'}
+              size="sm"
             >
               All Bookings
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => setStatusFilter('PENDING')}
-              className={`px-4 py-2 rounded-lg font-medium transition ${
-                statusFilter === 'PENDING'
-                  ? 'bg-secondary-500 text-primary-900'
-                  : 'bg-primary-100 dark:bg-primary-700 text-primary-700 dark:text-sand-200 hover:bg-secondary-100'
-              }`}
+              variant={statusFilter === 'PENDING' ? 'primary' : 'outline'}
+              size="sm"
             >
               Pending
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => setStatusFilter('CONFIRMED')}
-              className={`px-4 py-2 rounded-lg font-medium transition ${
-                statusFilter === 'CONFIRMED'
-                  ? 'bg-secondary-500 text-primary-900'
-                  : 'bg-primary-100 dark:bg-primary-700 text-primary-700 dark:text-sand-200 hover:bg-secondary-100'
-              }`}
+              variant={statusFilter === 'CONFIRMED' ? 'primary' : 'outline'}
+              size="sm"
             >
               Confirmed
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => setStatusFilter('CANCELLED')}
-              className={`px-4 py-2 rounded-lg font-medium transition ${
-                statusFilter === 'CANCELLED'
-                  ? 'bg-secondary-500 text-primary-900'
-                  : 'bg-primary-100 dark:bg-primary-700 text-primary-700 dark:text-sand-200 hover:bg-secondary-100'
-              }`}
+              variant={statusFilter === 'CANCELLED' ? 'primary' : 'outline'}
+              size="sm"
             >
               Cancelled
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -177,8 +166,8 @@ export function BookingContent() {
             <p className="text-primary-600 dark:text-sand-300 mb-8">
               You haven&apos;t made any bookings yet. Start exploring properties!
             </p>
-            <a href="/explore" className="btn-primary px-8 py-3">
-              Explore Properties
+            <a href="/explore" className="inline-block">
+              <Button>Explore Properties</Button>
             </a>
           </div>
         ) : (
@@ -233,17 +222,17 @@ export function BookingContent() {
                   </div>
 
                   <div className="flex gap-4 mt-4">
-                    <button className="btn-secondary px-6 py-2 text-sm">
-                      View Details
-                    </button>
+                    <a href={`/bookings/${booking.id}`} className="inline-block">
+                      <Button variant="secondary" size="sm">View Details</Button>
+                    </a>
                     {booking.status === 'CONFIRMED' && (
-                      <button 
+                      <Button
                         onClick={() => handleContactHost(booking)}
                         disabled={contactingHost === booking.id}
-                        className="btn-primary px-6 py-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                        size="sm"
                       >
                         {contactingHost === booking.id ? 'Starting...' : 'Contact Host'}
-                      </button>
+                      </Button>
                     )}
                   </div>
                 </div>

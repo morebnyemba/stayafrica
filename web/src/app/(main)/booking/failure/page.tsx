@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 const ProtectedRoute = dynamic(() => import('@/components/auth/protected-route').then(m => m.ProtectedRoute), { ssr: false });
 import { XCircle, Home, RefreshCcw, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
+import { Button } from '@/components/ui/Button';
 
 export default function BookingFailurePage() {
   const router = useRouter();
@@ -128,19 +129,24 @@ export default function BookingFailurePage() {
 
           {/* Action buttons */}
           <div className="grid md:grid-cols-2 gap-4">
-            <button 
+            <Button 
               onClick={handleRetry}
-              className="btn-primary px-6 py-3 text-center flex items-center justify-center gap-2"
+              variant="primary"
+              size="lg"
+              className="flex items-center justify-center gap-2"
             >
               <RefreshCcw className="w-5 h-5" />
               Try Again
-            </button>
-            <Link 
-              href="/"
-              className="btn-secondary px-6 py-3 text-center flex items-center justify-center gap-2"
-            >
-              <Home className="w-5 h-5" />
-              Back to Home
+            </Button>
+            <Link href="/">
+              <Button
+                variant="secondary"
+                size="lg"
+                className="flex items-center justify-center gap-2"
+              >
+                <Home className="w-5 h-5" />
+                Back to Home
+              </Button>
             </Link>
           </div>
 

@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { TypeAnimation } from 'react-type-animation';
 import { FEATURED_PROPERTY_TYPES, PROPERTY_TYPES } from '@/types/property-types';
+import { Input } from '@/components/ui/Input';
 
 const iconMap: Record<string, any> = {
   Home,
@@ -119,52 +120,47 @@ export function HeroSection() {
         >
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-1 sm:gap-2 items-stretch">
             {/* Location */}
-            <div className="px-2 sm:px-4 py-2 sm:py-3 hover:bg-sand-100/50 rounded-xl sm:rounded-full cursor-pointer transition">
-              <div className="text-xs font-semibold text-primary-900">Where</div>
-              <input
+            <div className="px-2 sm:px-4 py-2 sm:py-3 hover:bg-sand-100/50 rounded-xl sm:rounded-full transition">
+              <Input
                 type="text"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
+                label="Where"
                 placeholder="Destination"
-                className="w-full bg-transparent border-none text-xs sm:text-sm text-primary-800 placeholder-primary-500 focus:outline-none p-0"
               />
             </div>
 
             {/* Check-in */}
-            <div className="px-2 sm:px-4 py-2 sm:py-3 hover:bg-sand-100/50 rounded-xl sm:rounded-full cursor-pointer transition border-l border-primary-200">
-              <div className="text-xs font-semibold text-primary-900">Arrive</div>
-              <input
+            <div className="px-2 sm:px-4 py-2 sm:py-3 hover:bg-sand-100/50 rounded-xl sm:rounded-full transition border-l border-primary-200">
+              <Input
                 type="date"
                 value={checkIn}
                 onChange={(e) => setCheckIn(e.target.value)}
-                className="w-full bg-transparent border-none text-xs sm:text-sm text-primary-800 focus:outline-none p-0"
+                label="Arrive"
               />
             </div>
 
             {/* Check-out - Hide on small mobile */}
-            <div className="hidden sm:block px-2 sm:px-4 py-2 sm:py-3 hover:bg-sand-100/50 rounded-xl sm:rounded-full cursor-pointer transition border-l border-primary-200">
-              <div className="text-xs font-semibold text-primary-900">Leave</div>
-              <input
+            <div className="hidden sm:block px-2 sm:px-4 py-2 sm:py-3 hover:bg-sand-100/50 rounded-xl sm:rounded-full transition border-l border-primary-200">
+              <Input
                 type="date"
                 value={checkOut}
                 onChange={(e) => setCheckOut(e.target.value)}
-                className="w-full bg-transparent border-none text-xs sm:text-sm text-primary-800 focus:outline-none p-0"
+                label="Leave"
               />
             </div>
 
             {/* Guests + Search Button */}
             <div className="flex items-center gap-1 sm:gap-2 pl-1 sm:pl-4 col-span-2 sm:col-span-1">
-              <select 
-                value={guests} 
-                onChange={(e) => setGuests(e.target.value)} 
-                className="hidden sm:block flex-1 bg-transparent border-none text-xs sm:text-sm text-primary-800 focus:outline-none p-0 cursor-pointer"
-              >
-                {[1, 2, 3, 4, 5, 6, 8, 10].map((num) => (
-                  <option key={num} value={num}>
-                    {num}
-                  </option>
-                ))}
-              </select>
+              <div className="hidden sm:block flex-1">
+                <Input
+                  select
+                  value={guests}
+                  onChange={(e) => setGuests((e.target as HTMLSelectElement).value)}
+                  label="Guests"
+                  options={[1,2,3,4,5,6,8,10].map((n) => ({ value: String(n), label: String(n) }))}
+                />
+              </div>
               <button 
                 type="submit" 
                 className="bg-secondary-500 hover:bg-secondary-600 text-primary-900 p-2 sm:p-3 rounded-lg sm:rounded-full transition-colors flex-shrink-0"

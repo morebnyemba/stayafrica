@@ -4,6 +4,7 @@ import { useAuth } from '@/store/auth-store';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
 import { Calendar, MapPin, User, CheckCircle, XCircle, Clock, DollarSign, List } from 'lucide-react';
+import { Button } from '@/components/ui';
 import dynamic from 'next/dynamic';
 const ProtectedRoute = dynamic(() => import('@/components/auth/protected-route').then(m => m.ProtectedRoute), { ssr: false });
 import { useState } from 'react';
@@ -289,37 +290,43 @@ export function HostBookingsContent() {
                         {/* Actions */}
                         {booking.status === 'pending' && (
                           <div className="flex flex-row gap-2 lg:flex-col mt-4 lg:mt-0">
-                            <button
+                            <Button
                               onClick={() => handleConfirm(booking.id)}
                               disabled={confirmMutation.isPending}
-                              className="flex-1 lg:flex-none btn-primary px-3 sm:px-4 py-2 text-sm min-h-[44px] flex items-center justify-center gap-1 sm:gap-2"
+                              variant="primary"
+                              size="sm"
+                              className="flex-1 lg:flex-none px-3 sm:px-4 text-sm min-h-[44px] flex items-center justify-center gap-1 sm:gap-2"
                               aria-label={`Confirm booking for ${booking.property?.title}`}
                             >
                               <CheckCircle className="w-4 h-4" aria-hidden="true" />
                               <span>Confirm</span>
-                            </button>
-                            <button
+                            </Button>
+                            <Button
                               onClick={() => handleCancel(booking.id)}
                               disabled={cancelMutation.isPending}
-                              className="flex-1 lg:flex-none px-3 sm:px-4 py-2 bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-colors text-sm min-h-[44px] flex items-center justify-center gap-1 sm:gap-2"
+                              variant="danger"
+                              size="sm"
+                              className="flex-1 lg:flex-none px-3 sm:px-4 text-sm min-h-[44px] flex items-center justify-center gap-1 sm:gap-2"
                               aria-label={`Decline booking for ${booking.property?.title}`}
                             >
                               <XCircle className="w-4 h-4" aria-hidden="true" />
                               <span>Decline</span>
-                            </button>
+                            </Button>
                           </div>
                         )}
 
                         {booking.status === 'confirmed' && (
                           <div className="flex gap-2 lg:flex-col mt-4 lg:mt-0">
-                            <button
+                            <Button
                               onClick={() => handleCancel(booking.id)}
                               disabled={cancelMutation.isPending}
-                              className="flex-1 lg:flex-none px-3 sm:px-4 py-2 bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-colors text-sm min-h-[44px]"
+                              variant="danger"
+                              size="sm"
+                              className="flex-1 lg:flex-none px-3 sm:px-4 text-sm min-h-[44px]"
                               aria-label={`Cancel booking for ${booking.property?.title}`}
                             >
                               Cancel Booking
-                            </button>
+                            </Button>
                           </div>
                         )}
                       </div>

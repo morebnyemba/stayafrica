@@ -2,6 +2,8 @@
 
 import { useState, FormEvent } from 'react';
 import { MapPin, Calendar, Users } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
 import { useRouter } from 'next/navigation';
 
 export function SearchSection() {
@@ -33,80 +35,89 @@ export function SearchSection() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {/* Location */}
             <div>
-              <label className="block text-sm font-medium text-primary-800 mb-2">
-                <MapPin className="w-4 h-4 inline mr-2" />
-                Location
-              </label>
-              <input
+              <Input
                 type="text"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 placeholder="Where to?"
-                className="input-base"
+                label={
+                  <span className="flex items-center gap-2 text-primary-800">
+                    <MapPin className="w-4 h-4" />
+                    Location
+                  </span>
+                }
               />
             </div>
 
             {/* Check-in */}
             <div>
-              <label className="block text-sm font-medium text-primary-800 mb-2">
-                <Calendar className="w-4 h-4 inline mr-2" />
-                Check-in
-              </label>
-              <input
+              <Input
                 type="date"
                 value={checkIn}
                 onChange={(e) => setCheckIn(e.target.value)}
-                className="input-base"
+                label={
+                  <span className="flex items-center gap-2 text-primary-800">
+                    <Calendar className="w-4 h-4" />
+                    Check-in
+                  </span>
+                }
               />
             </div>
 
             {/* Check-out */}
             <div>
-              <label className="block text-sm font-medium text-primary-800 mb-2">
-                <Calendar className="w-4 h-4 inline mr-2" />
-                Check-out
-              </label>
-              <input
+              <Input
                 type="date"
                 value={checkOut}
                 onChange={(e) => setCheckOut(e.target.value)}
-                className="input-base"
+                label={
+                  <span className="flex items-center gap-2 text-primary-800">
+                    <Calendar className="w-4 h-4" />
+                    Check-out
+                  </span>
+                }
               />
             </div>
 
             {/* Guests */}
             <div>
-              <label className="block text-sm font-medium text-primary-800 mb-2">
-                <Users className="w-4 h-4 inline mr-2" />
-                Guests
-              </label>
-              <select value={guests} onChange={(e) => setGuests(e.target.value)} className="input-base">
-                {[1, 2, 3, 4, 5, 6, 8, 10].map((num) => (
-                  <option key={num} value={num}>
-                    {num} guest{num > 1 ? 's' : ''}
-                  </option>
-                ))}
-              </select>
+              <Input
+                select
+                value={guests}
+                onChange={(e) => setGuests(e.target.value)}
+                label={
+                  <span className="flex items-center gap-2 text-primary-800">
+                    <Users className="w-4 h-4" />
+                    Guests
+                  </span>
+                }
+                options={[1, 2, 3, 4, 5, 6, 8, 10].map((num) => ({
+                  value: String(num),
+                  label: `${num} guest${num > 1 ? 's' : ''}`,
+                }))}
+              />
             </div>
           </div>
 
           {/* Submit Button */}
           <div className="mt-6 flex flex-col md:flex-row gap-4">
-            <button type="submit" className="flex-1 md:flex-none md:w-auto btn-primary">
-              Search
-            </button>
-            <button
-              type="button"
-              className="flex-1 md:flex-none md:w-auto btn-secondary"
-              onClick={() => {
-                setLocation('');
-                setCheckIn('');
-                setCheckOut('');
-                setGuests('2');
-              }}
-            >
-              Clear Filters
-            </button>
+              <Button type="submit" variant="primary" size="lg" className="flex-1 md:flex-none md:w-auto">
+                Search
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                size="lg"
+                className="flex-1 md:flex-none md:w-auto"
+                onClick={() => {
+                  setLocation('');
+                  setCheckIn('');
+                  setCheckOut('');
+                  setGuests('2');
+                }}
+              >
+                Clear Filters
+              </Button>
           </div>
         </form>
       </div>

@@ -3,6 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
 import { MapPin, Star, Home, Users, Building2, Trees, Shield, UtensilsCrossed, Tent, Waves, Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui';
 import { PropertyListSkeleton } from './property-card-skeleton';
 import Link from 'next/link';
 import { useAuth } from '@/store/auth-store';
@@ -236,14 +237,14 @@ export function HomeProperties() {
                 Share your space and earn extra income. Join thousands of hosts welcoming guests from around the world.
               </p>
               <div>
-                <button
+                <Button
                   onClick={handleHostUpgrade}
-                  className="inline-flex items-center gap-2 btn-primary px-6 sm:px-8 py-2 sm:py-3 text-base sm:text-lg font-semibold"
                   disabled={hostLoading}
+                  className="inline-flex items-center gap-2 text-base sm:text-lg"
                 >
                   {hostLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : null}
                   <span>Learn More</span>
-                </button>
+                </Button>
               </div>
             </div>
           </div>

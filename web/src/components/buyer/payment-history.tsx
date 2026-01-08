@@ -5,6 +5,7 @@ import { apiClient } from '@/services/api-client';
 import { CreditCard, CheckCircle, XCircle, Clock } from 'lucide-react';
 import dynamic from 'next/dynamic';
 const ProtectedRoute = dynamic(() => import('@/components/auth/protected-route').then(m => m.ProtectedRoute), { ssr: false });
+import { Button } from '@/components/ui/Button';
 
 export function PaymentHistory() {
   const { data, isLoading, error } = useQuery({
@@ -31,7 +32,7 @@ export function PaymentHistory() {
           ) : error ? (
             <div className="bg-white dark:bg-primary-800 p-8 rounded-lg text-center border border-primary-200 dark:border-primary-700">
               <p className="text-primary-600 dark:text-sand-300 mb-4">Unable to load payment history.</p>
-              <button className="btn-primary px-6 py-2" onClick={() => window.location.reload()}>Retry</button>
+              <Button variant="primary" size="lg" onClick={() => window.location.reload()}>Retry</Button>
             </div>
           ) : data.length === 0 ? (
             <div className="bg-white dark:bg-primary-800 p-8 rounded-lg text-center border border-primary-200 dark:border-primary-700">

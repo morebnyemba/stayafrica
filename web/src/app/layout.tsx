@@ -2,8 +2,10 @@ import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import './globals.css';
 import { Providers } from '@/context/providers';
-import { Navigation } from '@/components/common/navigation';
-import { Footer } from '@/components/common/footer';
+import { Navigation } from '@/components/common/Navigation';
+import { Footer } from '@/components/common/Footer';
+import { ErrorBoundary } from '@/components/common/ErrorBoundary';
+import { BottomNav } from '@/components/common/Navigation';
 
 export const metadata: Metadata = {
   title: 'StayAfrica - Unique Accommodations Across Africa',
@@ -22,15 +24,18 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="antialiased bg-sand-100 text-primary-900">
-        <Providers>
-          <div className="flex flex-col min-h-screen">
-            <Navigation />
-            <main className="flex-grow">
-              {children}
-            </main>
-            <Footer />
-          </div>
-        </Providers>
+        <ErrorBoundary>
+          <Providers>
+            <div className="flex flex-col min-h-screen pb-16 lg:pb-0">
+              <Navigation />
+              <main id="main-content" className="flex-grow">
+                {children}
+              </main>
+              <BottomNav />
+              <Footer />
+            </div>
+          </Providers>
+        </ErrorBoundary>
       </body>
     </html>
   );

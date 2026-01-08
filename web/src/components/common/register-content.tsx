@@ -5,7 +5,8 @@ import { useAuth } from '@/store/auth-store';
 import Link from 'next/link';
 import { Mail, Lock, Eye, EyeOff, Loader2, User, Phone, MapPin, CheckCircle2, ArrowRight, ArrowLeft } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { validatePassword, validateEmail, validatePhoneNumber } from '@/lib/validation';
+import { Input, Button } from '@/components/ui';
+import { validateEmail, validatePassword, validatePhoneNumber } from '@/lib/form-validation';
 import { getCountriesByContext, getUserCountryByLocation } from '@/lib/countries';
 
 type Step = 1 | 2 | 3;
@@ -52,14 +53,12 @@ export function RegisterContent() {
   const validateStep1 = () => {
     const newErrors: Record<string, string> = {};
     
-    const emailValidation = validateEmail(formData.email);
-    if (!emailValidation.isValid) {
-      newErrors.email = emailValidation.error!;
+    if (!validateEmail(formData.email)) {
+      newErrors.email = 'Please enter a valid email address';
     }
     
-    const passwordValidation = validatePassword(formData.password);
-    if (!passwordValidation.isValid) {
-      newErrors.password = passwordValidation.error!;
+    if (!validatePassword(formData.password)) {
+      newErrors.password = 'Password must be at least 8 characters';
     }
     
     if (formData.password !== formData.confirmPassword) {
@@ -81,9 +80,8 @@ export function RegisterContent() {
       newErrors.last_name = 'Last name is required';
     }
     
-    const phoneValidation = validatePhoneNumber(formData.phone_number);
-    if (!phoneValidation.isValid) {
-      newErrors.phone_number = phoneValidation.error!;
+    if (!validatePhoneNumber(formData.phone_number)) {
+      newErrors.phone_number = 'Please enter a valid phone number';
     }
     
     setErrors(newErrors);
@@ -432,35 +430,29 @@ export function RegisterContent() {
             {/* Navigation Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
               {currentStep > 1 && (
-                <button
+                <Button
                   type="button"
                   onClick={handleBack}
-                  className="flex-1 btn-secondary py-3 text-base font-semibold rounded-lg flex items-center justify-center gap-2"
+                  variant="secondary"
+                  size="lg"
+                  className="flex-1"
                 >
                   <ArrowLeft className="w-5 h-5" />
-                  <span>Back</span>
-                </button>
+                  Back
+                </Button>
               )}
 
-              <button
+              <Button
                 type="submit"
+                variant="primary"
+                size="lg"
+                fullWidth={currentStep === 1}
+                loading={isLoading}
                 disabled={isLoading}
-                className="flex-1 btn-primary py-3 text-base font-semibold rounded-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className={currentStep > 1 ? 'flex-1' : ''}
               >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    <span>Creating Account...</span>
-                  </>
-                ) : currentStep === 3 ? (
-                  <span>Create Account</span>
-                ) : (
-                  <>
-                    <span>Continue</span>
-                    <ArrowRight className="w-5 h-5" />
-                  </>
-                )}
-              </button>
+                {currentStep === 3 ? 'Create Account' : 'Continue'}
+              </Button>
             </div>
           </form>
 

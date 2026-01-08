@@ -1,6 +1,7 @@
 'use client';
 
 import { MapPin, Star } from 'lucide-react';
+import { Button } from '@/components/ui';
 
 export function FeaturedProperties() {
   const properties = [
@@ -82,9 +83,9 @@ export function FeaturedProperties() {
                     <span className="text-3xl font-semibold text-primary-900">${property.price}</span>
                     <span className="text-sm text-primary-500 ml-1 font-medium">/night</span>
                   </div>
-                  <button type="button" className="btn-secondary px-5 py-2 border-secondary-400">
+                  <Button type="button" variant="secondary" size="sm">
                     View details
-                  </button>
+                  </Button>
                 </div>
               </div>
             </article>

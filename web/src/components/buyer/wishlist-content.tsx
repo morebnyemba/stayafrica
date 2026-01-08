@@ -8,6 +8,7 @@ const ProtectedRoute = dynamic(() => import('@/components/auth/protected-route')
 import Link from 'next/link';
 import { Heart, MapPin, Star, Users, Bed, X } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { Button } from '@/components/ui/Button';
 
 export function WishlistContent() {
   const router = useRouter();
@@ -76,12 +77,13 @@ export function WishlistContent() {
               <p className="text-primary-600 dark:text-sand-300 mb-4">
                 Unable to load your wishlist. Please try again later.
               </p>
-              <button
+              <Button
                 onClick={() => queryClient.invalidateQueries({ queryKey: ['properties', 'saved'] })}
-                className="btn-primary px-6 py-2"
+                variant="primary"
+                size="lg"
               >
                 Retry
-              </button>
+              </Button>
             </div>
           ) : savedPropertiesData?.length === 0 ? (
             <div className="card p-12 text-center">
@@ -92,8 +94,8 @@ export function WishlistContent() {
               <p className="text-primary-600 dark:text-sand-300 mb-8 max-w-md mx-auto">
                 Start exploring properties and save your favorites here for easy access later
               </p>
-              <Link href="/explore" className="btn-primary px-8 py-3 inline-block">
-                Explore Properties
+              <Link href="/explore">
+                <Button variant="primary" size="lg">Explore Properties</Button>
               </Link>
             </div>
           ) : (
@@ -180,15 +182,16 @@ export function WishlistContent() {
                             </div>
                             <span className="text-xs text-primary-600 dark:text-sand-400">per night</span>
                           </div>
-                          <button
+                          <Button
                             onClick={(e) => {
                               e.stopPropagation();
                               handlePropertyClick(property.id);
                             }}
-                            className="btn-primary px-4 py-2 text-sm"
+                            variant="primary"
+                            size="sm"
                           >
                             View Details
-                          </button>
+                          </Button>
                         </div>
 
                         <div className="text-xs text-primary-500 dark:text-sand-500 pt-2 mt-2 border-t border-primary-100 dark:border-primary-700">

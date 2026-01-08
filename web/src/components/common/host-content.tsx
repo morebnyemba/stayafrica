@@ -4,6 +4,7 @@ import { Building, DollarSign, Calendar, TrendingUp, CheckCircle, Loader2 } from
 import { useAuth } from '@/store/auth-store';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { Button } from '@/components/ui/Button';
 
 export function HostContent() {
   const { user, isAuthenticated, upgradeToHost } = useAuth();
@@ -46,14 +47,16 @@ export function HostContent() {
               <p className="text-xl text-sand-100 mb-8">
                 Share your space with travelers from around the world and earn extra income while showcasing the beauty of Africa.
               </p>
-              <button
+              <Button
                 onClick={handleGetStarted}
-                className="btn-primary px-8 py-4 text-lg font-semibold inline-flex items-center gap-2"
+                variant="primary"
+                size="lg"
+                className="text-lg font-semibold gap-2"
                 disabled={hostLoading}
               >
                 {hostLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : null}
                 <span>Get Started</span>
-              </button>
+              </Button>
             </div>
             <div className="card p-8">
               <h3 className="text-2xl font-bold text-primary-900 dark:text-sand-50 mb-6">
@@ -240,9 +243,9 @@ export function HostContent() {
           <p className="text-lg text-primary-600 dark:text-sand-200 mb-8 max-w-2xl mx-auto">
             Join StayAfrica today and start earning from your property.
           </p>
-          <button className="btn-primary px-10 py-4 text-lg font-semibold">
+          <Button variant="primary" size="lg" className="text-lg font-semibold px-10 py-4">
             List Your Property
-          </button>
+          </Button>
         </div>
       </div>
     </div>

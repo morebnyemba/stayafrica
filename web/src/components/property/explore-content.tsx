@@ -4,7 +4,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
-import { MapPin, Star, Filter } from 'lucide-react';
+import { Filter } from 'lucide-react';
+import { PropertyCard } from '@/components/property';
 import { PropertyListSkeleton } from './property-card-skeleton';
 import { SearchFilters, type FilterOptions } from '@/components/common/search-filters';
 
@@ -87,72 +88,22 @@ export function ExploreContent() {
         ) : (
           <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-6">
             {properties.map((property: any) => (
-              <article
+              <PropertyCard
                 key={property.id}
+                id={property.id}
+                title={property.title}
+                location={`${property.city}, ${property.country}`}
+                price={property.price_per_night}
+                image={property.images?.[0]?.image_url || property.main_image || 'https://images.unsplash.com/photo-1512917774080-9991f1c52e1d'}
+                rating={property.average_rating || 0}
+                reviewCount={property.review_count || 0}
+                bedrooms={property.bedrooms || 0}
+                guests={property.max_guests || 1}
+                amenities={property.amenities?.slice(0, 4) || []}
+                isFavorite={false}
                 onClick={() => handlePropertyClick(property.id)}
-                className="bg-white dark:bg-primary-800 rounded-xl group overflow-hidden shadow-md hover:shadow-2xl border border-primary-100/80 dark:border-primary-700 transition-all duration-300 cursor-pointer"
-              >
-                <div className="relative h-56 overflow-hidden">
-                  <img
-                    src={
-                      property.images?.[0]?.image_url ||
-                      property.main_image ||
-                      'https://images.unsplash.com/photo-1512917774080-9991f1c52e1d'
-                    }
-                    alt={property.title}
-                    className="w-full h-full object-cover transition duration-500 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  {property.average_rating && (
-                    <div className="absolute top-4 right-4 inline-flex items-center gap-1 bg-white/95 dark:bg-primary-900/95 backdrop-blur-sm px-3 py-1.5 rounded-lg shadow-lg">
-                      <Star
-                        className="w-4 h-4 text-secondary-500"
-                        fill="currentColor"
-                      />
-                      <span className="font-bold text-sm text-primary-900 dark:text-sand-50">{property.average_rating.toFixed(1)}</span>
-                    </div>
-                  )}
-                </div>
-                <div className="p-5 space-y-3">
-                  <div>
-                    <h3 className="text-lg font-bold text-primary-900 dark:text-sand-50 mb-1 group-hover:text-secondary-600 dark:group-hover:text-secondary-400 transition line-clamp-1">
-                      {property.title}
-                    </h3>
-                    <div className="flex items-center gap-2 text-primary-600 dark:text-sand-300 text-sm">
-                      <MapPin className="w-4 h-4 flex-shrink-0" />
-                      <span className="line-clamp-1">
-                        {property.city}, {property.country}
-                      </span>
-                    </div>
-                  </div>
-                  
-                  {/* Property details */}
-                  {(property.bedrooms || property.max_guests) && (
-                    <div className="flex items-center gap-3 text-xs text-primary-500 dark:text-sand-400">
-                      {property.bedrooms && <span>{property.bedrooms} bed{property.bedrooms > 1 ? 's' : ''}</span>}
-                      {property.bedrooms && property.max_guests && <span>•</span>}
-                      {property.max_guests && <span>{property.max_guests} guest{property.max_guests > 1 ? 's' : ''}</span>}
-                    </div>
-                  )}
-                  
-                  <div className="flex justify-between items-end pt-2 border-t border-primary-100 dark:border-primary-700">
-                    <div>
-                      <span className="text-2xl font-bold text-primary-900 dark:text-sand-50">
-                        ${property.price_per_night}
-                      </span>
-                      <span className="text-sm text-primary-500 dark:text-sand-400 ml-1 font-medium">
-                        / night
-                      </span>
-                    </div>
-                    <button
-                      type="button"
-                      className="bg-secondary-600 hover:bg-secondary-700 dark:bg-secondary-700 dark:hover:bg-secondary-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm hover:shadow-md"
-                    >
-                      View
-                    </button>
-                  </div>
-                </div>
-              </article>
+                onFavorite={() => {}}
+              />
             ))}
           </div>
         )}

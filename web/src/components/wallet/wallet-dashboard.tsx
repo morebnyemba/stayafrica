@@ -6,6 +6,7 @@ import { Wallet, ArrowUpRight, ArrowDownLeft, Building, Plus, CheckCircle, Clock
 import dynamic from 'next/dynamic';
 import { useState } from 'react';
 const ProtectedRoute = dynamic(() => import('@/components/auth/protected-route').then(m => m.ProtectedRoute), { ssr: false });
+import { Button } from '@/components/ui/Button';
 
 export function WalletDashboard() {
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
@@ -438,9 +439,9 @@ function WithdrawModal({ wallet, bankAccounts, onClose }: { wallet: any; bankAcc
         {bankAccounts.length === 0 ? (
           <div className="text-center py-4">
             <p className="text-primary-600 dark:text-sand-400 mb-4">You need to add a bank account first</p>
-            <button onClick={onClose} className="btn-primary px-4 py-2">
+            <Button onClick={onClose} variant="primary" size="sm">
               Close
-            </button>
+            </Button>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
