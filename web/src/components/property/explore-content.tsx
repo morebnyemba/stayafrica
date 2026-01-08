@@ -90,18 +90,20 @@ export function ExploreContent() {
             {properties.map((property: any) => (
               <PropertyCard
                 key={property.id}
-                id={property.id}
-                title={property.title}
-                location={`${property.city}, ${property.country}`}
-                price={property.price_per_night}
-                image={property.images?.[0]?.image_url || property.main_image || 'https://images.unsplash.com/photo-1512917774080-9991f1c52e1d'}
-                rating={property.average_rating || 0}
-                reviewCount={property.review_count || 0}
-                bedrooms={property.bedrooms || 0}
-                guests={property.max_guests || 1}
-                amenities={property.amenities?.slice(0, 4) || []}
-                isFavorite={false}
-                onClick={() => handlePropertyClick(property.id)}
+                property={{
+                  id: property.id,
+                  title: property.title,
+                  location: `${property.city}, ${property.country}`,
+                  price: property.price_per_night,
+                  images: property.images?.map((img: any) => img.image_url) || [property.main_image || 'https://images.unsplash.com/photo-1512917774080-9991f1c52e1d'],
+                  rating: property.average_rating || 0,
+                  reviewCount: property.review_count || 0,
+                  beds: property.bedrooms || 0,
+                  baths: property.bathrooms || 0,
+                  guests: property.max_guests || 1,
+                  amenities: property.amenities?.slice(0, 4) || [],
+                  isFavorite: false,
+                }}
                 onFavorite={() => {}}
               />
             ))}
