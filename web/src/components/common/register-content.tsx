@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { Mail, Lock, Eye, EyeOff, Loader2, User, Phone, MapPin, CheckCircle2, ArrowRight, ArrowLeft } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { Input, Button } from '@/components/ui';
-import { validateEmail, validatePassword, validatePhoneNumber } from '@/lib/form-validation';
+import { validateEmail, validatePassword, validatePhoneNumber } from '@/lib/validation';
 import { getCountriesByContext, getUserCountryByLocation } from '@/lib/countries';
 
 type Step = 1 | 2 | 3;
