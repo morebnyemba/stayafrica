@@ -11,7 +11,7 @@ import { PropertyImageCarousel } from '@/components/property/property-image-caro
 import { PropertyAmenities } from '@/components/property/property-amenities';
 import { PropertyHostCard } from '@/components/property/property-host-card';
 import { BookingPanel } from '@/components/booking';
-import { Heart, MapPin, Share2, Star, Users } from 'lucide-react';
+import { Heart, MapPin, Share2, Star, Users, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
 
@@ -333,12 +333,10 @@ export function PropertyDetailsContent() {
               <BookingPanel
                 propertyId={property.id}
                 pricePerNight={property.price_per_night}
-                currency={property.currency}
                 maxGuests={property.max_guests}
                 minStay={property.min_stay_nights || 1}
                 hostVerified={property.host?.is_verified || false}
                 hostRating={property.average_rating || 0}
-                cleaningFee={property.cleaning_fee || 0}
               />
             )}
           </div>
