@@ -36,10 +36,6 @@ export function ExploreContent() {
 
   const properties = propertiesData?.results || [];
 
-  const handlePropertyClick = (propertyId: string) => {
-    router.push(`/property?id=${propertyId}`);
-  };
-
   return (
     <div className="bg-sand-100 dark:bg-primary-900 min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
