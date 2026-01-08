@@ -20,7 +20,7 @@ interface BookingPanelProps {
   cancellationPolicy?: string;
   hostVerified?: boolean;
   hostRating?: number;
-  onBook?: (dates: { checkIn: Date; checkOut: Date }, guests: number) => void;
+  onBook?: (details: { propertyId: string; checkIn: Date; checkOut: Date }, guests: number) => void;
   isLoading?: boolean;
 }
 
@@ -50,7 +50,7 @@ export const BookingPanel: React.FC<BookingPanelProps> = ({
 
   const handleBook = () => {
     if (checkInDate && checkOutDate && nights >= minStay) {
-      onBook?.({ checkIn: checkInDate, checkOut: checkOutDate }, guestCount);
+      onBook?.({ propertyId, checkIn: checkInDate, checkOut: checkOutDate }, guestCount);
     }
   };
 
