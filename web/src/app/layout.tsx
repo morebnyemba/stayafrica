@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import './globals.css';
+import 'mapbox-gl/dist/mapbox-gl.css';
 import { Providers } from '@/context/providers';
 import { Navigation, BottomNav } from '@/components/common/navigation';
 import { Footer } from '@/components/common/footer';

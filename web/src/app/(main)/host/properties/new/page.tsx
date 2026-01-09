@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { PropertyForm } from '@/components/host/property-form';
+import { PropertyForm } from '@/components/host/property-form-multistep';
 
 export const metadata: Metadata = {
   title: 'Add New Property - StayAfrica',

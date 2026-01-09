@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ProtectedRoute } from '@/components/auth/protected-route';
-import { PropertyForm } from '@/components/host/property-form';
+import { PropertyForm } from '@/components/host/property-form-multistep';
 import { apiClient } from '@/services/api-client';
 
 export default function EditPropertyPage({ params }: { params: Promise<{ id: string }> }) {
