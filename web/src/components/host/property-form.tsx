@@ -574,6 +574,9 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
             <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 sm:p-4 text-xs sm:text-sm text-blue-800 dark:text-blue-200">
               <p className="font-medium mb-1">📍 Location powered by GDAL/PostGIS</p>
               <p className="leading-relaxed">Search for your property or enter the address, then click "Find Coordinates" or "Use Current Location" to populate coordinates.</p>
+              <p className="mt-2 pt-2 border-t border-blue-200 dark:border-blue-700 leading-relaxed">
+                <strong>Note:</strong> To use "Use Current Location", please ensure location services are enabled on your device and you've granted permission to this browser.
+              </p>
             </div>
             {premisesStatus.isOnPremises !== null && (
               <div className={`rounded-lg p-3 sm:p-4 text-xs sm:text-sm border ${premisesStatus.isOnPremises ? 'bg-green-50 border-green-200 text-green-800 dark:bg-green-900/20 dark:border-green-800 dark:text-green-200' : 'bg-yellow-50 border-yellow-200 text-yellow-800 dark:bg-yellow-900/20 dark:border-yellow-800 dark:text-yellow-200'}`}>
