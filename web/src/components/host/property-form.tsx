@@ -339,15 +339,15 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {error && (
-        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 text-red-800 dark:text-red-200">
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3 sm:p-4 text-xs sm:text-sm text-red-800 dark:text-red-200">
           {error}
         </div>
       )}
 
       {/* Basic Information */}
-      <div className="card p-6">
-        <h3 className="text-xl font-bold text-primary-900 dark:text-sand-50 mb-4 flex items-center gap-2">
-          <Home className="w-5 h-5" />
+      <div className="card p-4 sm:p-6">
+        <h3 className="text-lg sm:text-xl font-bold text-primary-900 dark:text-sand-50 mb-4 flex items-center gap-2">
+          <Home className="w-4 h-4 sm:w-5 sm:h-5" />
           Basic Information
         </h3>
         
@@ -574,9 +574,14 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
             <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 sm:p-4 text-xs sm:text-sm text-blue-800 dark:text-blue-200">
               <p className="font-medium mb-1">📍 Location powered by GDAL/PostGIS</p>
               <p className="leading-relaxed">Search for your property or enter the address, then click "Find Coordinates" or "Use Current Location" to populate coordinates.</p>
-              <p className="mt-2 pt-2 border-t border-blue-200 dark:border-blue-700 leading-relaxed">
-                <strong>Note:</strong> To use "Use Current Location", please ensure location services are enabled on your device and you've granted permission to this browser.
-              </p>
+              <div className="mt-2 pt-2 border-t border-blue-200 dark:border-blue-700 space-y-2">
+                <p className="leading-relaxed">
+                  <strong>Note:</strong> To use "Use Current Location", please ensure location services are enabled on your device and you've granted permission to this browser.
+                </p>
+                <p className="leading-relaxed text-yellow-700 dark:text-yellow-300 bg-yellow-50/50 dark:bg-yellow-900/20 px-2 py-1 rounded">
+                  ⚠️ <strong>Important:</strong> Desktop/computer locations may be inaccurate (within several kilometers). For precise coordinates, use a mobile device with GPS or manually enter the address for geocoding.
+                </p>
+              </div>
             </div>
             {premisesStatus.isOnPremises !== null && (
               <div className={`rounded-lg p-3 sm:p-4 text-xs sm:text-sm border ${premisesStatus.isOnPremises ? 'bg-green-50 border-green-200 text-green-800 dark:bg-green-900/20 dark:border-green-800 dark:text-green-200' : 'bg-yellow-50 border-yellow-200 text-yellow-800 dark:bg-yellow-900/20 dark:border-yellow-800 dark:text-yellow-200'}`}>
@@ -597,19 +602,19 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
       </div>
 
       {/* Images */}
-      <div className="card p-6">
-        <h3 className="text-xl font-bold text-primary-900 dark:text-sand-50 mb-4 flex items-center gap-2">
-          <ImageIcon className="w-5 h-5" />
+      <div className="card p-4 sm:p-6">
+        <h3 className="text-lg sm:text-xl font-bold text-primary-900 dark:text-sand-50 mb-4 flex items-center gap-2">
+          <ImageIcon className="w-4 h-4 sm:w-5 sm:h-5" />
           Property Images
         </h3>
         
         <div className="space-y-4">
-          <p className="text-sm text-primary-600 dark:text-sand-400">
+          <p className="text-xs sm:text-sm text-primary-600 dark:text-sand-400">
             Add up to 10 images of your property. The first image will be used as the main thumbnail.
           </p>
 
           {/* Image Upload Area */}
-          <div className="border-2 border-dashed border-primary-300 dark:border-primary-600 rounded-lg p-8 text-center hover:border-secondary-500 dark:hover:border-secondary-400 transition cursor-pointer"
+          <div className="border-2 border-dashed border-primary-300 dark:border-primary-600 rounded-lg p-4 sm:p-8 text-center hover:border-secondary-500 dark:hover:border-secondary-400 transition cursor-pointer"
             onClick={() => document.getElementById('image-input')?.click()}
           >
             <input
@@ -621,11 +626,11 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
               className="hidden"
               disabled={imageFiles.length >= 10}
             />
-            <Upload className="w-8 h-8 text-primary-400 mx-auto mb-2" />
-            <p className="font-medium text-primary-900 dark:text-sand-50 mb-1">
+            <Upload className="w-6 h-6 sm:w-8 sm:h-8 text-primary-400 mx-auto mb-2" />
+            <p className="font-medium text-sm sm:text-base text-primary-900 dark:text-sand-50 mb-1">
               Click to upload images
             </p>
-            <p className="text-sm text-primary-600 dark:text-sand-400">
+            <p className="text-xs sm:text-sm text-primary-600 dark:text-sand-400">
               or drag and drop (JPG, PNG, WebP up to 5MB each)
             </p>
             <p className="text-xs text-primary-500 dark:text-sand-400 mt-2">
@@ -636,10 +641,10 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
           {/* Existing Images (when editing) */}
           {existingImages.length > 0 && (
             <div className="mb-4">
-              <p className="text-sm font-medium text-primary-900 dark:text-sand-50 mb-2">
+              <p className="text-xs sm:text-sm font-medium text-primary-900 dark:text-sand-50 mb-2">
                 Current Images ({existingImages.length})
               </p>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4">
                 {existingImages.map((image, index) => (
                   <div key={image.id} className="relative group">
                     <img
@@ -669,10 +674,10 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
           {/* New Image Previews */}
           {imagePreviews.length > 0 && (
             <div>
-              <p className="text-sm font-medium text-primary-900 dark:text-sand-50 mb-2">
+              <p className="text-xs sm:text-sm font-medium text-primary-900 dark:text-sand-50 mb-2">
                 New Images ({imagePreviews.length})
               </p>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4">
                 {imagePreviews.map((preview, index) => (
                   <div key={index} className="relative group">
                     <img
@@ -696,9 +701,9 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
       </div>
 
       {/* Pricing */}
-      <div className="card p-6">
-        <h3 className="text-xl font-bold text-primary-900 dark:text-sand-50 mb-4 flex items-center gap-2">
-          <DollarSign className="w-5 h-5" />
+      <div className="card p-4 sm:p-6">
+        <h3 className="text-lg sm:text-xl font-bold text-primary-900 dark:text-sand-50 mb-4 flex items-center gap-2">
+          <DollarSign className="w-4 h-4 sm:w-5 sm:h-5" />
           Pricing
         </h3>
         
@@ -736,19 +741,20 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
       </div>
 
       {/* Submit */}
-      <div className="flex gap-4">
+      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
         <Button
           type="button"
           onClick={() => router.back()}
           variant="secondary"
           disabled={loading}
+          className="w-full sm:w-auto"
         >
           Cancel
         </Button>
         <Button
           type="submit"
           disabled={loading}
-          className="flex-1"
+          className="w-full sm:flex-1"
         >
           {loading ? 'Saving...' : isEdit ? 'Update Property' : 'Create Property'}
         </Button>
