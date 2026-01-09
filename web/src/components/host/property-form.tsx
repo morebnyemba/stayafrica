@@ -435,14 +435,14 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
       </div>
 
       {/* Location */}
-      <div className="card p-6">
-        <h3 className="text-xl font-bold text-primary-900 dark:text-sand-50 mb-4 flex items-center gap-2">
+      <div className="card p-4 sm:p-6">
+        <h3 className="text-lg sm:text-xl font-bold text-primary-900 dark:text-sand-50 mb-4 flex items-center gap-2">
           <MapPin className="w-5 h-5" />
-          Location (GDAL-Powered)
+          <span>Location <span className="hidden sm:inline">(GDAL-Powered)</span></span>
         </h3>
         
         <div className="space-y-4">
-          <div>
+          <div className="relative">
             <Input
               label="Search Location"
               type="text"
@@ -457,12 +457,12 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
                     key={index}
                     type="button"
                     onClick={() => handleSelectLocation(suggestion)}
-                    className="w-full text-left px-4 py-3 hover:bg-secondary-50 dark:hover:bg-secondary-900/10 border-b border-primary-100 dark:border-primary-700 last:border-b-0"
+                    className="w-full text-left px-3 sm:px-4 py-2 sm:py-3 hover:bg-secondary-50 dark:hover:bg-secondary-900/10 border-b border-primary-100 dark:border-primary-700 last:border-b-0"
                   >
-                    <div className="font-medium text-primary-900 dark:text-sand-50">
+                    <div className="font-medium text-primary-900 dark:text-sand-50 text-sm sm:text-base break-words">
                       {suggestion.display_name}
                     </div>
-                    <div className="text-sm text-primary-600 dark:text-sand-400">
+                    <div className="text-xs sm:text-sm text-primary-600 dark:text-sand-400">
                       {suggestion.type}
                     </div>
                   </button>
@@ -471,39 +471,37 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
             )}
           </div>
 
-          <div>
-            <div className="flex gap-2">
-              <div className="flex-1">
-                <Input
-                  label="Full Address *"
-                  type="text"
-                  name="address"
-                  value={formData.address}
-                  onChange={handleInputChange}
-                  required
-                  placeholder="123 Main Street, Harare"
-                />
-              </div>
-              <div className="flex items-end">
-                <Button
-                  type="button"
-                  onClick={handleGeocodeAddress}
-                  disabled={searchingLocation}
-                  variant="secondary"
-                >
-                  {searchingLocation ? 'Searching...' : 'Find Coordinates'}
-                </Button>
-              </div>
-              <div className="flex items-end">
-                <Button
-                  type="button"
-                  onClick={handleUseCurrentLocation}
-                  disabled={usingCurrentLocation}
-                  variant="secondary"
-                >
-                  {usingCurrentLocation ? 'Locating...' : 'Use Current Location'}
-                </Button>
-              </div>
+          <div className="space-y-3">
+            <div>
+              <Input
+                label="Full Address *"
+                type="text"
+                name="address"
+                value={formData.address}
+                onChange={handleInputChange}
+                required
+                placeholder="123 Main Street, Harare"
+              />
+            </div>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <Button
+                type="button"
+                onClick={handleGeocodeAddress}
+                disabled={searchingLocation}
+                variant="secondary"
+                className="w-full sm:w-auto"
+              >
+                {searchingLocation ? 'Searching...' : 'Find Coordinates'}
+              </Button>
+              <Button
+                type="button"
+                onClick={handleUseCurrentLocation}
+                disabled={usingCurrentLocation}
+                variant="secondary"
+                className="w-full sm:w-auto"
+              >
+                {usingCurrentLocation ? 'Locating...' : 'Use Current Location'}
+              </Button>
             </div>
           </div>
 
@@ -573,16 +571,21 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
           </div>
 
           <div className="space-y-3">
-            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 text-sm text-blue-800 dark:text-blue-200">
+            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 sm:p-4 text-xs sm:text-sm text-blue-800 dark:text-blue-200">
               <p className="font-medium mb-1">📍 Location powered by GDAL/PostGIS</p>
-              <p>Search for your property or enter the address, then click "Find Coordinates" or "Use Current Location" to populate coordinates.</p>
+              <p className="leading-relaxed">Search for your property or enter the address, then click "Find Coordinates" or "Use Current Location" to populate coordinates.</p>
             </div>
             {premisesStatus.isOnPremises !== null && (
-              <div className={`rounded-lg p-4 text-sm border ${premisesStatus.isOnPremises ? 'bg-green-50 border-green-200 text-green-800 dark:bg-green-900/20 dark:border-green-800 dark:text-green-200' : 'bg-yellow-50 border-yellow-200 text-yellow-800 dark:bg-yellow-900/20 dark:border-yellow-800 dark:text-yellow-200'}`}>
-                <p className="font-medium">Premises Check</p>
-                <p className="mt-1">{premisesStatus.message}</p>
+              <div className={`rounded-lg p-3 sm:p-4 text-xs sm:text-sm border ${premisesStatus.isOnPremises ? 'bg-green-50 border-green-200 text-green-800 dark:bg-green-900/20 dark:border-green-800 dark:text-green-200' : 'bg-yellow-50 border-yellow-200 text-yellow-800 dark:bg-yellow-900/20 dark:border-yellow-800 dark:text-yellow-200'}`}>
+                <p className="font-semibold flex items-center gap-2">
+                  <span className="text-base sm:text-lg">{premisesStatus.isOnPremises ? '✅' : '⚠️'}</span>
+                  Premises Check
+                </p>
+                <p className="mt-2 leading-relaxed">{premisesStatus.message}</p>
                 {premisesStatus.distanceKm !== null && !premisesStatus.isOnPremises && (
-                  <p className="mt-1">Distance from property: {premisesStatus.distanceKm} km</p>
+                  <p className="mt-2 text-xs sm:text-sm font-medium bg-white/50 dark:bg-black/20 px-2 py-1 rounded inline-block">
+                    Distance: {premisesStatus.distanceKm} km
+                  </p>
                 )}
               </div>
             )}
