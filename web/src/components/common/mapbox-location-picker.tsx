@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import { Button } from '@/components/ui';
-import { MapPin, Loader } from 'lucide-react';
+import { MapPin, Loader, Crosshair } from 'lucide-react';
 
 interface MapboxLocationPickerProps {
   onLocationSelect: (data: { lat: number; lng: number; address?: string }) => void;
@@ -22,6 +22,7 @@ export function MapboxLocationPicker({
   const map = useRef<mapboxgl.Map | null>(null);
   const marker = useRef<mapboxgl.Marker | null>(null);
   const [loading, setLoading] = useState(true);
+  const [gettingLocation, setGettingLocation] = useState(false);
   const [pinned, setPinned] = useState(false);
   const [coordinates, setCoordinates] = useState<{ lat: number; lng: number }>({
     lat: initialLat,
@@ -47,6 +48,10 @@ export function MapboxLocationPicker({
       center: [coordinates.lng, coordinates.lat],
       zoom: 14,
     });
+
+    // Add zoom controls
+    const nav = new mapboxgl.NavigationControl({ visualizePitch: true });
+    map.current.addControl(nav, 'top-right');
 
     // Add initial marker
     marker.current = new mapboxgl.Marker({ color: '#FF6B6B', draggable: true })
@@ -110,6 +115,46 @@ export function MapboxLocationPicker({
     }
   };
 
+  const handleGetCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      alert('Geolocation is not supported by your browser');
+      return;
+    }
+
+    setGettingLocation(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        
+        // Update coordinates and map
+        setCoordinates({ lat, lng });
+        
+        // Center map on current location
+        if (map.current) {
+          map.current.flyTo({
+            center: [lng, lat],
+            zoom: 16,
+            duration: 1000,
+          });
+        }
+        
+        // Move marker to current location
+        if (marker.current) {
+          marker.current.setLngLat([lng, lat]);
+        }
+        
+        setGettingLocation(false);
+      },
+      (error) => {
+        console.error('Geolocation error:', error);
+        alert('Unable to get your location. Please enable location services.');
+        setGettingLocation(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
+
   if (!mapboxToken) {
     return (
       <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 text-red-800 dark:text-red-200 text-sm">
@@ -152,6 +197,16 @@ export function MapboxLocationPicker({
             {coordinates.lat.toFixed(6)}, {coordinates.lng.toFixed(6)}
           </p>
         </div>
+        <Button
+          type="button"
+          onClick={handleGetCurrentLocation}
+          disabled={gettingLocation || pinned}
+          variant="secondary"
+          className="w-full sm:w-auto flex items-center justify-center gap-2"
+        >
+          <Crosshair className="w-4 h-4" />
+          {gettingLocation ? 'Locating...' : 'Current Location'}
+        </Button>
         <Button
           type="button"
           onClick={handleConfirm}
