@@ -47,7 +47,7 @@ export default function EditPropertyPage({ params }: { params: Promise<{ id: str
 
   return (
     <ProtectedRoute requiredRole="host">
-      <div className="max-w-4xl mx-auto px-4 py-12">
+      <div className="max-w-4xl mx-auto px-4 py-12 pt-20 sm:pt-12">
         <h1 className="text-3xl font-bold text-primary-900 dark:text-sand-50 mb-2">Edit Property</h1>
         {property && <p className="text-lg text-primary-600 dark:text-sand-300 mb-8">{property.title}</p>}
 
