@@ -28,7 +28,7 @@ export default function RootLayout({
           <Providers>
             <div className="flex flex-col min-h-screen pb-16 lg:pb-0">
               <Navigation />
-              <main id="main-content" className="flex-grow pt-20 sm:pt-0">
+              <main id="main-content" className="flex-grow pt-20 sm:pt-4">
                 {children}
               </main>
               <BottomNav />
