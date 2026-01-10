@@ -18,7 +18,7 @@ function RootLayoutContent() {
     if (!isLoading) {
       SplashScreen.hideAsync();
       // Always show tabs (explore is public), users can login from there
-      router.replace('/(tabs)/explore');
+      router.replace('/(tabs)');
     }
   }, [isLoading, router]);
 

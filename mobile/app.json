@@ -68,7 +68,7 @@
         "origin": false
       },
       "expoRouter": {
-        "initialRoute": "/(tabs)/explore"
+        "initialRoute": "/(tabs)"
       },
       "apiUrl": "http://localhost:8000"
     }

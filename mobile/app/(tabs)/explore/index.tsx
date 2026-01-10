@@ -20,44 +20,44 @@ export default function ExploreScreen() {
   };
 
   return (
-    <View className="flex-1 bg-gradient-to-b from-primary-50 to-white">
-      {/* Header */}
-      <View className="bg-white px-4 pt-8 pb-4 border-b border-gray-100 shadow-sm">
-        <Text className="text-3xl font-extrabold text-primary-900 mb-2 tracking-tight">Explore</Text>
-        <Text className="text-base text-gray-500 mb-4">Find your next stay from our curated selection of properties.</Text>
+    <View className="flex-1 bg-[#0f172a]">
+      {/* Hero / Header */}
+      <View className="px-4 pt-12 pb-6 bg-gradient-to-b from-[#0f172a] via-[#0f172a] to-[#111827] border-b border-white/5">
+        <Text className="text-4xl font-black text-white tracking-tight mb-2">StayAfrica</Text>
+        <Text className="text-lg text-slate-200 mb-5">Curated stays across Africafind your next escape.</Text>
         {/* Search Bar */}
-        <View className="flex-row items-center bg-gray-100 rounded-xl px-3 py-2 shadow-sm">
-          <Ionicons name="search" size={20} color="#999" />
+        <View className="flex-row items-center bg-white/10 rounded-2xl px-3 py-3 border border-white/15">
+          <Ionicons name="search" size={20} color="#cbd5e1" />
           <TextInput
-            className="flex-1 py-2 ml-2 text-base"
+            className="flex-1 py-2 ml-3 text-base text-white"
             placeholder="Search properties or cities..."
             value={searchQuery}
             onChangeText={setSearchQuery}
-            placeholderTextColor="#999"
+            placeholderTextColor="#94a3b8"
           />
         </View>
       </View>
 
       {/* Properties List */}
       {isLoading ? (
-        <View className="flex-1 justify-center items-center">
-          <ActivityIndicator size="large" color="#D4A574" />
-          <Text className="mt-2 text-gray-600">Loading properties...</Text>
+        <View className="flex-1 justify-center items-center bg-[#0f172a]">
+          <ActivityIndicator size="large" color="#fbbf24" />
+          <Text className="mt-2 text-slate-200">Loading properties...</Text>
         </View>
       ) : (
         <FlatList
           data={filteredProperties}
           renderItem={({ item }) => (
-            <View className="px-4">
+            <View className="px-4 py-2">
               <PropertyCard property={item} onPress={handlePropertyPress} />
             </View>
           )}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={{ paddingVertical: 12 }}
+          contentContainerStyle={{ paddingVertical: 12, paddingBottom: 40, backgroundColor: '#0f172a' }}
           ListEmptyComponent={
             <View className="flex-1 justify-center items-center py-12">
-              <Text className="text-gray-600 text-base">No properties found</Text>
-              <Text className="text-gray-500 text-sm mt-1">Try adjusting your search</Text>
+              <Text className="text-slate-200 text-base">No properties found</Text>
+              <Text className="text-slate-400 text-sm mt-1">Try adjusting your search</Text>
             </View>
           }
         />
