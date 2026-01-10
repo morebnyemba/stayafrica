@@ -20,7 +20,7 @@ function RootLayoutContent() {
       // Always show tabs (explore is public), users can login from there
       router.replace('/(tabs)/explore');
     }
-  }, [isLoading]);
+  }, [isLoading, router]);
 
   if (isLoading) {
     return (
