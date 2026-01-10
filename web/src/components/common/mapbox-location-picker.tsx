@@ -45,7 +45,7 @@ export function MapboxLocationPicker({
 
     map.current = new mapboxgl.Map({
       container: mapContainer.current!,
-      style: 'mapbox://styles/mapbox/streets-v12',
+      style: `mapbox://styles/mapbox/${mapStyle}-v12`,
       center: [coordinates.lng, coordinates.lat],
       zoom: 14,
     });
@@ -89,7 +89,14 @@ export function MapboxLocationPicker({
         map.current = null;
       }
     };
-  }, [mapboxToken, mapStyle]);
+  }, [mapboxToken]);
+
+  // Update map style when it changes
+  useEffect(() => {
+    if (map.current && mapStyle) {
+      map.current.setStyle(`mapbox://styles/mapbox/${mapStyle}-v12`);
+    }
+  }, [mapStyle]);
 
   const handleConfirm = async () => {
     try {
