@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import Animated, { FadeInRight } from 'react-native-reanimated';
 import { useProperties } from '@/hooks/api-hooks';
 import { PropertyCard } from '@/components/property/PropertyCard';
 
@@ -95,36 +96,40 @@ export default function ExploreScreen() {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 12 }}
         >
-          {CATEGORIES.map((category) => (
-            <TouchableOpacity
+          {CATEGORIES.map((category, index) => (
+            <Animated.View 
               key={category.id}
-              onPress={() => setSelectedCategory(category.id)}
-              className={`mr-3 px-5 py-2.5 rounded-full flex-row items-center ${
-                selectedCategory === category.id 
-                  ? 'bg-primary-800' 
-                  : 'bg-sand-100'
-              }`}
-              style={{
-                shadowColor: selectedCategory === category.id ? '#122F26' : '#000',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: selectedCategory === category.id ? 0.2 : 0.05,
-                shadowRadius: 4,
-                elevation: selectedCategory === category.id ? 3 : 1,
-              }}
+              entering={FadeInRight.delay(index * 50).springify()}
             >
-              <Ionicons 
-                name={category.icon as any} 
-                size={18} 
-                color={selectedCategory === category.id ? '#D9B168' : '#3A5C50'} 
-              />
-              <Text className={`ml-2 font-semibold text-sm ${
-                selectedCategory === category.id 
-                  ? 'text-gold' 
-                  : 'text-primary-800'
-              }`}>
-                {category.label}
-              </Text>
-            </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => setSelectedCategory(category.id)}
+                className={`mr-3 px-5 py-2.5 rounded-full flex-row items-center ${
+                  selectedCategory === category.id 
+                    ? 'bg-primary-800' 
+                    : 'bg-sand-100'
+                }`}
+                style={{
+                  shadowColor: selectedCategory === category.id ? '#122F26' : '#000',
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: selectedCategory === category.id ? 0.2 : 0.05,
+                  shadowRadius: 4,
+                  elevation: selectedCategory === category.id ? 3 : 1,
+                }}
+              >
+                <Ionicons 
+                  name={category.icon as any} 
+                  size={18} 
+                  color={selectedCategory === category.id ? '#D9B168' : '#3A5C50'} 
+                />
+                <Text className={`ml-2 font-semibold text-sm ${
+                  selectedCategory === category.id 
+                    ? 'text-gold' 
+                    : 'text-primary-800'
+                }`}>
+                  {category.label}
+                </Text>
+              </TouchableOpacity>
+            </Animated.View>
           ))}
         </ScrollView>
       </View>

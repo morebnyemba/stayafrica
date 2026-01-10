@@ -1,6 +1,7 @@
 import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { Property } from '@/types';
 
 interface PropertyCardProps {
@@ -11,68 +12,65 @@ interface PropertyCardProps {
 }
 
 export function PropertyCard({ property, onPress, showRemoveButton = false, onRemove }: PropertyCardProps) {
+  const scale = useSharedValue(1);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  const handlePressIn = () => {
+    scale.value = withSpring(0.97, { damping: 15, stiffness: 150 });
+  };
+
+  const handlePressOut = () => {
+    scale.value = withSpring(1, { damping: 15, stiffness: 150 });
+  };
+
   return (
-    <TouchableOpacity
-      className="mb-6 rounded-3xl overflow-hidden bg-white"
-      onPress={() => onPress(property.id)}
-      activeOpacity={0.92}
-      style={{
-        shadowColor: '#122F26',
-        shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 0.15,
-        shadowRadius: 16,
-        elevation: 8,
-      }}
-    >
-      {/* Image Section */}
-      <View className="relative">
-        {property.image_urls[0] ? (
-          <Image
-            source={{ uri: property.image_urls[0] }}
-            style={{ width: '100%', height: 220 }}
-            className="bg-sand-200"
-            resizeMode="cover"
+    <Animated.View style={animatedStyle}>
+      <TouchableOpacity
+        className="mb-6 rounded-3xl overflow-hidden bg-white"
+        onPress={() => onPress(property.id)}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        activeOpacity={1}
+        style={{
+          shadowColor: '#122F26',
+          shadowOffset: { width: 0, height: 8 },
+          shadowOpacity: 0.15,
+          shadowRadius: 16,
+          elevation: 8,
+        }}
+      >
+        {/* Image Section */}
+        <View className="relative">
+          {property.image_urls[0] ? (
+            <Image
+              source={{ uri: property.image_urls[0] }}
+              style={{ width: '100%', height: 220 }}
+              className="bg-sand-200"
+              resizeMode="cover"
+            />
+          ) : (
+            <View className="w-full h-56 bg-sand-200 items-center justify-center">
+              <Ionicons name="image-outline" size={56} color="#3A5C50" />
+            </View>
+          )}
+          
+          {/* Gradient Overlay on Image */}
+          <LinearGradient
+            colors={['transparent', 'rgba(0, 0, 0, 0.4)']}
+            className="absolute bottom-0 left-0 right-0 h-20"
           />
-        ) : (
-          <View className="w-full h-56 bg-sand-200 items-center justify-center">
-            <Ionicons name="image-outline" size={56} color="#3A5C50" />
-          </View>
-        )}
-        
-        {/* Gradient Overlay on Image */}
-        <LinearGradient
-          colors={['transparent', 'rgba(0, 0, 0, 0.4)']}
-          className="absolute bottom-0 left-0 right-0 h-20"
-        />
 
-        {/* Wishlist Remove Button */}
-        {showRemoveButton && onRemove && (
-          <TouchableOpacity
-            className="absolute top-3 right-3 bg-white rounded-full p-2.5"
-            onPress={(e) => {
-              e.stopPropagation();
-              onRemove();
-            }}
-            style={{
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.3,
-              shadowRadius: 4,
-              elevation: 4,
-            }}
-          >
-            <Ionicons name="heart" size={22} color="#EF4444" />
-          </TouchableOpacity>
-        )}
-
-        {/* Rating Badge */}
-        {property.rating && (
-          <View className="absolute top-3 left-3">
-            <LinearGradient
-              colors={['#D9B168', '#bea04f']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              className="flex-row items-center px-3 py-2 rounded-full"
+          {/* Wishlist Remove Button */}
+          {showRemoveButton && onRemove && (
+            <TouchableOpacity
+              className="absolute top-3 right-3 bg-white rounded-full p-2.5"
+              onPress={(e) => {
+                e.stopPropagation();
+                onRemove();
+              }}
               style={{
                 shadowColor: '#000',
                 shadowOffset: { width: 0, height: 2 },
@@ -81,67 +79,88 @@ export function PropertyCard({ property, onPress, showRemoveButton = false, onRe
                 elevation: 4,
               }}
             >
-              <Ionicons name="star" size={14} color="#122F26" />
-              <Text className="ml-1 font-bold text-sm text-forest">
-                {property.rating.toFixed(1)}
+              <Ionicons name="heart" size={22} color="#EF4444" />
+            </TouchableOpacity>
+          )}
+
+          {/* Rating Badge */}
+          {property.rating && (
+            <View className="absolute top-3 left-3">
+              <LinearGradient
+                colors={['#D9B168', '#bea04f']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                className="flex-row items-center px-3 py-2 rounded-full"
+                style={{
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.3,
+                  shadowRadius: 4,
+                  elevation: 4,
+                }}
+              >
+                <Ionicons name="star" size={14} color="#122F26" />
+                <Text className="ml-1 font-bold text-sm text-forest">
+                  {property.rating.toFixed(1)}
+                </Text>
+              </LinearGradient>
+            </View>
+          )}
+        </View>
+
+        {/* Content Section */}
+        <View className="p-5">
+          <Text className="text-xl font-black mb-1 text-forest" numberOfLines={1}>
+            {property.title}
+          </Text>
+          <View className="flex-row items-center mb-3">
+            <Ionicons name="location" size={14} color="#3A5C50" />
+            <Text className="text-moss text-sm ml-1" numberOfLines={1}>
+              {property.location.city}
+            </Text>
+          </View>
+
+          {/* Amenities Row */}
+          <View className="flex-row items-center mb-4 py-3 px-4 bg-sand-100 rounded-xl">
+            <View className="flex-row items-center mr-4">
+              <Ionicons name="bed-outline" size={18} color="#3A5C50" />
+              <Text className="ml-1 text-sm font-medium text-moss">
+                {property.number_of_beds}
               </Text>
+            </View>
+            <View className="flex-row items-center mr-4">
+              <Ionicons name="water-outline" size={18} color="#3A5C50" />
+              <Text className="ml-1 text-sm font-medium text-moss">
+                {property.number_of_bathrooms}
+              </Text>
+            </View>
+            <View className="flex-row items-center">
+              <Ionicons name="people-outline" size={18} color="#3A5C50" />
+              <Text className="ml-1 text-sm font-medium text-moss">
+                {property.max_guests}
+              </Text>
+            </View>
+          </View>
+
+          {/* Price Section */}
+          <View className="flex-row justify-between items-center">
+            <View>
+              <Text className="text-2xl font-black text-gold">
+                ${property.price_per_night}
+              </Text>
+              <Text className="text-moss text-xs font-medium">per night</Text>
+            </View>
+            <LinearGradient
+              colors={['#122F26', '#1d392f']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              className="px-5 py-3 rounded-xl"
+            >
+              <Text className="text-gold font-bold text-sm">View Details</Text>
             </LinearGradient>
           </View>
-        )}
-      </View>
-
-      {/* Content Section */}
-      <View className="p-5">
-        <Text className="text-xl font-black mb-1 text-forest" numberOfLines={1}>
-          {property.title}
-        </Text>
-        <View className="flex-row items-center mb-3">
-          <Ionicons name="location" size={14} color="#3A5C50" />
-          <Text className="text-moss text-sm ml-1" numberOfLines={1}>
-            {property.location.city}
-          </Text>
         </View>
-
-        {/* Amenities Row */}
-        <View className="flex-row items-center mb-4 py-3 px-4 bg-sand-100 rounded-xl">
-          <View className="flex-row items-center mr-4">
-            <Ionicons name="bed-outline" size={18} color="#3A5C50" />
-            <Text className="ml-1 text-sm font-medium text-moss">
-              {property.number_of_beds}
-            </Text>
-          </View>
-          <View className="flex-row items-center mr-4">
-            <Ionicons name="water-outline" size={18} color="#3A5C50" />
-            <Text className="ml-1 text-sm font-medium text-moss">
-              {property.number_of_bathrooms}
-            </Text>
-          </View>
-          <View className="flex-row items-center">
-            <Ionicons name="people-outline" size={18} color="#3A5C50" />
-            <Text className="ml-1 text-sm font-medium text-moss">
-              {property.max_guests}
-            </Text>
-          </View>
-        </View>
-
-        {/* Price Section */}
-        <View className="flex-row justify-between items-center">
-          <View>
-            <Text className="text-2xl font-black text-gold">
-              ${property.price_per_night}
-            </Text>
-            <Text className="text-moss text-xs font-medium">per night</Text>
-          </View>
-          <LinearGradient
-            colors={['#122F26', '#1d392f']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            className="px-5 py-3 rounded-xl"
-          >
-            <Text className="text-gold font-bold text-sm">View Details</Text>
-          </LinearGradient>
-        </View>
-      </View>
-    </TouchableOpacity>
+      </TouchableOpacity>
+    </Animated.View>
   );
 }
