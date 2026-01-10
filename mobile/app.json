@@ -19,14 +19,29 @@
     ],
     "ios": {
       "supportsTabletMode": true,
-      "bundleIdentifier": "com.stayafrica.app"
+      "bundleIdentifier": "com.stayafrica.app",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "StayAfrica needs access to your location to help you find nearby properties.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "StayAfrica needs access to your location to help you find nearby properties.",
+        "NSCameraUsageDescription": "StayAfrica needs access to your camera to take photos of properties.",
+        "NSPhotoLibraryUsageDescription": "StayAfrica needs access to your photo library to upload property images.",
+        "NSPhotoLibraryAddUsageDescription": "StayAfrica needs permission to save photos to your library."
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.stayafrica.app"
+      "package": "com.stayafrica.app",
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "READ_MEDIA_IMAGES"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
