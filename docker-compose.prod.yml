@@ -136,10 +136,12 @@ services:
       args:
         NEXT_PUBLIC_API_BASE_URL: https://api.stayafrica.app
         NEXT_PUBLIC_API_VERSION: v1
+        NEXT_PUBLIC_MAPBOX_TOKEN: pk.eyJ1Ijoic2x5a2VydGVjaCIsImEiOiJjbWs2d2pibjIwdGlkM2VyNW9rYTlycXI0In0.YZZHDu1_bFgW00LmGxvhKg
     container_name: stayafrica_frontend
     environment:
       NEXT_PUBLIC_API_BASE_URL: https://api.stayafrica.app
       NEXT_PUBLIC_API_VERSION: v1
+      NEXT_PUBLIC_MAPBOX_TOKEN: pk.eyJ1Ijoic2x5a2VydGVjaCIsImEiOiJjbWs2d2pibjIwdGlkM2VyNW9rYTlycXI0In0.YZZHDu1_bFgW00LmGxvhKg
       NODE_ENV: production
     depends_on:
       - web_deps
