@@ -1,48 +1,146 @@
-import { View, Text, FlatList, TextInput, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList, TextInput, ActivityIndicator, TouchableOpacity, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import Animated, { FadeInRight } from 'react-native-reanimated';
 import { useProperties } from '@/hooks/api-hooks';
 import { PropertyCard } from '@/components/property/PropertyCard';
+
+const CATEGORIES = [
+  { id: 'all', label: 'All', icon: 'apps' },
+  { id: 'villa', label: 'Villas', icon: 'home' },
+  { id: 'apartment', label: 'Apartments', icon: 'business' },
+  { id: 'cabin', label: 'Cabins', icon: 'log-cabin' },
+  { id: 'beach', label: 'Beach', icon: 'water' },
+  { id: 'safari', label: 'Safari', icon: 'leaf' },
+];
 
 export default function ExploreScreen() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all');
   const { data: propertiesData, isLoading } = useProperties();
   const properties = propertiesData?.results || [];
+  
   const filteredProperties = properties.filter((property: any) => {
     const matchesSearch = property.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       property.location?.city?.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesSearch;
   });
+
   const handlePropertyPress = (id: string) => {
     router.push(`/(tabs)/explore/${id}`);
   };
 
   return (
-    <View className="flex-1 bg-[#0f172a]">
-      {/* Hero / Header */}
-      <View className="px-4 pt-12 pb-6 bg-gradient-to-b from-[#0f172a] via-[#0f172a] to-[#111827] border-b border-white/5">
-        <Text className="text-4xl font-black text-white tracking-tight mb-2">StayAfrica</Text>
-        <Text className="text-lg text-slate-200 mb-5">Curated stays across Africafind your next escape.</Text>
-        {/* Search Bar */}
-        <View className="flex-row items-center bg-white/10 rounded-2xl px-3 py-3 border border-white/15">
-          <Ionicons name="search" size={20} color="#cbd5e1" />
-          <TextInput
-            className="flex-1 py-2 ml-3 text-base text-white"
-            placeholder="Search properties or cities..."
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            placeholderTextColor="#94a3b8"
-          />
+    <View className="flex-1 bg-sand-100">
+      {/* Modern Header with Gradient */}
+      <LinearGradient
+        colors={['#122F26', '#1d392f', '#2d4a40']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        className="px-4 pt-12 pb-6"
+      >
+        {/* Title Section */}
+        <View className="mb-5">
+          <Text className="text-4xl font-black text-white tracking-tight mb-2">
+            Discover Africa
+          </Text>
+          <View className="flex-row items-center">
+            <Ionicons name="location" size={16} color="#D9B168" />
+            <Text className="text-base text-sand-100 ml-2">
+              {properties.length} unique stays waiting for you
+            </Text>
+          </View>
         </View>
+
+        {/* Modern Search Bar */}
+        <View className="relative">
+          <LinearGradient
+            colors={['rgba(255, 255, 255, 0.15)', 'rgba(255, 255, 255, 0.08)']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            className="rounded-2xl overflow-hidden"
+            style={{
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.2,
+              shadowRadius: 8,
+              elevation: 5,
+            }}
+          >
+            <View className="flex-row items-center px-4 py-4 border border-white/20">
+              <Ionicons name="search" size={22} color="#D9B168" />
+              <TextInput
+                className="flex-1 ml-3 text-base text-white"
+                placeholder="Search destinations, cities..."
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                placeholderTextColor="rgba(255, 255, 255, 0.5)"
+              />
+              {searchQuery.length > 0 && (
+                <TouchableOpacity onPress={() => setSearchQuery('')}>
+                  <Ionicons name="close-circle" size={20} color="rgba(255, 255, 255, 0.5)" />
+                </TouchableOpacity>
+              )}
+            </View>
+          </LinearGradient>
+        </View>
+      </LinearGradient>
+
+      {/* Categories Filter */}
+      <View className="bg-white border-b border-sand-200" style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 4, elevation: 2 }}>
+        <ScrollView 
+          horizontal 
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 12 }}
+        >
+          {CATEGORIES.map((category, index) => (
+            <Animated.View 
+              key={category.id}
+              entering={FadeInRight.delay(index * 50).springify()}
+            >
+              <TouchableOpacity
+                onPress={() => setSelectedCategory(category.id)}
+                className={`mr-3 px-5 py-2.5 rounded-full flex-row items-center ${
+                  selectedCategory === category.id 
+                    ? 'bg-primary-800' 
+                    : 'bg-sand-100'
+                }`}
+                style={{
+                  shadowColor: selectedCategory === category.id ? '#122F26' : '#000',
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: selectedCategory === category.id ? 0.2 : 0.05,
+                  shadowRadius: 4,
+                  elevation: selectedCategory === category.id ? 3 : 1,
+                }}
+              >
+                <Ionicons 
+                  name={category.icon as any} 
+                  size={18} 
+                  color={selectedCategory === category.id ? '#D9B168' : '#3A5C50'} 
+                />
+                <Text className={`ml-2 font-semibold text-sm ${
+                  selectedCategory === category.id 
+                    ? 'text-gold' 
+                    : 'text-primary-800'
+                }`}>
+                  {category.label}
+                </Text>
+              </TouchableOpacity>
+            </Animated.View>
+          ))}
+        </ScrollView>
       </View>
 
       {/* Properties List */}
       {isLoading ? (
-        <View className="flex-1 justify-center items-center bg-[#0f172a]">
-          <ActivityIndicator size="large" color="#fbbf24" />
-          <Text className="mt-2 text-slate-200">Loading properties...</Text>
+        <View className="flex-1 justify-center items-center bg-sand-100">
+          <View className="items-center">
+            <ActivityIndicator size="large" color="#D9B168" />
+            <Text className="mt-4 text-primary-700 font-medium">Discovering amazing stays...</Text>
+          </View>
         </View>
       ) : (
         <FlatList
@@ -53,11 +151,18 @@ export default function ExploreScreen() {
             </View>
           )}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={{ paddingVertical: 12, paddingBottom: 40, backgroundColor: '#0f172a' }}
+          contentContainerStyle={{ paddingVertical: 12, paddingBottom: 40 }}
           ListEmptyComponent={
-            <View className="flex-1 justify-center items-center py-12">
-              <Text className="text-slate-200 text-base">No properties found</Text>
-              <Text className="text-slate-400 text-sm mt-1">Try adjusting your search</Text>
+            <View className="flex-1 justify-center items-center py-20 px-6">
+              <View className="bg-white rounded-3xl p-8 items-center" style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 12, elevation: 5 }}>
+                <View className="bg-sand-200 rounded-full p-6 mb-4">
+                  <Ionicons name="search" size={48} color="#3A5C50" />
+                </View>
+                <Text className="text-primary-900 text-xl font-bold mb-2">No properties found</Text>
+                <Text className="text-primary-600 text-center text-sm">
+                  Try adjusting your search or explore different categories
+                </Text>
+              </View>
             </View>
           }
         />
