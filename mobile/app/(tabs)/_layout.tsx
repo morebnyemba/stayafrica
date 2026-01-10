@@ -17,6 +17,8 @@ export default function TabsLayout() {
             iconName = focused ? 'calendar' : 'calendar-outline';
           } else if (route.name === 'wishlist') {
             iconName = focused ? 'heart' : 'heart-outline';
+          } else if (route.name === 'messages') {
+            iconName = focused ? 'chatbubbles' : 'chatbubbles-outline';
           } else if (route.name === 'host') {
             iconName = focused ? 'business' : 'business-outline';
           } else if (route.name === 'wallet') {
@@ -63,6 +65,13 @@ export default function TabsLayout() {
         options={{
           title: 'Wishlist',
           tabBarLabel: 'Wishlist',
+        }}
+      />
+      <Tabs.Screen
+        name="messages"
+        options={{
+          title: 'Messages',
+          tabBarLabel: 'Messages',
         }}
       />
       <Tabs.Screen

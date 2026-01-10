@@ -8,6 +8,16 @@ import { ActivityIndicator, View } from 'react-native';
 import { Providers } from '@/context/providers';
 import { useAuth } from '@/context/auth-context';
 
+// Expo Router's sitemap dev screen expects window.location on web; provide a safe shim for native.
+if (typeof globalThis.window === 'undefined') {
+  (globalThis as any).window = { location: { origin: '' } };
+}
+if (typeof globalThis.location === 'undefined') {
+  (globalThis as any).location = (globalThis as any).window.location;
+} else if (!(globalThis as any).location.origin) {
+  (globalThis as any).location.origin = '';
+}
+
 SplashScreen.preventAutoHideAsync();
 
 function RootLayoutContent() {

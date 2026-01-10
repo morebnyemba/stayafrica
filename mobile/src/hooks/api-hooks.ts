@@ -93,13 +93,24 @@ export function useConversations() {
   });
 }
 
+export function useConversationMessages(conversationId: string) {
+  return useQuery({
+    queryKey: ['conversations', conversationId, 'messages'],
+    queryFn: () => apiClient.getConversationMessages(conversationId),
+    enabled: !!conversationId,
+  });
+}
+
 export function useSendMessage() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ conversationId, message }: { conversationId: string; message: string }) =>
       apiClient.sendMessage(conversationId, message),
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['conversations'] });
+      if (variables?.conversationId) {
+        queryClient.invalidateQueries({ queryKey: ['conversations', variables.conversationId, 'messages'] });
+      }
     },
   });
 }

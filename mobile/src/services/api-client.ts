@@ -195,6 +195,12 @@ class APIClient {
     return (await this.client.get('/messaging/conversations/')).data;
   }
 
+  async getConversationMessages(conversationId: string): Promise<any> {
+    return (
+      await this.client.get(`/messaging/conversations/${conversationId}/messages/`)
+    ).data;
+  }
+
   async sendMessage(conversationId: string, message: string): Promise<any> {
     return (
       await this.client.post(`/messaging/conversations/${conversationId}/messages/`, {

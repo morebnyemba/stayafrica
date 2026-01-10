@@ -81,7 +81,7 @@ export default function MessagesScreen() {
         <Text className="text-3xl font-bold text-primary-900">Messages</Text>
         <TouchableOpacity
           className="bg-secondary-600 p-2 rounded-full"
-          onPress={() => router.push('/messages/new')}
+          onPress={() => router.push('/(tabs)/messages/new')}
         >
           <Ionicons name="send" size={20} color="white" />
         </TouchableOpacity>
