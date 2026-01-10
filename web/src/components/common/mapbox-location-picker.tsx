@@ -24,6 +24,7 @@ export function MapboxLocationPicker({
   const [loading, setLoading] = useState(true);
   const [gettingLocation, setGettingLocation] = useState(false);
   const [pinned, setPinned] = useState(false);
+  const [mapStyle, setMapStyle] = useState<'streets' | 'satellite' | 'outdoors'>('streets');
   const [coordinates, setCoordinates] = useState<{ lat: number; lng: number }>({
     lat: initialLat,
     lng: initialLng,
@@ -88,7 +89,7 @@ export function MapboxLocationPicker({
         map.current = null;
       }
     };
-  }, [mapboxToken]);
+  }, [mapboxToken, mapStyle]);
 
   const handleConfirm = async () => {
     try {
@@ -155,6 +156,10 @@ export function MapboxLocationPicker({
     );
   };
 
+  const handleChangeStyle = (style: 'streets' | 'satellite' | 'outdoors') => {
+    setMapStyle(style);
+  };
+
   if (!mapboxToken) {
     return (
       <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 text-red-800 dark:text-red-200 text-sm">
@@ -183,11 +188,28 @@ export function MapboxLocationPicker({
           <MapPin className="w-4 h-4" />
           How to use the map
         </p>
-        <ul className="space-y-1 ml-6 list-disc">
+        <ul className="space-y-1 ml-6 list-disc mb-3">
           <li>Click anywhere on the map to place a marker</li>
           <li>Drag the marker to adjust the exact location</li>
           <li>Click "Confirm Location" when satisfied</li>
         </ul>
+        <p className="font-medium mb-2">Map Style:</p>
+        <div className="flex flex-wrap gap-2">
+          {['streets', 'satellite', 'outdoors'].map((style) => (
+            <button
+              key={style}
+              type="button"
+              onClick={() => handleChangeStyle(style as 'streets' | 'satellite' | 'outdoors')}
+              className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
+                mapStyle === style
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-blue-100 dark:bg-blue-800 text-blue-900 dark:text-blue-100 hover:bg-blue-200 dark:hover:bg-blue-700'
+              }`}
+            >
+              {style.charAt(0).toUpperCase() + style.slice(1)}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
