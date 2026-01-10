@@ -123,7 +123,7 @@ export default function BookingConfirmPage() {
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-sand-100 dark:bg-primary-900">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-20 sm:pt-8">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Back button */}
           <Link 
             href={`/properties/${propertyId}`}

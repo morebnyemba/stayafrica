@@ -57,7 +57,7 @@ export default function BookingSuccessPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-sand-100 dark:bg-primary-900 flex items-center justify-center py-12 px-4 pt-20 sm:pt-12">
+      <div className="min-h-screen bg-sand-100 dark:bg-primary-900 flex items-center justify-center py-12 px-4">
         <div className="max-w-2xl w-full">
           {/* Success icon */}
           <div className="text-center mb-8">

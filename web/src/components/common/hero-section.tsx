@@ -60,7 +60,7 @@ export function HeroSection() {
   ];
 
   return (
-    <div className="relative overflow-hidden bg-gradient-to-br from-primary-900 via-primary-800 to-primary-700 text-sand-50 py-12 sm:py-16 md:py-24 lg:py-32">
+    <div className="relative overflow-hidden -mt-20 sm:mt-0 bg-gradient-to-br from-primary-900 via-primary-800 to-primary-700 text-sand-50 py-8 sm:py-16 md:py-24 lg:py-32">
       <div className="absolute inset-0 pointer-events-none" aria-hidden>
         <div className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-secondary-500/10 blur-3xl hidden sm:block" />
         <div className="absolute -bottom-32 -left-32 h-64 w-64 rounded-full bg-secondary-400/10 blur-2xl hidden sm:block" />
