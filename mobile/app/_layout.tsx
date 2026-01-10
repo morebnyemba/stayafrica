@@ -17,14 +17,10 @@ function RootLayoutContent() {
   useEffect(() => {
     if (!isLoading) {
       SplashScreen.hideAsync();
-      // Route based on auth state
-      if (isAuthenticated) {
-        router.replace('/(tabs)/explore');
-      } else {
-        router.replace('/(auth)/login');
-      }
+      // Always show tabs (explore is public), users can login from there
+      router.replace('/(tabs)/explore');
     }
-  }, [isLoading, isAuthenticated]);
+  }, [isLoading]);
 
   if (isLoading) {
     return (

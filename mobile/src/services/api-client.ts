@@ -86,7 +86,7 @@ class APIClient {
   }
 
   async register(userData: any): Promise<TokenResponse> {
-    const response = await this.client.post('/auth/register/', userData);
+    const response = await this.client.post('/users/register/', userData);
     const { access, refresh } = response.data;
     await this.saveTokens(access, refresh);
     return response.data;
