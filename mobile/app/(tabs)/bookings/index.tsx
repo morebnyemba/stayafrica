@@ -4,19 +4,7 @@ import { useBookings } from '@/hooks/api-hooks';
 import { useAuth } from '@/context/auth-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-
-interface Booking {
-  id: string;
-  property_id: string;
-  check_in: string;
-  check_out: string;
-  grand_total: number;
-  status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
-  property?: {
-    title: string;
-    city: string;
-  };
-}
+import { Booking } from '@/types';
 
 export default function BookingsScreen() {
   const router = useRouter();
@@ -80,14 +68,16 @@ export default function BookingsScreen() {
         return { bg: 'bg-yellow-100', text: 'text-yellow-800', icon: 'time' };
       case 'cancelled':
         return { bg: 'bg-red-100', text: 'text-red-800', icon: 'close-circle' };
-      case 'completed':
-        return { bg: 'bg-blue-100', text: 'text-blue-800', icon: 'checkbox' };
+      case 'checked_in':
+        return { bg: 'bg-blue-100', text: 'text-blue-800', icon: 'enter' };
+      case 'checked_out':
+        return { bg: 'bg-purple-100', text: 'text-purple-800', icon: 'checkbox' };
       default:
         return { bg: 'bg-gray-100', text: 'text-gray-800', icon: 'information-circle' };
     }
   };
 
-  const BookingCard = ({ booking }: { booking: Booking }) => {
+  const BookingCard = ({ booking }: { booking: Booking & { property?: { title: string; city: string } } }) => {
     const statusStyle = getStatusColor(booking.status);
     
     return (

@@ -11,7 +11,6 @@ export default function WishlistScreen() {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
   const [wishlistProperties, setWishlistProperties] = useState<Property[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
 
   if (!isAuthenticated) {
     return (
@@ -93,12 +92,7 @@ export default function WishlistScreen() {
       </LinearGradient>
 
       {/* Wishlist Content */}
-      {isLoading ? (
-        <View className="flex-1 justify-center items-center">
-          <ActivityIndicator size="large" color="#D9B168" />
-          <Text className="mt-4 text-primary-700 font-medium">Loading wishlist...</Text>
-        </View>
-      ) : wishlistProperties.length === 0 ? (
+      {wishlistProperties.length === 0 ? (
         <View className="flex-1 justify-center items-center px-6">
           <View className="bg-white rounded-3xl p-8 items-center" style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.1, shadowRadius: 16, elevation: 8 }}>
             <View className="bg-sand-200 rounded-full p-8 mb-6">
