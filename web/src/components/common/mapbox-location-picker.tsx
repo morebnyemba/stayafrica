@@ -24,7 +24,7 @@ export function MapboxLocationPicker({
   const [loading, setLoading] = useState(true);
   const [gettingLocation, setGettingLocation] = useState(false);
   const [pinned, setPinned] = useState(false);
-  const [mapStyle, setMapStyle] = useState<'streets' | 'satellite' | 'outdoors'>('streets');
+  const [mapStyle, setMapStyle] = useState<'streets' | 'satellite' | 'outdoors'>('satellite');
   const [coordinates, setCoordinates] = useState<{ lat: number; lng: number }>({
     lat: initialLat,
     lng: initialLng,
