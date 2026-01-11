@@ -112,8 +112,16 @@ class BookingAdmin(UnfoldModelAdmin):
     def nights_count(self, obj):
         if obj.check_in and obj.check_out:
             days = (obj.check_out - obj.check_in).days
-            # Ensure positive nights count
-            return days if days >= 0 else 0
+            # Data integrity check: flag if check_out is before check_in
+            if days < 0:
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.warning(
+                    f"Booking {obj.booking_ref}: check_out ({obj.check_out}) "
+                    f"is before check_in ({obj.check_in})"
+                )
+                return "⚠️ Invalid"
+            return days
         return 'N/A'
 
     @display(description=_('Summary'))

@@ -213,13 +213,16 @@ class BankAccountAdmin(UnfoldModelAdmin):
 
     @display(description=_('Account Number'))
     def masked_account_number(self, obj):
-        """Mask account number for security - consistent format"""
-        # Always show last 4 digits with consistent masking
-        if len(obj.account_number) > 4:
-            return f"****{obj.account_number[-4:]}"
+        """
+        Mask account number for security - consistent format
+        Always shows **** followed by up to 4 digits
+        """
+        if len(obj.account_number) <= 4:
+            # For very short account numbers, show only asterisks
+            return "****"
         else:
-            # For short account numbers, still mask consistently
-            return "****" + "*" * len(obj.account_number)
+            # Show last 4 digits only
+            return f"****{obj.account_number[-4:]}"
 
     @display(description=_('Primary'), label=True)
     def primary_badge(self, obj):
