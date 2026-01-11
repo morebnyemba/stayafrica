@@ -7,7 +7,6 @@ from typing import Dict, Optional, Tuple
 import stripe
 from paynow import Paynow as PaynowSDK
 from flutterwave import Flutterwave as FlutterwaveSDK
-import paypalrestsdk
 import logging
 
 logger = logging.getLogger(__name__)
@@ -17,12 +16,12 @@ class PaymentGatewayService:
     """Enhanced payment gateway with official SDK support"""
     
     REGIONAL_PROVIDERS = {
-        'Zimbabwe': ['paynow', 'flutterwave', 'paypal', 'cash_on_arrival'],
-        'South Africa': ['paystack', 'flutterwave', 'paypal', 'ozow'],
-        'Nigeria': ['paystack', 'flutterwave', 'paypal'],
-        'Kenya': ['flutterwave', 'paypal', 'mpesa'],
-        'Ghana': ['paystack', 'flutterwave', 'paypal'],
-        'International': ['stripe', 'paypal', 'flutterwave'],
+        'Zimbabwe': ['paynow', 'flutterwave', 'cash_on_arrival'],
+        'South Africa': ['paystack', 'flutterwave', 'ozow'],
+        'Nigeria': ['paystack', 'flutterwave'],
+        'Kenya': ['flutterwave', 'mpesa'],
+        'Ghana': ['paystack', 'flutterwave'],
+        'International': ['stripe', 'flutterwave'],
     }
     
     PAYMENT_METHODS = {
@@ -30,7 +29,6 @@ class PaymentGatewayService:
         'paystack': 'Paystack',
         'flutterwave': 'Flutterwave',
         'stripe': 'Stripe',
-        'paypal': 'PayPal',
         'cash_on_arrival': 'Cash on Arrival',
         'mpesa': 'M-Pesa',
         'ozow': 'Ozow',
@@ -64,14 +62,6 @@ class PaymentGatewayService:
                 public_key=getattr(self.config, 'flutterwave_public_key', ''),
                 secret_key=self.config.flutterwave_secret_key
             )
-        
-        # PayPal
-        if hasattr(self.config, 'paypal_client_id') and self.config.paypal_client_id:
-            paypalrestsdk.configure({
-                'mode': getattr(self.config, 'paypal_mode', 'sandbox'),  # sandbox or live
-                'client_id': self.config.paypal_client_id,
-                'client_secret': getattr(self.config, 'paypal_client_secret', '')
-            })
     
     def get_available_providers(self, user_country: str) -> list:
         """Get available payment providers for a specific country"""
@@ -332,75 +322,6 @@ class PaymentGatewayService:
                 'error': str(e)
             }
     
-    def initiate_paypal_payment(
-        self, 
-        payment_obj, 
-        booking,
-        customer_email: str,
-        customer_name: str = ''
-    ) -> Dict:
-        """Initiate PayPal payment using official SDK"""
-        try:
-            payment = paypalrestsdk.Payment({
-                'intent': 'sale',
-                'payer': {
-                    'payment_method': 'paypal'
-                },
-                'redirect_urls': {
-                    'return_url': f'{settings.SITE_URL}/payment/success?gateway_ref={payment_obj.gateway_ref}',
-                    'cancel_url': f'{settings.SITE_URL}/payment/cancel'
-                },
-                'transactions': [{
-                    'item_list': {
-                        'items': [{
-                            'name': f'Booking: {booking.rental_property.title}',
-                            'sku': str(booking.id),
-                            'price': str(payment_obj.amount),
-                            'currency': payment_obj.currency,
-                            'quantity': 1
-                        }]
-                    },
-                    'amount': {
-                        'total': str(payment_obj.amount),
-                        'currency': payment_obj.currency
-                    },
-                    'description': f'StayAfrica booking from {booking.check_in} to {booking.check_out}'
-                }]
-            })
-            
-            if payment.create():
-                # Get approval URL
-                approval_url = None
-                for link in payment.links:
-                    if link.rel == 'approval_url':
-                        approval_url = link.href
-                        break
-                
-                # Update payment with PayPal payment ID
-                payment_obj.gateway_ref = payment.id
-                payment_obj.save()
-                
-                logger.info(f'PayPal payment initiated: {payment.id}')
-                return {
-                    'success': True,
-                    'payment_link': approval_url,
-                    'paypal_payment_id': payment.id,
-                    'gateway_ref': payment.id
-                }
-            else:
-                logger.error(f'PayPal error: {payment.error}')
-                return {
-                    'success': False,
-                    'error': payment.error
-                }
-                
-        except Exception as e:
-            logger.error(f'PayPal exception: {str(e)}')
-            return {
-                'success': False,
-                'error': str(e)
-            }
-    
     def initiate_payment(
         self, 
         payment_obj, 
@@ -418,8 +339,6 @@ class PaymentGatewayService:
             return self.initiate_paynow_payment(payment_obj, booking, customer_email)
         elif provider == 'flutterwave':
             return self.initiate_flutterwave_payment(payment_obj, booking, customer_email, customer_name)
-        elif provider == 'paypal':
-            return self.initiate_paypal_payment(payment_obj, booking, customer_email, customer_name)
         elif provider == 'cash_on_arrival':
             # No external gateway needed
             return {
@@ -446,28 +365,6 @@ class PaymentGatewayService:
         except stripe.error.SignatureVerificationError:
             logger.error('Invalid Stripe webhook signature')
             return None
-    
-    def verify_paypal_webhook(self, headers: dict, body: str) -> bool:
-        """Verify PayPal webhook signature"""
-        try:
-            # PayPal webhook verification requires webhook ID from dashboard
-            webhook_id = getattr(self.config, 'paypal_webhook_id', '')
-            if not webhook_id:
-                logger.warning('PayPal webhook ID not configured, skipping verification')
-                return True  # Allow in dev/testing
-            
-            return paypalrestsdk.WebhookEvent.verify(
-                transmission_id=headers.get('PAYPAL-TRANSMISSION-ID'),
-                transmission_time=headers.get('PAYPAL-TRANSMISSION-TIME'),
-                cert_url=headers.get('PAYPAL-CERT-URL'),
-                auth_algo=headers.get('PAYPAL-AUTH-ALGO'),
-                transmission_sig=headers.get('PAYPAL-TRANSMISSION-SIG'),
-                webhook_id=webhook_id,
-                event_body=body
-            )
-        except Exception as e:
-            logger.error(f'PayPal webhook verification failed: {str(e)}')
-            return False
     
     def convert_currency(
         self, 
