@@ -121,11 +121,13 @@ class UserAdmin(UnfoldModelAdmin):
     @display(description=_('Profile Picture'))
     def profile_image_preview(self, obj):
         if obj.profile_picture:
+            from django.utils.html import escape
+            safe_url = escape(obj.profile_picture.url)
             return format_html(
                 '<img src="{}" style="max-width: 150px; max-height: 150px; '
                 'border-radius: 50%; border: 3px solid #D9B168; '
                 'box-shadow: 0 4px 6px rgba(0,0,0,0.1);" />',
-                obj.profile_picture.url
+                safe_url
             )
         return format_html(
             '<div style="width: 150px; height: 150px; border-radius: 50%; '
@@ -137,15 +139,21 @@ class UserAdmin(UnfoldModelAdmin):
     @display(description=_('User Summary'))
     def user_summary(self, obj):
         if obj.id:
-            # Get additional stats
-            from apps.properties.models import Property
-            from apps.bookings.models import Booking
+            # Note: For better performance with many users, consider:
+            # 1. Using annotations in get_queryset() to precompute stats
+            # 2. Caching these values
+            # 3. Computing stats asynchronously
             
+            stats = "N/A"
             if obj.role == 'host':
+                # These queries should be optimized with annotations if used frequently
+                from apps.properties.models import Property
+                from apps.bookings.models import Booking
                 properties_count = Property.objects.filter(host=obj).count()
                 bookings_received = Booking.objects.filter(rental_property__host=obj).count()
                 stats = f"Properties: {properties_count} | Bookings Received: {bookings_received}"
             elif obj.role == 'guest':
+                from apps.bookings.models import Booking
                 bookings_made = Booking.objects.filter(guest=obj).count()
                 stats = f"Bookings Made: {bookings_made}"
             else:

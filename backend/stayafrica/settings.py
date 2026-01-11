@@ -674,12 +674,13 @@ UNFOLD = {
 }
 
 
-# Unfold Dashboard Callbacks
 def environment_callback(request):
     """
     Display environment badge in admin header
+    Callback for UNFOLD configuration
     """
-    if DEBUG:
+    from django.conf import settings
+    if settings.DEBUG:
         return ["Development", "warning"]  # warning = amber color
     return ["Production", "success"]  # success = green color
 
@@ -687,19 +688,13 @@ def environment_callback(request):
 def dashboard_callback(request, context):
     """
     Add custom data to the dashboard context
+    Callback for UNFOLD configuration
     """
-    from django.db.models import Sum, Count
-    from apps.bookings.models import Booking
-    from apps.properties.models import Property
-    from apps.users.models import User
-    from apps.payments.models import Payment
-    
-    # Calculate dashboard statistics
+    # Add navigation link to view website
     context.update({
         "navigation": [
             {"title": "View Website", "link": "/", "icon": "open_in_new"},
         ],
     })
-    
     return context
 

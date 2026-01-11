@@ -38,10 +38,13 @@ class PropertyImageInline(UnfoldTabularInline):
     @display(description=_('Preview'))
     def image_preview(self, obj):
         if obj.image:
+            from django.utils.html import escape
+            # Escape the URL to prevent XSS
+            safe_url = escape(obj.image.url)
             return format_html(
                 '<img src="{}" style="max-height: 100px; max-width: 150px; border-radius: 4px; '
                 'border: 2px solid #D9B168;" />',
-                obj.image.url
+                safe_url
             )
         return '-'
 
@@ -206,19 +209,23 @@ class PropertyImageAdmin(UnfoldModelAdmin):
     @display(description=_('Preview'))
     def image_preview(self, obj):
         if obj.image:
+            from django.utils.html import escape
+            safe_url = escape(obj.image.url)
             return format_html(
                 '<img src="{}" style="max-height: 50px; max-width: 75px; border-radius: 4px;" />',
-                obj.image.url
+                safe_url
             )
         return '-'
 
     @display(description=_('Image Preview'))
     def image_preview_large(self, obj):
         if obj.image:
+            from django.utils.html import escape
+            safe_url = escape(obj.image.url)
             return format_html(
                 '<img src="{}" style="max-width: 400px; border-radius: 8px; '
                 'border: 3px solid #D9B168; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" />',
-                obj.image.url
+                safe_url
             )
         return 'No image uploaded'
 

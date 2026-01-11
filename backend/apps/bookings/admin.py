@@ -111,7 +111,9 @@ class BookingAdmin(UnfoldModelAdmin):
     @display(description=_('Nights'))
     def nights_count(self, obj):
         if obj.check_in and obj.check_out:
-            return (obj.check_out - obj.check_in).days
+            days = (obj.check_out - obj.check_in).days
+            # Ensure positive nights count
+            return days if days >= 0 else 0
         return 'N/A'
 
     @display(description=_('Summary'))
