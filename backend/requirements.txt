@@ -44,7 +44,7 @@ requests==2.31.0
 # Payment SDKs
 stripe==14.1.0
 paystack==1.5.0
-flutterwave==0.0.7
+flutterwave==1.0.7
 paynow==1.0.5
 paypalrestsdk==1.13.1
 
