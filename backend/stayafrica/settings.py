@@ -466,27 +466,41 @@ UNFOLD = {
     "SITE_TITLE": "StayAfrica Admin",
     "SITE_HEADER": "StayAfrica Administration",
     "SITE_URL": "/",
-    "SITE_ICON": None,  # Add your logo path here
-    "SITE_LOGO": None,  # Add your logo path here
-    "SITE_SYMBOL": "travel_explore",  # Material icon
+    "SITE_ICON": {
+        "light": lambda request: static("logo.svg"),  # Logo for light theme
+        "dark": lambda request: static("logo.svg"),   # Logo for dark theme
+    },
+    "SITE_SYMBOL": "travel_explore",  # Material icon for favicon
     "SHOW_HISTORY": True,
     "SHOW_VIEW_ON_SITE": True,
-    "STYLES": [],
+    "ENVIRONMENT": "stayafrica.settings.environment_callback",
+    "DASHBOARD_CALLBACK": "stayafrica.settings.dashboard_callback",
+    "LOGIN": {
+        "image": lambda request: static("images/login-bg.jpg"),
+        "redirect_after": lambda request: "/admin/",
+    },
+    "STYLES": [
+        lambda request: static("css/admin-custom.css"),
+    ],
+    "SCRIPTS": [
+        lambda request: static("js/admin-custom.js"),
+    ],
     "COLORS": {
         "primary": {
-            "50": "250 248 245",   # Off-white/Ivory Sand - very light
-            "100": "245 239 229",  # Light Ivory Sand
-            "200": "235 215 185",  # Light Safari Gold
-            "300": "225 190 145",  # Medium Safari Gold #D9B168
-            "400": "210 170 100",  # Deep Safari Gold
+            "50": "250 248 245",   # Off-white/Ivory Sand - very light (#FAF8F5)
+            "100": "244 241 234",  # Light Ivory Sand (#F4F1EA)
+            "200": "217 177 104",  # Light Safari Gold (#D9B168)
+            "300": "189 147 79",   # Medium Safari Gold
+            "400": "162 118 54",   # Deep Safari Gold
             "500": "58 92 80",     # Moss Green #3A5C50 (brand primary)
-            "600": "40 65 55",     # Dark Moss Green
-            "700": "25 50 40",     # Darker Moss Green
+            "600": "46 73 64",     # Dark Moss Green
+            "700": "29 57 47",     # Darker Moss Green
             "800": "18 47 38",     # Deep Forest #122F26 (brand dark)
             "900": "10 26 21",     # Savanna Text #0A1A15 (brand darkest)
-            "950": "5 15 12",      # Almost Black
+            "950": "5 13 11",      # Almost Black
         },
     },
+    "THEME": "light",  # Force light theme as it works better with our earthy colors
     "EXTENSIONS": {
         "modeltranslation": {
             "flags": {
@@ -496,6 +510,14 @@ UNFOLD = {
             },
         },
     },
+    "FAVICONS": [
+        {
+            "rel": "icon",
+            "sizes": "32x32",
+            "type": "image/svg+xml",
+            "href": lambda request: static("favicon.svg"),
+        },
+    ],
     "SIDEBAR": {
         "show_search": True,
         "show_all_applications": True,
@@ -650,3 +672,34 @@ UNFOLD = {
         },
     ],
 }
+
+
+# Unfold Dashboard Callbacks
+def environment_callback(request):
+    """
+    Display environment badge in admin header
+    """
+    if DEBUG:
+        return ["Development", "warning"]  # warning = amber color
+    return ["Production", "success"]  # success = green color
+
+
+def dashboard_callback(request, context):
+    """
+    Add custom data to the dashboard context
+    """
+    from django.db.models import Sum, Count
+    from apps.bookings.models import Booking
+    from apps.properties.models import Property
+    from apps.users.models import User
+    from apps.payments.models import Payment
+    
+    # Calculate dashboard statistics
+    context.update({
+        "navigation": [
+            {"title": "View Website", "link": "/", "icon": "open_in_new"},
+        ],
+    })
+    
+    return context
+
