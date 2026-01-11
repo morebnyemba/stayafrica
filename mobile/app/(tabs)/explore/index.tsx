@@ -6,6 +6,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeInRight } from 'react-native-reanimated';
 import { useProperties } from '@/hooks/api-hooks';
 import { PropertyCard } from '@/components/property/PropertyCard';
+import { PropertyCardSkeleton } from '@/components/common/Skeletons';
 
 const CATEGORIES = [
   { id: 'all', label: 'All', icon: 'apps' },
@@ -136,11 +137,10 @@ export default function ExploreScreen() {
 
       {/* Properties List */}
       {isLoading ? (
-        <View className="flex-1 justify-center items-center bg-sand-100">
-          <View className="items-center">
-            <ActivityIndicator size="large" color="#D9B168" />
-            <Text className="mt-4 text-primary-700 font-medium">Discovering amazing stays...</Text>
-          </View>
+        <View className="pt-4">
+          {[1, 2, 3, 4].map((i) => (
+            <PropertyCardSkeleton key={i} />
+          ))}
         </View>
       ) : (
         <FlatList

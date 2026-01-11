@@ -44,6 +44,8 @@ function RootLayoutContent() {
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="(auth)" options={{ animationEnabled: false }} />
       <Stack.Screen name="(tabs)" options={{ animationEnabled: false }} />
+      <Stack.Screen name="host" options={{ animationEnabled: true }} />
+      <Stack.Screen name="reviews" options={{ animationEnabled: true }} />
     </Stack>
   );
 }
