@@ -7,6 +7,9 @@ from typing import Dict, Optional, Tuple
 import stripe
 from paynow import Paynow as PaynowSDK
 from flutterwave import Flutterwave as FlutterwaveSDK
+import requests
+import base64
+import json
 import logging
 
 logger = logging.getLogger(__name__)
@@ -16,12 +19,12 @@ class PaymentGatewayService:
     """Enhanced payment gateway with official SDK support"""
     
     REGIONAL_PROVIDERS = {
-        'Zimbabwe': ['paynow', 'flutterwave', 'cash_on_arrival'],
-        'South Africa': ['paystack', 'flutterwave', 'ozow'],
-        'Nigeria': ['paystack', 'flutterwave'],
-        'Kenya': ['flutterwave', 'mpesa'],
-        'Ghana': ['paystack', 'flutterwave'],
-        'International': ['stripe', 'flutterwave'],
+        'Zimbabwe': ['paynow', 'flutterwave', 'paypal', 'cash_on_arrival'],
+        'South Africa': ['paystack', 'flutterwave', 'paypal', 'ozow'],
+        'Nigeria': ['paystack', 'flutterwave', 'paypal'],
+        'Kenya': ['flutterwave', 'paypal', 'mpesa'],
+        'Ghana': ['paystack', 'flutterwave', 'paypal'],
+        'International': ['stripe', 'paypal', 'flutterwave'],
     }
     
     PAYMENT_METHODS = {
@@ -29,6 +32,7 @@ class PaymentGatewayService:
         'paystack': 'Paystack',
         'flutterwave': 'Flutterwave',
         'stripe': 'Stripe',
+        'paypal': 'PayPal',
         'cash_on_arrival': 'Cash on Arrival',
         'mpesa': 'M-Pesa',
         'ozow': 'Ozow',
@@ -62,6 +66,12 @@ class PaymentGatewayService:
                 public_key=getattr(self.config, 'flutterwave_public_key', ''),
                 secret_key=self.config.flutterwave_secret_key
             )
+        
+        # PayPal - using REST API directly
+        self.paypal_mode = getattr(self.config, 'paypal_mode', 'sandbox')  # 'sandbox' or 'live'
+        self.paypal_client_id = getattr(self.config, 'paypal_client_id', '')
+        self.paypal_client_secret = getattr(self.config, 'paypal_client_secret', '')
+        self.paypal_base_url = 'https://api-m.sandbox.paypal.com' if self.paypal_mode == 'sandbox' else 'https://api-m.paypal.com'
     
     def get_available_providers(self, user_country: str) -> list:
         """Get available payment providers for a specific country"""
@@ -322,6 +332,104 @@ class PaymentGatewayService:
                 'error': str(e)
             }
     
+    def _get_paypal_access_token(self) -> Optional[str]:
+        """Get PayPal OAuth2 access token"""
+        try:
+            auth = base64.b64encode(f"{self.paypal_client_id}:{self.paypal_client_secret}".encode()).decode()
+            headers = {
+                'Authorization': f'Basic {auth}',
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+            response = requests.post(
+                f'{self.paypal_base_url}/v1/oauth2/token',
+                headers=headers,
+                data={'grant_type': 'client_credentials'}
+            )
+            if response.status_code == 200:
+                return response.json()['access_token']
+            return None
+        except Exception as e:
+            logger.error(f'PayPal auth error: {str(e)}')
+            return None
+    
+    def initiate_paypal_payment(
+        self, 
+        payment_obj, 
+        booking,
+        customer_email: str,
+        customer_name: str = ''
+    ) -> Dict:
+        """Initiate PayPal payment using REST API"""
+        try:
+            access_token = self._get_paypal_access_token()
+            if not access_token:
+                return {
+                    'success': False,
+                    'error': 'Failed to authenticate with PayPal'
+                }
+            
+            headers = {
+                'Content-Type': 'application/json',
+                'Authorization': f'Bearer {access_token}'
+            }
+            
+            order_data = {
+                'intent': 'CAPTURE',
+                'purchase_units': [{
+                    'reference_id': payment_obj.gateway_ref,
+                    'amount': {
+                        'currency_code': payment_obj.currency,
+                        'value': str(payment_obj.amount)
+                    },
+                    'description': f'StayAfrica booking from {booking.check_in} to {booking.check_out}'
+                }],
+                'application_context': {
+                    'return_url': f'{settings.SITE_URL}/payment/success?gateway_ref={payment_obj.gateway_ref}',
+                    'cancel_url': f'{settings.SITE_URL}/payment/cancel',
+                    'brand_name': 'StayAfrica',
+                    'user_action': 'PAY_NOW'
+                }
+            }
+            
+            response = requests.post(
+                f'{self.paypal_base_url}/v2/checkout/orders',
+                headers=headers,
+                json=order_data
+            )
+            
+            if response.status_code == 201:
+                order = response.json()
+                approval_url = None
+                for link in order.get('links', []):
+                    if link.get('rel') == 'approve':
+                        approval_url = link.get('href')
+                        break
+                
+                # Store PayPal order ID
+                payment_obj.gateway_ref = order['id']
+                payment_obj.save()
+                
+                logger.info(f'PayPal order created: {order["id"]}')
+                return {
+                    'success': True,
+                    'payment_link': approval_url,
+                    'paypal_order_id': order['id'],
+                    'gateway_ref': order['id']
+                }
+            else:
+                logger.error(f'PayPal API error: {response.text}')
+                return {
+                    'success': False,
+                    'error': response.json().get('message', 'Failed to create PayPal order')
+                }
+                
+        except Exception as e:
+            logger.error(f'PayPal exception: {str(e)}')
+            return {
+                'success': False,
+                'error': str(e)
+            }
+    
     def initiate_payment(
         self, 
         payment_obj, 
@@ -339,6 +447,8 @@ class PaymentGatewayService:
             return self.initiate_paynow_payment(payment_obj, booking, customer_email)
         elif provider == 'flutterwave':
             return self.initiate_flutterwave_payment(payment_obj, booking, customer_email, customer_name)
+        elif provider == 'paypal':
+            return self.initiate_paypal_payment(payment_obj, booking, customer_email, customer_name)
         elif provider == 'cash_on_arrival':
             # No external gateway needed
             return {
@@ -365,6 +475,46 @@ class PaymentGatewayService:
         except stripe.error.SignatureVerificationError:
             logger.error('Invalid Stripe webhook signature')
             return None
+    
+    def verify_paypal_webhook(self, headers: dict, body: str) -> bool:
+        """Verify PayPal webhook signature using REST API"""
+        try:
+            webhook_id = getattr(self.config, 'paypal_webhook_id', '')
+            if not webhook_id:
+                logger.warning('PayPal webhook ID not configured')
+                return True  # Allow in development
+            
+            access_token = self._get_paypal_access_token()
+            if not access_token:
+                return False
+            
+            verify_data = {
+                'transmission_id': headers.get('PAYPAL-TRANSMISSION-ID'),
+                'transmission_time': headers.get('PAYPAL-TRANSMISSION-TIME'),
+                'cert_url': headers.get('PAYPAL-CERT-URL'),
+                'auth_algo': headers.get('PAYPAL-AUTH-ALGO'),
+                'transmission_sig': headers.get('PAYPAL-TRANSMISSION-SIG'),
+                'webhook_id': webhook_id,
+                'webhook_event': json.loads(body)
+            }
+            
+            response = requests.post(
+                f'{self.paypal_base_url}/v1/notifications/verify-webhook-signature',
+                headers={
+                    'Content-Type': 'application/json',
+                    'Authorization': f'Bearer {access_token}'
+                },
+                json=verify_data
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                return result.get('verification_status') == 'SUCCESS'
+            return False
+            
+        except Exception as e:
+            logger.error(f'PayPal webhook verification failed: {str(e)}')
+            return False
     
     def convert_currency(
         self, 
