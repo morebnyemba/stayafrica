@@ -6,7 +6,6 @@ from django.conf import settings
 from typing import Dict, Optional, Tuple
 import stripe
 from paynow import Paynow as PaynowSDK
-from flutterwave import Flutterwave as FlutterwaveSDK
 import requests
 import base64
 import json
@@ -273,8 +272,13 @@ class PaymentGatewayService:
         customer_email: str,
         customer_name: str = ''
     ) -> Dict:
-        """Initiate Flutterwave payment using official SDK"""
+        """Initiate Flutterwave payment using REST API"""
         try:
+            headers = {
+                'Authorization': f'Bearer {self.flutterwave_secret_key}',
+                'Content-Type': 'application/json'
+            }
+            
             payload = {
                 'tx_ref': payment_obj.gateway_ref,
                 'amount': str(payment_obj.amount),
@@ -296,22 +300,28 @@ class PaymentGatewayService:
                 }
             }
             
-            response = self.flutterwave.payment.initiate(payload)
+            response = requests.post(
+                'https://api.flutterwave.com/v3/payments',
+                headers=headers,
+                json=payload
+            )
             
-            if response.get('status') == 'success':
-                link = response.get('data', {}).get('link')
-                logger.info(f'Flutterwave payment initiated: {payment_obj.gateway_ref}')
-                return {
-                    'success': True,
-                    'payment_link': link,
-                    'gateway_ref': payment_obj.gateway_ref
-                }
-            else:
-                logger.error(f'Flutterwave error: {response}')
-                return {
-                    'success': False,
-                    'error': response.get('message', 'Payment initialization failed')
-                }
+            if response.status_code == 200:
+                data = response.json()
+                if data.get('status') == 'success':
+                    link = data.get('data', {}).get('link')
+                    logger.info(f'Flutterwave payment initiated: {payment_obj.gateway_ref}')
+                    return {
+                        'success': True,
+                        'payment_link': link,
+                        'gateway_ref': payment_obj.gateway_ref
+                    }
+            
+            logger.error(f'Flutterwave error: {response.text}')
+            return {
+                'success': False,
+                'error': response.json().get('message', 'Payment initialization failed')
+            }
                 
         except Exception as e:
             logger.error(f'Flutterwave exception: {str(e)}')
