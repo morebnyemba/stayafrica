@@ -50,9 +50,18 @@ class PaymentGatewayService:
         if self.config.stripe_secret_key:
             stripe.api_key = self.config.stripe_secret_key
         
-        # REST API configurations
+        # Paynow SDK initialization
         self.paynow_integration_id = getattr(self.config, 'paynow_integration_id', '')
         self.paynow_integration_key = getattr(self.config, 'paynow_integration_key', '')
+        if self.paynow_integration_id and self.paynow_integration_key:
+            self.paynow = PaynowSDK(
+                self.paynow_integration_id,
+                self.paynow_integration_key,
+                f'{settings.SITE_URL}/payment/return',
+                f'{settings.SITE_URL}/payment/result'
+            )
+        
+        # REST API configurations
         self.flutterwave_secret_key = getattr(self.config, 'flutterwave_secret_key', '')
         self.paystack_secret_key = getattr(self.config, 'paystack_secret_key', '')
         self.paypal_mode = getattr(self.config, 'paypal_mode', 'sandbox')
@@ -317,14 +326,91 @@ class PaymentGatewayService:
                         'gateway_ref': payment_obj.gateway_ref
                     }
             
-            logger.error(f'Flutterwave error: {response.text}')
+            # Handle error response
+            try:
+                error_data = response.json()
+                error_msg = error_data.get('message', 'Payment initialization failed')
+            except ValueError:
+                error_msg = f'HTTP {response.status_code}: {response.text[:100]}'
+            
+            logger.error(f'Flutterwave error: {error_msg}')
             return {
                 'success': False,
-                'error': response.json().get('message', 'Payment initialization failed')
+                'error': error_msg
             }
                 
         except Exception as e:
             logger.error(f'Flutterwave exception: {str(e)}')
+            return {
+                'success': False,
+                'error': str(e)
+            }
+    
+    def initiate_paystack_payment(
+        self, 
+        payment_obj, 
+        booking,
+        customer_email: str,
+        customer_name: str = ''
+    ) -> Dict:
+        """Initiate Paystack payment using REST API"""
+        try:
+            headers = {
+                'Authorization': f'Bearer {self.paystack_secret_key}',
+                'Content-Type': 'application/json'
+            }
+            
+            payload = {
+                'reference': payment_obj.gateway_ref,
+                'amount': int(payment_obj.amount * 100),  # Convert to kobo/cents
+                'currency': payment_obj.currency,
+                'email': customer_email,
+                'callback_url': f'{settings.SITE_URL}/payment/return',
+                'metadata': {
+                    'payment_id': str(payment_obj.id),
+                    'booking_id': str(booking.id),
+                    'custom_fields': [
+                        {
+                            'display_name': 'Booking',
+                            'variable_name': 'booking',
+                            'value': f'{booking.rental_property.title}'
+                        }
+                    ]
+                }
+            }
+            
+            response = requests.post(
+                'https://api.paystack.co/transaction/initialize',
+                headers=headers,
+                json=payload
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get('status') == True:
+                    authorization_url = data.get('data', {}).get('authorization_url')
+                    logger.info(f'Paystack payment initiated: {payment_obj.gateway_ref}')
+                    return {
+                        'success': True,
+                        'payment_link': authorization_url,
+                        'gateway_ref': payment_obj.gateway_ref
+                    }
+            
+            # Handle error response
+            try:
+                error_data = response.json()
+                error_msg = error_data.get('message', 'Payment initialization failed')
+            except ValueError:
+                error_msg = f'HTTP {response.status_code}: {response.text[:100]}'
+            
+            logger.error(f'Paystack error: {error_msg}')
+            return {
+                'success': False,
+                'error': error_msg
+            }
+                
+        except Exception as e:
+            logger.error(f'Paystack exception: {str(e)}')
             return {
                 'success': False,
                 'error': str(e)
@@ -415,10 +501,17 @@ class PaymentGatewayService:
                     'gateway_ref': order['id']
                 }
             else:
-                logger.error(f'PayPal API error: {response.text}')
+                # Handle error response
+                try:
+                    error_data = response.json()
+                    error_msg = error_data.get('message', 'Failed to create PayPal order')
+                except ValueError:
+                    error_msg = f'HTTP {response.status_code}: {response.text[:100]}'
+                
+                logger.error(f'PayPal API error: {error_msg}')
                 return {
                     'success': False,
-                    'error': response.json().get('message', 'Failed to create PayPal order')
+                    'error': error_msg
                 }
                 
         except Exception as e:
@@ -443,6 +536,8 @@ class PaymentGatewayService:
             return self.initiate_stripe_payment(payment_obj, booking, customer_email)
         elif provider == 'paynow':
             return self.initiate_paynow_payment(payment_obj, booking, customer_email)
+        elif provider == 'paystack':
+            return self.initiate_paystack_payment(payment_obj, booking, customer_email, customer_name)
         elif provider == 'flutterwave':
             return self.initiate_flutterwave_payment(payment_obj, booking, customer_email, customer_name)
         elif provider == 'paypal':
