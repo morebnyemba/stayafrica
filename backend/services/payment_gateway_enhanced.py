@@ -51,24 +51,12 @@ class PaymentGatewayService:
         if self.config.stripe_secret_key:
             stripe.api_key = self.config.stripe_secret_key
         
-        # Paynow
-        if self.config.paynow_integration_id and self.config.paynow_integration_key:
-            self.paynow = PaynowSDK(
-                self.config.paynow_integration_id,
-                self.config.paynow_integration_key,
-                return_url=f'{settings.SITE_URL}/payment/return',
-                result_url=f'{settings.API_URL}/v1/payments/webhook/paynow/'
-            )
-        
-        # Flutterwave
-        if hasattr(self.config, 'flutterwave_secret_key') and self.config.flutterwave_secret_key:
-            self.flutterwave = FlutterwaveSDK(
-                public_key=getattr(self.config, 'flutterwave_public_key', ''),
-                secret_key=self.config.flutterwave_secret_key
-            )
-        
-        # PayPal - using REST API directly
-        self.paypal_mode = getattr(self.config, 'paypal_mode', 'sandbox')  # 'sandbox' or 'live'
+        # REST API configurations
+        self.paynow_integration_id = getattr(self.config, 'paynow_integration_id', '')
+        self.paynow_integration_key = getattr(self.config, 'paynow_integration_key', '')
+        self.flutterwave_secret_key = getattr(self.config, 'flutterwave_secret_key', '')
+        self.paystack_secret_key = getattr(self.config, 'paystack_secret_key', '')
+        self.paypal_mode = getattr(self.config, 'paypal_mode', 'sandbox')
         self.paypal_client_id = getattr(self.config, 'paypal_client_id', '')
         self.paypal_client_secret = getattr(self.config, 'paypal_client_secret', '')
         self.paypal_base_url = 'https://api-m.sandbox.paypal.com' if self.paypal_mode == 'sandbox' else 'https://api-m.paypal.com'
