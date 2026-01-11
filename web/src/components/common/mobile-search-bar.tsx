@@ -24,8 +24,8 @@ export function MobileSearchBar() {
   return (
     <>
       {/* Fixed, top-of-screen mobile search bar (Airbnb-like) */}
-      <div className="fixed top-0 left-0 right-0 md:hidden z-50 bg-primary-800/95 backdrop-blur border-b border-primary-700 shadow-md">
-        <div className="px-3 py-2">
+      <div className="fixed top-0 left-0 right-0 md:hidden z-50 bg-primary-800/95 backdrop-blur shadow-md">
+        <div className="px-3 py-1.5">
           {isExpanded ? (
             // Expanded search form
             <form onSubmit={handleSearch} className="flex gap-2">

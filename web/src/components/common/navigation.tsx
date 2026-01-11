@@ -46,12 +46,12 @@ export function Navigation() {
   return (
     <>
       <MobileSearchBar />
-      <nav className="sticky top-[60px] md:top-0 z-40 bg-primary-800/95 backdrop-blur border-b border-primary-700 text-sand-100 shadow-lg">
+      <nav className="sticky top-[52px] md:top-0 z-40 bg-primary-800/95 backdrop-blur text-sand-100 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+          <div className="flex items-center justify-between h-14">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2 text-sand-100">
-            <img src="/logo.png" alt="StayAfrica" className="h-16 w-auto" />
+            <img src="/logo.png" alt="StayAfrica" className="h-14 w-auto" />
           </Link>
 
           {/* Center Navigation - Desktop */}
@@ -141,7 +141,7 @@ export function Navigation() {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t border-primary-700 py-4 space-y-4 bg-primary-800/95 text-sand-100">
+          <div className="md:hidden py-2 space-y-2 bg-primary-800/95 text-sand-100">
             <Link href="/explore" className="block text-sand-200 hover:text-secondary-300 px-4 py-2">
               Stays
             </Link>
