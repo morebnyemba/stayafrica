@@ -221,18 +221,23 @@ export function BookingContent() {
                     </div>
                   </div>
 
-                  <div className="flex gap-4 mt-4">
+                  <div className="flex flex-wrap gap-3 mt-4">
                     <a href={`/bookings/${booking.id}`} className="inline-block">
                       <Button variant="secondary" size="sm">View Details</Button>
                     </a>
                     {booking.status === 'CONFIRMED' && (
-                      <Button
-                        onClick={() => handleContactHost(booking)}
-                        disabled={contactingHost === booking.id}
-                        size="sm"
-                      >
-                        {contactingHost === booking.id ? 'Starting...' : 'Contact Host'}
-                      </Button>
+                      <>
+                        <Button
+                          onClick={() => handleContactHost(booking)}
+                          disabled={contactingHost === booking.id}
+                          size="sm"
+                        >
+                          {contactingHost === booking.id ? 'Starting...' : 'Contact Host'}
+                        </Button>
+                        <a href={`/bookings/${booking.id}/directions`} className="inline-block">
+                          <Button variant="outline" size="sm">Get Directions</Button>
+                        </a>
+                      </>
                     )}
                   </div>
                 </div>

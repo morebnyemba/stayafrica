@@ -431,6 +431,50 @@ class ApiClient {
   async getTransactions(params?: any) {
     return this.client.get('/payments/transactions/', { params });
   }
+
+  // Experiences
+  async getExperiences(params?: any) {
+    return this.client.get('/experiences/', { params });
+  }
+
+  async getExperienceById(id: string) {
+    const safeId = this.assertId(id, 'Experience ID');
+    return this.client.get(`/experiences/${safeId}/`);
+  }
+
+  async getExperienceCategories() {
+    return this.client.get('/categories/');
+  }
+
+  async getNearbyExperiences(latitude: number, longitude: number, radiusKm: number = 50) {
+    return this.client.get('/experiences/nearby/', {
+      params: { lat: latitude, lng: longitude, radius: radiusKm },
+    });
+  }
+
+  async createExperienceBooking(data: any) {
+    return this.client.post('/bookings/', data);
+  }
+
+  async getExperienceBookings(params?: any) {
+    return this.client.get('/bookings/', { params });
+  }
+
+  // Review voting
+  async voteReview(reviewId: string, voteType: 'helpful' | 'unhelpful') {
+    return this.client.post(`/reviews/${reviewId}/vote/`, { vote_type: voteType });
+  }
+
+  async respondToReview(reviewId: string, response: string) {
+    return this.client.post(`/reviews/${reviewId}/respond/`, { response });
+  }
+
+  // Get reviews for a specific property
+  async getPropertyReviews(propertyId: string) {
+    return this.client.get('/reviews/property_reviews/', {
+      params: { property_id: propertyId },
+    });
+  }
 }
 
 export const apiClient = new ApiClient();
