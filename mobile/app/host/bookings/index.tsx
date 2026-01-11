@@ -1,8 +1,10 @@
 import { View, Text, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '@/context/auth-context';
 import { useHostBookings } from '@/hooks/api-hooks';
+import { Skeleton } from '@/components/common/Skeletons';
 import { format } from 'date-fns';
 import { COLORS } from '@/constants';
 import type { Booking } from '@/types';
@@ -15,18 +17,48 @@ export default function HostBookingsScreen() {
 
   if (!isAuthenticated) {
     return (
-      <View className="flex-1 items-center justify-center bg-white px-6">
-        <Ionicons name="calendar-outline" size={64} color="#ddd" />
-        <Text className="text-xl font-bold text-gray-800 mt-4">Sign In Required</Text>
-        <Text className="text-gray-600 text-center mt-2 mb-6">
-          Please sign in to view your bookings
-        </Text>
-        <TouchableOpacity
-          className="bg-primary-600 px-8 py-3 rounded-lg"
-          onPress={() => router.push('/(auth)/login')}
+      <View className="flex-1 bg-sand-100">
+        {/* Header */}
+        <LinearGradient
+          colors={['#122F26', '#1d392f']}
+          className="px-4 pt-12 pb-6"
         >
-          <Text className="text-white font-semibold">Sign In</Text>
-        </TouchableOpacity>
+          <Text className="text-3xl font-black text-white tracking-tight">
+            Property Bookings
+          </Text>
+          <Text className="text-sand-200 text-sm mt-1">
+            Manage your reservations
+          </Text>
+        </LinearGradient>
+
+        <View className="flex-1 items-center justify-center px-6">
+          <View className="bg-white rounded-3xl p-8 items-center" style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.1, shadowRadius: 16, elevation: 8 }}>
+            <View className="bg-sand-200 rounded-full p-8 mb-6">
+              <Ionicons name="calendar-outline" size={72} color="#D9B168" />
+            </View>
+            <Text className="text-2xl font-bold text-forest mb-3">Sign In Required</Text>
+            <Text className="text-moss text-center mb-8 px-4 leading-6">
+              Please sign in to view your property bookings
+            </Text>
+            <TouchableOpacity
+              onPress={() => router.push('/(auth)/login')}
+            >
+              <LinearGradient
+                colors={['#D9B168', '#bea04f']}
+                className="px-8 py-4 rounded-2xl"
+                style={{
+                  shadowColor: '#D9B168',
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.3,
+                  shadowRadius: 8,
+                  elevation: 5,
+                }}
+              >
+                <Text className="text-forest font-bold text-base">Sign In Now</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
+        </View>
       </View>
     );
   }
@@ -59,39 +91,49 @@ export default function HostBookingsScreen() {
     
     return (
       <TouchableOpacity
-        className="bg-white rounded-xl p-4 mb-3 shadow-sm border border-gray-100"
+        className="bg-white rounded-2xl p-4 mb-3 mx-4"
         onPress={() => router.push(`/host/bookings/${booking.id}`)}
+        style={{
+          shadowColor: '#122F26',
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.08,
+          shadowRadius: 8,
+          elevation: 4,
+        }}
       >
         {/* Property Name */}
-        <Text className="text-base font-bold text-gray-900 mb-2">
+        <Text className="text-base font-bold text-forest mb-2">
           {booking.property?.title || 'Property'}
         </Text>
         
         {/* Guest Info */}
         <View className="flex-row items-center mb-3">
-          <View className="w-10 h-10 rounded-full bg-primary-100 items-center justify-center mr-3">
-            <Ionicons name="person" size={20} color="#3A5C50" />
-          </View>
+          <LinearGradient
+            colors={['#D9B168', '#bea04f']}
+            className="w-10 h-10 rounded-full items-center justify-center mr-3"
+          >
+            <Ionicons name="person" size={20} color="#122F26" />
+          </LinearGradient>
           <View className="flex-1">
-            <Text className="text-sm font-semibold text-gray-900">
+            <Text className="text-sm font-semibold text-forest">
               {booking.guest?.first_name} {booking.guest?.last_name}
             </Text>
-            <Text className="text-xs text-gray-600">{booking.guest?.email}</Text>
+            <Text className="text-xs text-moss">{booking.guest?.email}</Text>
           </View>
         </View>
 
         {/* Dates */}
         <View className="flex-row items-center mb-2">
-          <Ionicons name="calendar" size={16} color="#666" />
-          <Text className="text-sm text-gray-600 ml-2">
+          <Ionicons name="calendar" size={16} color="#3A5C50" />
+          <Text className="text-sm text-moss ml-2">
             {format(new Date(booking.check_in_date), 'MMM dd')} - {format(new Date(booking.check_out_date), 'MMM dd, yyyy')}
           </Text>
         </View>
 
         {/* Guests */}
         <View className="flex-row items-center mb-3">
-          <Ionicons name="people" size={16} color="#666" />
-          <Text className="text-sm text-gray-600 ml-2">
+          <Ionicons name="people" size={16} color="#3A5C50" />
+          <Text className="text-sm text-moss ml-2">
             {booking.number_of_guests} {booking.number_of_guests === 1 ? 'guest' : 'guests'}
           </Text>
         </View>
@@ -104,7 +146,7 @@ export default function HostBookingsScreen() {
               {booking.status?.replace('_', ' ').toUpperCase()}
             </Text>
           </View>
-          <Text className="text-lg font-bold text-primary-600">
+          <Text className="text-lg font-bold text-gold">
             ${booking.total_price}
           </Text>
         </View>
@@ -112,39 +154,73 @@ export default function HostBookingsScreen() {
     );
   };
 
-  return (
-    <View className="flex-1 bg-gray-50">
-      {/* Header */}
-      <View className="bg-white px-4 pt-12 pb-4 border-b border-gray-100 shadow-sm">
-        <TouchableOpacity onPress={() => router.back()} className="mb-2">
-          <Ionicons name="arrow-back" size={24} color="#333" />
-        </TouchableOpacity>
-        <Text className="text-2xl font-extrabold text-primary-900">Property Bookings</Text>
-        <Text className="text-sm text-gray-500 mt-1">
-          {bookings.length} {bookings.length === 1 ? 'booking' : 'bookings'}
-        </Text>
+  const BookingSkeleton = () => (
+    <View className="bg-white rounded-2xl p-4 mb-3 mx-4">
+      <Skeleton height={18} width="70%" className="mb-2" />
+      <View className="flex-row items-center mb-3">
+        <Skeleton height={40} width={40} borderRadius={20} className="mr-3" />
+        <View className="flex-1">
+          <Skeleton height={14} width="60%" className="mb-2" />
+          <Skeleton height={12} width="80%" />
+        </View>
       </View>
+      <Skeleton height={16} width="50%" className="mb-2" />
+      <Skeleton height={16} width="40%" className="mb-3" />
+      <View className="flex-row justify-between">
+        <Skeleton height={24} width={80} borderRadius={12} />
+        <Skeleton height={24} width={60} />
+      </View>
+    </View>
+  );
+
+  return (
+    <View className="flex-1 bg-sand-100">
+      {/* Modern Header */}
+      <LinearGradient
+        colors={['#122F26', '#1d392f', '#2d4a40']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        className="px-4 pt-12 pb-6"
+      >
+        <TouchableOpacity onPress={() => router.back()} className="mb-3">
+          <Ionicons name="arrow-back" size={24} color="#D9B168" />
+        </TouchableOpacity>
+        <Text className="text-3xl font-black text-white tracking-tight mb-2">
+          Property Bookings
+        </Text>
+        <View className="flex-row items-center">
+          <Ionicons name="calendar" size={16} color="#D9B168" />
+          <Text className="text-sand-100 ml-2">
+            {bookings.length} {bookings.length === 1 ? 'booking' : 'bookings'}
+          </Text>
+        </View>
+      </LinearGradient>
 
       {/* Bookings List */}
       {isLoading ? (
-        <View className="flex-1 justify-center items-center">
-          <ActivityIndicator size="large" color="#3A5C50" />
-          <Text className="mt-2 text-gray-600">Loading bookings...</Text>
+        <View className="pt-4">
+          {[1, 2, 3, 4].map((i) => (
+            <BookingSkeleton key={i} />
+          ))}
         </View>
       ) : bookings.length === 0 ? (
         <View className="flex-1 justify-center items-center px-6">
-          <Ionicons name="calendar-outline" size={64} color="#ddd" />
-          <Text className="text-xl font-bold text-gray-800 mt-4">No Bookings Yet</Text>
-          <Text className="text-gray-600 text-center mt-2">
-            Bookings for your properties will appear here
-          </Text>
+          <View className="bg-white rounded-3xl p-8 items-center" style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.1, shadowRadius: 16, elevation: 8 }}>
+            <View className="bg-sand-200 rounded-full p-8 mb-6">
+              <Ionicons name="calendar-outline" size={72} color="#3A5C50" />
+            </View>
+            <Text className="text-2xl font-bold text-forest mb-3">No Bookings Yet</Text>
+            <Text className="text-moss text-center px-4 leading-6">
+              Bookings for your properties will appear here
+            </Text>
+          </View>
         </View>
       ) : (
         <FlatList
           data={bookings}
           renderItem={({ item }) => <BookingItem booking={item} />}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={{ padding: 16 }}
+          contentContainerStyle={{ paddingVertical: 12, paddingBottom: 40 }}
         />
       )}
     </View>
