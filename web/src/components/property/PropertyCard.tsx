@@ -11,7 +11,10 @@ import { Card, CardBody } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
-import { Heart, ChevronLeft, ChevronRight, Star, Wifi, UtensilsCrossed, Wind, MapPin } from 'lucide-react';
+import { 
+  Heart, ChevronLeft, ChevronRight, Star, Wifi, UtensilsCrossed, Wind, MapPin,
+  Tv, ParkingCircle, Dumbbell, Waves, Dog, Flame, Snowflake, Baby, Accessibility
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export interface Property {
@@ -72,6 +75,21 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
     wifi: <Wifi className="h-4 w-4" />,
     kitchen: <UtensilsCrossed className="h-4 w-4" />,
     ac: <Wind className="h-4 w-4" />,
+    'air conditioning': <Wind className="h-4 w-4" />,
+    tv: <Tv className="h-4 w-4" />,
+    television: <Tv className="h-4 w-4" />,
+    parking: <ParkingCircle className="h-4 w-4" />,
+    gym: <Dumbbell className="h-4 w-4" />,
+    fitness: <Dumbbell className="h-4 w-4" />,
+    pool: <Waves className="h-4 w-4" />,
+    swimming: <Waves className="h-4 w-4" />,
+    'pet friendly': <Dog className="h-4 w-4" />,
+    pets: <Dog className="h-4 w-4" />,
+    heating: <Flame className="h-4 w-4" />,
+    cooling: <Snowflake className="h-4 w-4" />,
+    'baby friendly': <Baby className="h-4 w-4" />,
+    accessible: <Accessibility className="h-4 w-4" />,
+    wheelchair: <Accessibility className="h-4 w-4" />,
   };
 
   return (
