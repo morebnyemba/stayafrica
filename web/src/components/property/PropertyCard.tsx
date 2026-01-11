@@ -162,12 +162,18 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
 
             {/* Amenities */}
             <div className="flex gap-2 flex-wrap">
-              {property.amenities.slice(0, 3).map((amenity) => (
-                <Badge key={amenity} size="sm" variant="neutral" icon={amenityIcons[amenity.toLowerCase()]} className="text-xs">
-                  <span className="hidden sm:inline">{amenity}</span>
-                  <span className="sm:hidden">{amenity.substring(0, 10)}{amenity.length > 10 ? '...' : ''}</span>
-                </Badge>
-              ))}
+              {property.amenities.slice(0, 3).map((amenity) => {
+                const maxLength = 10;
+                const truncatedName = amenity.length > maxLength 
+                  ? `${amenity.substring(0, maxLength)}...` 
+                  : amenity;
+                return (
+                  <Badge key={amenity} size="sm" variant="neutral" icon={amenityIcons[amenity.toLowerCase()]} className="text-xs">
+                    <span className="hidden sm:inline">{amenity}</span>
+                    <span className="sm:hidden">{truncatedName}</span>
+                  </Badge>
+                );
+              })}
               {property.amenities.length > 3 && (
                 <Badge size="sm" variant="neutral" className="text-xs">
                   +{property.amenities.length - 3}
