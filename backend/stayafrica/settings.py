@@ -90,6 +90,7 @@ INSTALLED_APPS = [
     'apps.reviews',
     'apps.messaging',
     'apps.admin_dashboard',
+    'apps.experiences',
 ]
 
 MIDDLEWARE = [
