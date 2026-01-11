@@ -58,7 +58,7 @@ class PaymentGatewayService:
                 self.paynow_integration_id,
                 self.paynow_integration_key,
                 f'{settings.SITE_URL}/payment/return',
-                f'{settings.SITE_URL}/payment/result'
+                f'{settings.SITE_URL}/api/v1/payments/webhook/?provider=paynow'  # result_url for webhooks
             )
         
         # REST API configurations
@@ -362,13 +362,14 @@ class PaymentGatewayService:
             
             payload = {
                 'reference': payment_obj.gateway_ref,
-                'amount': int(payment_obj.amount * 100),  # Convert to kobo/cents
+                'amount': int(Decimal(str(payment_obj.amount)) * 100),  # Convert to kobo/cents using Decimal
                 'currency': payment_obj.currency,
                 'email': customer_email,
                 'callback_url': f'{settings.SITE_URL}/payment/return',
                 'metadata': {
                     'payment_id': str(payment_obj.id),
                     'booking_id': str(booking.id),
+                    'customer_name': customer_name or customer_email,
                     'custom_fields': [
                         {
                             'display_name': 'Booking',
@@ -387,7 +388,7 @@ class PaymentGatewayService:
             
             if response.status_code == 200:
                 data = response.json()
-                if data.get('status') == True:
+                if data.get('status') is True:
                     authorization_url = data.get('data', {}).get('authorization_url')
                     logger.info(f'Paystack payment initiated: {payment_obj.gateway_ref}')
                     return {
