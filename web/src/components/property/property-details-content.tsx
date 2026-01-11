@@ -154,14 +154,14 @@ export function PropertyDetailsContent() {
     <div className="min-h-screen bg-sand-100 dark:bg-primary-900">
       {/* Header with back button */}
       <div className="bg-white dark:bg-primary-800 border-b border-primary-200 dark:border-primary-700 sticky top-16 z-40">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4 flex items-center justify-between">
           <button
             onClick={() => router.back()}
-            className="text-primary-600 dark:text-sand-300 hover:text-primary-900 dark:hover:text-sand-50"
+            className="text-primary-600 dark:text-sand-300 hover:text-primary-900 dark:hover:text-sand-50 text-sm sm:text-base"
           >
             ← Back
           </button>
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2 sm:space-x-4">
             <button
               disabled={checkingSaved || saveMutation.isPending || unsaveMutation.isPending}
               onClick={() => {
@@ -171,33 +171,33 @@ export function PropertyDetailsContent() {
                   saveMutation.mutate();
                 }
               }}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition ${
+              className={`flex items-center space-x-1 sm:space-x-2 px-2 sm:px-4 py-2 rounded-lg transition text-xs sm:text-base ${
                 isSaved
                   ? 'bg-secondary-100 dark:bg-secondary-900/30 text-secondary-600'
                   : 'bg-sand-100 dark:bg-primary-700 text-primary-600 dark:text-sand-300'
               } ${checkingSaved ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
-              <Heart className={`w-5 h-5 ${isSaved ? 'fill-current' : ''}`} />
-              <span>{isSaved ? 'Saved' : 'Save'}</span>
+              <Heart className={`w-4 h-4 sm:w-5 sm:h-5 ${isSaved ? 'fill-current' : ''}`} />
+              <span className="hidden sm:inline">{isSaved ? 'Saved' : 'Save'}</span>
             </button>
-            <button className="flex items-center space-x-2 px-4 py-2 bg-sand-100 dark:bg-primary-700 text-primary-600 dark:text-sand-300 rounded-lg hover:bg-sand-200 dark:hover:bg-primary-600 transition">
-              <Share2 className="w-5 h-5" />
-              <span>Share</span>
+            <button className="flex items-center space-x-1 sm:space-x-2 px-2 sm:px-4 py-2 bg-sand-100 dark:bg-primary-700 text-primary-600 dark:text-sand-300 rounded-lg hover:bg-sand-200 dark:hover:bg-primary-600 transition text-xs sm:text-base">
+              <Share2 className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="hidden sm:inline">Share</span>
             </button>
             {user && (
               <button
                 onClick={contactHost}
                 disabled={contactingHost}
-                className="flex items-center space-x-2 px-4 py-2 bg-secondary-600 hover:bg-secondary-700 dark:bg-secondary-700 dark:hover:bg-secondary-600 text-white rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center space-x-1 sm:space-x-2 px-2 sm:px-4 py-2 bg-secondary-600 hover:bg-secondary-700 dark:bg-secondary-700 dark:hover:bg-secondary-600 text-white rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-base"
               >
                 {contactingHost ? (
                   <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    <span>Contacting...</span>
+                    <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
+                    <span className="hidden sm:inline">Contacting...</span>
                   </>
                 ) : (
                   <>
-                    <Users className="w-5 h-5" />
+                    <Users className="w-4 h-4 sm:w-5 sm:h-5" />
                     <span>Contact Host</span>
                   </>
                 )}

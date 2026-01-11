@@ -98,10 +98,10 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
         <Card
           variant="default"
           hoverable
-          className="overflow-hidden"
+          className="overflow-hidden animate-fade-in transition-all duration-300"
         >
           {/* Image Carousel */}
-          <div className="relative h-48 w-full bg-neutral-200 overflow-hidden">
+          <div className="relative h-48 sm:h-56 md:h-48 w-full bg-neutral-200 overflow-hidden">
             <Image
               src={property.images[currentImageIndex]}
               alt={property.title}
@@ -151,26 +151,38 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
           <CardBody className="space-y-3">
             {/* Title & Location */}
             <div>
-              <h3 className="font-semibold text-neutral-900 line-clamp-1">
+              <h3 className="font-semibold text-neutral-900 line-clamp-1 text-base sm:text-lg">
                 {property.title}
               </h3>
               <p className="text-sm text-neutral-600 flex items-center gap-1">
-                <MapPin className="h-4 w-4" />
-                {property.location}
+                <MapPin className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="line-clamp-1">{property.location}</span>
               </p>
             </div>
 
             {/* Amenities */}
             <div className="flex gap-2 flex-wrap">
-              {property.amenities.slice(0, 3).map((amenity) => (
-                <Badge key={amenity} size="sm" variant="neutral" icon={amenityIcons[amenity.toLowerCase()]}>
-                  {amenity}
+              {property.amenities.slice(0, 3).map((amenity) => {
+                const maxLength = 10;
+                const truncatedName = amenity.length > maxLength 
+                  ? `${amenity.substring(0, maxLength)}...` 
+                  : amenity;
+                return (
+                  <Badge key={amenity} size="sm" variant="neutral" icon={amenityIcons[amenity.toLowerCase()]} className="text-xs">
+                    <span className="hidden sm:inline">{amenity}</span>
+                    <span className="sm:hidden">{truncatedName}</span>
+                  </Badge>
+                );
+              })}
+              {property.amenities.length > 3 && (
+                <Badge size="sm" variant="neutral" className="text-xs">
+                  +{property.amenities.length - 3}
                 </Badge>
-              ))}
+              )}
             </div>
 
             {/* Beds, Baths, Guests */}
-            <div className="flex gap-4 text-sm text-neutral-600">
+            <div className="flex gap-3 sm:gap-4 text-xs sm:text-sm text-neutral-600">
               <span>{property.beds} beds</span>
               <span>{property.baths} baths</span>
               <span>{property.guests} guests</span>
@@ -190,10 +202,10 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
             {/* Price & CTA */}
             <div className="flex items-center justify-between pt-2 border-t border-neutral-200">
               <div>
-                <p className="text-2xl font-bold text-neutral-900">
+                <p className="text-xl sm:text-2xl font-bold text-neutral-900">
                   ${property.price}
                 </p>
-                <p className="text-sm text-neutral-600">per night</p>
+                <p className="text-xs sm:text-sm text-neutral-600">per night</p>
               </div>
               <Button
                 size="sm"
@@ -201,6 +213,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
                   e.preventDefault();
                   setShowQuickView(true);
                 }}
+                className="text-xs sm:text-sm"
               >
                 Reserve
               </Button>
