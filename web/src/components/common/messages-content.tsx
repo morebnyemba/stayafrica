@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
-import { Send, MessageSquare, Search, Archive, Trash2, Edit2, Check, X } from 'lucide-react';
+import { Send, MessageSquare, Search, Archive, Trash2, Edit2, Check, X, ArrowLeft } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useState, useEffect, useRef } from 'react';
 const ProtectedRoute = dynamic(() => import('@/components/auth/protected-route').then(m => m.ProtectedRoute), { ssr: false });
@@ -151,7 +151,7 @@ export function MessagesContent() {
       <div className="h-screen bg-sand-100 dark:bg-primary-900 flex flex-col">
         <div className="flex-1 flex overflow-hidden">
           {/* Conversations List */}
-          <div className="w-full md:w-96 bg-white dark:bg-primary-800 border-r border-primary-200 dark:border-primary-700 flex flex-col">
+          <div className={`${selectedConversation ? 'hidden md:flex' : 'flex'} w-full md:w-96 bg-white dark:bg-primary-800 border-r border-primary-200 dark:border-primary-700 flex-col`}>
             {/* Header */}
             <div className="p-4 border-b border-primary-200 dark:border-primary-700">
               <h1 className="text-2xl font-bold text-primary-900 dark:text-sand-50 mb-3">Messages</h1>
@@ -237,12 +237,20 @@ export function MessagesContent() {
           </div>
 
           {/* Messages Panel */}
-          <div className="flex-1 flex flex-col bg-white dark:bg-primary-800">
+          <div className={`${selectedConversation ? 'flex' : 'hidden md:flex'} flex-1 flex-col bg-white dark:bg-primary-800`}>
             {selectedConversation ? (
               <>
                 {/* Conversation Header */}
                 <div className="p-4 border-b border-primary-200 dark:border-primary-700 flex items-center justify-between">
                   <div className="flex items-center gap-3">
+                    {/* Back button for mobile */}
+                    <button
+                      onClick={() => setSelectedConversation(null)}
+                      className="md:hidden p-2 hover:bg-primary-100 dark:hover:bg-primary-700 rounded-lg transition"
+                      title="Back to conversations"
+                    >
+                      <ArrowLeft className="w-5 h-5 text-primary-600 dark:text-sand-400" />
+                    </button>
                     <div className="w-10 h-10 rounded-full bg-primary-600 text-white flex items-center justify-center font-semibold">
                       {selectedConversation.other_participant?.email?.[0]?.toUpperCase() || '?'}
                     </div>
@@ -282,10 +290,10 @@ export function MessagesContent() {
                   ) : (
                     <>
                       {messages.map((message: any, idx: number) => {
-                        const isOwnMessage = message.is_sent_by_current_user;
+                        const isOwnMessage = message.is_own_message;
                         const isEditing = editingMessageId === message.id;
                         const prevMessage = idx > 0 ? messages[idx - 1] : null;
-                        const sameUserAsPrev = prevMessage && prevMessage.is_sent_by_current_user === isOwnMessage;
+                        const sameUserAsPrev = prevMessage && prevMessage.is_own_message === isOwnMessage;
                         const senderName = isOwnMessage ? 'You' : (selectedConversation.other_participant?.email || 'Unknown');
                         const senderInitial = isOwnMessage 
                           ? '?' 

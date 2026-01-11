@@ -141,53 +141,53 @@ export function Navigation() {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden py-2 space-y-2 bg-primary-800/95 text-sand-100">
-            <Link href="/explore" className="block text-sand-200 hover:text-secondary-300 px-4 py-2">
+          <div className="md:hidden py-4 space-y-1 bg-primary-800/95 text-sand-100 border-t border-primary-700">
+            <Link href="/explore" className="block text-sand-200 hover:text-secondary-300 hover:bg-primary-700/60 px-4 py-3 rounded-md mx-2 transition">
               Stays
             </Link>
-            <Link href="/experiences" className="block text-sand-200 hover:text-secondary-300 px-4 py-2">
+            <Link href="/experiences" className="block text-sand-200 hover:text-secondary-300 hover:bg-primary-700/60 px-4 py-3 rounded-md mx-2 transition">
               Experiences
             </Link>
             {isAuthenticated && (
               <>
-                <Link href="/wishlist" className="block text-sand-200 hover:text-secondary-300 px-4 py-2">
+                <Link href="/wishlist" className="block text-sand-200 hover:text-secondary-300 hover:bg-primary-700/60 px-4 py-3 rounded-md mx-2 transition">
                   Wishlist
                 </Link>
-                <Link href="/messages" className="block text-sand-200 hover:text-secondary-300 px-4 py-2">
+                <Link href="/messages" className="block text-sand-200 hover:text-secondary-300 hover:bg-primary-700/60 px-4 py-3 rounded-md mx-2 transition">
                   Messages
                 </Link>
               </>
             )}
             <button
               onClick={handleBecomeHost}
-              className="w-full text-left text-sand-200 hover:text-secondary-300 px-4 py-2 flex items-center gap-2"
+              className="w-full text-left text-sand-200 hover:text-secondary-300 hover:bg-primary-700/60 px-4 py-3 rounded-md mx-2 flex items-center gap-2 transition"
               disabled={hostLoading}
             >
               {hostLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
               <span>Become a Host</span>
             </button>
-            <div className="flex items-center justify-between px-4 py-2">
-              <span className="text-sand-200">Theme</span>
+            <div className="flex items-center justify-between px-6 py-3 mx-2">
+              <span className="text-sand-200 font-medium">Theme</span>
               <ThemeToggle />
             </div>
             {isAuthenticated ? (
               <>
-                <Link href="/dashboard" className="block w-full">
+                <Link href="/dashboard" className="block w-full px-2">
                   <Button variant="secondary" className="w-full">Dashboard</Button>
                 </Link>
                 <button
                   onClick={handleLogout}
-                  className="block w-full text-left text-sand-200 hover:text-secondary-400"
+                  className="block w-full text-left text-sand-200 hover:text-secondary-400 hover:bg-primary-700/60 px-4 py-3 rounded-md mx-2 transition"
                 >
                   Logout
                 </button>
               </>
             ) : (
               <>
-                <Link href="/login" className="block w-full">
+                <Link href="/login" className="block w-full px-2">
                   <Button variant="secondary" className="w-full">Login</Button>
                 </Link>
-                <Link href="/register" className="block w-full">
+                <Link href="/register" className="block w-full px-2">
                   <Button className="w-full">Sign Up</Button>
                 </Link>
               </>
