@@ -3,10 +3,11 @@
 ## Changes Summary
 
 ### 1. Official Payment SDKs Integrated ✅
-- **Stripe SDK** (stripe==10.15.0)
-- **Paystack SDK** (paystack==2.0.0)  
-- **Flutterwave SDK** (flutterwave-python==1.2.7)
-- **Paynow SDK** (paynow==1.0.5)
+- **Stripe SDK** (stripe==14.1.0)
+- **Pypaystack2 SDK** (pypaystack2==3.0.0) - Modern Paystack implementation
+- **Paynow SDK** (paynow==1.0.8)
+- **PayPal Server SDK** (paypal-server-sdk==2.1.0)
+- **Flutterwave** - REST API integration (no SDK dependency)
 
 ### 2. Enhanced Pricing Model ✅
 
@@ -31,7 +32,8 @@
 #### SDK-Based Initiation:
 - **Stripe**: Creates checkout session, returns checkout URL
 - **Paynow**: Uses official SDK for Ecocash/Visa payments
-- **Flutterwave**: Supports card, mobile money, USSD across Africa
+- **Flutterwave**: Uses REST API for card, mobile money, USSD across Africa
+- **PayPal**: Uses official PayPal Server SDK for order creation and payment processing
 
 #### Enhanced Webhooks:
 - Stripe webhook signature verification using SDK
@@ -73,6 +75,12 @@ FLUTTERWAVE_WEBHOOK_SECRET=...
 # Paystack (Nigeria, Ghana, South Africa)
 PAYSTACK_SECRET_KEY=sk_live_...
 PAYSTACK_PUBLIC_KEY=pk_live_...
+
+# PayPal
+PAYPAL_CLIENT_ID=...
+PAYPAL_CLIENT_SECRET=...
+PAYPAL_MODE=sandbox  # or 'live'
+PAYPAL_WEBHOOK_ID=...
 ```
 
 #### System Configuration (Admin Dashboard):
@@ -147,6 +155,7 @@ Configure these in payment provider dashboards:
 - **Stripe**: `https://api.stayafrica.app/v1/payments/webhook/`
 - **Paynow**: `https://api.stayafrica.app/v1/payments/webhook/?provider=paynow`
 - **Flutterwave**: `https://api.stayafrica.app/v1/payments/webhook/?provider=flutterwave`
+- **PayPal**: `https://api.stayafrica.app/v1/payments/webhook/?provider=paypal`
 
 ### 9. Testing
 

@@ -42,9 +42,9 @@ requests==2.31.0
 
 # Payment SDKs
 stripe==14.1.0
-paystack==1.5.0
-flutterwave==1.0.7
-paynow==1.0.5
+pypaystack2==3.0.0
+paynow==1.0.8
+paypal-server-sdk==2.1.0
 
 # Images
 Pillow>=10.2.0
