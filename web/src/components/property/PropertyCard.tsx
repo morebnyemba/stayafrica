@@ -98,7 +98,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
         <Card
           variant="default"
           hoverable
-          className="overflow-hidden"
+          className="overflow-hidden animate-fade-in transition-all duration-300"
         >
           {/* Image Carousel */}
           <div className="relative h-48 sm:h-56 md:h-48 w-full bg-neutral-200 overflow-hidden">
@@ -163,10 +163,16 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
             {/* Amenities */}
             <div className="flex gap-2 flex-wrap">
               {property.amenities.slice(0, 3).map((amenity) => (
-                <Badge key={amenity} size="sm" variant="neutral" icon={amenityIcons[amenity.toLowerCase()]}>
-                  {amenity}
+                <Badge key={amenity} size="sm" variant="neutral" icon={amenityIcons[amenity.toLowerCase()]} className="text-xs">
+                  <span className="hidden sm:inline">{amenity}</span>
+                  <span className="sm:hidden">{amenity.substring(0, 10)}{amenity.length > 10 ? '...' : ''}</span>
                 </Badge>
               ))}
+              {property.amenities.length > 3 && (
+                <Badge size="sm" variant="neutral" className="text-xs">
+                  +{property.amenities.length - 3}
+                </Badge>
+              )}
             </div>
 
             {/* Beds, Baths, Guests */}
