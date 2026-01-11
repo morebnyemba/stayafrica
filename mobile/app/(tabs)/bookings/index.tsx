@@ -4,6 +4,7 @@ import { useBookings } from '@/hooks/api-hooks';
 import { useAuth } from '@/context/auth-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { BookingCardSkeleton } from '@/components/common/Skeletons';
 import { Booking } from '@/types';
 
 export default function BookingsScreen() {
@@ -188,9 +189,10 @@ export default function BookingsScreen() {
 
       {/* Bookings List */}
       {isLoading ? (
-        <View className="flex-1 justify-center items-center">
-          <ActivityIndicator size="large" color="#D9B168" />
-          <Text className="mt-4 text-primary-700 font-medium">Loading bookings...</Text>
+        <View className="pt-4">
+          {[1, 2, 3, 4].map((i) => (
+            <BookingCardSkeleton key={i} />
+          ))}
         </View>
       ) : (
         <FlatList
