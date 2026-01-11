@@ -9,8 +9,11 @@ class Payment(models.Model):
     PROVIDER_CHOICES = [
         ('paynow', 'Paynow'),
         ('payfast', 'PayFast'),
+        ('paypal', 'PayPal'),
         ('ozow', 'Ozow'),
         ('stripe', 'Stripe'),
+        ('flutterwave', 'Flutterwave'),
+        ('paystack', 'Paystack'),
         ('cash_on_arrival', 'Cash on Arrival'),
     ]
     

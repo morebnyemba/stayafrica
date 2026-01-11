@@ -41,6 +41,13 @@ cryptography==41.0.7
 # HTTP
 requests==2.31.0
 
+# Payment SDKs
+stripe==10.15.0
+paystack==2.0.0
+flutterwave-python==1.2.7
+paynow==1.0.5
+paypalrestsdk==1.13.1
+
 # Images
 Pillow>=10.2.0
 

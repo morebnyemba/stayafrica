@@ -6,7 +6,7 @@ from django.db import transaction
 from django.conf import settings
 from apps.payments.models import Payment
 from apps.payments.serializers import PaymentSerializer
-from services.payment_gateway import PaymentGatewayService
+from services.payment_gateway_enhanced import PaymentGatewayService
 from utils.decorators import api_ratelimit, log_action
 from utils.helpers import verify_webhook_signature
 from tasks.email_tasks import send_payment_receipt_email
@@ -89,7 +89,7 @@ class PaymentViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # Create payment record
+        # Initiate payment with provider SDK
         with transaction.atomic():
             import uuid
             payment = Payment.objects.create(
@@ -100,6 +100,21 @@ class PaymentViewSet(viewsets.ModelViewSet):
                 currency=booking.currency,
                 status='initiated'
             )
+            
+            # Call provider SDK to initiate payment
+            result = payment_service.initiate_payment(
+                payment,
+                booking,
+                provider,
+                request.user.email,
+                request.user.get_full_name()
+            )
+            
+            if not result['success']:
+                return Response(
+                    {'error': result.get('error', 'Payment initialization failed')},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
             
             # Log the action
             AuditLoggerService.log_action(
@@ -113,15 +128,23 @@ class PaymentViewSet(viewsets.ModelViewSet):
                     'amount': str(booking.grand_total)
                 }
             )
+            
+            # Add SDK response data
+            response_data = PaymentSerializer(payment).data
+            if 'checkout_url' in result:
+                response_data['checkout_url'] = result['checkout_url']
+            if 'redirect_url' in result:
+                response_data['redirect_url'] = result['redirect_url']
+            if 'payment_link' in result:
+                response_data['payment_link'] = result['payment_link']
         
         logger.info(f"Payment initiated: {payment.gateway_ref}")
-        serializer = PaymentSerializer(payment)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(response_data, status=status.HTTP_201_CREATED)
     
     @action(detail=False, methods=['post'], permission_classes=[AllowAny])
     @api_ratelimit(rate='100/h')
     def webhook(self, request):
-        """Handle payment provider webhooks with signature verification"""
+        """Handle payment provider webhooks with SDK signature verification"""
         provider = request.data.get('provider') or request.GET.get('provider')
         
         if not provider:
@@ -131,37 +154,73 @@ class PaymentViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # Get signature from headers (different providers use different header names)
-        signature = (
-            request.headers.get('X-Webhook-Signature') or
-            request.headers.get('X-Paynow-Signature') or
-            request.headers.get('X-PayFast-Signature') or
-            request.headers.get('Stripe-Signature')
-        )
+        payment_service = PaymentGatewayService()
         
-        # Verify webhook signature if available (from system config)
-        from apps.admin_dashboard.models import SystemConfiguration
-        config = SystemConfiguration.get_config()
+        # Verify webhook using SDK methods
+        if provider == 'stripe':
+            signature = request.headers.get('Stripe-Signature')
+            if not signature:
+                return Response({'error': 'Missing signature'}, status=status.HTTP_403_FORBIDDEN)
+            
+            event = payment_service.verify_stripe_webhook(request.body, signature)
+            if not event:
+                return Response({'error': 'Invalid signature'}, status=status.HTTP_403_FORBIDDEN)
+            
+            # Extract payment info from Stripe event
+            if event['type'] == 'checkout.session.completed':
+                session = event['data']['object']
+                gateway_ref = session['id']
+                payment_status = 'succeeded'
+            else:
+                return Response({'status': 'ignored'})
         
-        webhook_secrets = {
-            'paynow': config.paynow_webhook_secret,
-            'payfast': config.payfast_webhook_secret,
-            'stripe': config.stripe_webhook_secret,
-            'ozow': '',  # Not configured yet
-        }
-        webhook_secret = webhook_secrets.get(provider.lower())
-        if webhook_secret and signature:
-            payload = json.dumps(request.data)
-            if not verify_webhook_signature(payload, signature, webhook_secret):
-                logger.error(f"Invalid webhook signature from {provider}")
-                return Response(
-                    {'error': 'Invalid signature'},
-                    status=status.HTTP_403_FORBIDDEN
-                )
+        elif provider == 'paypal':
+            # Verify PayPal webhook
+            if not payment_service.verify_paypal_webhook(dict(request.headers), request.body.decode('utf-8')):
+                return Response({'error': 'Invalid signature'}, status=status.HTTP_403_FORBIDDEN)
+            
+            # Extract payment info from PayPal webhook
+            event_type = request.data.get('event_type')
+            resource = request.data.get('resource', {})
+            gateway_ref = resource.get('id')
+            
+            if event_type == 'PAYMENT.SALE.COMPLETED':
+                payment_status = 'completed'
+            elif event_type in ['PAYMENT.SALE.DENIED', 'PAYMENT.SALE.REFUNDED']:
+                payment_status = 'failed'
+            else:
+                return Response({'status': 'ignored'})
         
-        # Extract payment details
-        gateway_ref = request.data.get('gateway_ref') or request.data.get('reference')
-        payment_status = request.data.get('status') or request.data.get('payment_status')
+        else:
+            # For other providers, use existing signature verification
+            signature = (
+                request.headers.get('X-Webhook-Signature') or
+                request.headers.get('X-Paynow-Signature') or
+                request.headers.get('X-PayFast-Signature') or
+                request.headers.get('X-Flutterwave-Signature')
+            )
+            
+            from apps.admin_dashboard.models import SystemConfiguration
+            config = SystemConfiguration.get_config()
+            
+            webhook_secrets = {
+                'paynow': config.paynow_webhook_secret,
+                'payfast': config.payfast_webhook_secret,
+                'flutterwave': getattr(config, 'flutterwave_webhook_secret', ''),
+                'ozow': '',
+            }
+            webhook_secret = webhook_secrets.get(provider.lower())
+            if webhook_secret and signature:
+                payload = json.dumps(request.data)
+                if not verify_webhook_signature(payload, signature, webhook_secret):
+                    logger.error(f"Invalid webhook signature from {provider}")
+                    return Response(
+                        {'error': 'Invalid signature'},
+                        status=status.HTTP_403_FORBIDDEN
+                    )
+            
+            gateway_ref = request.data.get('gateway_ref') or request.data.get('reference') or request.data.get('tx_ref')
+            payment_status = request.data.get('status') or request.data.get('payment_status')
         
         if not gateway_ref:
             logger.error("Webhook received without gateway_ref")
@@ -187,7 +246,7 @@ class PaymentViewSet(viewsets.ModelViewSet):
             old_status = payment.status
             
             # Map provider status to our status
-            if payment_status in ['success', 'completed', 'paid', 'succeeded']:
+            if payment_status in ['success', 'completed', 'paid', 'succeeded', 'successful']:
                 payment.status = 'success'
                 # Update booking status
                 payment.booking.status = 'confirmed'
@@ -196,7 +255,7 @@ class PaymentViewSet(viewsets.ModelViewSet):
                 # Send receipt email
                 send_payment_receipt_email.delay(payment.id)
                 
-            elif payment_status in ['failed', 'cancelled', 'declined']:
+            elif payment_status in ['failed', 'cancelled', 'declined', 'canceled']:
                 payment.status = 'failed'
             else:
                 payment.status = 'pending'
