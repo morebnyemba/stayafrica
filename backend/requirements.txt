@@ -36,7 +36,6 @@ django-ratelimit==4.1.0
 
 # Security
 cryptography==41.0.7
-pycryptodome==3.19.0
 
 # HTTP
 requests==2.31.0
