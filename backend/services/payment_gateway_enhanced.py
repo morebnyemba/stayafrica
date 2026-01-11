@@ -237,6 +237,14 @@ class PaymentGatewayService:
     ) -> Dict:
         """Initiate Paynow payment using official SDK"""
         try:
+            # Check if Paynow is initialized
+            if not hasattr(self, 'paynow'):
+                logger.error('Paynow SDK not initialized - credentials missing')
+                return {
+                    'success': False,
+                    'error': 'Paynow payment gateway is not configured'
+                }
+            
             # Create Paynow payment
             payment = self.paynow.create_payment(
                 payment_obj.gateway_ref,
@@ -362,7 +370,7 @@ class PaymentGatewayService:
             
             payload = {
                 'reference': payment_obj.gateway_ref,
-                'amount': int(Decimal(str(payment_obj.amount)) * 100),  # Convert to kobo/cents using Decimal
+                'amount': int(payment_obj.amount * 100),  # Convert to kobo/cents (amount is already Decimal)
                 'currency': payment_obj.currency,
                 'email': customer_email,
                 'callback_url': f'{settings.SITE_URL}/payment/return',
@@ -388,7 +396,7 @@ class PaymentGatewayService:
             
             if response.status_code == 200:
                 data = response.json()
-                if data.get('status') is True:
+                if data.get('status') == True:  # JSON boolean comparison
                     authorization_url = data.get('data', {}).get('authorization_url')
                     logger.info(f'Paystack payment initiated: {payment_obj.gateway_ref}')
                     return {
