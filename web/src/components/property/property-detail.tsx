@@ -6,6 +6,7 @@ import { PropertyImageCarousel } from '@/components/property/property-image-caro
 import { PropertyAmenities } from '@/components/property/property-amenities';
 import { PropertyHostCard } from '@/components/property/property-host-card';
 import { BookingCard } from '@/components/booking/booking-card';
+import { ReviewList } from '@/components/review/review-list';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui';
 import { Heart, MapPin, Share2, Star } from 'lucide-react';
@@ -13,10 +14,14 @@ import Link from 'next/link';
 
 type Review = {
   id: string;
-  guest?: { first_name?: string; last_name?: string };
+  guest_name: string;
   rating: number;
   text: string;
+  host_response?: string;
+  host_response_date?: string;
+  helpful_count: number;
   created_at: string;
+  guest?: number;
 };
 
 type PropertyDetailContentProps = {
@@ -38,15 +43,19 @@ export function PropertyDetailContent({ propertyId, useHostEndpoint = false }: P
   });
 
   // Fetch property reviews
-  const { data: reviews } = useQuery<Review[]>({
+  const { data: reviewsData } = useQuery({
     queryKey: ['property-reviews', propertyId],
     queryFn: async () => {
       if (!propertyId) throw new Error('Property ID not found');
       const response = await apiClient.getPropertyReviews(propertyId);
-      return response.data as Review[];
+      return response.data;
     },
     enabled: !!propertyId,
   });
+
+  const reviews = reviewsData?.reviews || [];
+  const averageRating = reviewsData?.average_rating;
+  const totalReviews = reviewsData?.count || 0;
 
   if (!propertyId) {
     return (
@@ -197,42 +206,17 @@ export function PropertyDetailContent({ propertyId, useHostEndpoint = false }: P
           <PropertyHostCard host={property?.host} />
 
           {/* Reviews section */}
-          {reviews && reviews.length > 0 && (
-            <div>
-              <h2 className="text-2xl font-semibold text-primary-900 dark:text-sand-50 mb-6">
-                Guest Reviews
-              </h2>
-              <div className="space-y-4">
-                {reviews.map((review) => (
-                  <div key={review.id} className="border border-primary-200 dark:border-primary-700 rounded-lg p-4">
-                    <div className="flex items-start justify-between mb-2">
-                      <div>
-                        <p className="font-semibold text-primary-900 dark:text-sand-50">
-                          {review.guest?.first_name} {review.guest?.last_name}
-                        </p>
-                        <p className="text-sm text-primary-600 dark:text-sand-400">
-                          {new Date(review.created_at).toLocaleDateString()}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            className={`w-4 h-4 ${
-                              i < review.rating
-                                ? 'fill-secondary-500 text-secondary-500'
-                                : 'text-primary-300 dark:text-primary-600'
-                            }`}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                    <p className="text-primary-700 dark:text-sand-200">{review.text}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+          <div>
+            <h2 className="text-2xl font-semibold text-primary-900 dark:text-sand-50 mb-6">
+              Guest Reviews
+            </h2>
+            <ReviewList
+              propertyId={propertyId}
+              reviews={reviews}
+              averageRating={averageRating}
+              totalReviews={totalReviews}
+            />
+          </div>
         </div>
 
         {/* Booking card */}
