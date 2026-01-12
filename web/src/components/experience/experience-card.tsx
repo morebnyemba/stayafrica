@@ -22,10 +22,9 @@ interface ExperienceCardProps {
     average_rating?: number;
     review_count?: number;
   };
-  onBookClick?: (experienceId: string) => void;
 }
 
-export function ExperienceCard({ experience, onBookClick }: ExperienceCardProps) {
+export function ExperienceCard({ experience }: ExperienceCardProps) {
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
       case 'easy':

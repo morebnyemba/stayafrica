@@ -473,13 +473,6 @@ class ApiClient {
     return this.client.post(`/reviews/${reviewId}/respond/`, { response });
   }
 
-  // Get reviews for a specific property
-  async getPropertyReviews(propertyId: string) {
-    return this.client.get('/reviews/property_reviews/', {
-      params: { property_id: propertyId },
-    });
-  }
-
   // User Preferences
   async getUserPreferences() {
     return this.client.get('/preferences/my_preferences/');
@@ -506,19 +499,6 @@ class ApiClient {
 
   async getUserInteractions() {
     return this.client.get('/interactions/');
-  }
-
-  // Save/Unsave Property (using SavedProperty model)
-  async saveProperty(propertyId: string) {
-    return this.client.post('/properties/save/', { property_id: propertyId });
-  }
-
-  async unsaveProperty(propertyId: string) {
-    return this.client.post('/properties/unsave/', { property_id: propertyId });
-  }
-
-  async getSavedProperties() {
-    return this.client.get('/properties/saved/');
   }
 }
 
