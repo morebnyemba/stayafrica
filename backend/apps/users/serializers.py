@@ -78,3 +78,30 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         token['role'] = user.role
         token['is_verified'] = user.is_verified
         return token
+
+
+class UserPreferenceSerializer(serializers.ModelSerializer):
+    from apps.users.models import UserPreference
+    
+    class Meta:
+        model = UserPreference
+        fields = [
+            'id', 'preferred_property_types', 'preferred_min_price', 'preferred_max_price',
+            'preferred_countries', 'preferred_cities', 'usual_guest_count',
+            'preferred_amenities', 'last_latitude', 'last_longitude',
+            'created_at', 'updated_at'
+        ]
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+
+class UserPropertyInteractionSerializer(serializers.ModelSerializer):
+    from apps.users.models import UserPropertyInteraction
+    
+    class Meta:
+        model = UserPropertyInteraction
+        fields = [
+            'id', 'property_id', 'interaction_type', 'search_query',
+            'viewed_duration_seconds', 'created_at'
+        ]
+        read_only_fields = ['id', 'created_at']
+

@@ -272,3 +272,95 @@ class UserViewSet(viewsets.ModelViewSet):
             'access': str(access),
             'refresh': str(refresh),
         }, status=status.HTTP_200_OK)
+
+
+class UserPreferenceViewSet(viewsets.ModelViewSet):
+    """Manage user preferences for personalized recommendations"""
+    from apps.users.serializers import UserPreferenceSerializer
+    from apps.users.models import UserPreference
+    
+    serializer_class = UserPreferenceSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        return self.UserPreference.objects.filter(user=self.request.user)
+    
+    def get_object(self):
+        # Get or create preferences for the current user
+        obj, created = self.UserPreference.objects.get_or_create(user=self.request.user)
+        return obj
+    
+    @action(detail=False, methods=['get'])
+    def my_preferences(self, request):
+        """Get current user's preferences"""
+        preferences, created = self.UserPreference.objects.get_or_create(user=request.user)
+        serializer = self.get_serializer(preferences)
+        return Response(serializer.data)
+    
+    @action(detail=False, methods=['post', 'put', 'patch'])
+    def update_preferences(self, request):
+        """Update current user's preferences"""
+        preferences, created = self.UserPreference.objects.get_or_create(user=request.user)
+        serializer = self.get_serializer(preferences, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    @action(detail=False, methods=['post'])
+    def update_location(self, request):
+        """Update user's last known location"""
+        lat = request.data.get('latitude')
+        lng = request.data.get('longitude')
+        
+        if not lat or not lng:
+            return Response(
+                {'error': 'latitude and longitude are required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        preferences, created = self.UserPreference.objects.get_or_create(user=request.user)
+        preferences.last_latitude = float(lat)
+        preferences.last_longitude = float(lng)
+        preferences.save()
+        
+        return Response({'status': 'location updated'})
+
+
+class UserPropertyInteractionViewSet(viewsets.ModelViewSet):
+    """Track user interactions with properties"""
+    from apps.users.serializers import UserPropertyInteractionSerializer
+    from apps.users.models import UserPropertyInteraction
+    
+    serializer_class = UserPropertyInteractionSerializer
+    permission_classes = [IsAuthenticated]
+    http_method_names = ['get', 'post']  # Only allow read and create
+    
+    def get_queryset(self):
+        return self.UserPropertyInteraction.objects.filter(user=self.request.user)
+    
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+    
+    @action(detail=False, methods=['post'])
+    def track_view(self, request):
+        """Track when user views a property"""
+        property_id = request.data.get('property_id')
+        duration = request.data.get('duration_seconds', 0)
+        
+        if not property_id:
+            return Response(
+                {'error': 'property_id is required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        interaction = self.UserPropertyInteraction.objects.create(
+            user=request.user,
+            property_id=property_id,
+            interaction_type='view',
+            viewed_duration_seconds=duration
+        )
+        
+        serializer = self.get_serializer(interaction)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+

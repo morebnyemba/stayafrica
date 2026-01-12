@@ -475,6 +475,47 @@ class ApiClient {
       params: { property_id: propertyId },
     });
   }
+
+  // User Preferences
+  async getUserPreferences() {
+    return this.client.get('/preferences/my_preferences/');
+  }
+
+  async updateUserPreferences(data: any) {
+    return this.client.post('/preferences/update_preferences/', data);
+  }
+
+  async updateUserLocation(latitude: number, longitude: number) {
+    return this.client.post('/preferences/update_location/', {
+      latitude,
+      longitude,
+    });
+  }
+
+  // User Property Interactions
+  async trackPropertyView(propertyId: string, durationSeconds?: number) {
+    return this.client.post('/interactions/track_view/', {
+      property_id: propertyId,
+      duration_seconds: durationSeconds,
+    });
+  }
+
+  async getUserInteractions() {
+    return this.client.get('/interactions/');
+  }
+
+  // Save/Unsave Property (using SavedProperty model)
+  async saveProperty(propertyId: string) {
+    return this.client.post('/properties/save/', { property_id: propertyId });
+  }
+
+  async unsaveProperty(propertyId: string) {
+    return this.client.post('/properties/unsave/', { property_id: propertyId });
+  }
+
+  async getSavedProperties() {
+    return this.client.get('/properties/saved/');
+  }
 }
 
 export const apiClient = new ApiClient();
