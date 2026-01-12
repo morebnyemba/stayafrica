@@ -70,6 +70,10 @@ class ApiClient {
     return this.client.get('/properties/', { params });
   }
 
+  async getAmenities() {
+    return this.client.get('/amenities/');
+  }
+
   async getPropertyById(id: string) {
     const safeId = this.assertId(id, 'Property ID');
     return this.client.get(`/properties/${safeId}/`);

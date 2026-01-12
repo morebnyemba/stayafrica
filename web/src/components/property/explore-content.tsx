@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useSearchParams } from 'next/navigation';
 import { apiClient } from '@/services/api-client';
 import { Filter, MapPin, Navigation } from 'lucide-react';
 import { PropertyCard } from '@/components/property';
@@ -12,14 +13,23 @@ import toast from 'react-hot-toast';
 import Link from 'next/link';
 
 export function ExploreContent() {
-  const [filters, setFilters] = useState<FilterOptions>({
-    priceMin: 0,
-    priceMax: 1000,
-    amenities: [],
-    propertyType: '',
-    minRating: 0,
-    guests: 1,
+  const searchParams = useSearchParams();
+  
+  // Initialize filters from URL parameters
+  const [filters, setFilters] = useState<FilterOptions>(() => {
+    return {
+      priceMin: 0,
+      priceMax: 1000,
+      amenities: [],
+      propertyType: searchParams.get('type') || '',
+      minRating: 0,
+      guests: parseInt(searchParams.get('guests') || '1'),
+      checkIn: searchParams.get('check_in') || undefined,
+      checkOut: searchParams.get('check_out') || undefined,
+    };
   });
+  
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('city') || '');
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [gettingLocation, setGettingLocation] = useState(false);
 
@@ -45,7 +55,7 @@ export function ExploreContent() {
   }, []);
 
   const { data: propertiesData, isLoading, error } = useQuery({
-    queryKey: ['properties', filters, userLocation],
+    queryKey: ['properties', filters, searchQuery, userLocation],
     queryFn: async () => {
       const params: any = {
         min_price: filters.priceMin,
@@ -54,6 +64,24 @@ export function ExploreContent() {
         min_rating: filters.minRating,
         guests: filters.guests,
       };
+
+      // Add search query
+      if (searchQuery) {
+        params.search = searchQuery;
+      }
+
+      // Add amenities filter (convert to comma-separated string or array)
+      if (filters.amenities && filters.amenities.length > 0) {
+        params.amenities = filters.amenities.join(',');
+      }
+
+      // Add check-in/check-out dates
+      if (filters.checkIn) {
+        params.check_in = filters.checkIn;
+      }
+      if (filters.checkOut) {
+        params.check_out = filters.checkOut;
+      }
 
       // If we have user location, search nearby properties
       if (userLocation) {
@@ -94,6 +122,10 @@ export function ExploreContent() {
     );
   };
 
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+  };
+
   return (
     <div className="bg-sand-100 dark:bg-primary-900 min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
@@ -125,9 +157,7 @@ export function ExploreContent() {
         <div className="mb-8 max-w-2xl">
           <SearchFilters
             onFilterChange={setFilters}
-            onSearch={() => {
-              // Search triggered
-            }}
+            onSearch={handleSearch}
           />
         </div>
 
