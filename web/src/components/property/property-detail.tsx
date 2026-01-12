@@ -119,7 +119,8 @@ export function PropertyDetailContent({ propertyId, useHostEndpoint = false }: P
           {/* Image carousel */}
           <PropertyImageCarousel
             images={property?.images || []}
-            title={property?.title}
+            title={property?.title || 'Property'}
+            mainImage={property?.main_image_url || property?.main_image}
           />
 
           {/* Basic info */}
