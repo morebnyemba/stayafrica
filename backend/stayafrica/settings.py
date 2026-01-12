@@ -341,8 +341,7 @@ DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'StayAfrica <noreply@stayaf
 FRONTEND_URL = os.getenv('FRONTEND_URL', 'https://zimlegend.online')
 
 # Create logs directory if it doesn't exist
-import os as log_os
-log_os.makedirs(BASE_DIR / 'logs', exist_ok=True)
+(BASE_DIR / 'logs').mkdir(parents=True, exist_ok=True)
 
 # Logging
 LOGGING = {
