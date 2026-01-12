@@ -3,7 +3,7 @@ from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 from unfold.admin import ModelAdmin as UnfoldModelAdmin
 from unfold.decorators import display
-from apps.users.models import User
+from apps.users.models import User, UserPreference, UserPropertyInteraction
 
 
 @admin.register(User)
@@ -177,3 +177,56 @@ class UserAdmin(UnfoldModelAdmin):
             """
             return format_html(summary)
         return "Save to see summary"
+
+
+@admin.register(UserPreference)
+class UserPreferenceAdmin(ModelAdmin):
+    list_display = ['user', 'usual_guest_count', 'has_location', 'updated_at']
+    search_fields = ['user__email', 'user__username']
+    readonly_fields = ['created_at', 'updated_at']
+    
+    fieldsets = (
+        ('User', {
+            'fields': ('user',)
+        }),
+        ('Property Preferences', {
+            'fields': ('preferred_property_types', 'preferred_min_price', 'preferred_max_price')
+        }),
+        ('Location Preferences', {
+            'fields': ('preferred_countries', 'preferred_cities', 'last_latitude', 'last_longitude')
+        }),
+        ('Other Preferences', {
+            'fields': ('usual_guest_count', 'preferred_amenities')
+        }),
+        ('Metadata', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def has_location(self, obj):
+        return bool(obj.last_latitude and obj.last_longitude)
+    has_location.boolean = True
+    has_location.short_description = 'Has Location'
+
+
+@admin.register(UserPropertyInteraction)
+class UserPropertyInteractionAdmin(ModelAdmin):
+    list_display = ['user', 'property_id', 'interaction_type', 'created_at']
+    list_filter = ['interaction_type', 'created_at']
+    search_fields = ['user__email', 'property_id', 'search_query']
+    readonly_fields = ['created_at']
+    
+    fieldsets = (
+        ('Interaction', {
+            'fields': ('user', 'property_id', 'interaction_type')
+        }),
+        ('Details', {
+            'fields': ('search_query', 'viewed_duration_seconds')
+        }),
+        ('Metadata', {
+            'fields': ('created_at',),
+            'classes': ('collapse',)
+        }),
+    )
+

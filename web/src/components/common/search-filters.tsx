@@ -1,7 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Search, Filter, X } from 'lucide-react';
+import { apiClient } from '@/services/api-client';
 
 interface SearchFiltersProps {
   onFilterChange?: (filters: FilterOptions) => void;
@@ -26,17 +28,6 @@ const PROPERTY_TYPES = [
   'Hotel Room',
 ];
 
-const AMENITIES = [
-  { id: 'wifi', name: 'WiFi' },
-  { id: 'pool', name: 'Pool' },
-  { id: 'kitchen', name: 'Kitchen' },
-  { id: 'parking', name: 'Parking' },
-  { id: 'ac', name: 'Air Conditioning' },
-  { id: 'gym', name: 'Gym' },
-  { id: 'heating', name: 'Heating' },
-  { id: 'washer', name: 'Washer' },
-];
-
 export function SearchFilters({ onFilterChange, onSearch }: SearchFiltersProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -48,6 +39,17 @@ export function SearchFilters({ onFilterChange, onSearch }: SearchFiltersProps) 
     minRating: 0,
     guests: 1,
   });
+
+  // Fetch amenities from API
+  const { data: amenitiesData } = useQuery({
+    queryKey: ['amenities'],
+    queryFn: async () => {
+      const response = await apiClient.getAmenities();
+      return response.data;
+    },
+  });
+
+  const amenities = amenitiesData || [];
 
   const handleSearchChange = (value: string) => {
     setSearchQuery(value);
@@ -201,21 +203,25 @@ export function SearchFilters({ onFilterChange, onSearch }: SearchFiltersProps) 
             <label className="block text-sm font-semibold text-primary-900 dark:text-sand-50 mb-3">
               Amenities
             </label>
-            <div className="grid grid-cols-2 gap-2">
-              {AMENITIES.map((amenity) => (
-                <label key={amenity.id} className="flex items-center space-x-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={filters.amenities?.includes(amenity.id) || false}
-                    onChange={() => handleAmenityToggle(amenity.id)}
-                    className="rounded border-primary-300 text-secondary-600 focus:ring-secondary-500"
-                  />
-                  <span className="text-sm text-primary-700 dark:text-sand-200">
-                    {amenity.name}
-                  </span>
-                </label>
-              ))}
-            </div>
+            {amenities.length === 0 ? (
+              <p className="text-sm text-primary-600 dark:text-sand-400">Loading amenities...</p>
+            ) : (
+              <div className="grid grid-cols-2 gap-2">
+                {amenities.map((amenity: any) => (
+                  <label key={amenity.id} className="flex items-center space-x-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={filters.amenities?.includes(String(amenity.id)) || false}
+                      onChange={() => handleAmenityToggle(String(amenity.id))}
+                      className="rounded border-primary-300 text-secondary-600 focus:ring-secondary-500"
+                    />
+                    <span className="text-sm text-primary-700 dark:text-sand-200">
+                      {amenity.name}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Minimum rating */}

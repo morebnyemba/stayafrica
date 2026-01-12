@@ -70,6 +70,10 @@ class ApiClient {
     return this.client.get('/properties/', { params });
   }
 
+  async getAmenities() {
+    return this.client.get('/amenities/');
+  }
+
   async getPropertyById(id: string) {
     const safeId = this.assertId(id, 'Property ID');
     return this.client.get(`/properties/${safeId}/`);
@@ -430,6 +434,91 @@ class ApiClient {
   // Transaction History
   async getTransactions(params?: any) {
     return this.client.get('/payments/transactions/', { params });
+  }
+
+  // Experiences
+  async getExperiences(params?: any) {
+    return this.client.get('/experiences/', { params });
+  }
+
+  async getExperienceById(id: string) {
+    const safeId = this.assertId(id, 'Experience ID');
+    return this.client.get(`/experiences/${safeId}/`);
+  }
+
+  async getExperienceCategories() {
+    return this.client.get('/categories/');
+  }
+
+  async getNearbyExperiences(latitude: number, longitude: number, radiusKm: number = 50) {
+    return this.client.get('/experiences/nearby/', {
+      params: { lat: latitude, lng: longitude, radius: radiusKm },
+    });
+  }
+
+  async createExperienceBooking(data: any) {
+    return this.client.post('/bookings/', data);
+  }
+
+  async getExperienceBookings(params?: any) {
+    return this.client.get('/bookings/', { params });
+  }
+
+  // Review voting
+  async voteReview(reviewId: string, voteType: 'helpful' | 'unhelpful') {
+    return this.client.post(`/reviews/${reviewId}/vote/`, { vote_type: voteType });
+  }
+
+  async respondToReview(reviewId: string, response: string) {
+    return this.client.post(`/reviews/${reviewId}/respond/`, { response });
+  }
+
+  // Get reviews for a specific property
+  async getPropertyReviews(propertyId: string) {
+    return this.client.get('/reviews/property_reviews/', {
+      params: { property_id: propertyId },
+    });
+  }
+
+  // User Preferences
+  async getUserPreferences() {
+    return this.client.get('/preferences/my_preferences/');
+  }
+
+  async updateUserPreferences(data: any) {
+    return this.client.post('/preferences/update_preferences/', data);
+  }
+
+  async updateUserLocation(latitude: number, longitude: number) {
+    return this.client.post('/preferences/update_location/', {
+      latitude,
+      longitude,
+    });
+  }
+
+  // User Property Interactions
+  async trackPropertyView(propertyId: string, durationSeconds?: number) {
+    return this.client.post('/interactions/track_view/', {
+      property_id: propertyId,
+      duration_seconds: durationSeconds,
+    });
+  }
+
+  async getUserInteractions() {
+    return this.client.get('/interactions/');
+  }
+
+  // Save/Unsave Property (using SavedProperty model)
+  async saveProperty(propertyId: string) {
+    return this.client.post('/properties/save/', { property_id: propertyId });
+  }
+
+  async unsaveProperty(propertyId: string) {
+    return this.client.post('/properties/unsave/', { property_id: propertyId });
+  }
+
+  async getSavedProperties() {
+    return this.client.get('/properties/saved/');
   }
 }
 

@@ -248,3 +248,94 @@ class ReviewViewSet(viewsets.ModelViewSet):
             'average_rating': round(avg_rating, 2) if avg_rating else None,
             'rating_distribution': rating_distribution
         })
+    
+    @action(detail=True, methods=['post'])
+    @api_ratelimit(rate='10/h')
+    def vote(self, request, pk=None):
+        """Vote a review as helpful or unhelpful"""
+        from apps.reviews.models import ReviewVote
+        
+        review = self.get_object()
+        vote_type = request.data.get('vote_type')
+        
+        if vote_type not in ['helpful', 'unhelpful']:
+            return Response(
+                {'error': 'vote_type must be either "helpful" or "unhelpful"'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Check if user already voted
+        existing_vote = ReviewVote.objects.filter(review=review, user=request.user).first()
+        
+        if existing_vote:
+            if existing_vote.vote_type == vote_type:
+                # Remove vote if same type
+                existing_vote.delete()
+                if vote_type == 'helpful':
+                    review.helpful_count = max(0, review.helpful_count - 1)
+                    review.save()
+                return Response({'message': 'Vote removed'})
+            else:
+                # Change vote type
+                existing_vote.vote_type = vote_type
+                existing_vote.save()
+                if vote_type == 'helpful':
+                    review.helpful_count += 1
+                else:
+                    review.helpful_count = max(0, review.helpful_count - 1)
+                review.save()
+                return Response({'message': 'Vote updated', 'vote_type': vote_type})
+        else:
+            # Create new vote
+            ReviewVote.objects.create(
+                review=review,
+                user=request.user,
+                vote_type=vote_type
+            )
+            if vote_type == 'helpful':
+                review.helpful_count += 1
+                review.save()
+            return Response({'message': 'Vote recorded', 'vote_type': vote_type})
+    
+    @action(detail=True, methods=['post'])
+    @api_ratelimit(rate='10/h')
+    @log_action('respond_to_review')
+    def respond(self, request, pk=None):
+        """Host responds to a review"""
+        review = self.get_object()
+        
+        # Check permissions - only the host can respond
+        if request.user != review.host:
+            return Response(
+                {'error': 'Only the host can respond to this review'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        response_text = request.data.get('response')
+        if not response_text:
+            return Response(
+                {'error': 'Response text is required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Sanitize response
+        from utils.helpers import sanitize_input
+        sanitized_response = sanitize_input(response_text)
+        
+        # Update review
+        review.host_response = sanitized_response
+        from datetime import datetime
+        review.host_response_date = datetime.now()
+        review.save()
+        
+        # Log the action
+        AuditLoggerService.log_action(
+            user=request.user,
+            action='respond',
+            model=Review,
+            object_id=review.id,
+            changes={'response_length': len(sanitized_response)}
+        )
+        
+        serializer = self.get_serializer(review)
+        return Response(serializer.data)
