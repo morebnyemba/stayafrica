@@ -8,11 +8,13 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.db import transaction
-from apps.users.models import User
+from apps.users.models import User, UserPreference, UserPropertyInteraction
 from apps.users.serializers import (
     UserSerializer,
     UserProfileSerializer,
-    CustomTokenObtainPairSerializer
+    CustomTokenObtainPairSerializer,
+    UserPreferenceSerializer,
+    UserPropertyInteractionSerializer
 )
 from utils.decorators import api_ratelimit, log_action
 from utils.helpers import sanitize_input
@@ -276,31 +278,28 @@ class UserViewSet(viewsets.ModelViewSet):
 
 class UserPreferenceViewSet(viewsets.ModelViewSet):
     """Manage user preferences for personalized recommendations"""
-    from apps.users.serializers import UserPreferenceSerializer
-    from apps.users.models import UserPreference
-    
     serializer_class = UserPreferenceSerializer
     permission_classes = [IsAuthenticated]
     
     def get_queryset(self):
-        return self.UserPreference.objects.filter(user=self.request.user)
+        return UserPreference.objects.filter(user=self.request.user)
     
     def get_object(self):
         # Get or create preferences for the current user
-        obj, created = self.UserPreference.objects.get_or_create(user=self.request.user)
+        obj, created = UserPreference.objects.get_or_create(user=self.request.user)
         return obj
     
     @action(detail=False, methods=['get'])
     def my_preferences(self, request):
         """Get current user's preferences"""
-        preferences, created = self.UserPreference.objects.get_or_create(user=request.user)
+        preferences, created = UserPreference.objects.get_or_create(user=request.user)
         serializer = self.get_serializer(preferences)
         return Response(serializer.data)
     
     @action(detail=False, methods=['post', 'put', 'patch'])
     def update_preferences(self, request):
         """Update current user's preferences"""
-        preferences, created = self.UserPreference.objects.get_or_create(user=request.user)
+        preferences, created = UserPreference.objects.get_or_create(user=request.user)
         serializer = self.get_serializer(preferences, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
@@ -319,7 +318,7 @@ class UserPreferenceViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        preferences, created = self.UserPreference.objects.get_or_create(user=request.user)
+        preferences, created = UserPreference.objects.get_or_create(user=request.user)
         preferences.last_latitude = float(lat)
         preferences.last_longitude = float(lng)
         preferences.save()
@@ -329,15 +328,12 @@ class UserPreferenceViewSet(viewsets.ModelViewSet):
 
 class UserPropertyInteractionViewSet(viewsets.ModelViewSet):
     """Track user interactions with properties"""
-    from apps.users.serializers import UserPropertyInteractionSerializer
-    from apps.users.models import UserPropertyInteraction
-    
     serializer_class = UserPropertyInteractionSerializer
     permission_classes = [IsAuthenticated]
     http_method_names = ['get', 'post']  # Only allow read and create
     
     def get_queryset(self):
-        return self.UserPropertyInteraction.objects.filter(user=self.request.user)
+        return UserPropertyInteraction.objects.filter(user=self.request.user)
     
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
@@ -354,7 +350,7 @@ class UserPropertyInteractionViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        interaction = self.UserPropertyInteraction.objects.create(
+        interaction = UserPropertyInteraction.objects.create(
             user=request.user,
             property_id=property_id,
             interaction_type='view',
