@@ -180,7 +180,7 @@ class UserAdmin(UnfoldModelAdmin):
 
 
 @admin.register(UserPreference)
-class UserPreferenceAdmin(ModelAdmin):
+class UserPreferenceAdmin(UnfoldModelAdmin):
     list_display = ['user', 'usual_guest_count', 'has_location', 'updated_at']
     search_fields = ['user__email', 'user__username']
     readonly_fields = ['created_at', 'updated_at']
@@ -211,7 +211,7 @@ class UserPreferenceAdmin(ModelAdmin):
 
 
 @admin.register(UserPropertyInteraction)
-class UserPropertyInteractionAdmin(ModelAdmin):
+class UserPropertyInteractionAdmin(UnfoldModelAdmin):
     list_display = ['user', 'property_id', 'interaction_type', 'created_at']
     list_filter = ['interaction_type', 'created_at']
     search_fields = ['user__email', 'property_id', 'search_query']
