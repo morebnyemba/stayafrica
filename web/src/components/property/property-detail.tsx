@@ -12,18 +12,6 @@ import { Button } from '@/components/ui';
 import { Heart, MapPin, Share2, Star } from 'lucide-react';
 import Link from 'next/link';
 
-type Review = {
-  id: string;
-  guest_name: string;
-  rating: number;
-  text: string;
-  host_response?: string;
-  host_response_date?: string;
-  helpful_count: number;
-  created_at: string;
-  guest?: number;
-};
-
 type PropertyDetailContentProps = {
   propertyId: string;
   useHostEndpoint?: boolean;

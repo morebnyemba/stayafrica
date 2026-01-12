@@ -186,7 +186,7 @@ export function ReviewList({ propertyId, reviews, averageRating, totalReviews }:
                 </button>
 
                 {/* Show respond button only to host */}
-                {isAuthenticated && user?.is_host && !review.host_response && (
+                {isAuthenticated && user?.role === 'host' && !review.host_response && (
                   <button
                     onClick={() => setRespondingTo(respondingTo === review.id ? null : review.id)}
                     className="flex items-center gap-2 text-sm text-primary-600 dark:text-sand-400 hover:text-primary-900 dark:hover:text-sand-50 transition-colors"
