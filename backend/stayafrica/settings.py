@@ -1,6 +1,5 @@
 import os
 from pathlib import Path
-from django.templatetags.static import static
 from dotenv import load_dotenv
 
 # Set GDAL library path for GeoDjango (only for Windows development)
@@ -468,8 +467,8 @@ UNFOLD = {
     "SITE_HEADER": "StayAfrica Administration",
     "SITE_URL": "/",
     "SITE_ICON": {
-        "light": lambda request: static("logo.svg"),  # Logo for light theme
-        "dark": lambda request: static("logo.svg"),   # Logo for dark theme
+        "light": lambda request: __import__('django.templatetags.static', fromlist=['static']).static("logo.svg"),  # Logo for light theme
+        "dark": lambda request: __import__('django.templatetags.static', fromlist=['static']).static("logo.svg"),   # Logo for dark theme
     },
     "SITE_SYMBOL": "travel_explore",  # Material icon for favicon
     "SHOW_HISTORY": True,
@@ -477,14 +476,14 @@ UNFOLD = {
     "ENVIRONMENT": "stayafrica.settings.environment_callback",
     "DASHBOARD_CALLBACK": "stayafrica.settings.dashboard_callback",
     "LOGIN": {
-        "image": lambda request: static("images/login-bg.jpg"),
+        "image": lambda request: __import__('django.templatetags.static', fromlist=['static']).static("images/login-bg.jpg"),
         "redirect_after": lambda request: "/admin/",
     },
     "STYLES": [
-        lambda request: static("css/admin-custom.css"),
+        lambda request: __import__('django.templatetags.static', fromlist=['static']).static("css/admin-custom.css"),
     ],
     "SCRIPTS": [
-        lambda request: static("js/admin-custom.js"),
+        lambda request: __import__('django.templatetags.static', fromlist=['static']).static("js/admin-custom.js"),
     ],
     "COLORS": {
         "primary": {
@@ -516,7 +515,7 @@ UNFOLD = {
             "rel": "icon",
             "sizes": "32x32",
             "type": "image/svg+xml",
-            "href": lambda request: static("favicon.svg"),
+            "href": lambda request: __import__('django.templatetags.static', fromlist=['static']).static("favicon.svg"),
         },
     ],
     "SIDEBAR": {
