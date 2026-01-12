@@ -186,7 +186,7 @@ This flexibility increases revenue and booking rates simultaneously.
 from django.contrib.gis.db import models as gis_models
 
 class Property(models.Model):
-    location = gis_models.PointField()  # Not FloatField!
+    location = gis_models.PointField()  # PostGIS PointField enables spatial indexing and distance queries vs basic FloatField
     
 # Enables powerful queries:
 from django.contrib.gis.measure import D  # Distance
@@ -208,7 +208,7 @@ nearby = Property.objects.filter(
 **Query Performance:**
 - PostGIS spatial index: ~5ms for 100k properties
 - Haversine in Python: ~500ms for 100k properties
-- 100x speed improvement!
+- Up to 100x speed improvement (scales with dataset size)
 
 ---
 
@@ -416,7 +416,7 @@ class SystemConfiguration(models.Model):
 28. ✅ Host responses
 29. ✅ Review statistics
 30. ✅ Rating display (1-5 stars)
-31. ❌ Photo reviews (missing - see AIRBNB_FEATURE_GAP_ANALYSIS.md Prompt #13)
+31. ❌ Photo reviews (missing - see AIRBNB_FEATURE_GAP_ANALYSIS.md for implementation prompt)
 
 ### Booking & Payments (95% Complete)
 32. ✅ Complete booking flow
@@ -453,9 +453,9 @@ class SystemConfiguration(models.Model):
 59. ✅ Read receipts
 60. ✅ Message templates (6 types)
 61. ✅ Variable substitution
-62. ❌ Real-time WebSocket (missing - see Prompt #3)
-63. ❌ Typing indicators (missing - see Prompt #3)
-64. ❌ Message reactions (missing - see Prompt #3)
+62. ❌ Real-time WebSocket (missing - see AIRBNB_FEATURE_GAP_ANALYSIS.md)
+63. ❌ Typing indicators (missing - see AIRBNB_FEATURE_GAP_ANALYSIS.md)
+64. ❌ Message reactions (missing - see AIRBNB_FEATURE_GAP_ANALYSIS.md)
 
 ### Map & Navigation (90% Complete)
 65. ✅ Mapbox integration
@@ -464,7 +464,7 @@ class SystemConfiguration(models.Model):
 68. ✅ Distance calculation
 69. ✅ Route visualization
 70. ✅ "Open in device maps" fallback
-71. ❌ Nearby POI (restaurants, attractions) - see Prompt #10
+71. ❌ Nearby POI (restaurants, attractions) - see AIRBNB_FEATURE_GAP_ANALYSIS.md
 
 ### Admin & Analytics (85% Complete)
 72. ✅ SystemConfiguration model
@@ -472,9 +472,9 @@ class SystemConfiguration(models.Model):
 74. ✅ Business rules config
 75. ✅ Audit logging
 76. ✅ Admin stats (cached)
-77. ❌ Real-time analytics dashboard (missing - see Prompt #11)
-78. ❌ Revenue charts (missing - see Prompt #11)
-79. ❌ Fraud detection (missing - see Prompt #16)
+77. ❌ Real-time analytics dashboard (missing - see AIRBNB_FEATURE_GAP_ANALYSIS.md)
+78. ❌ Revenue charts (missing - see AIRBNB_FEATURE_GAP_ANALYSIS.md)
+79. ❌ Fraud detection (missing - see AIRBNB_FEATURE_GAP_ANALYSIS.md)
 
 ---
 
@@ -483,32 +483,34 @@ class SystemConfiguration(models.Model):
 See **`AIRBNB_FEATURE_GAP_ANALYSIS.md`** for 20 detailed, copy-paste Copilot prompts covering:
 
 ### Critical (P0) - 5 Features
-1. ❌ **Push Notifications** - Prompt #1
-2. ❌ **Flexible Date Search** - Prompt #2  
-3. ❌ **Real-time WebSocket Messaging** - Prompt #3
-4. ❌ **Enhanced ID Verification** - Prompt #4
-5. ❌ **Dynamic Pricing Engine** - Prompt #5
+1. ❌ **Push Notifications**
+2. ❌ **Flexible Date Search**
+3. ❌ **Real-time WebSocket Messaging**
+4. ❌ **Enhanced ID Verification**
+5. ❌ **Dynamic Pricing Engine**
 
 ### High Priority (P1) - 7 Features
-6. ❌ **Instant Booking** - Prompt #6
-7. ❌ **Smart Search Ranking (AI)** - Prompt #7
-8. ❌ **Shared Wishlists** - Prompt #8
-9. ❌ **Automated Host Messaging** - Prompt #9
-10. ❌ **Local POI Display** - Prompt #10
-11. ❌ **Real-time Analytics Dashboard** - Prompt #11
-12. ❌ **Tax Collection System** - Prompt #12
+6. ❌ **Instant Booking**
+7. ❌ **Smart Search Ranking (AI)**
+8. ❌ **Shared Wishlists**
+9. ❌ **Automated Host Messaging**
+10. ❌ **Local POI Display**
+11. ❌ **Real-time Analytics Dashboard**
+12. ❌ **Tax Collection System**
 
 ### Medium Priority (P2) - 5 Features
-13. ❌ **Photo Reviews** - Prompt #13
-14. ❌ **Cancellation Insurance** - Prompt #14
-15. ❌ **Guest Background Checks** - Prompt #15
-16. ❌ **Fraud Detection** - Prompt #16
-17. ❌ **Multi-property Management Tools** - Prompt #17
+13. ❌ **Photo Reviews**
+14. ❌ **Cancellation Insurance**
+15. ❌ **Guest Background Checks**
+16. ❌ **Fraud Detection**
+17. ❌ **Multi-property Management Tools**
 
 ### Lower Priority (P3) - 3 Features
-18. ❌ **Dark Mode** - Prompt #18
-19. ❌ **Multi-language Support** - Prompt #19
-20. ❌ **Calendar Sync (iCal)** - Prompt #20
+18. ❌ **Dark Mode**
+19. ❌ **Multi-language Support**
+20. ❌ **Calendar Sync (iCal)**
+
+*Note: Detailed implementation prompts for all 20 features available in AIRBNB_FEATURE_GAP_ANALYSIS.md*
 
 **Each prompt includes:**
 - Full technical requirements
@@ -649,6 +651,13 @@ StayAfrica has achieved **75% feature parity** with Airbnb after 11 commits, wit
 
 **Document End**
 
-For implementation prompts, see: `AIRBNB_FEATURE_GAP_ANALYSIS.md`  
-For feature comparison matrix, see: `STAYAFRICA_VS_AIRBNB_CURRENT_STATUS.md`  
-For technical implementation details, see: `IMPLEMENTATION_SUMMARY.md`
+---
+
+## Related Documentation
+
+All referenced documents exist in the repository root:
+- **`AIRBNB_FEATURE_GAP_ANALYSIS.md`** - 20 ready-to-use Copilot prompts with full technical specifications
+- **`STAYAFRICA_VS_AIRBNB_CURRENT_STATUS.md`** - Feature-by-feature comparison matrix with scores
+- **`IMPLEMENTATION_SUMMARY.md`** - Technical implementation guide for experiences, reviews, and navigation
+- **`USER_PREFERENCES_IMPLEMENTATION.md`** - Geolocation and user preference system documentation
+- **`HERO_SEARCH_AMENITIES_IMPLEMENTATION.md`** - Search integration and amenities implementation guide
