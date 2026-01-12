@@ -31,9 +31,6 @@ RUN pip install --upgrade pip \
 # Copy project
 COPY . .
 
-# Collect static assets at build time
-RUN python manage.py collectstatic --noinput
-
 # Copy entrypoint script for migrations + server startup
 COPY entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
