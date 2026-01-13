@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from apps.users.models import User
+from apps.users.models import User, UserPreference, UserPropertyInteraction
 from django.contrib.auth.hashers import make_password
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
@@ -81,8 +81,6 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 
 class UserPreferenceSerializer(serializers.ModelSerializer):
-    from apps.users.models import UserPreference
-    
     class Meta:
         model = UserPreference
         fields = [
@@ -95,8 +93,6 @@ class UserPreferenceSerializer(serializers.ModelSerializer):
 
 
 class UserPropertyInteractionSerializer(serializers.ModelSerializer):
-    from apps.users.models import UserPropertyInteraction
-    
     class Meta:
         model = UserPropertyInteraction
         fields = [
