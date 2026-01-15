@@ -117,12 +117,21 @@ echo ""
 echo -e "${BLUE}8. Testing Redis Connection${NC}"
 echo "----------------------------------------"
 echo -n "Checking Redis connectivity... "
-if docker compose -f docker-compose.prod.yml exec -T redis redis-cli ping > /dev/null 2>&1; then
-    echo -e "${GREEN}✅ Redis connected${NC}"
+if docker compose -f docker-compose.prod.yml exec -T redis redis-cli -a "${REDIS_PASSWORD}" ping > /dev/null 2>&1; then
+    echo -e "${GREEN}✅ Redis connected and authenticated${NC}"
     ((PASSED++))
 else
-    echo -e "${RED}❌ Redis connection failed${NC}"
+    echo -e "${RED}❌ Redis connection or authentication failed${NC}"
     ((FAILED++))
+fi
+
+echo -n "Verifying Redis is NOT accessible from host... "
+if timeout 2 redis-cli -h localhost -p 6379 ping > /dev/null 2>&1; then
+    echo -e "${RED}❌ SECURITY ISSUE: Redis is exposed to host!${NC}"
+    ((FAILED++))
+else
+    echo -e "${GREEN}✅ Redis properly isolated (not accessible from host)${NC}"
+    ((PASSED++))
 fi
 echo ""
 
