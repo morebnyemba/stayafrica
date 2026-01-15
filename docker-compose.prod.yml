@@ -51,10 +51,17 @@ services:
   redis:
     image: redis:7-alpine
     container_name: stayafrica_redis
-    command: ["redis-server", "--appendonly", "yes"]
-    ports:
-      - "6379:6379"
+    command: redis-server --requirepass ${REDIS_PASSWORD} --appendonly yes
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    volumes:
+      - redis_data:/data
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   backend:
     build:
@@ -67,9 +74,9 @@ services:
       DB_PASSWORD: StayAfr1ca$2025!Secure
       DB_HOST: db
       DB_PORT: 5432
-      REDIS_URL: redis://redis:6379/0
-      CELERY_BROKER_URL: redis://redis:6379/0
-      CELERY_RESULT_BACKEND: redis://redis:6379/0
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
+      CELERY_BROKER_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
+      CELERY_RESULT_BACKEND: redis://:${REDIS_PASSWORD}@redis:6379/0
       SECRET_KEY: change-this-to-a-secure-key-in-production
       DEBUG: "False"
       ALLOWED_HOSTS: stayafrica.app,www.stayafrica.app,api.stayafrica.app,backend,localhost,127.0.0.1
@@ -95,9 +102,9 @@ services:
       DB_PASSWORD: StayAfr1ca$2025!Secure
       DB_HOST: db
       DB_PORT: 5432
-      REDIS_URL: redis://redis:6379/0
-      CELERY_BROKER_URL: redis://redis:6379/0
-      CELERY_RESULT_BACKEND: redis://redis:6379/0
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
+      CELERY_BROKER_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
+      CELERY_RESULT_BACKEND: redis://:${REDIS_PASSWORD}@redis:6379/0
       SECRET_KEY: change-this-to-a-secure-key-in-production
       DEBUG: "False"
     depends_on:
@@ -118,9 +125,9 @@ services:
       DB_PASSWORD: StayAfr1ca$2025!Secure
       DB_HOST: db
       DB_PORT: 5432
-      REDIS_URL: redis://redis:6379/0
-      CELERY_BROKER_URL: redis://redis:6379/0
-      CELERY_RESULT_BACKEND: redis://redis:6379/0
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
+      CELERY_BROKER_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
+      CELERY_RESULT_BACKEND: redis://:${REDIS_PASSWORD}@redis:6379/0
       SECRET_KEY: change-this-to-a-secure-key-in-production
       DEBUG: "False"
     depends_on:
@@ -177,6 +184,7 @@ volumes:
   postgres_data:
   static_volume:
   media_volume:
+  redis_data:
 
 networks:
   default:
