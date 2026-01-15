@@ -57,7 +57,7 @@ echo "----------------------------------------"
 # Development config
 if [ -f docker-compose.yml ]; then
     echo -n "Checking docker-compose.yml (development)... "
-    if grep -q "ports:" docker-compose.yml | grep -A1 "redis:" | grep -q "6379:6379"; then
+    if grep -A10 "redis:" docker-compose.yml | grep -q "ports:.*6379"; then
         echo -e "${RED}❌ Redis port exposed in docker-compose.yml${NC}"
         ((FAILED++))
     else
@@ -77,14 +77,9 @@ fi
 # Production config
 if [ -f docker-compose.prod.yml ]; then
     echo -n "Checking docker-compose.prod.yml (production)... "
-    if grep -A5 "redis:" docker-compose.prod.yml | grep -q "ports:"; then
-        if grep -A6 "redis:" docker-compose.prod.yml | grep "ports:" | grep -q "6379"; then
-            echo -e "${RED}❌ Redis port exposed in docker-compose.prod.yml${NC}"
-            ((FAILED++))
-        else
-            echo -e "${GREEN}✅ Redis port not exposed${NC}"
-            ((PASSED++))
-        fi
+    if grep -A10 "redis:" docker-compose.prod.yml | grep -q "ports:.*6379"; then
+        echo -e "${RED}❌ Redis port exposed in docker-compose.prod.yml${NC}"
+        ((FAILED++))
     else
         echo -e "${GREEN}✅ Redis port not exposed${NC}"
         ((PASSED++))
