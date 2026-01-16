@@ -3,16 +3,19 @@ Notifications app URLs for user notifications and alerts
 """
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from . import views
+from apps.notifications.views import (
+    PushTokenViewSet,
+    NotificationPreferenceViewSet,
+    NotificationViewSet
+)
 
 app_name = 'notifications'
 
 router = DefaultRouter()
-router.register(r'notifications', views.NotificationViewSet, basename='notification')
+router.register('tokens', PushTokenViewSet, basename='push-token')
+router.register('notifications', NotificationViewSet, basename='notification')
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('unread/', views.UnreadNotificationsView.as_view(), name='unread-notifications'),
-    path('mark-read/<int:notification_id>/', views.MarkNotificationReadView.as_view(), name='mark-read'),
-    path('mark-all-read/', views.MarkAllReadView.as_view(), name='mark-all-read'),
+    path('preferences/', NotificationPreferenceViewSet.as_view({'get': 'list', 'put': 'update'}), name='notification-preferences'),
 ]

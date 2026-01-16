@@ -102,6 +102,13 @@ class BookingViewSet(viewsets.ModelViewSet):
         else:
             logger.info("Celery not available, skipping confirmation email")
         
+        # Send push notification
+        try:
+            from services.notification_service import NotificationService
+            NotificationService.send_booking_confirmation(booking)
+        except Exception as e:
+            logger.warning(f"Could not send push notification: {e}")
+        
         logger.info(f"Booking created: {booking.booking_ref}")
     
     @action(detail=True, methods=['post'])
@@ -144,6 +151,13 @@ class BookingViewSet(viewsets.ModelViewSet):
                 object_id=booking.id,
                 changes={'status': 'confirmed'}
             )
+            
+            # Send push notification to guest
+            try:
+                from services.notification_service import NotificationService
+                NotificationService.send_booking_confirmation(booking)
+            except Exception as e:
+                logger.warning(f"Could not send push notification: {e}")
         
         logger.info(f"Booking confirmed: {booking.booking_ref}")
         return Response({'status': 'confirmed', 'booking_ref': booking.booking_ref})
