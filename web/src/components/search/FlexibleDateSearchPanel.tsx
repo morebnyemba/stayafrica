@@ -68,10 +68,8 @@ export default function FlexibleDateSearchPanel({
             {flexibility === 'flexible_days' && (
               <div className="mt-3 flex items-center gap-3">
                 <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setFlexibleDays(Math.max(1, flexibleDays - 1));
-                  }}
+                  type="button"
+                  onClick={() => setFlexibleDays(Math.max(1, flexibleDays - 1))}
                   className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition"
                 >
                   <Minus className="w-4 h-4" />
@@ -80,10 +78,8 @@ export default function FlexibleDateSearchPanel({
                   ±{flexibleDays} days
                 </span>
                 <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setFlexibleDays(Math.min(7, flexibleDays + 1));
-                  }}
+                  type="button"
+                  onClick={() => setFlexibleDays(Math.min(7, flexibleDays + 1))}
                   className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition"
                 >
                   <Plus className="w-4 h-4" />

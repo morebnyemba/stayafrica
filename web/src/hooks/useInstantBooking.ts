@@ -47,10 +47,11 @@ export function useInstantBooking(propertyId: string) {
       });
       return response.data;
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const apiError = error as { response?: { data?: { message?: string; detail?: string } } };
       setBookingError(
-        error.response?.data?.message || 
-        error.response?.data?.detail || 
+        apiError.response?.data?.message || 
+        apiError.response?.data?.detail || 
         'Failed to create instant booking'
       );
     },

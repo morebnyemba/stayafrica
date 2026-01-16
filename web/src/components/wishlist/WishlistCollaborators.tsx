@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useMutation, useQueryClient } from '@tantml:react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { X, UserPlus, Trash2, Mail, Loader2 } from 'lucide-react';
 import { WishlistCollaborator } from '@/types/wishlist-types';
 import wishlistApi from '@/services/wishlist-api';

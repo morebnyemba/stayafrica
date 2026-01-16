@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Copy, Check, Mail, Facebook, Twitter, Link as LinkIcon } from 'lucide-react';
 
 interface WishlistShareProps {
@@ -19,10 +19,16 @@ export default function WishlistShare({
   onClose,
 }: WishlistShareProps) {
   const [copied, setCopied] = useState(false);
+  const [shareUrl, setShareUrl] = useState('');
 
-  const shareUrl = shareToken
-    ? `${window.location.origin}/wishlists/shared/${shareToken}`
-    : `${window.location.origin}/wishlists/${wishlistId}`;
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const url = shareToken
+        ? `${window.location.origin}/wishlists/shared/${shareToken}`
+        : `${window.location.origin}/wishlists/${wishlistId}`;
+      setShareUrl(url);
+    }
+  }, [wishlistId, shareToken]);
 
   const handleCopy = async () => {
     try {

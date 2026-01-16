@@ -19,6 +19,7 @@ export default function POIMapDisplay({
 }: POIMapDisplayProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const [selectedPOI, setSelectedPOI] = useState<PropertyPOI | null>(null);
+  const [mapLoaded, setMapLoaded] = useState(false);
 
   const getCategoryColor = (type: POIType): string => {
     const colors: Record<POIType, string> = {
@@ -43,23 +44,30 @@ export default function POIMapDisplay({
   };
 
   useEffect(() => {
-    if (!mapRef.current || typeof window === 'undefined') return;
+    if (typeof window === 'undefined' || mapLoaded) return;
 
-    const script = document.createElement('script');
-    script.src = `https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js`;
-    script.async = true;
-    document.head.appendChild(script);
+    const loadMapbox = () => {
+      const existingScript = document.querySelector('script[src*="mapbox-gl.js"]');
+      const existingLink = document.querySelector('link[href*="mapbox-gl.css"]');
+      
+      if (!existingScript) {
+        const script = document.createElement('script');
+        script.src = 'https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js';
+        script.async = true;
+        script.onload = () => setMapLoaded(true);
+        document.head.appendChild(script);
+      }
 
-    const linkElement = document.createElement('link');
-    linkElement.href = 'https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css';
-    linkElement.rel = 'stylesheet';
-    document.head.appendChild(linkElement);
-
-    return () => {
-      document.head.removeChild(script);
-      document.head.removeChild(linkElement);
+      if (!existingLink) {
+        const link = document.createElement('link');
+        link.href = 'https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css';
+        link.rel = 'stylesheet';
+        document.head.appendChild(link);
+      }
     };
-  }, []);
+
+    loadMapbox();
+  }, [mapLoaded]);
 
   const handlePOIClick = (poi: PropertyPOI) => {
     setSelectedPOI(poi);
