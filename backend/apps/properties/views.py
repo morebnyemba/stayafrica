@@ -205,6 +205,110 @@ class PropertyViewSet(viewsets.ModelViewSet):
             )
     
     @action(detail=False, methods=['get'], permission_classes=[AllowAny])
+    def flexible_search(self, request):
+        """
+        Search properties with flexible dates
+        GET /api/v1/properties/flexible_search/?check_in=2026-02-01&check_out=2026-02-05&flexibility=flexible_days&days=3
+        
+        Parameters:
+        - check_in: Desired check-in date (YYYY-MM-DD)
+        - check_out: Desired check-out date (YYYY-MM-DD)
+        - flexibility: Type of flexibility ('exact', 'flexible_days', 'weekend', 'month')
+        - days: Number of days flexibility (for flexible_days type, default: 3)
+        - property_type: Optional filter
+        - min_price: Optional minimum price filter
+        - max_price: Optional maximum price filter
+        - guests: Optional minimum guests filter
+        - bedrooms: Optional minimum bedrooms filter
+        - city: Optional city filter
+        - country: Optional country filter
+        """
+        check_in = request.query_params.get('check_in')
+        check_out = request.query_params.get('check_out')
+        flexibility = request.query_params.get('flexibility', 'exact')
+        days = request.query_params.get('days', '3')
+        
+        if not check_in or not check_out:
+            return Response(
+                {'error': 'check_in and check_out dates are required (format: YYYY-MM-DD)'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Validate flexibility type
+        valid_types = ['exact', 'flexible_days', 'weekend', 'month']
+        if flexibility not in valid_types:
+            return Response(
+                {'error': f'flexibility must be one of: {", ".join(valid_types)}'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            flexibility_days = int(days)
+            if flexibility_days < 0 or flexibility_days > 14:
+                return Response(
+                    {'error': 'days must be between 0 and 14'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        except ValueError:
+            return Response(
+                {'error': 'days must be a valid integer'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Build filters
+        filters = {}
+        if request.query_params.get('property_type'):
+            filters['property_type'] = request.query_params.get('property_type')
+        if request.query_params.get('min_price'):
+            try:
+                filters['min_price'] = float(request.query_params.get('min_price'))
+            except ValueError:
+                pass
+        if request.query_params.get('max_price'):
+            try:
+                filters['max_price'] = float(request.query_params.get('max_price'))
+            except ValueError:
+                pass
+        if request.query_params.get('guests'):
+            try:
+                filters['guests'] = int(request.query_params.get('guests'))
+            except ValueError:
+                pass
+        if request.query_params.get('bedrooms'):
+            try:
+                filters['bedrooms'] = int(request.query_params.get('bedrooms'))
+            except ValueError:
+                pass
+        if request.query_params.get('city'):
+            filters['city'] = request.query_params.get('city')
+        if request.query_params.get('country'):
+            filters['country'] = request.query_params.get('country')
+        
+        # Perform flexible date search
+        try:
+            from services.flexible_date_search import FlexibleDateSearch
+            results = FlexibleDateSearch.search_properties_with_flexible_dates(
+                check_in=check_in,
+                check_out=check_out,
+                flexibility_type=flexibility,
+                flexibility_days=flexibility_days,
+                filters=filters
+            )
+            
+            # Add price range summary
+            price_summary = FlexibleDateSearch.get_price_range_summary(results)
+            results['price_summary'] = price_summary
+            
+            return Response(results)
+            
+        except Exception as e:
+            logger.error(f"Error in flexible date search: {e}")
+            return Response(
+                {'error': 'Failed to perform flexible date search', 'detail': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    @action(detail=False, methods=['get'], permission_classes=[AllowAny])
     def search_nearby(self, request):
         """Search for properties within a radius"""
         lat = request.query_params.get('lat')
