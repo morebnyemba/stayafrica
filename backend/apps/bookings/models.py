@@ -23,6 +23,7 @@ class Booking(models.Model):
     service_fee = models.DecimalField(max_digits=10, decimal_places=2, default=3.00)
     commission_fee = models.DecimalField(max_digits=10, decimal_places=2)
     cleaning_fee = models.DecimalField(max_digits=10, decimal_places=2, default=0, blank=True)
+    taxes = models.DecimalField(max_digits=10, decimal_places=2, default=0, blank=True, help_text='Total taxes applied')
     grand_total = models.DecimalField(max_digits=10, decimal_places=2)
     
     currency = models.CharField(max_length=3, default='USD')

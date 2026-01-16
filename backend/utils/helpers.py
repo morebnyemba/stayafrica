@@ -18,33 +18,72 @@ def calculate_nights(check_in, check_out):
     return (check_out - check_in).days
 
 
-def calculate_booking_total(price_per_night, nights, cleaning_fee=0, service_fee=None):
-    """Calculate total booking cost"""
+def calculate_booking_total(price_per_night, nights, cleaning_fee=0, service_fee=None, property_obj=None, check_in=None, check_out=None):
+    """
+    Calculate total booking cost with optional dynamic pricing support
+    
+    Args:
+        price_per_night: Base price per night (fallback if no property_obj)
+        nights: Number of nights
+        cleaning_fee: Cleaning fee amount
+        service_fee: Service fee (from config if None)
+        property_obj: Property instance (for dynamic pricing)
+        check_in: Check-in date (for dynamic pricing)
+        check_out: Check-out date (for dynamic pricing)
+    
+    Returns:
+        dict with pricing breakdown
+    """
     from apps.admin_dashboard.models import SystemConfiguration
     
     config = SystemConfiguration.get_config()
     
-    price_per_night = Decimal(str(price_per_night))
-    cleaning_fee = Decimal(str(cleaning_fee))
+    # Use dynamic pricing if property and dates are provided
+    if property_obj and check_in and check_out:
+        try:
+            from services.pricing_service import PricingService
+            dynamic_pricing = PricingService.calculate_price_for_booking(
+                property_obj, check_in, check_out
+            )
+            nightly_total = Decimal(str(dynamic_pricing['nightly_total']))
+            fees_total = Decimal(str(dynamic_pricing['total_fees']))
+            taxes_total = Decimal(str(dynamic_pricing['total_taxes']))
+        except Exception as e:
+            # Fallback to static pricing if dynamic pricing fails
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning(f"Dynamic pricing failed, using static: {e}")
+            price_per_night = Decimal(str(price_per_night))
+            nightly_total = price_per_night * nights
+            fees_total = Decimal(str(cleaning_fee))
+            taxes_total = Decimal('0')
+    else:
+        # Static pricing (legacy)
+        price_per_night = Decimal(str(price_per_night))
+        nightly_total = price_per_night * nights
+        fees_total = Decimal(str(cleaning_fee))
+        taxes_total = Decimal('0')
     
     # Use service fee from config if not provided
     if service_fee is None:
         service_fee = config.service_fee
     service_fee = Decimal(str(service_fee))
     
-    nightly_total = price_per_night * nights
+    # Calculate commission
     commission_rate = Decimal(str(config.commission_rate))
     commission_fee = (nightly_total + service_fee) * commission_rate
     
-    grand_total = nightly_total + service_fee + cleaning_fee
+    # Calculate grand total
+    grand_total = nightly_total + fees_total + taxes_total + service_fee
     
     return {
         'nightly_total': nightly_total,
         'service_fee': service_fee,
-        'cleaning_fee': cleaning_fee,
+        'cleaning_fee': fees_total,  # Now includes all fees
+        'taxes': taxes_total,
         'commission_fee': commission_fee,
         'grand_total': grand_total,
-        'host_payout': nightly_total + cleaning_fee - commission_fee,
+        'host_payout': nightly_total + fees_total - commission_fee,
     }
 
 

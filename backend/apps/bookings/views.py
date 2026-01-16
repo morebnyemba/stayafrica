@@ -59,12 +59,15 @@ class BookingViewSet(viewsets.ModelViewSet):
         if property_obj.status != 'active':
             raise ValidationError("Property is not available for booking")
         
-        # Calculate totals
+        # Calculate totals with dynamic pricing
         nights = calculate_nights(check_in, check_out)
         totals = calculate_booking_total(
             property_obj.price_per_night,
             nights,
-            cleaning_fee=serializer.validated_data.get('cleaning_fee', 0)
+            cleaning_fee=serializer.validated_data.get('cleaning_fee', 0),
+            property_obj=property_obj,
+            check_in=check_in,
+            check_out=check_out
         )
         
         # Create booking with calculated values
@@ -73,6 +76,8 @@ class BookingViewSet(viewsets.ModelViewSet):
             nightly_total=totals['nightly_total'],
             service_fee=totals['service_fee'],
             commission_fee=totals['commission_fee'],
+            cleaning_fee=totals['cleaning_fee'],
+            taxes=totals.get('taxes', 0),
             grand_total=totals['grand_total'],
             currency=property_obj.currency
         )

@@ -276,20 +276,63 @@ class PropertyViewSet(viewsets.ModelViewSet):
         }
         
         if available:
-            # Calculate pricing
-            from utils.helpers import calculate_nights, calculate_booking_total
-            nights = calculate_nights(check_in_date, check_out_date)
-            totals = calculate_booking_total(property_obj.price_per_night, nights)
-            response_data.update({
-                'nights': nights,
-                'price_per_night': property_obj.price_per_night,
-                'pricing': {
-                    'nightly_total': str(totals['nightly_total']),
-                    'service_fee': str(totals['service_fee']),
-                    'commission_fee': str(totals['commission_fee']),
-                    'grand_total': str(totals['grand_total']),
-                }
-            })
+            # Calculate pricing with dynamic pricing support
+            from services.pricing_service import PricingService
+            try:
+                pricing = PricingService.calculate_price_for_booking(
+                    property_obj, check_in_date, check_out_date
+                )
+                from utils.helpers import calculate_nights
+                nights = calculate_nights(check_in_date, check_out_date)
+                
+                # Get system config for service fee
+                from apps.admin_dashboard.models import SystemConfiguration
+                config = SystemConfiguration.get_config()
+                from decimal import Decimal
+                service_fee = Decimal(str(config.service_fee))
+                commission_rate = Decimal(str(config.commission_rate))
+                nightly_total = Decimal(str(pricing['nightly_total']))
+                fees_total = Decimal(str(pricing['total_fees']))
+                taxes_total = Decimal(str(pricing['total_taxes']))
+                
+                # Calculate commission and grand total
+                commission_fee = (nightly_total + service_fee) * commission_rate
+                grand_total = nightly_total + fees_total + taxes_total + service_fee
+                
+                response_data.update({
+                    'nights': nights,
+                    'base_price_per_night': pricing['base_price_per_night'],
+                    'adjusted_price_per_night': pricing['adjusted_price_per_night'],
+                    'has_dynamic_pricing': pricing['total_adjustments'] != 0,
+                    'pricing': {
+                        'nightly_total': str(nightly_total),
+                        'fees': str(fees_total),
+                        'taxes': str(taxes_total),
+                        'service_fee': str(service_fee),
+                        'commission_fee': str(commission_fee),
+                        'grand_total': str(grand_total),
+                        'fee_breakdown': pricing['fee_breakdown'],
+                        'tax_breakdown': pricing['tax_breakdown'],
+                        'applied_pricing_rules': pricing['applied_rules'],
+                    }
+                })
+            except Exception as e:
+                # Fallback to static pricing
+                logger.warning(f"Dynamic pricing failed for property {property_obj.id}: {e}")
+                from utils.helpers import calculate_nights, calculate_booking_total
+                nights = calculate_nights(check_in_date, check_out_date)
+                totals = calculate_booking_total(property_obj.price_per_night, nights)
+                response_data.update({
+                    'nights': nights,
+                    'price_per_night': property_obj.price_per_night,
+                    'has_dynamic_pricing': False,
+                    'pricing': {
+                        'nightly_total': str(totals['nightly_total']),
+                        'service_fee': str(totals['service_fee']),
+                        'commission_fee': str(totals['commission_fee']),
+                        'grand_total': str(totals['grand_total']),
+                    }
+                })
         else:
             response_data['reason'] = 'Property is already booked for these dates'
         
@@ -601,6 +644,43 @@ class PropertyViewSet(viewsets.ModelViewSet):
         
         serializer = ReviewSerializer(reviews, many=True, context={'request': request})
         return Response(serializer.data)
+    
+    @action(detail=True, methods=['get'], permission_classes=[AllowAny])
+    def pricing_calendar(self, request, pk=None):
+        """
+        Get pricing calendar for a property showing daily prices
+        GET /api/v1/properties/{id}/pricing_calendar/?start_date=YYYY-MM-DD&end_date=YYYY-MM-DD
+        """
+        property_obj = self.get_object()
+        start_date = request.query_params.get('start_date')
+        end_date = request.query_params.get('end_date')
+        
+        if not start_date or not end_date:
+            return Response(
+                {'error': 'start_date and end_date are required (format: YYYY-MM-DD)'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            from services.pricing_service import PricingService
+            calendar = PricingService.get_price_calendar(property_obj, start_date, end_date)
+            return Response({
+                'property_id': property_obj.id,
+                'start_date': start_date,
+                'end_date': end_date,
+                'calendar': calendar,
+            })
+        except ValueError as e:
+            return Response(
+                {'error': f'Invalid date format: {str(e)}'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            logger.error(f"Error generating pricing calendar: {e}")
+            return Response(
+                {'error': 'Failed to generate pricing calendar'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 # Additional view classes for search and filtering
