@@ -1,5 +1,5 @@
 // POI (Points of Interest) API Service
-import apiClient from './api-client';
+import { apiClient } from './api-client';
 import {
   NearbyPOIsResponse,
   DiscoverPOIsRequest,
