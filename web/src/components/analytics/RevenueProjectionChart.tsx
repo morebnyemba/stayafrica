@@ -45,8 +45,6 @@ export const RevenueProjectionChart: React.FC<RevenueProjectionChartProps> = ({
     handleGenerateProjections();
   }, [handleGenerateProjections]);
 
-
-
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',

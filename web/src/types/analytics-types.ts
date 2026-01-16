@@ -108,12 +108,12 @@ export interface ExportFormat {
   data_type: 'dashboard' | 'revenue' | 'occupancy' | 'bookings' | 'performance';
 }
 
-export interface ChartTooltipPayload {
+export interface ChartTooltipPayload<T = Record<string, any>> {
   value: number;
   name: string;
   dataKey: string;
   color: string;
-  payload: any;
+  payload: T;
 }
 
 export interface ChartConfig {
