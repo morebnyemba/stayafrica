@@ -30,11 +30,7 @@ export const RevenueProjectionChart: React.FC<RevenueProjectionChartProps> = ({
     height = 400,
   } = config;
 
-  React.useEffect(() => {
-    handleGenerateProjections();
-  }, [propertyId, daysAhead]);
-
-  const handleGenerateProjections = () => {
+  const handleGenerateProjections = React.useCallback(() => {
     generateProjections(
       { property_id: propertyId, days_ahead: daysAhead },
       {
@@ -43,7 +39,13 @@ export const RevenueProjectionChart: React.FC<RevenueProjectionChartProps> = ({
         },
       }
     );
-  };
+  }, [propertyId, daysAhead, generateProjections]);
+
+  React.useEffect(() => {
+    handleGenerateProjections();
+  }, [handleGenerateProjections]);
+
+
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -200,7 +202,9 @@ export const RevenueProjectionChart: React.FC<RevenueProjectionChartProps> = ({
             <span>Actual</span>
           </div>
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-0.5 bg-green-600 border-dashed border-t-2"></div>
+            <svg width="32" height="2" className="overflow-visible">
+              <line x1="0" y1="1" x2="32" y2="1" stroke="#10b981" strokeWidth="2" strokeDasharray="5,5" />
+            </svg>
             <span>Projected</span>
           </div>
           <div className="flex items-center space-x-2">

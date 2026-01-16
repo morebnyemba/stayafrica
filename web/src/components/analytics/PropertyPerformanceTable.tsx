@@ -202,7 +202,7 @@ export const PropertyPerformanceTable: React.FC<PropertyPerformanceTableProps> =
                       <div className="w-16 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mr-2">
                         <div
                           className="bg-blue-600 h-2 rounded-full"
-                          style={{ width: `${Math.min(property.occupancy_rate, 100)}%` }}
+                          style={{ width: `${Math.min(Math.max(property.occupancy_rate, 0), 100)}%` }}
                         ></div>
                       </div>
                       <span className="text-sm text-gray-900 dark:text-white">

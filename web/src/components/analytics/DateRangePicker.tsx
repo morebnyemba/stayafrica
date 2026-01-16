@@ -25,6 +25,16 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
     endDate ? format(endDate, 'yyyy-MM-dd') : ''
   );
 
+  // Sync local state with props when they change
+  React.useEffect(() => {
+    if (startDate) {
+      setLocalStartDate(format(startDate, 'yyyy-MM-dd'));
+    }
+    if (endDate) {
+      setLocalEndDate(format(endDate, 'yyyy-MM-dd'));
+    }
+  }, [startDate, endDate]);
+
   const handleApply = () => {
     const start = localStartDate ? new Date(localStartDate) : null;
     const end = localEndDate ? new Date(localEndDate) : null;

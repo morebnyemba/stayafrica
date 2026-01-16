@@ -66,7 +66,9 @@ export const MetricCard: React.FC<MetricCardProps> = ({ data, className = '' }) 
 
   const getIconComponent = () => {
     if (!icon) return null;
-    const IconComponent = (LucideIcons as any)[icon] as LucideIcon;
+    type LucideIconsType = typeof LucideIcons;
+    type IconName = keyof LucideIconsType;
+    const IconComponent = LucideIcons[icon as IconName] as LucideIcon | undefined;
     return IconComponent ? <IconComponent className="h-5 w-5" /> : null;
   };
 
