@@ -534,6 +534,15 @@ class ApiClient {
     const safeId = this.assertId(propertyId, 'Property ID');
     return this.client.post(`/properties/${safeId}/toggle_instant_booking/`, data);
   }
+
+  // Analytics
+  async get(url: string, config?: any) {
+    return this.client.get(url, config);
+  }
+
+  async post(url: string, data?: any, config?: any) {
+    return this.client.post(url, data, config);
+  }
 }
 
 export const apiClient = new ApiClient();
