@@ -54,6 +54,17 @@ class Property(models.Model):
     # Media
     main_image = models.ImageField(upload_to='properties/%Y/%m/%d/', blank=True, null=True)  # Made optional
     
+    # Instant Booking Settings
+    instant_booking_enabled = models.BooleanField(
+        default=False,
+        help_text='Auto-confirm bookings from qualified guests'
+    )
+    instant_booking_requirements = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text='Requirements for instant booking (e.g., verified guests only, min reviews)'
+    )
+    
     # Metadata
     max_guests = models.IntegerField(default=2)
     bedrooms = models.IntegerField(default=1)

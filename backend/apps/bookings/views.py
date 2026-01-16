@@ -82,6 +82,17 @@ class BookingViewSet(viewsets.ModelViewSet):
             currency=property_obj.currency
         )
         
+        # Check for instant booking
+        instant_confirmed = False
+        try:
+            from services.instant_booking_service import InstantBookingService
+            confirmed, reason = InstantBookingService.auto_confirm_booking(booking)
+            instant_confirmed = confirmed
+            if confirmed:
+                logger.info(f"Booking {booking.booking_ref} instantly confirmed: {reason}")
+        except Exception as e:
+            logger.warning(f"Instant booking check failed: {e}")
+        
         # Log the action
         from django.contrib.contenttypes.models import ContentType
         content_type = ContentType.objects.get_for_model(Booking)
@@ -90,7 +101,11 @@ class BookingViewSet(viewsets.ModelViewSet):
             action='create',
             content_type=content_type,
             object_id=booking.id,
-            changes={'booking_ref': booking.booking_ref, 'property': property_obj.title}
+            changes={
+                'booking_ref': booking.booking_ref,
+                'property': property_obj.title,
+                'instant_confirmed': instant_confirmed
+            }
         )
         
         # Send confirmation email if Celery is available
@@ -102,14 +117,15 @@ class BookingViewSet(viewsets.ModelViewSet):
         else:
             logger.info("Celery not available, skipping confirmation email")
         
-        # Send push notification
-        try:
-            from services.notification_service import NotificationService
-            NotificationService.send_booking_confirmation(booking)
-        except Exception as e:
-            logger.warning(f"Could not send push notification: {e}")
+        # Send push notification (only if not instant-confirmed, as auto_confirm_booking already sends it)
+        if not instant_confirmed:
+            try:
+                from services.notification_service import NotificationService
+                NotificationService.send_booking_confirmation(booking)
+            except Exception as e:
+                logger.warning(f"Could not send push notification: {e}")
         
-        logger.info(f"Booking created: {booking.booking_ref}")
+        logger.info(f"Booking created: {booking.booking_ref} (instant_confirmed={instant_confirmed})")
     
     @action(detail=True, methods=['post'])
     @log_action('confirm_booking')

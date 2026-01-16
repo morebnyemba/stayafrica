@@ -785,6 +785,76 @@ class PropertyViewSet(viewsets.ModelViewSet):
                 {'error': 'Failed to generate pricing calendar'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+    
+    @action(detail=True, methods=['get'], permission_classes=[AllowAny])
+    def instant_booking_info(self, request, pk=None):
+        """
+        Get instant booking information for a property
+        GET /api/v1/properties/{id}/instant_booking_info/
+        """
+        property_obj = self.get_object()
+        
+        try:
+            from services.instant_booking_service import InstantBookingService
+            guest = request.user if request.user.is_authenticated else None
+            info = InstantBookingService.get_instant_booking_info(property_obj, guest)
+            return Response(info)
+        except Exception as e:
+            logger.error(f"Error getting instant booking info: {e}")
+            return Response(
+                {'error': 'Failed to get instant booking information'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    def toggle_instant_booking(self, request, pk=None):
+        """
+        Toggle instant booking on/off for a property (host only)
+        POST /api/v1/properties/{id}/toggle_instant_booking/
+        Body: {"enabled": true/false, "requirements": {...}}
+        """
+        property_obj = self.get_object()
+        
+        # Check if user is the host
+        if request.user != property_obj.host and not request.user.is_admin_user:
+            return Response(
+                {'error': 'Only the property host can modify instant booking settings'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        enabled = request.data.get('enabled')
+        if enabled is None:
+            return Response(
+                {'error': 'enabled field is required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        property_obj.instant_booking_enabled = enabled
+        
+        # Update requirements if provided
+        if 'requirements' in request.data:
+            try:
+                from services.instant_booking_service import InstantBookingService
+                InstantBookingService.set_instant_booking_requirements(
+                    property_obj,
+                    request.data['requirements']
+                )
+            except Exception as e:
+                logger.error(f"Error setting instant booking requirements: {e}")
+                return Response(
+                    {'error': 'Failed to update requirements'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        
+        property_obj.save(update_fields=['instant_booking_enabled'])
+        
+        logger.info(f"Instant booking {'enabled' if enabled else 'disabled'} for property {property_obj.id}")
+        
+        return Response({
+            'message': f'Instant booking {"enabled" if enabled else "disabled"}',
+            'instant_booking_enabled': property_obj.instant_booking_enabled,
+            'instant_booking_requirements': property_obj.instant_booking_requirements
+        })
 
 
 # Additional view classes for search and filtering
