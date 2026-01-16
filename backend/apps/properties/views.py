@@ -855,6 +855,91 @@ class PropertyViewSet(viewsets.ModelViewSet):
             'instant_booking_enabled': property_obj.instant_booking_enabled,
             'instant_booking_requirements': property_obj.instant_booking_requirements
         })
+    
+    @action(detail=True, methods=['get'], permission_classes=[AllowAny])
+    def nearby_pois(self, request, pk=None):
+        """
+        Get nearby points of interest for a property
+        GET /api/v1/properties/{id}/nearby_pois/?radius_km=5&poi_types=restaurant,cafe
+        """
+        property_obj = self.get_object()
+        
+        # Get parameters
+        radius_km = float(request.query_params.get('radius_km', 5))
+        poi_types = request.query_params.get('poi_types', '').split(',') if request.query_params.get('poi_types') else None
+        recommended_only = request.query_params.get('recommended_only', 'false').lower() == 'true'
+        
+        try:
+            from services.poi_service import POIService
+            
+            # Get POIs grouped by category
+            pois_by_category = POIService.get_pois_by_category(property_obj, radius_km=radius_km)
+            
+            # Filter if needed
+            if poi_types:
+                poi_types = [t.strip() for t in poi_types if t.strip()]
+                pois_by_category = {k: v for k, v in pois_by_category.items() if k in poi_types}
+            
+            if recommended_only:
+                # Filter to only recommended POIs
+                for category in pois_by_category:
+                    pois_by_category[category] = [
+                        poi for poi in pois_by_category[category] if poi['is_recommended']
+                    ]
+            
+            # Count total POIs
+            total_pois = sum(len(pois) for pois in pois_by_category.values())
+            
+            return Response({
+                'property_id': property_obj.id,
+                'radius_km': radius_km,
+                'total_pois': total_pois,
+                'pois_by_category': pois_by_category
+            })
+        except Exception as e:
+            logger.error(f"Error getting nearby POIs: {e}")
+            return Response(
+                {'error': 'Failed to get nearby POIs'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    def discover_pois(self, request, pk=None):
+        """
+        Discover and associate POIs with property (host only)
+        POST /api/v1/properties/{id}/discover_pois/
+        Body: {"radius_km": 5, "source": "auto"}
+        """
+        property_obj = self.get_object()
+        
+        # Check if user is the host
+        if request.user != property_obj.host and not request.user.is_admin_user:
+            return Response(
+                {'error': 'Only the property host can discover POIs'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        radius_km = float(request.data.get('radius_km', 5))
+        
+        try:
+            from services.poi_service import POIService
+            count = POIService.associate_pois_with_property(
+                property_obj,
+                radius_km=radius_km
+            )
+            
+            logger.info(f"Discovered {count} POIs for property {property_obj.id}")
+            
+            return Response({
+                'message': f'Discovered {count} nearby points of interest',
+                'count': count
+            })
+        except Exception as e:
+            logger.error(f"Error discovering POIs: {e}")
+            return Response(
+                {'error': 'Failed to discover POIs'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 # Additional view classes for search and filtering
