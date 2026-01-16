@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@tantml:react-query';
 import { useSearchParams } from 'next/navigation';
 import { apiClient } from '@/services/api-client';
 import { Filter, Navigation } from 'lucide-react';
@@ -10,6 +10,10 @@ import { SearchFilters, type FilterOptions } from '@/components/common/search-fi
 import { Button } from '@/components/ui';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
+import FlexibilityToggle from '@/components/search/FlexibilityToggle';
+import FlexibleDateSearchPanel, { FlexibilityType } from '@/components/search/FlexibleDateSearchPanel';
+import FlexibleDateResults from '@/components/search/FlexibleDateResults';
+import { useFlexibleSearch } from '@/hooks/useFlexibleSearch';
 
 export function ExploreContent() {
   const searchParams = useSearchParams();
@@ -31,6 +35,9 @@ export function ExploreContent() {
   const [searchQuery, setSearchQuery] = useState(searchParams.get('city') || '');
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [gettingLocation, setGettingLocation] = useState(false);
+  const [isFlexible, setIsFlexible] = useState(false);
+  const [flexibilityType, setFlexibilityType] = useState<FlexibilityType>('exact');
+  const [flexibleDays, setFlexibleDays] = useState<number | undefined>(3);
 
   // Get user's current location
   useEffect(() => {
@@ -125,6 +132,21 @@ export function ExploreContent() {
     setSearchQuery(query);
   };
 
+  const handleFlexibleSearch = (flexibility: FlexibilityType, days?: number) => {
+    setFlexibilityType(flexibility);
+    setFlexibleDays(days);
+  };
+
+  // Flexible search query
+  const { data: flexibleResults, isLoading: flexibleLoading } = useFlexibleSearch({
+    location: searchQuery,
+    checkIn: filters.checkIn || new Date().toISOString().split('T')[0],
+    checkOut: filters.checkOut || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    flexibility: flexibilityType,
+    days: flexibleDays,
+    guests: filters.guests,
+  });
+
   return (
     <div className="bg-sand-100 dark:bg-primary-900 min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
@@ -139,16 +161,22 @@ export function ExploreContent() {
                 {userLocation ? 'Showing properties near you' : 'Discover unique accommodations across Africa'}
               </p>
             </div>
-            <Button
-              onClick={handleUseMyLocation}
-              disabled={gettingLocation}
-              variant="outline"
-              size="sm"
-              className="flex items-center gap-2"
-            >
-              <Navigation className="w-4 h-4" />
-              {gettingLocation ? 'Getting location...' : userLocation ? 'Update location' : 'Use my location'}
-            </Button>
+            <div className="flex items-center gap-3">
+              <FlexibilityToggle
+                isFlexible={isFlexible}
+                onChange={setIsFlexible}
+              />
+              <Button
+                onClick={handleUseMyLocation}
+                disabled={gettingLocation}
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                <Navigation className="w-4 h-4" />
+                {gettingLocation ? 'Getting location...' : userLocation ? 'Update location' : 'Use my location'}
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -160,24 +188,43 @@ export function ExploreContent() {
           />
         </div>
 
-        {/* Properties Grid */}
-        {isLoading ? (
-          <PropertyListSkeleton count={9} />
-        ) : error ? (
-          <div className="bg-white dark:bg-primary-800 p-12 rounded-lg text-center border border-primary-200 dark:border-primary-700">
-            <p className="text-primary-600 dark:text-sand-300 mb-4">
-              Unable to load properties. Please try again later.
-            </p>
-            <p className="text-sm text-primary-500 dark:text-sand-400">
-              Error: {error instanceof Error ? error.message : 'Unknown error'}
-            </p>
+        {/* Flexible Date Search Panel */}
+        {isFlexible && filters.checkIn && filters.checkOut && (
+          <div className="mb-8 max-w-2xl">
+            <FlexibleDateSearchPanel
+              checkIn={new Date(filters.checkIn)}
+              checkOut={new Date(filters.checkOut)}
+              onSearch={handleFlexibleSearch}
+            />
           </div>
-        ) : properties.length === 0 ? (
-          <div className="bg-white dark:bg-primary-800 p-12 rounded-lg text-center border border-primary-200 dark:border-primary-700">
-            <Filter className="w-16 h-16 text-primary-400 dark:text-sand-500 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-primary-900 dark:text-sand-50 mb-2">
-              No Properties Found
-            </h3>
+        )}
+
+        {/* Results: Flexible or Regular */}
+        {isFlexible && flexibilityType !== 'exact' ? (
+          <FlexibleDateResults
+            results={flexibleResults?.date_options || []}
+            isLoading={flexibleLoading}
+          />
+        ) : (
+          <>
+            {/* Properties Grid */}
+            {isLoading ? (
+              <PropertyListSkeleton count={9} />
+            ) : error ? (
+              <div className="bg-white dark:bg-primary-800 p-12 rounded-lg text-center border border-primary-200 dark:border-primary-700">
+                <p className="text-primary-600 dark:text-sand-300 mb-4">
+                  Unable to load properties. Please try again later.
+                </p>
+                <p className="text-sm text-primary-500 dark:text-sand-400">
+                  Error: {error instanceof Error ? error.message : 'Unknown error'}
+                </p>
+              </div>
+            ) : properties.length === 0 ? (
+              <div className="bg-white dark:bg-primary-800 p-12 rounded-lg text-center border border-primary-200 dark:border-primary-700">
+                <Filter className="w-16 h-16 text-primary-400 dark:text-sand-500 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-primary-900 dark:text-sand-50 mb-2">
+                  No Properties Found
+                </h3>
             <p className="text-primary-600 dark:text-sand-300">
               Try adjusting your search filters to find more results.
             </p>
@@ -245,13 +292,15 @@ export function ExploreContent() {
         )}
 
         {/* Pagination Info */}
-        {properties.length > 0 && (
+        {properties.length > 0 && !isFlexible && (
           <div className="mt-8 text-center">
             <p className="text-primary-600 dark:text-sand-300">
               Showing {properties.length} properties {userLocation && '(sorted by distance)'}
             </p>
           </div>
         )}
+            </>
+          )}
       </div>
     </div>
   );
