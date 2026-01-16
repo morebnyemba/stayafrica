@@ -230,3 +230,188 @@ class UserPropertyInteractionAdmin(UnfoldModelAdmin):
         }),
     )
 
+
+# Register verification models
+from apps.users.verification_models import IdentityVerification, VerificationAttempt, VerificationSettings
+
+
+@admin.register(IdentityVerification)
+class IdentityVerificationAdmin(UnfoldModelAdmin):
+    """Admin interface for identity verification"""
+    
+    list_display = [
+        'user_email', 'document_type_display', 'status_badge',
+        'submitted_at', 'reviewed_by_name', 'reviewed_at'
+    ]
+    list_filter = ['status', 'document_type', 'document_country', 'submitted_at', 'verification_method']
+    search_fields = ['user__email', 'document_number', 'document_country']
+    readonly_fields = [
+        'id', 'submitted_at', 'reviewed_at', 'reviewed_by',
+        'expires_at', 'created_at', 'updated_at', 'document_preview',
+        'selfie_preview'
+    ]
+    list_select_related = ['user', 'reviewed_by']
+    date_hierarchy = 'submitted_at'
+    list_per_page = 25
+    
+    actions = ['approve_verifications', 'mark_under_review']
+    
+    fieldsets = (
+        (_('User Information'), {
+            'fields': ('id', 'user'),
+        }),
+        (_('Document Information'), {
+            'fields': (
+                'document_type', 'document_number', 'document_country',
+                'document_expiry_date'
+            ),
+        }),
+        (_('Uploaded Documents'), {
+            'fields': (
+                'document_front_image', 'document_preview',
+                'document_back_image', 'selfie_image', 'selfie_preview'
+            ),
+        }),
+        (_('Verification Status'), {
+            'fields': ('status', 'verification_method'),
+        }),
+        (_('Review Details'), {
+            'fields': (
+                'reviewed_at', 'reviewed_by', 'rejection_reason',
+                'admin_notes', 'expires_at'
+            ),
+            'classes': ['collapse'],
+        }),
+        (_('Metadata'), {
+            'fields': ('metadata', 'submitted_at', 'created_at', 'updated_at'),
+            'classes': ['collapse'],
+        }),
+    )
+    
+    @display(description=_('User'))
+    def user_email(self, obj):
+        return obj.user.email
+    
+    @display(description=_('Document Type'))
+    def document_type_display(self, obj):
+        return obj.get_document_type_display()
+    
+    @display(description=_('Status'), label=True)
+    def status_badge(self, obj):
+        colors = {
+            'pending': 'warning',
+            'under_review': 'info',
+            'approved': 'success',
+            'rejected': 'danger',
+            'expired': 'secondary',
+        }
+        return {
+            'value': obj.get_status_display(),
+            'color': colors.get(obj.status, 'secondary'),
+        }
+    
+    @display(description=_('Reviewed By'))
+    def reviewed_by_name(self, obj):
+        return obj.reviewed_by.email if obj.reviewed_by else '-'
+    
+    @display(description=_('Document Preview'))
+    def document_preview(self, obj):
+        if obj.document_front_image:
+            return format_html(
+                '<img src="{}" width="300" style="border: 2px solid #3A5C50; border-radius: 8px;" />',
+                obj.document_front_image.url
+            )
+        return "No image"
+    
+    @display(description=_('Selfie Preview'))
+    def selfie_preview(self, obj):
+        if obj.selfie_image:
+            return format_html(
+                '<img src="{}" width="200" style="border: 2px solid #3A5C50; border-radius: 50%;" />',
+                obj.selfie_image.url
+            )
+        return "No image"
+    
+    @admin.action(description=_('Approve selected verifications'))
+    def approve_verifications(self, request, queryset):
+        for verification in queryset.filter(status__in=['pending', 'under_review']):
+            verification.approve(request.user, notes='Bulk approved by admin')
+        self.message_user(request, f'{queryset.count()} verification(s) approved.')
+    
+    @admin.action(description=_('Mark as under review'))
+    def mark_under_review(self, request, queryset):
+        updated = queryset.filter(status='pending').update(status='under_review')
+        self.message_user(request, f'{updated} verification(s) marked as under review.')
+
+
+@admin.register(VerificationAttempt)
+class VerificationAttemptAdmin(UnfoldModelAdmin):
+    """Admin interface for verification attempts"""
+    
+    list_display = ['user_email', 'attempted_at', 'success_badge', 'ip_address']
+    list_filter = ['success', 'attempted_at']
+    search_fields = ['user__email', 'ip_address']
+    readonly_fields = ['user', 'verification', 'ip_address', 'user_agent', 'success', 'error_message', 'attempted_at']
+    list_select_related = ['user']
+    date_hierarchy = 'attempted_at'
+    
+    @display(description=_('User'))
+    def user_email(self, obj):
+        return obj.user.email
+    
+    @display(description=_('Success'), label=True)
+    def success_badge(self, obj):
+        return {
+            'value': 'Success' if obj.success else 'Failed',
+            'color': 'success' if obj.success else 'danger',
+        }
+    
+    def has_add_permission(self, request):
+        return False
+    
+    def has_change_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(VerificationSettings)
+class VerificationSettingsAdmin(UnfoldModelAdmin):
+    """Admin interface for verification settings"""
+    
+    list_display = ['id', 'max_attempts_per_day', 'verification_valid_years', 'updated_at']
+    readonly_fields = ['updated_at']
+    
+    fieldsets = (
+        (_('Rate Limiting'), {
+            'fields': ('max_attempts_per_day', 'max_attempts_per_month'),
+        }),
+        (_('Document Requirements'), {
+            'fields': ('require_document_back', 'require_selfie'),
+        }),
+        (_('Image Requirements'), {
+            'fields': ('min_image_width', 'min_image_height', 'max_image_size_mb'),
+        }),
+        (_('Verification Policy'), {
+            'fields': (
+                'verification_valid_years',
+                'require_verification_for_hosting',
+                'require_verification_for_booking'
+            ),
+        }),
+        (_('Third-Party Integration'), {
+            'fields': ('use_third_party_service', 'third_party_api_key'),
+            'classes': ['collapse'],
+        }),
+        (_('Metadata'), {
+            'fields': ('updated_at',),
+            'classes': ['collapse'],
+        }),
+    )
+    
+    def has_add_permission(self, request):
+        # Only allow one settings instance
+        return not VerificationSettings.objects.exists()
+    
+    def has_delete_permission(self, request, obj=None):
+        # Don't allow deleting settings
+        return False
+

@@ -11,6 +11,7 @@ import { PropertyImageCarousel } from '@/components/property/property-image-caro
 import { PropertyAmenities } from '@/components/property/property-amenities';
 import { PropertyHostCard } from '@/components/property/property-host-card';
 import { BookingPanel } from '@/components/booking';
+import POIList from '@/components/poi/POIList';
 import { Heart, MapPin, Share2, Star, Users, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
@@ -323,6 +324,13 @@ export function PropertyDetailsContent() {
                     </div>
                   ))}
                 </div>
+              </div>
+            )}
+
+            {/* Nearby Points of Interest */}
+            {property && (
+              <div>
+                <POIList propertyId={property.id} radiusKm={2} />
               </div>
             )}
           </div>

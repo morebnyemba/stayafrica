@@ -500,6 +500,49 @@ class ApiClient {
   async getUserInteractions() {
     return this.client.get('/interactions/');
   }
+
+  // Flexible Date Search
+  async flexibleSearch(params: {
+    check_in: string;
+    check_out: string;
+    flexibility?: 'exact' | 'flexible_days' | 'weekend' | 'month';
+    days?: number;
+    property_type?: string;
+    min_price?: number;
+    max_price?: number;
+    guests?: number;
+  }) {
+    return this.client.get('/properties/flexible_search/', { params });
+  }
+
+  // Instant Booking
+  async getInstantBookingInfo(propertyId: string) {
+    const safeId = this.assertId(propertyId, 'Property ID');
+    return this.client.get(`/properties/${safeId}/instant_booking_info/`);
+  }
+
+  async toggleInstantBooking(propertyId: string, data: {
+    enabled: boolean;
+    requirements?: {
+      require_verified?: boolean;
+      min_reviews?: number;
+      min_rating?: number;
+      require_completed_bookings?: boolean;
+      require_payment_method?: boolean;
+    };
+  }) {
+    const safeId = this.assertId(propertyId, 'Property ID');
+    return this.client.post(`/properties/${safeId}/toggle_instant_booking/`, data);
+  }
+
+  // Analytics
+  async get(url: string, config?: any) {
+    return this.client.get(url, config);
+  }
+
+  async post(url: string, data?: any, config?: any) {
+    return this.client.post(url, data, config);
+  }
 }
 
 export const apiClient = new ApiClient();

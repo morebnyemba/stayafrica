@@ -205,6 +205,110 @@ class PropertyViewSet(viewsets.ModelViewSet):
             )
     
     @action(detail=False, methods=['get'], permission_classes=[AllowAny])
+    def flexible_search(self, request):
+        """
+        Search properties with flexible dates
+        GET /api/v1/properties/flexible_search/?check_in=2026-02-01&check_out=2026-02-05&flexibility=flexible_days&days=3
+        
+        Parameters:
+        - check_in: Desired check-in date (YYYY-MM-DD)
+        - check_out: Desired check-out date (YYYY-MM-DD)
+        - flexibility: Type of flexibility ('exact', 'flexible_days', 'weekend', 'month')
+        - days: Number of days flexibility (for flexible_days type, default: 3)
+        - property_type: Optional filter
+        - min_price: Optional minimum price filter
+        - max_price: Optional maximum price filter
+        - guests: Optional minimum guests filter
+        - bedrooms: Optional minimum bedrooms filter
+        - city: Optional city filter
+        - country: Optional country filter
+        """
+        check_in = request.query_params.get('check_in')
+        check_out = request.query_params.get('check_out')
+        flexibility = request.query_params.get('flexibility', 'exact')
+        days = request.query_params.get('days', '3')
+        
+        if not check_in or not check_out:
+            return Response(
+                {'error': 'check_in and check_out dates are required (format: YYYY-MM-DD)'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Validate flexibility type
+        valid_types = ['exact', 'flexible_days', 'weekend', 'month']
+        if flexibility not in valid_types:
+            return Response(
+                {'error': f'flexibility must be one of: {", ".join(valid_types)}'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            flexibility_days = int(days)
+            if flexibility_days < 0 or flexibility_days > 14:
+                return Response(
+                    {'error': 'days must be between 0 and 14'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        except ValueError:
+            return Response(
+                {'error': 'days must be a valid integer'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Build filters
+        filters = {}
+        if request.query_params.get('property_type'):
+            filters['property_type'] = request.query_params.get('property_type')
+        if request.query_params.get('min_price'):
+            try:
+                filters['min_price'] = float(request.query_params.get('min_price'))
+            except ValueError:
+                pass
+        if request.query_params.get('max_price'):
+            try:
+                filters['max_price'] = float(request.query_params.get('max_price'))
+            except ValueError:
+                pass
+        if request.query_params.get('guests'):
+            try:
+                filters['guests'] = int(request.query_params.get('guests'))
+            except ValueError:
+                pass
+        if request.query_params.get('bedrooms'):
+            try:
+                filters['bedrooms'] = int(request.query_params.get('bedrooms'))
+            except ValueError:
+                pass
+        if request.query_params.get('city'):
+            filters['city'] = request.query_params.get('city')
+        if request.query_params.get('country'):
+            filters['country'] = request.query_params.get('country')
+        
+        # Perform flexible date search
+        try:
+            from services.flexible_date_search import FlexibleDateSearch
+            results = FlexibleDateSearch.search_properties_with_flexible_dates(
+                check_in=check_in,
+                check_out=check_out,
+                flexibility_type=flexibility,
+                flexibility_days=flexibility_days,
+                filters=filters
+            )
+            
+            # Add price range summary
+            price_summary = FlexibleDateSearch.get_price_range_summary(results)
+            results['price_summary'] = price_summary
+            
+            return Response(results)
+            
+        except Exception as e:
+            logger.error(f"Error in flexible date search: {e}")
+            return Response(
+                {'error': 'Failed to perform flexible date search', 'detail': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    @action(detail=False, methods=['get'], permission_classes=[AllowAny])
     def search_nearby(self, request):
         """Search for properties within a radius"""
         lat = request.query_params.get('lat')
@@ -276,20 +380,63 @@ class PropertyViewSet(viewsets.ModelViewSet):
         }
         
         if available:
-            # Calculate pricing
-            from utils.helpers import calculate_nights, calculate_booking_total
-            nights = calculate_nights(check_in_date, check_out_date)
-            totals = calculate_booking_total(property_obj.price_per_night, nights)
-            response_data.update({
-                'nights': nights,
-                'price_per_night': property_obj.price_per_night,
-                'pricing': {
-                    'nightly_total': str(totals['nightly_total']),
-                    'service_fee': str(totals['service_fee']),
-                    'commission_fee': str(totals['commission_fee']),
-                    'grand_total': str(totals['grand_total']),
-                }
-            })
+            # Calculate pricing with dynamic pricing support
+            from services.pricing_service import PricingService
+            try:
+                pricing = PricingService.calculate_price_for_booking(
+                    property_obj, check_in_date, check_out_date
+                )
+                from utils.helpers import calculate_nights
+                nights = calculate_nights(check_in_date, check_out_date)
+                
+                # Get system config for service fee
+                from apps.admin_dashboard.models import SystemConfiguration
+                config = SystemConfiguration.get_config()
+                from decimal import Decimal
+                service_fee = Decimal(str(config.service_fee))
+                commission_rate = Decimal(str(config.commission_rate))
+                nightly_total = Decimal(str(pricing['nightly_total']))
+                fees_total = Decimal(str(pricing['total_fees']))
+                taxes_total = Decimal(str(pricing['total_taxes']))
+                
+                # Calculate commission and grand total
+                commission_fee = (nightly_total + service_fee) * commission_rate
+                grand_total = nightly_total + fees_total + taxes_total + service_fee
+                
+                response_data.update({
+                    'nights': nights,
+                    'base_price_per_night': pricing['base_price_per_night'],
+                    'adjusted_price_per_night': pricing['adjusted_price_per_night'],
+                    'has_dynamic_pricing': pricing['total_adjustments'] != 0,
+                    'pricing': {
+                        'nightly_total': str(nightly_total),
+                        'fees': str(fees_total),
+                        'taxes': str(taxes_total),
+                        'service_fee': str(service_fee),
+                        'commission_fee': str(commission_fee),
+                        'grand_total': str(grand_total),
+                        'fee_breakdown': pricing['fee_breakdown'],
+                        'tax_breakdown': pricing['tax_breakdown'],
+                        'applied_pricing_rules': pricing['applied_rules'],
+                    }
+                })
+            except Exception as e:
+                # Fallback to static pricing
+                logger.warning(f"Dynamic pricing failed for property {property_obj.id}: {e}")
+                from utils.helpers import calculate_nights, calculate_booking_total
+                nights = calculate_nights(check_in_date, check_out_date)
+                totals = calculate_booking_total(property_obj.price_per_night, nights)
+                response_data.update({
+                    'nights': nights,
+                    'price_per_night': property_obj.price_per_night,
+                    'has_dynamic_pricing': False,
+                    'pricing': {
+                        'nightly_total': str(totals['nightly_total']),
+                        'service_fee': str(totals['service_fee']),
+                        'commission_fee': str(totals['commission_fee']),
+                        'grand_total': str(totals['grand_total']),
+                    }
+                })
         else:
             response_data['reason'] = 'Property is already booked for these dates'
         
@@ -601,6 +748,198 @@ class PropertyViewSet(viewsets.ModelViewSet):
         
         serializer = ReviewSerializer(reviews, many=True, context={'request': request})
         return Response(serializer.data)
+    
+    @action(detail=True, methods=['get'], permission_classes=[AllowAny])
+    def pricing_calendar(self, request, pk=None):
+        """
+        Get pricing calendar for a property showing daily prices
+        GET /api/v1/properties/{id}/pricing_calendar/?start_date=YYYY-MM-DD&end_date=YYYY-MM-DD
+        """
+        property_obj = self.get_object()
+        start_date = request.query_params.get('start_date')
+        end_date = request.query_params.get('end_date')
+        
+        if not start_date or not end_date:
+            return Response(
+                {'error': 'start_date and end_date are required (format: YYYY-MM-DD)'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            from services.pricing_service import PricingService
+            calendar = PricingService.get_price_calendar(property_obj, start_date, end_date)
+            return Response({
+                'property_id': property_obj.id,
+                'start_date': start_date,
+                'end_date': end_date,
+                'calendar': calendar,
+            })
+        except ValueError as e:
+            return Response(
+                {'error': f'Invalid date format: {str(e)}'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            logger.error(f"Error generating pricing calendar: {e}")
+            return Response(
+                {'error': 'Failed to generate pricing calendar'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    @action(detail=True, methods=['get'], permission_classes=[AllowAny])
+    def instant_booking_info(self, request, pk=None):
+        """
+        Get instant booking information for a property
+        GET /api/v1/properties/{id}/instant_booking_info/
+        """
+        property_obj = self.get_object()
+        
+        try:
+            from services.instant_booking_service import InstantBookingService
+            guest = request.user if request.user.is_authenticated else None
+            info = InstantBookingService.get_instant_booking_info(property_obj, guest)
+            return Response(info)
+        except Exception as e:
+            logger.error(f"Error getting instant booking info: {e}")
+            return Response(
+                {'error': 'Failed to get instant booking information'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    def toggle_instant_booking(self, request, pk=None):
+        """
+        Toggle instant booking on/off for a property (host only)
+        POST /api/v1/properties/{id}/toggle_instant_booking/
+        Body: {"enabled": true/false, "requirements": {...}}
+        """
+        property_obj = self.get_object()
+        
+        # Check if user is the host
+        if request.user != property_obj.host and not request.user.is_admin_user:
+            return Response(
+                {'error': 'Only the property host can modify instant booking settings'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        enabled = request.data.get('enabled')
+        if enabled is None:
+            return Response(
+                {'error': 'enabled field is required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        property_obj.instant_booking_enabled = enabled
+        
+        # Update requirements if provided
+        if 'requirements' in request.data:
+            try:
+                from services.instant_booking_service import InstantBookingService
+                InstantBookingService.set_instant_booking_requirements(
+                    property_obj,
+                    request.data['requirements']
+                )
+            except Exception as e:
+                logger.error(f"Error setting instant booking requirements: {e}")
+                return Response(
+                    {'error': 'Failed to update requirements'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        
+        property_obj.save(update_fields=['instant_booking_enabled'])
+        
+        logger.info(f"Instant booking {'enabled' if enabled else 'disabled'} for property {property_obj.id}")
+        
+        return Response({
+            'message': f'Instant booking {"enabled" if enabled else "disabled"}',
+            'instant_booking_enabled': property_obj.instant_booking_enabled,
+            'instant_booking_requirements': property_obj.instant_booking_requirements
+        })
+    
+    @action(detail=True, methods=['get'], permission_classes=[AllowAny])
+    def nearby_pois(self, request, pk=None):
+        """
+        Get nearby points of interest for a property
+        GET /api/v1/properties/{id}/nearby_pois/?radius_km=5&poi_types=restaurant,cafe
+        """
+        property_obj = self.get_object()
+        
+        # Get parameters
+        radius_km = float(request.query_params.get('radius_km', 5))
+        poi_types = request.query_params.get('poi_types', '').split(',') if request.query_params.get('poi_types') else None
+        recommended_only = request.query_params.get('recommended_only', 'false').lower() == 'true'
+        
+        try:
+            from services.poi_service import POIService
+            
+            # Get POIs grouped by category
+            pois_by_category = POIService.get_pois_by_category(property_obj, radius_km=radius_km)
+            
+            # Filter if needed
+            if poi_types:
+                poi_types = [t.strip() for t in poi_types if t.strip()]
+                pois_by_category = {k: v for k, v in pois_by_category.items() if k in poi_types}
+            
+            if recommended_only:
+                # Filter to only recommended POIs
+                for category in pois_by_category:
+                    pois_by_category[category] = [
+                        poi for poi in pois_by_category[category] if poi['is_recommended']
+                    ]
+            
+            # Count total POIs
+            total_pois = sum(len(pois) for pois in pois_by_category.values())
+            
+            return Response({
+                'property_id': property_obj.id,
+                'radius_km': radius_km,
+                'total_pois': total_pois,
+                'pois_by_category': pois_by_category
+            })
+        except Exception as e:
+            logger.error(f"Error getting nearby POIs: {e}")
+            return Response(
+                {'error': 'Failed to get nearby POIs'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    def discover_pois(self, request, pk=None):
+        """
+        Discover and associate POIs with property (host only)
+        POST /api/v1/properties/{id}/discover_pois/
+        Body: {"radius_km": 5, "source": "auto"}
+        """
+        property_obj = self.get_object()
+        
+        # Check if user is the host
+        if request.user != property_obj.host and not request.user.is_admin_user:
+            return Response(
+                {'error': 'Only the property host can discover POIs'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        radius_km = float(request.data.get('radius_km', 5))
+        
+        try:
+            from services.poi_service import POIService
+            count = POIService.associate_pois_with_property(
+                property_obj,
+                radius_km=radius_km
+            )
+            
+            logger.info(f"Discovered {count} POIs for property {property_obj.id}")
+            
+            return Response({
+                'message': f'Discovered {count} nearby points of interest',
+                'count': count
+            })
+        except Exception as e:
+            logger.error(f"Error discovering POIs: {e}")
+            return Response(
+                {'error': 'Failed to discover POIs'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 # Additional view classes for search and filtering

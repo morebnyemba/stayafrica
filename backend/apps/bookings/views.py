@@ -59,12 +59,15 @@ class BookingViewSet(viewsets.ModelViewSet):
         if property_obj.status != 'active':
             raise ValidationError("Property is not available for booking")
         
-        # Calculate totals
+        # Calculate totals with dynamic pricing
         nights = calculate_nights(check_in, check_out)
         totals = calculate_booking_total(
             property_obj.price_per_night,
             nights,
-            cleaning_fee=serializer.validated_data.get('cleaning_fee', 0)
+            cleaning_fee=serializer.validated_data.get('cleaning_fee', 0),
+            property_obj=property_obj,
+            check_in=check_in,
+            check_out=check_out
         )
         
         # Create booking with calculated values
@@ -73,9 +76,22 @@ class BookingViewSet(viewsets.ModelViewSet):
             nightly_total=totals['nightly_total'],
             service_fee=totals['service_fee'],
             commission_fee=totals['commission_fee'],
+            cleaning_fee=totals['cleaning_fee'],
+            taxes=totals.get('taxes', 0),
             grand_total=totals['grand_total'],
             currency=property_obj.currency
         )
+        
+        # Check for instant booking
+        instant_confirmed = False
+        try:
+            from services.instant_booking_service import InstantBookingService
+            confirmed, reason = InstantBookingService.auto_confirm_booking(booking)
+            instant_confirmed = confirmed
+            if confirmed:
+                logger.info(f"Booking {booking.booking_ref} instantly confirmed: {reason}")
+        except Exception as e:
+            logger.warning(f"Instant booking check failed: {e}")
         
         # Log the action
         from django.contrib.contenttypes.models import ContentType
@@ -85,7 +101,11 @@ class BookingViewSet(viewsets.ModelViewSet):
             action='create',
             content_type=content_type,
             object_id=booking.id,
-            changes={'booking_ref': booking.booking_ref, 'property': property_obj.title}
+            changes={
+                'booking_ref': booking.booking_ref,
+                'property': property_obj.title,
+                'instant_confirmed': instant_confirmed
+            }
         )
         
         # Send confirmation email if Celery is available
@@ -97,7 +117,15 @@ class BookingViewSet(viewsets.ModelViewSet):
         else:
             logger.info("Celery not available, skipping confirmation email")
         
-        logger.info(f"Booking created: {booking.booking_ref}")
+        # Send push notification (only if not instant-confirmed, as auto_confirm_booking already sends it)
+        if not instant_confirmed:
+            try:
+                from services.notification_service import NotificationService
+                NotificationService.send_booking_confirmation(booking)
+            except Exception as e:
+                logger.warning(f"Could not send push notification: {e}")
+        
+        logger.info(f"Booking created: {booking.booking_ref} (instant_confirmed={instant_confirmed})")
     
     @action(detail=True, methods=['post'])
     @log_action('confirm_booking')
@@ -139,6 +167,13 @@ class BookingViewSet(viewsets.ModelViewSet):
                 object_id=booking.id,
                 changes={'status': 'confirmed'}
             )
+            
+            # Send push notification to guest
+            try:
+                from services.notification_service import NotificationService
+                NotificationService.send_booking_confirmation(booking)
+            except Exception as e:
+                logger.warning(f"Could not send push notification: {e}")
         
         logger.info(f"Booking confirmed: {booking.booking_ref}")
         return Response({'status': 'confirmed', 'booking_ref': booking.booking_ref})

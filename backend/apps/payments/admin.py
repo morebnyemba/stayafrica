@@ -4,6 +4,7 @@ from django.utils.translation import gettext_lazy as _
 from unfold.admin import ModelAdmin as UnfoldModelAdmin
 from unfold.decorators import display
 from apps.payments.models import Payment, Wallet, WalletTransaction, Withdrawal, BankAccount
+from apps.payments.pricing_models import PricingRule, PropertyFee, PropertyTax, CurrencyExchangeRate
 
 
 @admin.register(Payment)
@@ -379,3 +380,190 @@ class WithdrawalAdmin(UnfoldModelAdmin):
     def mark_failed(self, request, queryset):
         updated = queryset.update(status='failed')
         self.message_user(request, f'{updated} withdrawal(s) failed.')
+
+
+@admin.register(PricingRule)
+class PricingRuleAdmin(UnfoldModelAdmin):
+    """Admin interface for dynamic pricing rules"""
+    
+    list_display = ['property_title', 'name', 'rule_type', 'active_badge', 'adjustment_display', 
+                    'date_range', 'priority']
+    list_filter = ['rule_type', 'is_active', 'adjustment_type', 'created_at']
+    search_fields = ['name', 'property__title', 'property__host__email']
+    list_select_related = ['property', 'property__host']
+    list_per_page = 25
+    ordering = ['property', '-priority', 'start_date']
+    
+    fieldsets = (
+        (_('Basic Information'), {
+            'fields': ('property', 'name', 'rule_type', 'is_active', 'priority'),
+        }),
+        (_('Adjustment'), {
+            'fields': ('adjustment_type', 'adjustment_value'),
+        }),
+        (_('Date Range'), {
+            'fields': ('start_date', 'end_date'),
+            'classes': ['collapse'],
+        }),
+        (_('Stay Requirements'), {
+            'fields': ('min_nights', 'max_nights'),
+            'classes': ['collapse'],
+        }),
+        (_('Booking Window'), {
+            'fields': ('min_days_advance', 'max_days_advance'),
+            'classes': ['collapse'],
+        }),
+    )
+    
+    @display(description=_('Property'))
+    def property_title(self, obj):
+        return f"{obj.property.title} ({obj.property.host.email})"
+    
+    @display(description=_('Active'), label=True)
+    def active_badge(self, obj):
+        return {
+            'value': 'Active' if obj.is_active else 'Inactive',
+            'color': 'success' if obj.is_active else 'secondary',
+        }
+    
+    @display(description=_('Adjustment'))
+    def adjustment_display(self, obj):
+        if obj.adjustment_type == 'percentage':
+            return f"{obj.adjustment_value}%"
+        return f"${obj.adjustment_value}"
+    
+    @display(description=_('Date Range'))
+    def date_range(self, obj):
+        if obj.start_date and obj.end_date:
+            return f"{obj.start_date} to {obj.end_date}"
+        return "Always active"
+
+
+@admin.register(PropertyFee)
+class PropertyFeeAdmin(UnfoldModelAdmin):
+    """Admin interface for property fees"""
+    
+    list_display = ['property_title', 'name', 'fee_type', 'amount_display', 'charge_type', 
+                    'active_badge', 'mandatory_badge']
+    list_filter = ['fee_type', 'charge_type', 'is_mandatory', 'is_active', 'created_at']
+    search_fields = ['name', 'property__title']
+    list_select_related = ['property']
+    list_per_page = 25
+    
+    fieldsets = (
+        (_('Basic Information'), {
+            'fields': ('property', 'fee_type', 'name', 'is_active'),
+        }),
+        (_('Fee Details'), {
+            'fields': ('amount', 'charge_type', 'is_mandatory'),
+        }),
+        (_('Conditions'), {
+            'fields': ('applies_after_guests',),
+            'classes': ['collapse'],
+        }),
+    )
+    
+    @display(description=_('Property'))
+    def property_title(self, obj):
+        return obj.property.title
+    
+    @display(description=_('Amount'))
+    def amount_display(self, obj):
+        return f"${obj.amount:.2f}"
+    
+    @display(description=_('Active'), label=True)
+    def active_badge(self, obj):
+        return {
+            'value': 'Active' if obj.is_active else 'Inactive',
+            'color': 'success' if obj.is_active else 'secondary',
+        }
+    
+    @display(description=_('Mandatory'), label=True)
+    def mandatory_badge(self, obj):
+        return {
+            'value': 'Required' if obj.is_mandatory else 'Optional',
+            'color': 'info' if obj.is_mandatory else 'secondary',
+        }
+
+
+@admin.register(PropertyTax)
+class PropertyTaxAdmin(UnfoldModelAdmin):
+    """Admin interface for property taxes"""
+    
+    list_display = ['property_title', 'name', 'tax_type', 'rate_display', 'active_badge', 
+                    'applies_to_display']
+    list_filter = ['tax_type', 'is_active', 'applies_to_base_price', 'applies_to_fees', 'created_at']
+    search_fields = ['name', 'property__title']
+    list_select_related = ['property']
+    list_per_page = 25
+    
+    fieldsets = (
+        (_('Basic Information'), {
+            'fields': ('property', 'tax_type', 'name', 'is_active'),
+        }),
+        (_('Tax Rate'), {
+            'fields': ('rate',),
+        }),
+        (_('Applies To'), {
+            'fields': ('applies_to_base_price', 'applies_to_fees'),
+        }),
+    )
+    
+    @display(description=_('Property'))
+    def property_title(self, obj):
+        return obj.property.title
+    
+    @display(description=_('Rate'))
+    def rate_display(self, obj):
+        return f"{obj.rate}%"
+    
+    @display(description=_('Active'), label=True)
+    def active_badge(self, obj):
+        return {
+            'value': 'Active' if obj.is_active else 'Inactive',
+            'color': 'success' if obj.is_active else 'secondary',
+        }
+    
+    @display(description=_('Applies To'))
+    def applies_to_display(self, obj):
+        parts = []
+        if obj.applies_to_base_price:
+            parts.append('Base Price')
+        if obj.applies_to_fees:
+            parts.append('Fees')
+        return ', '.join(parts) if parts else 'None'
+
+
+@admin.register(CurrencyExchangeRate)
+class CurrencyExchangeRateAdmin(UnfoldModelAdmin):
+    """Admin interface for currency exchange rates"""
+    
+    list_display = ['currency_pair', 'rate', 'active_badge', 'last_updated']
+    list_filter = ['from_currency', 'to_currency', 'is_active', 'last_updated']
+    search_fields = ['from_currency', 'to_currency']
+    list_per_page = 25
+    ordering = ['from_currency', 'to_currency']
+    
+    fieldsets = (
+        (_('Currency Pair'), {
+            'fields': ('from_currency', 'to_currency'),
+        }),
+        (_('Exchange Rate'), {
+            'fields': ('rate', 'is_active'),
+        }),
+        (_('Metadata'), {
+            'fields': ('last_updated',),
+            'classes': ['collapse'],
+        }),
+    )
+    
+    @display(description=_('Currency Pair'))
+    def currency_pair(self, obj):
+        return f"{obj.from_currency} → {obj.to_currency}"
+    
+    @display(description=_('Active'), label=True)
+    def active_badge(self, obj):
+        return {
+            'value': 'Active' if obj.is_active else 'Inactive',
+            'color': 'success' if obj.is_active else 'secondary',
+        }
