@@ -8,11 +8,17 @@ from apps.users.views import (
     ProfileUpdateView,
     UserSearchView,
 )
+from apps.users.verification_views import (
+    IdentityVerificationViewSet,
+    VerificationSettingsViewSet
+)
 
 app_name = 'users'
 
 router = DefaultRouter()
 router.register(r'users', UserViewSet, basename='user')
+router.register(r'verification', IdentityVerificationViewSet, basename='verification')
+router.register(r'verification-settings', VerificationSettingsViewSet, basename='verification-settings')
 
 urlpatterns = [
     path('', include(router.urls)),
