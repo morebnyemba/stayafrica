@@ -1,5 +1,5 @@
 // Pricing API Service
-import apiClient from './api-client';
+import { apiClient } from './api-client';
 import { PricingCalendarResponse, DynamicPricing } from '@/types/pricing-types';
 
 export const pricingApi = {
