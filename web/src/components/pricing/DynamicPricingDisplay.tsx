@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { TrendingUp, TrendingDown, Info } from 'lucide-react';
 import pricingApi from '@/services/pricing-api';
@@ -52,7 +52,6 @@ export default function DynamicPricingDisplay({
 
   const priceChange = ((pricing.adjusted_price - pricing.base_price) / pricing.base_price) * 100;
   const hasDiscount = priceChange < 0;
-  const hasSurcharge = priceChange > 0;
 
   return (
     <div className={`space-y-2 ${className}`}>
@@ -95,7 +94,7 @@ export default function DynamicPricingDisplay({
 
       {pricing.applied_rules.length > 0 && (
         <div className="flex flex-wrap gap-2 mt-3">
-          {pricing.applied_rules.slice(0, 2).map((rule, index) => (
+          {pricing.applied_rules.slice(0, 2).map((rule: any, index: number) => (
             <PricingRuleIndicator key={index} rule={rule} />
           ))}
           {pricing.applied_rules.length > 2 && (

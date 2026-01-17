@@ -24,9 +24,9 @@ export const useVerification = () => {
       );
       return response.data;
     },
-    refetchInterval: (data) => {
+    refetchInterval: (query) => {
       // Poll every 30 seconds if under review
-      return data?.status === 'UNDER_REVIEW' ? 30000 : false;
+      return query.state.data?.status === 'UNDER_REVIEW' ? 30000 : false;
     },
   });
 

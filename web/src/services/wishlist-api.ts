@@ -1,7 +1,7 @@
 // Wishlist API Service
+import axios from 'axios';
 import { apiClient } from './api-client';
 import {
-  Wishlist,
   CreateWishlistRequest,
   AddPropertyToWishlistRequest,
   AddCollaboratorRequest,
@@ -9,12 +9,19 @@ import {
   CommentItemRequest,
 } from '@/types/wishlist-types';
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || (process.env.NODE_ENV === 'production' ? 'https://api.zimlegend.online' : 'http://localhost:8000');
+
+const getAuthHeaders = () => {
+  const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
 export const wishlistApi = {
   /**
    * Get all wishlists for current user
    */
   async getWishlists() {
-    const response = await apiClient.get<Wishlist[]>('/wishlists/');
+    const response = await apiClient.get('/wishlists/');
     return response.data;
   },
 
@@ -22,7 +29,7 @@ export const wishlistApi = {
    * Get single wishlist by ID
    */
   async getWishlist(wishlistId: string) {
-    const response = await apiClient.get<Wishlist>(`/wishlists/${wishlistId}/`);
+    const response = await apiClient.get(`/wishlists/${wishlistId}/`);
     return response.data;
   },
 
@@ -30,7 +37,7 @@ export const wishlistApi = {
    * Get wishlist by share token (public access)
    */
   async getSharedWishlist(shareToken: string) {
-    const response = await apiClient.get<Wishlist>(`/wishlists/${shareToken}/shared/`);
+    const response = await apiClient.get(`/wishlists/${shareToken}/shared/`);
     return response.data;
   },
 
@@ -38,7 +45,7 @@ export const wishlistApi = {
    * Create new wishlist
    */
   async createWishlist(data: CreateWishlistRequest) {
-    const response = await apiClient.post<Wishlist>('/wishlists/', data);
+    const response = await apiClient.post('/wishlists/', data);
     return response.data;
   },
 
@@ -46,7 +53,7 @@ export const wishlistApi = {
    * Update wishlist
    */
   async updateWishlist(wishlistId: string, data: Partial<CreateWishlistRequest>) {
-    const response = await apiClient.put<Wishlist>(`/wishlists/${wishlistId}/`, data);
+    const response = await apiClient.post(`/wishlists/${wishlistId}/`, data);
     return response.data;
   },
 
@@ -54,7 +61,9 @@ export const wishlistApi = {
    * Delete wishlist
    */
   async deleteWishlist(wishlistId: string) {
-    await apiClient.delete(`/wishlists/${wishlistId}/`);
+    await axios.delete(`${API_BASE_URL}/api/v1/wishlists/${wishlistId}/`, {
+      headers: getAuthHeaders()
+    });
   },
 
   /**

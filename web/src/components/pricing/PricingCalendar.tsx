@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { ChevronLeft, ChevronRight, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import pricingApi from '@/services/pricing-api';
@@ -103,9 +103,8 @@ export default function PricingCalendar({ propertyId }: PricingCalendarProps) {
           </div>
         ))}
         
-        {calendar.calendar.map((day, index) => {
+        {calendar.calendar.map((day: any, index: number) => {
           const date = new Date(day.date);
-          const dayOfWeek = date.getDay();
           const isToday = date.toDateString() === new Date().toDateString();
 
           return (
@@ -131,7 +130,7 @@ export default function PricingCalendar({ propertyId }: PricingCalendarProps) {
                   )}
                   {day.applied_rules.length > 0 && (
                     <div className="mt-1">
-                      {day.applied_rules.map((rule, idx) => (
+                      {day.applied_rules.map((rule: any, idx: number) => (
                         <span
                           key={idx}
                           className="inline-block text-xs bg-white bg-opacity-50 px-1 py-0.5 rounded mr-1 mb-1"

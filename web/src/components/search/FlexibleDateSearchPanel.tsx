@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Calendar, Minus, Plus } from 'lucide-react';
 
 export type FlexibilityType = 'exact' | 'flexible_days' | 'weekends' | 'month';

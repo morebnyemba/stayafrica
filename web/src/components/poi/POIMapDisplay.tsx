@@ -13,12 +13,11 @@ interface POIMapDisplayProps {
 
 export default function POIMapDisplay({
   propertyId: _propertyId,
-  propertyLocation,
+  propertyLocation: _propertyLocation,
   pois,
-  onPOIClick,
+  onPOIClick: _onPOIClick,
 }: POIMapDisplayProps) {
   const mapRef = useRef<HTMLDivElement>(null);
-  const [selectedPOI, setSelectedPOI] = useState<PropertyPOI | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
 
   const getCategoryColor = (type: POIType): string => {
@@ -68,11 +67,6 @@ export default function POIMapDisplay({
 
     loadMapbox();
   }, [mapLoaded]);
-
-  const handlePOIClick = (poi: PropertyPOI) => {
-    setSelectedPOI(poi);
-    onPOIClick?.(poi);
-  };
 
   return (
     <div className="relative">

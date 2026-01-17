@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Copy, Check, Mail, Facebook, Twitter, Link as LinkIcon } from 'lucide-react';
 
 interface WishlistShareProps {

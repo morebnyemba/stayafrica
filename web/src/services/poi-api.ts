@@ -1,9 +1,7 @@
 // POI (Points of Interest) API Service
 import { apiClient } from './api-client';
 import {
-  NearbyPOIsResponse,
   DiscoverPOIsRequest,
-  DiscoverPOIsResponse,
   POIType,
 } from '@/types/poi-types';
 
@@ -24,7 +22,7 @@ export const poiApi = {
     if (options?.poiTypes?.length) params.poi_types = options.poiTypes.join(',');
     if (options?.recommendedOnly !== undefined) params.recommended_only = options.recommendedOnly;
 
-    const response = await apiClient.get<NearbyPOIsResponse>(
+    const response = await apiClient.get(
       `/properties/${propertyId}/nearby_pois/`,
       { params }
     );
@@ -35,7 +33,7 @@ export const poiApi = {
    * Discover and associate POIs with property (host only)
    */
   async discoverPOIs(propertyId: string, data?: DiscoverPOIsRequest) {
-    const response = await apiClient.post<DiscoverPOIsResponse>(
+    const response = await apiClient.post(
       `/properties/${propertyId}/discover_pois/`,
       data || {}
     );
