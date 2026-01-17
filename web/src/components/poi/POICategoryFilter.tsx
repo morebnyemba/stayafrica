@@ -1,6 +1,5 @@
 'use client';
 
-import React from 'react';
 import { Filter } from 'lucide-react';
 import { POIType } from '@/types/poi-types';
 

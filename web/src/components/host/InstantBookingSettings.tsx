@@ -24,7 +24,7 @@ export default function InstantBookingSettings({ propertyId }: InstantBookingSet
   const { data: settings, isLoading } = useQuery({
     queryKey: ['instant-booking-settings', propertyId],
     queryFn: async () => {
-      const response = await apiClient.get<InstantBookingSettings>(
+      const response = await apiClient.get(
         `/properties/${propertyId}/instant_booking_info/`
       );
       return response.data;
@@ -62,7 +62,7 @@ export default function InstantBookingSettings({ propertyId }: InstantBookingSet
 
   const updateMutation = useMutation({
     mutationFn: async (data: Partial<InstantBookingSettings>) => {
-      const response = await apiClient.patch(
+      const response = await apiClient.post(
         `/properties/${propertyId}/instant_booking_info/`,
         data
       );

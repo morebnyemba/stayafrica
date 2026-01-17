@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { MapPin, Navigation } from 'lucide-react';
 import { PropertyPOI, POIType } from '@/types/poi-types';
 
@@ -12,7 +12,7 @@ interface POIMapDisplayProps {
 }
 
 export default function POIMapDisplay({
-  propertyId,
+  propertyId: _propertyId,
   propertyLocation,
   pois,
   onPOIClick,

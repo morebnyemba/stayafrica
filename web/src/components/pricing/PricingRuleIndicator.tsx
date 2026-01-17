@@ -1,6 +1,5 @@
 'use client';
 
-import React from 'react';
 import { Sparkles, Calendar, Clock, TrendingDown, Zap } from 'lucide-react';
 import { AppliedPricingRule } from '@/types/pricing-types';
 
