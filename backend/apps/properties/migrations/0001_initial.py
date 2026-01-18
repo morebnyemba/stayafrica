@@ -40,7 +40,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Property',
             fields=[
-                ('id', models.CharField(max_length=10, primary_key=True, editable=False)),
+                ('id', models.CharField(editable=False, max_length=10, primary_key=True, serialize=False)),
                 ('title', models.CharField(max_length=255)),
                 ('description', models.TextField()),
                 ('property_type', models.CharField(choices=[('lodge', 'Lodge'), ('cottage', 'Cottage'), ('room', 'Room'), ('apartment', 'Apartment'), ('house', 'House'), ('villa', 'Villa')], max_length=20)),
