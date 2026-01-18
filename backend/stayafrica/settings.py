@@ -91,6 +91,8 @@ INSTALLED_APPS = [
     'apps.messaging',
     'apps.admin_dashboard',
     'apps.experiences',
+    'apps.notifications',
+    'apps.health',
 ]
 
 MIDDLEWARE = [
