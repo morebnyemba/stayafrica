@@ -21,10 +21,12 @@ All API endpoint 404 errors have been resolved by fixing the URL configuration i
 - Changed to use `apps.users.api_urls` in main URLs
 - Updated router registration to `router.register(r'users/verification', ...)` to match frontend
 
-### 3. Analytics Endpoints ✅
+### 3. Analytics Endpoints (404) ✅
 **Problem:** Various analytics endpoints reported as 404
-**Status:** Already correctly configured - verified structure matches frontend expectations
-**Endpoints:** All analytics endpoints under `/api/v1/properties/analytics/` are properly configured
+**Cause:** Missing import - `from django.db import models` in `analytics_views.py`
+**Details:** The views were using `models.Sum()` and `models.Avg()` aggregation functions without importing the models module, causing runtime errors when endpoints were accessed
+
+**Fix:** Added `from django.db import models` import to `backend/apps/properties/analytics_views.py`
 
 ## Changes Made
 
@@ -37,7 +39,11 @@ All API endpoint 404 errors have been resolved by fixing the URL configuration i
    - Updated verification router registration to include `users/` prefix
    - Added clarifying comments about URL pattern design
 
-3. `/API_ENDPOINT_FIX.md`
+3. `/backend/apps/properties/analytics_views.py`
+   - Added missing `from django.db import models` import
+   - This was causing 404 errors when aggregation functions were used
+
+4. `/API_ENDPOINT_FIX.md`
    - Comprehensive documentation of changes
    - Endpoint reference guide
    - Testing instructions
@@ -180,6 +186,7 @@ If issues arise after deployment:
 
 - `backend/stayafrica/urls.py` - Main URL configuration
 - `backend/apps/users/api_urls.py` - Users API URL configuration with verification
+- `backend/apps/properties/analytics_views.py` - Added missing models import for analytics
 - `API_ENDPOINT_FIX.md` - Comprehensive documentation (new file)
 
 ## Commit History

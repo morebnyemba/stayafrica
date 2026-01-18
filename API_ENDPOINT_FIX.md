@@ -10,6 +10,7 @@ Multiple API endpoints were returning 404 errors:
 1. **Notifications app not registered** in main URL configuration
 2. **Wrong users URL module** - main URLs referenced `apps.users.urls` instead of `apps.users.api_urls`
 3. **Missing verification endpoints** - only available in `api_urls.py`, not in `urls.py`
+4. **Analytics views missing import** - `models` module from `django.db` not imported, causing runtime errors
 
 ## Changes Made
 
@@ -47,6 +48,20 @@ router.register(r'users/verification', IdentityVerificationViewSet, basename='ve
 - The router matches literal strings before numeric IDs, so no conflict occurs
 - This is a common and supported pattern in Django REST Framework
 - Alternative would require changing all frontend verification API calls
+
+### File: `/backend/apps/properties/analytics_views.py`
+
+#### Added Missing Import:
+```python
+# Added:
+from django.db import models
+```
+
+**Why this was needed:**
+- The views were using `models.Sum()` and `models.Avg()` aggregation functions
+- These are Django ORM functions that require the models module to be imported
+- Without this import, the analytics endpoints would fail with a NameError at runtime
+- This was a pre-existing bug that caused all analytics endpoints to return 404 errors
 
 ## Available Endpoints After Fix
 
