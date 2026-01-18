@@ -42,10 +42,10 @@ path('api/v1/', include('apps.notifications.urls', namespace='notifications')),
 - `PUT /api/v1/notifications/preferences/` - Update notification preferences
 
 ### User Verification
-- `GET /api/v1/verification/current_status/` - Get current verification status
-- `POST /api/v1/verification/` - Submit verification
-- `GET /api/v1/verification/{id}/` - Get verification details
-- `PATCH /api/v1/verification/{id}/` - Update verification
+- `GET /api/v1/users/verification/current_status/` - Get current verification status
+- `POST /api/v1/users/verification/` - Submit verification
+- `GET /api/v1/users/verification/{id}/` - Get verification details
+- `PATCH /api/v1/users/verification/{id}/` - Update verification
 
 ### Analytics (already working, verified)
 - `GET /api/v1/properties/analytics/host/dashboard/` - Analytics dashboard
@@ -66,7 +66,7 @@ python manage.py check
 
 # 2. Test endpoint availability (with authentication)
 curl -H "Authorization: Bearer YOUR_TOKEN" https://api.stayafrica.app/api/v1/notifications/
-curl -H "Authorization: Bearer YOUR_TOKEN" https://api.stayafrica.app/api/v1/verification/current_status/
+curl -H "Authorization: Bearer YOUR_TOKEN" https://api.stayafrica.app/api/v1/users/verification/current_status/
 ```
 
 ## Frontend Impact

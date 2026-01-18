@@ -17,8 +17,8 @@ app_name = 'users'
 
 router = DefaultRouter()
 router.register(r'users', UserViewSet, basename='user')
-router.register(r'verification', IdentityVerificationViewSet, basename='verification')
-router.register(r'verification-settings', VerificationSettingsViewSet, basename='verification-settings')
+router.register(r'users/verification', IdentityVerificationViewSet, basename='verification')
+router.register(r'users/verification-settings', VerificationSettingsViewSet, basename='verification-settings')
 
 urlpatterns = [
     path('', include(router.urls)),
