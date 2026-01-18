@@ -15,11 +15,15 @@ import {
   BarChart3,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { AnalyticsDashboard } from '@/components/analytics';
+import { VerificationStatus } from '@/components/verification/VerificationStatus';
+import { useState } from 'react';
 import dynamic from 'next/dynamic';
 const ProtectedRoute = dynamic(() => import('@/components/auth/protected-route').then(m => m.ProtectedRoute), { ssr: false });
 
 export function HostDashboard() {
   const { user, isAuthenticated } = useAuth();
+  const [activeTab, setActiveTab] = useState<'overview' | 'analytics'>('overview');
 
   // Redirect if not a host
   if (user && user.role !== 'host') {
@@ -176,18 +180,54 @@ export function HostDashboard() {
     <ProtectedRoute>
       <div className="min-h-screen bg-sand-100 dark:bg-primary-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Welcome Section */}
+          {/* Welcome Section with Tabs */}
           <div className="mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold text-primary-900 dark:text-sand-50 mb-2">
-              Welcome back, {user?.first_name}! 🏠
-            </h1>
-            <p className="text-lg text-primary-600 dark:text-sand-300">
-              Here&apos;s how your properties are performing
-            </p>
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+              <div>
+                <h1 className="text-3xl md:text-4xl font-bold text-primary-900 dark:text-sand-50 mb-2">
+                  Welcome back, {user?.first_name}! 🏠
+                </h1>
+                <p className="text-lg text-primary-600 dark:text-sand-300">
+                  Here&apos;s how your properties are performing
+                </p>
+              </div>
+              
+              {/* Tab Navigation */}
+              <div className="flex space-x-2 bg-primary-100 dark:bg-primary-800 rounded-lg p-1">
+                <button
+                  onClick={() => setActiveTab('overview')}
+                  className={`px-6 py-2 rounded-md font-medium transition-all ${
+                    activeTab === 'overview'
+                      ? 'bg-white dark:bg-primary-700 text-primary-900 dark:text-sand-50 shadow-sm'
+                      : 'text-primary-600 dark:text-sand-300 hover:text-primary-900 dark:hover:text-sand-50'
+                  }`}
+                >
+                  Overview
+                </button>
+                <button
+                  onClick={() => setActiveTab('analytics')}
+                  className={`px-6 py-2 rounded-md font-medium transition-all flex items-center gap-2 ${
+                    activeTab === 'analytics'
+                      ? 'bg-white dark:bg-primary-700 text-primary-900 dark:text-sand-50 shadow-sm'
+                      : 'text-primary-600 dark:text-sand-300 hover:text-primary-900 dark:hover:text-sand-50'
+                  }`}
+                >
+                  <BarChart3 className="w-4 h-4" />
+                  Analytics
+                </button>
+              </div>
+            </div>
           </div>
 
+          {/* Verification Status Banner */}
+          {activeTab === 'overview' && (
+            <div className="mb-8">
+              <VerificationStatus />
+            </div>
+          )}
+
           {/* Pending Actions Alert */}
-          {pendingData && pendingData.total_pending > 0 && (
+          {activeTab === 'overview' && pendingData && pendingData.total_pending > 0 && (
             <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 mb-8">
               <div className="flex items-start gap-3">
                 <AlertCircle className="w-5 h-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0 mt-0.5" />
@@ -214,8 +254,11 @@ export function HostDashboard() {
             </div>
           )}
 
-          {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {/* Tab Content */}
+          {activeTab === 'overview' ? (
+            <>
+              {/* Stats Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             {loadingAnalytics ? (
               Array.from({ length: 4 }).map((_, i) => (
                 <div key={i} className="card p-6 animate-pulse">
@@ -476,6 +519,11 @@ export function HostDashboard() {
                 </table>
               </div>
             </div>
+          )}
+            </>
+          ) : (
+            /* Analytics Tab */
+            <AnalyticsDashboard />
           )}
         </div>
       </div>

@@ -24,6 +24,7 @@ import {
 import { toast } from 'react-hot-toast';
 import { Button } from '@/components/ui';
 import { Input } from '@/components/ui/Input';
+import { HostTaxReport } from '@/components/tax/HostTaxReport';
 
 type Period = 'week' | 'month' | 'year';
 
@@ -451,7 +452,7 @@ export function HostEarningsContent() {
           </section>
 
           {/* Bank Accounts Section */}
-          <section aria-labelledby="bank-accounts-heading" className="card p-4 sm:p-6">
+          <section aria-labelledby="bank-accounts-heading" className="card p-4 sm:p-6 mb-8">
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h2 id="bank-accounts-heading" className="text-xl sm:text-2xl font-bold text-primary-900 dark:text-sand-50 mb-1">
@@ -653,6 +654,12 @@ export function HostEarningsContent() {
                 </Button>
               </div>
             )}
+          </section>
+
+          {/* Tax Report Section */}
+          <section aria-labelledby="tax-report-heading" className="mb-8">
+            <h2 id="tax-report-heading" className="sr-only">Tax Report</h2>
+            <HostTaxReport />
           </section>
         </div>
       </div>
