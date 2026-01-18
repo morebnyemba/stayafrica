@@ -471,13 +471,13 @@ if DEBUG:
         },
     }
 else:
-    # Production: Use Redis with encryption for message security
+    # Production: Use Redis with optional encryption for message security
     channel_config = {
         'hosts': [REDIS_URL],
         'capacity': CHANNELS_CAPACITY,
         'expiry': CHANNELS_EXPIRY,
     }
-    # Use dedicated encryption key if provided, otherwise use SECRET_KEY as fallback
+    # Add encryption if CHANNELS_ENCRYPTION_KEY is configured (recommended for production)
     if CHANNELS_ENCRYPTION_KEY:
         channel_config['symmetric_encryption_keys'] = [CHANNELS_ENCRYPTION_KEY]
     
