@@ -80,6 +80,7 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'django_celery_beat',
     'django_celery_results',
+    'channels',
     
     # Local apps
     'apps.users',
@@ -449,6 +450,43 @@ SESSION_CACHE_ALIAS = 'session'
 #         'TIMEOUT': 300,
 #     }
 # }
+
+# Channels Layer Configuration (WebSockets)
+# Configuration for real-time message passing between server instances
+CHANNELS_CAPACITY = int(os.getenv('CHANNELS_CAPACITY', '1500'))  # Maximum messages per channel
+CHANNELS_EXPIRY = int(os.getenv('CHANNELS_EXPIRY', '10'))  # Message expiry in seconds
+CHANNELS_ENCRYPTION_KEY = os.getenv('CHANNELS_ENCRYPTION_KEY', None)
+
+# Uses Redis for real-time message passing between server instances
+if DEBUG:
+    # Development: Use Redis with basic configuration
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': 'channels_redis.core.RedisChannelLayer',
+            'CONFIG': {
+                'hosts': [REDIS_URL],
+                'capacity': CHANNELS_CAPACITY,
+                'expiry': CHANNELS_EXPIRY,
+            },
+        },
+    }
+else:
+    # Production: Use Redis with optional encryption for message security
+    channel_config = {
+        'hosts': [REDIS_URL],
+        'capacity': CHANNELS_CAPACITY,
+        'expiry': CHANNELS_EXPIRY,
+    }
+    # Add encryption if CHANNELS_ENCRYPTION_KEY is configured (recommended for production)
+    if CHANNELS_ENCRYPTION_KEY:
+        channel_config['symmetric_encryption_keys'] = [CHANNELS_ENCRYPTION_KEY]
+    
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': 'channels_redis.core.RedisChannelLayer',
+            'CONFIG': channel_config,
+        },
+    }
 
 # Erlang Messaging Service Configuration
 ERLANG_MESSAGING_URL = os.getenv('ERLANG_MESSAGING_URL', 'http://erlang-messaging:8765')
