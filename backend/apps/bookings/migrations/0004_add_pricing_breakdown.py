@@ -8,7 +8,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('bookings', '0002_auto_previous'),  # Replace with your last migration
+        ('bookings', '0003_merge_0002_booking_taxes_0002_initial'),
     ]
 
     operations = [
