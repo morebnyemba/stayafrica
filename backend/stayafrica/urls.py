@@ -17,15 +17,15 @@ urlpatterns = [
     path('api/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
     
     # API v1
-    path('api/v1/', include('apps.users.api_urls', namespace='users')),
-    path('api/v1/', include('apps.properties.urls', namespace='properties')),
-    path('api/v1/', include('apps.bookings.urls', namespace='bookings')),
-    path('api/v1/', include('apps.payments.urls', namespace='payments')),
-    path('api/v1/', include('apps.reviews.urls', namespace='reviews')),
-    path('api/v1/', include('apps.experiences.urls', namespace='experiences')),
-    path('api/v1/', include('apps.notifications.urls', namespace='notifications')),
-    path('api/v1/messaging/', include('apps.messaging.urls', namespace='messaging')),
-    path('api/v1/admin/', include('apps.admin_dashboard.urls', namespace='admin_dashboard')),
+    path('api/v1/', include('apps.users.api_urls')),
+    path('api/v1/', include('apps.properties.urls')),
+    path('api/v1/', include('apps.bookings.urls')),
+    path('api/v1/', include('apps.payments.urls')),
+    path('api/v1/', include('apps.reviews.urls')),
+    path('api/v1/', include('apps.experiences.urls')),
+    path('api/v1/', include('apps.notifications.urls')),
+    path('api/v1/messaging/', include('apps.messaging.urls')),
+    path('api/v1/admin/', include('apps.admin_dashboard.urls')),
 ]
 
 if settings.DEBUG:
