@@ -11,7 +11,10 @@ done
 
 echo "✅ Database ready"
 echo "🔄 Running database migrations..."
-python manage.py migrate --noinput
+if ! python manage.py migrate --noinput; then
+  echo "❌ Migration failed"
+  exit 1
+fi
 
 echo "🚀 Starting Daphne ASGI server..."
 exec daphne -b 0.0.0.0 -p 8000 stayafrica.asgi:application
