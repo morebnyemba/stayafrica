@@ -53,15 +53,30 @@ INSTALLED_APPS = [
 #### Added CHANNEL_LAYERS configuration:
 ```python
 # Channels Layer Configuration (WebSockets)
+# Configuration for real-time message passing between server instances
+CHANNELS_CAPACITY = int(os.getenv('CHANNELS_CAPACITY', '1500'))  # Maximum messages per channel
+CHANNELS_EXPIRY = int(os.getenv('CHANNELS_EXPIRY', '10'))  # Message expiry in seconds
+CHANNELS_ENCRYPTION_KEY = os.getenv('CHANNELS_ENCRYPTION_KEY', None)
+
+# Development: Uses Redis with basic configuration
+# Production: Uses Redis with optional encryption for message security
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
             'hosts': [REDIS_URL],
+            'capacity': CHANNELS_CAPACITY,
+            'expiry': CHANNELS_EXPIRY,
+            # Optional encryption in production if CHANNELS_ENCRYPTION_KEY is set
         },
     },
 }
 ```
+
+#### Updated environment configuration files:
+- Added optional `CHANNELS_CAPACITY` environment variable (default: 1500)
+- Added optional `CHANNELS_EXPIRY` environment variable (default: 10)
+- Added optional `CHANNELS_ENCRYPTION_KEY` for secure WebSocket message encryption in production
 
 ## Verification Steps
 

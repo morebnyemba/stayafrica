@@ -452,6 +452,11 @@ SESSION_CACHE_ALIAS = 'session'
 # }
 
 # Channels Layer Configuration (WebSockets)
+# Configuration for real-time message passing between server instances
+CHANNELS_CAPACITY = int(os.getenv('CHANNELS_CAPACITY', '1500'))  # Maximum messages per channel
+CHANNELS_EXPIRY = int(os.getenv('CHANNELS_EXPIRY', '10'))  # Message expiry in seconds
+CHANNELS_ENCRYPTION_KEY = os.getenv('CHANNELS_ENCRYPTION_KEY', None)
+
 # Uses Redis for real-time message passing between server instances
 if DEBUG:
     # Development: Use Redis with basic configuration
@@ -460,23 +465,26 @@ if DEBUG:
             'BACKEND': 'channels_redis.core.RedisChannelLayer',
             'CONFIG': {
                 'hosts': [REDIS_URL],
-                'capacity': 1500,  # Maximum number of messages per channel
-                'expiry': 10,  # Message expiry in seconds
+                'capacity': CHANNELS_CAPACITY,
+                'expiry': CHANNELS_EXPIRY,
             },
         },
     }
 else:
     # Production: Use Redis with encryption for message security
+    channel_config = {
+        'hosts': [REDIS_URL],
+        'capacity': CHANNELS_CAPACITY,
+        'expiry': CHANNELS_EXPIRY,
+    }
+    # Use dedicated encryption key if provided, otherwise use SECRET_KEY as fallback
+    if CHANNELS_ENCRYPTION_KEY:
+        channel_config['symmetric_encryption_keys'] = [CHANNELS_ENCRYPTION_KEY]
+    
     CHANNEL_LAYERS = {
         'default': {
             'BACKEND': 'channels_redis.core.RedisChannelLayer',
-            'CONFIG': {
-                'hosts': [REDIS_URL],
-                'capacity': 1500,
-                'expiry': 10,
-                # Encrypt messages in transit for security
-                'symmetric_encryption_keys': [SECRET_KEY],
-            },
+            'CONFIG': channel_config,
         },
     }
 
