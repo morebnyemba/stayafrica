@@ -452,9 +452,9 @@ SESSION_CACHE_ALIAS = 'session'
 # }
 
 # Channels Layer Configuration (WebSockets)
-# Uses Redis in production/development, falls back to in-memory for testing
+# Uses Redis for real-time message passing between server instances
 if DEBUG:
-    # Development: Use Redis with graceful fallback
+    # Development: Use Redis with basic configuration
     CHANNEL_LAYERS = {
         'default': {
             'BACKEND': 'channels_redis.core.RedisChannelLayer',
@@ -466,7 +466,7 @@ if DEBUG:
         },
     }
 else:
-    # Production: Use Redis with connection pooling
+    # Production: Use Redis with encryption for message security
     CHANNEL_LAYERS = {
         'default': {
             'BACKEND': 'channels_redis.core.RedisChannelLayer',
@@ -474,7 +474,7 @@ else:
                 'hosts': [REDIS_URL],
                 'capacity': 1500,
                 'expiry': 10,
-                # Connection pool settings for better reliability
+                # Encrypt messages in transit for security
                 'symmetric_encryption_keys': [SECRET_KEY],
             },
         },

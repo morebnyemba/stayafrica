@@ -1,16 +1,23 @@
 # Backend Startup Error Fix
 
 ## Problem Statement
-The backend was failing to start with the following error:
-```
-django.core.exceptions.ImproperlyConfigured: Could not find the GDAL library
-```
+The backend was failing to start due to two separate issues:
 
-This error occurred because GeoDjango requires GDAL (Geospatial Data Abstraction Library) system libraries to be installed, but they were missing from the environment.
+1. **GDAL Library Error**: When testing locally without Docker:
+   ```
+   django.core.exceptions.ImproperlyConfigured: Could not find the GDAL library
+   ```
+   This error occurred because GeoDjango requires GDAL (Geospatial Data Abstraction Library) system libraries.
+
+2. **Missing Channels Configuration**: The WebSocket routing in `asgi.py` imports from `channels.routing`, but:
+   - The `channels` package was not listed in `requirements.txt`
+   - `channels` was not in INSTALLED_APPS
+   - CHANNEL_LAYERS was not configured
 
 ## Root Cause
-1. **Missing GDAL System Libraries**: The backend uses Django's GIS (Geographic Information System) functionality through `django.contrib.gis`, which requires GDAL to be installed at the system level.
-2. **Missing Channels Package**: The WebSocket routing in `asgi.py` imports from `channels.routing` but the `channels` package was not listed in `requirements.txt`.
+1. **Missing GDAL System Libraries**: The backend uses Django's GIS (Geographic Information System) functionality through `django.contrib.gis`, which requires GDAL to be installed at the system level. This was only an issue when running locally outside of Docker, as the Dockerfile already includes GDAL.
+
+2. **Incomplete Channels Setup**: While the ASGI configuration referenced channels for WebSocket support, the package wasn't properly integrated into the Django project configuration.
 
 ## Solution Implemented
 
