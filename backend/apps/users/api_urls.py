@@ -17,6 +17,9 @@ app_name = 'users'
 
 router = DefaultRouter()
 router.register(r'users', UserViewSet, basename='user')
+# Register verification under users/ prefix to match frontend expectations
+# DRF correctly handles this as: /api/v1/users/verification/ vs /api/v1/users/{id}/
+# The literal 'verification' path is matched before the numeric ID pattern
 router.register(r'users/verification', IdentityVerificationViewSet, basename='verification')
 router.register(r'users/verification-settings', VerificationSettingsViewSet, basename='verification-settings')
 

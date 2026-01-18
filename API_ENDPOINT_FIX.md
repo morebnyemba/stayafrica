@@ -30,6 +30,24 @@ path('api/v1/', include('apps.users.api_urls', namespace='users')),
 path('api/v1/', include('apps.notifications.urls', namespace='notifications')),
 ```
 
+### File: `/backend/apps/users/api_urls.py`
+
+#### Updated Router Registrations:
+```python
+# Before:
+router.register(r'verification', IdentityVerificationViewSet, basename='verification')
+
+# After:
+router.register(r'users/verification', IdentityVerificationViewSet, basename='verification')
+```
+
+**Why this pattern?**
+- Frontend calls `/api/v1/users/verification/...` 
+- DRF router correctly distinguishes between literal paths (`/users/verification/`) and ID patterns (`/users/{id}/`)
+- The router matches literal strings before numeric IDs, so no conflict occurs
+- This is a common and supported pattern in Django REST Framework
+- Alternative would require changing all frontend verification API calls
+
 ## Available Endpoints After Fix
 
 ### Notifications
