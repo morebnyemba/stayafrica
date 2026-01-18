@@ -6,6 +6,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.utils import timezone
+from django.db import models
 from datetime import timedelta, date
 from dateutil.relativedelta import relativedelta
 from apps.properties.analytics_models import (
