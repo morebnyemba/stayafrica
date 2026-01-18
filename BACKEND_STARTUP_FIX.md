@@ -1,44 +1,26 @@
 # Backend Startup Error Fix
 
 ## Problem Statement
-The backend was failing to start due to two separate issues:
+The backend was failing to start due to missing Channels configuration:
 
-1. **GDAL Library Error**: When testing locally without Docker:
-   ```
-   django.core.exceptions.ImproperlyConfigured: Could not find the GDAL library
-   ```
-   This error occurred because GeoDjango requires GDAL (Geospatial Data Abstraction Library) system libraries.
-
-2. **Missing Channels Configuration**: The WebSocket routing in `asgi.py` imports from `channels.routing`, but:
-   - The `channels` package was not listed in `requirements.txt`
-   - `channels` was not in INSTALLED_APPS
-   - CHANNEL_LAYERS was not configured
+**Missing Channels Configuration**: The WebSocket routing in `asgi.py` imports from `channels.routing`, but:
+- The `channels` package was not listed in `requirements.txt`
+- `channels` was not in INSTALLED_APPS
+- CHANNEL_LAYERS was not configured
 
 ## Root Cause
-1. **Missing GDAL System Libraries**: The backend uses Django's GIS (Geographic Information System) functionality through `django.contrib.gis`, which requires GDAL to be installed at the system level. This was only an issue when running locally outside of Docker, as the Dockerfile already includes GDAL.
-
-2. **Incomplete Channels Setup**: While the ASGI configuration referenced channels for WebSocket support, the package wasn't properly integrated into the Django project configuration.
+**Incomplete Channels Setup**: While the ASGI configuration referenced channels for WebSocket support, the package wasn't properly integrated into the Django project configuration.
 
 ## Solution Implemented
 
-### 1. System Dependencies (Already in Dockerfile)
-The `backend/Dockerfile` already includes the necessary GDAL packages:
-```dockerfile
-RUN apt-get update && apt-get install -y \
-    gdal-bin \
-    libgdal-dev \
-    libproj-dev \
-    ...
-```
-
-### 2. Python Dependencies Added
+### 1. Python Dependencies Added
 Updated `backend/requirements.txt` to include:
 ```
 channels==4.3.2
 channels-redis==4.3.0
 ```
 
-### 3. Django Configuration Updates
+### 2. Django Configuration Updates
 Added to `backend/stayafrica/settings.py`:
 
 #### Added `channels` to INSTALLED_APPS:
@@ -106,27 +88,12 @@ docker-compose up backend
 
 ## For Local Development (Non-Docker)
 
-If you're running the backend locally without Docker, you need to install GDAL system libraries:
-
-### Ubuntu/Debian:
-```bash
-sudo apt-get update
-sudo apt-get install -y gdal-bin libgdal-dev python3-gdal
-```
-
-### macOS (using Homebrew):
-```bash
-brew install gdal
-```
-
-### Windows:
-1. Download and install OSGeo4W from https://trac.osgeo.org/osgeo4w/
-2. Add GDAL/GEOS library paths to your Django settings (already configured in settings.py for Windows)
-
-Then install Python dependencies:
+If you're running the backend locally without Docker, install Python dependencies:
 ```bash
 pip install -r requirements.txt
 ```
+
+Note: The Dockerfile already includes all necessary system dependencies (including GDAL for GeoDjango). If you encounter any issues with GeoDjango when running locally, ensure you have GDAL system libraries installed for your platform.
 
 ## Docker Deployment Notes
 
@@ -150,5 +117,4 @@ No additional changes are needed to the Docker configuration.
 ## References
 
 - [Django Channels Documentation](https://channels.readthedocs.io/)
-- [GeoDjango Documentation](https://docs.djangoproject.com/en/5.0/ref/contrib/gis/)
-- [GDAL Installation Guide](https://gdal.org/download.html)
+- [Channels Redis Documentation](https://github.com/django/channels_redis)
