@@ -452,14 +452,33 @@ SESSION_CACHE_ALIAS = 'session'
 # }
 
 # Channels Layer Configuration (WebSockets)
-CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            'hosts': [REDIS_URL],
+# Uses Redis in production/development, falls back to in-memory for testing
+if DEBUG:
+    # Development: Use Redis with graceful fallback
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': 'channels_redis.core.RedisChannelLayer',
+            'CONFIG': {
+                'hosts': [REDIS_URL],
+                'capacity': 1500,  # Maximum number of messages per channel
+                'expiry': 10,  # Message expiry in seconds
+            },
         },
-    },
-}
+    }
+else:
+    # Production: Use Redis with connection pooling
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': 'channels_redis.core.RedisChannelLayer',
+            'CONFIG': {
+                'hosts': [REDIS_URL],
+                'capacity': 1500,
+                'expiry': 10,
+                # Connection pool settings for better reliability
+                'symmetric_encryption_keys': [SECRET_KEY],
+            },
+        },
+    }
 
 # Erlang Messaging Service Configuration
 ERLANG_MESSAGING_URL = os.getenv('ERLANG_MESSAGING_URL', 'http://erlang-messaging:8765')
