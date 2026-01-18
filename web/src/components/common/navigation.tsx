@@ -8,6 +8,7 @@ import { useState } from 'react';
 import { ThemeToggle } from './theme-toggle';
 import { MobileSearchBar } from './mobile-search-bar';
 import { Button } from '@/components/ui/Button';
+import { NotificationCenter } from '@/components/notifications/NotificationCenter';
 
 export function Navigation() {
   const { user, isAuthenticated, logout, upgradeToHost } = useAuth();
@@ -79,6 +80,8 @@ export function Navigation() {
             <ThemeToggle />
             {isAuthenticated ? (
               <>
+                {/* Notification Center */}
+                <NotificationCenter />
                 <button
                   onClick={handleBecomeHost}
                   className="text-sand-200 hover:text-sand-50 transition font-medium rounded-full px-4 py-2 hover:bg-primary-700/60 flex items-center gap-2"

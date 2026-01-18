@@ -18,6 +18,7 @@ import {
   Star,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { VerificationStatus } from '@/components/verification/VerificationStatus';
 import dynamic from 'next/dynamic';
 const ProtectedRoute = dynamic(() => import('@/components/auth/protected-route').then(m => m.ProtectedRoute), { ssr: false });
 
@@ -238,6 +239,11 @@ export function DashboardContent() {
             <p className="text-lg text-primary-600 dark:text-sand-300">
               Here&apos;s what&apos;s happening with your travels
             </p>
+          </div>
+
+          {/* Verification Status Banner */}
+          <div className="mb-8">
+            <VerificationStatus />
           </div>
 
           {/* Stats Grid */}
