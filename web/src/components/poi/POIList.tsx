@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { ChevronDown, ChevronUp, Loader2, MapPin } from 'lucide-react';
 import poiApi from '@/services/poi-api';
@@ -61,8 +61,8 @@ export default function POIList({ propertyId, radiusKm = 2 }: POIListProps) {
   }
 
   const categories = Object.entries(nearbyData.pois_by_category)
-    .filter(([_, pois]) => pois.length > 0)
-    .sort((a, b) => b[1].length - a[1].length);
+    .filter(([_, pois]) => (pois as any[]).length > 0)
+    .sort((a, b) => (b[1] as any[]).length - (a[1] as any[]).length);
 
   return (
     <div className="space-y-6">
@@ -84,9 +84,10 @@ export default function POIList({ propertyId, radiusKm = 2 }: POIListProps) {
       {/* Category Sections */}
       <div className="space-y-4">
         {categories.map(([category, pois]) => {
+          const poisArray = pois as any[];
           const isExpanded = expandedCategories.includes(category as POIType);
-          const displayPois = isExpanded ? pois : pois.slice(0, 3);
-          const hasMore = pois.length > 3;
+          const displayPois = isExpanded ? poisArray : poisArray.slice(0, 3);
+          const hasMore = poisArray.length > 3;
 
           return (
             <div key={category} className="bg-white rounded-xl shadow border">
@@ -96,7 +97,7 @@ export default function POIList({ propertyId, radiusKm = 2 }: POIListProps) {
                   <h4 className="text-lg font-semibold text-gray-900 capitalize flex items-center gap-2">
                     {category.replace(/_/g, ' ')}
                     <span className="px-2 py-0.5 bg-primary-100 text-primary-700 text-sm font-medium rounded-full">
-                      {pois.length}
+                      {poisArray.length}
                     </span>
                   </h4>
                   {hasMore && (
@@ -110,7 +111,7 @@ export default function POIList({ propertyId, radiusKm = 2 }: POIListProps) {
                         </>
                       ) : (
                         <>
-                          Show all ({pois.length}) <ChevronDown className="w-4 h-4" />
+                          Show all ({poisArray.length}) <ChevronDown className="w-4 h-4" />
                         </>
                       )}
                     </button>

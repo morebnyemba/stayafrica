@@ -2,24 +2,6 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
 import { apiClient } from '@/services/api-client';
 
-interface QualificationDetails {
-  is_qualified: boolean;
-  requirements_met: {
-    id_verified: boolean;
-    min_reviews: boolean;
-    min_rating: boolean;
-    completed_bookings: boolean;
-    payment_method: boolean;
-  };
-  guest_stats: {
-    review_count: number;
-    average_rating: number;
-    completed_bookings_count: number;
-  };
-  required_reviews?: number;
-  required_rating?: number;
-}
-
 interface InstantBookingData {
   check_in: string;
   check_out: string;
@@ -32,7 +14,7 @@ export function useInstantBooking(propertyId: string) {
   const { data: qualificationDetails, isLoading } = useQuery({
     queryKey: ['instant-booking-qualification', propertyId],
     queryFn: async () => {
-      const response = await apiClient.get<QualificationDetails>(
+      const response = await apiClient.get(
         `/properties/${propertyId}/instant_booking_info/`
       );
       return response.data;

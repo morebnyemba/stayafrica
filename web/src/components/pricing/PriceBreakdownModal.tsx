@@ -1,6 +1,5 @@
 'use client';
 
-import React from 'react';
 import { X, Calendar, TrendingUp, TrendingDown, DollarSign, Receipt } from 'lucide-react';
 import { DynamicPricing } from '@/types/pricing-types';
 

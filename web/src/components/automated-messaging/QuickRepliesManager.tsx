@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@antml:parameter>
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { QuickReply } from '@/types/automated-messaging-types';
 import { Plus, Edit2, Trash2, Loader2, Save, X } from 'lucide-react';

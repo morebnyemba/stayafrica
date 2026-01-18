@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area, ComposedChart } from 'recharts';
+import { Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area, ComposedChart } from 'recharts';
 import { TrendingUp, RefreshCw } from 'lucide-react';
 import { useGenerateProjections } from '@/hooks/useAnalytics';
 import type { ProjectionDataPoint, ChartConfig } from '@/types/analytics-types';

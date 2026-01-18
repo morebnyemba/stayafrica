@@ -1,6 +1,5 @@
 'use client';
 
-import React from 'react';
 import { useInstantBooking } from '@/hooks/useInstantBooking';
 import { Zap, Loader2, CheckCircle, XCircle } from 'lucide-react';
 import GuestQualificationBadge from './GuestQualificationBadge';

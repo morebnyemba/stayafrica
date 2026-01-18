@@ -1,6 +1,5 @@
 'use client';
 
-import React from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ThumbsUp, ThumbsDown } from 'lucide-react';
 import wishlistApi from '@/services/wishlist-api';

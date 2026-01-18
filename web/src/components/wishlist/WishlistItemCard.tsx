@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Calendar, MapPin, MessageSquare, StickyNote, Trash2 } from 'lucide-react';
+import { Calendar, MapPin, MessageSquare, StickyNote } from 'lucide-react';
 import { WishlistItem } from '@/types/wishlist-types';
 import WishlistVoting from './WishlistVoting';
 import WishlistComments from './WishlistComments';
@@ -14,7 +14,7 @@ interface WishlistItemCardProps {
   canEdit: boolean;
 }
 
-export default function WishlistItemCard({ item, wishlistId, canEdit }: WishlistItemCardProps) {
+export default function WishlistItemCard({ item, wishlistId, canEdit: _canEdit }: WishlistItemCardProps) {
   const [showComments, setShowComments] = useState(false);
 
   return (

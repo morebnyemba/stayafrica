@@ -202,14 +202,14 @@ export const AutoMessageSettings = () => {
               </div>
               <input
                 type="checkbox"
-                checked={localSettings.triggers[key as keyof typeof localSettings.triggers] ?? false}
+                checked={localSettings.triggers?.[key as keyof typeof localSettings.triggers] ?? false}
                 onChange={() => handleToggleTrigger(key as keyof SettingsType['triggers'])}
                 disabled={!localSettings.enabled}
                 className="h-5 w-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
               />
             </label>
 
-            {localSettings.triggers[key as keyof typeof localSettings.triggers] && (
+            {localSettings.triggers?.[key as keyof typeof localSettings.triggers] && (
               <div className="mt-3">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Message Template

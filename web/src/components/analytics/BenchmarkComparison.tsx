@@ -3,7 +3,6 @@
 import React from 'react';
 import { TrendingUp, Award, BarChart3 } from 'lucide-react';
 import { useBenchmarks } from '@/hooks/useAnalytics';
-import type { BenchmarkData } from '@/types/analytics-types';
 
 interface BenchmarkComparisonProps {
   propertyType?: string;

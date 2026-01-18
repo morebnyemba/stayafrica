@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { MapPin, Navigation } from 'lucide-react';
 import { PropertyPOI, POIType } from '@/types/poi-types';
 
@@ -12,13 +12,12 @@ interface POIMapDisplayProps {
 }
 
 export default function POIMapDisplay({
-  propertyId,
-  propertyLocation,
+  propertyId: _propertyId,
+  propertyLocation: _propertyLocation,
   pois,
-  onPOIClick,
+  onPOIClick: _onPOIClick,
 }: POIMapDisplayProps) {
   const mapRef = useRef<HTMLDivElement>(null);
-  const [selectedPOI, setSelectedPOI] = useState<PropertyPOI | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
 
   const getCategoryColor = (type: POIType): string => {
@@ -68,11 +67,6 @@ export default function POIMapDisplay({
 
     loadMapbox();
   }, [mapLoaded]);
-
-  const handlePOIClick = (poi: PropertyPOI) => {
-    setSelectedPOI(poi);
-    onPOIClick?.(poi);
-  };
 
   return (
     <div className="relative">

@@ -11,35 +11,6 @@ interface FlexibleSearchParams {
   guests?: number;
 }
 
-interface DateOption {
-  check_in: string;
-  check_out: string;
-  properties_count: number;
-  price_range: {
-    min: number;
-    max: number;
-    avg: number;
-  };
-  sample_properties: Array<{
-    id: string;
-    name: string;
-    image_url: string;
-    location: string;
-    price: number;
-    rating?: number;
-  }>;
-}
-
-interface FlexibleSearchResponse {
-  flexibility_type: string;
-  original_dates: {
-    check_in: string;
-    check_out: string;
-  };
-  date_options: DateOption[];
-  total_properties: number;
-}
-
 export function useFlexibleSearch(params: FlexibleSearchParams) {
   return useQuery({
     queryKey: ['flexible-search', params],
@@ -54,7 +25,7 @@ export function useFlexibleSearch(params: FlexibleSearchParams) {
       if (params.days) queryParams.days = params.days;
       if (params.guests) queryParams.guests = params.guests;
 
-      const response = await apiClient.get<FlexibleSearchResponse>(
+      const response = await apiClient.get(
         '/properties/flexible_search/',
         { params: queryParams }
       );

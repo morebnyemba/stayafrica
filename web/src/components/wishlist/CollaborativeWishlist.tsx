@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Heart, Share2, UserPlus, Lock, Users, Globe, Loader2 } from 'lucide-react';
 import wishlistApi from '@/services/wishlist-api';
@@ -149,7 +149,7 @@ export default function CollaborativeWishlist({
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {wishlist.items.map((item) => (
+          {wishlist.items.map((item: any) => (
             <WishlistItemCard
               key={item.id}
               item={item}

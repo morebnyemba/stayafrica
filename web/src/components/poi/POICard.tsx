@@ -1,6 +1,5 @@
 'use client';
 
-import React from 'react';
 import { MapPin, Star, DollarSign, Clock, Phone, Globe, ThumbsUp, Navigation } from 'lucide-react';
 import { PropertyPOI } from '@/types/poi-types';
 

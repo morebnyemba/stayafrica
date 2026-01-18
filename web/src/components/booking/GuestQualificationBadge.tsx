@@ -1,6 +1,5 @@
 'use client';
 
-import React from 'react';
 import { CheckCircle, ShieldCheck, Star, CreditCard, Home } from 'lucide-react';
 
 interface QualificationDetails {
@@ -58,8 +57,6 @@ export default function GuestQualificationBadge({
       label: 'Payment Verified',
     },
   ];
-
-  const metCount = qualifications.filter(q => q.met).length;
 
   return (
     <div className={`bg-green-50 border border-green-200 rounded-lg ${badgeSize}`}>

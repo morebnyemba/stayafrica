@@ -1,6 +1,5 @@
 // Pricing API Service
 import { apiClient } from './api-client';
-import { PricingCalendarResponse, DynamicPricing } from '@/types/pricing-types';
 
 export const pricingApi = {
   /**
@@ -11,7 +10,7 @@ export const pricingApi = {
     if (month !== undefined) params.month = month;
     if (year !== undefined) params.year = year;
     
-    const response = await apiClient.get<PricingCalendarResponse>(
+    const response = await apiClient.get(
       `/properties/${propertyId}/pricing_calendar/`,
       { params }
     );
@@ -26,7 +25,7 @@ export const pricingApi = {
     checkIn: string,
     checkOut: string
   ) {
-    const response = await apiClient.get<DynamicPricing>(
+    const response = await apiClient.get(
       `/properties/${propertyId}/availability/`,
       {
         params: {
@@ -47,7 +46,7 @@ export const pricingApi = {
     checkOut: string,
     guests: number
   ) {
-    const response = await apiClient.post<DynamicPricing>(
+    const response = await apiClient.post(
       `/bookings/calculate_total/`,
       {
         rental_property: propertyId,
