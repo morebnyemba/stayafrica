@@ -657,8 +657,7 @@ export function HostEarningsContent() {
           </section>
 
           {/* Tax Report Section */}
-          <section aria-labelledby="tax-report-heading" className="mb-8">
-            <h2 id="tax-report-heading" className="sr-only">Tax Report</h2>
+          <section aria-labelledby="tax-report-heading">
             <HostTaxReport />
           </section>
         </div>

@@ -522,8 +522,9 @@ export function HostDashboard() {
           )}
             </>
           ) : (
-            /* Analytics Tab */
-            <AnalyticsDashboard />
+            <>{/* Analytics Tab */}
+              <AnalyticsDashboard />
+            </>
           )}
         </div>
       </div>
