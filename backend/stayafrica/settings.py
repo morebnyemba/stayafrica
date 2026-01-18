@@ -80,6 +80,7 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'django_celery_beat',
     'django_celery_results',
+    'channels',
     
     # Local apps
     'apps.users',
@@ -449,6 +450,16 @@ SESSION_CACHE_ALIAS = 'session'
 #         'TIMEOUT': 300,
 #     }
 # }
+
+# Channels Layer Configuration (WebSockets)
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [REDIS_URL],
+        },
+    },
+}
 
 # Erlang Messaging Service Configuration
 ERLANG_MESSAGING_URL = os.getenv('ERLANG_MESSAGING_URL', 'http://erlang-messaging:8765')
