@@ -10,6 +10,9 @@ until nc -z -w1 $DB_HOST $DB_PORT; do
 done
 
 echo "✅ Database ready"
+echo "🔧 Fixing migration sequence if needed..."
+python scripts/fix_migration_sequence.py
+
 echo "🔄 Running database migrations..."
 if ! python manage.py migrate --noinput; then
   echo "❌ Migration failed"

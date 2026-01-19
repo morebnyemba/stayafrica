@@ -32,6 +32,21 @@ class HostAnalyticsViewSet(viewsets.ViewSet):
     """ViewSet for host analytics dashboard"""
     permission_classes = [IsAuthenticated]
     
+    def list(self, request):
+        """
+        List available analytics endpoints
+        """
+        endpoints = {
+            'dashboard': request.build_absolute_uri('dashboard/'),
+            'revenue_chart': request.build_absolute_uri('revenue_chart/'),
+            'occupancy_trend': request.build_absolute_uri('occupancy_trend/'),
+            'generate_projections': request.build_absolute_uri('generate_projections/'),
+        }
+        return Response({
+            'message': 'Host Analytics API',
+            'available_endpoints': endpoints
+        })
+    
     @action(detail=False, methods=['get'])
     def dashboard(self, request):
         """
