@@ -13,6 +13,10 @@ import {
   Star,
   MessageSquare,
   BarChart3,
+  ShieldCheck,
+  Receipt,
+  Settings,
+  TrendingUp,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { AnalyticsDashboard } from '@/components/analytics';
@@ -173,6 +177,34 @@ export function HostDashboard() {
       icon: MessageSquare,
       link: '/messages',
       color: 'bg-orange-500',
+    },
+    {
+      title: 'Tax Reports',
+      description: 'View tax documents',
+      icon: Receipt,
+      link: '/host/tax-reports',
+      color: 'bg-teal-500',
+    },
+    {
+      title: 'Dynamic Pricing',
+      description: 'Manage pricing rules',
+      icon: TrendingUp,
+      link: '/host/pricing',
+      color: 'bg-amber-500',
+    },
+    {
+      title: 'Verification',
+      description: 'Verify your identity',
+      icon: ShieldCheck,
+      link: '/host/verification',
+      color: 'bg-indigo-500',
+    },
+    {
+      title: 'Settings',
+      description: 'Account settings',
+      icon: Settings,
+      link: '/host/settings',
+      color: 'bg-gray-500',
     },
   ];
 

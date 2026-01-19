@@ -16,6 +16,7 @@ import {
   Home,
   MessageSquare,
   Star,
+  ShieldCheck,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { VerificationStatus } from '@/components/verification/VerificationStatus';
@@ -224,6 +225,13 @@ export function DashboardContent() {
       icon: Star,
       link: '/reviews',
       color: 'bg-pink-500',
+    },
+    {
+      title: 'Verify Identity',
+      description: 'Get verified for more trust',
+      icon: ShieldCheck,
+      link: '/profile/verification',
+      color: 'bg-indigo-500',
     },
   ];
 
