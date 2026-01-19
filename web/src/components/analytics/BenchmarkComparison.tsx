@@ -164,7 +164,7 @@ export const BenchmarkComparison: React.FC<BenchmarkComparisonProps> = ({
                       <>
                         <TrendingUp className="h-4 w-4 text-green-600" />
                         <span className="font-semibold text-green-600">
-                          +{(((yourValue - marketAvg) / marketAvg) * 100).toFixed(1)}%
+                          +{marketAvg > 0 ? (((yourValue - marketAvg) / marketAvg) * 100).toFixed(1) : '0.0'}%
                         </span>
                       </>
                     ) : (
