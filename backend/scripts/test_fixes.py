@@ -112,9 +112,12 @@ def test_entrypoint_integration():
         
         # Check order: fix should come before migrate
         fix_pos = content.find("fix_migration_sequence")
-        migrate_pos = content.find("migrate")
+        migrate_pos = content.find("python manage.py migrate")
         
-        if fix_pos < migrate_pos:
+        if migrate_pos == -1:
+            migrate_pos = content.find("manage.py migrate")
+        
+        if fix_pos < migrate_pos and migrate_pos != -1:
             print_success("Fix script runs before migrations (correct order)")
             return True
         else:
@@ -181,8 +184,8 @@ def test_urls_configuration():
     else:
         print_warning("Admin dashboard URLs not found")
     
-    # Count admin patterns
-    admin_count = len(re.findall(r"path\(['\"]admin", content))
+    # Count admin patterns - look for path('admin/ or path("admin/
+    admin_count = len(re.findall(r"path\s*\(\s*['\"]admin/", content))
     if admin_count == 1:
         print_success(f"Single admin path found (Django's default)")
     elif admin_count > 1:

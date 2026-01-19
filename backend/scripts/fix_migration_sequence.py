@@ -35,9 +35,10 @@ def fix_migration_sequence():
                 max_id = cursor.fetchone()[0] or 0
                 
                 # Reset the sequence to the correct value
-                cursor.execute(f"""
-                    SELECT setval('django_migrations_id_seq', {max_id}, true);
-                """)
+                cursor.execute(
+                    "SELECT setval('django_migrations_id_seq', %s, true);",
+                    [max_id]
+                )
                 print(f"✓ Sequence reset to {max_id}")
                 
             else:

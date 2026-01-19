@@ -51,9 +51,10 @@ def cleanup_database():
                 seq_exists = cursor.fetchone()[0]
                 
                 if seq_exists:
-                    cursor.execute(f"""
-                        SELECT setval('django_migrations_id_seq', {max_id}, true);
-                    """)
+                    cursor.execute(
+                        "SELECT setval('django_migrations_id_seq', %s, true);",
+                        [max_id]
+                    )
                     print(f"  ✓ Sequence reset to {max_id}")
                 else:
                     print("  ✓ Sequence does not exist yet")
