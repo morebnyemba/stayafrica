@@ -503,12 +503,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Helper function for lazy static file resolution in UNFOLD config
 # This avoids importing django.templatetags.static at settings load time
-def _static_lazy(path):
-    """Lazy wrapper for static() to avoid premature Django imports during settings load"""
-    def wrapper(request=None):
-        from django.templatetags.static import static
-        return static(path)
-    return wrapper
+# Remove the problematic _static_lazy function
+# Django Unfold can handle plain string paths which will be resolved to static URLs at runtime
 
 # Django Unfold Configuration - StayAfrica Brand Colors
 UNFOLD = {
@@ -516,8 +512,8 @@ UNFOLD = {
     "SITE_HEADER": "StayAfrica Administration",
     "SITE_URL": "/",
     "SITE_ICON": {
-        "light": _static_lazy("logo.svg"),  # Logo for light theme
-        "dark": _static_lazy("logo.svg"),   # Logo for dark theme
+        "light": f"{STATIC_URL}logo.svg",  # Logo for light theme
+        "dark": f"{STATIC_URL}logo.svg",   # Logo for dark theme
     },
     "SITE_SYMBOL": "travel_explore",  # Material icon for favicon
     "SHOW_HISTORY": True,
@@ -525,14 +521,14 @@ UNFOLD = {
     "ENVIRONMENT": "stayafrica.settings.environment_callback",
     "DASHBOARD_CALLBACK": "stayafrica.settings.dashboard_callback",
     "LOGIN": {
-        "image": _static_lazy("images/login-bg.jpg"),
+        "image": f"{STATIC_URL}images/login-bg.jpg",  # Full static URL path
         "redirect_after": lambda request: "/admin/",
     },
     "STYLES": [
-        _static_lazy("css/admin-custom.css"),
+        f"{STATIC_URL}css/admin-custom.css",  # Full static URL path
     ],
     "SCRIPTS": [
-        _static_lazy("js/admin-custom.js"),
+        f"{STATIC_URL}js/admin-custom.js",  # Full static URL path
     ],
     "COLORS": {
         "primary": {
@@ -564,7 +560,7 @@ UNFOLD = {
             "rel": "icon",
             "sizes": "32x32",
             "type": "image/svg+xml",
-            "href": _static_lazy("favicon.svg"),
+            "href": f"{STATIC_URL}favicon.svg",  # Full static URL path
         },
     ],
     "SIDEBAR": {
