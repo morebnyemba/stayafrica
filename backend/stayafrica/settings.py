@@ -505,7 +505,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # This avoids importing django.templatetags.static at settings load time
 def _static_lazy(path):
     """Lazy wrapper for static() to avoid premature Django imports during settings load"""
-    return lambda request: __import__('django.templatetags.static', fromlist=['static']).static(path)
+    def wrapper(request=None):
+        from django.templatetags.static import static
+        return static(path)
+    return wrapper
 
 # Django Unfold Configuration - StayAfrica Brand Colors
 UNFOLD = {
