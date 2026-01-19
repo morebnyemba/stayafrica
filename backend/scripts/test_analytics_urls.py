@@ -5,6 +5,11 @@ Run this inside the Django environment to check URL resolution.
 """
 import os
 import sys
+from pathlib import Path
+
+# Add the parent directory to sys.path so Python can find the stayafrica module
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 import django
 
 # Setup Django

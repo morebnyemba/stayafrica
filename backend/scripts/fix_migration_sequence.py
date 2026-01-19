@@ -5,6 +5,11 @@ This script handles the case where the sequence already exists but needs to be r
 """
 import os
 import sys
+from pathlib import Path
+
+# Add the parent directory to sys.path so Python can find the stayafrica module
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 import django
 
 # Setup Django
