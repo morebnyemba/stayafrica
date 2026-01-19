@@ -87,20 +87,28 @@ export const BenchmarkComparison: React.FC<BenchmarkComparisonProps> = ({
           </div>
         ) : (
           <div className="space-y-6">
-            {data.map((benchmark, index) => (
+            {data.map((benchmark, index) => {
+              const yourValue = benchmark?.your_value ?? 0;
+              const marketAvg = benchmark?.market_average ?? 1;
+              const percentile = benchmark?.percentile ?? 0;
+              const top10 = benchmark?.top_10_percent ?? 0;
+              const unit = benchmark?.unit;
+              const metric = benchmark?.metric ?? 'Metric';
+              
+              return (
               <div key={index} className="space-y-3">
                 {/* Metric Header */}
                 <div className="flex items-center justify-between">
                   <div>
                     <h4 className="text-sm font-medium text-gray-900 dark:text-white">
-                      {benchmark.metric}
+                      {metric}
                     </h4>
                     <div className="flex items-center space-x-2 mt-1">
                       <span className="text-2xl font-bold text-gray-900 dark:text-white">
-                        {formatValue(benchmark.your_value, benchmark.unit)}
+                        {formatValue(yourValue, unit)}
                       </span>
-                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getPercentileColor(benchmark.percentile)}`}>
-                        {getPercentileLabel(benchmark.percentile)}
+                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getPercentileColor(percentile)}`}>
+                        {getPercentileLabel(percentile)}
                       </span>
                     </div>
                   </div>
@@ -109,7 +117,7 @@ export const BenchmarkComparison: React.FC<BenchmarkComparisonProps> = ({
                     <div className="flex items-center space-x-1">
                       <Award className="h-5 w-5 text-yellow-500" />
                       <span className="text-xl font-bold text-gray-900 dark:text-white">
-                        {benchmark.percentile.toFixed(0)}
+                        {percentile.toFixed(0)}
                       </span>
                       <span className="text-sm text-gray-600 dark:text-gray-400">%ile</span>
                     </div>
@@ -120,20 +128,20 @@ export const BenchmarkComparison: React.FC<BenchmarkComparisonProps> = ({
                 <div className="relative pt-1">
                   <div className="flex mb-2 items-center justify-between text-xs">
                     <div className="text-gray-600 dark:text-gray-400">
-                      Market Avg: {formatValue(benchmark.market_average, benchmark.unit)}
+                      Market Avg: {formatValue(marketAvg, unit)}
                     </div>
                     <div className="text-gray-600 dark:text-gray-400">
-                      Top 10%: {formatValue(benchmark.top_10_percent, benchmark.unit)}
+                      Top 10%: {formatValue(top10, unit)}
                     </div>
                   </div>
                   <div className="overflow-hidden h-3 text-xs flex rounded-full bg-gray-200 dark:bg-gray-700">
                     <div
                       className={`shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center transition-all ${
-                        benchmark.percentile >= 90 ? 'bg-green-600' :
-                        benchmark.percentile >= 75 ? 'bg-blue-600' :
-                        benchmark.percentile >= 50 ? 'bg-yellow-600' : 'bg-red-600'
+                        percentile >= 90 ? 'bg-green-600' :
+                        percentile >= 75 ? 'bg-blue-600' :
+                        percentile >= 50 ? 'bg-yellow-600' : 'bg-red-600'
                       }`}
-                      style={{ width: `${benchmark.percentile}%` }}
+                      style={{ width: `${percentile}%` }}
                     ></div>
                   </div>
                   {/* Markers */}
@@ -152,25 +160,25 @@ export const BenchmarkComparison: React.FC<BenchmarkComparisonProps> = ({
                     vs Market Average:
                   </div>
                   <div className="flex items-center space-x-1">
-                    {benchmark.your_value > benchmark.market_average ? (
+                    {yourValue > marketAvg ? (
                       <>
                         <TrendingUp className="h-4 w-4 text-green-600" />
                         <span className="font-semibold text-green-600">
-                          +{((benchmark.your_value - benchmark.market_average) / benchmark.market_average * 100).toFixed(1)}%
+                          +{(((yourValue - marketAvg) / marketAvg) * 100).toFixed(1)}%
                         </span>
                       </>
                     ) : (
                       <>
                         <TrendingUp className="h-4 w-4 text-red-600 rotate-180" />
                         <span className="font-semibold text-red-600">
-                          {((benchmark.your_value - benchmark.market_average) / benchmark.market_average * 100).toFixed(1)}%
+                          {marketAvg > 0 ? (((yourValue - marketAvg) / marketAvg) * 100).toFixed(1) : '0.0'}%
                         </span>
                       </>
                     )}
                   </div>
                 </div>
               </div>
-            ))}
+            )})}
           </div>
         )}
       </div>

@@ -187,14 +187,14 @@ export const PropertyPerformanceTable: React.FC<PropertyPerformanceTableProps> =
                           {property.property_name}
                         </p>
                         <p className="text-xs text-gray-500 dark:text-gray-400">
-                          {property.days_available} days available
+                          {property.days_available ?? 0} days available
                         </p>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className="text-sm font-semibold text-green-600 dark:text-green-400">
-                      {formatCurrency(property.revenue)}
+                      {formatCurrency(property.revenue ?? 0)}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -202,27 +202,27 @@ export const PropertyPerformanceTable: React.FC<PropertyPerformanceTableProps> =
                       <div className="w-16 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mr-2">
                         <div
                           className="bg-blue-600 h-2 rounded-full"
-                          style={{ width: `${Math.min(Math.max(property.occupancy_rate, 0), 100)}%` }}
+                          style={{ width: `${Math.min(Math.max(property.occupancy_rate ?? 0, 0), 100)}%` }}
                         ></div>
                       </div>
                       <span className="text-sm text-gray-900 dark:text-white">
-                        {formatPercentage(property.occupancy_rate)}
+                        {formatPercentage(property.occupancy_rate ?? 0)}
                       </span>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                    {property.bookings}
+                    {property.bookings ?? 0}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <span className="text-sm text-gray-900 dark:text-white">
-                        {property.average_rating.toFixed(2)}
+                        {(property.average_rating ?? 0).toFixed(2)}
                       </span>
                       <span className="text-yellow-400 ml-1">★</span>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                    {formatCurrency(property.revenue_per_night)}
+                    {formatCurrency(property.revenue_per_night ?? 0)}
                   </td>
                 </tr>
               ))}

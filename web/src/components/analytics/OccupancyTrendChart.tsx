@@ -48,14 +48,16 @@ export const OccupancyTrendChart: React.FC<OccupancyTrendChartProps> = ({
 
   const calculateAverageOccupancy = () => {
     if (!data || data.length === 0) return 0;
-    const sum = data.reduce((acc, item) => acc + item.occupancy_rate, 0);
+    const sum = data.reduce((acc, item) => acc + (item?.occupancy_rate ?? 0), 0);
     return sum / data.length;
   };
 
   const calculateTrend = () => {
     if (!data || data.length < 2) return null;
-    const recent = data[data.length - 1].occupancy_rate;
-    const previous = data[data.length - 2].occupancy_rate;
+    const recentItem = data[data.length - 1];
+    const previousItem = data[data.length - 2];
+    const recent = recentItem?.occupancy_rate ?? 0;
+    const previous = previousItem?.occupancy_rate ?? 0;
     const change = recent - previous;
     return { change, isPositive: change >= 0 };
   };
@@ -65,20 +67,21 @@ export const OccupancyTrendChart: React.FC<OccupancyTrendChartProps> = ({
 
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
-      const data = payload[0].payload;
+      const data = payload[0]?.payload;
+      if (!data) return null;
       return (
         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
           <p className="text-sm font-medium text-gray-900 dark:text-white mb-2">
-            {formatDate(data.date)}
+            {formatDate(data.date || '')}
           </p>
           <p className="text-sm text-gray-600 dark:text-gray-300">
-            Occupancy: <span className="font-semibold text-blue-600">{formatPercentage(data.occupancy_rate)}</span>
+            Occupancy: <span className="font-semibold text-blue-600">{formatPercentage(data.occupancy_rate ?? 0)}</span>
           </p>
           <p className="text-sm text-gray-600 dark:text-gray-300">
-            Booked: <span className="font-semibold">{data.booked_nights} nights</span>
+            Booked: <span className="font-semibold">{data.booked_nights ?? 0} nights</span>
           </p>
           <p className="text-sm text-gray-600 dark:text-gray-300">
-            Available: <span className="font-semibold">{data.available_nights} nights</span>
+            Available: <span className="font-semibold">{data.available_nights ?? 0} nights</span>
           </p>
         </div>
       );

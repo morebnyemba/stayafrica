@@ -61,22 +61,23 @@ export const RevenueProjectionChart: React.FC<RevenueProjectionChartProps> = ({
 
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
-      const data = payload[0].payload;
+      const data = payload[0]?.payload;
+      if (!data) return null;
       return (
         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
           <p className="text-sm font-medium text-gray-900 dark:text-white mb-2">
-            {formatDate(data.date)}
+            {formatDate(data.date || '')}
           </p>
-          {data.actual_revenue && (
+          {data.actual_revenue != null && (
             <p className="text-sm text-gray-600 dark:text-gray-300">
               Actual: <span className="font-semibold text-blue-600">{formatCurrency(data.actual_revenue)}</span>
             </p>
           )}
           <p className="text-sm text-gray-600 dark:text-gray-300">
-            Projected: <span className="font-semibold text-green-600">{formatCurrency(data.projected_revenue)}</span>
+            Projected: <span className="font-semibold text-green-600">{formatCurrency(data.projected_revenue ?? 0)}</span>
           </p>
           <p className="text-sm text-gray-600 dark:text-gray-300 text-xs mt-1">
-            Range: {formatCurrency(data.confidence_lower)} - {formatCurrency(data.confidence_upper)}
+            Range: {formatCurrency(data.confidence_lower ?? 0)} - {formatCurrency(data.confidence_upper ?? 0)}
           </p>
         </div>
       );
