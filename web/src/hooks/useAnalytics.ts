@@ -27,7 +27,7 @@ export function useAnalyticsDashboard(filters?: FilterOptions) {
       if (filters?.start_date) params.append('start_date', filters.start_date);
       if (filters?.end_date) params.append('end_date', filters.end_date);
 
-      const response = await apiClient.get(`/properties/analytics/host/dashboard/?${params}`);
+      const response = await apiClient.get(`/analytics/host/dashboard/?${params}`);
       return response.data;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -45,7 +45,7 @@ export function useRevenueChart(period: TimePeriod = 'monthly', propertyId?: str
       params.append('period', period);
       if (propertyId) params.append('property_id', propertyId);
 
-      const response = await apiClient.get(`/properties/analytics/host/revenue_chart/?${params}`);
+      const response = await apiClient.get(`/analytics/host/revenue_chart/?${params}`);
       return response.data;
     },
     staleTime: 5 * 60 * 1000,
@@ -63,7 +63,7 @@ export function useOccupancyTrend(period: TimePeriod = 'monthly', propertyId?: s
       params.append('period', period);
       if (propertyId) params.append('property_id', propertyId);
 
-      const response = await apiClient.get(`/properties/analytics/host/occupancy_trend/?${params}`);
+      const response = await apiClient.get(`/analytics/host/occupancy_trend/?${params}`);
       return response.data;
     },
     staleTime: 5 * 60 * 1000,
@@ -78,7 +78,7 @@ export function useGenerateProjections() {
 
   return useMutation<ProjectionDataPoint[], Error, ProjectionParams>({
     mutationFn: async (params) => {
-      const response = await apiClient.post('/properties/analytics/host/generate_projections/', params);
+      const response = await apiClient.post('/analytics/host/generate_projections/', params);
       return response.data;
     },
     onSuccess: () => {
@@ -97,7 +97,7 @@ export function usePropertyPerformance(period: TimePeriod = 'monthly') {
       const params = new URLSearchParams();
       params.append('period', period);
 
-      const response = await apiClient.get(`/properties/analytics/properties/?${params}`);
+      const response = await apiClient.get(`/analytics/properties/?${params}`);
       return response.data;
     },
     staleTime: 5 * 60 * 1000,
@@ -115,7 +115,7 @@ export function useBenchmarks(propertyType?: string, location?: string) {
       if (propertyType) params.append('property_type', propertyType);
       if (location) params.append('location', location);
 
-      const response = await apiClient.get(`/properties/analytics/benchmarks/?${params}`);
+      const response = await apiClient.get(`/analytics/benchmarks/?${params}`);
       return response.data;
     },
     staleTime: 30 * 60 * 1000, // 30 minutes (benchmarks change less frequently)
@@ -129,7 +129,7 @@ export function useExportAnalytics() {
   return useMutation({
     mutationFn: async ({ format, data }: { format: 'csv' | 'pdf'; data: any }) => {
       const response = await apiClient.post(
-        `/properties/analytics/export/`,
+        `/analytics/export/`,
         { format, data },
         { responseType: 'blob' }
       );
