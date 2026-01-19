@@ -11,6 +11,7 @@ import {
   ChevronRight,
   Receipt,
   ShieldCheck,
+  TrendingUp,
 } from 'lucide-react';
 
 const settingsSections = [
@@ -34,6 +35,17 @@ const settingsSections = [
         description: 'Update password and security settings',
         icon: Lock,
         link: '/profile',
+      },
+    ],
+  },
+  {
+    title: 'Pricing',
+    items: [
+      {
+        title: 'Dynamic Pricing',
+        description: 'Manage pricing rules and seasonal adjustments',
+        icon: TrendingUp,
+        link: '/host/pricing',
       },
     ],
   },

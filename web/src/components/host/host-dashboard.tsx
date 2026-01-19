@@ -16,6 +16,7 @@ import {
   ShieldCheck,
   Receipt,
   Settings,
+  TrendingUp,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { AnalyticsDashboard } from '@/components/analytics';
@@ -183,6 +184,13 @@ export function HostDashboard() {
       icon: Receipt,
       link: '/host/tax-reports',
       color: 'bg-teal-500',
+    },
+    {
+      title: 'Dynamic Pricing',
+      description: 'Manage pricing rules',
+      icon: TrendingUp,
+      link: '/host/pricing',
+      color: 'bg-amber-500',
     },
     {
       title: 'Verification',
