@@ -6,7 +6,7 @@ from apps.admin_dashboard.views import (
     SystemConfigurationViewSet
 )
 
-app_name = 'admin'
+app_name = 'admin_dashboard'
 
 router = DefaultRouter()
 router.register(r'audit-logs', AuditLogViewSet, basename='audit-log')
