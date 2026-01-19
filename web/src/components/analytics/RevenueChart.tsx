@@ -64,8 +64,11 @@ export const RevenueChart: React.FC<RevenueChartProps> = ({
 
   const calculateTrend = () => {
     if (!data || data.length < 2) return null;
-    const recent = data[data.length - 1].revenue;
-    const previous = data[data.length - 2].revenue;
+    const recentItem = data[data.length - 1];
+    const previousItem = data[data.length - 2];
+    const recent = recentItem?.revenue ?? 0;
+    const previous = previousItem?.revenue ?? 0;
+    if (previous === 0) return null;
     const change = ((recent - previous) / previous) * 100;
     return { change, isPositive: change >= 0 };
   };
@@ -74,17 +77,18 @@ export const RevenueChart: React.FC<RevenueChartProps> = ({
 
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
-      const data = payload[0].payload;
+      const data = payload[0]?.payload;
+      if (!data) return null;
       return (
         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
           <p className="text-sm font-medium text-gray-900 dark:text-white mb-2">
-            {formatDate(data.date)}
+            {formatDate(data.date || '')}
           </p>
           <p className="text-sm text-gray-600 dark:text-gray-300">
-            Revenue: <span className="font-semibold text-green-600">{formatCurrency(data.revenue)}</span>
+            Revenue: <span className="font-semibold text-green-600">{formatCurrency(data.revenue ?? 0)}</span>
           </p>
           <p className="text-sm text-gray-600 dark:text-gray-300">
-            Bookings: <span className="font-semibold">{data.bookings}</span>
+            Bookings: <span className="font-semibold">{data.bookings ?? 0}</span>
           </p>
         </div>
       );

@@ -44,30 +44,31 @@ export const BookingTimelineChart: React.FC<BookingTimelineChartProps> = ({
     }
   };
 
-  const totalBookings = data.reduce((sum, item) => sum + item.count, 0);
-  const totalConfirmed = data.reduce((sum, item) => sum + item.confirmed, 0);
+  const totalBookings = data.reduce((sum, item) => sum + (item?.count ?? 0), 0);
+  const totalConfirmed = data.reduce((sum, item) => sum + (item?.confirmed ?? 0), 0);
   const confirmationRate = totalBookings > 0 ? (totalConfirmed / totalBookings) * 100 : 0;
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
-      const data = payload[0].payload;
+      const data = payload[0]?.payload;
+      if (!data) return null;
       return (
         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
           <p className="text-sm font-medium text-gray-900 dark:text-white mb-2">
-            {formatDate(label)}
+            {formatDate(label || '')}
           </p>
           <div className="space-y-1">
             <p className="text-sm text-gray-600 dark:text-gray-300">
-              Total: <span className="font-semibold">{data.count}</span>
+              Total: <span className="font-semibold">{data.count ?? 0}</span>
             </p>
             <p className="text-sm text-green-600">
-              Confirmed: <span className="font-semibold">{data.confirmed}</span>
+              Confirmed: <span className="font-semibold">{data.confirmed ?? 0}</span>
             </p>
             <p className="text-sm text-yellow-600">
-              Pending: <span className="font-semibold">{data.pending}</span>
+              Pending: <span className="font-semibold">{data.pending ?? 0}</span>
             </p>
             <p className="text-sm text-red-600">
-              Cancelled: <span className="font-semibold">{data.cancelled}</span>
+              Cancelled: <span className="font-semibold">{data.cancelled ?? 0}</span>
             </p>
           </div>
         </div>

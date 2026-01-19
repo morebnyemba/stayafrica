@@ -238,58 +238,58 @@ export function DashboardContent() {
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-sand-100 dark:bg-primary-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
           {/* Welcome Section */}
-          <div className="mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold text-primary-900 dark:text-sand-50 mb-2">
+          <div className="dashboard-header">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary-900 dark:text-sand-50 mb-2">
               Welcome back, {user?.first_name}! 👋
             </h1>
-            <p className="text-lg text-primary-600 dark:text-sand-300">
+            <p className="text-base sm:text-lg text-primary-600 dark:text-sand-300">
               Here&apos;s what&apos;s happening with your travels
             </p>
           </div>
 
           {/* Verification Status Banner */}
-          <div className="mb-8">
+          <div className="mb-6 sm:mb-8">
             <VerificationStatus />
           </div>
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8">
             {stats.map((stat, index) => (
               <Link
                 key={index}
                 href={stat.link}
-                className="card p-6 hover:shadow-lg transition-shadow"
+                className="stats-card group"
               >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-primary-600 dark:text-sand-400 mb-1">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
+                  <div className="order-2 sm:order-1">
+                    <p className="text-xs sm:text-sm text-primary-600 dark:text-sand-400 mb-1">
                       {stat.title}
                     </p>
-                    <p className="text-3xl font-bold text-primary-900 dark:text-sand-50">
+                    <p className="text-2xl sm:text-3xl font-bold text-primary-900 dark:text-sand-50">
                       {stat.value}
                     </p>
                   </div>
-                  <div className={`${stat.bgColor} ${stat.color} p-3 rounded-full`}>
-                    <stat.icon className="w-6 h-6" />
+                  <div className={`order-1 sm:order-2 ${stat.bgColor} ${stat.color} p-2 sm:p-3 rounded-full w-fit group-hover:scale-110 transition-transform`}>
+                    <stat.icon className="w-5 h-5 sm:w-6 sm:h-6" />
                   </div>
                 </div>
               </Link>
             ))}
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mb-6 sm:mb-8">
             {/* Upcoming Trips */}
             <div className="lg:col-span-2">
-              <div className="card p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-2xl font-bold text-primary-900 dark:text-sand-50">
+              <div className="card-gradient p-4 sm:p-6">
+                <div className="flex items-center justify-between mb-4 sm:mb-6">
+                  <h2 className="text-xl sm:text-2xl font-bold text-primary-900 dark:text-sand-50">
                     Upcoming Trips
                   </h2>
                   <Link
                     href="/bookings"
-                    className="text-secondary-600 dark:text-secondary-400 hover:underline text-sm font-medium"
+                    className="text-secondary-600 dark:text-secondary-400 hover:underline text-xs sm:text-sm font-medium"
                   >
                     View All
                   </Link>
@@ -304,41 +304,41 @@ export function DashboardContent() {
                     ))}
                   </div>
                 ) : upcomingBookings && upcomingBookings.length > 0 ? (
-                  <div className="space-y-4">
+                  <div className="space-y-3 sm:space-y-4">
                     {upcomingBookings.slice(0, 3).map((booking: any) => (
                       <div
                         key={booking.id}
-                        className="p-4 border border-primary-200 dark:border-primary-700 rounded-lg hover:border-secondary-500 transition"
+                        className="p-3 sm:p-4 border border-primary-200 dark:border-primary-700 rounded-lg hover:border-secondary-500 transition"
                       >
-                        <div className="flex items-start justify-between">
+                        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4">
                           <div className="flex-1">
-                            <h3 className="font-semibold text-primary-900 dark:text-sand-50 mb-1">
+                            <h3 className="font-semibold text-sm sm:text-base text-primary-900 dark:text-sand-50 mb-1">
                               {booking.property?.title || booking.property_title || 'Property'}
                             </h3>
-                            <div className="flex items-center gap-2 text-sm text-primary-600 dark:text-sand-300 mb-2">
-                              <MapPin className="w-4 h-4" />
-                              <span>
+                            <div className="flex items-center gap-2 text-xs sm:text-sm text-primary-600 dark:text-sand-300 mb-2">
+                              <MapPin className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                              <span className="truncate">
                                 {booking.property?.city || 'Unknown'}, {booking.property?.country || 'Unknown'}
                               </span>
                             </div>
-                            <div className="flex items-center gap-4 text-sm">
+                            <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm">
                               <div className="flex items-center gap-1">
-                                <Calendar className="w-4 h-4 text-primary-400" />
+                                <Calendar className="w-3 h-3 sm:w-4 sm:h-4 text-primary-400" />
                                 <span className="text-primary-700 dark:text-sand-200">
                                   {new Date(booking.check_in).toLocaleDateString()}
                                 </span>
                               </div>
                               <span className="text-primary-400">→</span>
                               <div className="flex items-center gap-1">
-                                <Calendar className="w-4 h-4 text-primary-400" />
+                                <Calendar className="w-3 h-3 sm:w-4 sm:h-4 text-primary-400" />
                                 <span className="text-primary-700 dark:text-sand-200">
                                   {new Date(booking.check_out).toLocaleDateString()}
                                 </span>
                               </div>
                             </div>
                           </div>
-                          <div className="text-right">
-                            <span className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 text-xs font-semibold rounded-full">
+                          <div className="self-start">
+                            <span className="px-2 sm:px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 text-xs font-semibold rounded-full">
                               Confirmed
                             </span>
                           </div>
@@ -347,12 +347,12 @@ export function DashboardContent() {
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center py-12">
-                    <Calendar className="w-16 h-16 text-primary-300 dark:text-primary-700 mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-primary-900 dark:text-sand-50 mb-2">
+                  <div className="text-center py-8 sm:py-12">
+                    <Calendar className="w-12 h-12 sm:w-16 sm:h-16 text-primary-300 dark:text-primary-700 mx-auto mb-3 sm:mb-4" />
+                    <h3 className="text-base sm:text-lg font-semibold text-primary-900 dark:text-sand-50 mb-2">
                       No Upcoming Trips
                     </h3>
-                    <p className="text-primary-600 dark:text-sand-300 mb-4">
+                    <p className="text-sm sm:text-base text-primary-600 dark:text-sand-300 mb-4">
                       Time to plan your next adventure!
                     </p>
                     <Link href="/explore">
@@ -365,25 +365,25 @@ export function DashboardContent() {
 
             {/* Quick Actions */}
             <div className="lg:col-span-1">
-              <div className="card p-6">
-                <h2 className="text-2xl font-bold text-primary-900 dark:text-sand-50 mb-6">
+              <div className="card-gradient p-4 sm:p-6">
+                <h2 className="text-xl sm:text-2xl font-bold text-primary-900 dark:text-sand-50 mb-4 sm:mb-6">
                   Quick Actions
                 </h2>
-                <div className="space-y-3">
+                <div className="grid grid-cols-2 sm:grid-cols-1 gap-2 sm:gap-3">
                   {quickActions.map((action, index) => (
                     <Link
                       key={index}
                       href={action.link}
-                      className="flex items-center gap-4 p-4 border border-primary-200 dark:border-primary-700 rounded-lg hover:border-secondary-500 hover:bg-secondary-50 dark:hover:bg-secondary-900/10 transition group"
+                      className="action-card"
                     >
-                      <div className={`${action.color} p-2 rounded-lg text-white group-hover:scale-110 transition-transform`}>
-                        <action.icon className="w-5 h-5" />
+                      <div className={`${action.color} p-1.5 sm:p-2 rounded-lg text-white group-hover:scale-110 transition-transform flex-shrink-0`}>
+                        <action.icon className="w-4 h-4 sm:w-5 sm:h-5" />
                       </div>
-                      <div>
-                        <div className="font-semibold text-primary-900 dark:text-sand-50 text-sm">
+                      <div className="min-w-0">
+                        <div className="font-semibold text-primary-900 dark:text-sand-50 text-xs sm:text-sm truncate">
                           {action.title}
                         </div>
-                        <div className="text-xs text-primary-600 dark:text-sand-400">
+                        <div className="text-xs text-primary-600 dark:text-sand-400 hidden sm:block">
                           {action.description}
                         </div>
                       </div>
@@ -395,18 +395,18 @@ export function DashboardContent() {
           </div>
 
           {/* Recent Activity */}
-          <div className="card p-6">
-            <h2 className="text-2xl font-bold text-primary-900 dark:text-sand-50 mb-6">
+          <div className="card-gradient p-4 sm:p-6">
+            <h2 className="text-xl sm:text-2xl font-bold text-primary-900 dark:text-sand-50 mb-4 sm:mb-6">
               Recent Activity
             </h2>
             {allActivities.length > 0 ? (
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 {allActivities.map((activity: any) => (
                   <div
                     key={activity.type + '-' + activity.id}
-                    className="flex items-center gap-4 p-4 border border-primary-200 dark:border-primary-700 rounded-lg"
+                    className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 border border-primary-200 dark:border-primary-700 rounded-lg"
                   >
-                    <div className={`p-2 rounded-full ${
+                    <div className={`p-2 rounded-full w-fit ${
                       activity.type === 'booking' ?
                         activity.status === 'CONFIRMED'
                           ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400'
@@ -423,55 +423,55 @@ export function DashboardContent() {
                       : 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400'
                     }`}>
                       {activity.type === 'booking' ? (
-                        activity.status === 'CONFIRMED' ? <CheckCircle className="w-5 h-5" />
-                        : activity.status === 'PENDING' ? <Clock className="w-5 h-5" />
-                        : <XCircle className="w-5 h-5" />
+                        activity.status === 'CONFIRMED' ? <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5" />
+                        : activity.status === 'PENDING' ? <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
+                        : <XCircle className="w-4 h-4 sm:w-5 sm:h-5" />
                       ) : activity.type === 'review' ? (
-                        <Star className="w-5 h-5" />
+                        <Star className="w-4 h-4 sm:w-5 sm:h-5" />
                       ) : activity.type === 'payment' ? (
-                        activity.status === 'success' ? <CheckCircle className="w-5 h-5" />
-                        : activity.status === 'pending' ? <Clock className="w-5 h-5" />
-                        : <XCircle className="w-5 h-5" />
+                        activity.status === 'success' ? <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5" />
+                        : activity.status === 'pending' ? <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
+                        : <XCircle className="w-4 h-4 sm:w-5 sm:h-5" />
                       ) : (
-                        <Heart className="w-5 h-5" />
+                        <Heart className="w-4 h-4 sm:w-5 sm:h-5" />
                       )}
                     </div>
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       {activity.type === 'booking' ? (
-                        <p className="font-semibold text-primary-900 dark:text-sand-50">
+                        <p className="font-semibold text-sm sm:text-base text-primary-900 dark:text-sand-50 truncate">
                           Booking {activity.status.toLowerCase()} - {activity.property?.title}
                         </p>
                       ) : activity.type === 'review' ? (
-                        <p className="font-semibold text-primary-900 dark:text-sand-50">
+                        <p className="font-semibold text-sm sm:text-base text-primary-900 dark:text-sand-50 truncate">
                           Review {activity.rating}★ - {activity.property?.title}
                         </p>
                       ) : activity.type === 'payment' ? (
-                        <p className="font-semibold text-primary-900 dark:text-sand-50">
+                        <p className="font-semibold text-sm sm:text-base text-primary-900 dark:text-sand-50 truncate">
                           Payment {activity.status} - {activity.provider} ${activity.amount}
                         </p>
                       ) : (
-                        <p className="font-semibold text-primary-900 dark:text-sand-50">
+                        <p className="font-semibold text-sm sm:text-base text-primary-900 dark:text-sand-50 truncate">
                           Saved property - {activity.property?.title}
                         </p>
                       )}
-                      <p className="text-sm text-primary-600 dark:text-sand-400">
-                        {new Date(activity.created_at).toLocaleDateString()} at {new Date(activity.created_at).toLocaleTimeString()}
+                      <p className="text-xs sm:text-sm text-primary-600 dark:text-sand-400">
+                        {new Date(activity.created_at).toLocaleDateString()} at {new Date(activity.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </p>
                     </div>
                     {activity.type === 'booking' ? (
-                      <Link href={`/bookings`} className="text-secondary-600 dark:text-secondary-400 hover:underline text-sm font-medium">View Details</Link>
+                      <Link href={`/bookings`} className="text-secondary-600 dark:text-secondary-400 hover:underline text-xs sm:text-sm font-medium whitespace-nowrap">View Details</Link>
                     ) : activity.type === 'review' ? (
-                      <Link href={`/reviews`} className="text-secondary-600 dark:text-secondary-400 hover:underline text-sm font-medium">View Reviews</Link>
+                      <Link href={`/reviews`} className="text-secondary-600 dark:text-secondary-400 hover:underline text-xs sm:text-sm font-medium whitespace-nowrap">View Reviews</Link>
                     ) : activity.type === 'payment' ? (
-                      <Link href={`/payments`} className="text-secondary-600 dark:text-secondary-400 hover:underline text-sm font-medium">View Payments</Link>
+                      <Link href={`/payments`} className="text-secondary-600 dark:text-secondary-400 hover:underline text-xs sm:text-sm font-medium whitespace-nowrap">View Payments</Link>
                     ) : (
-                      <Link href={`/wishlist`} className="text-secondary-600 dark:text-secondary-400 hover:underline text-sm font-medium">View Wishlist</Link>
+                      <Link href={`/wishlist`} className="text-secondary-600 dark:text-secondary-400 hover:underline text-xs sm:text-sm font-medium whitespace-nowrap">View Wishlist</Link>
                     )}
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="text-center py-8 text-primary-600 dark:text-sand-400">
+              <div className="text-center py-6 sm:py-8 text-primary-600 dark:text-sand-400 text-sm sm:text-base">
                 No recent activity
               </div>
             )}
