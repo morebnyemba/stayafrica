@@ -135,7 +135,7 @@ export function HostDashboard() {
     },
   ];
 
-  const quickActions = [
+  const baseQuickActions = [
     {
       title: 'Add New Property',
       description: 'List a new property',
@@ -193,13 +193,6 @@ export function HostDashboard() {
       color: 'bg-amber-500',
     },
     {
-      title: 'Verification',
-      description: 'Verify your identity',
-      icon: ShieldCheck,
-      link: '/host/verification',
-      color: 'bg-indigo-500',
-    },
-    {
       title: 'Settings',
       description: 'Account settings',
       icon: Settings,
@@ -207,6 +200,29 @@ export function HostDashboard() {
       color: 'bg-gray-500',
     },
   ];
+
+  // Only show verification option if user is not verified
+  // Insert verification before Settings action
+  const quickActions = user?.is_verified
+    ? baseQuickActions
+    : (() => {
+        const settingsIndex = baseQuickActions.findIndex(a => a.title === 'Settings');
+        const verificationAction = {
+          title: 'Verification',
+          description: 'Verify your identity',
+          icon: ShieldCheck,
+          link: '/host/verification',
+          color: 'bg-indigo-500',
+        };
+        if (settingsIndex === -1) {
+          return [...baseQuickActions, verificationAction];
+        }
+        return [
+          ...baseQuickActions.slice(0, settingsIndex),
+          verificationAction,
+          ...baseQuickActions.slice(settingsIndex),
+        ];
+      })();
 
   return (
     <ProtectedRoute>
@@ -251,8 +267,8 @@ export function HostDashboard() {
             </div>
           </div>
 
-          {/* Verification Status Banner */}
-          {activeTab === 'overview' && (
+          {/* Verification Status Banner - only show if user is not verified */}
+          {activeTab === 'overview' && !user?.is_verified && (
             <div className="mb-6 sm:mb-8">
               <VerificationStatus />
             </div>
