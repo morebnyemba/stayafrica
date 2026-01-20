@@ -32,6 +32,22 @@ class HostAnalyticsViewSet(viewsets.ViewSet):
     """ViewSet for host analytics dashboard"""
     permission_classes = [IsAuthenticated]
     
+    # Period to days mapping (includes aliases for backward compatibility)
+    PERIOD_DAYS = {
+        'daily': 7,
+        'weekly': 28,
+        'monthly': 30,
+        'yearly': 365,
+        # Aliases for backward compatibility
+        'week': 7,
+        'month': 30,
+        'year': 365,
+    }
+    
+    def _get_period_days(self, period: str, default: int = 30) -> int:
+        """Get the number of days for a given period string."""
+        return self.PERIOD_DAYS.get(period, default)
+    
     def list(self, request):
         """
         List available analytics endpoints
@@ -197,17 +213,8 @@ class HostAnalyticsViewSet(viewsets.ViewSet):
         
         today = timezone.now().date()
         
-        # Map frontend period names to day ranges
-        period_days = {
-            'daily': 7,
-            'weekly': 28,
-            'week': 7,
-            'monthly': 30,
-            'month': 30,
-            'yearly': 365,
-            'year': 365,
-        }
-        days = period_days.get(period, 30)
+        # Map period names to day ranges (includes aliases for backward compatibility)
+        days = self._get_period_days(period)
         start_date = today - timedelta(days=days)
         
         # Get daily analytics
@@ -248,14 +255,8 @@ class HostAnalyticsViewSet(viewsets.ViewSet):
         host = request.user
         period = request.query_params.get('period', 'monthly')
         
-        # Map frontend period names to day ranges
-        period_days = {
-            'daily': 7,
-            'weekly': 28,
-            'monthly': 30,
-            'yearly': 365,
-        }
-        days = period_days.get(period, 30)
+        # Use common period days mapping
+        days = self._get_period_days(period)
         
         today = timezone.now().date()
         start_date = today - timedelta(days=days)
