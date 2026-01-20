@@ -38,7 +38,7 @@ const transformVerificationResponse = (data: any): VerificationStatus | null => 
     admin_notes: v.admin_notes,
     verified_at: v.reviewed_at,
     created_at: v.submitted_at,
-    updated_at: v.submitted_at,
+    updated_at: v.reviewed_at || v.submitted_at,
   };
 };
 

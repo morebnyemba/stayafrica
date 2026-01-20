@@ -26,11 +26,9 @@ const transformTaxReport = (data: any): TaxReportType | null => {
   }
   
   return {
-    host_id: '',
     period_start: data.period?.start || '',
     period_end: data.period?.end || '',
     total_bookings: data.summary?.total_bookings || 0,
-    total_revenue: 0, // Backend doesn't return this currently
     total_taxes_collected: parseFloat(data.summary?.total_tax_collected) || 0,
     tax_breakdown: taxBreakdown,
   };
@@ -74,15 +72,20 @@ export const HostTaxReport = () => {
       item.total_amount.toFixed(2),
     ]);
 
-    const csvContent = [
+    const csvRows = [
       headers.join(','),
       ...rows.map(row => row.join(',')),
       '',
-      `Total Revenue,${report.total_revenue.toFixed(2)}`,
-      `Total Taxes Collected,${report.total_taxes_collected.toFixed(2)}`,
-      `Total Bookings,${report.total_bookings}`,
-      `Period,${periodStart} to ${periodEnd}`,
-    ].join('\n');
+    ];
+    
+    if (report.total_revenue !== undefined) {
+      csvRows.push(`Total Revenue,${report.total_revenue.toFixed(2)}`);
+    }
+    csvRows.push(`Total Taxes Collected,${report.total_taxes_collected.toFixed(2)}`);
+    csvRows.push(`Total Bookings,${report.total_bookings}`);
+    csvRows.push(`Period,${periodStart} to ${periodEnd}`);
+
+    const csvContent = csvRows.join('\n');
 
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
@@ -153,13 +156,15 @@ export const HostTaxReport = () => {
         ) : report ? (
           <div className="space-y-6">
             {/* Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <p className="text-sm text-blue-600 font-medium mb-1">Total Revenue</p>
-                <p className="text-2xl font-bold text-blue-900">
-                  ${report.total_revenue.toFixed(2)}
-                </p>
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {report.total_revenue !== undefined && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <p className="text-sm text-blue-600 font-medium mb-1">Total Revenue</p>
+                  <p className="text-2xl font-bold text-blue-900">
+                    ${report.total_revenue.toFixed(2)}
+                  </p>
+                </div>
+              )}
 
               <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                 <p className="text-sm text-green-600 font-medium mb-1">Taxes Collected</p>

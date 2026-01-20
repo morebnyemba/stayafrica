@@ -15,11 +15,11 @@ export interface BookingTax {
 }
 
 export interface HostTaxReport {
-  host_id: string;
+  host_id?: string;
   period_start: string;
   period_end: string;
   total_bookings: number;
-  total_revenue: number;
+  total_revenue?: number;
   total_taxes_collected: number;
   tax_breakdown: {
     jurisdiction: string;
