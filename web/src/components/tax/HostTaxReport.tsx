@@ -9,6 +9,31 @@ import { format, subMonths, startOfMonth, endOfMonth } from 'date-fns';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
+// Transform backend response to frontend expected format
+const transformTaxReport = (data: any): TaxReportType | null => {
+  if (!data) return null;
+  
+  // Build tax breakdown from by_jurisdiction
+  const taxBreakdown: TaxReportType['tax_breakdown'] = [];
+  if (data.by_jurisdiction) {
+    for (const [code, info] of Object.entries(data.by_jurisdiction as Record<string, any>)) {
+      taxBreakdown.push({
+        jurisdiction: info.name || code,
+        tax_type: 'Tax', // Default type since backend groups by jurisdiction
+        total_amount: parseFloat(info.total_tax) || 0,
+      });
+    }
+  }
+  
+  return {
+    period_start: data.period?.start || '',
+    period_end: data.period?.end || '',
+    total_bookings: data.summary?.total_bookings || 0,
+    total_taxes_collected: parseFloat(data.summary?.total_tax_collected) || 0,
+    tax_breakdown: taxBreakdown,
+  };
+};
+
 export const HostTaxReport = () => {
   const [periodStart, setPeriodStart] = useState(
     format(startOfMonth(subMonths(new Date(), 1)), 'yyyy-MM-dd')
@@ -17,7 +42,7 @@ export const HostTaxReport = () => {
     format(endOfMonth(subMonths(new Date(), 1)), 'yyyy-MM-dd')
   );
 
-  const { data: report, isLoading, error } = useQuery<TaxReportType>({
+  const { data: report, isLoading, error } = useQuery<TaxReportType | null>({
     queryKey: ['host-tax-report', periodStart, periodEnd],
     queryFn: async () => {
       const token = localStorage.getItem('access_token');
@@ -33,7 +58,7 @@ export const HostTaxReport = () => {
           },
         }
       );
-      return response.data;
+      return transformTaxReport(response.data);
     },
   });
 
@@ -47,15 +72,20 @@ export const HostTaxReport = () => {
       item.total_amount.toFixed(2),
     ]);
 
-    const csvContent = [
+    const csvRows = [
       headers.join(','),
       ...rows.map(row => row.join(',')),
       '',
-      `Total Revenue,${report.total_revenue.toFixed(2)}`,
-      `Total Taxes Collected,${report.total_taxes_collected.toFixed(2)}`,
-      `Total Bookings,${report.total_bookings}`,
-      `Period,${periodStart} to ${periodEnd}`,
-    ].join('\n');
+    ];
+    
+    if (report.total_revenue !== undefined) {
+      csvRows.push(`Total Revenue,${report.total_revenue.toFixed(2)}`);
+    }
+    csvRows.push(`Total Taxes Collected,${report.total_taxes_collected.toFixed(2)}`);
+    csvRows.push(`Total Bookings,${report.total_bookings}`);
+    csvRows.push(`Period,${periodStart} to ${periodEnd}`);
+
+    const csvContent = csvRows.join('\n');
 
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
@@ -126,13 +156,15 @@ export const HostTaxReport = () => {
         ) : report ? (
           <div className="space-y-6">
             {/* Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <p className="text-sm text-blue-600 font-medium mb-1">Total Revenue</p>
-                <p className="text-2xl font-bold text-blue-900">
-                  ${report.total_revenue.toFixed(2)}
-                </p>
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {report.total_revenue !== undefined && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <p className="text-sm text-blue-600 font-medium mb-1">Total Revenue</p>
+                  <p className="text-2xl font-bold text-blue-900">
+                    ${report.total_revenue.toFixed(2)}
+                  </p>
+                </div>
+              )}
 
               <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                 <p className="text-sm text-green-600 font-medium mb-1">Taxes Collected</p>
