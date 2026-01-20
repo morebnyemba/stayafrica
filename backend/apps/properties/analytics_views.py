@@ -93,6 +93,9 @@ class HostAnalyticsViewSet(viewsets.ViewSet):
             date__lte=end_date
         ).order_by('-date')[:30]  # Last 30 days
         
+        # Generate booking timeline data for BookingTimelineChart
+        booking_timeline = self._generate_booking_timeline(host, start_date, end_date)
+        
         # Get projections (next 3 months)
         next_month = today + relativedelta(months=1)
         projections = RevenueProjection.objects.filter(
@@ -117,16 +120,66 @@ class HostAnalyticsViewSet(viewsets.ViewSet):
         # Get insights
         insights = HostAnalyticsService.get_performance_insights(host)
         
-        # Prepare response
+        # Prepare response with all fields expected by frontend
         dashboard_data = {
             'summary': HostAnalyticsSummarySerializer(summary).data,
             'property_analytics': PropertyAnalyticsSerializer(property_analytics, many=True).data,
             'projections': RevenueProjectionSerializer(projections, many=True).data,
-            'insights': insights
+            'booking_timeline': booking_timeline,
+            'insights': insights,
+            'period': period,
+            'date_range': {
+                'start_date': str(start_date),
+                'end_date': str(end_date),
+            }
         }
         
-        serializer = AnalyticsDashboardSerializer(dashboard_data)
-        return Response(serializer.data)
+        return Response(dashboard_data)
+    
+    def _generate_booking_timeline(self, host, start_date, end_date):
+        """
+        Generate booking timeline data for the BookingTimelineChart.
+        Returns array of BookingDataPoint objects:
+        [{ date, count, confirmed, pending, cancelled }, ...]
+        """
+        from apps.bookings.models import Booking
+        
+        # Get all bookings for host's properties in the date range
+        bookings = Booking.objects.filter(
+            property__host=host,
+            created_at__date__gte=start_date,
+            created_at__date__lte=end_date
+        ).values('created_at__date', 'status').annotate(
+            count=models.Count('id')
+        ).order_by('created_at__date')
+        
+        # Group by date
+        timeline_dict = {}
+        for item in bookings:
+            date_str = str(item['created_at__date'])
+            if date_str not in timeline_dict:
+                timeline_dict[date_str] = {
+                    'date': date_str,
+                    'count': 0,
+                    'confirmed': 0,
+                    'pending': 0,
+                    'cancelled': 0,
+                }
+            
+            timeline_dict[date_str]['count'] += item['count']
+            
+            # Map booking status to frontend expected fields
+            status = item['status']
+            if status in ['confirmed', 'completed', 'active']:
+                timeline_dict[date_str]['confirmed'] += item['count']
+            elif status in ['pending', 'pending_approval']:
+                timeline_dict[date_str]['pending'] += item['count']
+            elif status in ['cancelled', 'rejected']:
+                timeline_dict[date_str]['cancelled'] += item['count']
+        
+        # Convert dict to sorted list
+        timeline = sorted(timeline_dict.values(), key=lambda x: x['date'])
+        return timeline
     
     @action(detail=False, methods=['get'])
     def revenue_chart(self, request):
@@ -134,21 +187,28 @@ class HostAnalyticsViewSet(viewsets.ViewSet):
         Get revenue data for charting
         
         Query params:
-        - period: 'week', 'month', 'year' (default: 'month')
+        - period: 'daily', 'weekly', 'month', 'year' (default: 'monthly')
+        
+        Returns array of RevenueDataPoint objects:
+        [{ date, revenue, bookings, label }, ...]
         """
         host = request.user
-        period = request.query_params.get('period', 'month')
+        period = request.query_params.get('period', 'monthly')
         
         today = timezone.now().date()
         
-        if period == 'week':
-            start_date = today - timedelta(days=7)
-        elif period == 'month':
-            start_date = today - timedelta(days=30)
-        elif period == 'year':
-            start_date = today - timedelta(days=365)
-        else:
-            start_date = today - timedelta(days=30)
+        # Map frontend period names to day ranges
+        period_days = {
+            'daily': 7,
+            'weekly': 28,
+            'week': 7,
+            'monthly': 30,
+            'month': 30,
+            'yearly': 365,
+            'year': 365,
+        }
+        days = period_days.get(period, 30)
+        start_date = today - timedelta(days=days)
         
         # Get daily analytics
         analytics = PropertyAnalytics.objects.filter(
@@ -161,21 +221,41 @@ class HostAnalyticsViewSet(viewsets.ViewSet):
             occupancy=models.Avg('occupancy_rate')
         ).order_by('date')
         
-        # Format for charting
-        chart_data = {
-            'labels': [str(item['date']) for item in analytics],
-            'revenue': [float(item['revenue']) for item in analytics],
-            'bookings': [item['bookings'] for item in analytics],
-            'occupancy': [float(item['occupancy']) for item in analytics]
-        }
+        # Format for frontend charting - return array of objects
+        chart_data = [
+            {
+                'date': str(item['date']),
+                'revenue': float(item['revenue'] or 0),
+                'bookings': item['bookings'] or 0,
+                'label': str(item['date']),
+            }
+            for item in analytics
+        ]
         
         return Response(chart_data)
     
     @action(detail=False, methods=['get'])
     def occupancy_trend(self, request):
-        """Get occupancy trend over time"""
+        """
+        Get occupancy trend over time
+        
+        Query params:
+        - period: 'daily', 'weekly', 'monthly', 'yearly' (default: 'monthly')
+        
+        Returns array of OccupancyDataPoint objects:
+        [{ date, occupancy_rate, booked_nights, available_nights }, ...]
+        """
         host = request.user
-        days = int(request.query_params.get('days', 30))
+        period = request.query_params.get('period', 'monthly')
+        
+        # Map frontend period names to day ranges
+        period_days = {
+            'daily': 7,
+            'weekly': 28,
+            'monthly': 30,
+            'yearly': 365,
+        }
+        days = period_days.get(period, 30)
         
         today = timezone.now().date()
         start_date = today - timedelta(days=days)
@@ -185,13 +265,21 @@ class HostAnalyticsViewSet(viewsets.ViewSet):
             date__gte=start_date,
             date__lte=today
         ).values('date').annotate(
-            avg_occupancy=models.Avg('occupancy_rate')
+            avg_occupancy=models.Avg('occupancy_rate'),
+            total_booked=models.Sum('nights_booked'),
+            total_available=models.Sum('nights_available')
         ).order_by('date')
         
-        trend_data = {
-            'dates': [str(item['date']) for item in analytics],
-            'occupancy_rates': [float(item['avg_occupancy']) for item in analytics]
-        }
+        # Format for frontend charting - return array of objects
+        trend_data = [
+            {
+                'date': str(item['date']),
+                'occupancy_rate': float(item['avg_occupancy'] or 0),
+                'booked_nights': item['total_booked'] or 0,
+                'available_nights': item['total_available'] or 0,
+            }
+            for item in analytics
+        ]
         
         return Response(trend_data)
     

@@ -12,17 +12,47 @@ const getAuthHeaders = () => {
   };
 };
 
+// Map backend lowercase status to frontend uppercase status
+const normalizeStatus = (backendStatus: string): VerificationStatus['status'] => {
+  const statusMap: Record<string, VerificationStatus['status']> = {
+    'pending': 'PENDING',
+    'under_review': 'UNDER_REVIEW',
+    'approved': 'APPROVED',
+    'rejected': 'REJECTED',
+  };
+  return statusMap[backendStatus?.toLowerCase()] || 'PENDING';
+};
+
+// Transform backend response to frontend format
+const transformVerificationResponse = (data: any): VerificationStatus | null => {
+  if (!data?.has_verification || !data?.verification) {
+    return null;
+  }
+
+  const verification = data.verification;
+  return {
+    id: verification.id,
+    user: verification.user_email || '',
+    status: normalizeStatus(verification.status),
+    rejection_reason: verification.rejection_reason,
+    admin_notes: verification.admin_notes,
+    verified_at: verification.reviewed_at,
+    created_at: verification.submitted_at,
+    updated_at: verification.reviewed_at || verification.submitted_at,
+  };
+};
+
 export const useVerification = () => {
   const queryClient = useQueryClient();
 
-  const { data: status, isLoading, error } = useQuery<VerificationStatus>({
+  const { data: status, isLoading, error } = useQuery<VerificationStatus | null>({
     queryKey: ['verification-status'],
     queryFn: async () => {
       const response = await axios.get(
         `${API_BASE_URL}/api/v1/users/verification/current_status/`,
         { headers: getAuthHeaders() }
       );
-      return response.data;
+      return transformVerificationResponse(response.data);
     },
     refetchInterval: (query) => {
       // Poll every 30 seconds if under review
