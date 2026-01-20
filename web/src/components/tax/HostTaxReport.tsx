@@ -9,6 +9,33 @@ import { format, subMonths, startOfMonth, endOfMonth } from 'date-fns';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
+// Transform backend response to frontend expected format
+const transformTaxReport = (data: any): TaxReportType | null => {
+  if (!data) return null;
+  
+  // Build tax breakdown from by_jurisdiction
+  const taxBreakdown: TaxReportType['tax_breakdown'] = [];
+  if (data.by_jurisdiction) {
+    for (const [code, info] of Object.entries(data.by_jurisdiction as Record<string, any>)) {
+      taxBreakdown.push({
+        jurisdiction: info.name || code,
+        tax_type: 'Tax', // Default type since backend groups by jurisdiction
+        total_amount: parseFloat(info.total_tax) || 0,
+      });
+    }
+  }
+  
+  return {
+    host_id: '',
+    period_start: data.period?.start || '',
+    period_end: data.period?.end || '',
+    total_bookings: data.summary?.total_bookings || 0,
+    total_revenue: 0, // Backend doesn't return this currently
+    total_taxes_collected: parseFloat(data.summary?.total_tax_collected) || 0,
+    tax_breakdown: taxBreakdown,
+  };
+};
+
 export const HostTaxReport = () => {
   const [periodStart, setPeriodStart] = useState(
     format(startOfMonth(subMonths(new Date(), 1)), 'yyyy-MM-dd')
@@ -17,7 +44,7 @@ export const HostTaxReport = () => {
     format(endOfMonth(subMonths(new Date(), 1)), 'yyyy-MM-dd')
   );
 
-  const { data: report, isLoading, error } = useQuery<TaxReportType>({
+  const { data: report, isLoading, error } = useQuery<TaxReportType | null>({
     queryKey: ['host-tax-report', periodStart, periodEnd],
     queryFn: async () => {
       const token = localStorage.getItem('access_token');
@@ -33,7 +60,7 @@ export const HostTaxReport = () => {
           },
         }
       );
-      return response.data;
+      return transformTaxReport(response.data);
     },
   });
 
