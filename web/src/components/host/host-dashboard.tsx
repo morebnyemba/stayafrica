@@ -202,19 +202,27 @@ export function HostDashboard() {
   ];
 
   // Only show verification option if user is not verified
+  // Insert verification before Settings action
   const quickActions = user?.is_verified
     ? baseQuickActions
-    : [
-        ...baseQuickActions.slice(0, 8),
-        {
+    : (() => {
+        const settingsIndex = baseQuickActions.findIndex(a => a.title === 'Settings');
+        const verificationAction = {
           title: 'Verification',
           description: 'Verify your identity',
           icon: ShieldCheck,
           link: '/host/verification',
           color: 'bg-indigo-500',
-        },
-        ...baseQuickActions.slice(8),
-      ];
+        };
+        if (settingsIndex === -1) {
+          return [...baseQuickActions, verificationAction];
+        }
+        return [
+          ...baseQuickActions.slice(0, settingsIndex),
+          verificationAction,
+          ...baseQuickActions.slice(settingsIndex),
+        ];
+      })();
 
   return (
     <ProtectedRoute>
