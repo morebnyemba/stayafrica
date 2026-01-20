@@ -17,12 +17,12 @@ export const VerificationStatus = () => {
 
   if (!status) {
     return (
-      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+      <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-6">
         <div className="flex items-start gap-3">
-          <AlertCircle className="h-6 w-6 text-yellow-600 flex-shrink-0 mt-0.5" />
+          <AlertCircle className="h-6 w-6 text-yellow-600 dark:text-yellow-400 flex-shrink-0 mt-0.5" />
           <div>
-            <h3 className="text-lg font-medium text-yellow-900">Verification Not Started</h3>
-            <p className="text-sm text-yellow-800 mt-1">
+            <h3 className="text-lg font-medium text-yellow-900 dark:text-yellow-100">Verification Not Started</h3>
+            <p className="text-sm text-yellow-800 dark:text-yellow-200 mt-1">
               Complete the verification process to unlock all platform features.
             </p>
           </div>
@@ -34,26 +34,26 @@ export const VerificationStatus = () => {
   const getStatusIcon = () => {
     switch (status.status) {
       case 'APPROVED':
-        return <CheckCircle className="h-8 w-8 text-green-600" />;
+        return <CheckCircle className="h-8 w-8 text-green-600 dark:text-green-400" />;
       case 'REJECTED':
-        return <XCircle className="h-8 w-8 text-red-600" />;
+        return <XCircle className="h-8 w-8 text-red-600 dark:text-red-400" />;
       case 'UNDER_REVIEW':
-        return <Clock className="h-8 w-8 text-blue-600" />;
+        return <Clock className="h-8 w-8 text-blue-600 dark:text-blue-400" />;
       case 'PENDING':
-        return <AlertCircle className="h-8 w-8 text-yellow-600" />;
+        return <AlertCircle className="h-8 w-8 text-yellow-600 dark:text-yellow-400" />;
     }
   };
 
   const getStatusColor = () => {
     switch (status.status) {
       case 'APPROVED':
-        return 'bg-green-50 border-green-200';
+        return 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800';
       case 'REJECTED':
-        return 'bg-red-50 border-red-200';
+        return 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800';
       case 'UNDER_REVIEW':
-        return 'bg-blue-50 border-blue-200';
+        return 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800';
       case 'PENDING':
-        return 'bg-yellow-50 border-yellow-200';
+        return 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800';
     }
   };
 
@@ -90,37 +90,37 @@ export const VerificationStatus = () => {
         
         <div className="flex-1">
           <div className="flex items-center justify-between">
-            <h3 className="text-xl font-semibold text-gray-900">
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
               {getStatusText()}
             </h3>
             
             {status.updated_at && (
-              <span className="text-sm text-gray-600">
+              <span className="text-sm text-gray-600 dark:text-gray-400">
                 {formatDistanceToNow(new Date(status.updated_at), { addSuffix: true })}
               </span>
             )}
           </div>
           
-          <p className="text-sm text-gray-700 mt-2">
+          <p className="text-sm text-gray-700 dark:text-gray-300 mt-2">
             {getStatusDescription()}
           </p>
 
           {status.status === 'REJECTED' && status.rejection_reason && (
-            <div className="mt-4 p-4 bg-white border border-red-200 rounded-lg">
-              <h4 className="text-sm font-medium text-red-900 mb-1">Rejection Reason</h4>
-              <p className="text-sm text-red-800">{status.rejection_reason}</p>
+            <div className="mt-4 p-4 bg-white dark:bg-gray-800 border border-red-200 dark:border-red-800 rounded-lg">
+              <h4 className="text-sm font-medium text-red-900 dark:text-red-300 mb-1">Rejection Reason</h4>
+              <p className="text-sm text-red-800 dark:text-red-400">{status.rejection_reason}</p>
             </div>
           )}
 
           {status.admin_notes && (
-            <div className="mt-4 p-4 bg-white border border-gray-200 rounded-lg">
-              <h4 className="text-sm font-medium text-gray-900 mb-1">Admin Notes</h4>
-              <p className="text-sm text-gray-700">{status.admin_notes}</p>
+            <div className="mt-4 p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
+              <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">Admin Notes</h4>
+              <p className="text-sm text-gray-700 dark:text-gray-300">{status.admin_notes}</p>
             </div>
           )}
 
           {status.verified_at && (
-            <p className="text-xs text-gray-500 mt-4">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-4">
               Verified on {new Date(status.verified_at).toLocaleDateString()}
             </p>
           )}
