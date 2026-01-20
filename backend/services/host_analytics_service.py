@@ -151,7 +151,7 @@ class HostAnalyticsService:
         
         # Review metrics
         # Get property IDs to filter reviews (property_id is CharField, not ForeignKey)
-        property_ids = [prop.id for prop in properties]
+        property_ids = properties.values_list('id', flat=True)
         reviews = Review.objects.filter(
             property_id__in=property_ids,
             created_at__gte=start_date,
