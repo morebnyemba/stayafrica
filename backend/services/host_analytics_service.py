@@ -150,8 +150,10 @@ class HostAnalyticsService:
             guest_retention_rate = (Decimal(total_returning_guests) / Decimal(total_unique_guests)) * 100
         
         # Review metrics
+        # Get property IDs to filter reviews (property_id is CharField, not ForeignKey)
+        property_ids = properties.values_list('id', flat=True)
         reviews = Review.objects.filter(
-            property__in=properties,
+            property_id__in=property_ids,
             created_at__gte=start_date,
             created_at__lte=end_date
         )
@@ -256,10 +258,15 @@ class HostAnalyticsService:
         # Estimate occupancy
         total_nights_in_month = 30  # Simplified
         projected_nights_booked = projected_bookings * 3  # Assume avg 3 nights per booking
-        projected_occupancy = min(
-            (projected_nights_booked / (total_nights_in_month * len(properties))) * 100,
-            100
-        )
+        
+        # Prevent division by zero when host has no properties
+        if len(properties) > 0:
+            projected_occupancy = min(
+                (projected_nights_booked / (total_nights_in_month * len(properties))) * 100,
+                100
+            )
+        else:
+            projected_occupancy = 0
         
         # Confidence level (simplified)
         confidence = Decimal('70.0')  # 70% confidence
