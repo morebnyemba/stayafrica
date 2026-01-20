@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { BarChart3, RefreshCw } from 'lucide-react';
+import { BarChart3, RefreshCw, AlertCircle } from 'lucide-react';
+import { useAuth } from '@/store/auth-store';
 import { useAnalyticsDashboard } from '@/hooks/useAnalytics';
 import { SummaryCards } from './SummaryCards';
 import { RevenueChart } from './RevenueChart';
@@ -20,6 +21,7 @@ interface AnalyticsDashboardProps {
 }
 
 export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ className = '' }) => {
+  const { isAuthenticated, user, isLoading: authLoading } = useAuth();
   const [filters, setFilters] = useState<FilterOptions>({
     period: 'monthly',
     property_id: undefined,
@@ -47,6 +49,39 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ classNam
     { value: 'monthly', label: 'Monthly' },
     { value: 'yearly', label: 'Yearly' },
   ];
+
+  // Show loading state while checking authentication
+  if (authLoading) {
+    return (
+      <div className={`min-h-screen bg-gray-50 dark:bg-gray-900 p-6 ${className}`}>
+        <div className="max-w-7xl mx-auto">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-12 text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600 dark:text-gray-400">Loading analytics...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show message if not authenticated or not a host
+  if (!isAuthenticated || user?.role !== 'host') {
+    return (
+      <div className={`min-h-screen bg-gray-50 dark:bg-gray-900 p-6 ${className}`}>
+        <div className="max-w-7xl mx-auto">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-12 text-center">
+            <div className="text-yellow-600 dark:text-yellow-400 mb-4">
+              <AlertCircle className="h-16 w-16 mx-auto mb-4 opacity-50" />
+              <h3 className="text-xl font-semibold mb-2">Access Required</h3>
+              <p className="text-gray-600 dark:text-gray-400">
+                Please log in as a host to view analytics.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (error) {
     return (

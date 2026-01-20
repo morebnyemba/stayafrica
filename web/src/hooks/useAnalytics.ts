@@ -31,6 +31,8 @@ export function useAnalyticsDashboard(filters?: FilterOptions) {
       return response.data;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: 2, // Retry failed requests up to 2 times
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
   });
 }
 
@@ -49,6 +51,8 @@ export function useRevenueChart(period: TimePeriod = 'monthly', propertyId?: str
       return response.data;
     },
     staleTime: 5 * 60 * 1000,
+    retry: 2,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
   });
 }
 
@@ -67,6 +71,8 @@ export function useOccupancyTrend(period: TimePeriod = 'monthly', propertyId?: s
       return response.data;
     },
     staleTime: 5 * 60 * 1000,
+    retry: 2,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
   });
 }
 
@@ -101,6 +107,8 @@ export function usePropertyPerformance(period: TimePeriod = 'monthly') {
       return response.data;
     },
     staleTime: 5 * 60 * 1000,
+    retry: 2,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
   });
 }
 
@@ -119,6 +127,8 @@ export function useBenchmarks(propertyType?: string, location?: string) {
       return response.data;
     },
     staleTime: 30 * 60 * 1000, // 30 minutes (benchmarks change less frequently)
+    retry: 2,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
   });
 }
 
