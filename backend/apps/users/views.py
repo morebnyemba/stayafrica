@@ -277,10 +277,12 @@ class UserViewSet(viewsets.ModelViewSet):
             user.is_verified = True
             user.save(update_fields=['is_verified'])
             
+            from django.contrib.contenttypes.models import ContentType
+            content_type = ContentType.objects.get_for_model(User)
             AuditLoggerService.log_action(
                 user=user,
                 action='email_verified',
-                model=User,
+                content_type=content_type,
                 object_id=user.id,
                 changes={'is_verified': True}
             )

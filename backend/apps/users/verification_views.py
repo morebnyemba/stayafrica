@@ -115,8 +115,8 @@ class IdentityVerificationViewSet(viewsets.ModelViewSet):
         
         file = request.FILES['file']
         
-        # Validate file type
-        allowed_types = ['image/jpeg', 'image/jpg', 'image/png']
+        # Validate file type (image/jpeg is the standard MIME type for JPEG images)
+        allowed_types = ['image/jpeg', 'image/png']
         if file.content_type not in allowed_types:
             return Response(
                 {'error': 'Invalid file type. Only JPEG and PNG images are allowed.'},
@@ -150,7 +150,6 @@ class IdentityVerificationViewSet(viewsets.ModelViewSet):
             
             return Response({
                 'url': file_url,
-                'file_url': file_url,
                 'path': saved_path,
                 'filename': file.name,
                 'size': file.size,

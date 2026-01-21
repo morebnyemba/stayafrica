@@ -99,6 +99,9 @@ class EmailService:
     @staticmethod
     def send_host_new_booking(booking):
         """Send new booking notification to host with HTML template"""
+        # Calculate host payout
+        host_payout = booking.nightly_total + booking.fees_total - getattr(booking, 'commission_fee', 0)
+        
         context = {
             'host_name': booking.rental_property.host.first_name or booking.rental_property.host.email.split('@')[0],
             'booking_ref': booking.booking_ref,
@@ -110,7 +113,7 @@ class EmailService:
             'num_nights': booking.nights,
             'num_guests': booking.number_of_guests,
             'currency': booking.currency,
-            'host_payout': f"{booking.host_payout:,.2f}",
+            'host_payout': f"{host_payout:,.2f}",
             'booking_url': f"{settings.FRONTEND_URL}/host/bookings/{booking.id}",
             'message_url': f"{settings.FRONTEND_URL}/messages",
         }
