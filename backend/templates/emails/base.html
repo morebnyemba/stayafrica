@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}StayAfrica{% endblock %}</title>
+    <style>
+        /* Reset */
+        body, table, td, p, a, li, blockquote {
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333333;
+            background-color: #f4f4f4;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header {
+            background-color: #3A5C50;
+            padding: 30px 40px;
+            text-align: center;
+        }
+        .header img {
+            max-width: 150px;
+            height: auto;
+        }
+        .header h1 {
+            color: #ffffff;
+            margin: 15px 0 0 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        .content {
+            padding: 40px;
+        }
+        .content h2 {
+            color: #3A5C50;
+            margin-top: 0;
+            font-size: 22px;
+        }
+        .content p {
+            margin: 15px 0;
+            color: #555555;
+        }
+        .button {
+            display: inline-block;
+            padding: 14px 32px;
+            background-color: #D9B168;
+            color: #ffffff !important;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            margin: 20px 0;
+        }
+        .button:hover {
+            background-color: #c9a158;
+        }
+        .button-secondary {
+            background-color: #3A5C50;
+        }
+        .info-box {
+            background-color: #f8f9fa;
+            border-left: 4px solid #3A5C50;
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 0 4px 4px 0;
+        }
+        .info-box p {
+            margin: 5px 0;
+        }
+        .footer {
+            background-color: #2d4a40;
+            color: #ffffff;
+            padding: 30px 40px;
+            text-align: center;
+            font-size: 13px;
+        }
+        .footer a {
+            color: #D9B168;
+            text-decoration: none;
+        }
+        .footer p {
+            color: #cccccc;
+            margin: 10px 0;
+        }
+        .social-links {
+            margin: 20px 0;
+        }
+        .social-links a {
+            display: inline-block;
+            margin: 0 8px;
+        }
+        .divider {
+            height: 1px;
+            background-color: #eeeeee;
+            margin: 25px 0;
+        }
+        .text-muted {
+            color: #888888;
+            font-size: 13px;
+        }
+        .text-center {
+            text-align: center;
+        }
+        @media only screen and (max-width: 600px) {
+            .email-container {
+                width: 100% !important;
+                border-radius: 0;
+            }
+            .content, .header, .footer {
+                padding: 25px 20px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+        <tr>
+            <td style="padding: 20px;">
+                <div class="email-container">
+                    <!-- Header -->
+                    <div class="header">
+                        <h1>🌍 StayAfrica</h1>
+                    </div>
+                    
+                    <!-- Content -->
+                    <div class="content">
+                        {% block content %}{% endblock %}
+                    </div>
+                    
+                    <!-- Footer -->
+                    <div class="footer">
+                        <p>© {{ year }} StayAfrica. All rights reserved.</p>
+                        <p>
+                            <a href="{{ frontend_url }}">Visit Website</a> |
+                            <a href="{{ frontend_url }}/help">Help Center</a> |
+                            <a href="{{ frontend_url }}/privacy">Privacy Policy</a>
+                        </p>
+                        <p class="text-muted" style="margin-top: 20px;">
+                            You're receiving this email because you have an account with StayAfrica.<br>
+                            If you no longer wish to receive these emails, you can 
+                            <a href="{{ frontend_url }}/settings/notifications">update your preferences</a>.
+                        </p>
+                    </div>
+                </div>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

@@ -1,0 +1,32 @@
+{% extends "emails/base.html" %}
+
+{% block title %}Verification Update - StayAfrica{% endblock %}
+
+{% block content %}
+<h2>Verification Update 📋</h2>
+
+<p>Hi {{ user_name|default:"there" }},</p>
+
+<p>Unfortunately, we were unable to verify your identity with the documents you provided.</p>
+
+<div class="info-box">
+    <p><strong>Reason:</strong></p>
+    <p>{{ rejection_reason }}</p>
+</div>
+
+<h3>What You Can Do:</h3>
+<ul>
+    <li>Ensure your document photos are clear and legible</li>
+    <li>Make sure all four corners of the document are visible</li>
+    <li>Use a document that is not expired</li>
+    <li>Take your selfie in good lighting conditions</li>
+</ul>
+
+<div class="text-center">
+    <a href="{{ frontend_url }}/profile/verification" class="button">Submit New Verification</a>
+</div>
+
+<div class="divider"></div>
+
+<p>If you believe this was a mistake or have questions, please contact our support team at <a href="mailto:support@stayafrica.com">support@stayafrica.com</a>.</p>
+{% endblock %}

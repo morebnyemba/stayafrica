@@ -5,7 +5,10 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.parsers import MultiPartParser, FormParser
 from django.shortcuts import get_object_or_404
+from django.core.files.storage import default_storage
+from django.conf import settings
 from apps.users.verification_models import IdentityVerification, VerificationSettings
 from apps.users.verification_serializers import (
     IdentityVerificationSerializer,
@@ -14,6 +17,8 @@ from apps.users.verification_serializers import (
     VerificationSettingsSerializer
 )
 import logging
+import uuid
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -95,6 +100,69 @@ class IdentityVerificationViewSet(viewsets.ModelViewSet):
             'verification': serializer.data
         })
     
+    @action(detail=False, methods=['post'], parser_classes=[MultiPartParser, FormParser])
+    def upload(self, request):
+        """
+        Upload a document or selfie image for verification.
+        This is a standalone upload endpoint that returns the file URL.
+        The frontend can then submit the verification with the uploaded URLs.
+        """
+        if 'file' not in request.FILES:
+            return Response(
+                {'error': 'No file provided'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        file = request.FILES['file']
+        
+        # Validate file type
+        allowed_types = ['image/jpeg', 'image/jpg', 'image/png']
+        if file.content_type not in allowed_types:
+            return Response(
+                {'error': 'Invalid file type. Only JPEG and PNG images are allowed.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Validate file size (max 10MB)
+        max_size = 10 * 1024 * 1024  # 10MB
+        if file.size > max_size:
+            return Response(
+                {'error': 'File size too large. Maximum allowed size is 10MB.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Generate a unique filename
+        ext = os.path.splitext(file.name)[1].lower()
+        if ext not in ['.jpg', '.jpeg', '.png']:
+            ext = '.jpg'
+        unique_filename = f"verification/{request.user.id}/{uuid.uuid4()}{ext}"
+        
+        try:
+            # Save the file
+            saved_path = default_storage.save(unique_filename, file)
+            
+            # Generate the file URL
+            file_url = request.build_absolute_uri(
+                settings.MEDIA_URL + saved_path
+            )
+            
+            logger.info(f"Verification document uploaded by user {request.user.id}: {saved_path}")
+            
+            return Response({
+                'url': file_url,
+                'file_url': file_url,
+                'path': saved_path,
+                'filename': file.name,
+                'size': file.size,
+            }, status=status.HTTP_201_CREATED)
+            
+        except Exception as e:
+            logger.error(f"Error uploading verification document: {e}")
+            return Response(
+                {'error': 'Failed to upload file. Please try again.'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
     @action(detail=True, methods=['post'], permission_classes=[IsAdminUser])
     def review(self, request, pk=None):
         """
@@ -120,7 +188,7 @@ class IdentityVerificationViewSet(viewsets.ModelViewSet):
             verification.approve(request.user, notes)
             logger.info(f"Verification {verification.id} approved by {request.user.email}")
             
-            # Send notification to user
+            # Send push notification to user
             try:
                 from services.notification_service import NotificationService
                 NotificationService.send_notification(
@@ -133,6 +201,13 @@ class IdentityVerificationViewSet(viewsets.ModelViewSet):
             except Exception as e:
                 logger.warning(f"Failed to send verification approval notification: {e}")
             
+            # Send email notification
+            try:
+                from tasks.email_tasks import send_identity_verification_email
+                send_identity_verification_email.delay(verification.user.id, 'approved')
+            except Exception as e:
+                logger.warning(f"Failed to queue verification approval email: {e}")
+            
             return Response({
                 'message': 'Verification approved successfully',
                 'verification': IdentityVerificationSerializer(verification).data
@@ -142,7 +217,7 @@ class IdentityVerificationViewSet(viewsets.ModelViewSet):
             verification.reject(request.user, reason, notes)
             logger.info(f"Verification {verification.id} rejected by {request.user.email}")
             
-            # Send notification to user
+            # Send push notification to user
             try:
                 from services.notification_service import NotificationService
                 NotificationService.send_notification(
@@ -154,6 +229,13 @@ class IdentityVerificationViewSet(viewsets.ModelViewSet):
                 )
             except Exception as e:
                 logger.warning(f"Failed to send verification rejection notification: {e}")
+            
+            # Send email notification
+            try:
+                from tasks.email_tasks import send_identity_verification_email
+                send_identity_verification_email.delay(verification.user.id, 'rejected', reason)
+            except Exception as e:
+                logger.warning(f"Failed to queue verification rejection email: {e}")
             
             return Response({
                 'message': 'Verification rejected',

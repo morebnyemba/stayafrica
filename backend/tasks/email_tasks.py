@@ -5,9 +5,21 @@ from celery import shared_task
 from django.core.mail import send_mail, EmailMultiAlternatives
 from django.conf import settings
 from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+from django.core.cache import cache
+from datetime import datetime
 import logging
+import hashlib
 
 logger = logging.getLogger(__name__)
+
+
+def _get_base_context():
+    """Get base context for email templates"""
+    return {
+        'frontend_url': getattr(settings, 'FRONTEND_URL', 'https://stayafrica.com'),
+        'year': datetime.now().year,
+    }
 
 
 @shared_task(bind=True, max_retries=3)
@@ -37,12 +49,37 @@ def send_email_async(self, subject, message, recipient_list, html_message=None):
         raise self.retry(exc=exc, countdown=60 * (2 ** self.request.retries))
 
 
+@shared_task(bind=True, max_retries=3)
+def send_templated_email(self, template_name, subject, recipient_list, context):
+    """
+    Send an email using an HTML template
+    """
+    try:
+        full_context = {**_get_base_context(), **context}
+        html_content = render_to_string(f'emails/{template_name}.html', full_context)
+        text_content = strip_tags(html_content)
+        
+        msg = EmailMultiAlternatives(
+            subject,
+            text_content,
+            settings.EMAIL_HOST_USER,
+            recipient_list
+        )
+        msg.attach_alternative(html_content, 'text/html')
+        msg.send()
+        
+        logger.info(f"Templated email '{template_name}' sent to {recipient_list}")
+        return True
+    except Exception as exc:
+        logger.error(f"Error sending templated email to {recipient_list}: {str(exc)}")
+        raise self.retry(exc=exc, countdown=60 * (2 ** self.request.retries))
+
+
 @shared_task
 def send_verification_email(user_id):
-    """Send email verification link to user"""
+    """Send email verification link to user using HTML template"""
     from apps.users.models import User
     from utils.helpers import generate_verification_token
-    import hashlib
     
     try:
         user = User.objects.get(id=user_id)
@@ -50,18 +87,24 @@ def send_verification_email(user_id):
         
         # Create a hashed user identifier for security
         user_hash = hashlib.sha256(f"{user.id}{user.email}".encode()).hexdigest()[:16]
+        verification_token = f"{user_hash}/{token}"
         
-        # Store token (in production, use Redis or database with expiry)
-        # TODO: Implement token storage with Redis
-        # cache.set(f'verify_{user_hash}', token, timeout=86400)  # 24 hours
+        # Store token in cache with 24-hour expiry
+        cache_key = f'verify_{user_hash}'
+        cache.set(cache_key, {'token': token, 'user_id': user.id}, timeout=86400)  # 24 hours
         
-        subject = 'Verify your StayAfrica account'
-        message = f'Welcome to StayAfrica! Please verify your account by clicking the link below:\n\n'
-        message += f'{settings.FRONTEND_URL}/verify/{user_hash}/{token}\n\n'
-        message += 'This link will expire in 24 hours.\n\n'
-        message += 'If you did not create this account, please ignore this email.'
+        context = {
+            'user_name': user.first_name or user.email.split('@')[0],
+            'verification_url': f"{settings.FRONTEND_URL}/verify/{verification_token}",
+        }
         
-        send_email_async.delay(subject, message, [user.email])
+        send_templated_email.delay(
+            'verification_email',
+            'Verify your StayAfrica account',
+            [user.email],
+            context
+        )
+        
         logger.info(f"Verification email queued for {user.email}")
     except User.DoesNotExist:
         logger.error(f"User with id {user_id} not found")
@@ -71,36 +114,58 @@ def send_verification_email(user_id):
 
 @shared_task
 def send_booking_confirmation_email(booking_id):
-    """Send booking confirmation email to guest and host"""
+    """Send booking confirmation email to guest and host using HTML templates"""
     from apps.bookings.models import Booking
     
     try:
-        booking = Booking.objects.select_related('guest', 'property__host').get(id=booking_id)
+        booking = Booking.objects.select_related(
+            'guest', 'rental_property', 'rental_property__host'
+        ).get(id=booking_id)
         
         # Email to guest
-        guest_subject = f'Booking Confirmed - {booking.booking_ref}'
-        guest_message = f'Dear {booking.guest.first_name or booking.guest.email},\n\n'
-        guest_message += f'Your booking for {booking.rental_property.title} has been confirmed!\n\n'
-        guest_message += f'Booking Reference: {booking.booking_ref}\n'
-        guest_message += f'Check-in: {booking.check_in}\n'
-        guest_message += f'Check-out: {booking.check_out}\n'
-        guest_message += f'Total: {booking.currency} {booking.grand_total}\n\n'
-        guest_message += 'Thank you for choosing StayAfrica!'
+        guest_context = {
+            'guest_name': booking.guest.first_name or booking.guest.email.split('@')[0],
+            'booking_ref': booking.booking_ref,
+            'property_title': booking.rental_property.title,
+            'property_location': f"{booking.rental_property.city}, {booking.rental_property.country}",
+            'check_in': booking.check_in.strftime('%B %d, %Y'),
+            'check_out': booking.check_out.strftime('%B %d, %Y'),
+            'num_guests': booking.number_of_guests,
+            'currency': booking.currency,
+            'total_amount': f"{booking.grand_total:,.2f}",
+            'booking_url': f"{settings.FRONTEND_URL}/bookings/{booking.id}",
+        }
         
-        send_email_async.delay(guest_subject, guest_message, [booking.guest.email])
+        send_templated_email.delay(
+            'booking_confirmation',
+            f'Booking Confirmed - {booking.booking_ref}',
+            [booking.guest.email],
+            guest_context
+        )
         
         # Email to host
-        host_subject = f'New Booking - {booking.rental_property.title}'
-        host_message = f'Dear {booking.rental_property.host.first_name or booking.rental_property.host.email},\n\n'
-        host_message += f'You have a new booking for {booking.rental_property.title}!\n\n'
-        host_message += f'Booking Reference: {booking.booking_ref}\n'
-        host_message += f'Guest: {booking.guest.email}\n'
-        host_message += f'Check-in: {booking.check_in}\n'
-        host_message += f'Check-out: {booking.check_out}\n'
-        host_message += f'Nights: {booking.nights}\n\n'
-        host_message += 'Please ensure the property is ready for your guest.'
+        host_context = {
+            'host_name': booking.rental_property.host.first_name or booking.rental_property.host.email.split('@')[0],
+            'booking_ref': booking.booking_ref,
+            'property_title': booking.rental_property.title,
+            'guest_name': booking.guest.get_full_name() or booking.guest.email,
+            'guest_email': booking.guest.email,
+            'check_in': booking.check_in.strftime('%B %d, %Y'),
+            'check_out': booking.check_out.strftime('%B %d, %Y'),
+            'num_nights': booking.nights,
+            'num_guests': booking.number_of_guests,
+            'currency': booking.currency,
+            'host_payout': f"{booking.host_payout:,.2f}" if hasattr(booking, 'host_payout') else f"{booking.grand_total:,.2f}",
+            'booking_url': f"{settings.FRONTEND_URL}/host/bookings/{booking.id}",
+            'message_url': f"{settings.FRONTEND_URL}/messages",
+        }
         
-        send_email_async.delay(host_subject, host_message, [booking.rental_property.host.email])
+        send_templated_email.delay(
+            'host_new_booking',
+            f'New Booking - {booking.rental_property.title}',
+            [booking.rental_property.host.email],
+            host_context
+        )
         
         logger.info(f"Booking confirmation emails queued for {booking.booking_ref}")
     except Booking.DoesNotExist:
@@ -111,23 +176,33 @@ def send_booking_confirmation_email(booking_id):
 
 @shared_task
 def send_payment_receipt_email(payment_id):
-    """Send payment receipt to guest"""
+    """Send payment receipt to guest using HTML template"""
     from apps.payments.models import Payment
     
     try:
-        payment = Payment.objects.select_related('booking__guest', 'booking__property').get(id=payment_id)
+        payment = Payment.objects.select_related(
+            'booking__guest', 'booking__rental_property'
+        ).get(id=payment_id)
         
-        subject = f'Payment Receipt - {payment.gateway_ref}'
-        message = f'Dear {payment.booking.guest.first_name or payment.booking.guest.email},\n\n'
-        message += f'Your payment has been processed successfully!\n\n'
-        message += f'Payment Reference: {payment.gateway_ref}\n'
-        message += f'Booking Reference: {payment.booking.booking_ref}\n'
-        message += f'Amount: {payment.currency} {payment.amount}\n'
-        message += f'Property: {payment.booking.rental_property.title}\n'
-        message += f'Payment Method: {payment.get_provider_display()}\n\n'
-        message += 'Thank you for your payment!'
+        context = {
+            'user_name': payment.booking.guest.first_name or payment.booking.guest.email.split('@')[0],
+            'payment_ref': payment.gateway_ref,
+            'booking_ref': payment.booking.booking_ref,
+            'property_title': payment.booking.rental_property.title,
+            'currency': payment.currency,
+            'amount': f"{payment.amount:,.2f}",
+            'payment_method': payment.get_provider_display(),
+            'payment_date': payment.created_at.strftime('%B %d, %Y at %H:%M'),
+            'booking_url': f"{settings.FRONTEND_URL}/bookings/{payment.booking.id}",
+        }
         
-        send_email_async.delay(subject, message, [payment.booking.guest.email])
+        send_templated_email.delay(
+            'payment_receipt',
+            f'Payment Receipt - {payment.gateway_ref}',
+            [payment.booking.guest.email],
+            context
+        )
+        
         logger.info(f"Payment receipt email queued for {payment.gateway_ref}")
     except Payment.DoesNotExist:
         logger.error(f"Payment with id {payment_id} not found")
@@ -137,25 +212,66 @@ def send_payment_receipt_email(payment_id):
 
 @shared_task
 def send_password_reset_email(user_id, reset_token):
-    """Send password reset email"""
+    """Send password reset email using HTML template"""
     from apps.users.models import User
     
     try:
         user = User.objects.get(id=user_id)
         
-        subject = 'Reset your StayAfrica password'
-        message = f'Dear {user.first_name or user.email},\n\n'
-        message += 'You requested to reset your password. Click the link below to reset it:\n\n'
-        message += f'{settings.FRONTEND_URL}/reset-password/{reset_token}\n\n'
-        message += 'This link will expire in 1 hour.\n\n'
-        message += 'If you did not request this, please ignore this email.'
+        context = {
+            'user_name': user.first_name or user.email.split('@')[0],
+            'reset_url': f"{settings.FRONTEND_URL}/reset-password/{reset_token}",
+        }
         
-        send_email_async.delay(subject, message, [user.email])
+        send_templated_email.delay(
+            'password_reset',
+            'Reset your StayAfrica password',
+            [user.email],
+            context
+        )
+        
         logger.info(f"Password reset email queued for {user.email}")
     except User.DoesNotExist:
         logger.error(f"User with id {user_id} not found")
     except Exception as e:
         logger.error(f"Error sending password reset email: {str(e)}")
+
+
+@shared_task
+def send_identity_verification_email(user_id, status, rejection_reason=None):
+    """Send identity verification status email"""
+    from apps.users.models import User
+    
+    try:
+        user = User.objects.get(id=user_id)
+        
+        if status == 'approved':
+            context = {
+                'user_name': user.first_name or user.email.split('@')[0],
+            }
+            send_templated_email.delay(
+                'identity_verification_approved',
+                'Identity Verified! ✅',
+                [user.email],
+                context
+            )
+        elif status == 'rejected':
+            context = {
+                'user_name': user.first_name or user.email.split('@')[0],
+                'rejection_reason': rejection_reason or 'Please contact support for more information.',
+            }
+            send_templated_email.delay(
+                'identity_verification_rejected',
+                'Verification Update',
+                [user.email],
+                context
+            )
+        
+        logger.info(f"Identity verification {status} email queued for {user.email}")
+    except User.DoesNotExist:
+        logger.error(f"User with id {user_id} not found")
+    except Exception as e:
+        logger.error(f"Error sending identity verification email: {str(e)}")
 
 
 @shared_task
