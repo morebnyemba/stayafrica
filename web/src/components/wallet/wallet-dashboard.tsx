@@ -5,6 +5,7 @@ import { apiClient } from '@/services/api-client';
 import { Wallet, ArrowUpRight, ArrowDownLeft, Building, Plus, CheckCircle, Clock, XCircle } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 const ProtectedRoute = dynamic(() => import('@/components/auth/protected-route').then(m => m.ProtectedRoute), { ssr: false });
 import { Button } from '@/components/ui/Button';
 
@@ -324,6 +325,10 @@ function BankAccountsList({ bankAccounts, loading, onAddNew }: { bankAccounts: a
     mutationFn: (accountId: string) => apiClient.setPrimaryBankAccount(accountId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bank-accounts'] });
+      toast.success('Primary bank account updated!');
+    },
+    onError: () => {
+      toast.error('Failed to set primary account. Please try again.');
     },
   });
 
@@ -331,15 +336,47 @@ function BankAccountsList({ bankAccounts, loading, onAddNew }: { bankAccounts: a
     mutationFn: (accountId: string) => apiClient.deleteBankAccount(accountId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bank-accounts'] });
+      toast.success('Bank account deleted successfully.');
+    },
+    onError: () => {
+      toast.error('Failed to delete account. Please try again.');
     },
   });
 
+  const handleDelete = (accountId: string) => {
+    // Using a toast-based confirmation instead of browser confirm()
+    toast((t) => (
+      <div className="flex flex-col gap-2">
+        <p className="font-medium">Delete this bank account?</p>
+        <p className="text-sm text-gray-500">This action cannot be undone.</p>
+        <div className="flex gap-2 mt-2">
+          <button
+            onClick={() => {
+              deleteMutation.mutate(accountId);
+              toast.dismiss(t.id);
+            }}
+            className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700"
+          >
+            Delete
+          </button>
+          <button
+            onClick={() => toast.dismiss(t.id)}
+            className="px-3 py-1 bg-gray-200 text-gray-800 text-sm rounded hover:bg-gray-300"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    ), { duration: 10000 });
+  };
+
   if (loading) {
     return (
-      <div className="space-y-3">
+      <div className="space-y-3" role="status" aria-busy="true" aria-label="Loading bank accounts">
         {[1, 2].map(i => (
           <div key={i} className="animate-pulse h-24 bg-white dark:bg-primary-800 rounded-lg"></div>
         ))}
+        <span className="sr-only">Loading bank accounts</span>
       </div>
     );
   }
@@ -349,8 +386,9 @@ function BankAccountsList({ bankAccounts, loading, onAddNew }: { bankAccounts: a
       <button
         onClick={onAddNew}
         className="w-full bg-white dark:bg-primary-800 rounded-lg p-4 border-2 border-dashed border-primary-300 dark:border-primary-600 hover:border-primary-500 dark:hover:border-primary-500 transition flex items-center justify-center gap-2 text-primary-700 dark:text-sand-300 font-semibold"
+        aria-label="Add a new bank account"
       >
-        <Plus className="w-5 h-5" />
+        <Plus className="w-5 h-5" aria-hidden="true" />
         Add Bank Account
       </button>
       
@@ -362,7 +400,7 @@ function BankAccountsList({ bankAccounts, loading, onAddNew }: { bankAccounts: a
           <div className="flex items-start justify-between">
             <div className="flex items-start gap-3">
               <div className="p-2 bg-primary-100 dark:bg-primary-700 rounded">
-                <Building className="w-5 h-5 text-primary-600 dark:text-sand-400" />
+                <Building className="w-5 h-5 text-primary-600 dark:text-sand-400" aria-hidden="true" />
               </div>
               <div>
                 <div className="font-semibold text-primary-900 dark:text-sand-50">{account.bank_name}</div>
@@ -380,18 +418,16 @@ function BankAccountsList({ bankAccounts, loading, onAddNew }: { bankAccounts: a
                 <button
                   onClick={() => setPrimaryMutation.mutate(account.id)}
                   disabled={setPrimaryMutation.isPending}
+                  aria-busy={setPrimaryMutation.isPending}
                   className="px-3 py-1 text-sm bg-primary-100 dark:bg-primary-700 text-primary-700 dark:text-sand-300 rounded hover:bg-primary-200 dark:hover:bg-primary-600 transition disabled:opacity-50"
                 >
                   Set Primary
                 </button>
               )}
               <button
-                onClick={() => {
-                  if (confirm('Are you sure you want to delete this bank account?')) {
-                    deleteMutation.mutate(account.id);
-                  }
-                }}
+                onClick={() => handleDelete(account.id)}
                 disabled={deleteMutation.isPending}
+                aria-label={`Delete ${account.bank_name} account`}
                 className="px-3 py-1 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200 transition disabled:opacity-50"
               >
                 Delete
@@ -416,7 +452,15 @@ function WithdrawModal({ wallet, bankAccounts, onClose }: { wallet: any; bankAcc
       queryClient.invalidateQueries({ queryKey: ['wallet'] });
       queryClient.invalidateQueries({ queryKey: ['withdrawals'] });
       queryClient.invalidateQueries({ queryKey: ['wallet-transactions'] });
+      toast.success('Withdrawal initiated successfully! It will be processed within 1-3 business days.');
+      // Reset form
+      setAmount('');
+      setSelectedBank('');
+      setNotes('');
       onClose();
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.error || 'Failed to initiate withdrawal. Please try again.');
     },
   });
 
@@ -431,10 +475,24 @@ function WithdrawModal({ wallet, bankAccounts, onClose }: { wallet: any; bankAcc
     });
   };
 
+  // Handle escape key to close modal
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      onClose();
+    }
+  };
+
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" onClick={onClose}>
+    <div 
+      className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" 
+      onClick={onClose}
+      onKeyDown={handleKeyDown}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="withdraw-modal-title"
+    >
       <div className="bg-white dark:bg-primary-800 rounded-xl p-6 max-w-md w-full" onClick={(e) => e.stopPropagation()}>
-        <h2 className="text-2xl font-bold text-primary-900 dark:text-sand-50 mb-4">Withdraw Funds</h2>
+        <h2 id="withdraw-modal-title" className="text-2xl font-bold text-primary-900 dark:text-sand-50 mb-4">Withdraw Funds</h2>
         
         {bankAccounts.length === 0 ? (
           <div className="text-center py-4">
@@ -446,10 +504,11 @@ function WithdrawModal({ wallet, bankAccounts, onClose }: { wallet: any; bankAcc
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-primary-900 dark:text-sand-50 mb-1">
+              <label htmlFor="withdraw-amount" className="block text-sm font-medium text-primary-900 dark:text-sand-50 mb-1">
                 Amount ({wallet.currency})
               </label>
               <input
+                id="withdraw-amount"
                 type="number"
                 step="0.01"
                 min="10"
@@ -457,19 +516,21 @@ function WithdrawModal({ wallet, bankAccounts, onClose }: { wallet: any; bankAcc
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 required
+                aria-describedby="withdraw-amount-hint"
                 className="w-full px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-white dark:bg-primary-900 text-primary-900 dark:text-sand-50 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                 placeholder="Min 10.00"
               />
-              <p className="text-xs text-primary-600 dark:text-sand-400 mt-1">
+              <p id="withdraw-amount-hint" className="text-xs text-primary-600 dark:text-sand-400 mt-1">
                 Available: {wallet.currency} {parseFloat(wallet.balance).toLocaleString(undefined, { minimumFractionDigits: 2 })}
               </p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-primary-900 dark:text-sand-50 mb-1">
+              <label htmlFor="withdraw-bank" className="block text-sm font-medium text-primary-900 dark:text-sand-50 mb-1">
                 Bank Account
               </label>
               <select
+                id="withdraw-bank"
                 value={selectedBank}
                 onChange={(e) => setSelectedBank(e.target.value)}
                 required
@@ -486,10 +547,11 @@ function WithdrawModal({ wallet, bankAccounts, onClose }: { wallet: any; bankAcc
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-primary-900 dark:text-sand-50 mb-1">
+              <label htmlFor="withdraw-notes" className="block text-sm font-medium text-primary-900 dark:text-sand-50 mb-1">
                 Notes (Optional)
               </label>
               <textarea
+                id="withdraw-notes"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 className="w-full px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-white dark:bg-primary-900 text-primary-900 dark:text-sand-50 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
@@ -499,7 +561,7 @@ function WithdrawModal({ wallet, bankAccounts, onClose }: { wallet: any; bankAcc
             </div>
 
             {withdrawMutation.isError && (
-              <div className="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 p-3 rounded-lg text-sm">
+              <div className="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 p-3 rounded-lg text-sm" role="alert">
                 {(withdrawMutation.error as any)?.response?.data?.error || 'Failed to initiate withdrawal'}
               </div>
             )}
@@ -515,6 +577,7 @@ function WithdrawModal({ wallet, bankAccounts, onClose }: { wallet: any; bankAcc
               <button
                 type="submit"
                 disabled={withdrawMutation.isPending}
+                aria-busy={withdrawMutation.isPending}
                 className="flex-1 px-4 py-2 bg-primary-600 text-white rounded-lg font-semibold hover:bg-primary-700 transition disabled:opacity-50"
               >
                 {withdrawMutation.isPending ? 'Processing...' : 'Withdraw'}
@@ -542,7 +605,11 @@ function BankAccountModal({ onClose }: { onClose: () => void }) {
     mutationFn: (data: any) => apiClient.createBankAccount(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bank-accounts'] });
+      toast.success('Bank account added successfully!');
       onClose();
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.error || 'Failed to add bank account. Please try again.');
     },
   });
 
@@ -551,17 +618,32 @@ function BankAccountModal({ onClose }: { onClose: () => void }) {
     createMutation.mutate(formData);
   };
 
+  // Handle escape key to close modal
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      onClose();
+    }
+  };
+
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" onClick={onClose}>
+    <div 
+      className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" 
+      onClick={onClose}
+      onKeyDown={handleKeyDown}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="bank-modal-title"
+    >
       <div className="bg-white dark:bg-primary-800 rounded-xl p-6 max-w-md w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-        <h2 className="text-2xl font-bold text-primary-900 dark:text-sand-50 mb-4">Add Bank Account</h2>
+        <h2 id="bank-modal-title" className="text-2xl font-bold text-primary-900 dark:text-sand-50 mb-4">Add Bank Account</h2>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-primary-900 dark:text-sand-50 mb-1">
+            <label htmlFor="bank-name" className="block text-sm font-medium text-primary-900 dark:text-sand-50 mb-1">
               Bank Name *
             </label>
             <input
+              id="bank-name"
               type="text"
               value={formData.bank_name}
               onChange={(e) => setFormData({ ...formData, bank_name: e.target.value })}
@@ -572,10 +654,11 @@ function BankAccountModal({ onClose }: { onClose: () => void }) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-primary-900 dark:text-sand-50 mb-1">
+            <label htmlFor="account-name" className="block text-sm font-medium text-primary-900 dark:text-sand-50 mb-1">
               Account Name *
             </label>
             <input
+              id="account-name"
               type="text"
               value={formData.account_name}
               onChange={(e) => setFormData({ ...formData, account_name: e.target.value })}
@@ -586,10 +669,11 @@ function BankAccountModal({ onClose }: { onClose: () => void }) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-primary-900 dark:text-sand-50 mb-1">
+            <label htmlFor="account-number" className="block text-sm font-medium text-primary-900 dark:text-sand-50 mb-1">
               Account Number *
             </label>
             <input
+              id="account-number"
               type="text"
               value={formData.account_number}
               onChange={(e) => setFormData({ ...formData, account_number: e.target.value })}
@@ -600,10 +684,11 @@ function BankAccountModal({ onClose }: { onClose: () => void }) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-primary-900 dark:text-sand-50 mb-1">
+            <label htmlFor="branch-code" className="block text-sm font-medium text-primary-900 dark:text-sand-50 mb-1">
               Branch Code
             </label>
             <input
+              id="branch-code"
               type="text"
               value={formData.branch_code}
               onChange={(e) => setFormData({ ...formData, branch_code: e.target.value })}
@@ -613,10 +698,11 @@ function BankAccountModal({ onClose }: { onClose: () => void }) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-primary-900 dark:text-sand-50 mb-1">
+            <label htmlFor="country" className="block text-sm font-medium text-primary-900 dark:text-sand-50 mb-1">
               Country
             </label>
             <input
+              id="country"
               type="text"
               value={formData.country}
               onChange={(e) => setFormData({ ...formData, country: e.target.value })}
@@ -639,7 +725,7 @@ function BankAccountModal({ onClose }: { onClose: () => void }) {
           </div>
 
           {createMutation.isError && (
-            <div className="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 p-3 rounded-lg text-sm">
+            <div className="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 p-3 rounded-lg text-sm" role="alert">
               {(createMutation.error as any)?.response?.data?.error || 'Failed to add bank account'}
             </div>
           )}
@@ -655,6 +741,7 @@ function BankAccountModal({ onClose }: { onClose: () => void }) {
             <button
               type="submit"
               disabled={createMutation.isPending}
+              aria-busy={createMutation.isPending}
               className="flex-1 px-4 py-2 bg-primary-600 text-white rounded-lg font-semibold hover:bg-primary-700 transition disabled:opacity-50"
             >
               {createMutation.isPending ? 'Adding...' : 'Add Account'}
