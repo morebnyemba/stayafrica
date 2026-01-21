@@ -5,7 +5,7 @@ export default function HostLayout() {
     <Stack
       screenOptions={{
         headerShown: false,
-        animationEnabled: true,
+        animation: 'fade',
       }}
     >
       <Stack.Screen name="bookings/index" />

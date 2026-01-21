@@ -1,6 +1,6 @@
 import { Stack } from 'expo-router';
 
-export default function AuthLayout() {
+export default function OnboardingLayout() {
   return (
     <Stack
       screenOptions={{
@@ -8,8 +8,8 @@ export default function AuthLayout() {
         animation: 'fade',
       }}
     >
-      <Stack.Screen name="login" />
-      <Stack.Screen name="register" />
+      <Stack.Screen name="index" />
+      <Stack.Screen name="welcome" />
     </Stack>
   );
 }
