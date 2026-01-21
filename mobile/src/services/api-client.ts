@@ -1,6 +1,7 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
+import { Platform } from 'react-native';
 import type {
   User,
   Property,
@@ -19,6 +20,31 @@ import type {
 const API_VERSION = process.env.EXPO_PUBLIC_API_VERSION || 'v1';
 const DEFAULT_API_BASE = 'https://api.stayafrica.app/api';
 const API_BASE_URL = `${process.env.EXPO_PUBLIC_API_BASE_URL || DEFAULT_API_BASE}/${API_VERSION}`;
+
+// Secure storage wrapper that falls back to AsyncStorage on web
+const secureStorage = {
+  async setItemAsync(key: string, value: string): Promise<void> {
+    if (Platform.OS === 'web') {
+      await AsyncStorage.setItem(key, value);
+    } else {
+      await SecureStore.setItemAsync(key, value);
+    }
+  },
+  async getItemAsync(key: string): Promise<string | null> {
+    if (Platform.OS === 'web') {
+      return await AsyncStorage.getItem(key);
+    } else {
+      return await SecureStore.getItemAsync(key);
+    }
+  },
+  async deleteItemAsync(key: string): Promise<void> {
+    if (Platform.OS === 'web') {
+      await AsyncStorage.removeItem(key);
+    } else {
+      await SecureStore.deleteItemAsync(key);
+    }
+  },
+};
 
 interface TokenResponse {
   access: string;
@@ -109,7 +135,7 @@ class APIClient {
       });
 
       const { access } = response.data;
-      await SecureStore.setItemAsync('accessToken', access);
+      await secureStorage.setItemAsync('accessToken', access);
       return access;
     })();
 
@@ -121,21 +147,21 @@ class APIClient {
   }
 
   async saveTokens(accessToken: string, refreshToken: string): Promise<void> {
-    await SecureStore.setItemAsync('accessToken', accessToken);
-    await SecureStore.setItemAsync('refreshToken', refreshToken);
+    await secureStorage.setItemAsync('accessToken', accessToken);
+    await secureStorage.setItemAsync('refreshToken', refreshToken);
   }
 
   async getAccessToken(): Promise<string | null> {
-    return await SecureStore.getItemAsync('accessToken');
+    return await secureStorage.getItemAsync('accessToken');
   }
 
   async getRefreshToken(): Promise<string | null> {
-    return await SecureStore.getItemAsync('refreshToken');
+    return await secureStorage.getItemAsync('refreshToken');
   }
 
   async clearTokens(): Promise<void> {
-    await SecureStore.deleteItemAsync('accessToken');
-    await SecureStore.deleteItemAsync('refreshToken');
+    await secureStorage.deleteItemAsync('accessToken');
+    await secureStorage.deleteItemAsync('refreshToken');
   }
 
   async hasValidToken(): Promise<boolean> {

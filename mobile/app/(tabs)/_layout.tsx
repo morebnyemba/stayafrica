@@ -53,6 +53,13 @@ export default function TabsLayout() {
         },
       })}
     >
+      {/* Hidden index route for redirect */}
+      <Tabs.Screen
+        name="index"
+        options={{
+          href: null, // Hide from tab bar
+        }}
+      />
       <Tabs.Screen
         name="explore"
         options={{

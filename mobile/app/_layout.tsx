@@ -1,13 +1,15 @@
 import '../global.css';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Stack } from 'expo-router';
 import { useRouter, SplashScreen } from 'expo-router';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, View, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Providers } from '@/context/providers';
 import { useAuth } from '@/context/auth-context';
+import { Ionicons } from '@expo/vector-icons';
+import * as Font from 'expo-font';
 
 const ONBOARDING_KEY = 'has_seen_onboarding';
 
@@ -23,11 +25,34 @@ if (typeof globalThis.location === 'undefined') {
 
 SplashScreen.preventAutoHideAsync();
 
+// Preload fonts with timeout handling for web
+async function loadFontsWithFallback() {
+  try {
+    // Only attempt font loading on non-web platforms or with a timeout
+    if (Platform.OS !== 'web') {
+      await Font.loadAsync(Ionicons.font);
+    } else {
+      // On web, use a race condition with timeout
+      const fontLoadPromise = Font.loadAsync(Ionicons.font);
+      const timeoutPromise = new Promise((resolve) => setTimeout(resolve, 3000));
+      await Promise.race([fontLoadPromise, timeoutPromise]);
+    }
+  } catch (error) {
+    console.warn('Font loading failed, using system fallback:', error);
+  }
+}
+
 function RootLayoutContent() {
   const router = useRouter();
   const { isLoading } = useAuth();
   const [hasSeenOnboarding, setHasSeenOnboarding] = useState<boolean | null>(null);
   const [checkingOnboarding, setCheckingOnboarding] = useState(true);
+  const [fontsLoaded, setFontsLoaded] = useState(false);
+
+  // Load fonts
+  useEffect(() => {
+    loadFontsWithFallback().then(() => setFontsLoaded(true));
+  }, []);
 
   // Check if user has seen onboarding
   useEffect(() => {
@@ -46,7 +71,7 @@ function RootLayoutContent() {
   }, []);
 
   useEffect(() => {
-    if (!isLoading && !checkingOnboarding) {
+    if (!isLoading && !checkingOnboarding && fontsLoaded) {
       SplashScreen.hideAsync();
       
       // Show onboarding for first-time users
@@ -57,9 +82,9 @@ function RootLayoutContent() {
         router.replace('/(tabs)');
       }
     }
-  }, [isLoading, checkingOnboarding, hasSeenOnboarding, router]);
+  }, [isLoading, checkingOnboarding, hasSeenOnboarding, fontsLoaded, router]);
 
-  if (isLoading || checkingOnboarding) {
+  if (isLoading || checkingOnboarding || !fontsLoaded) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size="large" color="#3A5C50" />
