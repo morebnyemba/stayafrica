@@ -1,0 +1,27 @@
+{% extends "emails/base.html" %}
+
+{% block title %}Verify Your Email - StayAfrica{% endblock %}
+
+{% block content %}
+<h2>Welcome to StayAfrica! 🎉</h2>
+
+<p>Hi {{ user_name|default:"there" }},</p>
+
+<p>Thank you for creating an account with StayAfrica! To get started and explore authentic African stays, please verify your email address by clicking the button below:</p>
+
+<div class="text-center">
+    <a href="{{ verification_url }}" class="button">Verify My Email</a>
+</div>
+
+<div class="info-box">
+    <p><strong>⏰ This link expires in 24 hours</strong></p>
+    <p>For security reasons, this verification link will expire in 24 hours. If it expires, you can request a new one from the login page.</p>
+</div>
+
+<div class="divider"></div>
+
+<p class="text-muted">If you didn't create an account with StayAfrica, you can safely ignore this email.</p>
+
+<p class="text-muted">If the button doesn't work, copy and paste this link into your browser:</p>
+<p class="text-muted" style="word-break: break-all;">{{ verification_url }}</p>
+{% endblock %}

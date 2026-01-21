@@ -1,0 +1,41 @@
+{% extends "emails/base.html" %}
+
+{% block title %}Booking Confirmed - StayAfrica{% endblock %}
+
+{% block content %}
+<h2>Your Booking is Confirmed! 🎉</h2>
+
+<p>Hi {{ guest_name|default:"there" }},</p>
+
+<p>Great news! Your booking has been confirmed. Here are your booking details:</p>
+
+<div class="info-box">
+    <p><strong>Booking Reference:</strong> {{ booking_ref }}</p>
+    <p><strong>Property:</strong> {{ property_title }}</p>
+    <p><strong>Location:</strong> {{ property_location }}</p>
+    <p><strong>Check-in:</strong> {{ check_in }}</p>
+    <p><strong>Check-out:</strong> {{ check_out }}</p>
+    <p><strong>Guests:</strong> {{ num_guests }}</p>
+    <p><strong>Total:</strong> {{ currency }} {{ total_amount }}</p>
+</div>
+
+<div class="text-center">
+    <a href="{{ booking_url }}" class="button">View Booking Details</a>
+</div>
+
+<div class="divider"></div>
+
+<h3>What's Next?</h3>
+<ul>
+    <li>📍 Check-in instructions will be sent 24 hours before your arrival</li>
+    <li>💬 You can message your host through the app</li>
+    <li>📄 Download or print your booking confirmation</li>
+</ul>
+
+<div class="divider"></div>
+
+<p><strong>Need help?</strong></p>
+<p>If you have any questions about your booking, visit our <a href="{{ frontend_url }}/help">Help Center</a> or contact your host directly through the app.</p>
+
+<p>We hope you have an amazing stay!</p>
+{% endblock %}

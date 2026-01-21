@@ -1,0 +1,31 @@
+{% extends "emails/base.html" %}
+
+{% block title %}Payment Receipt - StayAfrica{% endblock %}
+
+{% block content %}
+<h2>Payment Receipt 💰</h2>
+
+<p>Hi {{ user_name|default:"there" }},</p>
+
+<p>Your payment has been processed successfully. Here's your receipt:</p>
+
+<div class="info-box">
+    <p><strong>Payment Reference:</strong> {{ payment_ref }}</p>
+    <p><strong>Booking Reference:</strong> {{ booking_ref }}</p>
+    <p><strong>Property:</strong> {{ property_title }}</p>
+    <p><strong>Amount:</strong> {{ currency }} {{ amount }}</p>
+    <p><strong>Payment Method:</strong> {{ payment_method }}</p>
+    <p><strong>Date:</strong> {{ payment_date }}</p>
+    <p><strong>Status:</strong> <span style="color: #28a745;">Successful</span></p>
+</div>
+
+<div class="text-center">
+    <a href="{{ booking_url }}" class="button">View Booking</a>
+</div>
+
+<div class="divider"></div>
+
+<p class="text-muted">This is your official payment receipt. Please keep it for your records.</p>
+
+<p class="text-muted">If you have any questions about this payment, please contact our support team at <a href="mailto:support@stayafrica.com">support@stayafrica.com</a>.</p>
+{% endblock %}

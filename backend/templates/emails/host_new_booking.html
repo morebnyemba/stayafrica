@@ -1,0 +1,39 @@
+{% extends "emails/base.html" %}
+
+{% block title %}New Booking! - StayAfrica{% endblock %}
+
+{% block content %}
+<h2>You Have a New Booking! 🎉</h2>
+
+<p>Hi {{ host_name|default:"there" }},</p>
+
+<p>Great news! A guest has booked your property. Here are the booking details:</p>
+
+<div class="info-box">
+    <p><strong>Booking Reference:</strong> {{ booking_ref }}</p>
+    <p><strong>Property:</strong> {{ property_title }}</p>
+    <p><strong>Guest:</strong> {{ guest_name }} ({{ guest_email }})</p>
+    <p><strong>Check-in:</strong> {{ check_in }}</p>
+    <p><strong>Check-out:</strong> {{ check_out }}</p>
+    <p><strong>Nights:</strong> {{ num_nights }}</p>
+    <p><strong>Guests:</strong> {{ num_guests }}</p>
+    <p><strong>Total Payout:</strong> {{ currency }} {{ host_payout }}</p>
+</div>
+
+<div class="text-center">
+    <a href="{{ booking_url }}" class="button">View Booking</a>
+    <a href="{{ message_url }}" class="button button-secondary">Message Guest</a>
+</div>
+
+<div class="divider"></div>
+
+<h3>Prepare for Your Guest</h3>
+<ul>
+    <li>🏠 Ensure the property is clean and ready</li>
+    <li>🔑 Prepare check-in instructions</li>
+    <li>💬 Reach out to your guest to introduce yourself</li>
+    <li>📋 Review house rules with your guest</li>
+</ul>
+
+<p>Remember, great hospitality leads to great reviews!</p>
+{% endblock %}

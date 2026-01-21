@@ -224,6 +224,107 @@ class UserViewSet(viewsets.ModelViewSet):
             'status': 'If the email exists, a password reset link has been sent'
         })
     
+    @action(detail=False, methods=['post'], permission_classes=[AllowAny])
+    def verify_email(self, request):
+        """
+        Verify user email with token
+        POST body: {"user_hash": "...", "token": "..."}
+        """
+        from django.core.cache import cache
+        
+        user_hash = request.data.get('user_hash')
+        token = request.data.get('token')
+        
+        if not user_hash or not token:
+            return Response(
+                {'error': 'user_hash and token are required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Look up the token in cache
+        cache_key = f'verify_{user_hash}'
+        stored_data = cache.get(cache_key)
+        
+        if not stored_data:
+            return Response(
+                {'error': 'Verification link has expired or is invalid. Please request a new one.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        if stored_data.get('token') != token:
+            return Response(
+                {'error': 'Invalid verification token'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Get the user
+        user_id = stored_data.get('user_id')
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return Response(
+                {'error': 'User not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        if user.is_verified:
+            # Delete the token since it's been used
+            cache.delete(cache_key)
+            return Response({'status': 'Account already verified'})
+        
+        # Mark user as verified
+        with transaction.atomic():
+            user.is_verified = True
+            user.save(update_fields=['is_verified'])
+            
+            from django.contrib.contenttypes.models import ContentType
+            content_type = ContentType.objects.get_for_model(User)
+            AuditLoggerService.log_action(
+                user=user,
+                action='email_verified',
+                content_type=content_type,
+                object_id=user.id,
+                changes={'is_verified': True}
+            )
+        
+        # Delete the verification token
+        cache.delete(cache_key)
+        
+        logger.info(f"Email verified for user {user.id}")
+        return Response({
+            'status': 'Email verified successfully',
+            'message': 'Your email has been verified. You can now log in.'
+        })
+    
+    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
+    def resend_verification(self, request):
+        """Resend verification email to the current user"""
+        user = request.user
+        
+        if user.is_verified:
+            return Response({'status': 'Account already verified'})
+        
+        # Send verification email
+        if CELERY_AVAILABLE and send_verification_email:
+            try:
+                send_verification_email.delay(user.id)
+                logger.info(f"Verification email resent for user {user.id}")
+                return Response({
+                    'status': 'Verification email sent',
+                    'message': 'Please check your email for the verification link.'
+                })
+            except Exception as e:
+                logger.warning(f"Could not queue verification email: {e}")
+                return Response(
+                    {'error': 'Failed to send verification email. Please try again later.'},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+        else:
+            return Response(
+                {'error': 'Email service is not available'},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE
+            )
+    
     @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
     def verify_account(self, request):
         """Verify user account (placeholder for email verification)"""
