@@ -190,11 +190,9 @@ class EmailConfiguration(models.Model):
         Send a test email using current settings.
         Returns (success: bool, error_message: str)
         """
-        from django.core.mail import EmailMessage
+        from django.core.mail import EmailMessage, get_connection
         
         try:
-            from django.core.mail import get_connection
-            
             connection = get_connection(
                 backend=self.backend,
                 host=self.host,
