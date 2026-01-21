@@ -17,8 +17,11 @@ import type {
 } from '@/types';
 
 const API_VERSION = process.env.EXPO_PUBLIC_API_VERSION || 'v1';
-const DEFAULT_API_BASE = 'https://api.stayafrica.app/api';
-const API_BASE_URL = `${process.env.EXPO_PUBLIC_API_BASE_URL || DEFAULT_API_BASE}/${API_VERSION}`;
+// Match web frontend's API URL pattern
+const DEFAULT_API_BASE = process.env.NODE_ENV === 'production' 
+  ? 'https://api.zimlegend.online' 
+  : 'http://localhost:8000';
+const API_BASE_URL = `${process.env.EXPO_PUBLIC_API_BASE_URL || DEFAULT_API_BASE}/api/${API_VERSION}`;
 
 interface TokenResponse {
   access: string;
