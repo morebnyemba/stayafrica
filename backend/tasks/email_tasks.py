@@ -1,8 +1,9 @@
 """
 Email tasks for async processing
+Supports both environment variable and database-based SMTP configuration.
 """
 from celery import shared_task
-from django.core.mail import send_mail, EmailMultiAlternatives
+from django.core.mail import send_mail, EmailMultiAlternatives, get_connection
 from django.conf import settings
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
@@ -22,6 +23,34 @@ def _get_base_context():
     }
 
 
+def _get_email_config():
+    """
+    Get email configuration from database if available.
+    Returns tuple of (connection, from_email) or (None, settings.EMAIL_HOST_USER)
+    """
+    try:
+        from apps.notifications.models import EmailConfiguration
+        config = EmailConfiguration.objects.filter(is_active=True).first()
+        if config:
+            connection = get_connection(
+                backend=config.backend,
+                host=config.host,
+                port=config.port,
+                username=config.username,
+                password=config.password,
+                use_tls=config.get_use_tls(),
+                use_ssl=config.get_use_ssl(),
+                fail_silently=config.fail_silently,
+                timeout=config.timeout,
+            )
+            from_email = f'{config.default_from_name} <{config.default_from_email}>'
+            return connection, from_email
+    except Exception as e:
+        logger.debug(f"Could not load email config from database: {e}")
+    
+    return None, settings.EMAIL_HOST_USER
+
+
 @shared_task(bind=True, max_retries=3)
 def send_email_async(self, subject, message, recipient_list, html_message=None):
     """
@@ -29,17 +58,23 @@ def send_email_async(self, subject, message, recipient_list, html_message=None):
     Retries up to 3 times on failure with exponential backoff
     """
     try:
+        connection, from_email = _get_email_config()
+        
         if html_message:
             msg = EmailMultiAlternatives(
                 subject, 
                 message, 
-                settings.EMAIL_HOST_USER, 
-                recipient_list
+                from_email, 
+                recipient_list,
+                connection=connection
             )
             msg.attach_alternative(html_message, "text/html")
             msg.send()
         else:
-            send_mail(subject, message, settings.EMAIL_HOST_USER, recipient_list)
+            if connection:
+                send_mail(subject, message, from_email, recipient_list, connection=connection)
+            else:
+                send_mail(subject, message, from_email, recipient_list)
         
         logger.info(f"Email sent successfully to {recipient_list}")
         return True
@@ -59,11 +94,14 @@ def send_templated_email(self, template_name, subject, recipient_list, context):
         html_content = render_to_string(f'emails/{template_name}.html', full_context)
         text_content = strip_tags(html_content)
         
+        connection, from_email = _get_email_config()
+        
         msg = EmailMultiAlternatives(
             subject,
             text_content,
-            settings.EMAIL_HOST_USER,
-            recipient_list
+            from_email,
+            recipient_list,
+            connection=connection
         )
         msg.attach_alternative(html_content, 'text/html')
         msg.send()

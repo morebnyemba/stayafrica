@@ -1,8 +1,9 @@
 """
 Email Service
 Handles sending emails for bookings, payments, verification
+Supports both environment variable and database-based SMTP configuration.
 """
-from django.core.mail import send_mail, EmailMultiAlternatives
+from django.core.mail import send_mail, EmailMultiAlternatives, get_connection
 from django.conf import settings
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
@@ -13,7 +14,52 @@ logger = logging.getLogger(__name__)
 
 
 class EmailService:
-    """Email service with HTML template support"""
+    """Email service with HTML template support and database configuration"""
+    
+    @staticmethod
+    def _get_email_config():
+        """
+        Get email configuration from database if available, 
+        otherwise fall back to environment variables.
+        """
+        try:
+            from apps.notifications.models import EmailConfiguration
+            config = EmailConfiguration.objects.filter(is_active=True).first()
+            if config:
+                return config
+        except Exception as e:
+            logger.debug(f"Could not load email config from database: {e}")
+        return None
+    
+    @staticmethod
+    def _get_email_connection():
+        """
+        Get email connection using database config or fall back to Django settings.
+        """
+        config = EmailService._get_email_config()
+        
+        if config:
+            return get_connection(
+                backend=config.backend,
+                host=config.host,
+                port=config.port,
+                username=config.username,
+                password=config.password,
+                use_tls=config.get_use_tls(),
+                use_ssl=config.get_use_ssl(),
+                fail_silently=config.fail_silently,
+                timeout=config.timeout,
+            )
+        # Fall back to Django's default connection (uses settings.py / env vars)
+        return None
+    
+    @staticmethod
+    def _get_from_email():
+        """Get the from email address from database config or settings."""
+        config = EmailService._get_email_config()
+        if config:
+            return f'{config.default_from_name} <{config.default_from_email}>'
+        return settings.EMAIL_HOST_USER
     
     @staticmethod
     def _get_base_context():
@@ -32,11 +78,16 @@ class EmailService:
             html_content = render_to_string(f'emails/{template_name}.html', full_context)
             text_content = strip_tags(html_content)
             
+            # Get connection and from email
+            connection = EmailService._get_email_connection()
+            from_email = EmailService._get_from_email()
+            
             msg = EmailMultiAlternatives(
                 subject,
                 text_content,
-                settings.EMAIL_HOST_USER,
-                recipient_list
+                from_email,
+                recipient_list,
+                connection=connection
             )
             msg.attach_alternative(html_content, 'text/html')
             msg.send()

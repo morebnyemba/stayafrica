@@ -1,9 +1,85 @@
 from django.contrib import admin
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
+from django.contrib import messages
 from unfold.admin import ModelAdmin as UnfoldModelAdmin
-from unfold.decorators import display
-from apps.notifications.models import PushToken, NotificationPreference, Notification
+from unfold.decorators import display, action
+from apps.notifications.models import PushToken, NotificationPreference, Notification, EmailConfiguration
+
+
+@admin.register(EmailConfiguration)
+class EmailConfigurationAdmin(UnfoldModelAdmin):
+    """Admin interface for email/SMTP configuration"""
+    
+    list_display = ['name', 'host', 'port', 'encryption', 'active_badge', 'test_status', 'updated_at']
+    readonly_fields = ['last_tested_at', 'last_test_success', 'last_test_error', 'created_at', 'updated_at']
+    
+    fieldsets = (
+        (_('General'), {
+            'fields': ('name', 'is_active'),
+        }),
+        (_('SMTP Server Settings'), {
+            'fields': ('backend', 'host', 'port', 'encryption', 'timeout'),
+            'description': _('Configure your SMTP server connection settings'),
+        }),
+        (_('Authentication'), {
+            'fields': ('username', 'password'),
+            'description': _('SMTP server credentials. For Gmail, use an App Password.'),
+        }),
+        (_('Sender Information'), {
+            'fields': ('default_from_email', 'default_from_name'),
+            'description': _('Default sender information for outgoing emails'),
+        }),
+        (_('Advanced'), {
+            'fields': ('fail_silently',),
+            'classes': ['collapse'],
+        }),
+        (_('Test Status'), {
+            'fields': ('last_tested_at', 'last_test_success', 'last_test_error'),
+            'classes': ['collapse'],
+        }),
+        (_('Timestamps'), {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ['collapse'],
+        }),
+    )
+    
+    actions = ['test_smtp_connection']
+    
+    @display(description=_('Active'), label=True)
+    def active_badge(self, obj):
+        return {
+            'value': 'Active' if obj.is_active else 'Inactive',
+            'color': 'success' if obj.is_active else 'secondary',
+        }
+    
+    @display(description=_('Test Status'), label=True)
+    def test_status(self, obj):
+        if obj.last_tested_at is None:
+            return {'value': 'Not Tested', 'color': 'secondary'}
+        return {
+            'value': 'Passed' if obj.last_test_success else 'Failed',
+            'color': 'success' if obj.last_test_success else 'danger',
+        }
+    
+    @action(description=_('Test SMTP Connection'))
+    def test_smtp_connection(self, request, queryset):
+        for config in queryset:
+            success, message = config.test_connection()
+            if success:
+                self.message_user(request, f'{config.name}: {message}', messages.SUCCESS)
+            else:
+                self.message_user(request, f'{config.name}: {message}', messages.ERROR)
+    
+    def has_add_permission(self, request):
+        # Only allow adding if no configuration exists (singleton)
+        if EmailConfiguration.objects.exists():
+            return False
+        return super().has_add_permission(request)
+    
+    def has_delete_permission(self, request, obj=None):
+        # Prevent deletion of the only configuration
+        return False
 
 
 @admin.register(PushToken)
