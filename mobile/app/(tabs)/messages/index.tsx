@@ -1,10 +1,13 @@
-import { View, Text, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Platform } from 'react-native';
+import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { useConversations } from '@/hooks/api-hooks';
 import { useAuth } from '@/context/auth-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Skeleton } from '@/components/common/Skeletons';
+import { Avatar } from '@/components/common/Avatar';
+import { Sidebar } from '@/components/common/Sidebar';
 
 interface Conversation {
   id: string;
@@ -18,18 +21,55 @@ interface Conversation {
 
 export default function MessagesScreen() {
   const router = useRouter();
-  const { isAuthenticated } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const { data: conversationsData, isLoading } = useConversations();
   const conversations = conversationsData?.results || [];
+  const [sidebarVisible, setSidebarVisible] = useState(false);
+
+  const handleAvatarPress = () => {
+    if (isAuthenticated) {
+      router.push('/(tabs)/profile');
+    } else {
+      router.push('/(auth)/login');
+    }
+  };
 
   if (!isAuthenticated) {
     return (
       <View className="flex-1 bg-sand-100">
+        {/* Sidebar */}
+        <Sidebar
+          isVisible={sidebarVisible}
+          onClose={() => setSidebarVisible(false)}
+        />
+
         {/* Header */}
         <LinearGradient
           colors={['#122F26', '#1d392f']}
-          className="px-4 pt-12 pb-6"
+          className="px-4 pb-6"
+          style={{ paddingTop: Platform.OS === 'ios' ? 50 : 35 }}
         >
+          {/* Top Navigation Bar with Menu */}
+          <View className="flex-row items-center justify-between mb-4">
+            {/* Hamburger Menu */}
+            <TouchableOpacity
+              onPress={() => setSidebarVisible(true)}
+              className="w-10 h-10 rounded-xl items-center justify-center"
+              style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
+            >
+              <Ionicons name="menu" size={24} color="#fff" />
+            </TouchableOpacity>
+
+            {/* Avatar */}
+            <Avatar
+              uri={null}
+              firstName={undefined}
+              lastName={undefined}
+              size="small"
+              onPress={handleAvatarPress}
+            />
+          </View>
+
           <Text className="text-3xl font-black text-white tracking-tight">
             Messages
           </Text>
@@ -135,13 +175,42 @@ export default function MessagesScreen() {
 
   return (
     <View className="flex-1 bg-sand-100">
+      {/* Sidebar */}
+      <Sidebar
+        isVisible={sidebarVisible}
+        onClose={() => setSidebarVisible(false)}
+      />
+
       {/* Modern Header */}
       <LinearGradient
         colors={['#122F26', '#1d392f', '#2d4a40']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        className="px-4 pt-12 pb-6"
+        className="px-4 pb-6"
+        style={{ paddingTop: Platform.OS === 'ios' ? 50 : 35 }}
       >
+        {/* Top Navigation Bar with Menu and Avatar */}
+        <View className="flex-row items-center justify-between mb-4">
+          {/* Hamburger Menu */}
+          <TouchableOpacity
+            onPress={() => setSidebarVisible(true)}
+            className="w-10 h-10 rounded-xl items-center justify-center"
+            style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
+          >
+            <Ionicons name="menu" size={24} color="#fff" />
+          </TouchableOpacity>
+
+          {/* Avatar */}
+          <Avatar
+            uri={null}
+            firstName={user?.first_name}
+            lastName={user?.last_name}
+            size="small"
+            onPress={handleAvatarPress}
+            showBadge={isAuthenticated}
+          />
+        </View>
+
         <View className="flex-row justify-between items-center">
           <View className="flex-1">
             <Text className="text-3xl font-black text-white tracking-tight mb-2">
