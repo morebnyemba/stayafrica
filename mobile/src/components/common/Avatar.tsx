@@ -1,4 +1,3 @@
-import React from 'react';
 import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -83,7 +82,7 @@ export function Avatar({
     width: dimensions.container,
     height: dimensions.container,
     borderRadius: dimensions.container / 2,
-    overflow: 'hidden' as const,
+    overflow: 'hidden' as 'hidden',
     shadowColor: '#D9B168',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,

@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useRouter } from 'expo-router';
+import { useRouter, Href } from 'expo-router';
 import { useAuth } from '@/context/auth-context';
 import { Avatar } from './Avatar';
 
@@ -22,7 +22,7 @@ interface MenuItem {
   id: string;
   label: string;
   icon: keyof typeof Ionicons.glyphMap;
-  route?: string;
+  route?: Href;
   action?: () => void;
   badge?: number;
   children?: MenuItem[];
@@ -57,10 +57,10 @@ export function Sidebar({ isVisible, onClose }: SidebarProps) {
     );
   };
 
-  const handleNavigation = (route: string) => {
+  const handleNavigation = (route: Href) => {
     onClose();
     setTimeout(() => {
-      router.push(route as any);
+      router.push(route);
     }, 250);
   };
 
@@ -106,26 +106,6 @@ export function Sidebar({ isVisible, onClose }: SidebarProps) {
       icon: 'business-outline',
       route: '/(tabs)/host',
       authRequired: true,
-      children: [
-        {
-          id: 'host-listings',
-          label: 'My Listings',
-          icon: 'list-outline',
-          route: '/(tabs)/host',
-        },
-        {
-          id: 'host-calendar',
-          label: 'Calendar',
-          icon: 'calendar-outline',
-          route: '/(tabs)/host',
-        },
-        {
-          id: 'host-earnings',
-          label: 'Earnings',
-          icon: 'cash-outline',
-          route: '/(tabs)/wallet',
-        },
-      ],
     },
     {
       id: 'wallet',
@@ -138,27 +118,8 @@ export function Sidebar({ isVisible, onClose }: SidebarProps) {
       id: 'settings',
       label: 'Settings',
       icon: 'settings-outline',
+      route: '/(tabs)/profile',
       authRequired: true,
-      children: [
-        {
-          id: 'profile',
-          label: 'Edit Profile',
-          icon: 'person-outline',
-          route: '/(tabs)/profile',
-        },
-        {
-          id: 'notifications',
-          label: 'Notifications',
-          icon: 'notifications-outline',
-          route: '/(tabs)/profile',
-        },
-        {
-          id: 'privacy',
-          label: 'Privacy',
-          icon: 'shield-outline',
-          route: '/(tabs)/profile',
-        },
-      ],
     },
   ];
 
@@ -239,9 +200,9 @@ export function Sidebar({ isVisible, onClose }: SidebarProps) {
             />
           )}
         </TouchableOpacity>
-        {hasChildren && isExpanded && (
+        {hasChildren && isExpanded && item.children && (
           <View className="bg-sand-50">
-            {item.children!.map((child) => renderMenuItem(child, depth + 1))}
+            {item.children.map((child) => renderMenuItem(child, depth + 1))}
           </View>
         )}
       </View>
