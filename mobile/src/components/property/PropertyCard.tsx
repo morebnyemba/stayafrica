@@ -26,6 +26,16 @@ export function PropertyCard({ property, onPress, showRemoveButton = false, onRe
     scale.value = withSpring(1, { damping: 15, stiffness: 150 });
   };
 
+  // Guard against undefined property
+  if (!property) {
+    return null;
+  }
+
+  // Safe access to nested properties
+  const imageUrl = property.image_urls?.[0] || null;
+  const location = property.location || {};
+  const cityName = location.city || 'Unknown location';
+
   return (
     <Animated.View style={animatedStyle}>
       <TouchableOpacity
@@ -44,9 +54,9 @@ export function PropertyCard({ property, onPress, showRemoveButton = false, onRe
       >
         {/* Image Section */}
         <View className="relative">
-          {property.image_urls[0] ? (
+          {imageUrl ? (
             <Image
-              source={{ uri: property.image_urls[0] }}
+              source={{ uri: imageUrl }}
               style={{ width: '100%', height: 220 }}
               className="bg-sand-200"
               resizeMode="cover"
@@ -111,12 +121,12 @@ export function PropertyCard({ property, onPress, showRemoveButton = false, onRe
         {/* Content Section */}
         <View className="p-5">
           <Text className="text-xl font-black mb-1 text-forest" numberOfLines={1}>
-            {property.title}
+            {property.title || 'Untitled Property'}
           </Text>
           <View className="flex-row items-center mb-3">
             <Ionicons name="location" size={14} color="#3A5C50" />
             <Text className="text-moss text-sm ml-1" numberOfLines={1}>
-              {property.location.city}
+              {cityName}
             </Text>
           </View>
 
@@ -125,19 +135,19 @@ export function PropertyCard({ property, onPress, showRemoveButton = false, onRe
             <View className="flex-row items-center mr-4">
               <Ionicons name="bed-outline" size={18} color="#3A5C50" />
               <Text className="ml-1 text-sm font-medium text-moss">
-                {property.number_of_beds}
+                {property.number_of_beds ?? 0}
               </Text>
             </View>
             <View className="flex-row items-center mr-4">
               <Ionicons name="water-outline" size={18} color="#3A5C50" />
               <Text className="ml-1 text-sm font-medium text-moss">
-                {property.number_of_bathrooms}
+                {property.number_of_bathrooms ?? 0}
               </Text>
             </View>
             <View className="flex-row items-center">
               <Ionicons name="people-outline" size={18} color="#3A5C50" />
               <Text className="ml-1 text-sm font-medium text-moss">
-                {property.max_guests}
+                {property.max_guests ?? 0}
               </Text>
             </View>
           </View>
@@ -146,7 +156,7 @@ export function PropertyCard({ property, onPress, showRemoveButton = false, onRe
           <View className="flex-row justify-between items-center">
             <View>
               <Text className="text-2xl font-black text-gold">
-                ${property.price_per_night}
+                ${property.price_per_night ?? 0}
               </Text>
               <Text className="text-moss text-xs font-medium">per night</Text>
             </View>
