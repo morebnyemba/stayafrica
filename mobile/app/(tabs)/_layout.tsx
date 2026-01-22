@@ -1,8 +1,16 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Platform } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function TabsLayout() {
+  const insets = useSafeAreaInsets();
+  
+  // Calculate proper bottom padding to stay above navigation controls
+  const bottomPadding = Platform.OS === 'ios' 
+    ? Math.max(insets.bottom, 20) 
+    : Math.max(insets.bottom, 12);
+
   return (
     <Tabs
       screenOptions={({ route }) => ({
@@ -27,7 +35,7 @@ export default function TabsLayout() {
             iconName = focused ? 'person-circle' : 'person-circle-outline';
           }
 
-          return <Ionicons name={iconName} size={focused ? 28 : 24} color={color} />;
+          return <Ionicons name={iconName} size={focused ? 26 : 22} color={color} />;
         },
         tabBarActiveTintColor: '#D9B168', // Safari Gold
         tabBarInactiveTintColor: '#94a3b8',
@@ -35,8 +43,8 @@ export default function TabsLayout() {
           backgroundColor: '#122F26', // Deep Forest
           borderTopWidth: 0,
           elevation: 0,
-          height: Platform.OS === 'ios' ? 88 : 65,
-          paddingBottom: Platform.OS === 'ios' ? 20 : 8,
+          height: 60 + bottomPadding,
+          paddingBottom: bottomPadding,
           paddingTop: 8,
           shadowColor: '#000',
           shadowOffset: { width: 0, height: -4 },
@@ -44,12 +52,12 @@ export default function TabsLayout() {
           shadowRadius: 12,
         },
         tabBarLabelStyle: {
-          fontSize: 11,
+          fontSize: 10,
           fontWeight: '600',
-          marginTop: -2,
+          marginTop: -4,
         },
         tabBarItemStyle: {
-          paddingVertical: 4,
+          paddingVertical: 2,
         },
       })}
     >
