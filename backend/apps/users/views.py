@@ -178,7 +178,16 @@ class UserViewSet(viewsets.ModelViewSet):
                 )
             
             logger.info(f"New user registered: {user.email}")
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            
+            # Generate JWT tokens for auto-login after registration
+            from rest_framework_simplejwt.tokens import RefreshToken
+            refresh = RefreshToken.for_user(user)
+            
+            response_data = serializer.data
+            response_data['access'] = str(refresh.access_token)
+            response_data['refresh'] = str(refresh)
+            
+            return Response(response_data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     @action(detail=False, methods=['post'], permission_classes=[AllowAny])

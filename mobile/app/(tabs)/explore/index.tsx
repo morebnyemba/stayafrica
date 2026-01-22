@@ -15,7 +15,7 @@ const CATEGORIES = [
   { id: 'all', label: 'All', icon: 'apps' },
   { id: 'villa', label: 'Villas', icon: 'home' },
   { id: 'apartment', label: 'Apartments', icon: 'business' },
-  { id: 'cabin', label: 'Cabins', icon: 'log-cabin' },
+  { id: 'cabin', label: 'Cabins', icon: 'bed' },
   { id: 'beach', label: 'Beach', icon: 'water' },
   { id: 'safari', label: 'Safari', icon: 'leaf' },
 ];

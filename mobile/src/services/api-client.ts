@@ -64,12 +64,18 @@ class APIClient {
       },
     });
 
-    // Request interceptor - add token
+    // Request interceptor - add token (skip for auth endpoints)
     this.client.interceptors.request.use(
       async (config) => {
-        const token = await this.getAccessToken();
-        if (token) {
-          config.headers.Authorization = `Bearer ${token}`;
+        const requestUrl = config.url || '';
+        // Skip adding token for auth endpoints
+        const isAuthEndpoint = requestUrl.includes('/auth/') || requestUrl.includes('/users/register');
+        
+        if (!isAuthEndpoint) {
+          const token = await this.getAccessToken();
+          if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+          }
         }
         return config;
       },
@@ -81,19 +87,25 @@ class APIClient {
       (response) => response,
       async (error: AxiosError) => {
         const originalRequest = error.config as any;
+        const requestUrl = originalRequest?.url || '';
+        
+        // Skip token refresh for auth endpoints (login, register, refresh)
+        const isAuthEndpoint = requestUrl.includes('/auth/') || requestUrl.includes('/users/register');
 
-        if (error.response?.status === 401 && !originalRequest._retry) {
+        if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
           originalRequest._retry = true;
 
           try {
             const newToken = await this.refreshAccessToken();
-            this.client.defaults.headers.common.Authorization = `Bearer ${newToken}`;
-            originalRequest.headers.Authorization = `Bearer ${newToken}`;
-            return this.client(originalRequest);
+            if (newToken) {
+              this.client.defaults.headers.common.Authorization = `Bearer ${newToken}`;
+              originalRequest.headers.Authorization = `Bearer ${newToken}`;
+              return this.client(originalRequest);
+            }
           } catch (refreshError) {
             // Refresh failed - clear tokens and redirect to login
             await this.clearTokens();
-            return Promise.reject(refreshError);
+            return Promise.reject(error); // Return original error, not refresh error
           }
         }
 
@@ -107,15 +119,19 @@ class APIClient {
       email,
       password,
     });
-    const { access, refresh } = response.data;
-    await this.saveTokens(access, refresh);
+    const { access, refresh } = response.data || {};
+    if (access && refresh) {
+      await this.saveTokens(String(access), String(refresh));
+    }
     return response.data;
   }
 
   async register(userData: any): Promise<TokenResponse> {
     const response = await this.client.post('/users/register/', userData);
-    const { access, refresh } = response.data;
-    await this.saveTokens(access, refresh);
+    const { access, refresh } = response.data || {};
+    if (access && refresh) {
+      await this.saveTokens(String(access), String(refresh));
+    }
     return response.data;
   }
 
@@ -134,8 +150,10 @@ class APIClient {
         refresh: refreshToken,
       });
 
-      const { access } = response.data;
-      await secureStorage.setItemAsync('accessToken', access);
+      const { access } = response.data || {};
+      if (access) {
+        await secureStorage.setItemAsync('accessToken', String(access));
+      }
       return access;
     })();
 
@@ -147,8 +165,13 @@ class APIClient {
   }
 
   async saveTokens(accessToken: string, refreshToken: string): Promise<void> {
-    await secureStorage.setItemAsync('accessToken', accessToken);
-    await secureStorage.setItemAsync('refreshToken', refreshToken);
+    // Ensure tokens are strings before saving
+    if (accessToken && typeof accessToken === 'string') {
+      await secureStorage.setItemAsync('accessToken', accessToken);
+    }
+    if (refreshToken && typeof refreshToken === 'string') {
+      await secureStorage.setItemAsync('refreshToken', refreshToken);
+    }
   }
 
   async getAccessToken(): Promise<string | null> {
