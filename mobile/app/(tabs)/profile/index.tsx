@@ -1,22 +1,54 @@
-import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Alert, Platform } from 'react-native';
+import { useState } from 'react';
 import { useAuth } from '@/context/auth-context';
 import { useRouter } from 'expo-router';
 import { useUserProfile } from '@/hooks/api-hooks';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Avatar } from '@/components/common/Avatar';
+import { Sidebar } from '@/components/common/Sidebar';
 
 export default function ProfileScreen() {
   const { user, logout, isAuthenticated } = useAuth();
   const router = useRouter();
+  const [sidebarVisible, setSidebarVisible] = useState(false);
 
   if (!isAuthenticated) {
     return (
       <View className="flex-1 bg-sand-100">
+        {/* Sidebar */}
+        <Sidebar
+          isVisible={sidebarVisible}
+          onClose={() => setSidebarVisible(false)}
+        />
+
         {/* Header */}
         <LinearGradient
           colors={['#122F26', '#1d392f']}
-          className="px-4 pt-12 pb-6"
+          className="px-4 pb-6"
+          style={{ paddingTop: Platform.OS === 'ios' ? 50 : 35 }}
         >
+          {/* Top Navigation Bar with Menu */}
+          <View className="flex-row items-center justify-between mb-4">
+            {/* Hamburger Menu */}
+            <TouchableOpacity
+              onPress={() => setSidebarVisible(true)}
+              className="w-10 h-10 rounded-xl items-center justify-center"
+              style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
+            >
+              <Ionicons name="menu" size={24} color="#fff" />
+            </TouchableOpacity>
+
+            {/* Avatar for Auth Options */}
+            <Avatar
+              uri={null}
+              firstName={undefined}
+              lastName={undefined}
+              size="small"
+              onPress={() => router.push('/(auth)/login')}
+            />
+          </View>
+
           <Text className="text-3xl font-black text-white tracking-tight">
             Profile
           </Text>
@@ -114,50 +146,64 @@ export default function ProfileScreen() {
 
   return (
     <ScrollView className="flex-1 bg-sand-100" showsVerticalScrollIndicator={false}>
+      {/* Sidebar */}
+      <Sidebar
+        isVisible={sidebarVisible}
+        onClose={() => setSidebarVisible(false)}
+      />
+
       {/* Header with Profile Card */}
       <LinearGradient
         colors={['#122F26', '#1d392f', '#2d4a40']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        className="px-4 pt-12 pb-8"
+        className="px-4 pb-8"
+        style={{ paddingTop: Platform.OS === 'ios' ? 50 : 35 }}
       >
+        {/* Top Navigation Bar with Menu */}
+        <View className="flex-row items-center justify-between mb-4">
+          {/* Hamburger Menu */}
+          <TouchableOpacity
+            onPress={() => setSidebarVisible(true)}
+            className="w-10 h-10 rounded-xl items-center justify-center"
+            style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
+          >
+            <Ionicons name="menu" size={24} color="#fff" />
+          </TouchableOpacity>
+
+          {/* User Badge */}
+          <View className="flex-row items-center">
+            <LinearGradient
+              colors={user?.role === 'host' ? ['#3A5C50', '#2d4a40'] : ['#D9B168', '#bea04f']}
+              className="px-3 py-1.5 rounded-full"
+            >
+              <Text
+                className={`text-xs font-semibold ${
+                  user?.role === 'host' ? 'text-gold' : 'text-forest'
+                }`}
+              >
+                {user?.role === 'host' ? '🏠 Host' : '✨ Guest'}
+              </Text>
+            </LinearGradient>
+          </View>
+        </View>
+
         {/* Avatar */}
         <View className="items-center mb-4">
-          <LinearGradient
-            colors={['#D9B168', '#bea04f']}
-            className="w-28 h-28 rounded-full items-center justify-center mb-4"
-            style={{
-              shadowColor: '#D9B168',
-              shadowOffset: { width: 0, height: 8 },
-              shadowOpacity: 0.4,
-              shadowRadius: 16,
-              elevation: 8,
-            }}
-          >
-            <Ionicons name="person" size={56} color="#122F26" />
-          </LinearGradient>
+          <Avatar
+            uri={null}
+            firstName={user?.first_name}
+            lastName={user?.last_name}
+            size="large"
+          />
 
           {/* Name */}
-          <Text className="text-2xl font-black text-white text-center">
+          <Text className="text-2xl font-black text-white text-center mt-4">
             {user?.first_name} {user?.last_name}
           </Text>
 
           {/* Email */}
           <Text className="text-sand-200 text-center mt-1">{user?.email}</Text>
-
-          {/* Role Badge */}
-          <View className="mt-4">
-            <LinearGradient
-              colors={user?.role === 'host' ? ['#3A5C50', '#2d4a40'] : ['#D9B168', '#bea04f']}
-              className="px-5 py-2 rounded-full"
-            >
-              <Text className={`font-semibold text-sm ${
-                user?.role === 'host' ? 'text-gold' : 'text-forest'
-              }`}>
-                {user?.role === 'host' ? '🏠 Property Host' : '✨ Guest'}
-              </Text>
-            </LinearGradient>
-          </View>
         </View>
       </LinearGradient>
 

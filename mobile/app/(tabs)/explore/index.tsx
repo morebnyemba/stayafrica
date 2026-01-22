@@ -1,4 +1,4 @@
-import { View, Text, FlatList, TextInput, ActivityIndicator, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, FlatList, TextInput, ActivityIndicator, TouchableOpacity, ScrollView, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
@@ -7,6 +7,9 @@ import Animated, { FadeInRight } from 'react-native-reanimated';
 import { useProperties } from '@/hooks/api-hooks';
 import { PropertyCard } from '@/components/property/PropertyCard';
 import { PropertyCardSkeleton } from '@/components/common/Skeletons';
+import { Avatar } from '@/components/common/Avatar';
+import { Sidebar } from '@/components/common/Sidebar';
+import { useAuth } from '@/context/auth-context';
 
 const CATEGORIES = [
   { id: 'all', label: 'All', icon: 'apps' },
@@ -21,7 +24,9 @@ export default function ExploreScreen() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [sidebarVisible, setSidebarVisible] = useState(false);
   const { data: propertiesData, isLoading } = useProperties();
+  const { user, isAuthenticated } = useAuth();
   const properties = propertiesData?.results || [];
   
   const filteredProperties = properties.filter((property: any) => {
@@ -30,19 +35,56 @@ export default function ExploreScreen() {
     return matchesSearch;
   });
 
+  const handleAvatarPress = () => {
+    if (isAuthenticated) {
+      router.push('/(tabs)/profile');
+    } else {
+      router.push('/(auth)/login');
+    }
+  };
+
   const handlePropertyPress = (id: string) => {
     router.push(`/(tabs)/explore/${id}`);
   };
 
   return (
     <View className="flex-1 bg-sand-100">
+      {/* Sidebar */}
+      <Sidebar
+        isVisible={sidebarVisible}
+        onClose={() => setSidebarVisible(false)}
+      />
+
       {/* Modern Header with Gradient */}
       <LinearGradient
         colors={['#122F26', '#1d392f', '#2d4a40']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        className="px-4 pt-12 pb-6"
+        className="px-4 pb-6"
+        style={{ paddingTop: Platform.OS === 'ios' ? 50 : 35 }}
       >
+        {/* Top Navigation Bar with Menu and Avatar */}
+        <View className="flex-row items-center justify-between mb-4">
+          {/* Hamburger Menu */}
+          <TouchableOpacity
+            onPress={() => setSidebarVisible(true)}
+            className="w-10 h-10 rounded-xl items-center justify-center"
+            style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
+          >
+            <Ionicons name="menu" size={24} color="#fff" />
+          </TouchableOpacity>
+
+          {/* Avatar for Auth Options */}
+          <Avatar
+            uri={null}
+            firstName={user?.first_name}
+            lastName={user?.last_name}
+            size="small"
+            onPress={handleAvatarPress}
+            showBadge={isAuthenticated}
+          />
+        </View>
+
         {/* Title Section */}
         <View className="mb-5">
           <Text className="text-4xl font-black text-white tracking-tight mb-2">
