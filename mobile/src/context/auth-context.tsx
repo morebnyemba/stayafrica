@@ -13,6 +13,14 @@ interface User {
   is_verified: boolean;
 }
 
+interface UpdateProfileData {
+  first_name?: string;
+  last_name?: string;
+  email?: string;
+  phone_number?: string;
+  country_of_residence?: string;
+}
+
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
@@ -21,6 +29,7 @@ interface AuthContextType {
   register: (userData: any) => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
+  updateProfile: (data: UpdateProfileData) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -92,6 +101,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const updateProfile = async (data: UpdateProfileData) => {
+    try {
+      const updatedUser = await apiClient.updateUserProfile(data);
+      setUser(updatedUser);
+    } catch (error) {
+      console.error('Update profile error:', error);
+      throw error;
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -102,6 +121,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         register,
         logout,
         refreshUser,
+        updateProfile,
       }}
     >
       {children}
