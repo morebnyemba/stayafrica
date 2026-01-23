@@ -1,15 +1,35 @@
-import { View, Text, ScrollView, TouchableOpacity, Platform, TextInput, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Platform, TextInput, Alert, KeyboardTypeOptions } from 'react-native';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '@/context/auth-context';
 
+interface InputFieldProps {
+  label: string;
+  field: keyof FormData;
+  placeholder: string;
+  keyboardType?: KeyboardTypeOptions;
+  required?: boolean;
+}
+
+interface FormData {
+  title: string;
+  description: string;
+  address: string;
+  city: string;
+  country: string;
+  price: string;
+  bedrooms: string;
+  bathrooms: string;
+  maxGuests: string;
+}
+
 export default function NewPropertyScreen() {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     title: '',
     description: '',
     address: '',
@@ -83,7 +103,7 @@ export default function NewPropertyScreen() {
     );
   }
 
-  const InputField = ({ label, field, placeholder, keyboardType = 'default', required = false }: any) => (
+  const InputField = ({ label, field, placeholder, keyboardType = 'default', required = false }: InputFieldProps) => (
     <View className="mb-4">
       <Text className="text-base font-semibold text-forest mb-2">
         {label} {required && <Text className="text-red-500">*</Text>}
@@ -100,7 +120,7 @@ export default function NewPropertyScreen() {
           placeholder={placeholder}
           placeholderTextColor="#94a3b8"
           keyboardType={keyboardType}
-          value={formData[field as keyof typeof formData]}
+          value={formData[field]}
           onChangeText={(value) => handleChange(field, value)}
         />
       </View>

@@ -46,29 +46,31 @@ export default function ProfileVerificationScreen() {
     </View>
   );
 
+  // Use is_verified from user context - individual verification steps are placeholders
+  // that can be updated when API provides more detailed verification status
   const verificationSteps = [
     {
       title: 'Email Verification',
       description: 'Verify your email address to secure your account',
-      isComplete: user?.email_verified || false,
+      isComplete: user?.is_verified || false,
       icon: 'mail' as keyof typeof Ionicons.glyphMap,
     },
     {
       title: 'Phone Verification',
       description: 'Add and verify your phone number for account security',
-      isComplete: user?.phone_verified || false,
+      isComplete: false, // Placeholder - update when API provides this
       icon: 'call' as keyof typeof Ionicons.glyphMap,
     },
     {
       title: 'Identity Document',
       description: 'Upload a government-issued ID for identity verification',
-      isComplete: user?.id_verified || false,
+      isComplete: false, // Placeholder - update when API provides this
       icon: 'card' as keyof typeof Ionicons.glyphMap,
     },
     {
       title: 'Profile Photo',
       description: 'Add a clear profile photo showing your face',
-      isComplete: !!user?.profile_photo,
+      isComplete: false, // Placeholder - update when API provides this
       icon: 'camera' as keyof typeof Ionicons.glyphMap,
     },
   ];

@@ -61,10 +61,11 @@ export default function WithdrawScreen() {
           <Text className="text-xl font-bold text-white">Withdraw Funds</Text>
         </View>
 
-        {/* Balance Card */}
+        {/* Balance Card - Shows placeholder until API provides actual balance */}
         <View className="bg-white/10 rounded-2xl p-4">
           <Text className="text-sand-200 text-sm">Available Balance</Text>
           <Text className="text-3xl font-black text-white mt-1">$0.00</Text>
+          <Text className="text-sand-300 text-xs mt-1">Balance will update when connected to wallet API</Text>
         </View>
       </LinearGradient>
 

@@ -131,7 +131,10 @@ export default function PaymentMethodsScreen() {
         )}
 
         {/* Add New Method Button */}
-        <TouchableOpacity className="mt-4">
+        <TouchableOpacity 
+          className="mt-4"
+          onPress={() => Alert.alert('Coming Soon', 'Adding payment methods will be available soon.')}
+        >
           <LinearGradient
             colors={['#D9B168', '#bea04f']}
             className="py-4 rounded-2xl flex-row items-center justify-center"
