@@ -160,7 +160,12 @@ export default function RegisterScreen() {
         country_of_residence: formData.country,
         role: formData.role,
       });
-      router.replace('/(tabs)/explore');
+      // Redirect based on selected role
+      if (formData.role === 'host') {
+        router.replace('/(tabs)/host');
+      } else {
+        router.replace('/(tabs)/explore');
+      }
     } catch (error: any) {
       console.error('Registration failed:', error);
       const errorMessage = error?.response?.data?.email?.[0] || 
