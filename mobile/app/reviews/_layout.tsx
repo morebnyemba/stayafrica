@@ -9,6 +9,7 @@ export default function ReviewsLayout() {
       }}
     >
       <Stack.Screen name="index" />
+      <Stack.Screen name="my-reviews" />
     </Stack>
   );
 }

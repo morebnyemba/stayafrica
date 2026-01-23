@@ -9,7 +9,10 @@ export default function HostLayout() {
       }}
     >
       <Stack.Screen name="bookings/index" />
+      <Stack.Screen name="bookings/[id]" />
       <Stack.Screen name="properties/index" />
+      <Stack.Screen name="properties/[id]" />
+      <Stack.Screen name="properties/new" />
       <Stack.Screen name="earnings/index" />
       <Stack.Screen name="verification/index" />
       <Stack.Screen name="reviews/index" />
