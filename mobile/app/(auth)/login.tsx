@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import {
   Text,
   View,
@@ -54,11 +54,13 @@ export default function LoginScreen() {
     try {
       setLoading(true);
       setError(null);
+      setLoginSuccess(false);
       await login(email.trim().toLowerCase(), password);
       setLoginSuccess(true);
     } catch (err: any) {
       console.error("Login failed:", err);
       setError(err?.response?.data?.detail || "Invalid email or password. Please try again.");
+      setLoginSuccess(false);
       setLoading(false);
     }
   };
