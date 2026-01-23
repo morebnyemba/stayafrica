@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, TouchableOpacity, Platform, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Platform } from 'react-native';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -20,6 +20,13 @@ interface QuickActionProps {
   description: string;
   onPress: () => void;
   color: string;
+}
+
+interface ActivityItemProps {
+  type: 'booking' | 'review' | 'payment' | 'wishlist';
+  title: string;
+  subtitle: string;
+  time: string;
 }
 
 export default function GuestDashboardScreen() {
@@ -192,8 +199,8 @@ export default function GuestDashboardScreen() {
   );
 
   // Recent Activity Item
-  const ActivityItem = ({ type, title, subtitle, time, status }: any) => {
-    const getTypeIcon = () => {
+  const ActivityItem = ({ type, title, subtitle, time }: ActivityItemProps) => {
+    const getTypeIcon = (): keyof typeof Ionicons.glyphMap => {
       switch (type) {
         case 'booking': return 'calendar';
         case 'review': return 'star';
@@ -392,22 +399,6 @@ export default function GuestDashboardScreen() {
               Your bookings, reviews, and activity will appear here
             </Text>
           </View>
-
-          {/* Sample activity items (hidden for now, can be populated with real data) */}
-          {/* 
-          <ActivityItem
-            type="booking"
-            title="Booking Confirmed"
-            subtitle="Safari Lodge in Harare"
-            time="2h ago"
-          />
-          <ActivityItem
-            type="review"
-            title="Review Posted"
-            subtitle="Mountain View Villa - 5★"
-            time="1d ago"
-          />
-          */}
         </View>
       </View>
 
