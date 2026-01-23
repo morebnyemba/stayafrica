@@ -36,7 +36,7 @@ export default function LoginScreen() {
       if (user.role === 'host') {
         router.replace("/(tabs)/host");
       } else {
-        router.replace("/(tabs)/explore");
+        router.replace("/(tabs)/dashboard");
       }
     }
   }, [loginSuccess, user, router]);

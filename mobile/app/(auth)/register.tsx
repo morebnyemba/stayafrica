@@ -164,7 +164,7 @@ export default function RegisterScreen() {
       if (formData.role === 'host') {
         router.replace('/(tabs)/host');
       } else {
-        router.replace('/(tabs)/explore');
+        router.replace('/(tabs)/dashboard');
       }
     } catch (error: any) {
       console.error('Registration failed:', error);

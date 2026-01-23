@@ -19,7 +19,9 @@ export default function TabsLayout() {
           let iconName: any;
 
           // Use different icons for focused/unfocused states
-          if (route.name === 'explore') {
+          if (route.name === 'dashboard') {
+            iconName = focused ? 'home' : 'home-outline';
+          } else if (route.name === 'explore') {
             iconName = focused ? 'compass' : 'compass-outline';
           } else if (route.name === 'bookings') {
             iconName = focused ? 'calendar' : 'calendar-outline';
@@ -66,6 +68,13 @@ export default function TabsLayout() {
         name="index"
         options={{
           href: null, // Hide from tab bar
+        }}
+      />
+      <Tabs.Screen
+        name="dashboard"
+        options={{
+          title: 'Home',
+          tabBarLabel: 'Home',
         }}
       />
       <Tabs.Screen
