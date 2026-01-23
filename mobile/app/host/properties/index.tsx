@@ -1,6 +1,7 @@
-import { View, Text, FlatList, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, Image, ActivityIndicator, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '@/context/auth-context';
 import { useHostProperties } from '@/hooks/api-hooks';
 import type { Property } from '@/types';
@@ -13,61 +14,102 @@ export default function HostPropertiesScreen() {
 
   if (!isAuthenticated) {
     return (
-      <View className="flex-1 items-center justify-center bg-white px-6">
-        <Ionicons name="home-outline" size={64} color="#ddd" />
-        <Text className="text-xl font-bold text-gray-800 mt-4">Sign In Required</Text>
-        <Text className="text-gray-600 text-center mt-2 mb-6">
-          Please sign in to manage your properties
-        </Text>
-        <TouchableOpacity
-          className="bg-primary-600 px-8 py-3 rounded-lg"
-          onPress={() => router.push('/(auth)/login')}
+      <View className="flex-1 bg-sand-100">
+        {/* Header */}
+        <LinearGradient
+          colors={['#122F26', '#1d392f']}
+          className="px-4 pb-6"
+          style={{ paddingTop: Platform.OS === 'ios' ? 50 : 35 }}
         >
-          <Text className="text-white font-semibold">Sign In</Text>
-        </TouchableOpacity>
+          <Text className="text-3xl font-black text-white tracking-tight">
+            My Properties
+          </Text>
+          <Text className="text-sand-200 text-sm mt-1">
+            Manage your listings
+          </Text>
+        </LinearGradient>
+
+        <View className="flex-1 items-center justify-center px-6">
+          <View className="bg-white rounded-3xl p-8 items-center" style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.1, shadowRadius: 16, elevation: 8 }}>
+            <View className="bg-sand-200 rounded-full p-8 mb-6">
+              <Ionicons name="home-outline" size={72} color="#D9B168" />
+            </View>
+            <Text className="text-2xl font-bold text-forest mb-3">Sign In Required</Text>
+            <Text className="text-moss text-center mb-8 px-4 leading-6">
+              Please sign in to manage your properties
+            </Text>
+            <TouchableOpacity
+              onPress={() => router.push('/(auth)/login')}
+            >
+              <LinearGradient
+                colors={['#D9B168', '#bea04f']}
+                className="px-8 py-4 rounded-2xl"
+                style={{
+                  shadowColor: '#D9B168',
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.3,
+                  shadowRadius: 8,
+                  elevation: 5,
+                }}
+              >
+                <Text className="text-forest font-bold text-base">Sign In</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
+        </View>
       </View>
     );
   }
 
   const PropertyItem = ({ property }: { property: Property }) => (
     <TouchableOpacity
-      className="bg-white rounded-xl mb-3 shadow-sm border border-gray-100 overflow-hidden"
+      className="bg-white rounded-2xl mb-3 mx-4 overflow-hidden"
       onPress={() => router.push(`/host/properties/${property.id}`)}
+      style={{
+        shadowColor: '#122F26',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.08,
+        shadowRadius: 8,
+        elevation: 4,
+      }}
     >
       <View className="flex-row">
         {property.image_urls?.[0] ? (
           <Image
             source={{ uri: property.image_urls[0] }}
-            className="w-28 h-28 bg-gray-200"
+            className="w-28 h-28"
             resizeMode="cover"
           />
         ) : (
-          <View className="w-28 h-28 bg-gray-200 items-center justify-center">
-            <Ionicons name="image-outline" size={32} color="#999" />
+          <View className="w-28 h-28 bg-sand-200 items-center justify-center">
+            <Ionicons name="image-outline" size={32} color="#3A5C50" />
           </View>
         )}
         
         <View className="flex-1 p-3">
-          <Text className="text-base font-bold text-gray-900 mb-1" numberOfLines={1}>
+          <Text className="text-base font-bold text-forest mb-1" numberOfLines={1}>
             {property.title}
           </Text>
-          <Text className="text-sm text-gray-600 mb-2" numberOfLines={1}>
-            {property.location?.city}, {property.location?.country}
-          </Text>
+          <View className="flex-row items-center mb-2">
+            <Ionicons name="location" size={14} color="#3A5C50" />
+            <Text className="text-sm text-moss ml-1" numberOfLines={1}>
+              {property.location?.city}, {property.location?.country}
+            </Text>
+          </View>
           
           <View className="flex-row items-center mb-2">
             <View className="flex-row items-center mr-4">
-              <Ionicons name="bed" size={14} color="#666" />
-              <Text className="text-xs text-gray-600 ml-1">{property.number_of_beds}</Text>
+              <Ionicons name="bed" size={14} color="#3A5C50" />
+              <Text className="text-xs text-moss ml-1">{property.number_of_beds}</Text>
             </View>
             <View className="flex-row items-center">
-              <Ionicons name="people" size={14} color="#666" />
-              <Text className="text-xs text-gray-600 ml-1">{property.max_guests}</Text>
+              <Ionicons name="people" size={14} color="#3A5C50" />
+              <Text className="text-xs text-moss ml-1">{property.max_guests}</Text>
             </View>
           </View>
           
           <View className="flex-row items-center justify-between">
-            <Text className="text-lg font-bold text-primary-600">
+            <Text className="text-lg font-bold text-gold">
               ${property.price_per_night}/night
             </Text>
             <View className={`px-2 py-1 rounded-full ${
@@ -86,54 +128,87 @@ export default function HostPropertiesScreen() {
   );
 
   return (
-    <View className="flex-1 bg-gray-50">
+    <View className="flex-1 bg-sand-100">
       {/* Header */}
-      <View className="bg-white px-4 pt-12 pb-4 border-b border-gray-100 shadow-sm flex-row items-center justify-between">
-        <View className="flex-1">
-          <TouchableOpacity onPress={() => router.back()} className="mb-2">
-            <Ionicons name="arrow-back" size={24} color="#333" />
+      <LinearGradient
+        colors={['#122F26', '#1d392f', '#2d4a40']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        className="px-4 pb-6"
+        style={{ paddingTop: Platform.OS === 'ios' ? 50 : 35 }}
+      >
+        <View className="flex-row items-center justify-between mb-4">
+          <TouchableOpacity onPress={() => router.back()}>
+            <View className="w-10 h-10 rounded-xl items-center justify-center" style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}>
+              <Ionicons name="arrow-back" size={24} color="#fff" />
+            </View>
           </TouchableOpacity>
-          <Text className="text-2xl font-extrabold text-primary-900">My Properties</Text>
-          <Text className="text-sm text-gray-500 mt-1">
+          
+          <TouchableOpacity
+            onPress={() => router.push('/host/properties/new')}
+          >
+            <LinearGradient
+              colors={['#D9B168', '#bea04f']}
+              className="px-4 py-2 rounded-xl flex-row items-center"
+            >
+              <Ionicons name="add" size={20} color="#122F26" />
+              <Text className="text-forest font-bold ml-1">Add</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        </View>
+
+        <Text className="text-3xl font-black text-white tracking-tight mb-2">
+          My Properties
+        </Text>
+        <View className="flex-row items-center">
+          <Ionicons name="home" size={16} color="#D9B168" />
+          <Text className="text-sand-100 ml-2">
             {properties.length} {properties.length === 1 ? 'property' : 'properties'}
           </Text>
         </View>
-        
-        <TouchableOpacity
-          className="bg-primary-600 px-4 py-3 rounded-lg flex-row items-center"
-          onPress={() => router.push('/host/properties/new')}
-        >
-          <Ionicons name="add" size={20} color="white" />
-          <Text className="text-white font-semibold ml-1">Add</Text>
-        </TouchableOpacity>
-      </View>
+      </LinearGradient>
 
       {/* Properties List */}
       {isLoading ? (
         <View className="flex-1 justify-center items-center">
           <ActivityIndicator size="large" color="#3A5C50" />
-          <Text className="mt-2 text-gray-600">Loading properties...</Text>
+          <Text className="mt-2 text-moss">Loading properties...</Text>
         </View>
       ) : properties.length === 0 ? (
         <View className="flex-1 justify-center items-center px-6">
-          <Ionicons name="home-outline" size={64} color="#ddd" />
-          <Text className="text-xl font-bold text-gray-800 mt-4">No Properties Yet</Text>
-          <Text className="text-gray-600 text-center mt-2 mb-6">
-            Start earning by listing your first property
-          </Text>
-          <TouchableOpacity
-            className="bg-primary-600 px-8 py-3 rounded-lg"
-            onPress={() => router.push('/host/properties/new')}
-          >
-            <Text className="text-white font-semibold">List a Property</Text>
-          </TouchableOpacity>
+          <View className="bg-white rounded-3xl p-8 items-center" style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.1, shadowRadius: 16, elevation: 8 }}>
+            <View className="bg-sand-200 rounded-full p-8 mb-6">
+              <Ionicons name="home-outline" size={72} color="#3A5C50" />
+            </View>
+            <Text className="text-2xl font-bold text-forest mb-3">No Properties Yet</Text>
+            <Text className="text-moss text-center mb-8 px-4 leading-6">
+              Start earning by listing your first property
+            </Text>
+            <TouchableOpacity
+              onPress={() => router.push('/host/properties/new')}
+            >
+              <LinearGradient
+                colors={['#D9B168', '#bea04f']}
+                className="px-8 py-4 rounded-2xl"
+                style={{
+                  shadowColor: '#D9B168',
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.3,
+                  shadowRadius: 8,
+                  elevation: 5,
+                }}
+              >
+                <Text className="text-forest font-bold text-base">List a Property</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
         </View>
       ) : (
         <FlatList
           data={properties}
           renderItem={({ item }) => <PropertyItem property={item} />}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={{ padding: 16 }}
+          contentContainerStyle={{ paddingVertical: 16 }}
         />
       )}
     </View>

@@ -11,6 +11,11 @@ export default function HostLayout() {
       <Stack.Screen name="bookings/index" />
       <Stack.Screen name="properties/index" />
       <Stack.Screen name="earnings/index" />
+      <Stack.Screen name="verification/index" />
+      <Stack.Screen name="reviews/index" />
+      <Stack.Screen name="settings/index" />
+      <Stack.Screen name="pricing/index" />
+      <Stack.Screen name="tax-reports/index" />
     </Stack>
   );
 }
