@@ -2,7 +2,6 @@ import { View, Text, TouchableOpacity, ScrollView, Alert, Platform } from 'react
 import { useState } from 'react';
 import { useAuth } from '@/context/auth-context';
 import { useRouter } from 'expo-router';
-import { useUserProfile } from '@/hooks/api-hooks';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Avatar } from '@/components/common/Avatar';
@@ -103,7 +102,7 @@ export default function ProfileScreen() {
     ]);
   };
 
-  const MenuItem = ({ iconName, label, value, onPress, gradient = false }: any) => (
+  const MenuItem = ({ iconName, label, value, onPress, gradient = false, iconColor }: any) => (
     <TouchableOpacity
       className="mb-3 rounded-2xl overflow-hidden"
       onPress={onPress}
@@ -121,7 +120,7 @@ export default function ProfileScreen() {
           className="flex-row items-center p-4"
         >
           <View className="bg-gold/20 rounded-full p-2.5 mr-4">
-            <Ionicons name={iconName} size={20} color="#D9B168" />
+            <Ionicons name={iconName} size={20} color={iconColor || "#D9B168"} />
           </View>
           <View className="flex-1">
             <Text className="text-sand-200 text-xs mb-0.5">{label}</Text>
@@ -132,7 +131,7 @@ export default function ProfileScreen() {
       ) : (
         <View className="bg-white flex-row items-center p-4">
           <View className="bg-sand-200 rounded-full p-2.5 mr-4">
-            <Ionicons name={iconName} size={20} color="#3A5C50" />
+            <Ionicons name={iconName} size={20} color={iconColor || "#3A5C50"} />
           </View>
           <View className="flex-1">
             <Text className="text-moss text-xs mb-0.5">{label}</Text>
@@ -142,6 +141,112 @@ export default function ProfileScreen() {
         </View>
       )}
     </TouchableOpacity>
+  );
+
+  // Verification Status Banner Component
+  const VerificationBanner = () => {
+    if (user?.is_verified) {
+      return (
+        <View className="mx-4 mt-4">
+          <LinearGradient
+            colors={['#10B981', '#059669']}
+            className="p-4 rounded-2xl flex-row items-center"
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+          >
+            <View className="bg-white/20 rounded-full p-2 mr-3">
+              <Ionicons name="shield-checkmark" size={24} color="#fff" />
+            </View>
+            <View className="flex-1">
+              <Text className="text-white font-bold text-base">Verified Account</Text>
+              <Text className="text-white/80 text-sm mt-0.5">Your identity has been verified</Text>
+            </View>
+            <Ionicons name="checkmark-circle" size={28} color="#fff" />
+          </LinearGradient>
+        </View>
+      );
+    }
+
+    return (
+      <View className="mx-4 mt-4">
+        <TouchableOpacity onPress={() => router.push('/profile/verification')}>
+          <LinearGradient
+            colors={['#F59E0B', '#D97706']}
+            className="p-4 rounded-2xl flex-row items-center"
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+          >
+            <View className="bg-white/20 rounded-full p-2 mr-3">
+              <Ionicons name="alert-circle" size={24} color="#fff" />
+            </View>
+            <View className="flex-1">
+              <Text className="text-white font-bold text-base">Verification Required</Text>
+              <Text className="text-white/80 text-sm mt-0.5">Verify your identity to unlock all features</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={24} color="#fff" />
+          </LinearGradient>
+        </TouchableOpacity>
+      </View>
+    );
+  };
+
+  // Quick Stats Component
+  const QuickStats = () => (
+    <View className="flex-row px-4 mt-4">
+      <View className="flex-1 bg-white rounded-2xl p-4 mr-2" style={{
+        shadowColor: '#122F26',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
+        elevation: 2,
+      }}>
+        <View className="flex-row items-center">
+          <View className="bg-blue-100 rounded-full p-2">
+            <Ionicons name="calendar" size={18} color="#3B82F6" />
+          </View>
+          <View className="ml-3">
+            <Text className="text-xl font-bold text-forest">0</Text>
+            <Text className="text-xs text-moss">Bookings</Text>
+          </View>
+        </View>
+      </View>
+
+      <View className="flex-1 bg-white rounded-2xl p-4 mr-2" style={{
+        shadowColor: '#122F26',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
+        elevation: 2,
+      }}>
+        <View className="flex-row items-center">
+          <View className="bg-red-100 rounded-full p-2">
+            <Ionicons name="heart" size={18} color="#EF4444" />
+          </View>
+          <View className="ml-3">
+            <Text className="text-xl font-bold text-forest">0</Text>
+            <Text className="text-xs text-moss">Wishlist</Text>
+          </View>
+        </View>
+      </View>
+
+      <View className="flex-1 bg-white rounded-2xl p-4" style={{
+        shadowColor: '#122F26',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
+        elevation: 2,
+      }}>
+        <View className="flex-row items-center">
+          <View className="bg-purple-100 rounded-full p-2">
+            <Ionicons name="star" size={18} color="#8B5CF6" />
+          </View>
+          <View className="ml-3">
+            <Text className="text-xl font-bold text-forest">0</Text>
+            <Text className="text-xs text-moss">Reviews</Text>
+          </View>
+        </View>
+      </View>
+    </View>
   );
 
   return (
@@ -204,8 +309,29 @@ export default function ProfileScreen() {
 
           {/* Email */}
           <Text className="text-sand-200 text-center mt-1">{user?.email}</Text>
+
+          {/* Verification Badge inline */}
+          <View className="flex-row items-center mt-2">
+            {user?.is_verified ? (
+              <View className="flex-row items-center bg-green-500/20 px-3 py-1 rounded-full">
+                <Ionicons name="shield-checkmark" size={14} color="#10B981" />
+                <Text className="text-green-400 text-xs font-semibold ml-1">Verified</Text>
+              </View>
+            ) : (
+              <View className="flex-row items-center bg-yellow-500/20 px-3 py-1 rounded-full">
+                <Ionicons name="alert-circle" size={14} color="#F59E0B" />
+                <Text className="text-yellow-400 text-xs font-semibold ml-1">Unverified</Text>
+              </View>
+            )}
+          </View>
         </View>
       </LinearGradient>
+
+      {/* Verification Banner */}
+      <VerificationBanner />
+
+      {/* Quick Stats */}
+      <QuickStats />
 
       {/* Account Information */}
       <View className="px-4 mt-6">
@@ -231,7 +357,122 @@ export default function ProfileScreen() {
         />
       </View>
 
-      {/* Actions */}
+      {/* Quick Actions */}
+      <View className="px-4 mt-6">
+        <Text className="text-lg font-bold text-forest mb-4 px-2">Quick Actions</Text>
+        
+        <View className="flex-row flex-wrap">
+          <TouchableOpacity 
+            className="w-1/3 p-2"
+            onPress={() => router.push('/(tabs)/bookings')}
+          >
+            <View className="bg-white rounded-2xl p-4 items-center" style={{
+              shadowColor: '#122F26',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.05,
+              shadowRadius: 4,
+              elevation: 2,
+            }}>
+              <View className="bg-blue-100 rounded-full p-3 mb-2">
+                <Ionicons name="calendar" size={24} color="#3B82F6" />
+              </View>
+              <Text className="text-forest font-semibold text-xs text-center">Bookings</Text>
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            className="w-1/3 p-2"
+            onPress={() => router.push('/(tabs)/wishlist')}
+          >
+            <View className="bg-white rounded-2xl p-4 items-center" style={{
+              shadowColor: '#122F26',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.05,
+              shadowRadius: 4,
+              elevation: 2,
+            }}>
+              <View className="bg-red-100 rounded-full p-3 mb-2">
+                <Ionicons name="heart" size={24} color="#EF4444" />
+              </View>
+              <Text className="text-forest font-semibold text-xs text-center">Wishlist</Text>
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            className="w-1/3 p-2"
+            onPress={() => router.push('/(tabs)/messages')}
+          >
+            <View className="bg-white rounded-2xl p-4 items-center" style={{
+              shadowColor: '#122F26',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.05,
+              shadowRadius: 4,
+              elevation: 2,
+            }}>
+              <View className="bg-purple-100 rounded-full p-3 mb-2">
+                <Ionicons name="chatbubbles" size={24} color="#8B5CF6" />
+              </View>
+              <Text className="text-forest font-semibold text-xs text-center">Messages</Text>
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            className="w-1/3 p-2"
+            onPress={() => router.push('/(tabs)/wallet')}
+          >
+            <View className="bg-white rounded-2xl p-4 items-center" style={{
+              shadowColor: '#122F26',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.05,
+              shadowRadius: 4,
+              elevation: 2,
+            }}>
+              <View className="bg-green-100 rounded-full p-3 mb-2">
+                <Ionicons name="wallet" size={24} color="#10B981" />
+              </View>
+              <Text className="text-forest font-semibold text-xs text-center">Wallet</Text>
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            className="w-1/3 p-2"
+            onPress={() => router.push('/reviews/my-reviews')}
+          >
+            <View className="bg-white rounded-2xl p-4 items-center" style={{
+              shadowColor: '#122F26',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.05,
+              shadowRadius: 4,
+              elevation: 2,
+            }}>
+              <View className="bg-yellow-100 rounded-full p-3 mb-2">
+                <Ionicons name="star" size={24} color="#F59E0B" />
+              </View>
+              <Text className="text-forest font-semibold text-xs text-center">Reviews</Text>
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            className="w-1/3 p-2"
+            onPress={() => router.push('/(tabs)/host')}
+          >
+            <View className="bg-white rounded-2xl p-4 items-center" style={{
+              shadowColor: '#122F26',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.05,
+              shadowRadius: 4,
+              elevation: 2,
+            }}>
+              <View className="bg-orange-100 rounded-full p-3 mb-2">
+                <Ionicons name="business" size={24} color="#F97316" />
+              </View>
+              <Text className="text-forest font-semibold text-xs text-center">Hosting</Text>
+            </View>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {/* Settings */}
       <View className="px-4 mt-6">
         <Text className="text-lg font-bold text-forest mb-4 px-2">Settings</Text>
         
@@ -239,7 +480,7 @@ export default function ProfileScreen() {
           iconName="create-outline"
           label="Edit Profile"
           value="Update your information"
-          onPress={() => router.push('/profile/edit')}
+          onPress={() => router.push('/(tabs)/profile/edit')}
           gradient={true}
         />
 
@@ -247,7 +488,23 @@ export default function ProfileScreen() {
           iconName="lock-closed-outline"
           label="Change Password"
           value="Secure your account"
-          onPress={() => router.push('/profile/change-password')}
+          onPress={() => router.push('/(tabs)/profile/change-password')}
+          gradient={true}
+        />
+
+        <MenuItem
+          iconName="notifications-outline"
+          label="Notifications"
+          value="Manage notification preferences"
+          onPress={() => {}}
+          gradient={true}
+        />
+
+        <MenuItem
+          iconName="card-outline"
+          label="Payment Methods"
+          value="Manage your payment options"
+          onPress={() => router.push('/(tabs)/wallet')}
           gradient={true}
         />
       </View>

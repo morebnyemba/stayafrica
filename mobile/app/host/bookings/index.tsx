@@ -1,4 +1,4 @@
-import { View, Text, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -6,7 +6,6 @@ import { useAuth } from '@/context/auth-context';
 import { useHostBookings } from '@/hooks/api-hooks';
 import { Skeleton } from '@/components/common/Skeletons';
 import { format } from 'date-fns';
-import { COLORS } from '@/constants';
 import type { Booking } from '@/types';
 
 export default function HostBookingsScreen() {
@@ -21,7 +20,8 @@ export default function HostBookingsScreen() {
         {/* Header */}
         <LinearGradient
           colors={['#122F26', '#1d392f']}
-          className="px-4 pt-12 pb-6"
+          className="px-4 pb-6"
+          style={{ paddingTop: Platform.OS === 'ios' ? 50 : 35 }}
         >
           <Text className="text-3xl font-black text-white tracking-tight">
             Property Bookings
@@ -63,31 +63,19 @@ export default function HostBookingsScreen() {
     );
   }
 
-  const getStatusColor = (status: string) => {
-    const colors: Record<string, { bg: string; text: string; hex: string }> = {
-      pending: { bg: 'bg-yellow-100', text: 'text-yellow-800', hex: COLORS.yellow800 },
-      confirmed: { bg: 'bg-green-100', text: 'text-green-800', hex: COLORS.green800 },
-      checked_in: { bg: 'bg-blue-100', text: 'text-blue-800', hex: COLORS.blue800 },
-      checked_out: { bg: 'bg-gray-100', text: 'text-gray-800', hex: COLORS.gray800 },
-      cancelled: { bg: 'bg-red-100', text: 'text-red-800', hex: COLORS.red800 },
+  const getStatusStyle = (status: string) => {
+    const styles: Record<string, { bg: string; text: string; icon: keyof typeof Ionicons.glyphMap }> = {
+      pending: { bg: 'bg-yellow-100', text: 'text-yellow-800', icon: 'time-outline' },
+      confirmed: { bg: 'bg-green-100', text: 'text-green-800', icon: 'checkmark-circle' },
+      checked_in: { bg: 'bg-blue-100', text: 'text-blue-800', icon: 'enter' },
+      checked_out: { bg: 'bg-gray-100', text: 'text-gray-800', icon: 'exit' },
+      cancelled: { bg: 'bg-red-100', text: 'text-red-800', icon: 'close-circle' },
     };
-    return colors[status] || { bg: 'bg-gray-100', text: 'text-gray-800', hex: COLORS.gray800 };
-  };
-
-  const getStatusIcon = (status: string): keyof typeof Ionicons.glyphMap => {
-    const icons: Record<string, keyof typeof Ionicons.glyphMap> = {
-      pending: 'time-outline',
-      confirmed: 'checkmark-circle',
-      checked_in: 'enter',
-      checked_out: 'exit',
-      cancelled: 'close-circle',
-    };
-    return icons[status] || 'help-circle';
+    return styles[status] || { bg: 'bg-gray-100', text: 'text-gray-800', icon: 'help-circle' as keyof typeof Ionicons.glyphMap };
   };
 
   const BookingItem = ({ booking }: { booking: Booking }) => {
-    const statusColors = getStatusColor(booking.status);
-    const statusIcon = getStatusIcon(booking.status);
+    const statusStyle = getStatusStyle(booking.status);
     
     return (
       <TouchableOpacity
@@ -140,9 +128,9 @@ export default function HostBookingsScreen() {
 
         {/* Status and Price */}
         <View className="flex-row items-center justify-between">
-          <View className={`px-3 py-1 rounded-full flex-row items-center ${statusColors.bg}`}>
-            <Ionicons name={statusIcon} size={14} color={statusColors.hex} />
-            <Text className={`text-xs font-semibold ml-1 ${statusColors.text}`}>
+          <View className={`px-3 py-1 rounded-full flex-row items-center ${statusStyle.bg}`}>
+            <Ionicons name={statusStyle.icon} size={14} color={statusStyle.text.includes('yellow') ? '#92400E' : statusStyle.text.includes('green') ? '#166534' : statusStyle.text.includes('blue') ? '#1E40AF' : statusStyle.text.includes('red') ? '#991B1B' : '#374151'} />
+            <Text className={`text-xs font-semibold ml-1 ${statusStyle.text}`}>
               {booking.status?.replace('_', ' ').toUpperCase()}
             </Text>
           </View>
@@ -180,10 +168,13 @@ export default function HostBookingsScreen() {
         colors={['#122F26', '#1d392f', '#2d4a40']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        className="px-4 pt-12 pb-6"
+        className="px-4 pb-6"
+        style={{ paddingTop: Platform.OS === 'ios' ? 50 : 35 }}
       >
-        <TouchableOpacity onPress={() => router.back()} className="mb-3">
-          <Ionicons name="arrow-back" size={24} color="#D9B168" />
+        <TouchableOpacity onPress={() => router.back()} className="mb-4">
+          <View className="w-10 h-10 rounded-xl items-center justify-center" style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}>
+            <Ionicons name="arrow-back" size={24} color="#fff" />
+          </View>
         </TouchableOpacity>
         <Text className="text-3xl font-black text-white tracking-tight mb-2">
           Property Bookings

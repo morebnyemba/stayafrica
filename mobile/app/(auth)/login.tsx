@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Text,
   View,
@@ -23,9 +23,23 @@ export default function LoginScreen() {
   const [focusedInput, setFocusedInput] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { login } = useAuth();
+  const [loginSuccess, setLoginSuccess] = useState(false);
+  const { login, user } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+
+  // Watch for user changes after successful login and redirect based on role
+  useEffect(() => {
+    if (loginSuccess && user) {
+      setLoading(false);
+      // Redirect based on user role
+      if (user.role === 'host') {
+        router.replace("/(tabs)/host");
+      } else {
+        router.replace("/(tabs)/dashboard");
+      }
+    }
+  }, [loginSuccess, user, router]);
 
   const handleLogin = async () => {
     if (!email.trim()) {
@@ -40,12 +54,13 @@ export default function LoginScreen() {
     try {
       setLoading(true);
       setError(null);
+      setLoginSuccess(false);
       await login(email.trim().toLowerCase(), password);
-      router.replace("/(tabs)/explore");
+      setLoginSuccess(true);
     } catch (err: any) {
       console.error("Login failed:", err);
       setError(err?.response?.data?.detail || "Invalid email or password. Please try again.");
-    } finally {
+      setLoginSuccess(false);
       setLoading(false);
     }
   };
