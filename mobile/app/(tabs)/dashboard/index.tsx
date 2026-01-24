@@ -1,10 +1,11 @@
-import { View, Text, ScrollView, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { useState } from 'react';
-import { useRouter } from 'expo-router';
+import { Redirect, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '@/context/auth-context';
 import { Sidebar } from '@/components/common/Sidebar';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface StatCardProps {
   icon: keyof typeof Ionicons.glyphMap;
@@ -31,12 +32,21 @@ interface ActivityItemProps {
 
 export default function GuestDashboardScreen() {
   const router = useRouter();
-  const { user, isAuthenticated } = useAuth();
+  const insets = useSafeAreaInsets();
+  const { user, isAuthenticated, isLoading } = useAuth();
   const [sidebarVisible, setSidebarVisible] = useState(false);
+
+  if (isAuthenticated && user?.role === 'host') {
+    return <Redirect href="/(tabs)/host" />;
+  }
+
+  if (isLoading) {
+    return null;
+  }
 
   if (!isAuthenticated) {
     return (
-      <View className="flex-1 bg-sand-100">
+      <SafeAreaView className="flex-1 bg-sand-100">
         {/* Sidebar */}
         <Sidebar
           isVisible={sidebarVisible}
@@ -47,7 +57,7 @@ export default function GuestDashboardScreen() {
         <LinearGradient
           colors={['#122F26', '#1d392f']}
           className="px-4 pb-6"
-          style={{ paddingTop: Platform.OS === 'ios' ? 50 : 35 }}
+          style={{ paddingTop: insets.top + 12 }}
         >
           {/* Top Navigation Bar with Menu */}
           <View className="flex-row items-center justify-between mb-4">
@@ -96,7 +106,7 @@ export default function GuestDashboardScreen() {
             </TouchableOpacity>
           </View>
         </View>
-      </View>
+      </SafeAreaView>
     );
   }
 
@@ -238,7 +248,8 @@ export default function GuestDashboardScreen() {
   };
 
   return (
-    <ScrollView className="flex-1 bg-sand-100" showsVerticalScrollIndicator={false}>
+    <SafeAreaView className="flex-1 bg-sand-100">
+      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
       {/* Sidebar */}
       <Sidebar
         isVisible={sidebarVisible}
@@ -251,7 +262,7 @@ export default function GuestDashboardScreen() {
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         className="px-4 pb-6"
-        style={{ paddingTop: Platform.OS === 'ios' ? 50 : 35 }}
+        style={{ paddingTop: insets.top + 12 }}
       >
         {/* Top Navigation */}
         <View className="flex-row items-center justify-between mb-4">
@@ -423,6 +434,7 @@ export default function GuestDashboardScreen() {
           </Text>
         </LinearGradient>
       </View>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 }

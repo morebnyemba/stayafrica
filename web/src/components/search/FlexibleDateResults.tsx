@@ -119,7 +119,7 @@ export default function FlexibleDateResults({ results, isLoading }: FlexibleDate
                 </Link>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {option.sample_properties.slice(0, 3).map((property) => (
                   <Link
                     key={property.id}

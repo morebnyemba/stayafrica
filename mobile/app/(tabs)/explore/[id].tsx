@@ -1,14 +1,60 @@
-import { View, Text, ScrollView, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Image, ActivityIndicator, Alert, Dimensions } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { usePropertyById } from '@/hooks/api-hooks';
+import { usePropertyById, useCreateConversation } from '@/hooks/api-hooks';
 import { Skeleton } from '@/components/common/Skeletons';
+import { useAuth } from '@/context/auth-context';
+import { useState } from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function PropertyDetailsScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams();
   const { data: property, isLoading } = usePropertyById(id as string);
+  const { mutate: createConversation, isPending: isCreatingConversation } = useCreateConversation();
+  const { isAuthenticated } = useAuth();
+  const { width } = Dimensions.get('window');
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const insets = useSafeAreaInsets();
+
+  const handleMessageHost = () => {
+    if (!isAuthenticated) {
+      router.push('/(auth)/login');
+      return;
+    }
+
+    if (!property?.id) return;
+
+    createConversation(property.id, {
+      onSuccess: (data) => {
+        // If we get a conversation ID back, navigate to it
+        // Depending on API response structure, adjust access
+        if (!data) {
+          Alert.alert('Unavailable', 'Messaging is not available right now.');
+          return;
+        }
+
+        const conversationId = data?.id;
+        if (conversationId) {
+          // Navigate to specific conversation (assuming route exists)
+           // For now, if route is not clear, go to messages list
+           // But assuming /messages/[id] standard
+           // Since we see messages/new.tsx and messages/[id].tsx in file list earlier
+          // router.push(`/(tabs)/messages/${conversationId}`);
+           // Actually listing messages/[id].tsx showed it exists.
+           // But let's check if the path is correct.
+           // mobile/app/(tabs)/messages/[id].tsx
+           router.push(`/(tabs)/messages/${conversationId}`);
+        } else {
+          router.push('/(tabs)/messages');
+        }
+      },
+      onError: () => {
+        Alert.alert('Error', 'Unable to start conversation with host.');
+      }
+    });
+  };
 
   const PropertyDetailSkeleton = () => (
     <ScrollView className="flex-1 bg-sand-100">
@@ -83,10 +129,31 @@ export default function PropertyDetailsScreen() {
     { icon: 'people', label: 'Common Area' },
   ];
 
+  const pricePerNight =
+    property?.price_per_night ??
+    (property as any)?.price ??
+    (property as any)?.pricePerNight ??
+    0;
+
+  const imageUrls = (() => {
+    const urls = [
+      ...(property?.image_urls || []),
+      ...((property as any)?.images?.map((img: any) => img?.image_url).filter(Boolean) || []),
+    ].filter(Boolean);
+
+    if (urls.length > 0) return urls as string[];
+
+    const fallback = (property as any)?.main_image || (property as any)?.image;
+    return fallback ? [fallback] : [];
+  })();
+
   return (
     <View className="flex-1 bg-sand-100">
       {/* Header */}
-      <View className="bg-white px-4 py-3 border-b border-sand-200 flex-row items-center justify-between">
+      <View
+        className="bg-white px-4 py-3 border-b border-sand-200 flex-row items-center justify-between"
+        style={{ paddingTop: insets.top + 8 }}
+      >
         <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={24} color="#122F26" />
         </TouchableOpacity>
@@ -97,12 +164,48 @@ export default function PropertyDetailsScreen() {
       </View>
 
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-        {/* Image */}
-        <View className="h-80 bg-sand-200 justify-center items-center">
-          {property.image ? (
-            <Image source={{ uri: property.image }} className="w-full h-full" resizeMode="cover" />
+        {/* Image Carousel */}
+        <View className="h-80 bg-sand-200">
+          {imageUrls.length > 0 ? (
+            <View>
+              <ScrollView
+                horizontal
+                pagingEnabled
+                showsHorizontalScrollIndicator={false}
+                onScroll={(event) => {
+                  const index = Math.round(event.nativeEvent.contentOffset.x / width);
+                  setActiveImageIndex(index);
+                }}
+                scrollEventThrottle={16}
+              >
+                {imageUrls.map((url, index) => (
+                  <Image
+                    key={`${url}-${index}`}
+                    source={{ uri: url }}
+                    style={{ width, height: 320 }}
+                    resizeMode="cover"
+                  />
+                ))}
+              </ScrollView>
+
+              {/* Dots */}
+              {imageUrls.length > 1 && (
+                <View className="absolute bottom-3 w-full flex-row justify-center">
+                  {imageUrls.map((_, index) => (
+                    <View
+                      key={`dot-${index}`}
+                      className={
+                        `mx-1 h-2 w-2 rounded-full ${
+                          index === activeImageIndex ? 'bg-gold' : 'bg-white/60'
+                        }`
+                      }
+                    />
+                  ))}
+                </View>
+              )}
+            </View>
           ) : (
-            <View className="items-center">
+            <View className="h-80 bg-sand-200 justify-center items-center">
               <Ionicons name="image-outline" size={64} color="#3A5C50" />
               <Text className="text-moss mt-2">No image available</Text>
             </View>
@@ -141,7 +244,7 @@ export default function PropertyDetailsScreen() {
             }}
           >
             <View className="flex-row items-baseline">
-              <Text className="text-4xl font-black text-forest">${property.price_per_night}</Text>
+              <Text className="text-4xl font-black text-forest">${pricePerNight}</Text>
               <Text className="text-forest/80 ml-2 text-lg font-semibold">/night</Text>
             </View>
             {property.cleaning_fee && (
@@ -209,6 +312,29 @@ export default function PropertyDetailsScreen() {
               </View>
             </View>
           )}
+
+          {/* Message Host Button */}
+          <TouchableOpacity
+            onPress={handleMessageHost}
+            disabled={isCreatingConversation}
+            className="mb-4 bg-white border border-sand-300 py-4 rounded-2xl flex-row justify-center items-center"
+            style={{
+              shadowColor: '#122F26',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.05,
+              shadowRadius: 4,
+              elevation: 2,
+            }}
+          >
+            {isCreatingConversation ? (
+              <ActivityIndicator color="#D9B168" />
+            ) : (
+              <>
+                <Ionicons name="chatbubble-ellipses-outline" size={20} color="#3A5C50" className="mr-2" />
+                <Text className="text-forest font-bold text-base ml-2">Message Host</Text>
+              </>
+            )}
+          </TouchableOpacity>
 
           {/* Booking Button */}
           <TouchableOpacity

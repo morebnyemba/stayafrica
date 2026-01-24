@@ -6,9 +6,11 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '@/context/auth-context';
 import { PropertyCard } from '@/components/property/PropertyCard';
 import type { Property } from '@/types';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function WishlistScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { isAuthenticated } = useAuth();
   const [wishlistProperties, setWishlistProperties] = useState<Property[]>([]);
 
@@ -18,7 +20,8 @@ export default function WishlistScreen() {
         {/* Header */}
         <LinearGradient
           colors={['#122F26', '#1d392f']}
-          className="px-4 pt-12 pb-6"
+          className="px-4 pb-6"
+          style={{ paddingTop: insets.top + 12 }}
         >
           <Text className="text-3xl font-black text-white tracking-tight">
             My Wishlist
@@ -78,7 +81,8 @@ export default function WishlistScreen() {
         colors={['#122F26', '#1d392f', '#2d4a40']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        className="px-4 pt-12 pb-6"
+        className="px-4 pb-6"
+        style={{ paddingTop: insets.top + 12 }}
       >
         <Text className="text-3xl font-black text-white tracking-tight mb-2">
           My Wishlist

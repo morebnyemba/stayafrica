@@ -16,7 +16,6 @@ interface User {
 interface UpdateProfileData {
   first_name?: string;
   last_name?: string;
-  email?: string;
   phone_number?: string;
   country_of_residence?: string;
 }
@@ -103,7 +102,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const updateProfile = async (data: UpdateProfileData) => {
     try {
-      const updatedUser = await apiClient.updateUserProfile(data);
+      const cleanedData = Object.fromEntries(
+        Object.entries(data).filter(([, value]) => value !== '' && value !== undefined)
+      ) as UpdateProfileData;
+      const updatedUser = await apiClient.updateUserProfile(cleanedData);
       setUser(updatedUser);
     } catch (error) {
       console.error('Update profile error:', error);

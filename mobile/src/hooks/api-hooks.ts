@@ -93,6 +93,16 @@ export function useConversations() {
   });
 }
 
+export function useCreateConversation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (propertyId: string) => apiClient.createConversation(propertyId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['conversations'] });
+    },
+  });
+}
+
 export function useConversationMessages(conversationId: string) {
   return useQuery({
     queryKey: ['conversations', conversationId, 'messages'],

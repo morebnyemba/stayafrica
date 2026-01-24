@@ -9,9 +9,16 @@ interface PropertyCardProps {
   onPress: (id: string) => void;
   showRemoveButton?: boolean;
   onRemove?: () => void;
+  variant?: 'list' | 'grid' | 'compact';
 }
 
-export function PropertyCard({ property, onPress, showRemoveButton = false, onRemove }: PropertyCardProps) {
+export function PropertyCard({
+  property,
+  onPress,
+  showRemoveButton = false,
+  onRemove,
+  variant = 'list',
+}: PropertyCardProps) {
   const scale = useSharedValue(1);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -32,14 +39,23 @@ export function PropertyCard({ property, onPress, showRemoveButton = false, onRe
   }
 
   // Safe access to nested properties
-  const imageUrl = property.image_urls?.[0] || null;
+  const imageUrl =
+    property.image_urls?.[0] ||
+    (property as any).images?.[0]?.image_url ||
+    (property as any).main_image ||
+    (property as any).image ||
+    null;
   const location = property.location || {};
   const cityName = location.city || 'Unknown location';
+  const countryName = location.country || '';
+  const imageHeight = variant === 'list' ? 220 : variant === 'grid' ? 160 : 140;
+  const containerMargin = variant === 'list' ? 'mb-6' : 'mb-4';
+  const isCompact = variant !== 'list';
 
   return (
     <Animated.View style={animatedStyle}>
       <TouchableOpacity
-        className="mb-6 rounded-3xl overflow-hidden bg-white"
+        className={`${containerMargin} rounded-3xl overflow-hidden bg-white`}
         onPress={() => onPress(property.id)}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
@@ -57,12 +73,12 @@ export function PropertyCard({ property, onPress, showRemoveButton = false, onRe
           {imageUrl ? (
             <Image
               source={{ uri: imageUrl }}
-              style={{ width: '100%', height: 220 }}
+              style={{ width: '100%', height: imageHeight }}
               className="bg-sand-200"
               resizeMode="cover"
             />
           ) : (
-            <View className="w-full h-56 bg-sand-200 items-center justify-center">
+            <View className="w-full bg-sand-200 items-center justify-center" style={{ height: imageHeight }}>
               <Ionicons name="image-outline" size={56} color="#3A5C50" />
             </View>
           )}
@@ -119,55 +135,61 @@ export function PropertyCard({ property, onPress, showRemoveButton = false, onRe
         </View>
 
         {/* Content Section */}
-        <View className="p-5">
-          <Text className="text-xl font-black mb-1 text-forest" numberOfLines={1}>
+        <View className={isCompact ? 'p-3' : 'p-5'}>
+          <Text className={isCompact ? 'text-base font-bold mb-1 text-forest' : 'text-xl font-black mb-1 text-forest'} numberOfLines={1}>
             {property.title || 'Untitled Property'}
           </Text>
-          <View className="flex-row items-center mb-3">
+          <View className={isCompact ? 'flex-row items-center mb-2' : 'flex-row items-center mb-3'}>
             <Ionicons name="location" size={14} color="#3A5C50" />
-            <Text className="text-moss text-sm ml-1" numberOfLines={1}>
-              {cityName}
+            <Text className={isCompact ? 'text-moss text-xs ml-1' : 'text-moss text-sm ml-1'} numberOfLines={1}>
+              {countryName ? `${cityName}, ${countryName}` : cityName}
             </Text>
           </View>
 
           {/* Amenities Row */}
-          <View className="flex-row items-center mb-4 py-3 px-4 bg-sand-100 rounded-xl">
-            <View className="flex-row items-center mr-4">
-              <Ionicons name="bed-outline" size={18} color="#3A5C50" />
-              <Text className="ml-1 text-sm font-medium text-moss">
-                {property.number_of_beds ?? 0}
-              </Text>
+          {!isCompact && (
+            <View className="flex-row items-center mb-4 py-3 px-4 bg-sand-100 rounded-xl">
+              <View className="flex-row items-center mr-4">
+                <Ionicons name="bed-outline" size={18} color="#3A5C50" />
+                <Text className="ml-1 text-sm font-medium text-moss">
+                  {property.number_of_beds ?? 0}
+                </Text>
+              </View>
+              <View className="flex-row items-center mr-4">
+                <Ionicons name="water-outline" size={18} color="#3A5C50" />
+                <Text className="ml-1 text-sm font-medium text-moss">
+                  {property.number_of_bathrooms ?? 0}
+                </Text>
+              </View>
+              <View className="flex-row items-center">
+                <Ionicons name="people-outline" size={18} color="#3A5C50" />
+                <Text className="ml-1 text-sm font-medium text-moss">
+                  {property.max_guests ?? 0}
+                </Text>
+              </View>
             </View>
-            <View className="flex-row items-center mr-4">
-              <Ionicons name="water-outline" size={18} color="#3A5C50" />
-              <Text className="ml-1 text-sm font-medium text-moss">
-                {property.number_of_bathrooms ?? 0}
-              </Text>
-            </View>
-            <View className="flex-row items-center">
-              <Ionicons name="people-outline" size={18} color="#3A5C50" />
-              <Text className="ml-1 text-sm font-medium text-moss">
-                {property.max_guests ?? 0}
-              </Text>
-            </View>
-          </View>
+          )}
 
           {/* Price Section */}
           <View className="flex-row justify-between items-center">
             <View>
-              <Text className="text-2xl font-black text-gold">
+              <Text className={isCompact ? 'text-lg font-black text-gold' : 'text-2xl font-black text-gold'}>
                 ${property.price_per_night ?? 0}
               </Text>
-              <Text className="text-moss text-xs font-medium">per night</Text>
+              <Text className={isCompact ? 'text-moss text-[10px] font-medium' : 'text-moss text-xs font-medium'}>
+                per night
+              </Text>
             </View>
-            <LinearGradient
-              colors={['#122F26', '#1d392f']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              className="px-5 py-3 rounded-xl"
-            >
-              <Text className="text-gold font-bold text-sm">View Details</Text>
-            </LinearGradient>
+            {!isCompact && (
+              <LinearGradient
+                colors={['#122F26', '#1d392f']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                className="px-5 py-3 rounded-xl"
+              >
+                <Text className="text-gold font-bold text-sm">View Details</Text>
+              </LinearGradient>
+            )}
           </View>
         </View>
       </TouchableOpacity>

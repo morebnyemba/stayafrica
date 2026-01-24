@@ -6,6 +6,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '@/context/auth-context';
 import { Skeleton } from '@/components/common/Skeletons';
 import type { Transaction } from '@/types';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface TransactionItemProps {
   icon: keyof typeof Ionicons.glyphMap;
@@ -17,6 +18,7 @@ interface TransactionItemProps {
 
 export default function WalletScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { isAuthenticated } = useAuth();
   const [balance, setBalance] = useState(0);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -28,7 +30,8 @@ export default function WalletScreen() {
         {/* Header */}
         <LinearGradient
           colors={['#122F26', '#1d392f']}
-          className="px-4 pt-12 pb-6"
+          className="px-4 pb-6"
+          style={{ paddingTop: insets.top + 12 }}
         >
           <Text className="text-3xl font-black text-white tracking-tight">
             My Wallet
@@ -116,7 +119,8 @@ export default function WalletScreen() {
         colors={['#122F26', '#1d392f', '#2d4a40']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        className="px-4 pt-12 pb-8"
+        className="px-4 pb-8"
+        style={{ paddingTop: insets.top + 12 }}
       >
         <Text className="text-3xl font-black text-white tracking-tight mb-2">
           My Wallet

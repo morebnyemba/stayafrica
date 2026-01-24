@@ -2,9 +2,11 @@ import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useAuth } from '@/context/auth-context';
 
 export default function TabsLayout() {
   const insets = useSafeAreaInsets();
+  const { user } = useAuth();
   
   // Calculate proper bottom padding to stay above navigation controls
   const bottomPadding = Platform.OS === 'ios' 
@@ -105,13 +107,22 @@ export default function TabsLayout() {
           tabBarLabel: 'Bookings',
         }}
       />
-      <Tabs.Screen
-        name="host"
-        options={{
-          title: 'Host',
-          tabBarLabel: 'Host',
-        }}
-      />
+      {user?.role === 'host' ? (
+        <Tabs.Screen
+          name="host"
+          options={{
+            title: 'Host',
+            tabBarLabel: 'Host',
+          }}
+        />
+      ) : (
+        <Tabs.Screen
+          name="host"
+          options={{
+            href: null,
+          }}
+        />
+      )}
       <Tabs.Screen
         name="wallet"
         options={{

@@ -1,4 +1,4 @@
-import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Platform } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { useConversations } from '@/hooks/api-hooks';
@@ -8,6 +8,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Skeleton } from '@/components/common/Skeletons';
 import { Avatar } from '@/components/common/Avatar';
 import { Sidebar } from '@/components/common/Sidebar';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface Conversation {
   id: string;
@@ -21,6 +22,7 @@ interface Conversation {
 
 export default function MessagesScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { user, isAuthenticated } = useAuth();
   const { data: conversationsData, isLoading } = useConversations();
   const conversations = conversationsData?.results || [];
@@ -47,7 +49,7 @@ export default function MessagesScreen() {
         <LinearGradient
           colors={['#122F26', '#1d392f']}
           className="px-4 pb-6"
-          style={{ paddingTop: Platform.OS === 'ios' ? 50 : 35 }}
+          style={{ paddingTop: insets.top + 12 }}
         >
           {/* Top Navigation Bar with Menu */}
           <View className="flex-row items-center justify-between mb-4">
@@ -110,7 +112,11 @@ export default function MessagesScreen() {
     );
   }
 
-  const ConversationCard = ({ conversation }: { conversation: Conversation }) => (
+  const ConversationCard = ({ conversation }: { conversation: Conversation }) => {
+    const displayName = conversation.participant_name?.trim() || 'Guest';
+    const initial = displayName.charAt(0).toUpperCase();
+
+    return (
     <TouchableOpacity
       className="mx-4 mb-3 rounded-2xl overflow-hidden bg-white"
       onPress={() => router.push(`/(tabs)/messages/${conversation.id}`)}
@@ -129,14 +135,14 @@ export default function MessagesScreen() {
           className="w-14 h-14 rounded-full items-center justify-center mr-4"
         >
           <Text className="text-forest font-bold text-xl">
-            {conversation.participant_name.charAt(0).toUpperCase()}
+            {initial}
           </Text>
         </LinearGradient>
 
         {/* Content */}
         <View className="flex-1">
           <View className="flex-row justify-between items-start mb-1">
-            <Text className="font-bold text-forest text-base">{conversation.participant_name}</Text>
+            <Text className="font-bold text-forest text-base">{displayName}</Text>
             {conversation.last_message_time && (
               <Text className="text-moss text-xs">{conversation.last_message_time}</Text>
             )}
@@ -147,7 +153,7 @@ export default function MessagesScreen() {
             }`}
             numberOfLines={1}
           >
-            {conversation.last_message}
+            {conversation.last_message || 'No messages yet'}
           </Text>
         </View>
 
@@ -159,7 +165,8 @@ export default function MessagesScreen() {
         )}
       </View>
     </TouchableOpacity>
-  );
+    );
+  };
 
   const ConversationSkeleton = () => (
     <View className="mx-4 mb-3 rounded-2xl bg-white p-4">
@@ -187,7 +194,7 @@ export default function MessagesScreen() {
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         className="px-4 pb-6"
-        style={{ paddingTop: Platform.OS === 'ios' ? 50 : 35 }}
+        style={{ paddingTop: insets.top + 12 }}
       >
         {/* Top Navigation Bar with Menu and Avatar */}
         <View className="flex-row items-center justify-between mb-4">

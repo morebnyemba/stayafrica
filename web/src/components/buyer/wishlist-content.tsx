@@ -60,7 +60,7 @@ export function WishlistContent() {
 
           {/* Wishlist Grid */}
           {isLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="card overflow-hidden animate-pulse">
                   <div className="h-48 bg-primary-200 dark:bg-primary-700"></div>
@@ -103,7 +103,7 @@ export function WishlistContent() {
               <div className="mb-6 text-primary-600 dark:text-sand-300">
                 {savedPropertiesData?.length} {savedPropertiesData?.length === 1 ? 'property' : 'properties'} saved
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {savedPropertiesData?.map((saved: any) => {
                   const property = saved.property;
 

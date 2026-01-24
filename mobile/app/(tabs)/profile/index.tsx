@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, ScrollView, Alert, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { useState } from 'react';
 import { useAuth } from '@/context/auth-context';
 import { useRouter } from 'expo-router';
@@ -6,10 +6,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Avatar } from '@/components/common/Avatar';
 import { Sidebar } from '@/components/common/Sidebar';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function ProfileScreen() {
   const { user, logout, isAuthenticated } = useAuth();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [sidebarVisible, setSidebarVisible] = useState(false);
 
   if (!isAuthenticated) {
@@ -25,7 +27,7 @@ export default function ProfileScreen() {
         <LinearGradient
           colors={['#122F26', '#1d392f']}
           className="px-4 pb-6"
-          style={{ paddingTop: Platform.OS === 'ios' ? 50 : 35 }}
+          style={{ paddingTop: insets.top + 12 }}
         >
           {/* Top Navigation Bar with Menu */}
           <View className="flex-row items-center justify-between mb-4">
@@ -59,7 +61,7 @@ export default function ProfileScreen() {
         <View className="flex-1 items-center justify-center px-6">
           <View className="bg-white rounded-3xl p-8 items-center" style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.1, shadowRadius: 16, elevation: 8 }}>
             <View className="bg-sand-200 rounded-full p-8 mb-6">
-              <Ionicons name="person-outline" size={72} color="#D9B168" />
+          style={{ paddingTop: insets.top + 12 }}
             </View>
             <Text className="text-2xl font-bold text-forest mb-3">Welcome to StayAfrica</Text>
             <Text className="text-moss text-center mb-8 px-4 leading-6">
@@ -263,7 +265,7 @@ export default function ProfileScreen() {
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         className="px-4 pb-8"
-        style={{ paddingTop: Platform.OS === 'ios' ? 50 : 35 }}
+        style={{ paddingTop: insets.top + 12 }}
       >
         {/* Top Navigation Bar with Menu */}
         <View className="flex-row items-center justify-between mb-4">

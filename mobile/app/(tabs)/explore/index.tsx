@@ -1,6 +1,6 @@
-import { View, Text, FlatList, TextInput, ActivityIndicator, TouchableOpacity, ScrollView, Platform } from 'react-native';
+import { View, Text, FlatList, TextInput, ActivityIndicator, TouchableOpacity, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeInRight } from 'react-native-reanimated';
@@ -10,6 +10,7 @@ import { PropertyCardSkeleton } from '@/components/common/Skeletons';
 import { Avatar } from '@/components/common/Avatar';
 import { Sidebar } from '@/components/common/Sidebar';
 import { useAuth } from '@/context/auth-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const CATEGORIES = [
   { id: 'all', label: 'All', icon: 'apps' },
@@ -22,6 +23,7 @@ const CATEGORIES = [
 
 export default function ExploreScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [sidebarVisible, setSidebarVisible] = useState(false);
@@ -34,6 +36,27 @@ export default function ExploreScreen() {
       property.location?.city?.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesSearch;
   });
+
+  const featuredSections = useMemo(() => {
+    const counts = filteredProperties.reduce<Record<string, number>>((acc, property: any) => {
+      const city = property.location?.city?.trim();
+      if (!city) return acc;
+      acc[city] = (acc[city] || 0) + 1;
+      return acc;
+    }, {});
+
+    const topCities = Object.entries(counts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 2)
+      .map(([city]) => city);
+
+    return topCities.map((city) => ({
+      id: city,
+      title: `Popular homes in ${city}`,
+      city,
+      data: filteredProperties.filter((property: any) => property.location?.city === city).slice(0, 8),
+    }));
+  }, [filteredProperties]);
 
   const handleAvatarPress = () => {
     if (isAuthenticated) {
@@ -61,7 +84,7 @@ export default function ExploreScreen() {
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         className="px-4 pb-6"
-        style={{ paddingTop: Platform.OS === 'ios' ? 50 : 35 }}
+        style={{ paddingTop: insets.top + 12 }}
       >
         {/* Top Navigation Bar with Menu and Avatar */}
         <View className="flex-row items-center justify-between mb-4">
@@ -187,13 +210,43 @@ export default function ExploreScreen() {
       ) : (
         <FlatList
           data={filteredProperties}
+          numColumns={2}
           renderItem={({ item }) => (
-            <View className="px-4 py-2">
-              <PropertyCard property={item} onPress={handlePropertyPress} />
+            <View style={{ width: '48%' }} className="mb-4">
+              <PropertyCard property={item} onPress={handlePropertyPress} variant="grid" />
             </View>
           )}
           keyExtractor={(item) => item.id}
+          columnWrapperStyle={{ paddingHorizontal: 16, justifyContent: 'space-between' }}
           contentContainerStyle={{ paddingVertical: 12, paddingBottom: 40 }}
+          ListHeaderComponent={
+            featuredSections.length > 0 ? (
+              <View className="pt-2">
+                {featuredSections.map((section) => (
+                  <View key={section.id} className="mb-6">
+                    <View className="flex-row items-center justify-between px-4 mb-3">
+                      <Text className="text-lg font-bold text-forest">{section.title}</Text>
+                      <TouchableOpacity onPress={() => setSearchQuery(section.city)}>
+                        <Text className="text-sm font-semibold text-primary-800">View more</Text>
+                      </TouchableOpacity>
+                    </View>
+                    <FlatList
+                      horizontal
+                      showsHorizontalScrollIndicator={false}
+                      data={section.data}
+                      keyExtractor={(item) => `${section.id}-${item.id}`}
+                      contentContainerStyle={{ paddingHorizontal: 16 }}
+                      renderItem={({ item }) => (
+                        <View style={{ width: 220 }} className="mr-4">
+                          <PropertyCard property={item} onPress={handlePropertyPress} variant="compact" />
+                        </View>
+                      )}
+                    />
+                  </View>
+                ))}
+              </View>
+            ) : null
+          }
           ListEmptyComponent={
             <View className="flex-1 justify-center items-center py-20 px-6">
               <View className="bg-white rounded-3xl p-8 items-center" style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 12, elevation: 5 }}>

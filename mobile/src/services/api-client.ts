@@ -241,13 +241,42 @@ class APIClient {
 
   // Messages
   async getConversations(): Promise<any> {
-    return (await this.client.get('/messaging/conversations/')).data;
+    try {
+      return (await this.client.get('/messaging/conversations/')).data;
+    } catch (error: any) {
+      if (error?.response?.status === 404) {
+        return { results: [] };
+      }
+      throw error;
+    }
   }
 
   async getConversationMessages(conversationId: string): Promise<any> {
-    return (
-      await this.client.get(`/messaging/conversations/${conversationId}/messages/`)
-    ).data;
+    try {
+      return (
+        await this.client.get(`/messaging/conversations/${conversationId}/messages/`)
+      ).data;
+    } catch (error: any) {
+      if (error?.response?.status === 404) {
+        return { results: [] };
+      }
+      throw error;
+    }
+  }
+
+  async createConversation(propertyId: string): Promise<any> {
+    try {
+      return (
+        await this.client.post('/messaging/conversations/', {
+          property_id: propertyId,
+        })
+      ).data;
+    } catch (error: any) {
+      if (error?.response?.status === 404) {
+        return null;
+      }
+      throw error;
+    }
   }
 
   async sendMessage(conversationId: string, message: string): Promise<any> {

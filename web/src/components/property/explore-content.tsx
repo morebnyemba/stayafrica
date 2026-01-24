@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useSearchParams } from 'next/navigation';
 import { apiClient } from '@/services/api-client';
@@ -102,6 +102,27 @@ export function ExploreContent() {
   });
 
   const properties = propertiesData?.results || [];
+
+  const featuredSections = useMemo(() => {
+    const counts = properties.reduce<Record<string, number>>((acc, property: any) => {
+      const city = property.city?.trim();
+      if (!city) return acc;
+      acc[city] = (acc[city] || 0) + 1;
+      return acc;
+    }, {});
+
+    const topCities = Object.entries(counts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([city]) => city);
+
+    return topCities.map((city) => ({
+      id: city,
+      title: `Popular homes in ${city}`,
+      city,
+      data: properties.filter((property: any) => property.city === city).slice(0, 10),
+    }));
+  }, [properties]);
 
   const handleUseMyLocation = () => {
     if (!navigator.geolocation) {
@@ -207,6 +228,56 @@ export function ExploreContent() {
           />
         ) : (
           <>
+            {featuredSections.length > 0 && (
+              <div className="mb-10 space-y-8">
+                {featuredSections.map((section) => (
+                  <div key={section.id}>
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg sm:text-xl font-semibold text-primary-900 dark:text-sand-50">
+                        {section.title}
+                      </h3>
+                      <Link
+                        href={`/explore?city=${encodeURIComponent(section.city)}`}
+                        className="text-sm font-semibold text-secondary-600 hover:text-secondary-700"
+                      >
+                        View more
+                      </Link>
+                    </div>
+                    <div className="flex gap-4 overflow-x-auto pb-2">
+                      {section.data.map((property: any) => (
+                        <Link
+                          key={`${section.id}-${property.id}`}
+                          href={`/property/${property.id}`}
+                          className="min-w-[220px] sm:min-w-[260px] group"
+                        >
+                          <div className="bg-white dark:bg-primary-800 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition border border-primary-100 dark:border-primary-700">
+                            <div className="relative h-36 sm:h-40 overflow-hidden">
+                              <img
+                                src={property.images?.[0]?.image_url || property.main_image || 'https://images.unsplash.com/photo-1512917774080-9991f1c52e1d'}
+                                alt={property.title}
+                                className="w-full h-full object-cover transition duration-500 group-hover:scale-110"
+                              />
+                            </div>
+                            <div className="p-3">
+                              <p className="text-sm font-semibold text-primary-900 dark:text-sand-50 line-clamp-1">
+                                {property.title}
+                              </p>
+                              <p className="text-xs text-primary-600 dark:text-sand-300 line-clamp-1">
+                                {property.city}, {property.country}
+                              </p>
+                              <div className="mt-2 text-sm font-semibold text-primary-900 dark:text-sand-50">
+                                ${property.price_per_night}
+                                <span className="text-xs font-normal text-primary-500 dark:text-sand-400"> / night</span>
+                              </div>
+                            </div>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
             {/* Properties Grid */}
             {isLoading ? (
               <PropertyListSkeleton count={9} />
@@ -230,7 +301,7 @@ export function ExploreContent() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
             {properties.map((property: any) => (
               <Link
                 key={property.id}

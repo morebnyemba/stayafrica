@@ -52,7 +52,16 @@ export default function EditProfileScreen() {
     setIsLoading(true);
     
     try {
-      await updateProfile(formData);
+      const payload = {
+        first_name: formData.first_name.trim(),
+        last_name: formData.last_name.trim(),
+        phone_number: formData.phone_number.trim(),
+        country_of_residence: formData.country_of_residence.trim(),
+      };
+      const cleanedPayload = Object.fromEntries(
+        Object.entries(payload).filter(([, value]) => value !== '')
+      );
+      await updateProfile(cleanedPayload);
       Alert.alert('Success', 'Profile updated successfully!', [
         { text: 'OK', onPress: () => router.back() }
       ]);
@@ -162,9 +171,9 @@ export default function EditProfileScreen() {
             icon="mail-outline"
             label="Email Address"
             value={formData.email}
-            onChangeText={(text: string) => setFormData({ ...formData, email: text })}
             placeholder="Enter your email"
             keyboardType="email-address"
+            editable={false}
           />
 
           <InputField

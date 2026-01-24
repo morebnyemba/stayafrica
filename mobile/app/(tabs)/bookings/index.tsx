@@ -6,9 +6,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BookingCardSkeleton } from '@/components/common/Skeletons';
 import { Booking } from '@/types';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function BookingsScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { isAuthenticated } = useAuth();
   const { data: bookingsData, isLoading } = useBookings();
   const bookings = bookingsData?.results || [];
@@ -19,7 +21,8 @@ export default function BookingsScreen() {
         {/* Header */}
         <LinearGradient
           colors={['#122F26', '#1d392f']}
-          className="px-4 pt-12 pb-6"
+          className="px-4 pb-6"
+          style={{ paddingTop: insets.top + 12 }}
         >
           <Text className="text-3xl font-black text-white tracking-tight">
             My Bookings
@@ -174,7 +177,8 @@ export default function BookingsScreen() {
         colors={['#122F26', '#1d392f', '#2d4a40']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        className="px-4 pt-12 pb-6"
+        className="px-4 pb-6"
+        style={{ paddingTop: insets.top + 12 }}
       >
         <Text className="text-3xl font-black text-white tracking-tight mb-2">
           My Bookings

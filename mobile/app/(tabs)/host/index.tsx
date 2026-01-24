@@ -1,9 +1,10 @@
-import { View, Text, ScrollView, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '@/context/auth-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface StatCardProps {
   icon: keyof typeof Ionicons.glyphMap;
@@ -24,17 +25,18 @@ interface MenuItemProps {
 
 export default function HostScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { user, isAuthenticated } = useAuth();
   const [activeTab, setActiveTab] = useState<'overview' | 'analytics'>('overview');
 
   if (!isAuthenticated) {
     return (
-      <View className="flex-1 bg-sand-100">
+      <SafeAreaView className="flex-1 bg-sand-100">
         {/* Header */}
         <LinearGradient
           colors={['#122F26', '#1d392f']}
           className="px-4 pb-6"
-          style={{ paddingTop: Platform.OS === 'ios' ? 50 : 35 }}
+          style={{ paddingTop: insets.top + 12 }}
         >
           <Text className="text-3xl font-black text-white tracking-tight">
             Become a Host
@@ -72,7 +74,7 @@ export default function HostScreen() {
             </TouchableOpacity>
           </View>
         </View>
-      </View>
+      </SafeAreaView>
     );
   }
 
@@ -254,14 +256,15 @@ export default function HostScreen() {
   );
 
   return (
-    <ScrollView className="flex-1 bg-sand-100" showsVerticalScrollIndicator={false}>
+    <SafeAreaView className="flex-1 bg-sand-100">
+      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
       {/* Modern Header with Tabs */}
       <LinearGradient
         colors={['#122F26', '#1d392f', '#2d4a40']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         className="px-4 pb-6"
-        style={{ paddingTop: Platform.OS === 'ios' ? 50 : 35 }}
+        style={{ paddingTop: insets.top + 12 }}
       >
         <View className="flex-row items-center justify-between mb-4">
           <View>
@@ -465,6 +468,7 @@ export default function HostScreen() {
 
       {/* Analytics Tab */}
       {activeTab === 'analytics' && <AnalyticsContent />}
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
