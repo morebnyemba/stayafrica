@@ -223,6 +223,60 @@ export default function HostEarningsScreen() {
             </LinearGradient>
           </TouchableOpacity>
 
+          {/* Charges Breakdown */}
+          {earnings?.gross_earnings && (
+            <View className="bg-white rounded-2xl p-5 mb-4" style={{
+              shadowColor: '#122F26',
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.08,
+              shadowRadius: 8,
+              elevation: 4,
+            }}>
+              <Text className="text-lg font-bold text-forest mb-4">Charges & Fees Breakdown</Text>
+              
+              <View className="space-y-3">
+                <View className="flex-row justify-between items-center">
+                  <Text className="text-forest font-medium">Gross Revenue</Text>
+                  <Text className="text-forest font-bold text-lg">${earnings.gross_earnings || '0.00'}</Text>
+                </View>
+                
+                <View className="h-px bg-sand-200" />
+                
+                <View className="flex-row justify-between items-center">
+                  <Text className="text-red-600 pl-3">Platform Commission (15%)</Text>
+                  <Text className="text-red-600 font-semibold">-${earnings.total_commission || '0.00'}</Text>
+                </View>
+                
+                {earnings.total_service_fee > 0 && (
+                  <View className="flex-row justify-between items-center">
+                    <Text className="text-moss pl-3">Service Fees</Text>
+                    <Text className="text-moss font-medium">${earnings.total_service_fee || '0.00'}</Text>
+                  </View>
+                )}
+                
+                {earnings.total_taxes > 0 && (
+                  <View className="flex-row justify-between items-center">
+                    <Text className="text-moss pl-3">Taxes Collected</Text>
+                    <Text className="text-moss font-medium">${earnings.total_taxes || '0.00'}</Text>
+                  </View>
+                )}
+                
+                <View className="h-px bg-sand-200" />
+                
+                <View className="flex-row justify-between items-center">
+                  <Text className="text-green-600 font-bold">Net Earnings to You</Text>
+                  <Text className="text-green-600 font-black text-xl">${earnings.total_earnings || '0.00'}</Text>
+                </View>
+              </View>
+              
+              <View className="mt-4 bg-blue-50 rounded-xl p-3 border border-blue-200">
+                <Text className="text-xs text-blue-800 leading-5">
+                  <Text className="font-bold">Note:</Text> The 15% platform commission covers secure payments, support, marketing, and maintenance.
+                </Text>
+              </View>
+            </View>
+          )}
+
           {/* Recent Payouts */}
           <View className="mb-8">
             <View className="flex-row items-center justify-between mb-3">
