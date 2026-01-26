@@ -132,9 +132,6 @@ export function HostEarningsContent() {
   const bankAccounts = bankAccountsData?.results || bankAccountsData || [];
   const earnings = earningsData?.earnings || [];
   
-  // Calculate totals and trends
-  const totalEarnings = earnings.reduce((sum: number, e: any) => sum + parseFloat(e.total || 0), 0);
-  
   // Get trend (compare last 2 periods)
   const lastPeriod = earnings[earnings.length - 1];
   const prevPeriod = earnings[earnings.length - 2];
