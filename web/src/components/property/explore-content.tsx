@@ -104,7 +104,7 @@ export function ExploreContent() {
   const properties = propertiesData?.results || [];
 
   const featuredSections = useMemo(() => {
-    const counts = properties.reduce<Record<string, number>>((acc, property: any) => {
+    const counts = (properties as any[]).reduce<Record<string, number>>((acc, property: any) => {
       const city = property.city?.trim();
       if (!city) return acc;
       acc[city] = (acc[city] || 0) + 1;
