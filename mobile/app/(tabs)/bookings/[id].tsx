@@ -60,7 +60,11 @@ export default function BookingDetailScreen() {
   }
 
   return (
-    <ScrollView className="flex-1 bg-sand-100" showsVerticalScrollIndicator={false}>
+    <ScrollView 
+      className="flex-1 bg-sand-100" 
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={{ paddingBottom: 40 }}
+    >
       {/* Header */}
       <LinearGradient
         colors={['#122F26', '#1d392f']}
@@ -79,7 +83,7 @@ export default function BookingDetailScreen() {
         </View>
       </LinearGradient>
 
-      <View className="px-4 py-6">
+      <View className="px-4 py-6 pb-8">
         {booking ? (
           <>
             {/* Property Info */}

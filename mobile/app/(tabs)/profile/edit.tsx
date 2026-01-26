@@ -200,7 +200,10 @@ export default function EditProfileScreen() {
             </TouchableOpacity>
 
             {showCountryPicker && (
-              <View className="bg-white rounded-2xl border border-sand-300 mt-2 max-h-60 overflow-hidden">
+              <View 
+                className="bg-white rounded-2xl border border-sand-300 mt-2 overflow-hidden"
+                style={{ maxHeight: 240 }}
+              >
                 <ScrollView nestedScrollEnabled>
                   {COUNTRIES.map((country) => (
                     <TouchableOpacity

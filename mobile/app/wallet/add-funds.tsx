@@ -43,7 +43,12 @@ export default function AddFundsScreen() {
   };
 
   return (
-    <ScrollView className="flex-1 bg-sand-100" showsVerticalScrollIndicator={false}>
+    <ScrollView 
+      className="flex-1 bg-sand-100" 
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={{ paddingBottom: 40 }}
+      keyboardShouldPersistTaps="handled"
+    >
       {/* Header */}
       <LinearGradient
         colors={['#122F26', '#1d392f']}
@@ -86,28 +91,30 @@ export default function AddFundsScreen() {
         </View>
 
         {/* Quick Amounts */}
-        <View className="flex-row flex-wrap gap-2 mb-6">
-          {quickAmounts.map((quickAmount) => (
-            <TouchableOpacity
-              key={quickAmount}
-              onPress={() => setAmount(quickAmount.toString())}
-              className={`px-4 py-2 rounded-xl ${
-                amount === quickAmount.toString() ? 'bg-gold' : 'bg-white'
-              }`}
-              style={{
-                shadowColor: '#122F26',
-                shadowOffset: { width: 0, height: 1 },
-                shadowOpacity: 0.05,
-                shadowRadius: 2,
-                elevation: 1,
-              }}
-            >
-              <Text className={`font-semibold ${
-                amount === quickAmount.toString() ? 'text-forest' : 'text-moss'
-              }`}>
-                ${quickAmount}
-              </Text>
-            </TouchableOpacity>
+        <View className="mb-6">
+          <View className="flex-row flex-wrap gap-2">
+            {quickAmounts.map((quickAmount) => (
+              <TouchableOpacity
+                key={quickAmount}
+                onPress={() => setAmount(quickAmount.toString())}
+                className={`px-4 py-2 rounded-xl ${
+                  amount === quickAmount.toString() ? 'bg-gold' : 'bg-white'
+                }`}
+                style={{
+                  minWidth: '30%',
+                  shadowColor: '#122F26',
+                  shadowOffset: { width: 0, height: 1 },
+                  shadowOpacity: 0.05,
+                  shadowRadius: 2,
+                  elevation: 1,
+                }}
+              >
+                <Text className={`font-semibold text-center ${
+                  amount === quickAmount.toString() ? 'text-forest' : 'text-moss'
+                }`}>
+                  ${quickAmount}
+                </Text>
+              </TouchableOpacity>
           ))}
         </View>
 

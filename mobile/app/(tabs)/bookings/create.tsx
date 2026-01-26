@@ -73,7 +73,12 @@ export default function CreateBookingScreen() {
   }
 
   return (
-    <ScrollView className="flex-1 bg-sand-100" showsVerticalScrollIndicator={false}>
+    <ScrollView 
+      className="flex-1 bg-sand-100" 
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={{ paddingBottom: 40 }}
+      keyboardShouldPersistTaps="handled"
+    >
       {/* Header */}
       <LinearGradient
         colors={['#122F26', '#1d392f']}
