@@ -321,7 +321,7 @@ export function HostEarningsContent() {
           {analytics && (
             <section aria-labelledby="charges-summary-heading" className="card p-4 sm:p-6 mb-8">
               <h2 id="charges-summary-heading" className="text-xl sm:text-2xl font-bold text-primary-900 dark:text-sand-50 mb-4">
-                Total Charges & Fees Breakdown
+                Your Disbursement Breakdown
               </h2>
               <div className="bg-sand-50 dark:bg-primary-800 rounded-lg p-4 sm:p-6">
                 <div className="space-y-3">
@@ -334,18 +334,6 @@ export function HostEarningsContent() {
                     <span className="pl-4">Platform Commission (15%)</span>
                     <span className="font-semibold">-${analytics.total_commission?.toFixed(2) || '0.00'}</span>
                   </div>
-                  {analytics.total_service_fee > 0 && (
-                    <div className="flex justify-between items-center text-primary-600 dark:text-sand-400">
-                      <span className="pl-4">Service Fees</span>
-                      <span className="font-medium">${analytics.total_service_fee?.toFixed(2) || '0.00'}</span>
-                    </div>
-                  )}
-                  {analytics.total_taxes > 0 && (
-                    <div className="flex justify-between items-center text-primary-600 dark:text-sand-400">
-                      <span className="pl-4">Taxes Collected</span>
-                      <span className="font-medium">${analytics.total_taxes?.toFixed(2) || '0.00'}</span>
-                    </div>
-                  )}
                   <div className="h-px bg-primary-200 dark:bg-primary-600"></div>
                   <div className="flex justify-between items-center text-green-600 dark:text-green-400">
                     <span className="font-bold text-lg">Net Earnings to You</span>
@@ -354,7 +342,7 @@ export function HostEarningsContent() {
                 </div>
                 <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
                   <p className="text-xs text-blue-800 dark:text-blue-300">
-                    <strong>Note:</strong> The platform commission of 15% helps us provide secure payments, customer support, marketing, and platform maintenance. Service fees and taxes (if applicable) are itemized separately.
+                    <strong>Note:</strong> The platform commission of 15% helps us provide secure payments, customer support, marketing, and platform maintenance. Guest service fees and taxes are charged separately to guests and don't affect your payout.
                   </p>
                 </div>
               </div>
@@ -431,22 +419,6 @@ export function HostEarningsContent() {
                             </span>
                             <span className="font-medium">-${commission.toFixed(2)}</span>
                           </div>
-                          {serviceFee > 0 && (
-                            <div className="flex justify-between text-primary-500 dark:text-sand-400">
-                              <span className="flex items-center gap-1.5 pl-4">
-                                Service Fee
-                              </span>
-                              <span className="font-medium">${serviceFee.toFixed(2)}</span>
-                            </div>
-                          )}
-                          {taxes > 0 && (
-                            <div className="flex justify-between text-primary-500 dark:text-sand-400">
-                              <span className="flex items-center gap-1.5 pl-4">
-                                Taxes
-                              </span>
-                              <span className="font-medium">${taxes.toFixed(2)}</span>
-                            </div>
-                          )}
                           <div className="flex justify-between font-semibold text-green-600 dark:text-green-400 pt-1.5 border-t border-primary-100 dark:border-primary-700">
                             <span>Net to Host</span>
                             <span>${amount.toFixed(2)}</span>

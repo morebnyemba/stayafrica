@@ -251,20 +251,6 @@ export default function HostEarningsScreen() {
                   <Text className="text-red-600 font-semibold">-${earnings.total_commission || '0.00'}</Text>
                 </View>
                 
-                {earnings.total_service_fee > 0 && (
-                  <View className="flex-row justify-between items-center">
-                    <Text className="text-moss pl-3">Service Fees</Text>
-                    <Text className="text-moss font-medium">${earnings.total_service_fee || '0.00'}</Text>
-                  </View>
-                )}
-                
-                {earnings.total_taxes > 0 && (
-                  <View className="flex-row justify-between items-center">
-                    <Text className="text-moss pl-3">Taxes Collected</Text>
-                    <Text className="text-moss font-medium">${earnings.total_taxes || '0.00'}</Text>
-                  </View>
-                )}
-                
                 <View className="h-px bg-sand-200" />
                 
                 <View className="flex-row justify-between items-center">
@@ -275,7 +261,7 @@ export default function HostEarningsScreen() {
               
               <View className="mt-4 bg-blue-50 rounded-xl p-3 border border-blue-200">
                 <Text className="text-xs text-blue-800 leading-5">
-                  <Text className="font-bold">Note:</Text> The 15% platform commission covers secure payments, support, marketing, and maintenance.
+                  <Text className="font-bold">Note:</Text> The 15% platform commission covers secure payments, support, marketing, and maintenance. Guest service fees and taxes are charged separately to guests.
                 </Text>
               </View>
             </View>
