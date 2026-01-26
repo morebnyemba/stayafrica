@@ -367,8 +367,6 @@ export function HostEarningsContent() {
                   const amount = parseFloat(earning.total || 0);
                   const gross = parseFloat(earning.gross_earnings || 0);
                   const commission = parseFloat(earning.commission || 0);
-                  const serviceFee = parseFloat(earning.service_fee || 0);
-                  const taxes = parseFloat(earning.taxes || 0);
                   const bookingsCount = earning.bookings || 0;
                   
                   return (

@@ -92,7 +92,7 @@ export default function AddFundsScreen() {
 
         {/* Quick Amounts */}
         <View className="mb-6">
-          <View className="flex-row flex-wrap gap-2">
+          <View className="flex-row flex-wrap" style={{ gap: 8 }}>
             {quickAmounts.map((quickAmount) => (
               <TouchableOpacity
                 key={quickAmount}
@@ -101,7 +101,10 @@ export default function AddFundsScreen() {
                   amount === quickAmount.toString() ? 'bg-gold' : 'bg-white'
                 }`}
                 style={{
-                  minWidth: '30%',
+                  flexBasis: '30%',
+                  flexGrow: 0,
+                  flexShrink: 1,
+                  minWidth: 90,
                   shadowColor: '#122F26',
                   shadowOffset: { width: 0, height: 1 },
                   shadowOpacity: 0.05,

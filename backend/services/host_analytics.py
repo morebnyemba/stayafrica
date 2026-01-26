@@ -136,7 +136,13 @@ class HostAnalyticsService:
             period: 'week', 'month', or 'year'
             
         Returns:
-            List of earnings by period with charge details
+            List of earnings by period with detailed charge breakdown including:
+            - gross_earnings: Total revenue (nightly + cleaning fees) before deductions
+            - commission: Platform commission deducted from host (15%)
+            - service_fee: Service fees paid by guests (not deducted from host)
+            - taxes: Taxes paid by guests (not deducted from host)
+            - total: Net earnings to host (gross_earnings - commission)
+            - bookings: Number of completed bookings in the period
         """
         from apps.bookings.models import Booking
         
