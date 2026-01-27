@@ -4,12 +4,12 @@
     "slug": "stayafrica",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/IMG-20251208-WA0002(1).jpg",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#F5F5DC"
     },
     "updates": {
       "fallbackToCacheTimeout": 0
@@ -21,17 +21,19 @@
       "supportsTabletMode": true,
       "bundleIdentifier": "com.stayafrica.app",
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "StayAfrica needs access to your location to help you find nearby properties.",
-        "NSLocationAlwaysAndWhenInUseUsageDescription": "StayAfrica needs access to your location to help you find nearby properties.",
-        "NSCameraUsageDescription": "StayAfrica needs access to your camera to take photos of properties.",
-        "NSPhotoLibraryUsageDescription": "StayAfrica needs access to your photo library to upload property images.",
-        "NSPhotoLibraryAddUsageDescription": "StayAfrica needs permission to save photos to your library."
+        "NSLocationWhenInUseUsageDescription": "StayAfrica needs your location to show nearby properties and experiences.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "StayAfrica uses your location to provide personalized recommendations.",
+        "NSCameraUsageDescription": "StayAfrica needs camera access to upload property photos and verify your identity.",
+        "NSPhotoLibraryUsageDescription": "StayAfrica needs photo library access to upload property images.",
+        "NSPhotoLibraryAddUsageDescription": "StayAfrica saves photos to your library for your records.",
+        "NSCalendarsUsageDescription": "StayAfrica can add your booking dates to your calendar for convenience.",
+        "NSMicrophoneUsageDescription": "StayAfrica uses your microphone for video tours and support calls."
       }
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/IMG-20251208-WA0002(1).jpg",
-        "backgroundColor": "#ffffff"
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#F5F5DC"
       },
       "package": "com.stayafrica.app",
       "permissions": [
@@ -41,9 +43,11 @@
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE",
         "android.permission.READ_MEDIA_IMAGES",
-        "android.permission.ACCESS_COARSE_LOCATION",
-        "android.permission.ACCESS_FINE_LOCATION",
-        "android.permission.RECORD_AUDIO"
+        "android.permission.INTERNET",
+        "android.permission.ACCESS_NETWORK_STATE",
+        "android.permission.VIBRATE",
+        "android.permission.RECEIVE_BOOT_COMPLETED",
+        "android.permission.WAKE_LOCK"
       ]
     },
     "web": {
