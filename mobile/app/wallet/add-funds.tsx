@@ -118,7 +118,8 @@ export default function AddFundsScreen() {
                   ${quickAmount}
                 </Text>
               </TouchableOpacity>
-          ))}
+            ))}
+          </View>
         </View>
 
         {/* Payment Methods */}
