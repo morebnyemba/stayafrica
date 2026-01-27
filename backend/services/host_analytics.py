@@ -52,9 +52,19 @@ class HostAnalyticsService:
         
         # Calculate total earnings (completed bookings only)
         # Host gets: (nightly_total + cleaning_fee) - commission_fee
-        total_earnings = bookings.filter(status='completed').aggregate(
-            total=Sum(F('nightly_total') + F('cleaning_fee') - F('commission_fee'))
-        )['total'] or Decimal('0.00')
+        completed = bookings.filter(status='completed')
+        earnings_agg = completed.aggregate(
+            total_net=Sum(F('nightly_total') + F('cleaning_fee') - F('commission_fee')),
+            total_gross=Sum(F('nightly_total') + F('cleaning_fee')),
+            total_commission=Sum(F('commission_fee')),
+            total_service_fee=Sum(F('service_fee')),
+            total_taxes=Sum(F('taxes'))
+        )
+        total_earnings = earnings_agg['total_net'] or Decimal('0.00')
+        gross_earnings = earnings_agg['total_gross'] or Decimal('0.00')
+        total_commission = earnings_agg['total_commission'] or Decimal('0.00')
+        total_service_fee = earnings_agg['total_service_fee'] or Decimal('0.00')
+        total_taxes = earnings_agg['total_taxes'] or Decimal('0.00')
         
         # Pending earnings (confirmed but not completed)
         pending_earnings = bookings.filter(status='confirmed').aggregate(
@@ -105,6 +115,10 @@ class HostAnalyticsService:
             'pending_bookings': pending_bookings,
             'completed_bookings': completed_bookings,
             'total_earnings': float(total_earnings),
+            'gross_earnings': float(gross_earnings),
+            'total_commission': float(total_commission),
+            'total_service_fee': float(total_service_fee),
+            'total_taxes': float(total_taxes),
             'pending_earnings': float(pending_earnings),
             'average_rating': round(avg_rating, 2),
             'total_reviews': total_reviews,
@@ -115,14 +129,20 @@ class HostAnalyticsService:
     @classmethod
     def get_earnings_breakdown(cls, host_user, period: str = 'month') -> List[Dict]:
         """
-        Get earnings breakdown by time period
+        Get earnings breakdown by time period with detailed charge breakdown
         
         Args:
             host_user: User instance (host)
             period: 'week', 'month', or 'year'
             
         Returns:
-            List of earnings by period
+            List of earnings by period with detailed charge breakdown including:
+            - gross_earnings: Total revenue (nightly + cleaning fees) before deductions
+            - commission: Platform commission deducted from host (15%)
+            - service_fee: Service fees paid by guests (not deducted from host)
+            - taxes: Taxes paid by guests (not deducted from host)
+            - total: Net earnings to host (gross_earnings - commission)
+            - bookings: Number of completed bookings in the period
         """
         from apps.bookings.models import Booking
         
@@ -144,6 +164,10 @@ class HostAnalyticsService:
             period=trunc_func('created_at')
         ).values('period').annotate(
             total_earnings=Sum(F('nightly_total') + F('cleaning_fee') - F('commission_fee')),
+            gross_earnings=Sum(F('nightly_total') + F('cleaning_fee')),
+            total_commission=Sum(F('commission_fee')),
+            total_service_fee=Sum(F('service_fee')),
+            total_taxes=Sum(F('taxes')),
             booking_count=Count('id')
         ).order_by('period')
         
@@ -151,6 +175,10 @@ class HostAnalyticsService:
             {
                 'period': item['period'].strftime('%Y-%m' if period == 'month' else '%Y-W%W'),
                 'total': float(item['total_earnings'] or 0),
+                'gross_earnings': float(item['gross_earnings'] or 0),
+                'commission': float(item['total_commission'] or 0),
+                'service_fee': float(item['total_service_fee'] or 0),
+                'taxes': float(item['total_taxes'] or 0),
                 'bookings': item['booking_count']
             }
             for item in earnings_by_period

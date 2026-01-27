@@ -132,9 +132,6 @@ export function HostEarningsContent() {
   const bankAccounts = bankAccountsData?.results || bankAccountsData || [];
   const earnings = earningsData?.earnings || [];
   
-  // Calculate totals and trends
-  const totalEarnings = earnings.reduce((sum: number, e: any) => sum + parseFloat(e.total || 0), 0);
-  
   // Get trend (compare last 2 periods)
   const lastPeriod = earnings[earnings.length - 1];
   const prevPeriod = earnings[earnings.length - 2];
@@ -320,6 +317,38 @@ export function HostEarningsContent() {
             </div>
           </section>
 
+          {/* Charges Breakdown Summary */}
+          {analytics && (
+            <section aria-labelledby="charges-summary-heading" className="card p-4 sm:p-6 mb-8">
+              <h2 id="charges-summary-heading" className="text-xl sm:text-2xl font-bold text-primary-900 dark:text-sand-50 mb-4">
+                Your Disbursement Breakdown
+              </h2>
+              <div className="bg-sand-50 dark:bg-primary-800 rounded-lg p-4 sm:p-6">
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center text-primary-900 dark:text-sand-50">
+                    <span className="font-medium">Total Gross Revenue</span>
+                    <span className="text-xl font-bold">${analytics.gross_earnings?.toFixed(2) || '0.00'}</span>
+                  </div>
+                  <div className="h-px bg-primary-200 dark:bg-primary-600"></div>
+                  <div className="flex justify-between items-center text-red-600 dark:text-red-400">
+                    <span className="pl-4">Platform Commission (15%)</span>
+                    <span className="font-semibold">-${analytics.total_commission?.toFixed(2) || '0.00'}</span>
+                  </div>
+                  <div className="h-px bg-primary-200 dark:bg-primary-600"></div>
+                  <div className="flex justify-between items-center text-green-600 dark:text-green-400">
+                    <span className="font-bold text-lg">Net Earnings to You</span>
+                    <span className="text-2xl font-bold">${analytics.total_earnings?.toFixed(2) || '0.00'}</span>
+                  </div>
+                </div>
+                <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                  <p className="text-xs text-blue-800 dark:text-blue-300">
+                    <strong>Note:</strong> The platform commission of 15% helps us provide secure payments, customer support, marketing, and platform maintenance. Guest service fees and taxes are charged separately to guests and don't affect your payout.
+                  </p>
+                </div>
+              </div>
+            </section>
+          )}
+
           {/* Earnings Timeline */}
           <section aria-labelledby="earnings-timeline-heading" className="card p-4 sm:p-6 mb-8">
             <h2 id="earnings-timeline-heading" className="text-xl sm:text-2xl font-bold text-primary-900 dark:text-sand-50 mb-6">
@@ -336,38 +365,29 @@ export function HostEarningsContent() {
               <div className="space-y-4">
                 {earnings.map((earning: any, index: number) => {
                   const amount = parseFloat(earning.total || 0);
+                  const gross = parseFloat(earning.gross_earnings || 0);
+                  const commission = parseFloat(earning.commission || 0);
                   const bookingsCount = earning.bookings || 0;
                   
                   return (
                     <article
                       key={index}
-                      className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border border-primary-100 dark:border-primary-700 rounded-lg hover:bg-primary-50 dark:hover:bg-primary-800 transition-colors"
+                      className="p-4 border border-primary-100 dark:border-primary-700 rounded-lg hover:bg-primary-50 dark:hover:bg-primary-800 transition-colors"
                       aria-label={`Earnings for ${earning.period}`}
                     >
-                      <div className="flex-1 mb-3 sm:mb-0">
-                        <div className="flex items-center gap-3 mb-2">
-                          <Calendar className="w-5 h-5 text-secondary-600 dark:text-secondary-400" aria-hidden="true" />
-                          <h3 className="font-semibold text-primary-900 dark:text-sand-50">
-                            {earning.period}
-                          </h3>
-                        </div>
-                        <div className="flex items-center gap-4 text-sm text-primary-600 dark:text-sand-300">
-                          <span>{bookingsCount} booking{bookingsCount !== 1 ? 's' : ''}</span>
-                          <span>•</span>
-                          <span>Avg: ${bookingsCount > 0 ? (amount / bookingsCount).toFixed(2) : '0.00'}</span>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center gap-4">
-                        {/* Visual bar */}
-                        <div className="hidden sm:block w-32 h-2 bg-primary-200 dark:bg-primary-700 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-secondary-500"
-                            style={{
-                              width: `${Math.min((amount / totalEarnings) * 100, 100)}%`,
-                            }}
-                            aria-label={`${((amount / totalEarnings) * 100).toFixed(0)}% of total`}
-                          />
+                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <Calendar className="w-5 h-5 text-secondary-600 dark:text-secondary-400" aria-hidden="true" />
+                            <h3 className="font-semibold text-primary-900 dark:text-sand-50">
+                              {earning.period}
+                            </h3>
+                          </div>
+                          <div className="flex items-center gap-4 text-sm text-primary-600 dark:text-sand-300">
+                            <span>{bookingsCount} booking{bookingsCount !== 1 ? 's' : ''}</span>
+                            <span>•</span>
+                            <span>Avg: ${bookingsCount > 0 ? (amount / bookingsCount).toFixed(2) : '0.00'}</span>
+                          </div>
                         </div>
                         
                         <div className="text-right">
@@ -377,6 +397,30 @@ export function HostEarningsContent() {
                           <p className="text-xs text-primary-500 dark:text-sand-500">
                             Net earnings
                           </p>
+                        </div>
+                      </div>
+
+                      {/* Charge Breakdown */}
+                      <div className="border-t border-primary-100 dark:border-primary-700 pt-3 mt-3">
+                        <p className="text-xs font-semibold text-primary-700 dark:text-sand-300 mb-2">Disbursement Breakdown:</p>
+                        <div className="space-y-1.5 text-xs">
+                          <div className="flex justify-between text-primary-600 dark:text-sand-300">
+                            <span className="flex items-center gap-1.5">
+                              <DollarSign className="w-3 h-3" />
+                              Gross Revenue
+                            </span>
+                            <span className="font-medium">${gross.toFixed(2)}</span>
+                          </div>
+                          <div className="flex justify-between text-red-600 dark:text-red-400">
+                            <span className="flex items-center gap-1.5 pl-4">
+                              - Platform Commission (15%)
+                            </span>
+                            <span className="font-medium">-${commission.toFixed(2)}</span>
+                          </div>
+                          <div className="flex justify-between font-semibold text-green-600 dark:text-green-400 pt-1.5 border-t border-primary-100 dark:border-primary-700">
+                            <span>Net to Host</span>
+                            <span>${amount.toFixed(2)}</span>
+                          </div>
                         </div>
                       </div>
                     </article>

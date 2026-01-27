@@ -1,16 +1,16 @@
-import { View, Text, ScrollView, TouchableOpacity, Platform, Switch } from 'react-native';
-import { useState } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, Platform, ActivityIndicator, FlatList } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '@/context/auth-context';
+import { useHostProperties } from '@/hooks/api-hooks';
+import type { Property } from '@/types';
 
 export default function HostPricingScreen() {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
-  const [weekendPricing, setWeekendPricing] = useState(false);
-  const [seasonalPricing, setSeasonalPricing] = useState(false);
-  const [smartPricing, setSmartPricing] = useState(false);
+  const { data: propertiesData, isLoading } = useHostProperties();
+  const properties = propertiesData?.results || [];
 
   if (!isAuthenticated) {
     return (
@@ -36,173 +36,231 @@ export default function HostPricingScreen() {
     );
   }
 
-  const PricingToggle = ({ icon, title, description, value, onToggle, color = '#3A5C50' }: any) => (
-    <View className="bg-white rounded-2xl p-4 mb-3 flex-row items-center" style={{
+  const PricingFeatureCard = ({ icon, title, description, color }: any) => (
+    <View className="bg-white rounded-xl p-4 flex-1 mr-2" style={{
       shadowColor: '#122F26',
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.05,
       shadowRadius: 4,
       elevation: 2,
+      minWidth: 160,
     }}>
-      <LinearGradient
-        colors={[`${color}20`, `${color}10`]}
-        className="w-12 h-12 rounded-full items-center justify-center"
-      >
-        <Ionicons name={icon} size={24} color={color} />
-      </LinearGradient>
-      <View className="flex-1 ml-4">
-        <Text className="text-base font-semibold text-forest">{title}</Text>
-        <Text className="text-sm text-moss mt-1">{description}</Text>
+      <View className="items-center">
+        <LinearGradient
+          colors={[`${color}30`, `${color}20`]}
+          className="w-12 h-12 rounded-full items-center justify-center mb-3"
+        >
+          <Ionicons name={icon} size={24} color={color} />
+        </LinearGradient>
+        <Text className="text-sm font-bold text-forest text-center mb-1">{title}</Text>
+        <Text className="text-xs text-moss text-center">{description}</Text>
       </View>
-      <Switch
-        value={value}
-        onValueChange={onToggle}
-        trackColor={{ false: '#e5dfd0', true: '#10B981' }}
-        thumbColor={value ? '#fff' : '#fff'}
-      />
     </View>
   );
 
+  const PropertyItem = ({ property }: { property: Property }) => (
+    <TouchableOpacity
+      className="bg-white rounded-2xl p-4 mb-3 flex-row items-center justify-between"
+      onPress={() => router.push(`/host/properties/${property.id}/pricing`)}
+      style={{
+        shadowColor: '#122F26',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.08,
+        shadowRadius: 8,
+        elevation: 4,
+      }}
+    >
+      <View className="flex-row items-center flex-1">
+        <LinearGradient
+          colors={['#3A5C50', '#2d4a40']}
+          className="w-12 h-12 rounded-xl items-center justify-center"
+        >
+          <Ionicons name="home" size={24} color="#D9B168" />
+        </LinearGradient>
+        <View className="ml-3 flex-1">
+          <Text className="text-base font-bold text-forest mb-1" numberOfLines={1}>
+            {property.title}
+          </Text>
+          <Text className="text-sm text-moss" numberOfLines={1}>
+            {property.location?.city}, {property.location?.country}
+          </Text>
+          <View className="flex-row items-center mt-1">
+            <Text className="text-sm font-semibold text-gold">
+              ${property.price_per_night}/night
+            </Text>
+            <View className={`ml-2 px-2 py-0.5 rounded-full ${
+              property.status === 'active' ? 'bg-green-100' : 'bg-gray-100'
+            }`}>
+              <Text className={`text-xs font-medium ${
+                property.status === 'active' ? 'text-green-800' : 'text-gray-800'
+              }`}>
+                {property.status}
+              </Text>
+            </View>
+          </View>
+        </View>
+      </View>
+      <Ionicons name="chevron-forward" size={20} color="#3A5C50" />
+    </TouchableOpacity>
+  );
+
   return (
-    <ScrollView className="flex-1 bg-sand-100" showsVerticalScrollIndicator={false}>
+    <View className="flex-1 bg-sand-100">
       {/* Header */}
       <LinearGradient
         colors={['#122F26', '#1d392f', '#2d4a40']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        className="px-4 pb-8"
+        className="px-4 pb-6"
         style={{ paddingTop: Platform.OS === 'ios' ? 50 : 35 }}
       >
-        <TouchableOpacity onPress={() => router.back()} className="mb-4">
-          <View className="w-10 h-10 rounded-xl items-center justify-center" style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}>
-            <Ionicons name="arrow-back" size={24} color="#fff" />
-          </View>
-        </TouchableOpacity>
+        <View className="flex-row items-center justify-between mb-4">
+          <TouchableOpacity onPress={() => router.back()}>
+            <View className="w-10 h-10 rounded-xl items-center justify-center" style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}>
+              <Ionicons name="arrow-back" size={24} color="#fff" />
+            </View>
+          </TouchableOpacity>
+        </View>
         <Text className="text-3xl font-black text-white tracking-tight mb-2">
           Dynamic Pricing
         </Text>
-        <View className="flex-row items-center">
-          <Ionicons name="trending-up" size={16} color="#D9B168" />
-          <Text className="text-sand-100 ml-2">
-            Optimize your pricing strategy
-          </Text>
-        </View>
+        <Text className="text-sand-200 text-sm">
+          Manage pricing rules to maximize your earnings
+        </Text>
       </LinearGradient>
 
-      <View className="px-4 -mt-4">
-        {/* Smart Pricing Card */}
-        <LinearGradient
-          colors={['#6366F1', '#8B5CF6']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          className="rounded-2xl p-5 mb-4"
-          style={{
-            shadowColor: '#6366F1',
-            shadowOffset: { width: 0, height: 8 },
-            shadowOpacity: 0.25,
-            shadowRadius: 12,
-            elevation: 8,
-          }}
-        >
-          <View className="flex-row items-center mb-3">
-            <View className="bg-white/20 rounded-full p-2">
-              <Ionicons name="sparkles" size={24} color="#fff" />
-            </View>
-            <Text className="text-white text-xl font-bold ml-3">Smart Pricing</Text>
-          </View>
-          <Text className="text-white/80 mb-4">
-            Let StayAfrica automatically adjust your prices based on demand, seasonality, and local events
-          </Text>
-          <View className="flex-row items-center justify-between">
-            <Text className="text-white font-semibold">Enable Smart Pricing</Text>
-            <Switch
-              value={smartPricing}
-              onValueChange={setSmartPricing}
-              trackColor={{ false: 'rgba(255,255,255,0.3)', true: '#10B981' }}
-              thumbColor="#fff"
+      <ScrollView 
+        className="flex-1" 
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingHorizontal: 16 }}
+      >
+        {/* Pricing Overview Cards */}
+        <View className="mb-4 -mt-4">
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <PricingFeatureCard
+              icon="trending-up"
+              title="Seasonal Pricing"
+              description="Peak season rates"
+              color="#10B981"
             />
-          </View>
-        </LinearGradient>
+            <PricingFeatureCard
+              icon="calendar-outline"
+              title="Weekend Premium"
+              description="Higher weekend rates"
+              color="#3B82F6"
+            />
+            <PricingFeatureCard
+              icon="pricetag-outline"
+              title="Length Discounts"
+              description="Longer stay deals"
+              color="#8B5CF6"
+            />
+          </ScrollView>
+        </View>
 
-        {/* Pricing Rules */}
-        <Text className="text-lg font-bold text-forest mb-3 mt-4">Pricing Rules</Text>
-
-        <PricingToggle
-          icon="calendar-outline"
-          title="Weekend Pricing"
-          description="Charge more on Friday and Saturday nights"
-          value={weekendPricing}
-          onToggle={setWeekendPricing}
-          color="#F59E0B"
-        />
-
-        <PricingToggle
-          icon="sunny-outline"
-          title="Seasonal Pricing"
-          description="Adjust prices for peak and off-peak seasons"
-          value={seasonalPricing}
-          onToggle={setSeasonalPricing}
-          color="#10B981"
-        />
-
-        {/* Discounts Section */}
-        <Text className="text-lg font-bold text-forest mb-3 mt-6">Discounts</Text>
-
-        <View className="bg-white rounded-2xl p-4 mb-3" style={{
+        {/* Available Rule Types */}
+        <View className="bg-white rounded-2xl p-4 mb-4" style={{
           shadowColor: '#122F26',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.05,
-          shadowRadius: 4,
-          elevation: 2,
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.08,
+          shadowRadius: 8,
+          elevation: 4,
         }}>
-          <View className="flex-row items-center justify-between mb-4">
-            <View className="flex-row items-center">
-              <View className="bg-blue-100 rounded-full p-2">
-                <Ionicons name="calendar" size={20} color="#3B82F6" />
-              </View>
-              <View className="ml-3">
-                <Text className="font-semibold text-forest">Weekly Discount</Text>
-                <Text className="text-sm text-moss">7+ nights</Text>
-              </View>
-            </View>
-            <View className="bg-sand-100 rounded-xl px-4 py-2">
-              <Text className="text-forest font-bold">0%</Text>
-            </View>
-          </View>
-
-          <View className="flex-row items-center justify-between mb-4">
-            <View className="flex-row items-center">
-              <View className="bg-purple-100 rounded-full p-2">
-                <Ionicons name="calendar" size={20} color="#8B5CF6" />
-              </View>
-              <View className="ml-3">
-                <Text className="font-semibold text-forest">Monthly Discount</Text>
-                <Text className="text-sm text-moss">28+ nights</Text>
+          <Text className="text-lg font-bold text-forest mb-3">
+            Available Pricing Rules
+          </Text>
+          <View className="flex-row flex-wrap justify-between">
+            <View className="items-center mb-3" style={{ width: '30%' }}>
+              <View className="bg-sand-100 rounded-xl p-3 w-full items-center">
+                <Ionicons name="trending-up" size={24} color="#10B981" />
+                <Text className="text-xs font-semibold text-forest mt-1">Seasonal</Text>
               </View>
             </View>
-            <View className="bg-sand-100 rounded-xl px-4 py-2">
-              <Text className="text-forest font-bold">0%</Text>
-            </View>
-          </View>
-
-          <View className="flex-row items-center justify-between">
-            <View className="flex-row items-center">
-              <View className="bg-green-100 rounded-full p-2">
-                <Ionicons name="flash" size={20} color="#10B981" />
-              </View>
-              <View className="ml-3">
-                <Text className="font-semibold text-forest">Last Minute Discount</Text>
-                <Text className="text-sm text-moss">Bookings within 48hrs</Text>
+            <View className="items-center mb-3" style={{ width: '30%' }}>
+              <View className="bg-sand-100 rounded-xl p-3 w-full items-center">
+                <Ionicons name="calendar" size={24} color="#3B82F6" />
+                <Text className="text-xs font-semibold text-forest mt-1">Weekend</Text>
               </View>
             </View>
-            <View className="bg-sand-100 rounded-xl px-4 py-2">
-              <Text className="text-forest font-bold">0%</Text>
+            <View className="items-center mb-3" style={{ width: '30%' }}>
+              <View className="bg-sand-100 rounded-xl p-3 w-full items-center">
+                <Ionicons name="pricetag" size={24} color="#8B5CF6" />
+                <Text className="text-xs font-semibold text-forest mt-1">Length</Text>
+              </View>
+            </View>
+            <View className="items-center mb-3" style={{ width: '30%' }}>
+              <View className="bg-sand-100 rounded-xl p-3 w-full items-center">
+                <Ionicons name="cash" size={24} color="#F59E0B" />
+                <Text className="text-xs font-semibold text-forest mt-1">Early Bird</Text>
+              </View>
+            </View>
+            <View className="items-center" style={{ width: '30%' }}>
+              <View className="bg-sand-100 rounded-xl p-3 w-full items-center">
+                <Ionicons name="flash" size={24} color="#EF4444" />
+                <Text className="text-xs font-semibold text-forest mt-1">Last Minute</Text>
+              </View>
             </View>
           </View>
         </View>
 
-        {/* Tips */}
-        <View className="mt-4 mb-8 rounded-2xl overflow-hidden" style={{
+        {/* Property Pricing List */}
+        <View className="bg-white rounded-2xl overflow-hidden mb-4" style={{
+          shadowColor: '#122F26',
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.08,
+          shadowRadius: 8,
+          elevation: 4,
+        }}>
+          <View className="p-4 border-b border-sand-200">
+            <Text className="text-lg font-bold text-forest">Property Pricing</Text>
+            <Text className="text-sm text-moss mt-1">
+              Select a property to manage its pricing rules
+            </Text>
+          </View>
+
+          {isLoading ? (
+            <View className="p-6">
+              <ActivityIndicator size="large" color="#3A5C50" />
+              <Text className="text-center text-moss mt-4">Loading properties...</Text>
+            </View>
+          ) : properties.length > 0 ? (
+            <View className="p-4">
+              {properties.filter((p: any) => p?.id).map((property: any) => (
+                <PropertyItem key={property.id} property={property} />
+              ))}
+            </View>
+          ) : (
+            <View className="p-8 items-center">
+              <View className="bg-sand-200 rounded-full p-8 mb-4">
+                <Ionicons name="home-outline" size={48} color="#3A5C50" />
+              </View>
+              <Text className="text-lg font-bold text-forest mb-2">No Properties Yet</Text>
+              <Text className="text-moss text-center mb-6">
+                Add a property to start managing its pricing rules
+              </Text>
+              <TouchableOpacity
+                onPress={() => router.push('/host/properties/new')}
+              >
+                <LinearGradient
+                  colors={['#D9B168', '#bea04f']}
+                  className="px-6 py-3 rounded-xl"
+                  style={{
+                    shadowColor: '#D9B168',
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.3,
+                    shadowRadius: 8,
+                    elevation: 5,
+                  }}
+                >
+                  <Text className="text-forest font-bold">Add Property</Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
+
+        {/* Tips Section */}
+        <View className="mb-6 rounded-2xl overflow-hidden" style={{
           shadowColor: '#3B82F6',
           shadowOffset: { width: 0, height: 4 },
           shadowOpacity: 0.15,
@@ -213,16 +271,20 @@ export default function HostPricingScreen() {
             colors={['#DBEAFE', '#BFDBFE']}
             className="p-4"
           >
-            <View className="flex-row items-center mb-2">
+            <View className="flex-row items-center mb-3">
               <Ionicons name="bulb" size={20} color="#3B82F6" />
-              <Text className="text-base font-semibold text-blue-900 ml-2">Pricing Tip</Text>
+              <Text className="text-base font-bold text-blue-900 ml-2">💡 Pricing Tips</Text>
             </View>
-            <Text className="text-sm text-blue-800">
-              Properties with competitive pricing get 40% more bookings. Consider enabling smart pricing to maximize your revenue.
-            </Text>
+            <View className="space-y-2">
+              <Text className="text-xs text-blue-800 mb-1">• Use seasonal pricing to capture peak demand during holidays</Text>
+              <Text className="text-xs text-blue-800 mb-1">• Offer early bird discounts (10-15%) to secure bookings in advance</Text>
+              <Text className="text-xs text-blue-800 mb-1">• Apply last-minute discounts to fill vacant dates</Text>
+              <Text className="text-xs text-blue-800 mb-1">• Weekend premiums of 10-20% are common in most markets</Text>
+              <Text className="text-xs text-blue-800">• Length of stay discounts encourage longer bookings</Text>
+            </View>
           </LinearGradient>
         </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
