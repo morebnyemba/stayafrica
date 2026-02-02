@@ -17,8 +17,9 @@ interface ConversationMessage {
 
 export default function ConversationDetailScreen() {
   const router = useRouter();
-  const { id } = useLocalSearchParams();
+  const { id, participantId } = useLocalSearchParams();
   const conversationId = Array.isArray(id) ? id[0] : id;
+  const receiverId = Array.isArray(participantId) ? participantId[0] : participantId;
   const [message, setMessage] = useState('');
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
   const [editText, setEditText] = useState('');
@@ -48,9 +49,9 @@ export default function ConversationDetailScreen() {
 
   const handleSend = async () => {
     const trimmed = message.trim();
-    if (!conversationId || !trimmed) return;
+    if (!conversationId || !trimmed || !receiverId) return;
 
-    await sendMessage({ conversationId, message: trimmed });
+    await sendMessage({ conversationId, receiverId, message: trimmed });
     setMessage('');
     refetch();
   };

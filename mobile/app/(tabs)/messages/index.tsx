@@ -130,7 +130,11 @@ export default function MessagesScreen() {
     return (
     <TouchableOpacity
       className="mx-4 mb-3 rounded-2xl overflow-hidden bg-white"
-      onPress={() => router.push(`/(tabs)/messages/${conversation.id}`)}
+      onPress={() =>
+        router.push(
+          `/(tabs)/messages/${conversation.id}?participantId=${conversation.participant_id}`
+        )
+      }
       style={{
         shadowColor: '#122F26',
         shadowOffset: { width: 0, height: 4 },

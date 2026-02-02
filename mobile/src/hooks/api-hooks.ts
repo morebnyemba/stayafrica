@@ -274,10 +274,47 @@ export function useHostBookings() {
 }
 
 // Host - Earnings
-export function useHostEarnings() {
-  return useQuery<HostEarnings>({
-    queryKey: ['host', 'earnings'],
-    queryFn: () => apiClient.getHostEarnings(),
+export function useHostEarnings(period: string = 'month') {
+  return useQuery<{ earnings: any[] }>({
+    queryKey: ['host', 'earnings', period],
+    queryFn: () => apiClient.getHostEarnings(period),
+  });
+}
+
+// Host - Analytics & Dashboard
+export function useHostAnalytics() {
+  return useQuery({
+    queryKey: ['host', 'analytics'],
+    queryFn: () => apiClient.getHostAnalytics(),
+  });
+}
+
+export function usePropertyPerformance() {
+  return useQuery({
+    queryKey: ['host', 'property-performance'],
+    queryFn: () => apiClient.getPropertyPerformance(),
+  });
+}
+
+export function useUpcomingCheckins(days: number = 7) {
+  return useQuery({
+    queryKey: ['host', 'checkins', days],
+    queryFn: () => apiClient.getUpcomingCheckins(days),
+  });
+}
+
+export function usePendingActions() {
+  return useQuery({
+    queryKey: ['host', 'pending-actions'],
+    queryFn: () => apiClient.getPendingActions(),
+  });
+}
+
+export function useBookingCalendar(propertyId: string, start?: string, end?: string) {
+  return useQuery({
+    queryKey: ['host', 'calendar', propertyId, start, end],
+    queryFn: () => apiClient.getBookingCalendar(propertyId, start, end),
+    enabled: !!propertyId,
   });
 }
 

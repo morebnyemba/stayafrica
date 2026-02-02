@@ -254,7 +254,9 @@ class APIClient {
   async getConversationMessages(conversationId: string): Promise<any> {
     try {
       return (
-        await this.client.get(`/messaging/conversations/${conversationId}/messages/`)
+        await this.client.get('/messaging/messages/', {
+          params: { conversation: conversationId },
+        })
       ).data;
     } catch (error: any) {
       if (error?.response?.status === 404) {
@@ -279,10 +281,12 @@ class APIClient {
     }
   }
 
-  async sendMessage(conversationId: string, message: string): Promise<any> {
+  async sendMessage(conversationId: string, receiverId: string, message: string): Promise<any> {
     return (
-      await this.client.post(`/messaging/conversations/${conversationId}/messages/`, {
-        content: message,
+      await this.client.post('/messaging/messages/', {
+        conversation: conversationId,
+        receiver: receiverId,
+        text: message,
       })
     ).data;
   }
@@ -341,7 +345,7 @@ class APIClient {
 
   // Host - Properties
   async getHostProperties(): Promise<{ results: Property[] }> {
-    return (await this.client.get('/properties/host/')).data;
+    return (await this.client.get('/properties/host_properties/')).data;
   }
 
   async createProperty(data: CreatePropertyRequest): Promise<Property> {
@@ -356,14 +360,36 @@ class APIClient {
     return (await this.client.delete(`/properties/${id}/`)).data;
   }
 
-  // Host - Bookings
-  async getHostBookings(): Promise<{ results: Booking[] }> {
-    return (await this.client.get('/bookings/host/')).data;
+  // Host - Analytics & Dashboard
+  async getHostAnalytics(): Promise<any> {
+    return (await this.client.get('/properties/host_analytics/')).data;
   }
 
-  // Host - Earnings
-  async getHostEarnings(): Promise<HostEarnings> {
-    return (await this.client.get('/payments/earnings/')).data;
+  async getHostEarnings(period: string = 'month'): Promise<{ earnings: any[] }> {
+    return (await this.client.get('/properties/host_earnings/', { params: { period } })).data;
+  }
+
+  async getPropertyPerformance(): Promise<{ properties: any[] }> {
+    return (await this.client.get('/properties/property_performance/')).data;
+  }
+
+  async getBookingCalendar(propertyId: string, start?: string, end?: string): Promise<any> {
+    return (await this.client.get(`/properties/${propertyId}/booking_calendar/`, {
+      params: { start, end },
+    })).data;
+  }
+
+  async getUpcomingCheckins(days: number = 7): Promise<any> {
+    return (await this.client.get('/properties/upcoming_checkins/', { params: { days } })).data;
+  }
+
+  async getPendingActions(): Promise<any> {
+    return (await this.client.get('/properties/pending_actions/')).data;
+  }
+
+  // Host - Bookings
+  async getHostBookings(): Promise<{ results: Booking[] }> {
+    return (await this.client.get('/bookings/')).data;
   }
 
   // Wallet/Payments

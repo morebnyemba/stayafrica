@@ -1,10 +1,16 @@
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '@/context/auth-context';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { 
+  useHostProperties, 
+  useHostAnalytics, 
+  usePendingActions,
+  usePropertyPerformance 
+} from '@/hooks/api-hooks';
 
 interface StatCardProps {
   icon: keyof typeof Ionicons.glyphMap;
@@ -28,6 +34,24 @@ export default function HostScreen() {
   const insets = useSafeAreaInsets();
   const { user, isAuthenticated } = useAuth();
   const [activeTab, setActiveTab] = useState<'overview' | 'analytics'>('overview');
+  
+  // Fetch host data
+  const { data: propertiesData } = useHostProperties();
+  const { data: analyticsData } = useHostAnalytics();
+  const { data: pendingData } = usePendingActions();
+  const { data: performanceData } = usePropertyPerformance();
+  
+  // Calculate totals
+  const properties = propertiesData?.results || [];
+  const totalProperties = properties.length;
+  const totalBookings = analyticsData?.total_bookings || 0;
+  const totalEarnings = analyticsData?.total_earnings || 0;
+  const avgRating = analyticsData?.average_rating || 0;
+  const pendingRequests = pendingData?.pending_bookings || 0;
+  const unreadMessages = pendingData?.unread_messages || 0;
+  const occupancyRate = analyticsData?.occupancy_rate || 0;
+  const responseRate = analyticsData?.response_rate || 0;
+  const bookingRate = analyticsData?.booking_conversion_rate || 0;
 
   if (!isAuthenticated) {
     return (
@@ -111,7 +135,13 @@ export default function HostScreen() {
   };
 
   // Pending Actions Alert
-  const PendingActionsAlert = () => (
+  const PendingActionsAlert = () => {
+    // Don't show if no pending actions
+    if (pendingRequests === 0 && unreadMessages === 0) {
+      return null;
+    }
+    
+    return (
     <View className="mx-4 mt-4">
       <LinearGradient
         colors={['#FEF3C7', '#FDE68A']}
@@ -125,17 +155,18 @@ export default function HostScreen() {
             <Text className="text-yellow-900 font-bold mb-2">Pending Actions</Text>
             <View className="flex-row items-center mb-1">
               <Ionicons name="ellipse" size={6} color="#D97706" />
-              <Text className="text-yellow-800 text-sm ml-2">0 booking requests awaiting response</Text>
+              <Text className="text-yellow-800 text-sm ml-2">{pendingRequests} booking requests awaiting response</Text>
             </View>
             <View className="flex-row items-center mb-1">
               <Ionicons name="ellipse" size={6} color="#D97706" />
-              <Text className="text-yellow-800 text-sm ml-2">0 unread messages</Text>
+              <Text className="text-yellow-800 text-sm ml-2">{unreadMessages} unread messages</Text>
             </View>
           </View>
         </View>
       </LinearGradient>
     </View>
-  );
+    );
+  };
 
   const StatCard = ({ icon, label, value, color, onPress }: StatCardProps) => (
     <TouchableOpacity 
@@ -193,8 +224,12 @@ export default function HostScreen() {
     </TouchableOpacity>
   );
 
-  // Analytics Tab Content
-  const AnalyticsContent = () => (
+  // Analytics Tab Content  
+  const AnalyticsContent = () => {
+    const hasData = totalBookings > 0 || totalEarnings > 0;
+    const performanceProperties = performanceData?.properties || [];
+    
+    return (
     <View className="px-4 mt-4">
       {/* Revenue Chart Placeholder */}
       <View className="bg-white rounded-2xl p-4 mb-4" style={{
@@ -205,11 +240,26 @@ export default function HostScreen() {
         elevation: 4,
       }}>
         <Text className="text-lg font-bold text-forest mb-4">Revenue Overview</Text>
-        <View className="h-40 bg-sand-100 rounded-xl items-center justify-center">
-          <Ionicons name="bar-chart-outline" size={48} color="#94a3b8" />
-          <Text className="text-moss mt-2">No earnings data yet</Text>
-          <Text className="text-sm text-moss/70">Start hosting to see analytics</Text>
-        </View>
+        {hasData ? (
+          <View className="h-40 bg-sand-100 rounded-xl p-4 justify-center">
+            <View className="flex-row items-baseline justify-between mb-2">
+              <Text className="text-3xl font-bold text-forest">${totalEarnings.toLocaleString()}</Text>
+              <Text className="text-sm text-moss">This Month</Text>
+            </View>
+            <View className="flex-row items-center">
+              <Ionicons name="trending-up" size={16} color="#10B981" />
+              <Text className="text-sm text-green-600 ml-1">
+                {totalBookings} bookings completed
+              </Text>
+            </View>
+          </View>
+        ) : (
+          <View className="h-40 bg-sand-100 rounded-xl items-center justify-center">
+            <Ionicons name="bar-chart-outline" size={48} color="#94a3b8" />
+            <Text className="text-moss mt-2">No earnings data yet</Text>
+            <Text className="text-sm text-moss/70">Start hosting to see analytics</Text>
+          </View>
+        )}
       </View>
 
       {/* Performance Metrics */}
@@ -224,15 +274,15 @@ export default function HostScreen() {
         
         <View className="flex-row justify-between mb-3">
           <View className="flex-1 items-center p-3 bg-blue-50 rounded-xl mr-2">
-            <Text className="text-2xl font-bold text-blue-600">0%</Text>
+            <Text className="text-2xl font-bold text-blue-600">{occupancyRate.toFixed(0)}%</Text>
             <Text className="text-xs text-blue-700 mt-1">Occupancy Rate</Text>
           </View>
           <View className="flex-1 items-center p-3 bg-green-50 rounded-xl mr-2">
-            <Text className="text-2xl font-bold text-green-600">0%</Text>
+            <Text className="text-2xl font-bold text-green-600">{responseRate.toFixed(0)}%</Text>
             <Text className="text-xs text-green-700 mt-1">Response Rate</Text>
           </View>
           <View className="flex-1 items-center p-3 bg-purple-50 rounded-xl">
-            <Text className="text-2xl font-bold text-purple-600">0%</Text>
+            <Text className="text-2xl font-bold text-purple-600">{bookingRate.toFixed(0)}%</Text>
             <Text className="text-xs text-purple-700 mt-1">Booking Rate</Text>
           </View>
         </View>
@@ -247,13 +297,35 @@ export default function HostScreen() {
         elevation: 4,
       }}>
         <Text className="text-lg font-bold text-forest mb-4">Property Performance</Text>
-        <View className="h-24 bg-sand-100 rounded-xl items-center justify-center">
-          <Ionicons name="home-outline" size={32} color="#94a3b8" />
-          <Text className="text-moss mt-2 text-sm">No properties listed yet</Text>
-        </View>
+        {performanceProperties.length > 0 ? (
+          performanceProperties.slice(0, 3).map((property: any, index: number) => (
+            <View key={property.id || index} className="bg-sand-50 rounded-xl p-3 mb-2">
+              <Text className="text-forest font-semibold mb-1" numberOfLines={1}>
+                {property.title || property.name || 'Property'}
+              </Text>
+              <View className="flex-row justify-between">
+                <Text className="text-xs text-moss">
+                  {property.booking_count || 0} bookings
+                </Text>
+                <Text className="text-xs text-moss">
+                  ${property.total_revenue || 0} revenue
+                </Text>
+                <Text className="text-xs text-moss">
+                  {property.occupancy_rate || 0}% occupied
+                </Text>
+              </View>
+            </View>
+          ))
+        ) : (
+          <View className="h-24 bg-sand-100 rounded-xl items-center justify-center">
+            <Ionicons name="home-outline" size={32} color="#94a3b8" />
+            <Text className="text-moss mt-2 text-sm">No properties listed yet</Text>
+          </View>
+        )}
       </View>
     </View>
-  );
+    );
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-sand-100">
@@ -316,6 +388,9 @@ export default function HostScreen() {
 
       {/* Verification Banner */}
       {activeTab === 'overview' && <VerificationBanner />}
+      
+  {/* Pending Actions */}
+  {activeTab === 'overview' && <PendingActionsAlert />}
 
       {/* Stats Cards */}
       {activeTab === 'overview' && (
@@ -324,14 +399,14 @@ export default function HostScreen() {
             <StatCard
               icon="home"
               label="Properties"
-              value="0"
+              value={totalProperties.toString()}
               color="#3A5C50"
               onPress={() => router.push('/host/properties')}
             />
             <StatCard
               icon="calendar"
               label="Bookings"
-              value="0"
+              value={totalBookings.toString()}
               color="#D9B168"
               onPress={() => router.push('/host/bookings')}
             />
@@ -341,14 +416,14 @@ export default function HostScreen() {
             <StatCard
               icon="cash"
               label="Earnings"
-              value="$0"
+              value={`$${totalEarnings.toLocaleString()}`}
               color="#10B981"
               onPress={() => router.push('/host/earnings')}
             />
             <StatCard
               icon="star"
               label="Avg Rating"
-              value="N/A"
+              value={avgRating > 0 ? avgRating.toFixed(1) : 'N/A'}
               color="#F59E0B"
             />
           </View>

@@ -61,7 +61,6 @@ export default function ProfileScreen() {
         <View className="flex-1 items-center justify-center px-6">
           <View className="bg-white rounded-3xl p-8 items-center" style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.1, shadowRadius: 16, elevation: 8 }}>
             <View className="bg-sand-200 rounded-full p-8 mb-6">
-          style={{ paddingTop: insets.top + 12 }}
             </View>
             <Text className="text-2xl font-bold text-forest mb-3">Welcome to StayAfrica</Text>
             <Text className="text-moss text-center mb-8 px-4 leading-6">

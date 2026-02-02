@@ -58,15 +58,31 @@ export default function EditProfileScreen() {
         phone_number: formData.phone_number.trim(),
         country_of_residence: formData.country_of_residence.trim(),
       };
+      if (payload.phone_number) {
+        const phoneRegex = /^\+?\d{9,15}$/;
+        if (!phoneRegex.test(payload.phone_number)) {
+          Alert.alert('Invalid phone number', 'Use 9-15 digits, optionally starting with +.');
+          return;
+        }
+      }
       const cleanedPayload = Object.fromEntries(
         Object.entries(payload).filter(([, value]) => value !== '')
       );
+      if (Object.keys(cleanedPayload).length === 0) {
+        Alert.alert('No changes', 'Update at least one field before saving.');
+        return;
+      }
       await updateProfile(cleanedPayload);
       Alert.alert('Success', 'Profile updated successfully!', [
         { text: 'OK', onPress: () => router.back() }
       ]);
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to update profile');
+      const serverMessage =
+        error?.response?.data?.detail ||
+        error?.response?.data?.error ||
+        error?.message ||
+        'Failed to update profile';
+      Alert.alert('Error', serverMessage);
     } finally {
       setIsLoading(false);
     }
