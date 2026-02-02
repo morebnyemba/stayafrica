@@ -1,7 +1,7 @@
-import { View, Text, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, TextInput } from 'react-native';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
-import { useConversations } from '@/hooks/api-hooks';
+import { useConversations, useUnreadCount } from '@/hooks/api-hooks';
 import { useAuth } from '@/context/auth-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -25,8 +25,10 @@ export default function MessagesScreen() {
   const insets = useSafeAreaInsets();
   const { user, isAuthenticated } = useAuth();
   const { data: conversationsData, isLoading } = useConversations();
+  const { data: unreadData } = useUnreadCount();
   const conversations = conversationsData?.results || [];
   const [sidebarVisible, setSidebarVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const handleAvatarPress = () => {
     if (isAuthenticated) {
@@ -35,6 +37,15 @@ export default function MessagesScreen() {
       router.push('/(auth)/login');
     }
   };
+
+  // Filter conversations by search query
+  const filteredConversations = conversations.filter((conv: any) => {
+    if (!searchQuery) return true;
+    const participantName = conv.participant_name?.toLowerCase() || '';
+    const lastMessage = conv.last_message?.toLowerCase() || '';
+    return participantName.includes(searchQuery.toLowerCase()) ||
+           lastMessage.includes(searchQuery.toLowerCase());
+  });
 
   if (!isAuthenticated) {
     return (
@@ -226,8 +237,16 @@ export default function MessagesScreen() {
             <View className="flex-row items-center">
               <Ionicons name="chatbubbles" size={16} color="#D9B168" />
               <Text className="text-sand-100 ml-2">
-                {conversations.length} {conversations.length === 1 ? 'conversation' : 'conversations'}
+                {filteredConversations.length} {filteredConversations.length === 1 ? 'conversation' : 'conversations'}
               </Text>
+              {unreadData?.unread_count > 0 && (
+                <>
+                  <Text className="text-sand-100 mx-1">•</Text>
+                  <Text className="text-gold font-semibold">
+                    {unreadData.unread_count} unread
+                  </Text>
+                </>
+              )}
             </View>
           </View>
           <TouchableOpacity
@@ -248,6 +267,23 @@ export default function MessagesScreen() {
             </LinearGradient>
           </TouchableOpacity>
         </View>
+
+        {/* Search Bar */}
+        <View className="mt-4 bg-white/10 rounded-xl px-4 py-2 flex-row items-center">
+          <Ionicons name="search" size={20} color="#D9B168" />
+          <TextInput
+            placeholder="Search conversations..."
+            placeholderTextColor="rgba(255, 255, 255, 0.5)"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            className="flex-1 ml-2 text-white"
+          />
+          {searchQuery ? (
+            <TouchableOpacity onPress={() => setSearchQuery('')}>
+              <Ionicons name="close-circle" size={20} color="rgba(255, 255, 255, 0.5)" />
+            </TouchableOpacity>
+          ) : null}
+        </View>
       </LinearGradient>
 
       {/* Conversations List */}
@@ -259,7 +295,7 @@ export default function MessagesScreen() {
         </View>
       ) : (
         <FlatList
-          data={conversations}
+          data={filteredConversations}
           renderItem={({ item }) => <ConversationCard conversation={item} />}
           keyExtractor={(item) => item.id}
           contentContainerStyle={{ paddingVertical: 12, paddingBottom: 40 }}
@@ -269,27 +305,33 @@ export default function MessagesScreen() {
                 <View className="bg-sand-200 rounded-full p-8 mb-6">
                   <Ionicons name="chatbubbles-outline" size={72} color="#3A5C50" />
                 </View>
-                <Text className="text-2xl font-bold text-forest mb-3">No Conversations Yet</Text>
-                <Text className="text-moss text-center mb-8 px-4 leading-6">
-                  Start a conversation with a host or guest to begin messaging
+                <Text className="text-2xl font-bold text-forest mb-3">
+                  {searchQuery ? 'No Results Found' : 'No Conversations Yet'}
                 </Text>
-                <TouchableOpacity
-                  onPress={() => router.push('/(tabs)/explore')}
-                >
-                  <LinearGradient
-                    colors={['#122F26', '#1d392f']}
-                    className="px-8 py-4 rounded-2xl"
-                    style={{
-                      shadowColor: '#122F26',
-                      shadowOffset: { width: 0, height: 4 },
-                      shadowOpacity: 0.3,
-                      shadowRadius: 8,
-                      elevation: 5,
-                    }}
+                <Text className="text-moss text-center mb-8 px-4 leading-6">
+                  {searchQuery 
+                    ? 'Try adjusting your search terms' 
+                    : 'Start a conversation with a host or guest to begin messaging'}
+                </Text>
+                {!searchQuery && (
+                  <TouchableOpacity
+                    onPress={() => router.push('/(tabs)/explore')}
                   >
-                    <Text className="text-gold font-bold text-base">Explore Properties</Text>
-                  </LinearGradient>
-                </TouchableOpacity>
+                    <LinearGradient
+                      colors={['#122F26', '#1d392f']}
+                      className="px-8 py-4 rounded-2xl"
+                      style={{
+                        shadowColor: '#122F26',
+                        shadowOffset: { width: 0, height: 4 },
+                        shadowOpacity: 0.3,
+                        shadowRadius: 8,
+                        elevation: 5,
+                      }}
+                    >
+                      <Text className="text-gold font-bold text-base">Explore Properties</Text>
+                    </LinearGradient>
+                  </TouchableOpacity>
+                )}
               </View>
             </View>
           }
