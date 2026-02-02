@@ -240,6 +240,8 @@ export default function RegisterScreen() {
           keyboardType={keyboardType}
           autoCapitalize={field === 'email' ? 'none' : 'words'}
           secureTextEntry={secureTextEntry && !toggleState}
+          blurOnSubmit={false}
+          returnKeyType="next"
         />
         {showToggle && (
           <TouchableOpacity onPress={onToggle}>

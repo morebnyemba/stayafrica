@@ -165,6 +165,8 @@ export default function LoginScreen() {
                       keyboardType="email-address"
                       autoCapitalize="none"
                       autoComplete="email"
+                      blurOnSubmit={false}
+                      returnKeyType="next"
                     />
                   </View>
                 </View>
@@ -201,6 +203,9 @@ export default function LoginScreen() {
                       secureTextEntry={!showPassword}
                       editable={!loading}
                       autoComplete="password"
+                      blurOnSubmit={false}
+                      returnKeyType="done"
+                      onSubmitEditing={handleLogin}
                     />
                     <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
                       <Ionicons 

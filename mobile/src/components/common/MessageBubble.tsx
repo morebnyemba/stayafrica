@@ -1,4 +1,5 @@
 import { View, Text, TextInput, TouchableOpacity, FlatList } from 'react-native';
+import { useState } from 'react';
 import { Message } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -30,7 +31,7 @@ interface MessageInputProps {
 }
 
 export function MessageInput({ onSend, loading }: MessageInputProps) {
-  const [text, setText] = view('');
+  const [text, setText] = useState('');
 
   const handleSend = () => {
     if (text.trim()) {
@@ -47,6 +48,10 @@ export function MessageInput({ onSend, loading }: MessageInputProps) {
         value={text}
         onChangeText={setText}
         editable={!loading}
+        multiline
+        blurOnSubmit={false}
+        returnKeyType="send"
+        onSubmitEditing={handleSend}
       />
       <TouchableOpacity
         className="ml-3 bg-primary-600 p-2 rounded-lg disabled:opacity-50"
