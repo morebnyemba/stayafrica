@@ -151,8 +151,9 @@ export function useEditMessage() {
   return useMutation({
     mutationFn: ({ messageId, text }: { messageId: string; text: string }) =>
       apiClient.editMessage(messageId, text),
-    onSuccess: (_, variables) => {
-      // Invalidate all conversation messages since we don't know which conversation this message belongs to
+    onSuccess: () => {
+      // Invalidate all conversations since the API doesn't return conversation ID in the response
+      // and we need to update both the conversation list and message details
       queryClient.invalidateQueries({ queryKey: ['conversations'] });
     },
   });
@@ -163,7 +164,8 @@ export function useDeleteMessage() {
   return useMutation({
     mutationFn: (messageId: string) => apiClient.deleteMessage(messageId),
     onSuccess: () => {
-      // Invalidate all conversation messages since we don't know which conversation this message belongs to
+      // Invalidate all conversations since the API doesn't return conversation ID in the response
+      // and we need to update both the conversation list and message details
       queryClient.invalidateQueries({ queryKey: ['conversations'] });
     },
   });

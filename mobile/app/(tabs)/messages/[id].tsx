@@ -31,7 +31,7 @@ export default function ConversationDetailScreen() {
     refetch,
   } = useConversationMessages(conversationId || '');
   const { mutateAsync: sendMessage, isPending } = useSendMessage();
-  const { mutate: editMessage, isPending: isEditing } = useEditMessage();
+  const editMessageMutation = useEditMessage();
   const { mutate: deleteMessage } = useDeleteMessage();
   const { mutate: markAsRead } = useMarkConversationAsRead();
   const { mutate: archiveConversation } = useArchiveConversation();
@@ -43,7 +43,8 @@ export default function ConversationDetailScreen() {
     if (conversationId) {
       markAsRead(conversationId);
     }
-  }, [conversationId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [conversationId]); // markAsRead is stable from useMutation
 
   const handleSend = async () => {
     const trimmed = message.trim();
@@ -61,7 +62,7 @@ export default function ConversationDetailScreen() {
 
   const handleSaveEdit = (messageId: string) => {
     if (!editText.trim()) return;
-    editMessage({ messageId, text: editText }, {
+    editMessageMutation.mutate({ messageId, text: editText }, {
       onSuccess: () => {
         setEditingMessageId(null);
         setEditText('');
@@ -221,7 +222,7 @@ export default function ConversationDetailScreen() {
                         </TouchableOpacity>
                         <TouchableOpacity 
                           onPress={() => handleSaveEdit(item.id)} 
-                          disabled={isEditing}
+                          disabled={editMessageMutation.isPending}
                           className="px-3 py-1 bg-gold rounded-lg"
                         >
                           <Text className="text-forest font-semibold">Save</Text>
