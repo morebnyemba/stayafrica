@@ -125,6 +125,57 @@ export function useSendMessage() {
   });
 }
 
+export function useMarkConversationAsRead() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (conversationId: string) => apiClient.markConversationAsRead(conversationId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['conversations'] });
+      queryClient.invalidateQueries({ queryKey: ['unread-count'] });
+    },
+  });
+}
+
+export function useArchiveConversation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (conversationId: string) => apiClient.archiveConversation(conversationId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['conversations'] });
+    },
+  });
+}
+
+export function useEditMessage() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ messageId, text }: { messageId: string; text: string }) =>
+      apiClient.editMessage(messageId, text),
+    onSuccess: (_, variables) => {
+      // Invalidate all conversation messages since we don't know which conversation this message belongs to
+      queryClient.invalidateQueries({ queryKey: ['conversations'] });
+    },
+  });
+}
+
+export function useDeleteMessage() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (messageId: string) => apiClient.deleteMessage(messageId),
+    onSuccess: () => {
+      // Invalidate all conversation messages since we don't know which conversation this message belongs to
+      queryClient.invalidateQueries({ queryKey: ['conversations'] });
+    },
+  });
+}
+
+export function useUnreadCount() {
+  return useQuery({
+    queryKey: ['unread-count'],
+    queryFn: () => apiClient.getTotalUnreadCount(),
+  });
+}
+
 // Reviews
 export function useSubmitReview() {
   const queryClient = useQueryClient();

@@ -287,6 +287,36 @@ class APIClient {
     ).data;
   }
 
+  async markConversationAsRead(conversationId: string): Promise<any> {
+    return (
+      await this.client.post(`/messaging/conversations/${conversationId}/mark_as_read/`)
+    ).data;
+  }
+
+  async archiveConversation(conversationId: string): Promise<any> {
+    return (
+      await this.client.post(`/messaging/conversations/${conversationId}/archive/`)
+    ).data;
+  }
+
+  async editMessage(messageId: string, text: string): Promise<any> {
+    return (
+      await this.client.put(`/messaging/messages/${messageId}/edit/`, { text })
+    ).data;
+  }
+
+  async deleteMessage(messageId: string): Promise<any> {
+    return (
+      await this.client.delete(`/messaging/messages/${messageId}/`)
+    ).data;
+  }
+
+  async getTotalUnreadCount(): Promise<any> {
+    return (
+      await this.client.get('/messaging/conversations/unread_count/')
+    ).data;
+  }
+
   // Reviews
   async submitReview(bookingId: string, data: any): Promise<any> {
     return (await this.client.post(`/reviews/`, { booking_id: bookingId, ...data })).data;
