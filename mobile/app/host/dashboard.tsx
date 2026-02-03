@@ -36,8 +36,8 @@ export default function HostDashboardScreen() {
   const properties = performanceData?.properties || [];
 
   const StatCard = ({ icon, label, value, color, trend, onPress }: any) => {
-    // Color mapping for proper Tailwind classes
-    const colorMap: Record<string, { bg: string, icon: string }> = {
+    // Color palette for proper Tailwind classes
+    const colorStyles: Record<string, { bg: string, icon: string }> = {
       green: { bg: '#D1FAE5', icon: '#10B981' },
       blue: { bg: '#DBEAFE', icon: '#3B82F6' },
       yellow: { bg: '#FEF3C7', icon: '#F59E0B' },
@@ -45,7 +45,7 @@ export default function HostDashboardScreen() {
       gold: { bg: '#FEF3E2', icon: '#D9B168' },
     };
 
-    const colorStyle = colorMap[color] || colorMap.gold;
+    const colorStyle = colorStyles[color] || colorStyles.gold;
 
     return (
       <TouchableOpacity
