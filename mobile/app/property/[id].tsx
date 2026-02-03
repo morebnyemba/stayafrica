@@ -10,6 +10,14 @@ import { apiClient } from '@/services/api-client';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
+interface Review {
+  id: string;
+  guest_name: string;
+  rating: number;
+  created_at: string;
+  comment: string;
+}
+
 export default function PropertyDetailScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -63,7 +71,7 @@ export default function PropertyDetailScreen() {
     </View>
   );
 
-  const ReviewCard = ({ review }: any) => (
+  const ReviewCard = ({ review }: { review: Review }) => (
     <View
       className="bg-white rounded-2xl p-4 mb-3"
       style={{
@@ -293,9 +301,9 @@ export default function PropertyDetailScreen() {
                   elevation: 4,
                 }}
               >
-                {property.amenities.slice(0, 6).map((amenity: string, index: number) => (
+                {property.amenities.slice(0, 6).map((amenity: string) => (
                   <AmenityItem
-                    key={index}
+                    key={amenity}
                     icon="checkmark-circle"
                     label={amenity}
                   />
@@ -350,7 +358,7 @@ export default function PropertyDetailScreen() {
                   </TouchableOpacity>
                 )}
               </View>
-              {reviews.slice(0, 3).map((review: any) => (
+              {reviews.slice(0, 3).map((review: Review) => (
                 <ReviewCard key={review.id} review={review} />
               ))}
             </View>
