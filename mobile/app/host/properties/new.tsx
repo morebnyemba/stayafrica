@@ -774,7 +774,7 @@ export default function NewPropertyScreen() {
           {!isLastStep ? (
             <TouchableOpacity
               onPress={goToNextStep}
-              className={currentStepIndex === 0 ? 'flex-1' : 'flex-1'}
+              className="flex-1"
             >
               <LinearGradient
                 colors={['#D9B168', '#bea04f']}
@@ -788,7 +788,7 @@ export default function NewPropertyScreen() {
             <TouchableOpacity
               onPress={handleCreate}
               disabled={loading}
-              className={currentStepIndex === 0 ? 'flex-1' : 'flex-1'}
+              className="flex-1"
             >
               <LinearGradient
                 colors={loading ? ['#94a3b8', '#94a3b8'] : ['#D9B168', '#bea04f']}
