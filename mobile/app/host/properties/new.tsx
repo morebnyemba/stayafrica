@@ -65,7 +65,6 @@ export default function NewPropertyScreen() {
   ];
 
   const countries = [
-    { label: 'Select Country', value: '' },
     { label: 'Zimbabwe', value: 'Zimbabwe' },
     { label: 'South Africa', value: 'South Africa' },
     { label: 'Botswana', value: 'Botswana' },
@@ -87,14 +86,39 @@ export default function NewPropertyScreen() {
   };
 
   const handleCreate = async () => {
+    // Validate required fields
     if (!formData.title || !formData.price || !formData.city) {
-      Alert.alert('Error', 'Please fill in all required fields');
+      Alert.alert('Error', 'Please fill in all required fields: Title, Price, and City');
+      return;
+    }
+
+    if (!formData.country) {
+      Alert.alert('Error', 'Please select a country');
       return;
     }
 
     setLoading(true);
     try {
-      // TODO: Implement property creation API call
+      // TODO: Implement property creation API call with all fields
+      const propertyData = {
+        title: formData.title,
+        description: formData.description,
+        property_type: formData.propertyType,
+        address: formData.address,
+        city: formData.city,
+        suburb: formData.suburb,
+        country: formData.country,
+        latitude: formData.latitude ? parseFloat(formData.latitude) : null,
+        longitude: formData.longitude ? parseFloat(formData.longitude) : null,
+        price_per_night: parseFloat(formData.price),
+        currency: formData.currency,
+        bedrooms: parseInt(formData.bedrooms) || 1,
+        bathrooms: parseInt(formData.bathrooms) || 1,
+        max_guests: parseInt(formData.maxGuests) || 2,
+      };
+      
+      console.log('Property data to submit:', propertyData);
+      
       await new Promise(resolve => setTimeout(resolve, 1500));
       Alert.alert('Success', 'Property created successfully!', [
         { text: 'OK', onPress: () => router.replace('/host/properties') }
@@ -345,7 +369,7 @@ export default function NewPropertyScreen() {
 
         <SelectField
           label="Property Type"
-          value={propertyTypes.find(pt => pt.value === formData.propertyType)?.label || 'House'}
+          value={propertyTypes.find(pt => pt.value === formData.propertyType)?.label || propertyTypes[0].label}
           onPress={() => setShowPropertyTypeModal(true)}
           required
         />
@@ -374,8 +398,9 @@ export default function NewPropertyScreen() {
         
         <SelectField
           label="Country"
-          value={countries.find(c => c.value === formData.country)?.label || 'Select Country'}
+          value={countries.find(c => c.value === formData.country)?.label || 'Tap to select'}
           onPress={() => setShowCountryModal(true)}
+          required
         />
 
         <View className="flex-row gap-3 mb-4">
@@ -422,7 +447,7 @@ export default function NewPropertyScreen() {
           <View className="flex-1">
             <SelectField
               label="Currency"
-              value={currencies.find(c => c.value === formData.currency)?.label || 'USD ($)'}
+              value={currencies.find(c => c.value === formData.currency)?.label || currencies[0].label}
               onPress={() => setShowCurrencyModal(true)}
               required
             />
