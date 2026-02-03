@@ -115,6 +115,12 @@ export function Sidebar({ isVisible, onClose }: SidebarProps) {
       authRequired: true,
     },
     {
+      id: 'about',
+      label: 'About StayAfrica',
+      icon: 'information-circle-outline',
+      route: '/about' as Href,
+    },
+    {
       id: 'settings',
       label: 'Settings',
       icon: 'settings-outline',
