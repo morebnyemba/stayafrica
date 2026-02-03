@@ -35,39 +35,55 @@ export default function HostDashboardScreen() {
   const unreadMessages = pendingData?.unread_messages || 0;
   const properties = performanceData?.properties || [];
 
-  const StatCard = ({ icon, label, value, color, trend, onPress }: any) => (
-    <TouchableOpacity
-      onPress={onPress}
-      disabled={!onPress}
-      className="bg-white rounded-2xl p-5 mb-4"
-      style={{
-        shadowColor: '#122F26',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.08,
-        shadowRadius: 8,
-        elevation: 4,
-        width: SCREEN_WIDTH / 2 - 24,
-      }}
-    >
-      <View className={`bg-${color}-100 rounded-full p-3 w-12 h-12 items-center justify-center mb-3`}>
-        <Ionicons name={icon} size={24} color={color === 'gold' ? '#D9B168' : `#${color}`} />
-      </View>
-      <Text className="text-2xl font-black text-forest mb-1">{value}</Text>
-      <Text className="text-xs text-moss mb-2">{label}</Text>
-      {trend && (
-        <View className="flex-row items-center">
-          <Ionicons 
-            name={trend > 0 ? 'trending-up' : 'trending-down'} 
-            size={12} 
-            color={trend > 0 ? '#10B981' : '#EF4444'} 
-          />
-          <Text className={`text-xs ml-1 ${trend > 0 ? 'text-green-600' : 'text-red-600'}`}>
-            {Math.abs(trend)}%
-          </Text>
+  const StatCard = ({ icon, label, value, color, trend, onPress }: any) => {
+    // Color mapping for proper Tailwind classes
+    const colorMap: Record<string, { bg: string, icon: string }> = {
+      green: { bg: '#D1FAE5', icon: '#10B981' },
+      blue: { bg: '#DBEAFE', icon: '#3B82F6' },
+      yellow: { bg: '#FEF3C7', icon: '#F59E0B' },
+      purple: { bg: '#EDE9FE', icon: '#8B5CF6' },
+      gold: { bg: '#FEF3E2', icon: '#D9B168' },
+    };
+
+    const colorStyle = colorMap[color] || colorMap.gold;
+
+    return (
+      <TouchableOpacity
+        onPress={onPress}
+        disabled={!onPress}
+        className="bg-white rounded-2xl p-5 mb-4"
+        style={{
+          shadowColor: '#122F26',
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.08,
+          shadowRadius: 8,
+          elevation: 4,
+          width: SCREEN_WIDTH / 2 - 24,
+        }}
+      >
+        <View 
+          className="rounded-full p-3 w-12 h-12 items-center justify-center mb-3"
+          style={{ backgroundColor: colorStyle.bg }}
+        >
+          <Ionicons name={icon} size={24} color={colorStyle.icon} />
         </View>
-      )}
-    </TouchableOpacity>
-  );
+        <Text className="text-2xl font-black text-forest mb-1">{value}</Text>
+        <Text className="text-xs text-moss mb-2">{label}</Text>
+        {trend && (
+          <View className="flex-row items-center">
+            <Ionicons 
+              name={trend > 0 ? 'trending-up' : 'trending-down'} 
+              size={12} 
+              color={trend > 0 ? '#10B981' : '#EF4444'} 
+            />
+            <Text className={`text-xs ml-1 ${trend > 0 ? 'text-green-600' : 'text-red-600'}`}>
+              {Math.abs(trend)}%
+            </Text>
+          </View>
+        )}
+      </TouchableOpacity>
+    );
+  };
 
   const PerformanceCard = ({ property }: any) => (
     <View
@@ -206,7 +222,7 @@ export default function HostDashboardScreen() {
             <TouchableOpacity
               key={days}
               onPress={() => setTimeRange(days as any)}
-              className={`flex-1 py-2 rounded-xl ${timeRange === days ? '' : ''}`}
+              className="flex-1 py-2 rounded-xl"
             >
               <LinearGradient
                 colors={timeRange === days ? ['#D9B168', '#bea04f'] : ['transparent', 'transparent']}
