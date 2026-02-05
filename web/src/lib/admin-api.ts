@@ -135,7 +135,7 @@ export const adminApi = {
   },
 
   // Analytics - these endpoints don't exist yet, will return mock data for now
-  async getRevenueAnalytics(params?: {
+  async getRevenueAnalytics(_params?: {
     period?: 'daily' | 'weekly' | 'monthly' | 'yearly';
     start_date?: string;
     end_date?: string;
@@ -144,7 +144,7 @@ export const adminApi = {
     return { data: [] };
   },
 
-  async getBookingAnalytics(params?: {
+  async getBookingAnalytics(_params?: {
     period?: 'daily' | 'weekly' | 'monthly' | 'yearly';
     start_date?: string;
     end_date?: string;
@@ -153,7 +153,7 @@ export const adminApi = {
     return { data: [] };
   },
 
-  async getUserAnalytics(params?: {
+  async getUserAnalytics(_params?: {
     period?: 'daily' | 'weekly' | 'monthly' | 'yearly';
     start_date?: string;
     end_date?: string;
