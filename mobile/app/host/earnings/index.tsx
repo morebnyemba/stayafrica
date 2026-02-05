@@ -2,6 +2,7 @@ import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Platform }
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { GlassmorphicView } from '@/components/common/GlassmorphicView';
 import { useAuth } from '@/context/auth-context';
 import { useHostEarnings } from '@/hooks/api-hooks';
 
@@ -60,13 +61,18 @@ export default function HostEarningsScreen() {
   }
 
   const StatCard = ({ title, value, subtitle, icon, color }: any) => (
-    <View className="bg-white rounded-2xl p-4 mb-3" style={{
-      shadowColor: '#122F26',
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.08,
-      shadowRadius: 8,
-      elevation: 4,
-    }}>
+    <GlassmorphicView
+      intensity={30}
+      tint="light"
+      className="p-4 mb-3"
+      style={{
+        shadowColor: '#122F26',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.08,
+        shadowRadius: 8,
+        elevation: 4,
+      }}
+    >
       <View className="flex-row items-center justify-between mb-2">
         <Text className="text-sm text-moss font-medium">{title}</Text>
         <LinearGradient
@@ -78,17 +84,22 @@ export default function HostEarningsScreen() {
       </View>
       <Text className="text-3xl font-black text-forest mb-1">{value}</Text>
       {subtitle && <Text className="text-xs text-moss/70">{subtitle}</Text>}
-    </View>
+    </GlassmorphicView>
   );
 
   const PayoutItem = ({ date, amount, status, property }: any) => (
-    <View className="bg-white rounded-2xl p-4 mb-3" style={{
-      shadowColor: '#122F26',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.05,
-      shadowRadius: 4,
-      elevation: 2,
-    }}>
+    <GlassmorphicView
+      intensity={30}
+      tint="light"
+      className="p-4 mb-3"
+      style={{
+        shadowColor: '#122F26',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
+        elevation: 2,
+      }}
+    >
       <View className="flex-row items-center justify-between">
         <View className="flex-1">
           <Text className="text-base font-semibold text-forest">{property}</Text>
@@ -107,7 +118,7 @@ export default function HostEarningsScreen() {
           </View>
         </View>
       </View>
-    </View>
+    </GlassmorphicView>
   );
 
   return (

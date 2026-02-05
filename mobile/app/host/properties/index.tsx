@@ -2,6 +2,7 @@ import { View, Text, FlatList, TouchableOpacity, Image, ActivityIndicator, Platf
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { GlassmorphicView } from '@/components/common/GlassmorphicView';
 import { useAuth } from '@/context/auth-context';
 import { useHostProperties } from '@/hooks/api-hooks';
 import type { Property } from '@/types';
@@ -63,67 +64,73 @@ export default function HostPropertiesScreen() {
 
   const PropertyItem = ({ property }: { property: Property }) => (
     <TouchableOpacity
-      className="bg-white rounded-2xl mb-3 mx-4 overflow-hidden"
+      className="mb-3 mx-4"
       onPress={() => router.push(`/host/properties/${property.id}`)}
-      style={{
-        shadowColor: '#122F26',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.08,
-        shadowRadius: 8,
-        elevation: 4,
-      }}
     >
-      <View className="flex-row">
-        {property.image_urls?.[0] ? (
-          <Image
-            source={{ uri: property.image_urls[0] }}
-            className="w-28 h-28"
-            resizeMode="cover"
-          />
-        ) : (
-          <View className="w-28 h-28 bg-sand-200 items-center justify-center">
-            <Ionicons name="image-outline" size={32} color="#3A5C50" />
-          </View>
-        )}
-        
-        <View className="flex-1 p-3">
-          <Text className="text-base font-bold text-forest mb-1" numberOfLines={1}>
-            {property.title}
-          </Text>
-          <View className="flex-row items-center mb-2">
-            <Ionicons name="location" size={14} color="#3A5C50" />
-            <Text className="text-sm text-moss ml-1" numberOfLines={1}>
-              {property.location?.city}, {property.location?.country}
-            </Text>
-          </View>
-          
-          <View className="flex-row items-center mb-2">
-            <View className="flex-row items-center mr-4">
-              <Ionicons name="bed" size={14} color="#3A5C50" />
-              <Text className="text-xs text-moss ml-1">{property.number_of_beds}</Text>
+      <GlassmorphicView
+        intensity={30}
+        tint="light"
+        className="overflow-hidden"
+        style={{
+          shadowColor: '#122F26',
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.08,
+          shadowRadius: 8,
+          elevation: 4,
+        }}
+      >
+        <View className="flex-row">
+          {property.image_urls?.[0] ? (
+            <Image
+              source={{ uri: property.image_urls[0] }}
+              className="w-28 h-28"
+              resizeMode="cover"
+            />
+          ) : (
+            <View className="w-28 h-28 bg-sand-200 items-center justify-center">
+              <Ionicons name="image-outline" size={32} color="#3A5C50" />
             </View>
-            <View className="flex-row items-center">
-              <Ionicons name="people" size={14} color="#3A5C50" />
-              <Text className="text-xs text-moss ml-1">{property.max_guests}</Text>
-            </View>
-          </View>
+          )}
           
-          <View className="flex-row items-center justify-between">
-            <Text className="text-lg font-bold text-gold">
-              ${property.price_per_night}/night
+          <View className="flex-1 p-3">
+            <Text className="text-base font-bold text-forest mb-1" numberOfLines={1}>
+              {property.title}
             </Text>
-            <View className={`px-2 py-1 rounded-full ${
-              property.is_available ? 'bg-green-100' : 'bg-red-100'
-            }`}>
-              <Text className={`text-xs font-semibold ${
-                property.is_available ? 'text-green-800' : 'text-red-800'
-              }`}>
-                {property.is_available ? 'Available' : 'Unavailable'}
+            <View className="flex-row items-center mb-2">
+              <Ionicons name="location" size={14} color="#3A5C50" />
+              <Text className="text-sm text-moss ml-1" numberOfLines={1}>
+                {property.location?.city}, {property.location?.country}
               </Text>
+            </View>
+            
+            <View className="flex-row items-center mb-2">
+              <View className="flex-row items-center mr-4">
+                <Ionicons name="bed" size={14} color="#3A5C50" />
+                <Text className="text-xs text-moss ml-1">{property.number_of_beds}</Text>
+              </View>
+              <View className="flex-row items-center">
+                <Ionicons name="people" size={14} color="#3A5C50" />
+                <Text className="text-xs text-moss ml-1">{property.max_guests}</Text>
+              </View>
+            </View>
+            
+            <View className="flex-row items-center justify-between">
+              <Text className="text-lg font-bold text-gold">
+                ${property.price_per_night}/night
+              </Text>
+              <View className={`px-2 py-1 rounded-full ${
+                property.is_available ? 'bg-green-100' : 'bg-red-100'
+              }`}>
+                <Text className={`text-xs font-semibold ${
+                  property.is_available ? 'text-green-800' : 'text-red-800'
+                }`}>
+                  {property.is_available ? 'Available' : 'Unavailable'}
+                </Text>
+              </View>
             </View>
           </View>
         </View>
-      </View>
+      </GlassmorphicView>
     </TouchableOpacity>
   );
 
@@ -139,9 +146,16 @@ export default function HostPropertiesScreen() {
       >
         <View className="flex-row items-center justify-between mb-4">
           <TouchableOpacity onPress={() => router.back()}>
-            <View className="w-10 h-10 rounded-xl items-center justify-center" style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}>
-              <Ionicons name="arrow-back" size={24} color="#fff" />
-            </View>
+            <GlassmorphicView
+              intensity={40}
+              tint="dark"
+              borderRadius={12}
+              style={{ width: 40, height: 40 }}
+            >
+              <View className="w-10 h-10 rounded-xl items-center justify-center">
+                <Ionicons name="arrow-back" size={24} color="#fff" />
+              </View>
+            </GlassmorphicView>
           </TouchableOpacity>
           
           <TouchableOpacity

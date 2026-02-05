@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { GlassmorphicView } from '@/components/common/GlassmorphicView';
 import { useAuth } from '@/context/auth-context';
 
 export default function HostSettingsScreen() {
@@ -21,9 +22,16 @@ export default function HostSettingsScreen() {
           style={{ paddingTop: Platform.OS === 'ios' ? 50 : 35 }}
         >
           <TouchableOpacity onPress={() => router.back()} className="mb-4">
-            <View className="w-10 h-10 rounded-xl items-center justify-center" style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}>
-              <Ionicons name="arrow-back" size={24} color="#fff" />
-            </View>
+            <GlassmorphicView
+              intensity={40}
+              tint="dark"
+              borderRadius={12}
+              style={{ width: 40, height: 40 }}
+            >
+              <View className="w-10 h-10 rounded-xl items-center justify-center">
+                <Ionicons name="arrow-back" size={24} color="#fff" />
+              </View>
+            </GlassmorphicView>
           </TouchableOpacity>
           <Text className="text-3xl font-black text-white tracking-tight">
             Host Settings
@@ -37,13 +45,18 @@ export default function HostSettingsScreen() {
   }
 
   const SettingToggle = ({ icon, title, description, value, onToggle }: any) => (
-    <View className="bg-white rounded-2xl p-4 mb-3 flex-row items-center" style={{
-      shadowColor: '#122F26',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.05,
-      shadowRadius: 4,
-      elevation: 2,
-    }}>
+    <GlassmorphicView
+      intensity={30}
+      tint="light"
+      className="p-4 mb-3 flex-row items-center"
+      style={{
+        shadowColor: '#122F26',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
+        elevation: 2,
+      }}
+    >
       <LinearGradient
         colors={['#3A5C5020', '#3A5C5010']}
         className="w-12 h-12 rounded-full items-center justify-center"
@@ -60,32 +73,38 @@ export default function HostSettingsScreen() {
         trackColor={{ false: '#e5dfd0', true: '#10B981' }}
         thumbColor={value ? '#fff' : '#fff'}
       />
-    </View>
+    </GlassmorphicView>
   );
 
   const SettingLink = ({ icon, title, description, onPress, color = '#3A5C50' }: any) => (
     <TouchableOpacity
-      className="bg-white rounded-2xl p-4 mb-3 flex-row items-center"
+      className="mb-3"
       onPress={onPress}
-      style={{
-        shadowColor: '#122F26',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 4,
-        elevation: 2,
-      }}
     >
-      <LinearGradient
-        colors={[`${color}20`, `${color}10`]}
-        className="w-12 h-12 rounded-full items-center justify-center"
+      <GlassmorphicView
+        intensity={30}
+        tint="light"
+        className="p-4 flex-row items-center"
+        style={{
+          shadowColor: '#122F26',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.05,
+          shadowRadius: 4,
+          elevation: 2,
+        }}
       >
-        <Ionicons name={icon} size={24} color={color} />
-      </LinearGradient>
-      <View className="flex-1 ml-4">
-        <Text className="text-base font-semibold text-forest">{title}</Text>
-        <Text className="text-sm text-moss mt-1">{description}</Text>
-      </View>
-      <Ionicons name="chevron-forward" size={20} color="#3A5C50" />
+        <LinearGradient
+          colors={[`${color}20`, `${color}10`]}
+          className="w-12 h-12 rounded-full items-center justify-center"
+        >
+          <Ionicons name={icon} size={24} color={color} />
+        </LinearGradient>
+        <View className="flex-1 ml-4">
+          <Text className="text-base font-semibold text-forest">{title}</Text>
+          <Text className="text-sm text-moss mt-1">{description}</Text>
+        </View>
+        <Ionicons name="chevron-forward" size={20} color="#3A5C50" />
+      </GlassmorphicView>
     </TouchableOpacity>
   );
 

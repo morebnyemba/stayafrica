@@ -7,10 +7,8 @@ import Animated, { FadeInRight } from 'react-native-reanimated';
 import { useProperties } from '@/hooks/api-hooks';
 import { PropertyCard } from '@/components/property/PropertyCard';
 import { PropertyCardSkeleton } from '@/components/common/Skeletons';
-import { Avatar } from '@/components/common/Avatar';
-import { Sidebar } from '@/components/common/Sidebar';
+import { AppHeader } from '@/components/common/AppHeader';
 import { GlassmorphicView } from '@/components/common/GlassmorphicView';
-import { useAuth } from '@/context/auth-context';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const CATEGORIES = [
@@ -27,9 +25,7 @@ export default function ExploreScreen() {
   const insets = useSafeAreaInsets();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [sidebarVisible, setSidebarVisible] = useState(false);
   const { data: propertiesData, isLoading } = useProperties();
-  const { user, isAuthenticated } = useAuth();
   const properties = propertiesData?.results || [];
   
   const filteredProperties = properties.filter((property: any) => {
@@ -59,104 +55,53 @@ export default function ExploreScreen() {
     }));
   }, [filteredProperties]);
 
-  const handleAvatarPress = () => {
-    if (isAuthenticated) {
-      router.push('/(tabs)/profile');
-    } else {
-      router.push('/(auth)/login');
-    }
-  };
-
   const handlePropertyPress = (id: string) => {
     router.push(`/(tabs)/explore/${id}`);
   };
 
   return (
     <View className="flex-1 bg-sand-100">
-      {/* Sidebar */}
-      <Sidebar
-        isVisible={sidebarVisible}
-        onClose={() => setSidebarVisible(false)}
-      />
-
-      {/* Modern Header with Gradient */}
+      {/* Consistent Header with Sidebar */}
       <LinearGradient
         colors={['#122F26', '#1d392f', '#2d4a40']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        className="px-4 pb-6"
-        style={{ paddingTop: insets.top + 12 }}
+        className="pb-6"
       >
-        {/* Top Navigation Bar with Menu and Avatar */}
-        <View className="flex-row items-center justify-between mb-4">
-          {/* Hamburger Menu with Glassmorphism */}
+        <AppHeader />
+        
+        <View className="px-4">
+          {/* Title */}
+          <Text className="text-3xl font-black text-white tracking-tight mb-1">
+            Explore
+          </Text>
+          <Text className="text-sand-200 text-sm mb-4">
+            Discover amazing places
+          </Text>
+
+          {/* Search Bar with Glassmorphism */}
           <GlassmorphicView
             intensity={40}
             tint="dark"
-            borderRadius={12}
-            style={{ width: 40, height: 40 }}
+            borderRadius={16}
           >
-            <TouchableOpacity
-              onPress={() => setSidebarVisible(true)}
-              className="w-10 h-10 rounded-xl items-center justify-center"
-            >
-              <Ionicons name="menu" size={24} color="#fff" />
-            </TouchableOpacity>
+            <View className="flex-row items-center px-4 py-3 bg-white/10">
+              <Ionicons name="search" size={22} color="#D9B168" />
+              <TextInput
+                className="flex-1 ml-3 text-base text-white"
+                placeholder="Search destinations, cities..."
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                placeholderTextColor="rgba(255, 255, 255, 0.5)"
+              />
+              {searchQuery.length > 0 && (
+                <TouchableOpacity onPress={() => setSearchQuery('')}>
+                  <Ionicons name="close-circle" size={20} color="rgba(255, 255, 255, 0.5)" />
+                </TouchableOpacity>
+              )}
+            </View>
           </GlassmorphicView>
-
-          {/* Avatar for Auth Options */}
-          <Avatar
-            uri={null}
-            firstName={user?.first_name}
-            lastName={user?.last_name}
-            size="small"
-            onPress={handleAvatarPress}
-            showBadge={isAuthenticated}
-          />
         </View>
-
-        {/* Title Section */}
-        <View className="mb-5">
-          <Text className="text-4xl font-black text-white tracking-tight mb-2">
-            Discover Africa
-          </Text>
-          <View className="flex-row items-center">
-            <Ionicons name="location" size={16} color="#D9B168" />
-            <Text className="text-base text-sand-100 ml-2">
-              {properties.length} unique stays waiting for you
-            </Text>
-          </View>
-        </View>
-
-        {/* Modern Search Bar with Glassmorphism */}
-        <GlassmorphicView
-          intensity={30}
-          tint="dark"
-          borderRadius={16}
-          style={{
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.2,
-            shadowRadius: 8,
-            elevation: 5,
-          }}
-        >
-          <View className="flex-row items-center px-4 py-4 border border-white/20">
-            <Ionicons name="search" size={22} color="#D9B168" />
-            <TextInput
-              className="flex-1 ml-3 text-base text-white"
-              placeholder="Search destinations, cities..."
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              placeholderTextColor="rgba(255, 255, 255, 0.5)"
-            />
-            {searchQuery.length > 0 && (
-              <TouchableOpacity onPress={() => setSearchQuery('')}>
-                <Ionicons name="close-circle" size={20} color="rgba(255, 255, 255, 0.5)" />
-              </TouchableOpacity>
-            )}
-          </View>
-        </GlassmorphicView>
       </LinearGradient>
 
       {/* Categories Filter */}

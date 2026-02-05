@@ -75,13 +75,18 @@ export default function WalletScreen() {
   }
 
   const TransactionItem = ({ icon, title, amount, date, type }: TransactionItemProps) => (
-    <View className="bg-white rounded-2xl p-4 mb-3 flex-row items-center" style={{
-      shadowColor: '#122F26',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.05,
-      shadowRadius: 4,
-      elevation: 2,
-    }}>
+    <GlassmorphicView
+      intensity={30}
+      tint="light"
+      className="p-4 mb-3 flex-row items-center"
+      style={{
+        shadowColor: '#122F26',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
+        elevation: 2,
+      }}
+    >
       <LinearGradient
         colors={type === 'credit' ? ['#10B981', '#059669'] : ['#EF4444', '#DC2626']}
         className="w-12 h-12 rounded-full items-center justify-center"
@@ -97,7 +102,7 @@ export default function WalletScreen() {
       }`}>
         {type === 'credit' ? '+' : '-'}${amount}
       </Text>
-    </View>
+    </GlassmorphicView>
   );
 
   const TransactionSkeleton = () => (
