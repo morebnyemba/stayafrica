@@ -330,7 +330,11 @@ class HostAnalyticsService:
             })
         
         # Check for properties without reviews
-        properties_without_reviews = properties.filter(reviews__isnull=True).count()
+        from apps.reviews.models import Review
+        property_ids_with_reviews = Review.objects.filter(
+            property_id__in=properties.values_list('id', flat=True)
+        ).values_list('property_id', flat=True).distinct()
+        properties_without_reviews = properties.exclude(id__in=property_ids_with_reviews).count()
         if properties_without_reviews > 0:
             insights['recommendations'].append({
                 'type': 'no_reviews',

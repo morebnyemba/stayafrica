@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from apps.users.models import User, UserPreference, UserPropertyInteraction
 from django.contrib.auth.hashers import make_password
+from django.core.validators import RegexValidator
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 class UserSerializer(serializers.ModelSerializer):
@@ -35,6 +36,17 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 class UserProfileSerializer(serializers.ModelSerializer):
+    phone_number = serializers.CharField(
+        required=False, 
+        allow_blank=True,
+        validators=[
+            RegexValidator(
+                regex=r'^(\+?1?\d{9,15})?$',  # Allow empty or valid phone
+                message='Phone number must be between 9 and 15 digits when provided.'
+            )
+        ]
+    )
+    
     class Meta:
         model = User
         fields = [
@@ -42,6 +54,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'role', 'country_of_residence', 'is_verified', 'profile_picture', 'bio',
             'is_online', 'last_seen'
         ]
+        read_only_fields = ['id', 'email', 'username', 'role', 'is_verified', 'is_online', 'last_seen']
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     username_field = 'email'

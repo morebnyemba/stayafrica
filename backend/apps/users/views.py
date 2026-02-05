@@ -55,31 +55,42 @@ class UserViewSet(viewsets.ModelViewSet):
             serializer = UserProfileSerializer(user)
             return Response(serializer.data)
         
-        # Sanitize text inputs
-        if 'bio' in request.data:
-            request.data['bio'] = sanitize_input(request.data['bio'])
-        if 'first_name' in request.data:
-            request.data['first_name'] = sanitize_input(request.data['first_name'])
-        if 'last_name' in request.data:
-            request.data['last_name'] = sanitize_input(request.data['last_name'])
-        
-        serializer = UserProfileSerializer(user, data=request.data, partial=True)
-        if serializer.is_valid():
-            with transaction.atomic():
-                updated_user = serializer.save()
-                
-                # Log the action
-                AuditLoggerService.log_action(
-                    user=user,
-                    action='update',
-                    model=User,
-                    object_id=user.id,
-                    changes={'fields_updated': list(request.data.keys())}
-                )
+        try:
+            # Sanitize text inputs
+            if 'bio' in request.data:
+                request.data['bio'] = sanitize_input(request.data['bio'])
+            if 'first_name' in request.data:
+                request.data['first_name'] = sanitize_input(request.data['first_name'])
+            if 'last_name' in request.data:
+                request.data['last_name'] = sanitize_input(request.data['last_name'])
             
-            logger.info(f"User profile updated: {user.id}")
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            serializer = UserProfileSerializer(user, data=request.data, partial=True)
+            if serializer.is_valid():
+                with transaction.atomic():
+                    updated_user = serializer.save()
+                    
+                    # Log the action
+                    from django.contrib.contenttypes.models import ContentType
+                    content_type = ContentType.objects.get_for_model(User)
+                    AuditLoggerService.log_action(
+                        user=user,
+                        action='update',
+                        content_type=content_type,
+                        object_id=user.id,
+                        changes={'fields_updated': list(request.data.keys())}
+                    )
+                
+                logger.info(f"User profile updated: {user.id}")
+                return Response(serializer.data)
+            
+            logger.error(f"Profile update validation failed for user {user.id}: {serializer.errors}")
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            logger.error(f"Error updating profile for user {user.id}: {str(e)}", exc_info=True)
+            return Response(
+                {'error': 'Failed to update profile. Please check your input and try again.'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
     
     @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
     @log_action('change_password')
