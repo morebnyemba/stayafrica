@@ -55,7 +55,7 @@ export default function PropertiesManagement() {
 
   const handleReject = async (propertyId: string) => {
     try {
-      await adminApi.rejectProperty(propertyId);
+      await adminApi.rejectProperty(propertyId, 'Rejected by admin');
       toast.success('Property rejected successfully');
       loadProperties();
     } catch (err) {
