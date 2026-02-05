@@ -49,7 +49,7 @@ export default function AdminDashboard() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#D9B168]"></div>
       </div>
     );
   }
@@ -90,7 +90,7 @@ export default function AdminDashboard() {
       label: 'Total Properties',
       value: stats.total_properties.toLocaleString(),
       icon: Home,
-      color: 'bg-orange-500',
+      color: 'bg-[#D9B168]',
       change: '+15.7%',
     },
     {
@@ -122,8 +122,8 @@ export default function AdminDashboard() {
   return (
     <div className="p-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-        <p className="text-gray-600 mt-2">Overview of your platform's performance</p>
+        <h1 className="text-3xl font-bold text-[#122F26]">Admin Dashboard</h1>
+        <p className="text-[#3A5C50] mt-2">Overview of your platform's performance</p>
       </div>
 
       {/* Stats Cards */}
@@ -136,8 +136,8 @@ export default function AdminDashboard() {
               </div>
               <span className="text-sm font-medium text-green-600">{stat.change}</span>
             </div>
-            <h3 className="text-gray-600 text-sm font-medium">{stat.label}</h3>
-            <p className="text-2xl font-bold text-gray-900 mt-1">{stat.value}</p>
+            <h3 className="text-[#3A5C50] text-sm font-medium">{stat.label}</h3>
+            <p className="text-2xl font-bold text-[#122F26] mt-1">{stat.value}</p>
           </div>
         ))}
       </div>
@@ -146,7 +146,7 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         {/* Bookings Trend */}
         <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Bookings Trend</h3>
+          <h3 className="text-lg font-semibold text-[#122F26] mb-4">Bookings Trend</h3>
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={monthlyBookings}>
               <CartesianGrid strokeDasharray="3 3" />
@@ -154,14 +154,14 @@ export default function AdminDashboard() {
               <YAxis />
               <Tooltip />
               <Legend />
-              <Line type="monotone" dataKey="bookings" stroke="#f97316" strokeWidth={2} />
+              <Line type="monotone" dataKey="bookings" stroke="#D9B168" strokeWidth={2} />
             </LineChart>
           </ResponsiveContainer>
         </div>
 
         {/* Revenue Trend */}
         <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Revenue Trend</h3>
+          <h3 className="text-lg font-semibold text-[#122F26] mb-4">Revenue Trend</h3>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={monthlyBookings}>
               <CartesianGrid strokeDasharray="3 3" />
@@ -179,7 +179,7 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Property Distribution */}
         <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Property Types Distribution</h3>
+          <h3 className="text-lg font-semibold text-[#122F26] mb-4">Property Types Distribution</h3>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie
@@ -199,34 +199,34 @@ export default function AdminDashboard() {
 
         {/* Recent Activity */}
         <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
+          <h3 className="text-lg font-semibold text-[#122F26] mb-4">Recent Activity</h3>
           <div className="space-y-4">
             <div className="flex items-start space-x-3 pb-3 border-b">
               <div className="w-2 h-2 rounded-full bg-green-500 mt-2"></div>
               <div>
-                <p className="text-sm font-medium text-gray-900">New property listed</p>
-                <p className="text-xs text-gray-600">Luxury Villa in Cape Town • 2 hours ago</p>
+                <p className="text-sm font-medium text-[#122F26]">New property listed</p>
+                <p className="text-xs text-[#3A5C50]">Luxury Villa in Cape Town • 2 hours ago</p>
               </div>
             </div>
             <div className="flex items-start space-x-3 pb-3 border-b">
               <div className="w-2 h-2 rounded-full bg-blue-500 mt-2"></div>
               <div>
-                <p className="text-sm font-medium text-gray-900">New booking confirmed</p>
-                <p className="text-xs text-gray-600">Booking #12345 • 3 hours ago</p>
+                <p className="text-sm font-medium text-[#122F26]">New booking confirmed</p>
+                <p className="text-xs text-[#3A5C50]">Booking #12345 • 3 hours ago</p>
               </div>
             </div>
             <div className="flex items-start space-x-3 pb-3 border-b">
               <div className="w-2 h-2 rounded-full bg-purple-500 mt-2"></div>
               <div>
-                <p className="text-sm font-medium text-gray-900">New user registered</p>
-                <p className="text-xs text-gray-600">John Doe joined as host • 5 hours ago</p>
+                <p className="text-sm font-medium text-[#122F26]">New user registered</p>
+                <p className="text-xs text-[#3A5C50]">John Doe joined as host • 5 hours ago</p>
               </div>
             </div>
             <div className="flex items-start space-x-3 pb-3 border-b">
-              <div className="w-2 h-2 rounded-full bg-orange-500 mt-2"></div>
+              <div className="w-2 h-2 rounded-full bg-[#D9B168] mt-2"></div>
               <div>
-                <p className="text-sm font-medium text-gray-900">Payment processed</p>
-                <p className="text-xs text-gray-600">$1,250 via Stripe • 6 hours ago</p>
+                <p className="text-sm font-medium text-[#122F26]">Payment processed</p>
+                <p className="text-xs text-[#3A5C50]">$1,250 via Stripe • 6 hours ago</p>
               </div>
             </div>
           </div>

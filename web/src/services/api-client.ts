@@ -2,6 +2,9 @@ import axios, { AxiosInstance } from 'axios';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || (process.env.NODE_ENV === 'production' ? 'https://api.zimlegend.online' : 'http://localhost:8000');
 
+// Remove any trailing /api/v1 from the base URL to prevent duplication
+const cleanBaseUrl = API_BASE_URL.replace(/\/api\/v1\/?$/, '');
+
 class ApiClient {
   private client: AxiosInstance;
 
@@ -17,7 +20,7 @@ class ApiClient {
 
   constructor() {
     this.client = axios.create({
-      baseURL: `${API_BASE_URL}/api/v1`,
+      baseURL: `${cleanBaseUrl}/api/v1`,
       headers: {
         'Content-Type': 'application/json',
       },

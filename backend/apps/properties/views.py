@@ -940,6 +940,64 @@ class PropertyViewSet(viewsets.ModelViewSet):
                 {'error': 'Failed to discover POIs'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+    
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    def approve(self, request, pk=None):
+        """Admin action to approve a property"""
+        if not request.user.is_staff:
+            return Response(
+                {'error': 'Only admin users can approve properties'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        property_obj = self.get_object()
+        property_obj.status = 'active'
+        property_obj.save()
+        
+        # Log the action
+        from django.contrib.contenttypes.models import ContentType
+        from services.audit_logger import AuditLoggerService
+        content_type = ContentType.objects.get_for_model(Property)
+        AuditLoggerService.log_action(
+            user=request.user,
+            action='approve',
+            content_type=content_type,
+            object_id=property_obj.id,
+            changes={'status': 'active', 'approved_by': request.user.id}
+        )
+        
+        serializer = self.get_serializer(property_obj)
+        return Response(serializer.data)
+    
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    def reject(self, request, pk=None):
+        """Admin action to reject a property"""
+        if not request.user.is_staff:
+            return Response(
+                {'error': 'Only admin users can reject properties'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        property_obj = self.get_object()
+        reason = request.data.get('reason', 'Rejected by admin')
+        
+        property_obj.status = 'rejected'
+        property_obj.save()
+        
+        # Log the action
+        from django.contrib.contenttypes.models import ContentType
+        from services.audit_logger import AuditLoggerService
+        content_type = ContentType.objects.get_for_model(Property)
+        AuditLoggerService.log_action(
+            user=request.user,
+            action='reject',
+            content_type=content_type,
+            object_id=property_obj.id,
+            changes={'status': 'rejected', 'reason': reason, 'rejected_by': request.user.id}
+        )
+        
+        serializer = self.get_serializer(property_obj)
+        return Response(serializer.data)
 
 
 # Additional view classes for search and filtering
