@@ -101,50 +101,34 @@ export default function ProfileScreen() {
       className="mb-3"
       onPress={onPress}
     >
-      {gradient ? (
-        <LinearGradient
-          colors={['#122F26', '#1d392f']}
-          className="rounded-2xl overflow-hidden"
-          style={{
-            shadowColor: '#122F26',
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.05,
-            shadowRadius: 4,
-            elevation: 2,
-          }}
-        >
-          <View className="flex-row items-center p-4 bg-white rounded-2xl">
-            <View className="bg-gold/20 rounded-full p-2.5 mr-4">
-              <Ionicons name={iconName} size={20} color={iconColor || "#D9B168"} />
-            </View>
-            <View className="flex-1">
-              <Text className="text-sand-200 text-xs mb-0.5">{label}</Text>
-              <Text className="text-white font-semibold">{value}</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color="#D9B168" />
-          </View>
-        </LinearGradient>
-      ) : (
-        <View
-          className="flex-row items-center p-4 bg-white rounded-2xl"
-          style={{
-            shadowColor: '#122F26',
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.05,
-            shadowRadius: 4,
-            elevation: 2,
-          }}
-        >
+      <View
+        className="flex-row items-center p-4 bg-white rounded-2xl"
+        style={{
+          shadowColor: '#122F26',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.05,
+          shadowRadius: 4,
+          elevation: 2,
+        }}
+      >
+        {gradient ? (
+          <LinearGradient
+            colors={['#D9B168', '#bea04f']}
+            className="rounded-full p-2.5 mr-4"
+          >
+            <Ionicons name={iconName} size={20} color="#122F26" />
+          </LinearGradient>
+        ) : (
           <View className="bg-sand-200 rounded-full p-2.5 mr-4">
             <Ionicons name={iconName} size={20} color={iconColor || "#3A5C50"} />
           </View>
-          <View className="flex-1">
-            <Text className="text-moss text-xs mb-0.5">{label}</Text>
-            <Text className="text-forest font-semibold">{value}</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={20} color="#3A5C50" />
+        )}
+        <View className="flex-1">
+          <Text className="text-moss text-xs mb-0.5">{label}</Text>
+          <Text className="text-forest font-semibold">{value}</Text>
         </View>
-      )}
+        <Ionicons name="chevron-forward" size={20} color={gradient ? "#D9B168" : "#3A5C50"} />
+      </View>
     </TouchableOpacity>
   );
 
@@ -535,7 +519,7 @@ export default function ProfileScreen() {
       </View>
 
       {/* Logout */}
-      <View className="p-4 bg-white rounded-2xl mt-6 mb-8">
+      <View className="px-4 mt-6 mb-8">
         <TouchableOpacity
           className="rounded-2xl overflow-hidden"
           onPress={handleLogout}
