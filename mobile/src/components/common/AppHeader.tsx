@@ -5,6 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '@/context/auth-context';
 import { Avatar } from './Avatar';
 import { Sidebar } from './Sidebar';
+import { GlassmorphicView } from './GlassmorphicView';
 import { useRouter } from 'expo-router';
 
 interface AppHeaderProps {
@@ -33,19 +34,29 @@ export function AppHeader({ transparent = false }: AppHeaderProps) {
       }}
     >
       {/* Hamburger Menu */}
-      <TouchableOpacity
-        onPress={() => setSidebarVisible(true)}
-        className="w-10 h-10 rounded-xl items-center justify-center"
+      <GlassmorphicView
+        intensity={transparent ? 40 : 0}
+        tint={transparent ? 'dark' : 'light'}
+        borderRadius={12}
         style={{
-          backgroundColor: transparent ? 'rgba(255, 255, 255, 0.2)' : '#f4f1ea',
+          width: 40,
+          height: 40,
         }}
       >
-        <Ionicons
-          name="menu"
-          size={24}
-          color={transparent ? '#fff' : '#122F26'}
-        />
-      </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => setSidebarVisible(true)}
+          className="w-10 h-10 rounded-xl items-center justify-center"
+          style={{
+            backgroundColor: transparent ? 'transparent' : '#f4f1ea',
+          }}
+        >
+          <Ionicons
+            name="menu"
+            size={24}
+            color={transparent ? '#fff' : '#122F26'}
+          />
+        </TouchableOpacity>
+      </GlassmorphicView>
 
       {/* Avatar */}
       <Avatar

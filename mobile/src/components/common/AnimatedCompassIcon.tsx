@@ -14,7 +14,7 @@ export function AnimatedCompassIcon({
   size = 24,
   color = '#D9B168',
   style,
-  durationMs = 4000,
+  durationMs = 8000,
   filled = false,
 }: AnimatedCompassIconProps) {
   const rotateAnim = useRef(new Animated.Value(0)).current;
@@ -24,7 +24,7 @@ export function AnimatedCompassIcon({
       Animated.timing(rotateAnim, {
         toValue: 1,
         duration: durationMs,
-        easing: Easing.linear,
+        easing: Easing.bezier(0.4, 0.0, 0.2, 1.0), // Smooth ease-in-out
         useNativeDriver: true,
       })
     );

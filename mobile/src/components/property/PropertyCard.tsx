@@ -2,6 +2,7 @@ import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import { GlassmorphicView } from '@/components/common/GlassmorphicView';
 import { Property } from '@/types';
 
 interface PropertyCardProps {
@@ -89,24 +90,28 @@ export function PropertyCard({
             className="absolute bottom-0 left-0 right-0 h-20"
           />
 
-          {/* Wishlist Remove Button */}
+          {/* Wishlist Remove Button with Glassmorphism */}
           {showRemoveButton && onRemove && (
-            <TouchableOpacity
-              className="absolute top-3 right-3 bg-white rounded-full p-2.5"
-              onPress={(e) => {
-                e.stopPropagation();
-                onRemove();
-              }}
+            <GlassmorphicView
+              intensity={60}
+              tint="light"
+              borderRadius={20}
               style={{
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.3,
-                shadowRadius: 4,
-                elevation: 4,
+                position: 'absolute',
+                top: 12,
+                right: 12,
               }}
             >
-              <Ionicons name="heart" size={22} color="#EF4444" />
-            </TouchableOpacity>
+              <TouchableOpacity
+                className="p-2.5"
+                onPress={(e) => {
+                  e.stopPropagation();
+                  onRemove();
+                }}
+              >
+                <Ionicons name="heart" size={22} color="#EF4444" />
+              </TouchableOpacity>
+            </GlassmorphicView>
           )}
 
           {/* Rating Badge */}
