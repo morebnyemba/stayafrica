@@ -102,6 +102,13 @@ export function Sidebar({ isVisible, onClose }: SidebarProps) {
       authRequired: true,
     },
     {
+      id: 'notifications',
+      label: 'Notifications',
+      icon: 'notifications-outline',
+      route: '/notifications',
+      authRequired: true,
+    },
+    {
       id: 'host',
       label: 'Host Dashboard',
       icon: 'business-outline',
