@@ -3,13 +3,13 @@ import { AdminStats, AuditLog, SystemConfig } from '@/types/admin-types';
 import { User, Property, Booking, Payment } from '@/types';
 
 export const adminApi = {
-  // Dashboard Stats
+  // Dashboard Stats - uses actual backend endpoint
   async getStats(): Promise<AdminStats> {
-    const response = await apiClient.get('/admin/stats/');
+    const response = await apiClient.get('/admin/stats/dashboard/');
     return response.data;
   },
 
-  // User Management
+  // User Management - uses regular users endpoint (admin can access all)
   async getUsers(params?: { 
     search?: string; 
     role?: string; 
@@ -17,102 +17,102 @@ export const adminApi = {
     page?: number;
     per_page?: number;
   }): Promise<{ results: User[]; count: number }> {
-    const response = await apiClient.get('/admin/users/', { params });
+    const response = await apiClient.get('/users/', { params });
     return response.data;
   },
 
   async getUserById(id: string): Promise<User> {
-    const response = await apiClient.get(`/admin/users/${id}/`);
+    const response = await apiClient.get(`/users/${id}/`);
     return response.data;
   },
 
   async updateUser(id: string, data: Partial<User>): Promise<User> {
-    const response = await apiClient.put(`/admin/users/${id}/`, data);
+    const response = await apiClient.put(`/users/${id}/`, data);
     return response.data;
   },
 
   async verifyUser(id: string): Promise<User> {
-    const response = await apiClient.post(`/admin/users/${id}/verify/`);
+    const response = await apiClient.post(`/users/${id}/verify/`);
     return response.data;
   },
 
   async suspendUser(id: string, reason: string): Promise<User> {
-    const response = await apiClient.post(`/admin/users/${id}/suspend/`, { reason });
+    const response = await apiClient.post(`/users/${id}/suspend/`, { reason });
     return response.data;
   },
 
   async deleteUser(id: string): Promise<void> {
-    await apiClient.delete(`/admin/users/${id}/`);
+    await apiClient.delete(`/users/${id}/`);
   },
 
-  // Property Management
+  // Property Management - uses regular properties endpoint
   async getProperties(params?: {
     search?: string;
     status?: string;
     page?: number;
     per_page?: number;
   }): Promise<{ results: Property[]; count: number }> {
-    const response = await apiClient.get('/admin/properties/', { params });
+    const response = await apiClient.get('/properties/', { params });
     return response.data;
   },
 
   async approveProperty(id: string): Promise<Property> {
-    const response = await apiClient.post(`/admin/properties/${id}/approve/`);
+    const response = await apiClient.post(`/properties/${id}/approve/`);
     return response.data;
   },
 
   async rejectProperty(id: string, reason: string): Promise<Property> {
-    const response = await apiClient.post(`/admin/properties/${id}/reject/`, { reason });
+    const response = await apiClient.post(`/properties/${id}/reject/`, { reason });
     return response.data;
   },
 
   async deleteProperty(id: string): Promise<void> {
-    await apiClient.delete(`/admin/properties/${id}/`);
+    await apiClient.delete(`/properties/${id}/`);
   },
 
-  // Booking Management
+  // Booking Management - uses regular bookings endpoint
   async getBookings(params?: {
     search?: string;
     status?: string;
     page?: number;
     per_page?: number;
   }): Promise<{ results: Booking[]; count: number }> {
-    const response = await apiClient.get('/admin/bookings/', { params });
+    const response = await apiClient.get('/bookings/', { params });
     return response.data;
   },
 
   async getBookingById(id: string): Promise<Booking> {
-    const response = await apiClient.get(`/admin/bookings/${id}/`);
+    const response = await apiClient.get(`/bookings/${id}/`);
     return response.data;
   },
 
   async cancelBooking(id: string, reason: string): Promise<Booking> {
-    const response = await apiClient.post(`/admin/bookings/${id}/cancel/`, { reason });
+    const response = await apiClient.post(`/bookings/${id}/cancel/`, { reason });
     return response.data;
   },
 
-  // Payment Management
+  // Payment Management - uses regular payments endpoint
   async getPayments(params?: {
     search?: string;
     status?: string;
     page?: number;
     per_page?: number;
   }): Promise<{ results: Payment[]; count: number }> {
-    const response = await apiClient.get('/admin/payments/', { params });
+    const response = await apiClient.get('/payments/', { params });
     return response.data;
   },
 
   async getPaymentById(id: string): Promise<Payment> {
-    const response = await apiClient.get(`/admin/payments/${id}/`);
+    const response = await apiClient.get(`/payments/${id}/`);
     return response.data;
   },
 
   async refundPayment(id: string, amount?: number): Promise<Payment> {
-    const response = await apiClient.post(`/admin/payments/${id}/refund/`, { amount });
+    const response = await apiClient.post(`/payments/${id}/refund/`, { amount });
     return response.data;
   },
 
-  // Audit Logs
+  // Audit Logs - uses actual backend endpoint
   async getAuditLogs(params?: {
     user_id?: string;
     action?: string;
@@ -123,25 +123,25 @@ export const adminApi = {
     return response.data;
   },
 
-  // System Settings
+  // System Settings - uses actual backend endpoint
   async getSystemConfig(): Promise<SystemConfig> {
-    const response = await apiClient.get('/admin/system-config/');
+    const response = await apiClient.get('/admin/config/fees/');
     return response.data;
   },
 
   async updateSystemConfig(data: Partial<SystemConfig>): Promise<SystemConfig> {
-    const response = await apiClient.put('/admin/system-config/', data);
+    const response = await apiClient.put('/admin/config/fees/', data);
     return response.data;
   },
 
-  // Analytics
+  // Analytics - these endpoints don't exist yet, will return mock data for now
   async getRevenueAnalytics(params?: {
     period?: 'daily' | 'weekly' | 'monthly' | 'yearly';
     start_date?: string;
     end_date?: string;
   }): Promise<any> {
-    const response = await apiClient.get('/admin/analytics/revenue/', { params });
-    return response.data;
+    // TODO: Backend needs to implement these endpoints
+    return { data: [] };
   },
 
   async getBookingAnalytics(params?: {
@@ -149,8 +149,8 @@ export const adminApi = {
     start_date?: string;
     end_date?: string;
   }): Promise<any> {
-    const response = await apiClient.get('/admin/analytics/bookings/', { params });
-    return response.data;
+    // TODO: Backend needs to implement these endpoints
+    return { data: [] };
   },
 
   async getUserAnalytics(params?: {
@@ -158,7 +158,7 @@ export const adminApi = {
     start_date?: string;
     end_date?: string;
   }): Promise<any> {
-    const response = await apiClient.get('/admin/analytics/users/', { params });
-    return response.data;
+    // TODO: Backend needs to implement these endpoints
+    return { data: [] };
   },
 };
