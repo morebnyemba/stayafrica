@@ -4,6 +4,7 @@ import { Redirect, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { AnimatedCompassIcon } from '@/components/common/AnimatedCompassIcon';
 import { LinearGradient } from 'expo-linear-gradient';
+import { GlassmorphicView } from '@/components/common/GlassmorphicView';
 import { useAuth } from '@/context/auth-context';
 import { Sidebar } from '@/components/common/Sidebar';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -62,13 +63,19 @@ export default function GuestDashboardScreen() {
         >
           {/* Top Navigation Bar with Menu */}
           <View className="flex-row items-center justify-between mb-4">
-            <TouchableOpacity
-              onPress={() => setSidebarVisible(true)}
-              className="w-10 h-10 rounded-xl items-center justify-center"
-              style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
+            <GlassmorphicView
+              intensity={40}
+              tint="dark"
+              borderRadius={12}
+              style={{ width: 40, height: 40 }}
             >
-              <Ionicons name="menu" size={24} color="#fff" />
-            </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => setSidebarVisible(true)}
+                className="w-10 h-10 rounded-xl items-center justify-center"
+              >
+                <Ionicons name="menu" size={24} color="#fff" />
+              </TouchableOpacity>
+            </GlassmorphicView>
           </View>
 
           <Text className="text-3xl font-black text-white tracking-tight">

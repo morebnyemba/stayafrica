@@ -9,6 +9,7 @@ import { PropertyCard } from '@/components/property/PropertyCard';
 import { PropertyCardSkeleton } from '@/components/common/Skeletons';
 import { Avatar } from '@/components/common/Avatar';
 import { Sidebar } from '@/components/common/Sidebar';
+import { GlassmorphicView } from '@/components/common/GlassmorphicView';
 import { useAuth } from '@/context/auth-context';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -88,14 +89,20 @@ export default function ExploreScreen() {
       >
         {/* Top Navigation Bar with Menu and Avatar */}
         <View className="flex-row items-center justify-between mb-4">
-          {/* Hamburger Menu */}
-          <TouchableOpacity
-            onPress={() => setSidebarVisible(true)}
-            className="w-10 h-10 rounded-xl items-center justify-center"
-            style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
+          {/* Hamburger Menu with Glassmorphism */}
+          <GlassmorphicView
+            intensity={40}
+            tint="dark"
+            borderRadius={12}
+            style={{ width: 40, height: 40 }}
           >
-            <Ionicons name="menu" size={24} color="#fff" />
-          </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setSidebarVisible(true)}
+              className="w-10 h-10 rounded-xl items-center justify-center"
+            >
+              <Ionicons name="menu" size={24} color="#fff" />
+            </TouchableOpacity>
+          </GlassmorphicView>
 
           {/* Avatar for Auth Options */}
           <Avatar
@@ -121,38 +128,35 @@ export default function ExploreScreen() {
           </View>
         </View>
 
-        {/* Modern Search Bar */}
-        <View className="relative">
-          <LinearGradient
-            colors={['rgba(255, 255, 255, 0.15)', 'rgba(255, 255, 255, 0.08)']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            className="rounded-2xl overflow-hidden"
-            style={{
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.2,
-              shadowRadius: 8,
-              elevation: 5,
-            }}
-          >
-            <View className="flex-row items-center px-4 py-4 border border-white/20">
-              <Ionicons name="search" size={22} color="#D9B168" />
-              <TextInput
-                className="flex-1 ml-3 text-base text-white"
-                placeholder="Search destinations, cities..."
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-                placeholderTextColor="rgba(255, 255, 255, 0.5)"
-              />
-              {searchQuery.length > 0 && (
-                <TouchableOpacity onPress={() => setSearchQuery('')}>
-                  <Ionicons name="close-circle" size={20} color="rgba(255, 255, 255, 0.5)" />
-                </TouchableOpacity>
-              )}
-            </View>
-          </LinearGradient>
-        </View>
+        {/* Modern Search Bar with Glassmorphism */}
+        <GlassmorphicView
+          intensity={30}
+          tint="dark"
+          borderRadius={16}
+          style={{
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.2,
+            shadowRadius: 8,
+            elevation: 5,
+          }}
+        >
+          <View className="flex-row items-center px-4 py-4 border border-white/20">
+            <Ionicons name="search" size={22} color="#D9B168" />
+            <TextInput
+              className="flex-1 ml-3 text-base text-white"
+              placeholder="Search destinations, cities..."
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              placeholderTextColor="rgba(255, 255, 255, 0.5)"
+            />
+            {searchQuery.length > 0 && (
+              <TouchableOpacity onPress={() => setSearchQuery('')}>
+                <Ionicons name="close-circle" size={20} color="rgba(255, 255, 255, 0.5)" />
+              </TouchableOpacity>
+            )}
+          </View>
+        </GlassmorphicView>
       </LinearGradient>
 
       {/* Categories Filter */}

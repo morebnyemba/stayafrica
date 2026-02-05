@@ -4,6 +4,7 @@ import { useBookings } from '@/hooks/api-hooks';
 import { useAuth } from '@/context/auth-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { GlassmorphicView } from '@/components/common/GlassmorphicView';
 import { BookingCardSkeleton } from '@/components/common/Skeletons';
 import { Booking } from '@/types';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -115,12 +116,19 @@ export default function BookingsScreen() {
                 </Text>
               </View>
             </View>
-            <View className={`px-3 py-1.5 rounded-full ${statusStyle.bg} flex-row items-center`}>
-              <Ionicons name={statusStyle.icon as any} size={14} color={statusStyle.text.replace('text-', '#')} />
-              <Text className={`text-xs font-semibold capitalize ml-1 ${statusStyle.text}`}>
-                {booking.status}
-              </Text>
-            </View>
+            <GlassmorphicView
+              intensity={80}
+              tint="light"
+              borderRadius={20}
+              style={{ paddingHorizontal: 12, paddingVertical: 6 }}
+            >
+              <View className="flex-row items-center">
+                <Ionicons name={statusStyle.icon as any} size={14} color={statusStyle.text.replace('text-', '#')} />
+                <Text className={`text-xs font-semibold capitalize ml-1 ${statusStyle.text}`}>
+                  {booking.status}
+                </Text>
+              </View>
+            </GlassmorphicView>
           </View>
         </LinearGradient>
 
