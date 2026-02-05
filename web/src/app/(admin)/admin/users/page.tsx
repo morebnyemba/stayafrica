@@ -52,7 +52,7 @@ export default function UsersManagement() {
     }
   };
 
-  const handleRoleChange = async (userId: string, newRole: string) => {
+  const handleRoleChange = async (userId: string, newRole: 'admin' | 'guest' | 'host') => {
     try {
       await adminApi.updateUser(userId, { role: newRole });
       toast.success('User role updated successfully');
