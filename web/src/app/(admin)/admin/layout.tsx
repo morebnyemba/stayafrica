@@ -35,9 +35,25 @@ export default function AdminLayout({
 }) {
   const router = useRouter();
   const { user, isLoading, logout } = useAuth();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  // Initialize sidebar closed on mobile, open on desktop
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const isAdmin = user?.is_staff === true;
+
+  // Set initial sidebar state based on screen size
+  useEffect(() => {
+    const handleResize = () => {
+      // lg breakpoint is 1024px in Tailwind
+      setSidebarOpen(window.innerWidth >= 1024);
+    };
+    
+    // Set initial state
+    handleResize();
+    
+    // Listen for window resize
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     if (!isLoading && !isAdmin) {
@@ -138,7 +154,8 @@ export default function AdminLayout({
             </button>
           </div>
         </div>
-        <div className="p-4">
+        {/* Content with padding to accommodate mobile toggle button */}
+        <div className="p-4 pt-16 lg:pt-4">
           {children}
         </div>
       </main>
