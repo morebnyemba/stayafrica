@@ -10,6 +10,7 @@ import {
   Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { AnimatedCompassIcon } from '@/components/common/AnimatedCompassIcon';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter, Href } from 'expo-router';
 import { useAuth } from '@/context/auth-context';
@@ -174,11 +175,18 @@ export function Sidebar({ isVisible, onClose }: SidebarProps) {
               depth > 0 ? 'bg-sand-100' : 'bg-sand-200'
             }`}
           >
-            <Ionicons
-              name={item.icon}
-              size={depth > 0 ? 18 : 22}
-              color="#3A5C50"
-            />
+            {item.id === 'explore' ? (
+              <AnimatedCompassIcon
+                size={depth > 0 ? 18 : 22}
+                color="#3A5C50"
+              />
+            ) : (
+              <Ionicons
+                name={item.icon}
+                size={depth > 0 ? 18 : 22}
+                color="#3A5C50"
+              />
+            )}
           </View>
           <Text
             className={`flex-1 ml-3 font-semibold ${

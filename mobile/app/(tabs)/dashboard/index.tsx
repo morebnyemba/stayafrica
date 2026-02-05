@@ -2,6 +2,7 @@ import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { useState } from 'react';
 import { Redirect, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { AnimatedCompassIcon } from '@/components/common/AnimatedCompassIcon';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '@/context/auth-context';
 import { Sidebar } from '@/components/common/Sidebar';
@@ -81,7 +82,7 @@ export default function GuestDashboardScreen() {
         <View className="flex-1 items-center justify-center px-6">
           <View className="bg-white rounded-3xl p-8 items-center" style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.1, shadowRadius: 16, elevation: 8 }}>
             <View className="bg-sand-200 rounded-full p-8 mb-6">
-              <Ionicons name="compass-outline" size={72} color="#D9B168" />
+              <AnimatedCompassIcon size={72} color="#D9B168" />
             </View>
             <Text className="text-2xl font-bold text-forest mb-3">Welcome to StayAfrica</Text>
             <Text className="text-moss text-center mb-8 px-4 leading-6">
@@ -198,7 +199,11 @@ export default function GuestDashboardScreen() {
         colors={[`${color}`, `${color}dd`]}
         className="w-12 h-12 rounded-xl items-center justify-center"
       >
-        <Ionicons name={icon} size={24} color="#fff" />
+        {icon === 'compass' ? (
+          <AnimatedCompassIcon size={24} color="#fff" filled />
+        ) : (
+          <Ionicons name={icon} size={24} color="#fff" />
+        )}
       </LinearGradient>
       <View className="flex-1 ml-4">
         <Text className="text-base font-semibold text-forest">{title}</Text>

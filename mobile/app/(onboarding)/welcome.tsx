@@ -12,6 +12,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { AnimatedCompassIcon } from '@/components/common/AnimatedCompassIcon';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width } = Dimensions.get('window');
@@ -133,7 +134,11 @@ export default function WelcomeScreen() {
               shadowRadius: 16,
               elevation: 8,
             }}>
-              <Ionicons name={item.icon} size={80} color="#D9B168" />
+              {item.icon === 'compass-outline' ? (
+                <AnimatedCompassIcon size={80} color="#D9B168" />
+              ) : (
+                <Ionicons name={item.icon} size={80} color="#D9B168" />
+              )}
             </View>
           )}
 

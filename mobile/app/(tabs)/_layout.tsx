@@ -2,11 +2,10 @@ import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useAuth } from '@/context/auth-context';
+import { AnimatedCompassIcon } from '@/components/common/AnimatedCompassIcon';
 
 export default function TabsLayout() {
   const insets = useSafeAreaInsets();
-  const { user } = useAuth();
   
   // Calculate proper bottom padding to stay above navigation controls
   const bottomPadding = Platform.OS === 'ios' 
@@ -19,27 +18,21 @@ export default function TabsLayout() {
         headerShown: false,
         tabBarIcon: ({ color, focused }) => {
           let iconName: any;
+          let size = focused ? 26 : 22;
 
           // Use different icons for focused/unfocused states
           if (route.name === 'dashboard') {
             iconName = focused ? 'home' : 'home-outline';
+            return <Ionicons name={iconName} size={size} color={color} />;
           } else if (route.name === 'explore') {
-            iconName = focused ? 'compass' : 'compass-outline';
-          } else if (route.name === 'bookings') {
-            iconName = focused ? 'calendar' : 'calendar-outline';
-          } else if (route.name === 'wishlist') {
-            iconName = focused ? 'heart' : 'heart-outline';
-          } else if (route.name === 'messages') {
-            iconName = focused ? 'chatbubbles' : 'chatbubbles-outline';
-          } else if (route.name === 'host') {
-            iconName = focused ? 'business' : 'business-outline';
-          } else if (route.name === 'wallet') {
-            iconName = focused ? 'wallet' : 'wallet-outline';
+            size = focused ? 34 : 30; // Reduce size to avoid clipping
+            return <AnimatedCompassIcon size={size} color={color} filled={focused} />;
           } else if (route.name === 'profile') {
             iconName = focused ? 'person-circle' : 'person-circle-outline';
+            return <Ionicons name={iconName} size={size} color={color} />;
           }
 
-          return <Ionicons name={iconName} size={focused ? 26 : 22} color={color} />;
+          return <Ionicons name="help-outline" size={size} color={color} />;
         },
         tabBarActiveTintColor: '#D9B168', // Safari Gold
         tabBarInactiveTintColor: '#94a3b8',
@@ -47,9 +40,9 @@ export default function TabsLayout() {
           backgroundColor: '#122F26', // Deep Forest
           borderTopWidth: 0,
           elevation: 0,
-          height: 60 + bottomPadding,
+          height: 90 + bottomPadding,
           paddingBottom: bottomPadding,
-          paddingTop: 8,
+          paddingTop: 12,
           shadowColor: '#000',
           shadowOffset: { width: 0, height: -4 },
           shadowOpacity: 0.3,
@@ -58,10 +51,12 @@ export default function TabsLayout() {
         tabBarLabelStyle: {
           fontSize: 10,
           fontWeight: '600',
-          marginTop: -4,
+          marginTop: 2,
         },
         tabBarItemStyle: {
-          paddingVertical: 2,
+          paddingVertical: 4,
+          alignItems: 'center',
+          justifyContent: 'center',
         },
       })}
     >
@@ -87,54 +82,60 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="profile"
+        options={{
+          title: 'Profile',
+          tabBarLabel: 'Profile',
+        }}
+      />
+      {/* Hidden tabs - accessible via navigation but not in bottom bar */}
+      <Tabs.Screen
+        name="bookings"
+        options={{
+          href: null,
+          title: 'Bookings',
+        }}
+      />
+      <Tabs.Screen
         name="wishlist"
         options={{
+          href: null,
           title: 'Wishlist',
-          tabBarLabel: 'Wishlist',
         }}
       />
       <Tabs.Screen
         name="messages"
         options={{
+          href: null,
           title: 'Messages',
-          tabBarLabel: 'Messages',
         }}
       />
       <Tabs.Screen
-        name="bookings"
+        name="host"
         options={{
-          title: 'Bookings',
-          tabBarLabel: 'Bookings',
+          href: null,
+          title: 'Host',
         }}
       />
-      {user?.role === 'host' ? (
-        <Tabs.Screen
-          name="host"
-          options={{
-            title: 'Host',
-            tabBarLabel: 'Host',
-          }}
-        />
-      ) : (
-        <Tabs.Screen
-          name="host"
-          options={{
-            href: null,
-          }}
-        />
-      )}
       <Tabs.Screen
         name="wallet"
         options={{
+          href: null,
           title: 'Wallet',
-          tabBarLabel: 'Wallet',
         }}
       />
       <Tabs.Screen
-        name="profile"
+        name="payments"
         options={{
-          title: 'Profile',
-          tabBarLabel: 'Profile',
+          href: null,
+          title: 'Payments',
+        }}
+      />
+      <Tabs.Screen
+        name="about"
+        options={{
+          href: null,
+          title: 'About',
         }}
       />
     </Tabs>

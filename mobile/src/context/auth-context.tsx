@@ -47,13 +47,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const hasToken = await apiClient.hasValidToken();
       if (hasToken) {
-        const profile = await apiClient.getUserProfile();
-        setUser(profile);
-        setIsAuthenticated(true);
+        try {
+          const profile = await apiClient.getUserProfile();
+          setUser(profile);
+          setIsAuthenticated(true);
+        } catch (profileError: any) {
+          // If token is invalid (401), clear tokens and continue as guest
+          if (profileError?.response?.status === 401) {
+            await apiClient.clearTokens();
+            setUser(null);
+            setIsAuthenticated(false);
+          } else {
+            throw profileError;
+          }
+        }
       }
     } catch (error) {
       console.error('Bootstrap error:', error);
       await apiClient.clearTokens();
+      setUser(null);
+      setIsAuthenticated(false);
     } finally {
       setIsLoading(false);
     }

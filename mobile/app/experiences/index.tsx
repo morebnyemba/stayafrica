@@ -1,6 +1,7 @@
 import { View, Text, ScrollView, TouchableOpacity, Platform, ActivityIndicator, FlatList, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { AnimatedCompassIcon } from '@/components/common/AnimatedCompassIcon';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
@@ -136,7 +137,7 @@ export default function ExperiencesScreen() {
         ) : (
           <View className="py-12 items-center">
             <View className="bg-sand-200 rounded-full p-8 mb-4">
-              <Ionicons name="compass-outline" size={64} color="#94a3b8" />
+              <AnimatedCompassIcon size={64} color="#94a3b8" />
             </View>
             <Text className="text-xl font-bold text-forest mb-2">No Experiences Yet</Text>
             <Text className="text-moss text-center px-6">

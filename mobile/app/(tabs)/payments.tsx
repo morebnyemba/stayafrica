@@ -12,7 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { apiClient } from '@/services/api-client';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/auth-context';
 
 interface Payment {
   id: string;
@@ -47,14 +47,22 @@ export default function PaymentsScreen() {
 
   const fetchData = async () => {
     try {
-      const [paymentsRes, methodsRes] = await Promise.all([
-        apiClient.get('/api/v1/payments/'),
-        apiClient.get('/api/v1/payments/methods/'),
-      ]);
-      setPayments(paymentsRes.data.results || paymentsRes.data || []);
-      setPaymentMethods(methodsRes.data.results || methodsRes.data || []);
+      // For now, use mock data since payment endpoints may not be ready
+      // TODO: Replace with actual API calls when backend is ready
+      setPayments([]);
+      setPaymentMethods([]);
+      
+      // Uncomment when backend endpoints are available:
+      // const [paymentsRes, methodsRes] = await Promise.all([
+      //   apiClient.get('/api/v1/payments/'),
+      //   apiClient.get('/api/v1/payments/methods/'),
+      // ]);
+      // setPayments(paymentsRes.data.results || paymentsRes.data || []);
+      // setPaymentMethods(methodsRes.data.results || methodsRes.data || []);
     } catch (error) {
       console.error('Error fetching payment data:', error);
+      setPayments([]);
+      setPaymentMethods([]);
     } finally {
       setLoading(false);
       setRefreshing(false);
