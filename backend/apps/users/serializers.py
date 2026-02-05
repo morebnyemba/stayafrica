@@ -12,10 +12,10 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'id', 'email', 'username', 'first_name', 'last_name', 'phone_number',
-            'role', 'country_of_residence', 'is_verified', 'profile_picture',
+            'role', 'country_of_residence', 'is_verified', 'is_staff', 'profile_picture',
             'bio', 'password', 'is_online', 'last_seen', 'created_at', 'updated_at'
         ]
-        read_only_fields = ['id', 'created_at', 'updated_at', 'is_verified', 'is_online', 'last_seen']
+        read_only_fields = ['id', 'created_at', 'updated_at', 'is_verified', 'is_staff', 'is_online', 'last_seen']
     
     def create(self, validated_data):
         password = validated_data.pop('password')
@@ -51,10 +51,10 @@ class UserProfileSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'id', 'email', 'username', 'first_name', 'last_name', 'phone_number',
-            'role', 'country_of_residence', 'is_verified', 'profile_picture', 'bio',
+            'role', 'country_of_residence', 'is_verified', 'is_staff', 'profile_picture', 'bio',
             'is_online', 'last_seen'
         ]
-        read_only_fields = ['id', 'email', 'username', 'role', 'is_verified', 'is_online', 'last_seen']
+        read_only_fields = ['id', 'email', 'username', 'role', 'is_verified', 'is_staff', 'is_online', 'last_seen']
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     username_field = 'email'
@@ -90,6 +90,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         token['email'] = user.email
         token['role'] = user.role
         token['is_verified'] = user.is_verified
+        token['is_staff'] = user.is_staff
         return token
 
 

@@ -33,11 +33,13 @@ export default function AdminLayout({
   const router = useRouter();
   const { user, isLoading, logout } = useAuth();
 
+  const isAdmin = user?.is_staff === true;
+
   useEffect(() => {
-    if (!isLoading && (!user || user.role !== 'admin')) {
+    if (!isLoading && !isAdmin) {
       router.push('/login?error=admin_access_required');
     }
-  }, [user, isLoading, router]);
+  }, [user, isLoading, isAdmin, router]);
 
   if (isLoading) {
     return (
@@ -47,7 +49,7 @@ export default function AdminLayout({
     );
   }
 
-  if (!user || user.role !== 'admin') {
+  if (!isAdmin) {
     return null;
   }
 

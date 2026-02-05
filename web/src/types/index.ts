@@ -6,6 +6,7 @@ export interface User {
   first_name: string;
   last_name: string;
   role: 'guest' | 'host' | 'admin';
+  is_staff?: boolean;
   profile_picture?: string;
   country_of_residence: string;
   is_verified: boolean;
