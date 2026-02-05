@@ -5,64 +5,32 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { GlassmorphicView } from '@/components/common/GlassmorphicView';
-import { Avatar } from '@/components/common/Avatar';
-import { Sidebar } from '@/components/common/Sidebar';
+import { AppHeader } from '@/components/common/AppHeader';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function ProfileScreen() {
   const { user, logout, isAuthenticated } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const [sidebarVisible, setSidebarVisible] = useState(false);
 
   if (!isAuthenticated) {
     return (
       <View className="flex-1 bg-sand-100">
-        {/* Sidebar */}
-        <Sidebar
-          isVisible={sidebarVisible}
-          onClose={() => setSidebarVisible(false)}
-        />
-
-        {/* Header */}
+        {/* Header with AppHeader */}
         <LinearGradient
           colors={['#122F26', '#1d392f']}
-          className="px-4 pb-6"
-          style={{ paddingTop: insets.top + 12 }}
+          className="pb-6"
         >
-          {/* Top Navigation Bar with Menu */}
-          <View className="flex-row items-center justify-between mb-4">
-            {/* Hamburger Menu with Glassmorphism */}
-            <GlassmorphicView
-              intensity={40}
-              tint="dark"
-              borderRadius={12}
-              style={{ width: 40, height: 40 }}
-            >
-              <TouchableOpacity
-                onPress={() => setSidebarVisible(true)}
-                className="w-10 h-10 rounded-xl items-center justify-center"
-              >
-                <Ionicons name="menu" size={24} color="#fff" />
-              </TouchableOpacity>
-            </GlassmorphicView>
-
-            {/* Avatar for Auth Options */}
-            <Avatar
-              uri={null}
-              firstName={undefined}
-              lastName={undefined}
-              size="small"
-              onPress={() => router.push('/(auth)/login')}
-            />
+          <AppHeader />
+          
+          <View className="px-4">
+            <Text className="text-3xl font-black text-white tracking-tight">
+              Profile
+            </Text>
+            <Text className="text-sand-200 text-sm mt-1">
+              Manage your account
+            </Text>
           </View>
-
-          <Text className="text-3xl font-black text-white tracking-tight">
-            Profile
-          </Text>
-          <Text className="text-sand-200 text-sm mt-1">
-            Manage your account
-          </Text>
         </LinearGradient>
 
         <View className="flex-1 items-center justify-center px-6">
@@ -293,84 +261,47 @@ export default function ProfileScreen() {
 
   return (
     <ScrollView className="flex-1 bg-sand-100" showsVerticalScrollIndicator={false}>
-      {/* Sidebar */}
-      <Sidebar
-        isVisible={sidebarVisible}
-        onClose={() => setSidebarVisible(false)}
-      />
-
       {/* Header with Profile Card */}
       <LinearGradient
         colors={['#122F26', '#1d392f', '#2d4a40']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        className="px-4 pb-8"
-        style={{ paddingTop: insets.top + 12 }}
+        className="pb-8"
       >
-        {/* Top Navigation Bar with Menu */}
-        <View className="flex-row items-center justify-between mb-4">
-          {/* Hamburger Menu */}
-          <GlassmorphicView
-            intensity={40}
-            tint="dark"
-            borderRadius={12}
-            style={{ width: 40, height: 40 }}
-          >
-            <TouchableOpacity
-              onPress={() => setSidebarVisible(true)}
-              className="w-10 h-10 rounded-xl items-center justify-center"
-            >
-              <Ionicons name="menu" size={24} color="#fff" />
-            </TouchableOpacity>
-          </GlassmorphicView>
+        <AppHeader />
+        
+        <View className="px-4">
+          {/* Avatar */}
+          <View className="items-center mt-4">
+            <Avatar
+              uri={null}
+              firstName={user?.first_name}
+              lastName={user?.last_name}
+              size="large"
+            />
 
-          {/* User Badge */}
-          <View className="flex-row items-center">
-            <LinearGradient
-              colors={user?.role === 'host' ? ['#3A5C50', '#2d4a40'] : ['#D9B168', '#bea04f']}
-              className="px-3 py-1.5 rounded-full"
-            >
-              <Text
-                className={`text-xs font-semibold ${
-                  user?.role === 'host' ? 'text-gold' : 'text-forest'
-                }`}
-              >
-                {user?.role === 'host' ? '🏠 Host' : '✨ Guest'}
-              </Text>
-            </LinearGradient>
-          </View>
-        </View>
+            {/* Name */}
+            <Text className="text-2xl font-black text-white text-center mt-4">
+              {user?.first_name} {user?.last_name}
+            </Text>
 
-        {/* Avatar */}
-        <View className="items-center mb-4">
-          <Avatar
-            uri={null}
-            firstName={user?.first_name}
-            lastName={user?.last_name}
-            size="large"
-          />
+            {/* Email */}
+            <Text className="text-sand-200 text-center mt-1">{user?.email}</Text>
 
-          {/* Name */}
-          <Text className="text-2xl font-black text-white text-center mt-4">
-            {user?.first_name} {user?.last_name}
-          </Text>
-
-          {/* Email */}
-          <Text className="text-sand-200 text-center mt-1">{user?.email}</Text>
-
-          {/* Verification Badge inline */}
-          <View className="flex-row items-center mt-2">
-            {user?.is_verified ? (
-              <View className="flex-row items-center bg-green-500/20 px-3 py-1 rounded-full">
-                <Ionicons name="shield-checkmark" size={14} color="#10B981" />
-                <Text className="text-green-400 text-xs font-semibold ml-1">Verified</Text>
-              </View>
-            ) : (
-              <View className="flex-row items-center bg-yellow-500/20 px-3 py-1 rounded-full">
-                <Ionicons name="alert-circle" size={14} color="#F59E0B" />
-                <Text className="text-yellow-400 text-xs font-semibold ml-1">Unverified</Text>
-              </View>
-            )}
+            {/* Verification Badge inline */}
+            <View className="flex-row items-center mt-2">
+              {user?.is_verified ? (
+                <View className="flex-row items-center bg-green-500/20 px-3 py-1 rounded-full">
+                  <Ionicons name="shield-checkmark" size={14} color="#10B981" />
+                  <Text className="text-green-400 text-xs font-semibold ml-1">Verified</Text>
+                </View>
+              ) : (
+                <View className="flex-row items-center bg-yellow-500/20 px-3 py-1 rounded-full">
+                  <Ionicons name="alert-circle" size={14} color="#F59E0B" />
+                  <Text className="text-yellow-400 text-xs font-semibold ml-1">Unverified</Text>
+                </View>
+              )}
+            </View>
           </View>
         </View>
       </LinearGradient>
