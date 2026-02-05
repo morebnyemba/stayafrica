@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { adminApi } from '@/lib/admin-api';
 import { Payment } from '@/types';
-import { Search, Eye } from 'lucide-react';
+import { Eye } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function PaymentsManagement() {
