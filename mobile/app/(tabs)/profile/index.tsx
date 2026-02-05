@@ -4,7 +4,6 @@ import { useAuth } from '@/context/auth-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { GlassmorphicView } from '@/components/common/GlassmorphicView';
 import { AppHeader } from '@/components/common/AppHeader';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -95,7 +94,7 @@ export default function ProfileScreen() {
             elevation: 2,
           }}
         >
-          <View className="flex-row items-center p-4">
+          <View className="flex-row items-center p-4 bg-white rounded-2xl">
             <View className="bg-gold/20 rounded-full p-2.5 mr-4">
               <Ionicons name={iconName} size={20} color={iconColor || "#D9B168"} />
             </View>
@@ -107,10 +106,8 @@ export default function ProfileScreen() {
           </View>
         </LinearGradient>
       ) : (
-        <GlassmorphicView
-          intensity={30}
-          tint="light"
-          className="flex-row items-center p-4"
+        <View
+          className="flex-row items-center p-4 bg-white rounded-2xl"
           style={{
             shadowColor: '#122F26',
             shadowOffset: { width: 0, height: 2 },
@@ -127,7 +124,7 @@ export default function ProfileScreen() {
             <Text className="text-forest font-semibold">{value}</Text>
           </View>
           <Ionicons name="chevron-forward" size={20} color="#3A5C50" />
-        </GlassmorphicView>
+        </View>
       )}
     </TouchableOpacity>
   );
@@ -139,7 +136,7 @@ export default function ProfileScreen() {
         <View className="mx-4 mt-4">
           <LinearGradient
             colors={['#10B981', '#059669']}
-            className="p-4 rounded-2xl flex-row items-center"
+            className="p-4 bg-white rounded-2xl rounded-2xl flex-row items-center"
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
           >
@@ -161,7 +158,7 @@ export default function ProfileScreen() {
         <TouchableOpacity onPress={() => router.push('/profile/verification')}>
           <LinearGradient
             colors={['#F59E0B', '#D97706']}
-            className="p-4 rounded-2xl flex-row items-center"
+            className="p-4 bg-white rounded-2xl rounded-2xl flex-row items-center"
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
           >
@@ -183,10 +180,8 @@ export default function ProfileScreen() {
   const QuickStats = () => (
     <View className="flex-row px-4 mt-4">
       <View className="flex-1 mr-2">
-        <GlassmorphicView
-          intensity={30}
-          tint="light"
-          className="p-4"
+        <View
+          className="p-4 bg-white rounded-2xl"
           style={{
             shadowColor: '#122F26',
             shadowOffset: { width: 0, height: 2 },
@@ -204,14 +199,12 @@ export default function ProfileScreen() {
               <Text className="text-xs text-moss">Bookings</Text>
             </View>
           </View>
-        </GlassmorphicView>
+        </View>
       </View>
 
       <View className="flex-1 mr-2">
-        <GlassmorphicView
-          intensity={30}
-          tint="light"
-          className="p-4"
+        <View
+          className="p-4 bg-white rounded-2xl"
           style={{
             shadowColor: '#122F26',
             shadowOffset: { width: 0, height: 2 },
@@ -229,14 +222,12 @@ export default function ProfileScreen() {
               <Text className="text-xs text-moss">Wishlist</Text>
             </View>
           </View>
-        </GlassmorphicView>
+        </View>
       </View>
 
       <View className="flex-1">
-        <GlassmorphicView
-          intensity={30}
-          tint="light"
-          className="p-4"
+        <View
+          className="p-4 bg-white rounded-2xl"
           style={{
             shadowColor: '#122F26',
             shadowOffset: { width: 0, height: 2 },
@@ -254,7 +245,7 @@ export default function ProfileScreen() {
               <Text className="text-xs text-moss">Reviews</Text>
             </View>
           </View>
-        </GlassmorphicView>
+        </View>
       </View>
     </View>
   );
@@ -345,10 +336,8 @@ export default function ProfileScreen() {
             className="w-1/3 p-2"
             onPress={() => router.push('/(tabs)/bookings')}
           >
-            <GlassmorphicView
-              intensity={30}
-              tint="light"
-              className="p-4 items-center"
+            <View
+              className="p-4 bg-white rounded-2xl items-center"
               style={{
                 shadowColor: '#122F26',
                 shadowOffset: { width: 0, height: 2 },
@@ -361,17 +350,15 @@ export default function ProfileScreen() {
                 <Ionicons name="calendar" size={24} color="#3B82F6" />
               </View>
               <Text className="text-forest font-semibold text-xs text-center">Bookings</Text>
-            </GlassmorphicView>
+            </View>
           </TouchableOpacity>
 
           <TouchableOpacity 
             className="w-1/3 p-2"
             onPress={() => router.push('/(tabs)/wishlist')}
           >
-            <GlassmorphicView
-              intensity={30}
-              tint="light"
-              className="p-4 items-center"
+            <View
+              className="p-4 bg-white rounded-2xl items-center"
               style={{
                 shadowColor: '#122F26',
                 shadowOffset: { width: 0, height: 2 },
@@ -384,17 +371,15 @@ export default function ProfileScreen() {
                 <Ionicons name="heart" size={24} color="#EF4444" />
               </View>
               <Text className="text-forest font-semibold text-xs text-center">Wishlist</Text>
-            </GlassmorphicView>
+            </View>
           </TouchableOpacity>
 
           <TouchableOpacity 
             className="w-1/3 p-2"
             onPress={() => router.push('/(tabs)/messages')}
           >
-            <GlassmorphicView
-              intensity={30}
-              tint="light"
-              className="p-4 items-center"
+            <View
+              className="p-4 bg-white rounded-2xl items-center"
               style={{
                 shadowColor: '#122F26',
                 shadowOffset: { width: 0, height: 2 },
@@ -407,17 +392,15 @@ export default function ProfileScreen() {
                 <Ionicons name="chatbubbles" size={24} color="#8B5CF6" />
               </View>
               <Text className="text-forest font-semibold text-xs text-center">Messages</Text>
-            </GlassmorphicView>
+            </View>
           </TouchableOpacity>
 
           <TouchableOpacity 
             className="w-1/3 p-2"
             onPress={() => router.push('/(tabs)/wallet')}
           >
-            <GlassmorphicView
-              intensity={30}
-              tint="light"
-              className="p-4 items-center"
+            <View
+              className="p-4 bg-white rounded-2xl items-center"
               style={{
                 shadowColor: '#122F26',
                 shadowOffset: { width: 0, height: 2 },
@@ -430,17 +413,15 @@ export default function ProfileScreen() {
                 <Ionicons name="wallet" size={24} color="#10B981" />
               </View>
               <Text className="text-forest font-semibold text-xs text-center">Wallet</Text>
-            </GlassmorphicView>
+            </View>
           </TouchableOpacity>
 
           <TouchableOpacity 
             className="w-1/3 p-2"
             onPress={() => router.push('/reviews/my-reviews')}
           >
-            <GlassmorphicView
-              intensity={30}
-              tint="light"
-              className="p-4 items-center"
+            <View
+              className="p-4 bg-white rounded-2xl items-center"
               style={{
                 shadowColor: '#122F26',
                 shadowOffset: { width: 0, height: 2 },
@@ -453,17 +434,15 @@ export default function ProfileScreen() {
                 <Ionicons name="star" size={24} color="#F59E0B" />
               </View>
               <Text className="text-forest font-semibold text-xs text-center">Reviews</Text>
-            </GlassmorphicView>
+            </View>
           </TouchableOpacity>
 
           <TouchableOpacity 
             className="w-1/3 p-2"
             onPress={() => router.push('/(tabs)/host')}
           >
-            <GlassmorphicView
-              intensity={30}
-              tint="light"
-              className="p-4 items-center"
+            <View
+              className="p-4 bg-white rounded-2xl items-center"
               style={{
                 shadowColor: '#122F26',
                 shadowOffset: { width: 0, height: 2 },
@@ -476,7 +455,7 @@ export default function ProfileScreen() {
                 <Ionicons name="business" size={24} color="#F97316" />
               </View>
               <Text className="text-forest font-semibold text-xs text-center">Hosting</Text>
-            </GlassmorphicView>
+            </View>
           </TouchableOpacity>
         </View>
       </View>
@@ -519,7 +498,7 @@ export default function ProfileScreen() {
       </View>
 
       {/* Logout */}
-      <View className="p-4 mt-6 mb-8">
+      <View className="p-4 bg-white rounded-2xl mt-6 mb-8">
         <TouchableOpacity
           className="rounded-2xl overflow-hidden"
           onPress={handleLogout}

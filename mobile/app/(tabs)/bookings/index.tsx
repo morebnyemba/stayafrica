@@ -4,7 +4,6 @@ import { useBookings } from '@/hooks/api-hooks';
 import { useAuth } from '@/context/auth-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { GlassmorphicView } from '@/components/common/GlassmorphicView';
 import { BookingCardSkeleton } from '@/components/common/Skeletons';
 import { Booking } from '@/types';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -102,7 +101,7 @@ export default function BookingsScreen() {
           colors={['#122F26', '#1d392f']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
-          className="p-4"
+          className="p-4 bg-white rounded-2xl"
         >
           <View className="flex-row justify-between items-start">
             <View className="flex-1">
@@ -116,9 +115,7 @@ export default function BookingsScreen() {
                 </Text>
               </View>
             </View>
-            <GlassmorphicView
-              intensity={80}
-              tint="light"
+            <View
               borderRadius={20}
               style={{ paddingHorizontal: 12, paddingVertical: 6 }}
             >
@@ -128,14 +125,14 @@ export default function BookingsScreen() {
                   {booking.status}
                 </Text>
               </View>
-            </GlassmorphicView>
+            </View>
           </View>
         </LinearGradient>
 
         {/* Content */}
-        <View className="p-4">
+        <View className="p-4 bg-white rounded-2xl">
           {/* Dates Timeline */}
-          <View className="bg-sand-100 rounded-2xl p-4 mb-4">
+          <View className="bg-sand-100 rounded-2xl p-4 bg-white rounded-2xl mb-4">
             <View className="flex-row items-center justify-between">
               <View className="flex-1">
                 <Text className="text-moss text-xs font-medium mb-1">Check-in</Text>

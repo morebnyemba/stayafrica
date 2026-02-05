@@ -8,7 +8,6 @@ import { useProperties } from '@/hooks/api-hooks';
 import { PropertyCard } from '@/components/property/PropertyCard';
 import { PropertyCardSkeleton } from '@/components/common/Skeletons';
 import { AppHeader } from '@/components/common/AppHeader';
-import { GlassmorphicView } from '@/components/common/GlassmorphicView';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const CATEGORIES = [
@@ -80,9 +79,7 @@ export default function ExploreScreen() {
           </Text>
 
           {/* Search Bar with Glassmorphism */}
-          <GlassmorphicView
-            intensity={40}
-            tint="dark"
+          <View
             borderRadius={16}
           >
             <View className="flex-row items-center px-4 py-3 bg-white/10">
@@ -100,7 +97,7 @@ export default function ExploreScreen() {
                 </TouchableOpacity>
               )}
             </View>
-          </GlassmorphicView>
+          </View>
         </View>
       </LinearGradient>
 

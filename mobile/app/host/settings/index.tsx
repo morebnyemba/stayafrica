@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { GlassmorphicView } from '@/components/common/GlassmorphicView';
 import { useAuth } from '@/context/auth-context';
 
 export default function HostSettingsScreen() {
@@ -22,16 +21,14 @@ export default function HostSettingsScreen() {
           style={{ paddingTop: Platform.OS === 'ios' ? 50 : 35 }}
         >
           <TouchableOpacity onPress={() => router.back()} className="mb-4">
-            <GlassmorphicView
-              intensity={40}
-              tint="dark"
+            <View
               borderRadius={12}
               style={{ width: 40, height: 40 }}
             >
               <View className="w-10 h-10 rounded-xl items-center justify-center">
                 <Ionicons name="arrow-back" size={24} color="#fff" />
               </View>
-            </GlassmorphicView>
+            </View>
           </TouchableOpacity>
           <Text className="text-3xl font-black text-white tracking-tight">
             Host Settings
@@ -45,10 +42,8 @@ export default function HostSettingsScreen() {
   }
 
   const SettingToggle = ({ icon, title, description, value, onToggle }: any) => (
-    <GlassmorphicView
-      intensity={30}
-      tint="light"
-      className="p-4 mb-3 flex-row items-center"
+    <View
+      className="p-4 bg-white rounded-2xl mb-3 flex-row items-center"
       style={{
         shadowColor: '#122F26',
         shadowOffset: { width: 0, height: 2 },
@@ -73,7 +68,7 @@ export default function HostSettingsScreen() {
         trackColor={{ false: '#e5dfd0', true: '#10B981' }}
         thumbColor={value ? '#fff' : '#fff'}
       />
-    </GlassmorphicView>
+    </View>
   );
 
   const SettingLink = ({ icon, title, description, onPress, color = '#3A5C50' }: any) => (
@@ -81,10 +76,8 @@ export default function HostSettingsScreen() {
       className="mb-3"
       onPress={onPress}
     >
-      <GlassmorphicView
-        intensity={30}
-        tint="light"
-        className="p-4 flex-row items-center"
+      <View
+        className="p-4 bg-white rounded-2xl flex-row items-center"
         style={{
           shadowColor: '#122F26',
           shadowOffset: { width: 0, height: 2 },
@@ -104,7 +97,7 @@ export default function HostSettingsScreen() {
           <Text className="text-sm text-moss mt-1">{description}</Text>
         </View>
         <Ionicons name="chevron-forward" size={20} color="#3A5C50" />
-      </GlassmorphicView>
+      </View>
     </TouchableOpacity>
   );
 

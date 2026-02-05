@@ -2,7 +2,6 @@ import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Platform }
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { GlassmorphicView } from '@/components/common/GlassmorphicView';
 import { useAuth } from '@/context/auth-context';
 import { useHostEarnings } from '@/hooks/api-hooks';
 
@@ -61,10 +60,8 @@ export default function HostEarningsScreen() {
   }
 
   const StatCard = ({ title, value, subtitle, icon, color }: any) => (
-    <GlassmorphicView
-      intensity={30}
-      tint="light"
-      className="p-4 mb-3"
+    <View
+      className="p-4 bg-white rounded-2xl mb-3"
       style={{
         shadowColor: '#122F26',
         shadowOffset: { width: 0, height: 4 },
@@ -84,14 +81,12 @@ export default function HostEarningsScreen() {
       </View>
       <Text className="text-3xl font-black text-forest mb-1">{value}</Text>
       {subtitle && <Text className="text-xs text-moss/70">{subtitle}</Text>}
-    </GlassmorphicView>
+    </View>
   );
 
   const PayoutItem = ({ date, amount, status, property }: any) => (
-    <GlassmorphicView
-      intensity={30}
-      tint="light"
-      className="p-4 mb-3"
+    <View
+      className="p-4 bg-white rounded-2xl mb-3"
       style={{
         shadowColor: '#122F26',
         shadowOffset: { width: 0, height: 2 },
@@ -118,7 +113,7 @@ export default function HostEarningsScreen() {
           </View>
         </View>
       </View>
-    </GlassmorphicView>
+    </View>
   );
 
   return (

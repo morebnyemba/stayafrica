@@ -2,7 +2,6 @@ import { View, Text, FlatList, TouchableOpacity, Image, ActivityIndicator, Platf
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { GlassmorphicView } from '@/components/common/GlassmorphicView';
 import { useAuth } from '@/context/auth-context';
 import { useHostProperties } from '@/hooks/api-hooks';
 import type { Property } from '@/types';
@@ -67,9 +66,7 @@ export default function HostPropertiesScreen() {
       className="mb-3 mx-4"
       onPress={() => router.push(`/host/properties/${property.id}`)}
     >
-      <GlassmorphicView
-        intensity={30}
-        tint="light"
+      <View
         className="overflow-hidden"
         style={{
           shadowColor: '#122F26',
@@ -130,7 +127,7 @@ export default function HostPropertiesScreen() {
             </View>
           </View>
         </View>
-      </GlassmorphicView>
+      </View>
     </TouchableOpacity>
   );
 
@@ -146,16 +143,14 @@ export default function HostPropertiesScreen() {
       >
         <View className="flex-row items-center justify-between mb-4">
           <TouchableOpacity onPress={() => router.back()}>
-            <GlassmorphicView
-              intensity={40}
-              tint="dark"
+            <View
               borderRadius={12}
               style={{ width: 40, height: 40 }}
             >
               <View className="w-10 h-10 rounded-xl items-center justify-center">
                 <Ionicons name="arrow-back" size={24} color="#fff" />
               </View>
-            </GlassmorphicView>
+            </View>
           </TouchableOpacity>
           
           <TouchableOpacity
