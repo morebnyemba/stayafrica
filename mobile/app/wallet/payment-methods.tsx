@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { GlassmorphicView } from '@/components/common/GlassmorphicView';
 
 interface PaymentMethod {
   id: string;
@@ -57,14 +58,20 @@ export default function PaymentMethodsScreen() {
         style={{ paddingTop: Platform.OS === 'ios' ? 50 : 35 }}
       >
         <View className="flex-row items-center">
-          <TouchableOpacity
-            onPress={() => router.back()}
-            className="w-10 h-10 rounded-xl items-center justify-center mr-3"
-            style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
+          <GlassmorphicView
+            intensity={40}
+            tint="dark"
+            borderRadius={12}
+            style={{ width: 40, height: 40 }}
           >
-            <Ionicons name="arrow-back" size={24} color="#fff" />
-          </TouchableOpacity>
-          <Text className="text-xl font-bold text-white">Payment Methods</Text>
+            <TouchableOpacity
+              onPress={() => router.back()}
+              className="flex-1 items-center justify-center"
+            >
+              <Ionicons name="arrow-back" size={24} color="#fff" />
+            </TouchableOpacity>
+          </GlassmorphicView>
+          <Text className="text-xl font-bold text-white ml-3">Payment Methods</Text>
         </View>
       </LinearGradient>
 
