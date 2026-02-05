@@ -3,7 +3,6 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { AnimatedCompassIcon } from '@/components/common/AnimatedCompassIcon';
 import { LinearGradient } from 'expo-linear-gradient';
-import { GlassmorphicView } from '@/components/common/GlassmorphicView';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
 
@@ -26,9 +25,7 @@ export default function ExperiencesScreen() {
       onPress={() => router.push(`/experiences/${experience.id}`)}
       className="mb-4"
     >
-      <GlassmorphicView
-        intensity={30}
-        tint="light"
+      <View
         className="overflow-hidden"
         style={{
           shadowColor: '#122F26',
@@ -45,7 +42,7 @@ export default function ExperiencesScreen() {
             resizeMode="cover"
           />
         )}
-        <View className="p-4">
+        <View className="p-4 bg-white rounded-2xl">
           <Text className="text-lg font-bold text-forest mb-1">
             {experience.title}
           </Text>
@@ -76,7 +73,7 @@ export default function ExperiencesScreen() {
             </View>
           )}
         </View>
-      </GlassmorphicView>
+      </View>
     </TouchableOpacity>
   );
 
@@ -94,16 +91,14 @@ export default function ExperiencesScreen() {
         style={{ paddingTop: Platform.OS === 'ios' ? 50 : 35 }}
       >
         <TouchableOpacity onPress={() => router.back()} className="mb-4">
-          <GlassmorphicView
-            intensity={40}
-            tint="dark"
+          <View
             borderRadius={12}
             style={{ width: 40, height: 40 }}
           >
             <View className="w-10 h-10 rounded-xl items-center justify-center">
               <Ionicons name="arrow-back" size={24} color="#fff" />
             </View>
-          </GlassmorphicView>
+          </View>
         </TouchableOpacity>
         <Text className="text-4xl font-black text-white tracking-tight mb-2">
           Experiences
@@ -122,9 +117,7 @@ export default function ExperiencesScreen() {
                 key={category}
                 className="mr-2"
               >
-                <GlassmorphicView
-                  intensity={30}
-                  tint="light"
+                <View
                   className="px-4 py-2"
                   borderRadius={20}
                   style={{
@@ -136,7 +129,7 @@ export default function ExperiencesScreen() {
                   }}
                 >
                   <Text className="text-forest font-semibold">{category}</Text>
-                </GlassmorphicView>
+                </View>
               </TouchableOpacity>
             ))}
           </ScrollView>

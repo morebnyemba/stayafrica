@@ -130,7 +130,7 @@ export function HomeProperties() {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     {property.average_rating && (
-                      <div className="absolute top-3 right-3 flex items-center gap-1 bg-white/95 dark:bg-primary-900/95 backdrop-blur-sm px-2.5 py-1.5 rounded-lg shadow-lg">
+                      <div className="absolute top-3 right-3 flex items-center gap-1 bg-white/98 dark:bg-primary-900/98 backdrop-blur-sm px-2.5 py-1.5 rounded-lg shadow-lg">
                         <Star className="w-3.5 h-3.5 text-secondary-500" fill="currentColor" />
                         <span className="text-sm font-bold text-primary-900 dark:text-sand-50">{property.average_rating.toFixed(1)}</span>
                       </div>

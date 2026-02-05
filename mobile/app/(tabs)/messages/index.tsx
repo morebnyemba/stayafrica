@@ -5,7 +5,6 @@ import { useConversations, useUnreadCount } from '@/hooks/api-hooks';
 import { useAuth } from '@/context/auth-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { GlassmorphicView } from '@/components/common/GlassmorphicView';
 import { Skeleton } from '@/components/common/Skeletons';
 import { Avatar } from '@/components/common/Avatar';
 import { Sidebar } from '@/components/common/Sidebar';
@@ -67,9 +66,7 @@ export default function MessagesScreen() {
           {/* Top Navigation Bar with Menu */}
           <View className="flex-row items-center justify-between mb-4">
             {/* Hamburger Menu with Glassmorphism */}
-            <GlassmorphicView
-              intensity={40}
-              tint="dark"
+            <View
               borderRadius={12}
               style={{ width: 40, height: 40 }}
             >
@@ -79,7 +76,7 @@ export default function MessagesScreen() {
               >
                 <Ionicons name="menu" size={24} color="#fff" />
               </TouchableOpacity>
-            </GlassmorphicView>
+            </View>
 
             {/* Avatar */}
             <Avatar
@@ -171,7 +168,7 @@ export default function MessagesScreen() {
   };
 
   const ConversationSkeleton = () => (
-    <View className="mx-4 mb-3 rounded-2xl bg-white p-4">
+    <View className="mx-4 mb-3 rounded-2xl bg-white p-4 bg-white rounded-2xl">
       <View className="flex-row items-center">
         <Skeleton height={56} width={56} borderRadius={28} className="mr-4" />
         <View className="flex-1">
@@ -201,9 +198,7 @@ export default function MessagesScreen() {
         {/* Top Navigation Bar with Menu and Avatar */}
         <View className="flex-row items-center justify-between mb-4">
           {/* Hamburger Menu with Glassmorphism */}
-          <GlassmorphicView
-            intensity={40}
-            tint="dark"
+          <View
             borderRadius={12}
             style={{ width: 40, height: 40 }}
           >
@@ -213,7 +208,7 @@ export default function MessagesScreen() {
             >
               <Ionicons name="menu" size={24} color="#fff" />
             </TouchableOpacity>
-          </GlassmorphicView>
+          </View>
 
           {/* Avatar */}
           <Avatar
@@ -266,9 +261,7 @@ export default function MessagesScreen() {
         </View>
 
         {/* Search Bar with Glassmorphism */}
-        <GlassmorphicView
-          intensity={30}
-          tint="dark"
+        <View
           borderRadius={12}
           style={{ marginTop: 16 }}
         >
@@ -287,7 +280,7 @@ export default function MessagesScreen() {
               </TouchableOpacity>
             ) : null}
           </View>
-        </GlassmorphicView>
+        </View>
       </LinearGradient>
 
       {/* Conversations List */}

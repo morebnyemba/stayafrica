@@ -3,7 +3,6 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { GlassmorphicView } from '@/components/common/GlassmorphicView';
 import { useAuth } from '@/context/auth-context';
 import { Skeleton } from '@/components/common/Skeletons';
 import type { Transaction } from '@/types';
@@ -75,10 +74,8 @@ export default function WalletScreen() {
   }
 
   const TransactionItem = ({ icon, title, amount, date, type }: TransactionItemProps) => (
-    <GlassmorphicView
-      intensity={30}
-      tint="light"
-      className="p-4 mb-3 flex-row items-center"
+    <View
+      className="p-4 bg-white rounded-2xl mb-3 flex-row items-center"
       style={{
         shadowColor: '#122F26',
         shadowOffset: { width: 0, height: 2 },
@@ -102,11 +99,11 @@ export default function WalletScreen() {
       }`}>
         {type === 'credit' ? '+' : '-'}${amount}
       </Text>
-    </GlassmorphicView>
+    </View>
   );
 
   const TransactionSkeleton = () => (
-    <View className="bg-white rounded-2xl p-4 mb-3">
+    <View className="bg-white rounded-2xl p-4 bg-white rounded-2xl mb-3">
       <View className="flex-row items-center">
         <Skeleton height={48} width={48} borderRadius={24} className="mr-4" />
         <View className="flex-1">
@@ -158,9 +155,7 @@ export default function WalletScreen() {
           <Text className="text-5xl font-black text-forest mb-6">${balance.toFixed(2)}</Text>
           
           <View className="flex-row gap-3">
-            <GlassmorphicView
-              intensity={60}
-              tint="dark"
+            <View
               borderRadius={12}
               className="flex-1"
             >
@@ -171,11 +166,9 @@ export default function WalletScreen() {
                 <Ionicons name="arrow-down" size={18} color="#fff" />
                 <Text className="text-white font-semibold ml-2">Withdraw</Text>
               </TouchableOpacity>
-            </GlassmorphicView>
+            </View>
             
-            <GlassmorphicView
-              intensity={80}
-              tint="light"
+            <View
               borderRadius={12}
               className="flex-1"
             >
@@ -186,14 +179,14 @@ export default function WalletScreen() {
                 <Ionicons name="arrow-up" size={18} color="#122F26" />
                 <Text className="text-forest font-semibold ml-2">Add Funds</Text>
               </TouchableOpacity>
-            </GlassmorphicView>
+            </View>
           </View>
         </LinearGradient>
       </View>
 
       {/* Quick Stats */}
       <View className="flex-row px-4 mt-4 gap-3">
-        <View className="flex-1 bg-white rounded-2xl p-4" style={{
+        <View className="flex-1 bg-white rounded-2xl p-4 bg-white rounded-2xl" style={{
           shadowColor: '#122F26',
           shadowOffset: { width: 0, height: 2 },
           shadowOpacity: 0.05,
@@ -210,7 +203,7 @@ export default function WalletScreen() {
           <Text className="text-xs text-moss mt-1">Earned</Text>
         </View>
         
-        <View className="flex-1 bg-white rounded-2xl p-4" style={{
+        <View className="flex-1 bg-white rounded-2xl p-4 bg-white rounded-2xl" style={{
           shadowColor: '#122F26',
           shadowOffset: { width: 0, height: 2 },
           shadowOpacity: 0.05,
@@ -273,7 +266,7 @@ export default function WalletScreen() {
         <Text className="text-lg font-bold text-forest mb-4">Payment Methods</Text>
         
         <TouchableOpacity
-          className="bg-white rounded-2xl p-4 flex-row items-center"
+          className="bg-white rounded-2xl p-4 bg-white rounded-2xl flex-row items-center"
           onPress={() => router.push('/wallet/payment-methods')}
           style={{
             shadowColor: '#122F26',

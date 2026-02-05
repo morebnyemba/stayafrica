@@ -4,7 +4,6 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { GlassmorphicView } from '@/components/common/GlassmorphicView';
 
 interface Notification {
   id: string;
@@ -189,16 +188,14 @@ export default function NotificationsScreen() {
                 onPress={() => router.back()}
                 className="w-10 h-10 rounded-xl items-center justify-center mr-3"
               >
-                <GlassmorphicView
-                  intensity={40}
-                  tint="dark"
+                <View
                   borderRadius={12}
                   style={{ width: 40, height: 40 }}
                 >
                   <TouchableOpacity className="flex-1 items-center justify-center">
                     <Ionicons name="arrow-back" size={24} color="#fff" />
                   </TouchableOpacity>
-                </GlassmorphicView>
+                </View>
               </TouchableOpacity>
               <View>
                 <Text className="text-2xl font-black text-white tracking-tight">
@@ -214,14 +211,12 @@ export default function NotificationsScreen() {
 
             {unreadCount > 0 && (
               <TouchableOpacity onPress={markAllAsRead}>
-                <GlassmorphicView
-                  intensity={40}
-                  tint="dark"
+                <View
                   borderRadius={8}
                   style={{ paddingHorizontal: 12, paddingVertical: 6 }}
                 >
                   <Text className="text-gold text-xs font-semibold">Mark all read</Text>
-                </GlassmorphicView>
+                </View>
               </TouchableOpacity>
             )}
           </View>

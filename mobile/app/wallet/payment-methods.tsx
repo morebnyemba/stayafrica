@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { GlassmorphicView } from '@/components/common/GlassmorphicView';
 
 interface PaymentMethod {
   id: string;
@@ -58,9 +57,7 @@ export default function PaymentMethodsScreen() {
         style={{ paddingTop: Platform.OS === 'ios' ? 50 : 35 }}
       >
         <View className="flex-row items-center">
-          <GlassmorphicView
-            intensity={40}
-            tint="dark"
+          <View
             borderRadius={12}
             style={{ width: 40, height: 40 }}
           >
@@ -70,7 +67,7 @@ export default function PaymentMethodsScreen() {
             >
               <Ionicons name="arrow-back" size={24} color="#fff" />
             </TouchableOpacity>
-          </GlassmorphicView>
+          </View>
           <Text className="text-xl font-bold text-white ml-3">Payment Methods</Text>
         </View>
       </LinearGradient>
@@ -81,7 +78,7 @@ export default function PaymentMethodsScreen() {
             {paymentMethods.map((method) => (
               <View
                 key={method.id}
-                className="bg-white rounded-2xl p-4 mb-3"
+                className="bg-white rounded-2xl p-4 bg-white rounded-2xl mb-3"
                 style={{
                   shadowColor: '#122F26',
                   shadowOffset: { width: 0, height: 2 },
@@ -152,7 +149,7 @@ export default function PaymentMethodsScreen() {
         </TouchableOpacity>
 
         {/* Info Section */}
-        <View className="mt-6 bg-blue-50 rounded-2xl p-4">
+        <View className="mt-6 bg-blue-50 rounded-2xl p-4 bg-white rounded-2xl">
           <View className="flex-row items-center mb-2">
             <Ionicons name="shield-checkmark" size={20} color="#3B82F6" />
             <Text className="text-blue-800 font-semibold ml-2">Secure Payments</Text>

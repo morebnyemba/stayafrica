@@ -3,7 +3,6 @@ import { useState, useMemo } from 'react';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { GlassmorphicView } from '@/components/common/GlassmorphicView';
 import { useAuth } from '@/context/auth-context';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { 
@@ -117,7 +116,7 @@ export default function HostScreen() {
         <TouchableOpacity onPress={() => router.push('/host/verification')}>
           <LinearGradient
             colors={['#F59E0B', '#D97706']}
-            className="p-4 rounded-2xl flex-row items-center"
+            className="p-4 bg-white rounded-2xl flex-row items-center"
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
           >
@@ -146,7 +145,7 @@ export default function HostScreen() {
     <View className="mx-4 mt-4">
       <LinearGradient
         colors={['#FEF3C7', '#FDE68A']}
-        className="p-4 rounded-2xl"
+        className="p-4 bg-white rounded-2xl"
       >
         <View className="flex-row items-start">
           <View className="bg-yellow-500/20 rounded-full p-2 mr-3">
@@ -174,10 +173,8 @@ export default function HostScreen() {
       className="flex-1 m-2" 
       onPress={onPress}
     >
-      <GlassmorphicView
-        intensity={30}
-        tint="light"
-        className="p-4"
+      <View
+        className="p-4 bg-white rounded-2xl"
         style={{
           shadowColor: '#122F26',
           shadowOffset: { width: 0, height: 4 },
@@ -194,7 +191,7 @@ export default function HostScreen() {
         </LinearGradient>
         <Text className="text-2xl font-bold text-forest">{value}</Text>
         <Text className="text-sm text-moss mt-1">{label}</Text>
-      </GlassmorphicView>
+      </View>
     </TouchableOpacity>
   );
 
@@ -203,10 +200,8 @@ export default function HostScreen() {
       className="mb-3"
       onPress={onPress}
     >
-      <GlassmorphicView
-        intensity={30}
-        tint="light"
-        className="p-4 flex-row items-center"
+      <View
+        className="p-4 bg-white rounded-2xl flex-row items-center"
         style={{
           shadowColor: '#122F26',
           shadowOffset: { width: 0, height: 2 },
@@ -233,7 +228,7 @@ export default function HostScreen() {
           <Text className="text-sm text-moss mt-1">{description}</Text>
         </View>
         <Ionicons name="chevron-forward" size={20} color="#3A5C50" />
-      </GlassmorphicView>
+      </View>
     </TouchableOpacity>
   );
 
@@ -245,10 +240,8 @@ export default function HostScreen() {
     return (
     <View className="px-4 mt-4">
       {/* Revenue Chart Placeholder */}
-      <GlassmorphicView
-        intensity={30}
-        tint="light"
-        className="p-4 mb-4"
+      <View
+        className="p-4 bg-white rounded-2xl mb-4"
         style={{
           shadowColor: '#122F26',
           shadowOffset: { width: 0, height: 4 },
@@ -259,7 +252,7 @@ export default function HostScreen() {
       >
         <Text className="text-lg font-bold text-forest mb-4">Revenue Overview</Text>
         {hasData ? (
-          <View className="h-40 bg-sand-100 rounded-xl p-4 justify-center">
+          <View className="h-40 bg-sand-100 rounded-xl p-4 bg-white rounded-2xl justify-center">
             <View className="flex-row items-baseline justify-between mb-2">
               <Text className="text-3xl font-bold text-forest">${totalEarnings.toLocaleString()}</Text>
               <Text className="text-sm text-moss">This Month</Text>
@@ -278,13 +271,11 @@ export default function HostScreen() {
             <Text className="text-sm text-moss/70">Start hosting to see analytics</Text>
           </View>
         )}
-      </GlassmorphicView>
+      </View>
 
       {/* Performance Metrics */}
-      <GlassmorphicView
-        intensity={30}
-        tint="light"
-        className="p-4 mb-4"
+      <View
+        className="p-4 bg-white rounded-2xl mb-4"
         style={{
           shadowColor: '#122F26',
           shadowOffset: { width: 0, height: 4 },
@@ -309,13 +300,11 @@ export default function HostScreen() {
             <Text className="text-xs text-purple-700 mt-1">Booking Rate</Text>
           </View>
         </View>
-      </GlassmorphicView>
+      </View>
 
       {/* Property Performance Table */}
-      <GlassmorphicView
-        intensity={30}
-        tint="light"
-        className="p-4 mb-6"
+      <View
+        className="p-4 bg-white rounded-2xl mb-6"
         style={{
           shadowColor: '#122F26',
           shadowOffset: { width: 0, height: 4 },
@@ -350,7 +339,7 @@ export default function HostScreen() {
             <Text className="text-moss mt-2 text-sm">No properties listed yet</Text>
           </View>
         )}
-      </GlassmorphicView>
+      </View>
     </View>
     );
   };
@@ -554,7 +543,7 @@ export default function HostScreen() {
           }}>
             <LinearGradient
               colors={['#DBEAFE', '#BFDBFE']}
-              className="p-4"
+              className="p-4 bg-white rounded-2xl"
             >
               <View className="flex-row items-center mb-2">
                 <Ionicons name="bulb" size={20} color="#3B82F6" />

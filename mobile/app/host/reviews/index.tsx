@@ -2,7 +2,6 @@ import { View, Text, ScrollView, TouchableOpacity, Platform, FlatList } from 're
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { GlassmorphicView } from '@/components/common/GlassmorphicView';
 import { useAuth } from '@/context/auth-context';
 
 export default function HostReviewsScreen() {
@@ -18,16 +17,14 @@ export default function HostReviewsScreen() {
           style={{ paddingTop: Platform.OS === 'ios' ? 50 : 35 }}
         >
           <TouchableOpacity onPress={() => router.back()} className="mb-4">
-            <GlassmorphicView
-              intensity={40}
-              tint="dark"
+            <View
               borderRadius={12}
               style={{ width: 40, height: 40 }}
             >
               <View className="w-10 h-10 rounded-xl items-center justify-center">
                 <Ionicons name="arrow-back" size={24} color="#fff" />
               </View>
-            </GlassmorphicView>
+            </View>
           </TouchableOpacity>
           <Text className="text-3xl font-black text-white tracking-tight">
             Reviews
@@ -44,9 +41,7 @@ export default function HostReviewsScreen() {
   const reviews: any[] = [];
 
   const RatingStats = () => (
-    <GlassmorphicView
-      intensity={30}
-      tint="light"
+    <View
       className="p-5 mx-4 -mt-4"
       style={{
         shadowColor: '#122F26',
@@ -80,14 +75,12 @@ export default function HostReviewsScreen() {
           ))}
         </View>
       </View>
-    </GlassmorphicView>
+    </View>
   );
 
   const ReviewItem = ({ review }: any) => (
-    <GlassmorphicView
-      intensity={30}
-      tint="light"
-      className="p-4 mb-3 mx-4"
+    <View
+      className="p-4 bg-white rounded-2xl mb-3 mx-4"
       style={{
         shadowColor: '#122F26',
         shadowOffset: { width: 0, height: 2 },
@@ -115,7 +108,7 @@ export default function HostReviewsScreen() {
       </View>
       <Text className="text-moss">{review.text}</Text>
       <Text className="text-xs text-moss/70 mt-2">{review.date}</Text>
-    </GlassmorphicView>
+    </View>
   );
 
   return (

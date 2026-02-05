@@ -132,7 +132,7 @@ export function WishlistContent() {
                           <X className="w-5 h-5 text-red-600 dark:text-red-400" />
                         </button>
                         {property.average_rating && (
-                          <div className="absolute top-3 left-3 px-3 py-1 bg-white/90 dark:bg-primary-800/90 backdrop-blur rounded-full">
+                          <div className="absolute top-3 left-3 px-3 py-1 bg-white/95 dark:bg-primary-800/95 backdrop-blur-sm rounded-full">
                             <div className="flex items-center gap-1">
                               <Star className="w-4 h-4 text-yellow-500 fill-current" />
                               <span className="text-sm font-semibold text-primary-900 dark:text-sand-50">

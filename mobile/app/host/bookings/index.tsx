@@ -2,7 +2,6 @@ import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Platform } f
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { GlassmorphicView } from '@/components/common/GlassmorphicView';
 import { useAuth } from '@/context/auth-context';
 import { useHostBookings } from '@/hooks/api-hooks';
 import { Skeleton } from '@/components/common/Skeletons';
@@ -83,10 +82,8 @@ export default function HostBookingsScreen() {
         className="mb-3 mx-4"
         onPress={() => router.push(`/host/bookings/${booking.id}`)}
       >
-        <GlassmorphicView
-          intensity={30}
-          tint="light"
-          className="p-4"
+        <View
+          className="p-4 bg-white rounded-2xl"
           style={{
             shadowColor: '#122F26',
             shadowOffset: { width: 0, height: 4 },
@@ -144,13 +141,13 @@ export default function HostBookingsScreen() {
               ${booking.total_price}
             </Text>
           </View>
-        </GlassmorphicView>
+        </View>
       </TouchableOpacity>
     );
   };
 
   const BookingSkeleton = () => (
-    <View className="bg-white rounded-2xl p-4 mb-3 mx-4">
+    <View className="bg-white rounded-2xl p-4 bg-white rounded-2xl mb-3 mx-4">
       <Skeleton height={18} width="70%" className="mb-2" />
       <View className="flex-row items-center mb-3">
         <Skeleton height={40} width={40} borderRadius={20} className="mr-3" />

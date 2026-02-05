@@ -73,7 +73,7 @@ export function ExperienceCard({ experience }: ExperienceCardProps) {
         )}
         {experience.category_name && (
           <div className="absolute top-3 left-3">
-            <span className="px-3 py-1 bg-white/90 dark:bg-primary-900/90 backdrop-blur-sm rounded-full text-xs font-semibold text-primary-900 dark:text-sand-50">
+            <span className="px-3 py-1 bg-white/95 dark:bg-primary-900/95 backdrop-blur-sm rounded-full text-xs font-semibold text-primary-900 dark:text-sand-50">
               {experience.category_name}
             </span>
           </div>

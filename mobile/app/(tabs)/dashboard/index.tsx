@@ -4,7 +4,6 @@ import { Redirect, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { AnimatedCompassIcon } from '@/components/common/AnimatedCompassIcon';
 import { LinearGradient } from 'expo-linear-gradient';
-import { GlassmorphicView } from '@/components/common/GlassmorphicView';
 import { useAuth } from '@/context/auth-context';
 import { Sidebar } from '@/components/common/Sidebar';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -63,9 +62,7 @@ export default function GuestDashboardScreen() {
         >
           {/* Top Navigation Bar with Menu */}
           <View className="flex-row items-center justify-between mb-4">
-            <GlassmorphicView
-              intensity={40}
-              tint="dark"
+            <View
               borderRadius={12}
               style={{ width: 40, height: 40 }}
             >
@@ -75,7 +72,7 @@ export default function GuestDashboardScreen() {
               >
                 <Ionicons name="menu" size={24} color="#fff" />
               </TouchableOpacity>
-            </GlassmorphicView>
+            </View>
           </View>
 
           <Text className="text-3xl font-black text-white tracking-tight">
@@ -125,7 +122,7 @@ export default function GuestDashboardScreen() {
         <View className="mx-4 mt-4">
           <LinearGradient
             colors={['#10B981', '#059669']}
-            className="p-4 rounded-2xl flex-row items-center"
+            className="p-4 bg-white rounded-2xl flex-row items-center"
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
           >
@@ -147,7 +144,7 @@ export default function GuestDashboardScreen() {
         <TouchableOpacity onPress={() => router.push('/profile/verification')}>
           <LinearGradient
             colors={['#F59E0B', '#D97706']}
-            className="p-4 rounded-2xl flex-row items-center"
+            className="p-4 bg-white rounded-2xl flex-row items-center"
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
           >
@@ -168,7 +165,7 @@ export default function GuestDashboardScreen() {
   // Stats Card Component
   const StatCard = ({ icon, label, value, color, onPress }: StatCardProps) => (
     <TouchableOpacity 
-      className="flex-1 bg-white rounded-2xl p-4 m-1.5" 
+      className="flex-1 bg-white rounded-2xl p-4 bg-white rounded-2xl m-1.5" 
       onPress={onPress}
       style={{
         shadowColor: '#122F26',
@@ -192,7 +189,7 @@ export default function GuestDashboardScreen() {
   // Quick Action Component
   const QuickAction = ({ icon, title, description, onPress, color }: QuickActionProps) => (
     <TouchableOpacity
-      className="bg-white rounded-2xl p-4 mb-3 flex-row items-center"
+      className="bg-white rounded-2xl p-4 bg-white rounded-2xl mb-3 flex-row items-center"
       onPress={onPress}
       style={{
         shadowColor: '#122F26',
@@ -405,7 +402,7 @@ export default function GuestDashboardScreen() {
           </TouchableOpacity>
         </View>
 
-        <View className="bg-white rounded-2xl p-4" style={{
+        <View className="bg-white rounded-2xl p-4 bg-white rounded-2xl" style={{
           shadowColor: '#122F26',
           shadowOffset: { width: 0, height: 4 },
           shadowOpacity: 0.08,
@@ -414,7 +411,7 @@ export default function GuestDashboardScreen() {
         }}>
           {/* Empty state */}
           <View className="items-center py-6">
-            <View className="bg-sand-100 rounded-full p-4 mb-3">
+            <View className="bg-sand-100 rounded-full p-4 bg-white rounded-2xl mb-3">
               <Ionicons name="time-outline" size={32} color="#94a3b8" />
             </View>
             <Text className="text-forest font-semibold">No Recent Activity</Text>
@@ -435,7 +432,7 @@ export default function GuestDashboardScreen() {
       }}>
         <LinearGradient
           colors={['#DBEAFE', '#BFDBFE']}
-          className="p-4"
+          className="p-4 bg-white rounded-2xl"
         >
           <View className="flex-row items-center mb-2">
             <Ionicons name="bulb" size={20} color="#3B82F6" />
