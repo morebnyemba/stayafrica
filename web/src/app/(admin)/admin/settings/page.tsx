@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { adminApi } from '@/lib/admin-api';
 import { SystemConfig } from '@/types/admin-types';
-import { Save } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function SettingsPage() {
