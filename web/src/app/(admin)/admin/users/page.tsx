@@ -3,8 +3,10 @@
 import { useEffect, useState } from 'react';
 import { adminApi } from '@/lib/admin-api';
 import { User } from '@/types';
-import { Search, CheckCircle, XCircle, Edit } from 'lucide-react';
+import { Search, CheckCircle, XCircle, Edit, UserPlus, Ban, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import UserModal from '@/components/admin/UserModal';
+import ConfirmDialog from '@/components/admin/ConfirmDialog';
 
 export default function UsersManagement() {
   const [users, setUsers] = useState<User[]>([]);
@@ -13,6 +15,10 @@ export default function UsersManagement() {
   const [roleFilter, setRoleFilter] = useState<string>('');
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
+  const [showUserModal, setShowUserModal] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [confirmAction, setConfirmAction] = useState<{ type: string; userId: string; data?: any } | null>(null);
 
   useEffect(() => {
     loadUsers();
