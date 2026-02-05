@@ -11,8 +11,23 @@ const protectedRoutes = [
   '/wishlist',
 ];
 
+// Define admin routes (require admin role)
+const adminRoutes = ['/admin'];
+
 // Define auth routes (redirect to dashboard if already logged in)
 const authRoutes = ['/login', '/register'];
+
+// Helper function to decode JWT and check if user is admin
+function isUserAdmin(token: string): boolean {
+  try {
+    // Decode JWT (without verification - just to read the payload)
+    const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
+    // User is admin if role is 'admin' OR is_staff is true (matches backend logic)
+    return payload.role === 'admin' || payload.is_staff === true;
+  } catch (error) {
+    return false;
+  }
+}
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -20,10 +35,25 @@ export function middleware(request: NextRequest) {
   // Get the token from cookies or headers
   const token = request.cookies.get('access_token')?.value;
   const isAuthenticated = !!token;
+  const hasAdminAccess = token ? isUserAdmin(token) : false;
 
-  // Check if the current route is protected
+  // Check if the current route is protected or admin
   const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
+  const isAdminRoute = adminRoutes.some(route => pathname.startsWith(route));
   const isAuthRoute = authRoutes.some(route => pathname.startsWith(route));
+
+  // Redirect to login if accessing admin route without admin role
+  if (isAdminRoute) {
+    if (!isAuthenticated) {
+      const url = new URL('/login', request.url);
+      url.searchParams.set('redirect', pathname);
+      url.searchParams.set('error', 'admin_access_required');
+      return NextResponse.redirect(url);
+    }
+    if (!hasAdminAccess) {
+      return NextResponse.redirect(new URL('/dashboard?error=unauthorized', request.url));
+    }
+  }
 
   // Redirect to login if accessing protected route without authentication
   if (isProtectedRoute && !isAuthenticated) {
