@@ -6,13 +6,15 @@ import {
   TouchableOpacity,
   Linking,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default function AboutScreen() {
   const appVersion = '1.0.0';
   const buildNumber = '100';
+  const insets = useSafeAreaInsets();
 
   const handleLink = async (url: string) => {
     try {
@@ -42,17 +44,27 @@ export default function AboutScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
+    <SafeAreaView className="flex-1 bg-sand-100">
       {/* Header */}
-      <View className="bg-white px-6 py-4 border-b border-gray-200 flex-row items-center">
-        <TouchableOpacity
-          onPress={() => router.back()}
-          className="w-10 h-10 items-center justify-center mr-3"
-        >
-          <Ionicons name="arrow-back" size={24} color="#000" />
-        </TouchableOpacity>
-        <Text className="text-2xl font-bold text-gray-900">About</Text>
-      </View>
+      <LinearGradient
+        colors={['#122F26', '#1d392f', '#2d4a40']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        className="px-4 pb-6"
+        style={{ paddingTop: insets.top + 12 }}
+      >
+        <View className="flex-row items-center mb-2">
+          <TouchableOpacity
+            onPress={() => router.back()}
+            className="w-10 h-10 rounded-xl items-center justify-center mr-3"
+            style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
+          >
+            <Ionicons name="arrow-back" size={24} color="#fff" />
+          </TouchableOpacity>
+          <Text className="text-3xl font-black text-white tracking-tight">About</Text>
+        </View>
+        <Text className="text-sand-200 text-sm ml-13">Learn more about StayAfrica</Text>
+      </LinearGradient>
 
       <ScrollView className="flex-1">
         {/* App Logo & Name */}
