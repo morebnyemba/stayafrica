@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { adminApi } from '@/lib/admin-api';
 import { User } from '@/types';
-import { Search, Filter, CheckCircle, XCircle, Edit } from 'lucide-react';
+import { Search, CheckCircle, XCircle, Edit } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function UsersManagement() {
