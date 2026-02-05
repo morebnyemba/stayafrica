@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, TouchableOpacity, TextInput, Platform, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, TextInput, Platform, Alert, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -43,12 +43,17 @@ export default function WithdrawScreen() {
   };
 
   return (
-    <ScrollView 
-      className="flex-1 bg-sand-100" 
-      showsVerticalScrollIndicator={false}
-      contentContainerStyle={{ paddingBottom: 40 }}
-      keyboardShouldPersistTaps="handled"
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      className="flex-1"
     >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <ScrollView 
+          className="flex-1 bg-sand-100" 
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 40 }}
+          keyboardShouldPersistTaps="handled"
+        >
       {/* Header */}
       <LinearGradient
         colors={['#122F26', '#1d392f']}
@@ -149,6 +154,8 @@ export default function WithdrawScreen() {
           </LinearGradient>
         </TouchableOpacity>
       </View>
-    </ScrollView>
+        </ScrollView>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 }

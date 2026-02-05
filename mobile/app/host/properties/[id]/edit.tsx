@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, TouchableOpacity, TextInput, Platform, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, TextInput, Platform, ActivityIndicator, Alert, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { useState, useEffect } from 'react';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -103,12 +103,17 @@ export default function PropertyEditScreen() {
   }
 
   return (
-    <ScrollView 
-      className="flex-1 bg-sand-100" 
-      showsVerticalScrollIndicator={false}
-      contentContainerStyle={{ paddingBottom: 40 }}
-      keyboardShouldPersistTaps="handled"
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      className="flex-1"
     >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <ScrollView 
+          className="flex-1 bg-sand-100" 
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 40 }}
+          keyboardShouldPersistTaps="handled"
+        >
       <LinearGradient
         colors={['#122F26', '#1d392f']}
         className="px-4 pb-6"
@@ -256,6 +261,8 @@ export default function PropertyEditScreen() {
           </LinearGradient>
         </TouchableOpacity>
       </View>
-    </ScrollView>
+        </ScrollView>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 }

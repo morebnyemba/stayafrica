@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, TouchableOpacity, Platform, TextInput, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Platform, TextInput, Alert, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { useState } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -73,12 +73,17 @@ export default function CreateBookingScreen() {
   }
 
   return (
-    <ScrollView 
-      className="flex-1 bg-sand-100" 
-      showsVerticalScrollIndicator={false}
-      contentContainerStyle={{ paddingBottom: 40 }}
-      keyboardShouldPersistTaps="handled"
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      className="flex-1"
     >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <ScrollView 
+          className="flex-1 bg-sand-100" 
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 40 }}
+          keyboardShouldPersistTaps="handled"
+        >
       {/* Header */}
       <LinearGradient
         colors={['#122F26', '#1d392f']}
@@ -182,6 +187,8 @@ export default function CreateBookingScreen() {
           </Text>
         </View>
       </View>
-    </ScrollView>
+        </ScrollView>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 }
