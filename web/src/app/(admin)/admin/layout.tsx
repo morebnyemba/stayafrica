@@ -60,7 +60,7 @@ export default function AdminLayout({
       <aside className="w-64 bg-[#122F26] shadow-lg flex flex-col">
         <div className="p-6 border-b border-[#3A5C50]">
           <Image
-            src="/logo.svg"
+            src="/logo.png"
             alt="StayAfrica"
             width={180}
             height={50}

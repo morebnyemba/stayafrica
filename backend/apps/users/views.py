@@ -480,4 +480,60 @@ class UserPropertyInteractionViewSet(viewsets.ModelViewSet):
         
         serializer = self.get_serializer(interaction)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    def verify(self, request, pk=None):
+        """Admin action to verify a user"""
+        if not request.user.is_staff:
+            return Response(
+                {'error': 'Only admin users can verify accounts'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        user = self.get_object()
+        user.is_verified = True
+        user.save()
+        
+        # Log the action
+        from django.contrib.contenttypes.models import ContentType
+        content_type = ContentType.objects.get_for_model(User)
+        AuditLoggerService.log_action(
+            user=request.user,
+            action='verify',
+            content_type=content_type,
+            object_id=user.id,
+            changes={'verified': True, 'verified_by': request.user.id}
+        )
+        
+        serializer = self.get_serializer(user)
+        return Response(serializer.data)
+    
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    def suspend(self, request, pk=None):
+        """Admin action to suspend a user"""
+        if not request.user.is_staff:
+            return Response(
+                {'error': 'Only admin users can suspend accounts'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        user = self.get_object()
+        reason = request.data.get('reason', 'Suspended by admin')
+        
+        user.is_active = False
+        user.save()
+        
+        # Log the action
+        from django.contrib.contenttypes.models import ContentType
+        content_type = ContentType.objects.get_for_model(User)
+        AuditLoggerService.log_action(
+            user=request.user,
+            action='suspend',
+            content_type=content_type,
+            object_id=user.id,
+            changes={'suspended': True, 'reason': reason, 'suspended_by': request.user.id}
+        )
+        
+        serializer = self.get_serializer(user)
+        return Response(serializer.data)
 

@@ -49,7 +49,7 @@ export default function PaymentsManagement() {
       paynow: 'bg-purple-100 text-purple-800',
       payfast: 'bg-blue-100 text-blue-800',
       stripe: 'bg-indigo-100 text-indigo-800',
-      ozow: 'bg-orange-100 text-orange-800',
+      ozow: 'bg-[#F4F1EA] text-[#122F26]',
       cash_on_arrival: 'bg-gray-100 text-gray-800',
     };
     return colors[provider] || 'bg-gray-100 text-gray-800';
@@ -62,15 +62,15 @@ export default function PaymentsManagement() {
   return (
     <div className="p-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Payment Management</h1>
-        <p className="text-gray-600 mt-2">Monitor payment transactions and payouts</p>
+        <h1 className="text-3xl font-bold text-[#122F26]">Payment Management</h1>
+        <p className="text-[#3A5C50] mt-2">Monitor payment transactions and payouts</p>
       </div>
 
       {/* Filters */}
       <div className="bg-white rounded-lg shadow p-6 mb-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-[#122F26] mb-2">
               Filter by Status
             </label>
             <select
@@ -79,7 +79,7 @@ export default function PaymentsManagement() {
                 setStatusFilter(e.target.value);
                 setPage(1);
               }}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-[#3A5C50] rounded-lg focus:ring-2 focus:ring-[#D9B168] focus:border-transparent"
             >
               <option value="">All Status</option>
               <option value="initiated">Initiated</option>
@@ -94,23 +94,23 @@ export default function PaymentsManagement() {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-gray-600">Total Transactions</p>
-          <p className="text-2xl font-bold text-gray-900">{totalCount}</p>
+          <p className="text-sm text-[#3A5C50]">Total Transactions</p>
+          <p className="text-2xl font-bold text-[#122F26]">{totalCount}</p>
         </div>
         <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-gray-600">Successful</p>
+          <p className="text-sm text-[#3A5C50]">Successful</p>
           <p className="text-2xl font-bold text-green-600">
             {payments.filter(p => p.status === 'success').length}
           </p>
         </div>
         <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-gray-600">Failed</p>
+          <p className="text-sm text-[#3A5C50]">Failed</p>
           <p className="text-2xl font-bold text-red-600">
             {payments.filter(p => p.status === 'failed').length}
           </p>
         </div>
         <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-gray-600">Total Revenue</p>
+          <p className="text-sm text-[#3A5C50]">Total Revenue</p>
           <p className="text-2xl font-bold text-green-600">
             ${totalRevenue.toLocaleString()}
           </p>
@@ -121,7 +121,7 @@ export default function PaymentsManagement() {
       <div className="bg-white rounded-lg shadow overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#D9B168]"></div>
           </div>
         ) : (
           <>
@@ -129,25 +129,25 @@ export default function PaymentsManagement() {
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[#3A5C50] uppercase tracking-wider">
                       Transaction ID
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[#3A5C50] uppercase tracking-wider">
                       Gateway Ref
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[#3A5C50] uppercase tracking-wider">
                       Provider
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[#3A5C50] uppercase tracking-wider">
                       Amount
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[#3A5C50] uppercase tracking-wider">
                       Status
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[#3A5C50] uppercase tracking-wider">
                       Date
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[#3A5C50] uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
@@ -156,14 +156,14 @@ export default function PaymentsManagement() {
                   {payments.map((payment) => (
                     <tr key={payment.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">
+                        <div className="text-sm font-medium text-[#122F26]">
                           {payment.id}
                         </div>
-                        <div className="text-sm text-gray-500">
+                        <div className="text-sm text-[#3A5C50]">
                           Booking: {payment.booking_id}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-[#122F26]">
                         {payment.gateway_ref || 'N/A'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -171,7 +171,7 @@ export default function PaymentsManagement() {
                           {payment.provider}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-[#122F26]">
                         ${payment.amount.toLocaleString()}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -179,11 +179,11 @@ export default function PaymentsManagement() {
                           {payment.status}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-[#3A5C50]">
                         {new Date(payment.created_at).toLocaleString()}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <button className="text-orange-600 hover:text-orange-900">
+                        <button className="text-[#D9B168] hover:text-[#c9a158]">
                           <Eye className="w-5 h-5" />
                         </button>
                       </td>
@@ -195,21 +195,21 @@ export default function PaymentsManagement() {
 
             {/* Pagination */}
             <div className="bg-gray-50 px-6 py-4 flex items-center justify-between border-t">
-              <div className="text-sm text-gray-700">
+              <div className="text-sm text-[#122F26]">
                 Showing {(page - 1) * 30 + 1} to {Math.min(page * 30, totalCount)} of {totalCount} payments
               </div>
               <div className="flex space-x-2">
                 <button
                   onClick={() => setPage(p => Math.max(1, p - 1))}
                   disabled={page === 1}
-                  className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 border border-[#3A5C50] rounded-lg text-sm font-medium text-[#122F26] hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Previous
                 </button>
                 <button
                   onClick={() => setPage(p => p + 1)}
                   disabled={page * 30 >= totalCount}
-                  className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 border border-[#3A5C50] rounded-lg text-sm font-medium text-[#122F26] hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Next
                 </button>

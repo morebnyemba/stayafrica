@@ -289,6 +289,48 @@ class PaymentViewSet(viewsets.ModelViewSet):
             'currency': payment.currency,
             'created_at': payment.created_at,
         })
+    
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    def refund(self, request, pk=None):
+        """Admin action to refund a payment"""
+        if not request.user.is_staff:
+            return Response(
+                {'error': 'Only admin users can process refunds'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        payment = self.get_object()
+        amount = request.data.get('amount')
+        
+        if payment.status != 'completed':
+            return Response(
+                {'error': 'Only completed payments can be refunded'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # TODO: Integrate with actual payment gateway to process refund
+        # For now, just update status
+        payment.status = 'refunded'
+        payment.save()
+        
+        # Log the action
+        from django.contrib.contenttypes.models import ContentType
+        from services.audit_logger import AuditLoggerService
+        content_type = ContentType.objects.get_for_model(Payment)
+        AuditLoggerService.log_action(
+            user=request.user,
+            action='refund',
+            content_type=content_type,
+            object_id=payment.id,
+            changes={
+                'status': 'refunded',
+                'refund_amount': amount or payment.amount,
+                'refunded_by': request.user.id
+            }
+        )
+        
+        serializer = self.get_serializer(payment)
+        return Response(serializer.data)
 
 
 class WalletViewSet(viewsets.ModelViewSet):
