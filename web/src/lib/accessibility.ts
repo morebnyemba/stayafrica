@@ -142,10 +142,13 @@ export const getContrastRatio = (rgb1: string, rgb2: string): number => {
  * Skip to main content link
  */
 export const SkipToMainContent = () => (
-  <a
-    href="#main-content"
-    className="absolute top-0 left-0 -translate-y-full focus:translate-y-0 bg-primary-500 text-white px-4 py-2 rounded-b-lg font-medium"
-  >
-    Skip to main content
-  </a>
+  React.createElement(
+    'a',
+    {
+      href: '#main-content',
+      className:
+        'absolute top-0 left-0 -translate-y-full focus:translate-y-0 bg-primary-500 text-white px-4 py-2 rounded-b-lg font-medium',
+    },
+    'Skip to main content'
+  )
 );
