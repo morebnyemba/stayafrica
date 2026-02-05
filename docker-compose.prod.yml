@@ -39,9 +39,9 @@ services:
     image: postgis/postgis:15-3.3
     container_name: stayafrica_db
     environment:
-      POSTGRES_DB: stayafrica_db
-      POSTGRES_USER: stayafrica_user
-      POSTGRES_PASSWORD: StayAfr1ca$2025!Secure
+      POSTGRES_DB: ${DB_NAME:-stayafrica_db}
+      POSTGRES_USER: ${DB_USER:-stayafrica_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
@@ -69,17 +69,20 @@ services:
       dockerfile: Dockerfile
     container_name: stayafrica_backend
     environment:
-      DB_NAME: stayafrica_db
-      DB_USER: stayafrica_user
-      DB_PASSWORD: StayAfr1ca$2025!Secure
+      DB_NAME: ${DB_NAME:-stayafrica_db}
+      DB_USER: ${DB_USER:-stayafrica_user}
+      DB_PASSWORD: ${DB_PASSWORD}
       DB_HOST: db
       DB_PORT: 5432
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
       CELERY_BROKER_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
       CELERY_RESULT_BACKEND: redis://:${REDIS_PASSWORD}@redis:6379/0
-      SECRET_KEY: change-this-to-a-secure-key-in-production
-      DEBUG: "False"
-      ALLOWED_HOSTS: stayafrica.app,www.stayafrica.app,api.stayafrica.app,backend,localhost,127.0.0.1
+      SECRET_KEY: ${SECRET_KEY}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-${SECRET_KEY}}
+      DEBUG: ${DEBUG:-False}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-stayafrica.app,www.stayafrica.app,api.stayafrica.app,backend,localhost,127.0.0.1}
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      APP_VERSION: ${APP_VERSION:-1.0.0}
     depends_on:
       - db
       - redis
@@ -97,16 +100,19 @@ services:
     container_name: stayafrica_celery
     command: celery -A stayafrica worker --loglevel=info --concurrency=4
     environment:
-      DB_NAME: stayafrica_db
-      DB_USER: stayafrica_user
-      DB_PASSWORD: StayAfr1ca$2025!Secure
+      DB_NAME: ${DB_NAME:-stayafrica_db}
+      DB_USER: ${DB_USER:-stayafrica_user}
+      DB_PASSWORD: ${DB_PASSWORD}
       DB_HOST: db
       DB_PORT: 5432
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
       CELERY_BROKER_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
       CELERY_RESULT_BACKEND: redis://:${REDIS_PASSWORD}@redis:6379/0
-      SECRET_KEY: change-this-to-a-secure-key-in-production
-      DEBUG: "False"
+      SECRET_KEY: ${SECRET_KEY}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-${SECRET_KEY}}
+      DEBUG: ${DEBUG:-False}
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      APP_VERSION: ${APP_VERSION:-1.0.0}
     depends_on:
       - db
       - redis
@@ -120,16 +126,19 @@ services:
     container_name: stayafrica_celery_beat
     command: celery -A stayafrica beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
     environment:
-      DB_NAME: stayafrica_db
-      DB_USER: stayafrica_user
-      DB_PASSWORD: StayAfr1ca$2025!Secure
+      DB_NAME: ${DB_NAME:-stayafrica_db}
+      DB_USER: ${DB_USER:-stayafrica_user}
+      DB_PASSWORD: ${DB_PASSWORD}
       DB_HOST: db
       DB_PORT: 5432
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
       CELERY_BROKER_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
       CELERY_RESULT_BACKEND: redis://:${REDIS_PASSWORD}@redis:6379/0
-      SECRET_KEY: change-this-to-a-secure-key-in-production
-      DEBUG: "False"
+      SECRET_KEY: ${SECRET_KEY}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-${SECRET_KEY}}
+      DEBUG: ${DEBUG:-False}
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      APP_VERSION: ${APP_VERSION:-1.0.0}
     depends_on:
       - db
       - redis

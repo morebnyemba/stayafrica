@@ -153,6 +153,14 @@ else:
             'PASSWORD': os.getenv('DB_PASSWORD', 'postgres'),
             'HOST': os.getenv('DB_HOST', 'localhost'),
             'PORT': os.getenv('DB_PORT', '5432'),
+            'OPTIONS': {
+                # Use SSL for database connections in production
+                'sslmode': 'require' if not DEBUG else 'prefer',
+                # Connection timeout (seconds)
+                'connect_timeout': 10,
+                # Query timeout (milliseconds) - 30 seconds
+                'options': '-c statement_timeout=30000',
+            },
         }
     }
 
