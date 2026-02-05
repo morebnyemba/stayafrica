@@ -27,7 +27,7 @@ export const adminApi = {
   },
 
   async updateUser(id: string, data: Partial<User>): Promise<User> {
-    const response = await apiClient.patch(`/api/v1/admin/users/${id}/`, data);
+    const response = await apiClient.put(`/api/v1/admin/users/${id}/`, data);
     return response.data;
   },
 
@@ -130,7 +130,7 @@ export const adminApi = {
   },
 
   async updateSystemConfig(data: Partial<SystemConfig>): Promise<SystemConfig> {
-    const response = await apiClient.patch('/api/v1/admin/system-config/', data);
+    const response = await apiClient.put('/api/v1/admin/system-config/', data);
     return response.data;
   },
 
