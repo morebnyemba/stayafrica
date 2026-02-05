@@ -215,3 +215,101 @@ The changes are production-ready, tested, and secure. No breaking changes introd
 
 **Ready for Merge** 🎉
 
+
+---
+
+## Update: Mobile Glassmorphism Reverted (Feb 5, 2026)
+
+### User Feedback
+User requested to revert the glassmorphism effects that were applied to the **mobile app** in PR #91, as they were affecting the beauty/UX of the mobile screens.
+
+### Changes Made
+
+#### Mobile App Files Reverted (15 files)
+All mobile screens that had glassmorphism effects have been reverted to use solid white backgrounds:
+
+1. `mobile/app/(tabs)/profile/index.tsx`
+2. `mobile/app/(tabs)/host/index.tsx`
+3. `mobile/app/(tabs)/bookings/index.tsx`
+4. `mobile/app/(tabs)/dashboard/index.tsx`
+5. `mobile/app/(tabs)/explore/index.tsx`
+6. `mobile/app/(tabs)/messages/index.tsx`
+7. `mobile/app/(tabs)/wallet/index.tsx`
+8. `mobile/app/host/properties/index.tsx`
+9. `mobile/app/host/bookings/index.tsx`
+10. `mobile/app/host/earnings/index.tsx`
+11. `mobile/app/host/reviews/index.tsx`
+12. `mobile/app/host/settings/index.tsx`
+13. `mobile/app/experiences/index.tsx`
+14. `mobile/app/notifications/index.tsx`
+15. `mobile/app/wallet/payment-methods.tsx`
+
+#### Technical Changes
+- **Removed**: All `GlassmorphicView` component imports
+- **Replaced**: `<GlassmorphicView>` → `<View>` with solid backgrounds
+- **Removed**: `intensity` and `tint` props (glassmorphism-specific)
+- **Added**: `bg-white rounded-2xl` classes for solid white card backgrounds
+- **Maintained**: Shadow effects and elevation for card-like appearance
+
+#### Code Statistics
+- **Lines removed**: 228 (glassmorphism code)
+- **Lines added**: 131 (standard Views with solid backgrounds)
+- **Net change**: -97 lines (cleaner, more maintainable code)
+
+### Before & After
+
+#### Before (Glassmorphism)
+```tsx
+<GlassmorphicView
+  intensity={30}
+  tint="light"
+  className="flex-row items-center p-4"
+  style={{
+    shadowColor: '#122F26',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  }}
+>
+  {/* Content */}
+</GlassmorphicView>
+```
+
+#### After (Solid Background)
+```tsx
+<View
+  className="flex-row items-center p-4 bg-white rounded-2xl"
+  style={{
+    shadowColor: '#122F26',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  }}
+>
+  {/* Content */}
+</View>
+```
+
+### Benefits of Reversion
+
+1. **Better Performance**: No blur effects to render on mobile devices
+2. **Improved Readability**: Solid backgrounds provide better text contrast
+3. **Cleaner Code**: Removed dependency on GlassmorphicView component
+4. **Faster Rendering**: Standard Views render faster than blur effects
+5. **Better Battery Life**: Less GPU usage without backdrop-filter effects
+
+### Web vs Mobile
+
+**Important**: The glassmorphism optimizations on the **web** frontend are still active and have been enhanced for better readability. Only the **mobile app** glassmorphism has been reverted.
+
+| Platform | Glassmorphism Status | Rationale |
+|----------|---------------------|-----------|
+| **Web** | ✅ Active (optimized) | Desktop browsers handle blur well; improved opacity for readability |
+| **Mobile** | ❌ Reverted | Mobile performance concerns; solid backgrounds preferred |
+
+---
+
+**Last Updated**: February 5, 2026  
+**Status**: ✅ Complete - All changes committed and pushed
