@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/store/auth-store';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   LayoutDashboard,
   Users,
@@ -43,8 +44,8 @@ export default function AdminLayout({
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
+      <div className="flex items-center justify-center min-h-screen bg-[#F4F1EA]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#D9B168]"></div>
       </div>
     );
   }
@@ -54,12 +55,18 @@ export default function AdminLayout({
   }
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-[#F4F1EA]">
       {/* Sidebar */}
-      <aside className="w-64 bg-white shadow-lg flex flex-col">
-        <div className="p-6 border-b">
-          <h1 className="text-2xl font-bold text-orange-600">StayAfrica</h1>
-          <p className="text-sm text-gray-600 mt-1">Admin Portal</p>
+      <aside className="w-64 bg-[#122F26] shadow-lg flex flex-col">
+        <div className="p-6 border-b border-[#3A5C50]">
+          <Image
+            src="/logo.svg"
+            alt="StayAfrica"
+            width={180}
+            height={50}
+            className="mb-2"
+          />
+          <p className="text-sm text-[#D9B168] mt-2 font-medium">Admin Portal</p>
         </div>
 
         <nav className="flex-1 p-4 space-y-1">
@@ -67,7 +74,7 @@ export default function AdminLayout({
             <Link
               key={item.href}
               href={item.href}
-              className="flex items-center space-x-3 px-4 py-3 text-gray-700 rounded-lg hover:bg-orange-50 hover:text-orange-600 transition-colors"
+              className="flex items-center space-x-3 px-4 py-3 text-[#F4F1EA] rounded-lg hover:bg-[#3A5C50] hover:text-[#D9B168] transition-colors"
             >
               <item.icon className="w-5 h-5" />
               <span className="font-medium">{item.label}</span>
@@ -75,15 +82,15 @@ export default function AdminLayout({
           ))}
         </nav>
 
-        <div className="p-4 border-t">
-          <div className="mb-4 p-3 bg-gray-50 rounded-lg">
-            <p className="text-sm font-medium text-gray-900">{user.first_name} {user.last_name}</p>
-            <p className="text-xs text-gray-600">{user.email}</p>
-            <p className="text-xs text-orange-600 mt-1">Admin</p>
+        <div className="p-4 border-t border-[#3A5C50]">
+          <div className="mb-4 p-3 bg-[#3A5C50] rounded-lg">
+            <p className="text-sm font-medium text-[#F4F1EA]">{user.first_name} {user.last_name}</p>
+            <p className="text-xs text-[#D9B168]">{user.email}</p>
+            <p className="text-xs text-[#D9B168] mt-1 font-semibold">Admin</p>
           </div>
           <button
             onClick={logout}
-            className="flex items-center space-x-2 w-full px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+            className="flex items-center space-x-2 w-full px-4 py-2 text-[#F4F1EA] bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
           >
             <LogOut className="w-5 h-5" />
             <span>Logout</span>
