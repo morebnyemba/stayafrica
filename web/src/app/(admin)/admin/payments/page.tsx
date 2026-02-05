@@ -49,7 +49,7 @@ export default function PaymentsManagement() {
       paynow: 'bg-purple-100 text-purple-800',
       payfast: 'bg-blue-100 text-blue-800',
       stripe: 'bg-indigo-100 text-indigo-800',
-      ozow: 'bg-orange-100 text-orange-800',
+      ozow: 'bg-[#F4F1EA] text-[#122F26]',
       cash_on_arrival: 'bg-gray-100 text-gray-800',
     };
     return colors[provider] || 'bg-gray-100 text-gray-800';

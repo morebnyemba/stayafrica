@@ -245,8 +245,8 @@ export default function UsersManagement() {
                     <tr key={user.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
-                          <div className="h-10 w-10 rounded-full bg-orange-100 flex items-center justify-center">
-                            <span className="text-orange-600 font-medium">
+                          <div className="h-10 w-10 rounded-full bg-[#F4F1EA] flex items-center justify-center">
+                            <span className="text-[#D9B168] font-medium">
                               {user.first_name?.[0]}{user.last_name?.[0]}
                             </span>
                           </div>
