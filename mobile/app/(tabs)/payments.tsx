@@ -8,9 +8,10 @@ import {
   RefreshControl,
   Alert,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { apiClient } from '@/services/api-client';
 import { useAuth } from '@/context/auth-context';
 
@@ -35,6 +36,7 @@ interface PaymentMethod {
 
 export default function PaymentsScreen() {
   const { user } = useAuth();
+  const insets = useSafeAreaInsets();
   const [payments, setPayments] = useState<Payment[]>([]);
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
   const [loading, setLoading] = useState(true);
@@ -146,65 +148,72 @@ export default function PaymentsScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView className="flex-1 bg-white">
+      <SafeAreaView className="flex-1 bg-sand-100">
         <View className="flex-1 justify-center items-center">
-          <ActivityIndicator size="large" color="#059669" />
+          <ActivityIndicator size="large" color="#D9B168" />
+          <Text className="text-moss mt-4">Loading payments...</Text>
         </View>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
+    <SafeAreaView className="flex-1 bg-sand-100">
       {/* Header */}
-      <View className="bg-white px-6 py-4 border-b border-gray-200">
+      <LinearGradient
+        colors={['#122F26', '#1d392f', '#2d4a40']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        className="px-4 pb-6"
+        style={{ paddingTop: insets.top + 12 }}
+      >
         <View className="flex-row items-center justify-between mb-4">
-          <Text className="text-2xl font-bold text-gray-900">Payments</Text>
+          <Text className="text-3xl font-black text-white tracking-tight">Payments</Text>
           <TouchableOpacity
             onPress={handleAddPaymentMethod}
-            className="bg-emerald-600 px-4 py-2 rounded-lg"
+            className="px-4 py-2 rounded-xl"
+            style={{ backgroundColor: 'rgba(217, 177, 104, 0.2)' }}
           >
-            <Text className="text-white font-semibold">+ Add Method</Text>
+            <View className="flex-row items-center">
+              <Ionicons name="add" size={18} color="#D9B168" />
+              <Text className="text-gold font-semibold ml-1">Add</Text>
+            </View>
           </TouchableOpacity>
         </View>
 
         {/* Tabs */}
-        <View className="flex-row">
+        <View className="flex-row bg-white/10 rounded-xl p-1">
           <TouchableOpacity
             onPress={() => setActiveTab('history')}
-            className={`flex-1 py-3 border-b-2 ${
-              activeTab === 'history'
-                ? 'border-emerald-600'
-                : 'border-transparent'
+            className={`flex-1 py-2.5 rounded-lg items-center ${
+              activeTab === 'history' ? 'bg-white' : ''
             }`}
           >
             <Text
-              className={`text-center font-semibold ${
-                activeTab === 'history' ? 'text-emerald-600' : 'text-gray-500'
+              className={`font-semibold ${
+                activeTab === 'history' ? 'text-forest' : 'text-white'
               }`}
             >
-              Payment History
+              History
             </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             onPress={() => setActiveTab('methods')}
-            className={`flex-1 py-3 border-b-2 ${
-              activeTab === 'methods'
-                ? 'border-emerald-600'
-                : 'border-transparent'
+            className={`flex-1 py-2.5 rounded-lg items-center ${
+              activeTab === 'methods' ? 'bg-white' : ''
             }`}
           >
             <Text
-              className={`text-center font-semibold ${
-                activeTab === 'methods' ? 'text-emerald-600' : 'text-gray-500'
+              className={`font-semibold ${
+                activeTab === 'methods' ? 'text-forest' : 'text-white'
               }`}
             >
-              Payment Methods
+              Methods
             </Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </LinearGradient>
 
       <ScrollView
         className="flex-1"

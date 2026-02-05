@@ -2,8 +2,9 @@ import { useState, useEffect, useRef } from 'react';
 import { View, Text, FlatList, TextInput, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useConversationMessages, useSendMessage, useEditMessage, useDeleteMessage, useMarkConversationAsRead, useArchiveConversation } from '@/hooks/api-hooks';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface ConversationMessage {
   id: string;
@@ -17,6 +18,7 @@ interface ConversationMessage {
 
 export default function ConversationDetailScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { id, participantId } = useLocalSearchParams();
   const conversationId = Array.isArray(id) ? id[0] : id;
   const receiverId = Array.isArray(participantId) ? participantId[0] : participantId;
@@ -118,50 +120,96 @@ export default function ConversationDetailScreen() {
 
   if (!conversationId) {
     return (
-      <View className="flex-1 items-center justify-center bg-white p-6">
-        <Text className="text-lg text-gray-600">Conversation not found.</Text>
-        <TouchableOpacity onPress={() => router.back()} className="mt-4">
-          <Text className="text-secondary-600 font-semibold">Go back</Text>
-        </TouchableOpacity>
-      </View>
+      <SafeAreaView className="flex-1 bg-sand-100">
+        <View className="flex-1 items-center justify-center px-6">
+          <View className="bg-white rounded-3xl p-8 items-center" style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.1, shadowRadius: 16, elevation: 8 }}>
+            <View className="bg-sand-200 rounded-full p-8 mb-6">
+              <Ionicons name="chatbubbles-outline" size={72} color="#3A5C50" />
+            </View>
+            <Text className="text-2xl font-bold text-forest mb-3">Conversation Not Found</Text>
+            <Text className="text-moss text-center mb-8 px-4 leading-6">
+              This conversation could not be loaded
+            </Text>
+            <TouchableOpacity onPress={() => router.back()}>
+              <LinearGradient
+                colors={['#122F26', '#1d392f']}
+                className="px-8 py-4 rounded-2xl"
+                style={{
+                  shadowColor: '#122F26',
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.3,
+                  shadowRadius: 8,
+                  elevation: 5,
+                }}
+              >
+                <Text className="text-gold font-bold text-base">Go Back</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </SafeAreaView>
     );
   }
 
   if (isLoading) {
     return (
-      <View className="flex-1 items-center justify-center bg-white">
-        <ActivityIndicator size="large" color="#D4A574" />
-      </View>
+      <SafeAreaView className="flex-1 bg-sand-100">
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator size="large" color="#D9B168" />
+          <Text className="text-moss mt-4">Loading conversation...</Text>
+        </View>
+      </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50" edges={['top', 'left', 'right']}>
+    <SafeAreaView className="flex-1 bg-sand-100">
       <KeyboardAvoidingView 
         className="flex-1" 
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
-        <View className="flex-row items-center justify-between px-4 py-3 bg-white border-b border-gray-200">
-          <View className="flex-row items-center flex-1">
-            <TouchableOpacity onPress={() => router.back()}>
-              <Ionicons name="arrow-back" size={24} color="#333" />
-            </TouchableOpacity>
-            <Text className="text-lg font-semibold text-primary-900 ml-3">Conversation</Text>
+        {/* Header */}
+        <LinearGradient
+          colors={['#122F26', '#1d392f', '#2d4a40']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          className="px-4 pb-4"
+          style={{ paddingTop: insets.top + 12 }}
+        >
+          <View className="flex-row items-center justify-between">
+            <View className="flex-row items-center flex-1">
+              <TouchableOpacity 
+                onPress={() => router.back()}
+                className="w-10 h-10 rounded-xl items-center justify-center mr-3"
+                style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
+              >
+                <Ionicons name="arrow-back" size={24} color="#fff" />
+              </TouchableOpacity>
+              <Text className="text-xl font-black text-white tracking-tight">Conversation</Text>
+            </View>
+            <View className="flex-row items-center">
+              <TouchableOpacity 
+                onPress={() => refetch()} 
+                className="mr-3 w-10 h-10 rounded-xl items-center justify-center"
+                style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
+              >
+                {isRefetching ? (
+                  <ActivityIndicator size="small" color="#D9B168" />
+                ) : (
+                  <Ionicons name="refresh" size={22} color="#D9B168" />
+                )}
+              </TouchableOpacity>
+              <TouchableOpacity 
+                onPress={handleArchive}
+                className="w-10 h-10 rounded-xl items-center justify-center"
+                style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
+              >
+                <Ionicons name="archive" size={22} color="#D9B168" />
+              </TouchableOpacity>
+            </View>
           </View>
-          <View className="flex-row items-center">
-            <TouchableOpacity onPress={() => refetch()} className="mr-3">
-              {isRefetching ? (
-                <ActivityIndicator size="small" color="#D4A574" />
-              ) : (
-                <Ionicons name="refresh" size={22} color="#3A5C50" />
-              )}
-            </TouchableOpacity>
-            <TouchableOpacity onPress={handleArchive}>
-              <Ionicons name="archive" size={22} color="#3A5C50" />
-            </TouchableOpacity>
-          </View>
-        </View>
+        </LinearGradient>
 
         <FlatList
           ref={flatListRef}

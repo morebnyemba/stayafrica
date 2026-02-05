@@ -6,23 +6,43 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '@/context/auth-context';
 import { PropertyCard } from '@/components/property/PropertyCard';
 import type { Property } from '@/types';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Sidebar } from '@/components/common/Sidebar';
 
 export default function WishlistScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { isAuthenticated } = useAuth();
   const [wishlistProperties, setWishlistProperties] = useState<Property[]>([]);
+  const [sidebarVisible, setSidebarVisible] = useState(false);
 
   if (!isAuthenticated) {
     return (
-      <View className="flex-1 bg-sand-100">
+      <SafeAreaView className="flex-1 bg-sand-100">
+        {/* Sidebar */}
+        <Sidebar
+          isVisible={sidebarVisible}
+          onClose={() => setSidebarVisible(false)}
+        />
+        
         {/* Header */}
         <LinearGradient
           colors={['#122F26', '#1d392f']}
           className="px-4 pb-6"
           style={{ paddingTop: insets.top + 12 }}
         >
+          {/* Top Navigation Bar with Menu */}
+          <View className="flex-row items-center justify-between mb-4">
+            {/* Hamburger Menu */}
+            <TouchableOpacity
+              onPress={() => setSidebarVisible(true)}
+              className="w-10 h-10 rounded-xl items-center justify-center"
+              style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
+            >
+              <Ionicons name="menu" size={24} color="#fff" />
+            </TouchableOpacity>
+          </View>
+          
           <Text className="text-3xl font-black text-white tracking-tight">
             My Wishlist
           </Text>
@@ -62,7 +82,7 @@ export default function WishlistScreen() {
             </TouchableOpacity>
           </View>
         </View>
-      </View>
+      </SafeAreaView>
     );
   }
 
@@ -75,25 +95,44 @@ export default function WishlistScreen() {
   };
 
   return (
-    <View className="flex-1 bg-sand-100">
-      {/* Modern Header */}
-      <LinearGradient
-        colors={['#122F26', '#1d392f', '#2d4a40']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        className="px-4 pb-6"
-        style={{ paddingTop: insets.top + 12 }}
-      >
-        <Text className="text-3xl font-black text-white tracking-tight mb-2">
-          My Wishlist
-        </Text>
-        <View className="flex-row items-center">
-          <Ionicons name="heart" size={16} color="#D9B168" />
-          <Text className="text-sand-100 ml-2">
-            {wishlistProperties.length} saved {wishlistProperties.length === 1 ? 'property' : 'properties'}
+    <SafeAreaView className="flex-1 bg-sand-100">
+      {/* Sidebar */}
+      <Sidebar
+        isVisible={sidebarVisible}
+        onClose={() => setSidebarVisible(false)}
+      />
+      
+      <View className="flex-1 bg-sand-100">
+        {/* Modern Header */}
+        <LinearGradient
+          colors={['#122F26', '#1d392f', '#2d4a40']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          className="px-4 pb-6"
+          style={{ paddingTop: insets.top + 12 }}
+        >
+          {/* Top Navigation Bar with Menu */}
+          <View className="flex-row items-center justify-between mb-4">
+            {/* Hamburger Menu */}
+            <TouchableOpacity
+              onPress={() => setSidebarVisible(true)}
+              className="w-10 h-10 rounded-xl items-center justify-center"
+              style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
+            >
+              <Ionicons name="menu" size={24} color="#fff" />
+            </TouchableOpacity>
+          </View>
+          
+          <Text className="text-3xl font-black text-white tracking-tight mb-2">
+            My Wishlist
           </Text>
-        </View>
-      </LinearGradient>
+          <View className="flex-row items-center">
+            <Ionicons name="heart" size={16} color="#D9B168" />
+            <Text className="text-sand-100 ml-2">
+              {wishlistProperties.length} saved {wishlistProperties.length === 1 ? 'property' : 'properties'}
+            </Text>
+          </View>
+        </LinearGradient>
 
       {/* Wishlist Content */}
       {wishlistProperties.length === 0 ? (
@@ -142,6 +181,7 @@ export default function WishlistScreen() {
           contentContainerStyle={{ paddingVertical: 12, paddingBottom: 40 }}
         />
       )}
-    </View>
+      </View>
+    </SafeAreaView>
   );
 }

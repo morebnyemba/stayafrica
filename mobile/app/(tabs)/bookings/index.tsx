@@ -1,12 +1,14 @@
 import { View, Text, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useState } from 'react';
 import { useBookings } from '@/hooks/api-hooks';
 import { useAuth } from '@/context/auth-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BookingCardSkeleton } from '@/components/common/Skeletons';
 import { Booking } from '@/types';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Sidebar } from '@/components/common/Sidebar';
 
 export default function BookingsScreen() {
   const router = useRouter();
@@ -14,16 +16,35 @@ export default function BookingsScreen() {
   const { isAuthenticated } = useAuth();
   const { data: bookingsData, isLoading } = useBookings();
   const bookings = bookingsData?.results || [];
+  const [sidebarVisible, setSidebarVisible] = useState(false);
 
   if (!isAuthenticated) {
     return (
-      <View className="flex-1 bg-sand-100">
+      <SafeAreaView className="flex-1 bg-sand-100">
+        {/* Sidebar */}
+        <Sidebar
+          isVisible={sidebarVisible}
+          onClose={() => setSidebarVisible(false)}
+        />
+        
         {/* Header */}
         <LinearGradient
           colors={['#122F26', '#1d392f']}
           className="px-4 pb-6"
           style={{ paddingTop: insets.top + 12 }}
         >
+          {/* Top Navigation Bar with Menu */}
+          <View className="flex-row items-center justify-between mb-4">
+            {/* Hamburger Menu */}
+            <TouchableOpacity
+              onPress={() => setSidebarVisible(true)}
+              className="w-10 h-10 rounded-xl items-center justify-center"
+              style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
+            >
+              <Ionicons name="menu" size={24} color="#fff" />
+            </TouchableOpacity>
+          </View>
+          
           <Text className="text-3xl font-black text-white tracking-tight">
             My Bookings
           </Text>
@@ -60,25 +81,22 @@ export default function BookingsScreen() {
             </TouchableOpacity>
           </View>
         </View>
-      </View>
+      </SafeAreaView>
     );
   }
 
+  // Status color mapping
+  const STATUS_COLORS = {
+    confirmed: { bg: 'bg-green-100', text: 'text-green-800', icon: 'checkmark-circle', bgColor: '#10B98120', textColor: '#10B981' },
+    pending: { bg: 'bg-yellow-100', text: 'text-yellow-800', icon: 'time', bgColor: '#F59E0B20', textColor: '#F59E0B' },
+    cancelled: { bg: 'bg-red-100', text: 'text-red-800', icon: 'close-circle', bgColor: '#EF444420', textColor: '#EF4444' },
+    checked_in: { bg: 'bg-blue-100', text: 'text-blue-800', icon: 'enter', bgColor: '#3B82F620', textColor: '#3B82F6' },
+    checked_out: { bg: 'bg-purple-100', text: 'text-purple-800', icon: 'checkbox', bgColor: '#8B5CF620', textColor: '#8B5CF6' },
+    default: { bg: 'bg-gray-100', text: 'text-gray-800', icon: 'information-circle', bgColor: '#6B728020', textColor: '#6B7280' },
+  };
+
   const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'confirmed':
-        return { bg: 'bg-green-100', text: 'text-green-800', icon: 'checkmark-circle' };
-      case 'pending':
-        return { bg: 'bg-yellow-100', text: 'text-yellow-800', icon: 'time' };
-      case 'cancelled':
-        return { bg: 'bg-red-100', text: 'text-red-800', icon: 'close-circle' };
-      case 'checked_in':
-        return { bg: 'bg-blue-100', text: 'text-blue-800', icon: 'enter' };
-      case 'checked_out':
-        return { bg: 'bg-purple-100', text: 'text-purple-800', icon: 'checkbox' };
-      default:
-        return { bg: 'bg-gray-100', text: 'text-gray-800', icon: 'information-circle' };
-    }
+    return STATUS_COLORS[status as keyof typeof STATUS_COLORS] || STATUS_COLORS.default;
   };
 
   const BookingCard = ({ booking }: { booking: Booking & { property?: { title: string; city: string } } }) => {
@@ -116,11 +134,11 @@ export default function BookingsScreen() {
               </View>
             </View>
             <View
-              borderRadius={20}
-              style={{ paddingHorizontal: 12, paddingVertical: 6 }}
+              className="px-3 py-1.5 rounded-full"
+              style={{ backgroundColor: statusStyle.bgColor }}
             >
               <View className="flex-row items-center">
-                <Ionicons name={statusStyle.icon as any} size={14} color={statusStyle.text.replace('text-', '#')} />
+                <Ionicons name={statusStyle.icon as any} size={14} color={statusStyle.textColor} />
                 <Text className={`text-xs font-semibold capitalize ml-1 ${statusStyle.text}`}>
                   {booking.status}
                 </Text>
@@ -176,25 +194,44 @@ export default function BookingsScreen() {
   };
 
   return (
-    <View className="flex-1 bg-sand-100">
-      {/* Modern Header */}
-      <LinearGradient
-        colors={['#122F26', '#1d392f', '#2d4a40']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        className="px-4 pb-6"
-        style={{ paddingTop: insets.top + 12 }}
-      >
-        <Text className="text-3xl font-black text-white tracking-tight mb-2">
-          My Bookings
-        </Text>
-        <View className="flex-row items-center">
-          <Ionicons name="calendar" size={16} color="#D9B168" />
-          <Text className="text-sand-100 ml-2">
-            {bookings.length} active {bookings.length === 1 ? 'booking' : 'bookings'}
+    <SafeAreaView className="flex-1 bg-sand-100">
+      {/* Sidebar */}
+      <Sidebar
+        isVisible={sidebarVisible}
+        onClose={() => setSidebarVisible(false)}
+      />
+      
+      <View className="flex-1 bg-sand-100">
+        {/* Modern Header */}
+        <LinearGradient
+          colors={['#122F26', '#1d392f', '#2d4a40']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          className="px-4 pb-6"
+          style={{ paddingTop: insets.top + 12 }}
+        >
+          {/* Top Navigation Bar with Menu */}
+          <View className="flex-row items-center justify-between mb-4">
+            {/* Hamburger Menu */}
+            <TouchableOpacity
+              onPress={() => setSidebarVisible(true)}
+              className="w-10 h-10 rounded-xl items-center justify-center"
+              style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
+            >
+              <Ionicons name="menu" size={24} color="#fff" />
+            </TouchableOpacity>
+          </View>
+          
+          <Text className="text-3xl font-black text-white tracking-tight mb-2">
+            My Bookings
           </Text>
-        </View>
-      </LinearGradient>
+          <View className="flex-row items-center">
+            <Ionicons name="calendar" size={16} color="#D9B168" />
+            <Text className="text-sand-100 ml-2">
+              {bookings.length} active {bookings.length === 1 ? 'booking' : 'bookings'}
+            </Text>
+          </View>
+        </LinearGradient>
 
       {/* Bookings List */}
       {isLoading ? (
@@ -241,6 +278,7 @@ export default function BookingsScreen() {
           }
         />
       )}
-    </View>
+      </View>
+    </SafeAreaView>
   );
 }

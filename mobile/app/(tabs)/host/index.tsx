@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '@/context/auth-context';
+import { Sidebar } from '@/components/common/Sidebar';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { 
   useHostProperties, 
@@ -34,6 +35,7 @@ export default function HostScreen() {
   const insets = useSafeAreaInsets();
   const { user, isAuthenticated } = useAuth();
   const [activeTab, setActiveTab] = useState<'overview' | 'analytics'>('overview');
+  const [sidebarVisible, setSidebarVisible] = useState(false);
   
   // Fetch host data
   const { data: propertiesData } = useHostProperties();
@@ -346,6 +348,12 @@ export default function HostScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-sand-100">
+      {/* Sidebar */}
+      <Sidebar
+        isVisible={sidebarVisible}
+        onClose={() => setSidebarVisible(false)}
+      />
+      
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
       {/* Modern Header with Tabs */}
       <LinearGradient
@@ -355,17 +363,27 @@ export default function HostScreen() {
         className="px-4 pb-6"
         style={{ paddingTop: insets.top + 12 }}
       >
+        {/* Top Navigation Bar with Menu */}
         <View className="flex-row items-center justify-between mb-4">
-          <View>
-            <Text className="text-2xl font-black text-white tracking-tight mb-1">
-              Welcome back, {user?.first_name}! 🏠
+          {/* Hamburger Menu */}
+          <TouchableOpacity
+            onPress={() => setSidebarVisible(true)}
+            className="w-10 h-10 rounded-xl items-center justify-center"
+            style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
+          >
+            <Ionicons name="menu" size={24} color="#fff" />
+          </TouchableOpacity>
+        </View>
+
+        <View className="mb-4">
+          <Text className="text-2xl font-black text-white tracking-tight mb-1">
+            Welcome back, {user?.first_name}! 🏠
+          </Text>
+          <View className="flex-row items-center">
+            <Ionicons name="home" size={14} color="#D9B168" />
+            <Text className="text-sand-100 text-sm ml-2">
+              Manage your properties and bookings
             </Text>
-            <View className="flex-row items-center">
-              <Ionicons name="home" size={14} color="#D9B168" />
-              <Text className="text-sand-100 text-sm ml-2">
-                Manage your properties and bookings
-              </Text>
-            </View>
           </View>
         </View>
 

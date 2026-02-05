@@ -9,7 +9,7 @@ import { Skeleton } from '@/components/common/Skeletons';
 import { Avatar } from '@/components/common/Avatar';
 import { Sidebar } from '@/components/common/Sidebar';
 import { EmptyState } from '@/components/common/EmptyState';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface Conversation {
   id: string;
@@ -50,60 +50,58 @@ export default function MessagesScreen() {
 
   if (!isAuthenticated) {
     return (
-      <View className="flex-1 bg-sand-100">
+      <SafeAreaView className="flex-1 bg-sand-100">
         {/* Sidebar */}
         <Sidebar
           isVisible={sidebarVisible}
           onClose={() => setSidebarVisible(false)}
         />
 
-        {/* Header */}
-        <LinearGradient
-          colors={['#122F26', '#1d392f']}
-          className="px-4 pb-6"
-          style={{ paddingTop: insets.top + 12 }}
-        >
-          {/* Top Navigation Bar with Menu */}
-          <View className="flex-row items-center justify-between mb-4">
-            {/* Hamburger Menu with Glassmorphism */}
-            <View
-              borderRadius={12}
-              style={{ width: 40, height: 40 }}
-            >
+        <View className="flex-1 bg-sand-100">
+          {/* Header */}
+          <LinearGradient
+            colors={['#122F26', '#1d392f']}
+            className="px-4 pb-6"
+            style={{ paddingTop: insets.top + 12 }}
+          >
+            {/* Top Navigation Bar with Menu */}
+            <View className="flex-row items-center justify-between mb-4">
+              {/* Hamburger Menu */}
               <TouchableOpacity
                 onPress={() => setSidebarVisible(true)}
                 className="w-10 h-10 rounded-xl items-center justify-center"
+                style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
               >
                 <Ionicons name="menu" size={24} color="#fff" />
               </TouchableOpacity>
+
+              {/* Avatar */}
+              <Avatar
+                uri={null}
+                firstName={undefined}
+                lastName={undefined}
+                size="small"
+                onPress={handleAvatarPress}
+              />
             </View>
 
-            {/* Avatar */}
-            <Avatar
-              uri={null}
-              firstName={undefined}
-              lastName={undefined}
-              size="small"
-              onPress={handleAvatarPress}
-            />
-          </View>
+            <Text className="text-3xl font-black text-white tracking-tight">
+              Messages
+            </Text>
+            <Text className="text-sand-200 text-sm mt-1">
+              Chat with hosts and guests
+            </Text>
+          </LinearGradient>
 
-          <Text className="text-3xl font-black text-white tracking-tight">
-            Messages
-          </Text>
-          <Text className="text-sand-200 text-sm mt-1">
-            Chat with hosts and guests
-          </Text>
-        </LinearGradient>
-
-        <EmptyState
-          icon="chatbubbles-outline"
-          title="Sign In to Chat"
-          description="Sign in to start conversations with hosts and guests"
-          actionLabel="Sign In Now"
-          onAction={() => router.replace('/(auth)/login')}
-        />
-      </View>
+          <EmptyState
+            icon="chatbubbles-outline"
+            title="Sign In to Chat"
+            description="Sign in to start conversations with hosts and guests"
+            actionLabel="Sign In Now"
+            onAction={() => router.replace('/(auth)/login')}
+          />
+        </View>
+      </SafeAreaView>
     );
   }
 
@@ -180,106 +178,103 @@ export default function MessagesScreen() {
   );
 
   return (
-    <View className="flex-1 bg-sand-100">
+    <SafeAreaView className="flex-1 bg-sand-100">
       {/* Sidebar */}
       <Sidebar
         isVisible={sidebarVisible}
         onClose={() => setSidebarVisible(false)}
       />
 
-      {/* Modern Header */}
-      <LinearGradient
-        colors={['#122F26', '#1d392f', '#2d4a40']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        className="px-4 pb-6"
-        style={{ paddingTop: insets.top + 12 }}
-      >
-        {/* Top Navigation Bar with Menu and Avatar */}
-        <View className="flex-row items-center justify-between mb-4">
-          {/* Hamburger Menu with Glassmorphism */}
-          <View
-            borderRadius={12}
-            style={{ width: 40, height: 40 }}
-          >
+      <View className="flex-1 bg-sand-100">
+        {/* Modern Header */}
+        <LinearGradient
+          colors={['#122F26', '#1d392f', '#2d4a40']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          className="px-4 pb-6"
+          style={{ paddingTop: insets.top + 12 }}
+        >
+          {/* Top Navigation Bar with Menu and Avatar */}
+          <View className="flex-row items-center justify-between mb-4">
+            {/* Hamburger Menu */}
             <TouchableOpacity
               onPress={() => setSidebarVisible(true)}
               className="w-10 h-10 rounded-xl items-center justify-center"
+              style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
             >
               <Ionicons name="menu" size={24} color="#fff" />
             </TouchableOpacity>
-          </View>
 
-          {/* Avatar */}
-          <Avatar
-            uri={null}
-            firstName={user?.first_name}
-            lastName={user?.last_name}
-            size="small"
-            onPress={handleAvatarPress}
-            showBadge={isAuthenticated}
-          />
-        </View>
-
-        <View className="flex-row justify-between items-center">
-          <View className="flex-1">
-            <Text className="text-3xl font-black text-white tracking-tight mb-2">
-              Messages
-            </Text>
-            <View className="flex-row items-center">
-              <Ionicons name="chatbubbles" size={16} color="#D9B168" />
-              <Text className="text-sand-100 ml-2">
-                {filteredConversations.length} {filteredConversations.length === 1 ? 'conversation' : 'conversations'}
-              </Text>
-              {unreadData?.unread_count > 0 && (
-                <>
-                  <Text className="text-sand-100 mx-1">•</Text>
-                  <Text className="text-gold font-semibold">
-                    {unreadData.unread_count} unread
-                  </Text>
-                </>
-              )}
-            </View>
-          </View>
-          <TouchableOpacity
-            onPress={() => router.push('/(tabs)/messages/new')}
-            style={{
-              shadowColor: '#D9B168',
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.3,
-              shadowRadius: 8,
-              elevation: 5,
-            }}
-          >
-            <LinearGradient
-              colors={['#D9B168', '#bea04f']}
-              className="w-12 h-12 rounded-full items-center justify-center"
-            >
-              <Ionicons name="create-outline" size={24} color="#122F26" />
-            </LinearGradient>
-          </TouchableOpacity>
-        </View>
-
-        {/* Search Bar with Glassmorphism */}
-        <View
-          borderRadius={12}
-          style={{ marginTop: 16 }}
-        >
-          <View className="px-4 py-2 flex-row items-center">
-            <Ionicons name="search" size={20} color="#D9B168" />
-            <TextInput
-              placeholder="Search conversations..."
-              placeholderTextColor="rgba(255, 255, 255, 0.5)"
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              className="flex-1 ml-2 text-white"
+            {/* Avatar */}
+            <Avatar
+              uri={null}
+              firstName={user?.first_name}
+              lastName={user?.last_name}
+              size="small"
+              onPress={handleAvatarPress}
+              showBadge={isAuthenticated}
             />
-            {searchQuery ? (
-              <TouchableOpacity onPress={() => setSearchQuery('')}>
-                <Ionicons name="close-circle" size={20} color="rgba(255, 255, 255, 0.5)" />
-              </TouchableOpacity>
-            ) : null}
           </View>
+
+          <View className="flex-row justify-between items-center">
+            <View className="flex-1">
+              <Text className="text-3xl font-black text-white tracking-tight mb-2">
+                Messages
+              </Text>
+              <View className="flex-row items-center">
+                <Ionicons name="chatbubbles" size={16} color="#D9B168" />
+                <Text className="text-sand-100 ml-2">
+                  {filteredConversations.length} {filteredConversations.length === 1 ? 'conversation' : 'conversations'}
+                </Text>
+                {unreadData?.unread_count > 0 && (
+                  <>
+                    <Text className="text-sand-100 mx-1">•</Text>
+                    <Text className="text-gold font-semibold">
+                      {unreadData.unread_count} unread
+                    </Text>
+                  </>
+                )}
+              </View>
+            </View>
+            <TouchableOpacity
+              onPress={() => router.push('/(tabs)/messages/new')}
+              style={{
+                shadowColor: '#D9B168',
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.3,
+                shadowRadius: 8,
+                elevation: 5,
+              }}
+            >
+              <LinearGradient
+                colors={['#D9B168', '#bea04f']}
+                className="w-12 h-12 rounded-full items-center justify-center"
+              >
+                <Ionicons name="create-outline" size={24} color="#122F26" />
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
+        {/* Search Bar */}
+        <View
+          className="px-4 py-2 flex-row items-center mt-4"
+          style={{ 
+            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+            borderRadius: 12
+          }}
+        >
+          <Ionicons name="search" size={20} color="#D9B168" />
+          <TextInput
+            placeholder="Search conversations..."
+            placeholderTextColor="rgba(255, 255, 255, 0.5)"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            className="flex-1 ml-2 text-white"
+          />
+          {searchQuery ? (
+            <TouchableOpacity onPress={() => setSearchQuery('')}>
+              <Ionicons name="close-circle" size={20} color="rgba(255, 255, 255, 0.5)" />
+            </TouchableOpacity>
+          ) : null}
         </View>
       </LinearGradient>
 
@@ -335,5 +330,6 @@ export default function MessagesScreen() {
         />
       )}
     </View>
+  </SafeAreaView>
   );
 }

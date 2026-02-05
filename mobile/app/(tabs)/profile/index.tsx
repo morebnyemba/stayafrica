@@ -4,23 +4,42 @@ import { useAuth } from '@/context/auth-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { AppHeader } from '@/components/common/AppHeader';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Avatar } from '@/components/common/Avatar';
+import { Sidebar } from '@/components/common/Sidebar';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function ProfileScreen() {
   const { user, logout, isAuthenticated } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const [sidebarVisible, setSidebarVisible] = useState(false);
 
   if (!isAuthenticated) {
     return (
-      <View className="flex-1 bg-sand-100">
-        {/* Header with AppHeader */}
+      <SafeAreaView className="flex-1 bg-sand-100">
+        {/* Sidebar */}
+        <Sidebar
+          isVisible={sidebarVisible}
+          onClose={() => setSidebarVisible(false)}
+        />
+        
+        {/* Header */}
         <LinearGradient
           colors={['#122F26', '#1d392f']}
           className="pb-6"
+          style={{ paddingTop: insets.top + 12 }}
         >
-          <AppHeader />
+          {/* Top Navigation Bar with Menu */}
+          <View className="flex-row items-center justify-between px-4 mb-4">
+            {/* Hamburger Menu */}
+            <TouchableOpacity
+              onPress={() => setSidebarVisible(true)}
+              className="w-10 h-10 rounded-xl items-center justify-center"
+              style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
+            >
+              <Ionicons name="menu" size={24} color="#fff" />
+            </TouchableOpacity>
+          </View>
           
           <View className="px-4">
             <Text className="text-3xl font-black text-white tracking-tight">
@@ -59,7 +78,7 @@ export default function ProfileScreen() {
             </TouchableOpacity>
           </View>
         </View>
-      </View>
+      </SafeAreaView>
     );
   }
 
@@ -77,55 +96,39 @@ export default function ProfileScreen() {
     ]);
   };
 
-  const MenuItem = ({ iconName, label, value, onPress, gradient = false, iconColor }: any) => (
+  const MenuItem = ({ iconName, label, value, onPress, highlighted = false, iconColor }: any) => (
     <TouchableOpacity
       className="mb-3"
       onPress={onPress}
     >
-      {gradient ? (
-        <LinearGradient
-          colors={['#122F26', '#1d392f']}
-          className="rounded-2xl overflow-hidden"
-          style={{
-            shadowColor: '#122F26',
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.05,
-            shadowRadius: 4,
-            elevation: 2,
-          }}
-        >
-          <View className="flex-row items-center p-4 bg-white rounded-2xl">
-            <View className="bg-gold/20 rounded-full p-2.5 mr-4">
-              <Ionicons name={iconName} size={20} color={iconColor || "#D9B168"} />
-            </View>
-            <View className="flex-1">
-              <Text className="text-sand-200 text-xs mb-0.5">{label}</Text>
-              <Text className="text-white font-semibold">{value}</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color="#D9B168" />
-          </View>
-        </LinearGradient>
-      ) : (
-        <View
-          className="flex-row items-center p-4 bg-white rounded-2xl"
-          style={{
-            shadowColor: '#122F26',
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.05,
-            shadowRadius: 4,
-            elevation: 2,
-          }}
-        >
+      <View
+        className="flex-row items-center p-4 bg-white rounded-2xl"
+        style={{
+          shadowColor: '#122F26',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.05,
+          shadowRadius: 4,
+          elevation: 2,
+        }}
+      >
+        {highlighted ? (
+          <LinearGradient
+            colors={['#D9B168', '#bea04f']}
+            className="rounded-full p-2.5 mr-4"
+          >
+            <Ionicons name={iconName} size={20} color="#122F26" />
+          </LinearGradient>
+        ) : (
           <View className="bg-sand-200 rounded-full p-2.5 mr-4">
             <Ionicons name={iconName} size={20} color={iconColor || "#3A5C50"} />
           </View>
-          <View className="flex-1">
-            <Text className="text-moss text-xs mb-0.5">{label}</Text>
-            <Text className="text-forest font-semibold">{value}</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={20} color="#3A5C50" />
+        )}
+        <View className="flex-1">
+          <Text className="text-moss text-xs mb-0.5">{label}</Text>
+          <Text className="text-forest font-semibold">{value}</Text>
         </View>
-      )}
+        <Ionicons name="chevron-forward" size={20} color={highlighted ? "#D9B168" : "#3A5C50"} />
+      </View>
     </TouchableOpacity>
   );
 
@@ -251,51 +254,69 @@ export default function ProfileScreen() {
   );
 
   return (
-    <ScrollView className="flex-1 bg-sand-100" showsVerticalScrollIndicator={false}>
-      {/* Header with Profile Card */}
-      <LinearGradient
-        colors={['#122F26', '#1d392f', '#2d4a40']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        className="pb-8"
-      >
-        <AppHeader />
-        
-        <View className="px-4">
-          {/* Avatar */}
-          <View className="items-center mt-4">
-            <Avatar
-              uri={null}
-              firstName={user?.first_name}
-              lastName={user?.last_name}
-              size="large"
-            />
+    <SafeAreaView className="flex-1 bg-sand-100">
+      {/* Sidebar */}
+      <Sidebar
+        isVisible={sidebarVisible}
+        onClose={() => setSidebarVisible(false)}
+      />
 
-            {/* Name */}
-            <Text className="text-2xl font-black text-white text-center mt-4">
-              {user?.first_name} {user?.last_name}
-            </Text>
+      <ScrollView className="flex-1 bg-sand-100" showsVerticalScrollIndicator={false}>
+        {/* Header with Profile Card */}
+        <LinearGradient
+          colors={['#122F26', '#1d392f', '#2d4a40']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          className="pb-8"
+          style={{ paddingTop: insets.top + 12 }}
+        >
+          {/* Top Navigation Bar with Menu */}
+          <View className="flex-row items-center justify-between px-4 mb-4">
+            {/* Hamburger Menu */}
+            <TouchableOpacity
+              onPress={() => setSidebarVisible(true)}
+              className="w-10 h-10 rounded-xl items-center justify-center"
+              style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
+            >
+              <Ionicons name="menu" size={24} color="#fff" />
+            </TouchableOpacity>
+          </View>
+          
+          <View className="px-4">
+            {/* Avatar */}
+            <View className="items-center mt-4">
+              <Avatar
+                uri={null}
+                firstName={user?.first_name}
+                lastName={user?.last_name}
+                size="large"
+              />
 
-            {/* Email */}
-            <Text className="text-sand-200 text-center mt-1">{user?.email}</Text>
+              {/* Name */}
+              <Text className="text-2xl font-black text-white text-center mt-4">
+                {user?.first_name} {user?.last_name}
+              </Text>
 
-            {/* Verification Badge inline */}
-            <View className="flex-row items-center mt-2">
-              {user?.is_verified ? (
-                <View className="flex-row items-center bg-green-500/20 px-3 py-1 rounded-full">
-                  <Ionicons name="shield-checkmark" size={14} color="#10B981" />
-                  <Text className="text-green-400 text-xs font-semibold ml-1">Verified</Text>
-                </View>
-              ) : (
-                <View className="flex-row items-center bg-yellow-500/20 px-3 py-1 rounded-full">
-                  <Ionicons name="alert-circle" size={14} color="#F59E0B" />
-                  <Text className="text-yellow-400 text-xs font-semibold ml-1">Unverified</Text>
-                </View>
-              )}
+              {/* Email */}
+              <Text className="text-sand-200 text-center mt-1">{user?.email}</Text>
+
+              {/* Verification Badge inline */}
+              <View className="flex-row items-center mt-2">
+                {user?.is_verified ? (
+                  <View className="flex-row items-center bg-green-500/20 px-3 py-1 rounded-full">
+                    <Ionicons name="shield-checkmark" size={14} color="#10B981" />
+                    <Text className="text-green-400 text-xs font-semibold ml-1">Verified</Text>
+                  </View>
+                ) : (
+                  <View className="flex-row items-center bg-yellow-500/20 px-3 py-1 rounded-full">
+                    <Ionicons name="alert-circle" size={14} color="#F59E0B" />
+                    <Text className="text-yellow-400 text-xs font-semibold ml-1">Unverified</Text>
+                  </View>
+                )}
+              </View>
             </View>
           </View>
-        </View>
-      </LinearGradient>
+        </LinearGradient>
 
       {/* Verification Banner */}
       <VerificationBanner />
@@ -469,7 +490,7 @@ export default function ProfileScreen() {
           label="Edit Profile"
           value="Update your information"
           onPress={() => router.push('/(tabs)/profile/edit')}
-          gradient={true}
+          highlighted={true}
         />
 
         <MenuItem
@@ -477,7 +498,7 @@ export default function ProfileScreen() {
           label="Change Password"
           value="Secure your account"
           onPress={() => router.push('/(tabs)/profile/change-password')}
-          gradient={true}
+          highlighted={true}
         />
 
         <MenuItem
@@ -485,7 +506,7 @@ export default function ProfileScreen() {
           label="Notifications"
           value="Manage notification preferences"
           onPress={() => {}}
-          gradient={true}
+          highlighted={true}
         />
 
         <MenuItem
@@ -493,12 +514,12 @@ export default function ProfileScreen() {
           label="Payment Methods"
           value="Manage your payment options"
           onPress={() => router.push('/(tabs)/wallet')}
-          gradient={true}
+          highlighted={true}
         />
       </View>
 
       {/* Logout */}
-      <View className="p-4 bg-white rounded-2xl mt-6 mb-8">
+      <View className="px-4 mt-6 mb-8">
         <TouchableOpacity
           className="rounded-2xl overflow-hidden"
           onPress={handleLogout}
@@ -520,5 +541,6 @@ export default function ProfileScreen() {
         </TouchableOpacity>
       </View>
     </ScrollView>
+    </SafeAreaView>
   );
 }

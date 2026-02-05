@@ -62,17 +62,13 @@ export default function GuestDashboardScreen() {
         >
           {/* Top Navigation Bar with Menu */}
           <View className="flex-row items-center justify-between mb-4">
-            <View
-              borderRadius={12}
-              style={{ width: 40, height: 40 }}
+            <TouchableOpacity
+              onPress={() => setSidebarVisible(true)}
+              className="w-10 h-10 rounded-xl items-center justify-center"
+              style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
             >
-              <TouchableOpacity
-                onPress={() => setSidebarVisible(true)}
-                className="w-10 h-10 rounded-xl items-center justify-center"
-              >
-                <Ionicons name="menu" size={24} color="#fff" />
-              </TouchableOpacity>
-            </View>
+              <Ionicons name="menu" size={24} color="#fff" />
+            </TouchableOpacity>
           </View>
 
           <Text className="text-3xl font-black text-white tracking-tight">

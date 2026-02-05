@@ -6,7 +6,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '@/context/auth-context';
 import { Skeleton } from '@/components/common/Skeletons';
 import type { Transaction } from '@/types';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Sidebar } from '@/components/common/Sidebar';
 
 interface TransactionItemProps {
   icon: keyof typeof Ionicons.glyphMap;
@@ -23,16 +24,35 @@ export default function WalletScreen() {
   const [balance, setBalance] = useState(0);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [sidebarVisible, setSidebarVisible] = useState(false);
 
   if (!isAuthenticated) {
     return (
-      <View className="flex-1 bg-sand-100">
+      <SafeAreaView className="flex-1 bg-sand-100">
+        {/* Sidebar */}
+        <Sidebar
+          isVisible={sidebarVisible}
+          onClose={() => setSidebarVisible(false)}
+        />
+        
         {/* Header */}
         <LinearGradient
           colors={['#122F26', '#1d392f']}
           className="px-4 pb-6"
           style={{ paddingTop: insets.top + 12 }}
         >
+          {/* Top Navigation Bar with Menu */}
+          <View className="flex-row items-center justify-between mb-4">
+            {/* Hamburger Menu */}
+            <TouchableOpacity
+              onPress={() => setSidebarVisible(true)}
+              className="w-10 h-10 rounded-xl items-center justify-center"
+              style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
+            >
+              <Ionicons name="menu" size={24} color="#fff" />
+            </TouchableOpacity>
+          </View>
+          
           <Text className="text-3xl font-black text-white tracking-tight">
             My Wallet
           </Text>
@@ -69,7 +89,7 @@ export default function WalletScreen() {
             </TouchableOpacity>
           </View>
         </View>
-      </View>
+      </SafeAreaView>
     );
   }
 
@@ -116,25 +136,44 @@ export default function WalletScreen() {
   );
 
   return (
-    <ScrollView className="flex-1 bg-sand-100" showsVerticalScrollIndicator={false}>
-      {/* Modern Header */}
-      <LinearGradient
-        colors={['#122F26', '#1d392f', '#2d4a40']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        className="px-4 pb-8"
-        style={{ paddingTop: insets.top + 12 }}
-      >
-        <Text className="text-3xl font-black text-white tracking-tight mb-2">
-          My Wallet
-        </Text>
-        <View className="flex-row items-center">
-          <Ionicons name="wallet" size={16} color="#D9B168" />
-          <Text className="text-sand-100 ml-2">
-            Track your earnings and expenses
+    <SafeAreaView className="flex-1 bg-sand-100">
+      {/* Sidebar */}
+      <Sidebar
+        isVisible={sidebarVisible}
+        onClose={() => setSidebarVisible(false)}
+      />
+      
+      <ScrollView className="flex-1 bg-sand-100" showsVerticalScrollIndicator={false}>
+        {/* Modern Header */}
+        <LinearGradient
+          colors={['#122F26', '#1d392f', '#2d4a40']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          className="px-4 pb-8"
+          style={{ paddingTop: insets.top + 12 }}
+        >
+          {/* Top Navigation Bar with Menu */}
+          <View className="flex-row items-center justify-between mb-4">
+            {/* Hamburger Menu */}
+            <TouchableOpacity
+              onPress={() => setSidebarVisible(true)}
+              className="w-10 h-10 rounded-xl items-center justify-center"
+              style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
+            >
+              <Ionicons name="menu" size={24} color="#fff" />
+            </TouchableOpacity>
+          </View>
+          
+          <Text className="text-3xl font-black text-white tracking-tight mb-2">
+            My Wallet
           </Text>
-        </View>
-      </LinearGradient>
+          <View className="flex-row items-center">
+            <Ionicons name="wallet" size={16} color="#D9B168" />
+            <Text className="text-sand-100 ml-2">
+              Track your earnings and expenses
+            </Text>
+          </View>
+        </LinearGradient>
 
       {/* Balance Card */}
       <View className="mx-4 -mt-6 mb-4">
@@ -155,31 +194,23 @@ export default function WalletScreen() {
           <Text className="text-5xl font-black text-forest mb-6">${balance.toFixed(2)}</Text>
           
           <View className="flex-row gap-3">
-            <View
-              borderRadius={12}
-              className="flex-1"
+            <TouchableOpacity
+              className="flex-1 py-3 flex-row items-center justify-center rounded-xl"
+              style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+              onPress={() => router.push('/wallet/withdraw')}
             >
-              <TouchableOpacity
-                className="py-3 flex-row items-center justify-center"
-                onPress={() => router.push('/wallet/withdraw')}
-              >
-                <Ionicons name="arrow-down" size={18} color="#fff" />
-                <Text className="text-white font-semibold ml-2">Withdraw</Text>
-              </TouchableOpacity>
-            </View>
+              <Ionicons name="arrow-down" size={18} color="#fff" />
+              <Text className="text-white font-semibold ml-2">Withdraw</Text>
+            </TouchableOpacity>
             
-            <View
-              borderRadius={12}
-              className="flex-1"
+            <TouchableOpacity
+              className="flex-1 py-3 flex-row items-center justify-center rounded-xl"
+              style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+              onPress={() => router.push('/wallet/add-funds')}
             >
-              <TouchableOpacity
-                className="py-3 flex-row items-center justify-center"
-                onPress={() => router.push('/wallet/add-funds')}
-              >
-                <Ionicons name="arrow-up" size={18} color="#122F26" />
-                <Text className="text-forest font-semibold ml-2">Add Funds</Text>
-              </TouchableOpacity>
-            </View>
+              <Ionicons name="arrow-up" size={18} color="#122F26" />
+              <Text className="text-forest font-semibold ml-2">Add Funds</Text>
+            </TouchableOpacity>
           </View>
         </LinearGradient>
       </View>
@@ -286,6 +317,7 @@ export default function WalletScreen() {
           <Ionicons name="chevron-forward" size={20} color="#3A5C50" />
         </TouchableOpacity>
       </View>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
