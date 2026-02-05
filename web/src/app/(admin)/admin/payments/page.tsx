@@ -20,7 +20,7 @@ export default function PaymentsManagement() {
   const loadPayments = async () => {
     try {
       setLoading(true);
-      const data = await adminApi.getAllPayments({ 
+      const data = await adminApi.getPayments({ 
         page, 
         status: statusFilter || undefined,
       });

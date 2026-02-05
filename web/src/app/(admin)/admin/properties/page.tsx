@@ -22,7 +22,7 @@ export default function PropertiesManagement() {
   const loadProperties = async () => {
     try {
       setLoading(true);
-      const data = await adminApi.getAllProperties({ 
+      const data = await adminApi.getProperties({ 
         page, 
         status: statusFilter || undefined,
         search: search || undefined,
@@ -71,7 +71,7 @@ export default function PropertiesManagement() {
     }
 
     try {
-      await adminApi.bulkApproveProperties(selectedProperties);
+      await Promise.all(selectedProperties.map(id => adminApi.approveProperty(id)));
       toast.success(`${selectedProperties.length} properties approved`);
       setSelectedProperties([]);
       loadProperties();

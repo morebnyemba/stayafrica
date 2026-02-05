@@ -21,7 +21,7 @@ export default function UsersManagement() {
   const loadUsers = async () => {
     try {
       setLoading(true);
-      const data = await adminApi.getAllUsers({ 
+      const data = await adminApi.getUsers({ 
         page, 
         role: roleFilter || undefined,
         search: search || undefined,
@@ -54,7 +54,7 @@ export default function UsersManagement() {
 
   const handleRoleChange = async (userId: string, newRole: string) => {
     try {
-      await adminApi.updateUserRole(userId, newRole);
+      await adminApi.updateUser(userId, { role: newRole });
       toast.success('User role updated successfully');
       loadUsers();
     } catch (err) {
