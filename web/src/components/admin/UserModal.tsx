@@ -103,7 +103,7 @@ export default function UserModal({ isOpen, onClose, onSave, user }: UserModalPr
           <select
             required
             value={formData.role}
-            onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+            onChange={(e) => setFormData({ ...formData, role: e.target.value as 'admin' | 'guest' | 'host' })}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#D9B168] focus:border-transparent"
           >
             <option value="guest">Guest</option>
