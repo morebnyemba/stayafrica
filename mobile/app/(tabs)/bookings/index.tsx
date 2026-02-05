@@ -1,12 +1,14 @@
 import { View, Text, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useState } from 'react';
 import { useBookings } from '@/hooks/api-hooks';
 import { useAuth } from '@/context/auth-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BookingCardSkeleton } from '@/components/common/Skeletons';
 import { Booking } from '@/types';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Sidebar } from '@/components/common/Sidebar';
 
 export default function BookingsScreen() {
   const router = useRouter();
@@ -14,16 +16,35 @@ export default function BookingsScreen() {
   const { isAuthenticated } = useAuth();
   const { data: bookingsData, isLoading } = useBookings();
   const bookings = bookingsData?.results || [];
+  const [sidebarVisible, setSidebarVisible] = useState(false);
 
   if (!isAuthenticated) {
     return (
-      <View className="flex-1 bg-sand-100">
+      <SafeAreaView className="flex-1 bg-sand-100">
+        {/* Sidebar */}
+        <Sidebar
+          isVisible={sidebarVisible}
+          onClose={() => setSidebarVisible(false)}
+        />
+        
         {/* Header */}
         <LinearGradient
           colors={['#122F26', '#1d392f']}
           className="px-4 pb-6"
           style={{ paddingTop: insets.top + 12 }}
         >
+          {/* Top Navigation Bar with Menu */}
+          <View className="flex-row items-center justify-between mb-4">
+            {/* Hamburger Menu */}
+            <TouchableOpacity
+              onPress={() => setSidebarVisible(true)}
+              className="w-10 h-10 rounded-xl items-center justify-center"
+              style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
+            >
+              <Ionicons name="menu" size={24} color="#fff" />
+            </TouchableOpacity>
+          </View>
+          
           <Text className="text-3xl font-black text-white tracking-tight">
             My Bookings
           </Text>
@@ -60,7 +81,7 @@ export default function BookingsScreen() {
             </TouchableOpacity>
           </View>
         </View>
-      </View>
+      </SafeAreaView>
     );
   }
 
@@ -176,25 +197,44 @@ export default function BookingsScreen() {
   };
 
   return (
-    <View className="flex-1 bg-sand-100">
-      {/* Modern Header */}
-      <LinearGradient
-        colors={['#122F26', '#1d392f', '#2d4a40']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        className="px-4 pb-6"
-        style={{ paddingTop: insets.top + 12 }}
-      >
-        <Text className="text-3xl font-black text-white tracking-tight mb-2">
-          My Bookings
-        </Text>
-        <View className="flex-row items-center">
-          <Ionicons name="calendar" size={16} color="#D9B168" />
-          <Text className="text-sand-100 ml-2">
-            {bookings.length} active {bookings.length === 1 ? 'booking' : 'bookings'}
+    <SafeAreaView className="flex-1 bg-sand-100">
+      {/* Sidebar */}
+      <Sidebar
+        isVisible={sidebarVisible}
+        onClose={() => setSidebarVisible(false)}
+      />
+      
+      <View className="flex-1 bg-sand-100">
+        {/* Modern Header */}
+        <LinearGradient
+          colors={['#122F26', '#1d392f', '#2d4a40']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          className="px-4 pb-6"
+          style={{ paddingTop: insets.top + 12 }}
+        >
+          {/* Top Navigation Bar with Menu */}
+          <View className="flex-row items-center justify-between mb-4">
+            {/* Hamburger Menu */}
+            <TouchableOpacity
+              onPress={() => setSidebarVisible(true)}
+              className="w-10 h-10 rounded-xl items-center justify-center"
+              style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
+            >
+              <Ionicons name="menu" size={24} color="#fff" />
+            </TouchableOpacity>
+          </View>
+          
+          <Text className="text-3xl font-black text-white tracking-tight mb-2">
+            My Bookings
           </Text>
-        </View>
-      </LinearGradient>
+          <View className="flex-row items-center">
+            <Ionicons name="calendar" size={16} color="#D9B168" />
+            <Text className="text-sand-100 ml-2">
+              {bookings.length} active {bookings.length === 1 ? 'booking' : 'bookings'}
+            </Text>
+          </View>
+        </LinearGradient>
 
       {/* Bookings List */}
       {isLoading ? (
@@ -241,6 +281,7 @@ export default function BookingsScreen() {
           }
         />
       )}
-    </View>
+      </View>
+    </SafeAreaView>
   );
 }
