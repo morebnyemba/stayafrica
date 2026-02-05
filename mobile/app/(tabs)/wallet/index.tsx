@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { GlassmorphicView } from '@/components/common/GlassmorphicView';
 import { useAuth } from '@/context/auth-context';
 import { Skeleton } from '@/components/common/Skeletons';
 import type { Transaction } from '@/types';
@@ -152,21 +153,35 @@ export default function WalletScreen() {
           <Text className="text-5xl font-black text-forest mb-6">${balance.toFixed(2)}</Text>
           
           <View className="flex-row gap-3">
-            <TouchableOpacity
-              className="flex-1 bg-forest py-3 rounded-xl flex-row items-center justify-center"
-              onPress={() => router.push('/wallet/withdraw')}
+            <GlassmorphicView
+              intensity={60}
+              tint="dark"
+              borderRadius={12}
+              className="flex-1"
             >
-              <Ionicons name="arrow-down" size={18} color="#D9B168" />
-              <Text className="text-gold font-semibold ml-2">Withdraw</Text>
-            </TouchableOpacity>
+              <TouchableOpacity
+                className="py-3 flex-row items-center justify-center"
+                onPress={() => router.push('/wallet/withdraw')}
+              >
+                <Ionicons name="arrow-down" size={18} color="#fff" />
+                <Text className="text-white font-semibold ml-2">Withdraw</Text>
+              </TouchableOpacity>
+            </GlassmorphicView>
             
-            <TouchableOpacity
-              className="flex-1 bg-white py-3 rounded-xl flex-row items-center justify-center"
-              onPress={() => router.push('/wallet/add-funds')}
+            <GlassmorphicView
+              intensity={80}
+              tint="light"
+              borderRadius={12}
+              className="flex-1"
             >
-              <Ionicons name="arrow-up" size={18} color="#122F26" />
-              <Text className="text-forest font-semibold ml-2">Add Funds</Text>
-            </TouchableOpacity>
+              <TouchableOpacity
+                className="py-3 flex-row items-center justify-center"
+                onPress={() => router.push('/wallet/add-funds')}
+              >
+                <Ionicons name="arrow-up" size={18} color="#122F26" />
+                <Text className="text-forest font-semibold ml-2">Add Funds</Text>
+              </TouchableOpacity>
+            </GlassmorphicView>
           </View>
         </LinearGradient>
       </View>

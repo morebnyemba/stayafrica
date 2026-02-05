@@ -4,6 +4,7 @@ import { useAuth } from '@/context/auth-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { GlassmorphicView } from '@/components/common/GlassmorphicView';
 import { Avatar } from '@/components/common/Avatar';
 import { Sidebar } from '@/components/common/Sidebar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -31,14 +32,20 @@ export default function ProfileScreen() {
         >
           {/* Top Navigation Bar with Menu */}
           <View className="flex-row items-center justify-between mb-4">
-            {/* Hamburger Menu */}
-            <TouchableOpacity
-              onPress={() => setSidebarVisible(true)}
-              className="w-10 h-10 rounded-xl items-center justify-center"
-              style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
+            {/* Hamburger Menu with Glassmorphism */}
+            <GlassmorphicView
+              intensity={40}
+              tint="dark"
+              borderRadius={12}
+              style={{ width: 40, height: 40 }}
             >
-              <Ionicons name="menu" size={24} color="#fff" />
-            </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => setSidebarVisible(true)}
+                className="w-10 h-10 rounded-xl items-center justify-center"
+              >
+                <Ionicons name="menu" size={24} color="#fff" />
+              </TouchableOpacity>
+            </GlassmorphicView>
 
             {/* Avatar for Auth Options */}
             <Avatar
