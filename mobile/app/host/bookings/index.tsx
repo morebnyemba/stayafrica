@@ -2,6 +2,7 @@ import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Platform } f
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { GlassmorphicView } from '@/components/common/GlassmorphicView';
 import { useAuth } from '@/context/auth-context';
 import { useHostBookings } from '@/hooks/api-hooks';
 import { Skeleton } from '@/components/common/Skeletons';
@@ -79,65 +80,71 @@ export default function HostBookingsScreen() {
     
     return (
       <TouchableOpacity
-        className="bg-white rounded-2xl p-4 mb-3 mx-4"
+        className="mb-3 mx-4"
         onPress={() => router.push(`/host/bookings/${booking.id}`)}
-        style={{
-          shadowColor: '#122F26',
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.08,
-          shadowRadius: 8,
-          elevation: 4,
-        }}
       >
-        {/* Property Name */}
-        <Text className="text-base font-bold text-forest mb-2">
-          {booking.property?.title || 'Property'}
-        </Text>
-        
-        {/* Guest Info */}
-        <View className="flex-row items-center mb-3">
-          <LinearGradient
-            colors={['#D9B168', '#bea04f']}
-            className="w-10 h-10 rounded-full items-center justify-center mr-3"
-          >
-            <Ionicons name="person" size={20} color="#122F26" />
-          </LinearGradient>
-          <View className="flex-1">
-            <Text className="text-sm font-semibold text-forest">
-              {booking.guest?.first_name} {booking.guest?.last_name}
-            </Text>
-            <Text className="text-xs text-moss">{booking.guest?.email}</Text>
+        <GlassmorphicView
+          intensity={30}
+          tint="light"
+          className="p-4"
+          style={{
+            shadowColor: '#122F26',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.08,
+            shadowRadius: 8,
+            elevation: 4,
+          }}
+        >
+          {/* Property Name */}
+          <Text className="text-base font-bold text-forest mb-2">
+            {booking.property?.title || 'Property'}
+          </Text>
+          
+          {/* Guest Info */}
+          <View className="flex-row items-center mb-3">
+            <LinearGradient
+              colors={['#D9B168', '#bea04f']}
+              className="w-10 h-10 rounded-full items-center justify-center mr-3"
+            >
+              <Ionicons name="person" size={20} color="#122F26" />
+            </LinearGradient>
+            <View className="flex-1">
+              <Text className="text-sm font-semibold text-forest">
+                {booking.guest?.first_name} {booking.guest?.last_name}
+              </Text>
+              <Text className="text-xs text-moss">{booking.guest?.email}</Text>
+            </View>
           </View>
-        </View>
 
-        {/* Dates */}
-        <View className="flex-row items-center mb-2">
-          <Ionicons name="calendar" size={16} color="#3A5C50" />
-          <Text className="text-sm text-moss ml-2">
-            {format(new Date(booking.check_in_date), 'MMM dd')} - {format(new Date(booking.check_out_date), 'MMM dd, yyyy')}
-          </Text>
-        </View>
-
-        {/* Guests */}
-        <View className="flex-row items-center mb-3">
-          <Ionicons name="people" size={16} color="#3A5C50" />
-          <Text className="text-sm text-moss ml-2">
-            {booking.number_of_guests} {booking.number_of_guests === 1 ? 'guest' : 'guests'}
-          </Text>
-        </View>
-
-        {/* Status and Price */}
-        <View className="flex-row items-center justify-between">
-          <View className={`px-3 py-1 rounded-full flex-row items-center ${statusStyle.bg}`}>
-            <Ionicons name={statusStyle.icon} size={14} color={statusStyle.text.includes('yellow') ? '#92400E' : statusStyle.text.includes('green') ? '#166534' : statusStyle.text.includes('blue') ? '#1E40AF' : statusStyle.text.includes('red') ? '#991B1B' : '#374151'} />
-            <Text className={`text-xs font-semibold ml-1 ${statusStyle.text}`}>
-              {booking.status?.replace('_', ' ').toUpperCase()}
+          {/* Dates */}
+          <View className="flex-row items-center mb-2">
+            <Ionicons name="calendar" size={16} color="#3A5C50" />
+            <Text className="text-sm text-moss ml-2">
+              {format(new Date(booking.check_in_date), 'MMM dd')} - {format(new Date(booking.check_out_date), 'MMM dd, yyyy')}
             </Text>
           </View>
-          <Text className="text-lg font-bold text-gold">
-            ${booking.total_price}
-          </Text>
-        </View>
+
+          {/* Guests */}
+          <View className="flex-row items-center mb-3">
+            <Ionicons name="people" size={16} color="#3A5C50" />
+            <Text className="text-sm text-moss ml-2">
+              {booking.number_of_guests} {booking.number_of_guests === 1 ? 'guest' : 'guests'}
+            </Text>
+          </View>
+
+          {/* Status and Price */}
+          <View className="flex-row items-center justify-between">
+            <View className={`px-3 py-1 rounded-full flex-row items-center ${statusStyle.bg}`}>
+              <Ionicons name={statusStyle.icon} size={14} color={statusStyle.text.includes('yellow') ? '#92400E' : statusStyle.text.includes('green') ? '#166534' : statusStyle.text.includes('blue') ? '#1E40AF' : statusStyle.text.includes('red') ? '#991B1B' : '#374151'} />
+              <Text className={`text-xs font-semibold ml-1 ${statusStyle.text}`}>
+                {booking.status?.replace('_', ' ').toUpperCase()}
+              </Text>
+            </View>
+            <Text className="text-lg font-bold text-gold">
+              ${booking.total_price}
+            </Text>
+          </View>
+        </GlassmorphicView>
       </TouchableOpacity>
     );
   };

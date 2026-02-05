@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { AnimatedCompassIcon } from '@/components/common/AnimatedCompassIcon';
 import { LinearGradient } from 'expo-linear-gradient';
+import { GlassmorphicView } from '@/components/common/GlassmorphicView';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
 
@@ -25,13 +26,18 @@ export default function ExperiencesScreen() {
       onPress={() => router.push(`/experiences/${experience.id}`)}
       className="mb-4"
     >
-      <View className="bg-white rounded-2xl overflow-hidden" style={{
-        shadowColor: '#122F26',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.08,
-        shadowRadius: 8,
-        elevation: 4,
-      }}>
+      <GlassmorphicView
+        intensity={30}
+        tint="light"
+        className="overflow-hidden"
+        style={{
+          shadowColor: '#122F26',
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.08,
+          shadowRadius: 8,
+          elevation: 4,
+        }}
+      >
         {experience.images?.[0] && (
           <Image
             source={{ uri: experience.images[0] }}
@@ -70,7 +76,7 @@ export default function ExperiencesScreen() {
             </View>
           )}
         </View>
-      </View>
+      </GlassmorphicView>
     </TouchableOpacity>
   );
 
@@ -88,9 +94,16 @@ export default function ExperiencesScreen() {
         style={{ paddingTop: Platform.OS === 'ios' ? 50 : 35 }}
       >
         <TouchableOpacity onPress={() => router.back()} className="mb-4">
-          <View className="w-10 h-10 rounded-xl items-center justify-center" style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}>
-            <Ionicons name="arrow-back" size={24} color="#fff" />
-          </View>
+          <GlassmorphicView
+            intensity={40}
+            tint="dark"
+            borderRadius={12}
+            style={{ width: 40, height: 40 }}
+          >
+            <View className="w-10 h-10 rounded-xl items-center justify-center">
+              <Ionicons name="arrow-back" size={24} color="#fff" />
+            </View>
+          </GlassmorphicView>
         </TouchableOpacity>
         <Text className="text-4xl font-black text-white tracking-tight mb-2">
           Experiences
@@ -107,16 +120,23 @@ export default function ExperiencesScreen() {
             {['All', 'Adventure', 'Culture', 'Food & Drink', 'Wellness', 'Nature'].map((category) => (
               <TouchableOpacity
                 key={category}
-                className="mr-2 px-4 py-2 bg-white rounded-full"
-                style={{
-                  shadowColor: '#122F26',
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.05,
-                  shadowRadius: 4,
-                  elevation: 2,
-                }}
+                className="mr-2"
               >
-                <Text className="text-forest font-semibold">{category}</Text>
+                <GlassmorphicView
+                  intensity={30}
+                  tint="light"
+                  className="px-4 py-2"
+                  borderRadius={20}
+                  style={{
+                    shadowColor: '#122F26',
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.05,
+                    shadowRadius: 4,
+                    elevation: 2,
+                  }}
+                >
+                  <Text className="text-forest font-semibold">{category}</Text>
+                </GlassmorphicView>
               </TouchableOpacity>
             ))}
           </ScrollView>

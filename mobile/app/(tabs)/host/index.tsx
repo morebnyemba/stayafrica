@@ -3,6 +3,7 @@ import { useState, useMemo } from 'react';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { GlassmorphicView } from '@/components/common/GlassmorphicView';
 import { useAuth } from '@/context/auth-context';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { 
@@ -170,57 +171,69 @@ export default function HostScreen() {
 
   const StatCard = ({ icon, label, value, color, onPress }: StatCardProps) => (
     <TouchableOpacity 
-      className="flex-1 bg-white rounded-2xl p-4 m-2" 
+      className="flex-1 m-2" 
       onPress={onPress}
-      style={{
-        shadowColor: '#122F26',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.08,
-        shadowRadius: 8,
-        elevation: 4,
-      }}
     >
-      <LinearGradient
-        colors={[`${color}20`, `${color}10`]}
-        className="w-12 h-12 rounded-full items-center justify-center mb-3"
+      <GlassmorphicView
+        intensity={30}
+        tint="light"
+        className="p-4"
+        style={{
+          shadowColor: '#122F26',
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.08,
+          shadowRadius: 8,
+          elevation: 4,
+        }}
       >
-        <Ionicons name={icon} size={24} color={color} />
-      </LinearGradient>
-      <Text className="text-2xl font-bold text-forest">{value}</Text>
-      <Text className="text-sm text-moss mt-1">{label}</Text>
+        <LinearGradient
+          colors={[`${color}20`, `${color}10`]}
+          className="w-12 h-12 rounded-full items-center justify-center mb-3"
+        >
+          <Ionicons name={icon} size={24} color={color} />
+        </LinearGradient>
+        <Text className="text-2xl font-bold text-forest">{value}</Text>
+        <Text className="text-sm text-moss mt-1">{label}</Text>
+      </GlassmorphicView>
     </TouchableOpacity>
   );
 
   const MenuItem = ({ icon, title, description, onPress, color = '#3A5C50', badge }: MenuItemProps) => (
     <TouchableOpacity
-      className="bg-white rounded-2xl p-4 mb-3 flex-row items-center"
+      className="mb-3"
       onPress={onPress}
-      style={{
-        shadowColor: '#122F26',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 4,
-        elevation: 2,
-      }}
     >
-      <LinearGradient
-        colors={[`${color}20`, `${color}10`]}
-        className="w-12 h-12 rounded-full items-center justify-center"
+      <GlassmorphicView
+        intensity={30}
+        tint="light"
+        className="p-4 flex-row items-center"
+        style={{
+          shadowColor: '#122F26',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.05,
+          shadowRadius: 4,
+          elevation: 2,
+        }}
       >
-        <Ionicons name={icon} size={24} color={color} />
-      </LinearGradient>
-      <View className="flex-1 ml-4">
-        <View className="flex-row items-center">
-          <Text className="text-base font-semibold text-forest">{title}</Text>
-          {badge && (
-            <View className="bg-red-500 rounded-full px-2 py-0.5 ml-2">
-              <Text className="text-white text-xs font-bold">{badge}</Text>
-            </View>
-          )}
+        <LinearGradient
+          colors={[`${color}20`, `${color}10`]}
+          className="w-12 h-12 rounded-full items-center justify-center"
+        >
+          <Ionicons name={icon} size={24} color={color} />
+        </LinearGradient>
+        <View className="flex-1 ml-4">
+          <View className="flex-row items-center">
+            <Text className="text-base font-semibold text-forest">{title}</Text>
+            {badge && (
+              <View className="bg-red-500 rounded-full px-2 py-0.5 ml-2">
+                <Text className="text-white text-xs font-bold">{badge}</Text>
+              </View>
+            )}
+          </View>
+          <Text className="text-sm text-moss mt-1">{description}</Text>
         </View>
-        <Text className="text-sm text-moss mt-1">{description}</Text>
-      </View>
-      <Ionicons name="chevron-forward" size={20} color="#3A5C50" />
+        <Ionicons name="chevron-forward" size={20} color="#3A5C50" />
+      </GlassmorphicView>
     </TouchableOpacity>
   );
 
@@ -232,13 +245,18 @@ export default function HostScreen() {
     return (
     <View className="px-4 mt-4">
       {/* Revenue Chart Placeholder */}
-      <View className="bg-white rounded-2xl p-4 mb-4" style={{
-        shadowColor: '#122F26',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.08,
-        shadowRadius: 8,
-        elevation: 4,
-      }}>
+      <GlassmorphicView
+        intensity={30}
+        tint="light"
+        className="p-4 mb-4"
+        style={{
+          shadowColor: '#122F26',
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.08,
+          shadowRadius: 8,
+          elevation: 4,
+        }}
+      >
         <Text className="text-lg font-bold text-forest mb-4">Revenue Overview</Text>
         {hasData ? (
           <View className="h-40 bg-sand-100 rounded-xl p-4 justify-center">
@@ -260,16 +278,21 @@ export default function HostScreen() {
             <Text className="text-sm text-moss/70">Start hosting to see analytics</Text>
           </View>
         )}
-      </View>
+      </GlassmorphicView>
 
       {/* Performance Metrics */}
-      <View className="bg-white rounded-2xl p-4 mb-4" style={{
-        shadowColor: '#122F26',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.08,
-        shadowRadius: 8,
-        elevation: 4,
-      }}>
+      <GlassmorphicView
+        intensity={30}
+        tint="light"
+        className="p-4 mb-4"
+        style={{
+          shadowColor: '#122F26',
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.08,
+          shadowRadius: 8,
+          elevation: 4,
+        }}
+      >
         <Text className="text-lg font-bold text-forest mb-4">Performance Metrics</Text>
         
         <View className="flex-row justify-between mb-3">
@@ -286,16 +309,21 @@ export default function HostScreen() {
             <Text className="text-xs text-purple-700 mt-1">Booking Rate</Text>
           </View>
         </View>
-      </View>
+      </GlassmorphicView>
 
       {/* Property Performance Table */}
-      <View className="bg-white rounded-2xl p-4 mb-6" style={{
-        shadowColor: '#122F26',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.08,
-        shadowRadius: 8,
-        elevation: 4,
-      }}>
+      <GlassmorphicView
+        intensity={30}
+        tint="light"
+        className="p-4 mb-6"
+        style={{
+          shadowColor: '#122F26',
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.08,
+          shadowRadius: 8,
+          elevation: 4,
+        }}
+      >
         <Text className="text-lg font-bold text-forest mb-4">Property Performance</Text>
         {performanceProperties.length > 0 ? (
           performanceProperties.slice(0, 3).map((property: any, index: number) => (
@@ -322,7 +350,7 @@ export default function HostScreen() {
             <Text className="text-moss mt-2 text-sm">No properties listed yet</Text>
           </View>
         )}
-      </View>
+      </GlassmorphicView>
     </View>
     );
   };

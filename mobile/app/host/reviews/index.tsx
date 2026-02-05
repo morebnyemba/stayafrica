@@ -2,6 +2,7 @@ import { View, Text, ScrollView, TouchableOpacity, Platform, FlatList } from 're
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { GlassmorphicView } from '@/components/common/GlassmorphicView';
 import { useAuth } from '@/context/auth-context';
 
 export default function HostReviewsScreen() {
@@ -17,9 +18,16 @@ export default function HostReviewsScreen() {
           style={{ paddingTop: Platform.OS === 'ios' ? 50 : 35 }}
         >
           <TouchableOpacity onPress={() => router.back()} className="mb-4">
-            <View className="w-10 h-10 rounded-xl items-center justify-center" style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}>
-              <Ionicons name="arrow-back" size={24} color="#fff" />
-            </View>
+            <GlassmorphicView
+              intensity={40}
+              tint="dark"
+              borderRadius={12}
+              style={{ width: 40, height: 40 }}
+            >
+              <View className="w-10 h-10 rounded-xl items-center justify-center">
+                <Ionicons name="arrow-back" size={24} color="#fff" />
+              </View>
+            </GlassmorphicView>
           </TouchableOpacity>
           <Text className="text-3xl font-black text-white tracking-tight">
             Reviews
@@ -36,13 +44,18 @@ export default function HostReviewsScreen() {
   const reviews: any[] = [];
 
   const RatingStats = () => (
-    <View className="bg-white rounded-2xl p-5 mx-4 -mt-4" style={{
-      shadowColor: '#122F26',
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.08,
-      shadowRadius: 8,
-      elevation: 4,
-    }}>
+    <GlassmorphicView
+      intensity={30}
+      tint="light"
+      className="p-5 mx-4 -mt-4"
+      style={{
+        shadowColor: '#122F26',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.08,
+        shadowRadius: 8,
+        elevation: 4,
+      }}
+    >
       <View className="flex-row items-center justify-between">
         <View className="items-center">
           <Text className="text-4xl font-black text-forest">0.0</Text>
@@ -67,17 +80,22 @@ export default function HostReviewsScreen() {
           ))}
         </View>
       </View>
-    </View>
+    </GlassmorphicView>
   );
 
   const ReviewItem = ({ review }: any) => (
-    <View className="bg-white rounded-2xl p-4 mb-3 mx-4" style={{
-      shadowColor: '#122F26',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.05,
-      shadowRadius: 4,
-      elevation: 2,
-    }}>
+    <GlassmorphicView
+      intensity={30}
+      tint="light"
+      className="p-4 mb-3 mx-4"
+      style={{
+        shadowColor: '#122F26',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
+        elevation: 2,
+      }}
+    >
       <View className="flex-row items-center mb-3">
         <View className="w-12 h-12 rounded-full bg-gold items-center justify-center">
           <Text className="text-xl font-bold text-forest">
@@ -97,7 +115,7 @@ export default function HostReviewsScreen() {
       </View>
       <Text className="text-moss">{review.text}</Text>
       <Text className="text-xs text-moss/70 mt-2">{review.date}</Text>
-    </View>
+    </GlassmorphicView>
   );
 
   return (

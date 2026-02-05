@@ -112,32 +112,45 @@ export default function ProfileScreen() {
 
   const MenuItem = ({ iconName, label, value, onPress, gradient = false, iconColor }: any) => (
     <TouchableOpacity
-      className="mb-3 rounded-2xl overflow-hidden"
+      className="mb-3"
       onPress={onPress}
-      style={{
-        shadowColor: '#122F26',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 4,
-        elevation: 2,
-      }}
     >
       {gradient ? (
         <LinearGradient
           colors={['#122F26', '#1d392f']}
-          className="flex-row items-center p-4"
+          className="rounded-2xl overflow-hidden"
+          style={{
+            shadowColor: '#122F26',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.05,
+            shadowRadius: 4,
+            elevation: 2,
+          }}
         >
-          <View className="bg-gold/20 rounded-full p-2.5 mr-4">
-            <Ionicons name={iconName} size={20} color={iconColor || "#D9B168"} />
+          <View className="flex-row items-center p-4">
+            <View className="bg-gold/20 rounded-full p-2.5 mr-4">
+              <Ionicons name={iconName} size={20} color={iconColor || "#D9B168"} />
+            </View>
+            <View className="flex-1">
+              <Text className="text-sand-200 text-xs mb-0.5">{label}</Text>
+              <Text className="text-white font-semibold">{value}</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#D9B168" />
           </View>
-          <View className="flex-1">
-            <Text className="text-sand-200 text-xs mb-0.5">{label}</Text>
-            <Text className="text-white font-semibold">{value}</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={20} color="#D9B168" />
         </LinearGradient>
       ) : (
-        <View className="bg-white flex-row items-center p-4">
+        <GlassmorphicView
+          intensity={30}
+          tint="light"
+          className="flex-row items-center p-4"
+          style={{
+            shadowColor: '#122F26',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.05,
+            shadowRadius: 4,
+            elevation: 2,
+          }}
+        >
           <View className="bg-sand-200 rounded-full p-2.5 mr-4">
             <Ionicons name={iconName} size={20} color={iconColor || "#3A5C50"} />
           </View>
@@ -146,7 +159,7 @@ export default function ProfileScreen() {
             <Text className="text-forest font-semibold">{value}</Text>
           </View>
           <Ionicons name="chevron-forward" size={20} color="#3A5C50" />
-        </View>
+        </GlassmorphicView>
       )}
     </TouchableOpacity>
   );
@@ -201,58 +214,79 @@ export default function ProfileScreen() {
   // Quick Stats Component
   const QuickStats = () => (
     <View className="flex-row px-4 mt-4">
-      <View className="flex-1 bg-white rounded-2xl p-4 mr-2" style={{
-        shadowColor: '#122F26',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 4,
-        elevation: 2,
-      }}>
-        <View className="flex-row items-center">
-          <View className="bg-blue-100 rounded-full p-2">
-            <Ionicons name="calendar" size={18} color="#3B82F6" />
+      <View className="flex-1 mr-2">
+        <GlassmorphicView
+          intensity={30}
+          tint="light"
+          className="p-4"
+          style={{
+            shadowColor: '#122F26',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.05,
+            shadowRadius: 4,
+            elevation: 2,
+          }}
+        >
+          <View className="flex-row items-center">
+            <View className="bg-blue-100 rounded-full p-2">
+              <Ionicons name="calendar" size={18} color="#3B82F6" />
+            </View>
+            <View className="ml-3">
+              <Text className="text-xl font-bold text-forest">0</Text>
+              <Text className="text-xs text-moss">Bookings</Text>
+            </View>
           </View>
-          <View className="ml-3">
-            <Text className="text-xl font-bold text-forest">0</Text>
-            <Text className="text-xs text-moss">Bookings</Text>
-          </View>
-        </View>
+        </GlassmorphicView>
       </View>
 
-      <View className="flex-1 bg-white rounded-2xl p-4 mr-2" style={{
-        shadowColor: '#122F26',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 4,
-        elevation: 2,
-      }}>
-        <View className="flex-row items-center">
-          <View className="bg-red-100 rounded-full p-2">
-            <Ionicons name="heart" size={18} color="#EF4444" />
+      <View className="flex-1 mr-2">
+        <GlassmorphicView
+          intensity={30}
+          tint="light"
+          className="p-4"
+          style={{
+            shadowColor: '#122F26',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.05,
+            shadowRadius: 4,
+            elevation: 2,
+          }}
+        >
+          <View className="flex-row items-center">
+            <View className="bg-red-100 rounded-full p-2">
+              <Ionicons name="heart" size={18} color="#EF4444" />
+            </View>
+            <View className="ml-3">
+              <Text className="text-xl font-bold text-forest">0</Text>
+              <Text className="text-xs text-moss">Wishlist</Text>
+            </View>
           </View>
-          <View className="ml-3">
-            <Text className="text-xl font-bold text-forest">0</Text>
-            <Text className="text-xs text-moss">Wishlist</Text>
-          </View>
-        </View>
+        </GlassmorphicView>
       </View>
 
-      <View className="flex-1 bg-white rounded-2xl p-4" style={{
-        shadowColor: '#122F26',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 4,
-        elevation: 2,
-      }}>
-        <View className="flex-row items-center">
-          <View className="bg-purple-100 rounded-full p-2">
-            <Ionicons name="star" size={18} color="#8B5CF6" />
+      <View className="flex-1">
+        <GlassmorphicView
+          intensity={30}
+          tint="light"
+          className="p-4"
+          style={{
+            shadowColor: '#122F26',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.05,
+            shadowRadius: 4,
+            elevation: 2,
+          }}
+        >
+          <View className="flex-row items-center">
+            <View className="bg-purple-100 rounded-full p-2">
+              <Ionicons name="star" size={18} color="#8B5CF6" />
+            </View>
+            <View className="ml-3">
+              <Text className="text-xl font-bold text-forest">0</Text>
+              <Text className="text-xs text-moss">Reviews</Text>
+            </View>
           </View>
-          <View className="ml-3">
-            <Text className="text-xl font-bold text-forest">0</Text>
-            <Text className="text-xs text-moss">Reviews</Text>
-          </View>
-        </View>
+        </GlassmorphicView>
       </View>
     </View>
   );
@@ -276,13 +310,19 @@ export default function ProfileScreen() {
         {/* Top Navigation Bar with Menu */}
         <View className="flex-row items-center justify-between mb-4">
           {/* Hamburger Menu */}
-          <TouchableOpacity
-            onPress={() => setSidebarVisible(true)}
-            className="w-10 h-10 rounded-xl items-center justify-center"
-            style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
+          <GlassmorphicView
+            intensity={40}
+            tint="dark"
+            borderRadius={12}
+            style={{ width: 40, height: 40 }}
           >
-            <Ionicons name="menu" size={24} color="#fff" />
-          </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setSidebarVisible(true)}
+              className="w-10 h-10 rounded-xl items-center justify-center"
+            >
+              <Ionicons name="menu" size={24} color="#fff" />
+            </TouchableOpacity>
+          </GlassmorphicView>
 
           {/* User Badge */}
           <View className="flex-row items-center">
@@ -374,108 +414,138 @@ export default function ProfileScreen() {
             className="w-1/3 p-2"
             onPress={() => router.push('/(tabs)/bookings')}
           >
-            <View className="bg-white rounded-2xl p-4 items-center" style={{
-              shadowColor: '#122F26',
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.05,
-              shadowRadius: 4,
-              elevation: 2,
-            }}>
+            <GlassmorphicView
+              intensity={30}
+              tint="light"
+              className="p-4 items-center"
+              style={{
+                shadowColor: '#122F26',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.05,
+                shadowRadius: 4,
+                elevation: 2,
+              }}
+            >
               <View className="bg-blue-100 rounded-full p-3 mb-2">
                 <Ionicons name="calendar" size={24} color="#3B82F6" />
               </View>
               <Text className="text-forest font-semibold text-xs text-center">Bookings</Text>
-            </View>
+            </GlassmorphicView>
           </TouchableOpacity>
 
           <TouchableOpacity 
             className="w-1/3 p-2"
             onPress={() => router.push('/(tabs)/wishlist')}
           >
-            <View className="bg-white rounded-2xl p-4 items-center" style={{
-              shadowColor: '#122F26',
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.05,
-              shadowRadius: 4,
-              elevation: 2,
-            }}>
+            <GlassmorphicView
+              intensity={30}
+              tint="light"
+              className="p-4 items-center"
+              style={{
+                shadowColor: '#122F26',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.05,
+                shadowRadius: 4,
+                elevation: 2,
+              }}
+            >
               <View className="bg-red-100 rounded-full p-3 mb-2">
                 <Ionicons name="heart" size={24} color="#EF4444" />
               </View>
               <Text className="text-forest font-semibold text-xs text-center">Wishlist</Text>
-            </View>
+            </GlassmorphicView>
           </TouchableOpacity>
 
           <TouchableOpacity 
             className="w-1/3 p-2"
             onPress={() => router.push('/(tabs)/messages')}
           >
-            <View className="bg-white rounded-2xl p-4 items-center" style={{
-              shadowColor: '#122F26',
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.05,
-              shadowRadius: 4,
-              elevation: 2,
-            }}>
+            <GlassmorphicView
+              intensity={30}
+              tint="light"
+              className="p-4 items-center"
+              style={{
+                shadowColor: '#122F26',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.05,
+                shadowRadius: 4,
+                elevation: 2,
+              }}
+            >
               <View className="bg-purple-100 rounded-full p-3 mb-2">
                 <Ionicons name="chatbubbles" size={24} color="#8B5CF6" />
               </View>
               <Text className="text-forest font-semibold text-xs text-center">Messages</Text>
-            </View>
+            </GlassmorphicView>
           </TouchableOpacity>
 
           <TouchableOpacity 
             className="w-1/3 p-2"
             onPress={() => router.push('/(tabs)/wallet')}
           >
-            <View className="bg-white rounded-2xl p-4 items-center" style={{
-              shadowColor: '#122F26',
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.05,
-              shadowRadius: 4,
-              elevation: 2,
-            }}>
+            <GlassmorphicView
+              intensity={30}
+              tint="light"
+              className="p-4 items-center"
+              style={{
+                shadowColor: '#122F26',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.05,
+                shadowRadius: 4,
+                elevation: 2,
+              }}
+            >
               <View className="bg-green-100 rounded-full p-3 mb-2">
                 <Ionicons name="wallet" size={24} color="#10B981" />
               </View>
               <Text className="text-forest font-semibold text-xs text-center">Wallet</Text>
-            </View>
+            </GlassmorphicView>
           </TouchableOpacity>
 
           <TouchableOpacity 
             className="w-1/3 p-2"
             onPress={() => router.push('/reviews/my-reviews')}
           >
-            <View className="bg-white rounded-2xl p-4 items-center" style={{
-              shadowColor: '#122F26',
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.05,
-              shadowRadius: 4,
-              elevation: 2,
-            }}>
+            <GlassmorphicView
+              intensity={30}
+              tint="light"
+              className="p-4 items-center"
+              style={{
+                shadowColor: '#122F26',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.05,
+                shadowRadius: 4,
+                elevation: 2,
+              }}
+            >
               <View className="bg-yellow-100 rounded-full p-3 mb-2">
                 <Ionicons name="star" size={24} color="#F59E0B" />
               </View>
               <Text className="text-forest font-semibold text-xs text-center">Reviews</Text>
-            </View>
+            </GlassmorphicView>
           </TouchableOpacity>
 
           <TouchableOpacity 
             className="w-1/3 p-2"
             onPress={() => router.push('/(tabs)/host')}
           >
-            <View className="bg-white rounded-2xl p-4 items-center" style={{
-              shadowColor: '#122F26',
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.05,
-              shadowRadius: 4,
-              elevation: 2,
-            }}>
+            <GlassmorphicView
+              intensity={30}
+              tint="light"
+              className="p-4 items-center"
+              style={{
+                shadowColor: '#122F26',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.05,
+                shadowRadius: 4,
+                elevation: 2,
+              }}
+            >
               <View className="bg-orange-100 rounded-full p-3 mb-2">
                 <Ionicons name="business" size={24} color="#F97316" />
               </View>
               <Text className="text-forest font-semibold text-xs text-center">Hosting</Text>
-            </View>
+            </GlassmorphicView>
           </TouchableOpacity>
         </View>
       </View>
