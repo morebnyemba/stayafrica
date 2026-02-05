@@ -36,7 +36,7 @@ export default function AuditLogsPage() {
   return (
     <div className="p-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-#122F26">Audit Logs</h1>
+        <h1 className="text-3xl font-bold text-[#122F26]">Audit Logs</h1>
         <p className="text-[#3A5C50] mt-2">Track all system activities and changes</p>
       </div>
 
@@ -53,7 +53,7 @@ export default function AuditLogsPage() {
                 setActionFilter(e.target.value);
                 setPage(1);
               }}
-              className="w-full px-4 py-2 border border-[#3A5C50] rounded-lg focus:ring-2 focus:ring-#D9B168 focus:border-transparent"
+              className="w-full px-4 py-2 border border-[#3A5C50] rounded-lg focus:ring-2 focus:ring-[#D9B168] focus:border-transparent"
             >
               <option value="">All Actions</option>
               <option value="create">Create</option>
@@ -70,7 +70,7 @@ export default function AuditLogsPage() {
       <div className="bg-white rounded-lg shadow overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-#D9B168"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#D9B168]"></div>
           </div>
         ) : (
           <>
@@ -95,13 +95,13 @@ export default function AuditLogsPage() {
                 <tbody className="bg-white divide-y divide-gray-200">
                   {logs.map((log) => (
                     <tr key={log.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-#122F26">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-[#122F26]">
                         {new Date(log.timestamp).toLocaleString()}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         {log.user ? (
                           <div>
-                            <div className="text-sm font-medium text-#122F26">
+                            <div className="text-sm font-medium text-[#122F26]">
                               {log.user.first_name} {log.user.last_name}
                             </div>
                             <div className="text-sm text-gray-500">{log.user.email}</div>
@@ -116,7 +116,7 @@ export default function AuditLogsPage() {
                         </span>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="text-sm text-#122F26">
+                        <div className="text-sm text-[#122F26]">
                           {log.content_type && (
                             <span className="font-medium">{log.content_type}</span>
                           )}
@@ -126,7 +126,7 @@ export default function AuditLogsPage() {
                         </div>
                         {Object.keys(log.changes).length > 0 && (
                           <details className="mt-2">
-                            <summary className="text-xs text-#D9B168 cursor-pointer">
+                            <summary className="text-xs text-[#D9B168] cursor-pointer">
                               View changes
                             </summary>
                             <pre className="mt-2 text-xs bg-gray-50 p-2 rounded overflow-auto max-w-lg">

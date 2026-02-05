@@ -29,7 +29,7 @@ export default function SettingsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-#D9B168"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#D9B168]"></div>
       </div>
     );
   }
@@ -47,14 +47,14 @@ export default function SettingsPage() {
   return (
     <div className="p-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-#122F26">System Settings</h1>
+        <h1 className="text-3xl font-bold text-[#122F26]">System Settings</h1>
         <p className="text-[#3A5C50] mt-2">Configure system-wide settings and parameters</p>
       </div>
 
       <div className="space-y-6">
         {/* Pricing Configuration */}
         <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold text-#122F26 mb-4">Pricing Configuration</h2>
+          <h2 className="text-xl font-semibold text-[#122F26] mb-4">Pricing Configuration</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -100,7 +100,7 @@ export default function SettingsPage() {
 
         {/* Business Rules */}
         <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold text-#122F26 mb-4">Business Rules</h2>
+          <h2 className="text-xl font-semibold text-[#122F26] mb-4">Business Rules</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -153,7 +153,7 @@ export default function SettingsPage() {
 
         {/* Email Configuration */}
         <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold text-#122F26 mb-4">Email Configuration</h2>
+          <h2 className="text-xl font-semibold text-[#122F26] mb-4">Email Configuration</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -182,11 +182,11 @@ export default function SettingsPage() {
 
         {/* Payment Gateway Status */}
         <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold text-#122F26 mb-4">Payment Gateways</h2>
+          <h2 className="text-xl font-semibold text-[#122F26] mb-4">Payment Gateways</h2>
           <div className="space-y-4">
             <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
               <div>
-                <h3 className="font-medium text-#122F26">Paynow</h3>
+                <h3 className="font-medium text-[#122F26]">Paynow</h3>
                 <p className="text-sm text-[#3A5C50]">
                   {config.paynow_integration_id ? 'Configured' : 'Not configured'}
                 </p>
@@ -201,7 +201,7 @@ export default function SettingsPage() {
             </div>
             <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
               <div>
-                <h3 className="font-medium text-#122F26">PayFast</h3>
+                <h3 className="font-medium text-[#122F26]">PayFast</h3>
                 <p className="text-sm text-[#3A5C50]">
                   {config.payfast_merchant_id ? 'Configured' : 'Not configured'}
                 </p>
@@ -216,7 +216,7 @@ export default function SettingsPage() {
             </div>
             <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
               <div>
-                <h3 className="font-medium text-#122F26">Stripe</h3>
+                <h3 className="font-medium text-[#122F26]">Stripe</h3>
                 <p className="text-sm text-[#3A5C50]">
                   {config.stripe_secret_key ? 'Configured' : 'Not configured'}
                 </p>
@@ -234,11 +234,11 @@ export default function SettingsPage() {
 
         {/* Maintenance Mode */}
         <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold text-#122F26 mb-4">Maintenance Mode</h2>
+          <h2 className="text-xl font-semibold text-[#122F26] mb-4">Maintenance Mode</h2>
           <div className="space-y-4">
             <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
               <div>
-                <h3 className="font-medium text-#122F26">System Status</h3>
+                <h3 className="font-medium text-[#122F26]">System Status</h3>
                 <p className="text-sm text-[#3A5C50]">
                   {config.maintenance_mode ? 'Maintenance mode is active' : 'System is operational'}
                 </p>
