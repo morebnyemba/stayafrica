@@ -25,7 +25,6 @@ interface Review {
 }
 
 export function HostReviews() {
-  const { user } = useAuth();
   const [selectedProperty, setSelectedProperty] = useState<string>('all');
   const [sortBy, setSortBy] = useState<'recent' | 'rating'>('recent');
 
