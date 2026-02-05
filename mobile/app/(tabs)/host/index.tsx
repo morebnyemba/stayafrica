@@ -116,7 +116,7 @@ export default function HostScreen() {
         <TouchableOpacity onPress={() => router.push('/host/verification')}>
           <LinearGradient
             colors={['#F59E0B', '#D97706']}
-            className="p-4 bg-white rounded-2xl rounded-2xl flex-row items-center"
+            className="p-4 bg-white rounded-2xl flex-row items-center"
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
           >
@@ -145,7 +145,7 @@ export default function HostScreen() {
     <View className="mx-4 mt-4">
       <LinearGradient
         colors={['#FEF3C7', '#FDE68A']}
-        className="p-4 bg-white rounded-2xl rounded-2xl"
+        className="p-4 bg-white rounded-2xl"
       >
         <View className="flex-row items-start">
           <View className="bg-yellow-500/20 rounded-full p-2 mr-3">

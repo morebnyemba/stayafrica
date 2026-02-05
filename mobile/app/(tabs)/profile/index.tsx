@@ -136,7 +136,7 @@ export default function ProfileScreen() {
         <View className="mx-4 mt-4">
           <LinearGradient
             colors={['#10B981', '#059669']}
-            className="p-4 bg-white rounded-2xl rounded-2xl flex-row items-center"
+            className="p-4 bg-white rounded-2xl flex-row items-center"
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
           >
@@ -158,7 +158,7 @@ export default function ProfileScreen() {
         <TouchableOpacity onPress={() => router.push('/profile/verification')}>
           <LinearGradient
             colors={['#F59E0B', '#D97706']}
-            className="p-4 bg-white rounded-2xl rounded-2xl flex-row items-center"
+            className="p-4 bg-white rounded-2xl flex-row items-center"
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
           >
