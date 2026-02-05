@@ -201,7 +201,7 @@ export default function UsersManagement() {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <select
                           value={user.role}
-                          onChange={(e) => handleRoleChange(user.id, e.target.value)}
+                          onChange={(e) => handleRoleChange(user.id, e.target.value as 'admin' | 'guest' | 'host')}
                           className="text-sm border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-orange-500"
                         >
                           <option value="guest">Guest</option>
