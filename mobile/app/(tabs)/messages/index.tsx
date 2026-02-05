@@ -8,6 +8,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Skeleton } from '@/components/common/Skeletons';
 import { Avatar } from '@/components/common/Avatar';
 import { Sidebar } from '@/components/common/Sidebar';
+import { EmptyState } from '@/components/common/EmptyState';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface Conversation {
@@ -91,34 +92,13 @@ export default function MessagesScreen() {
           </Text>
         </LinearGradient>
 
-        <View className="flex-1 items-center justify-center px-6">
-          <View className="bg-white rounded-3xl p-8 items-center" style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.1, shadowRadius: 16, elevation: 8 }}>
-            <View className="bg-sand-200 rounded-full p-8 mb-6">
-              <Ionicons name="chatbubbles-outline" size={72} color="#D9B168" />
-            </View>
-            <Text className="text-2xl font-bold text-forest mb-3">Sign In to Chat</Text>
-            <Text className="text-moss text-center mb-8 px-4 leading-6">
-              Sign in to start conversations with hosts and guests
-            </Text>
-            <TouchableOpacity
-              onPress={() => router.replace('/(auth)/login')}
-            >
-              <LinearGradient
-                colors={['#D9B168', '#bea04f']}
-                className="px-8 py-4 rounded-2xl"
-                style={{
-                  shadowColor: '#D9B168',
-                  shadowOffset: { width: 0, height: 4 },
-                  shadowOpacity: 0.3,
-                  shadowRadius: 8,
-                  elevation: 5,
-                }}
-              >
-                <Text className="text-forest font-bold text-base">Sign In Now</Text>
-              </LinearGradient>
-            </TouchableOpacity>
-          </View>
-        </View>
+        <EmptyState
+          icon="chatbubbles-outline"
+          title="Sign In to Chat"
+          description="Sign in to start conversations with hosts and guests"
+          actionLabel="Sign In Now"
+          onAction={() => router.replace('/(auth)/login')}
+        />
       </View>
     );
   }

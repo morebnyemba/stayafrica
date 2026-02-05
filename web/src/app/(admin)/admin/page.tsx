@@ -35,7 +35,7 @@ export default function AdminDashboard() {
   const loadStats = async () => {
     try {
       setLoading(true);
-      const data = await adminApi.getDashboardStats();
+      const data = await adminApi.getStats();
       setStats(data);
       setError(null);
     } catch (err) {
