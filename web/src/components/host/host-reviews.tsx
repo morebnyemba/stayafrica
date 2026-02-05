@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
 import { useAuth } from '@/store/auth-store';
-import { Star, Filter, ChevronDown, MessageCircle } from 'lucide-react';
+import { Star, MessageCircle } from 'lucide-react';
 import Link from 'next/link';
 
 interface Review {
