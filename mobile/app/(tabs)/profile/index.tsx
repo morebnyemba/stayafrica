@@ -96,7 +96,7 @@ export default function ProfileScreen() {
     ]);
   };
 
-  const MenuItem = ({ iconName, label, value, onPress, gradient = false, iconColor }: any) => (
+  const MenuItem = ({ iconName, label, value, onPress, highlighted = false, iconColor }: any) => (
     <TouchableOpacity
       className="mb-3"
       onPress={onPress}
@@ -111,7 +111,7 @@ export default function ProfileScreen() {
           elevation: 2,
         }}
       >
-        {gradient ? (
+        {highlighted ? (
           <LinearGradient
             colors={['#D9B168', '#bea04f']}
             className="rounded-full p-2.5 mr-4"
@@ -127,7 +127,7 @@ export default function ProfileScreen() {
           <Text className="text-moss text-xs mb-0.5">{label}</Text>
           <Text className="text-forest font-semibold">{value}</Text>
         </View>
-        <Ionicons name="chevron-forward" size={20} color={gradient ? "#D9B168" : "#3A5C50"} />
+        <Ionicons name="chevron-forward" size={20} color={highlighted ? "#D9B168" : "#3A5C50"} />
       </View>
     </TouchableOpacity>
   );
@@ -490,7 +490,7 @@ export default function ProfileScreen() {
           label="Edit Profile"
           value="Update your information"
           onPress={() => router.push('/(tabs)/profile/edit')}
-          gradient={true}
+          highlighted={true}
         />
 
         <MenuItem
@@ -498,7 +498,7 @@ export default function ProfileScreen() {
           label="Change Password"
           value="Secure your account"
           onPress={() => router.push('/(tabs)/profile/change-password')}
-          gradient={true}
+          highlighted={true}
         />
 
         <MenuItem
@@ -506,7 +506,7 @@ export default function ProfileScreen() {
           label="Notifications"
           value="Manage notification preferences"
           onPress={() => {}}
-          gradient={true}
+          highlighted={true}
         />
 
         <MenuItem
@@ -514,7 +514,7 @@ export default function ProfileScreen() {
           label="Payment Methods"
           value="Manage your payment options"
           onPress={() => router.push('/(tabs)/wallet')}
-          gradient={true}
+          highlighted={true}
         />
       </View>
 

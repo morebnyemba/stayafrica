@@ -63,7 +63,7 @@ export default function AboutScreen() {
           </TouchableOpacity>
           <Text className="text-3xl font-black text-white tracking-tight">About</Text>
         </View>
-        <Text className="text-sand-200 text-sm ml-13">Learn more about StayAfrica</Text>
+        <Text className="text-sand-200 text-sm ml-12">Learn more about StayAfrica</Text>
       </LinearGradient>
 
       <ScrollView className="flex-1">

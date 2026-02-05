@@ -85,21 +85,18 @@ export default function BookingsScreen() {
     );
   }
 
+  // Status color mapping
+  const STATUS_COLORS = {
+    confirmed: { bg: 'bg-green-100', text: 'text-green-800', icon: 'checkmark-circle', bgColor: '#10B98120', textColor: '#10B981' },
+    pending: { bg: 'bg-yellow-100', text: 'text-yellow-800', icon: 'time', bgColor: '#F59E0B20', textColor: '#F59E0B' },
+    cancelled: { bg: 'bg-red-100', text: 'text-red-800', icon: 'close-circle', bgColor: '#EF444420', textColor: '#EF4444' },
+    checked_in: { bg: 'bg-blue-100', text: 'text-blue-800', icon: 'enter', bgColor: '#3B82F620', textColor: '#3B82F6' },
+    checked_out: { bg: 'bg-purple-100', text: 'text-purple-800', icon: 'checkbox', bgColor: '#8B5CF620', textColor: '#8B5CF6' },
+    default: { bg: 'bg-gray-100', text: 'text-gray-800', icon: 'information-circle', bgColor: '#6B728020', textColor: '#6B7280' },
+  };
+
   const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'confirmed':
-        return { bg: 'bg-green-100', text: 'text-green-800', icon: 'checkmark-circle' };
-      case 'pending':
-        return { bg: 'bg-yellow-100', text: 'text-yellow-800', icon: 'time' };
-      case 'cancelled':
-        return { bg: 'bg-red-100', text: 'text-red-800', icon: 'close-circle' };
-      case 'checked_in':
-        return { bg: 'bg-blue-100', text: 'text-blue-800', icon: 'enter' };
-      case 'checked_out':
-        return { bg: 'bg-purple-100', text: 'text-purple-800', icon: 'checkbox' };
-      default:
-        return { bg: 'bg-gray-100', text: 'text-gray-800', icon: 'information-circle' };
-    }
+    return STATUS_COLORS[status as keyof typeof STATUS_COLORS] || STATUS_COLORS.default;
   };
 
   const BookingCard = ({ booking }: { booking: Booking & { property?: { title: string; city: string } } }) => {
@@ -138,14 +135,10 @@ export default function BookingsScreen() {
             </View>
             <View
               className="px-3 py-1.5 rounded-full"
-              style={{ 
-                backgroundColor: statusStyle.bg.replace('bg-', '').includes('green') ? '#10B98120' :
-                                 statusStyle.bg.replace('bg-', '').includes('yellow') ? '#F59E0B20' :
-                                 statusStyle.bg.replace('bg-', '').includes('red') ? '#EF444420' : '#6B728020'
-              }}
+              style={{ backgroundColor: statusStyle.bgColor }}
             >
               <View className="flex-row items-center">
-                <Ionicons name={statusStyle.icon as any} size={14} color={statusStyle.text.replace('text-', '#')} />
+                <Ionicons name={statusStyle.icon as any} size={14} color={statusStyle.textColor} />
                 <Text className={`text-xs font-semibold capitalize ml-1 ${statusStyle.text}`}>
                   {booking.status}
                 </Text>
