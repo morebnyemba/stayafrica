@@ -21,7 +21,7 @@ export default function BookingsManagement() {
   const loadBookings = async () => {
     try {
       setLoading(true);
-      const data = await adminApi.getAllBookings({ 
+      const data = await adminApi.getBookings({ 
         page, 
         status: statusFilter || undefined,
         search: search || undefined,
