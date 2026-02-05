@@ -1,6 +1,7 @@
 /**
  * Accessibility Utilities & ARIA Helpers
  */
+import React from 'react';
 
 /**
  * ARIA Attributes for common patterns
