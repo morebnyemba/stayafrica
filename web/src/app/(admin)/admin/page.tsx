@@ -8,7 +8,6 @@ import {
   Home, 
   Calendar, 
   DollarSign,
-  TrendingUp,
   Activity,
 } from 'lucide-react';
 import { Bar, Line, Pie } from 'recharts';
