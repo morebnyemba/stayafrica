@@ -90,15 +90,12 @@ export default function ExperiencesScreen() {
         className="px-4 pb-8"
         style={{ paddingTop: Platform.OS === 'ios' ? 50 : 35 }}
       >
-        <TouchableOpacity onPress={() => router.back()} className="mb-4">
-          <View
-            borderRadius={12}
-            style={{ width: 40, height: 40 }}
-          >
-            <View className="w-10 h-10 rounded-xl items-center justify-center">
-              <Ionicons name="arrow-back" size={24} color="#fff" />
-            </View>
-          </View>
+        <TouchableOpacity 
+          onPress={() => router.back()} 
+          className="mb-4 w-10 h-10 rounded-xl items-center justify-center"
+          style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
+        >
+          <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
         <Text className="text-4xl font-black text-white tracking-tight mb-2">
           Experiences
@@ -118,9 +115,9 @@ export default function ExperiencesScreen() {
                 className="mr-2"
               >
                 <View
-                  className="px-4 py-2"
-                  borderRadius={20}
+                  className="px-4 py-2 rounded-full"
                   style={{
+                    backgroundColor: '#ffffff',
                     shadowColor: '#122F26',
                     shadowOffset: { width: 0, height: 2 },
                     shadowOpacity: 0.05,

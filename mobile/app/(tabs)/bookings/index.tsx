@@ -137,8 +137,12 @@ export default function BookingsScreen() {
               </View>
             </View>
             <View
-              borderRadius={20}
-              style={{ paddingHorizontal: 12, paddingVertical: 6 }}
+              className="px-3 py-1.5 rounded-full"
+              style={{ 
+                backgroundColor: statusStyle.bg.replace('bg-', '').includes('green') ? '#10B98120' :
+                                 statusStyle.bg.replace('bg-', '').includes('yellow') ? '#F59E0B20' :
+                                 statusStyle.bg.replace('bg-', '').includes('red') ? '#EF444420' : '#6B728020'
+              }}
             >
               <View className="flex-row items-center">
                 <Ionicons name={statusStyle.icon as any} size={14} color={statusStyle.text.replace('text-', '#')} />

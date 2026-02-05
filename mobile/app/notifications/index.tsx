@@ -187,15 +187,9 @@ export default function NotificationsScreen() {
               <TouchableOpacity
                 onPress={() => router.back()}
                 className="w-10 h-10 rounded-xl items-center justify-center mr-3"
+                style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
               >
-                <View
-                  borderRadius={12}
-                  style={{ width: 40, height: 40 }}
-                >
-                  <TouchableOpacity className="flex-1 items-center justify-center">
-                    <Ionicons name="arrow-back" size={24} color="#fff" />
-                  </TouchableOpacity>
-                </View>
+                <Ionicons name="arrow-back" size={24} color="#fff" />
               </TouchableOpacity>
               <View>
                 <Text className="text-2xl font-black text-white tracking-tight">
@@ -210,13 +204,12 @@ export default function NotificationsScreen() {
             </View>
 
             {unreadCount > 0 && (
-              <TouchableOpacity onPress={markAllAsRead}>
-                <View
-                  borderRadius={8}
-                  style={{ paddingHorizontal: 12, paddingVertical: 6 }}
-                >
-                  <Text className="text-gold text-xs font-semibold">Mark all read</Text>
-                </View>
+              <TouchableOpacity 
+                onPress={markAllAsRead}
+                className="px-3 py-1.5 rounded-lg"
+                style={{ backgroundColor: 'rgba(217, 177, 104, 0.2)' }}
+              >
+                <Text className="text-gold text-xs font-semibold">Mark all read</Text>
               </TouchableOpacity>
             )}
           </View>

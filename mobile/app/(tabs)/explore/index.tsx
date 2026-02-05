@@ -97,23 +97,27 @@ export default function ExploreScreen() {
               Discover amazing places
             </Text>
 
-            {/* Search Bar with Glassmorphism */}
-            <View borderRadius={16}>
-              <View className="flex-row items-center px-4 py-3 bg-white/10">
-                <Ionicons name="search" size={22} color="#D9B168" />
-                <TextInput
-                  className="flex-1 ml-3 text-base text-white"
-                  placeholder="Search destinations, cities..."
-                  value={searchQuery}
-                  onChangeText={setSearchQuery}
-                  placeholderTextColor="rgba(255, 255, 255, 0.5)"
-                />
-                {searchQuery.length > 0 && (
-                  <TouchableOpacity onPress={() => setSearchQuery('')}>
-                    <Ionicons name="close-circle" size={20} color="rgba(255, 255, 255, 0.5)" />
-                  </TouchableOpacity>
-                )}
-              </View>
+            {/* Search Bar */}
+            <View 
+              className="flex-row items-center px-4 py-3"
+              style={{ 
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                borderRadius: 16
+              }}
+            >
+              <Ionicons name="search" size={22} color="#D9B168" />
+              <TextInput
+                className="flex-1 ml-3 text-base text-white"
+                placeholder="Search destinations, cities..."
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                placeholderTextColor="rgba(255, 255, 255, 0.5)"
+              />
+              {searchQuery.length > 0 && (
+                <TouchableOpacity onPress={() => setSearchQuery('')}>
+                  <Ionicons name="close-circle" size={20} color="rgba(255, 255, 255, 0.5)" />
+                </TouchableOpacity>
+              )}
             </View>
           </View>
         </LinearGradient>

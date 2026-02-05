@@ -194,31 +194,23 @@ export default function WalletScreen() {
           <Text className="text-5xl font-black text-forest mb-6">${balance.toFixed(2)}</Text>
           
           <View className="flex-row gap-3">
-            <View
-              borderRadius={12}
-              className="flex-1"
+            <TouchableOpacity
+              className="flex-1 py-3 flex-row items-center justify-center rounded-xl"
+              style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+              onPress={() => router.push('/wallet/withdraw')}
             >
-              <TouchableOpacity
-                className="py-3 flex-row items-center justify-center"
-                onPress={() => router.push('/wallet/withdraw')}
-              >
-                <Ionicons name="arrow-down" size={18} color="#fff" />
-                <Text className="text-white font-semibold ml-2">Withdraw</Text>
-              </TouchableOpacity>
-            </View>
+              <Ionicons name="arrow-down" size={18} color="#fff" />
+              <Text className="text-white font-semibold ml-2">Withdraw</Text>
+            </TouchableOpacity>
             
-            <View
-              borderRadius={12}
-              className="flex-1"
+            <TouchableOpacity
+              className="flex-1 py-3 flex-row items-center justify-center rounded-xl"
+              style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+              onPress={() => router.push('/wallet/add-funds')}
             >
-              <TouchableOpacity
-                className="py-3 flex-row items-center justify-center"
-                onPress={() => router.push('/wallet/add-funds')}
-              >
-                <Ionicons name="arrow-up" size={18} color="#122F26" />
-                <Text className="text-forest font-semibold ml-2">Add Funds</Text>
-              </TouchableOpacity>
-            </View>
+              <Ionicons name="arrow-up" size={18} color="#122F26" />
+              <Text className="text-forest font-semibold ml-2">Add Funds</Text>
+            </TouchableOpacity>
           </View>
         </LinearGradient>
       </View>

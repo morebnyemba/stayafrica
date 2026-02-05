@@ -57,17 +57,13 @@ export default function PaymentMethodsScreen() {
         style={{ paddingTop: Platform.OS === 'ios' ? 50 : 35 }}
       >
         <View className="flex-row items-center">
-          <View
-            borderRadius={12}
-            style={{ width: 40, height: 40 }}
+          <TouchableOpacity
+            onPress={() => router.back()}
+            className="w-10 h-10 rounded-xl items-center justify-center"
+            style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
           >
-            <TouchableOpacity
-              onPress={() => router.back()}
-              className="flex-1 items-center justify-center"
-            >
-              <Ionicons name="arrow-back" size={24} color="#fff" />
-            </TouchableOpacity>
-          </View>
+            <Ionicons name="arrow-back" size={24} color="#fff" />
+          </TouchableOpacity>
           <Text className="text-xl font-bold text-white ml-3">Payment Methods</Text>
         </View>
       </LinearGradient>

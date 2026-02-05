@@ -142,15 +142,12 @@ export default function HostPropertiesScreen() {
         style={{ paddingTop: Platform.OS === 'ios' ? 50 : 35 }}
       >
         <View className="flex-row items-center justify-between mb-4">
-          <TouchableOpacity onPress={() => router.back()}>
-            <View
-              borderRadius={12}
-              style={{ width: 40, height: 40 }}
-            >
-              <View className="w-10 h-10 rounded-xl items-center justify-center">
-                <Ionicons name="arrow-back" size={24} color="#fff" />
-              </View>
-            </View>
+          <TouchableOpacity 
+            onPress={() => router.back()}
+            className="w-10 h-10 rounded-xl items-center justify-center"
+            style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
+          >
+            <Ionicons name="arrow-back" size={24} color="#fff" />
           </TouchableOpacity>
           
           <TouchableOpacity
