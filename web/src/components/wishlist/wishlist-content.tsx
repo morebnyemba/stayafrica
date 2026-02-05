@@ -123,7 +123,7 @@ export function WishlistContent() {
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-primary-900/70 via-primary-900/10 to-transparent opacity-0 group-hover:opacity-100 transition" />
                         {property.average_rating && (
-                          <div className="absolute top-4 left-4 inline-flex items-center gap-1 bg-primary-900/80 backdrop-blur px-3 py-1 rounded-full text-sm font-semibold text-sand-50">
+                          <div className="absolute top-4 left-4 inline-flex items-center gap-1 bg-primary-900/90 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-semibold text-sand-50">
                             <Star className="w-4 h-4 text-secondary-300" fill="currentColor" />
                             <span>{property.average_rating.toFixed(1)}</span>
                           </div>

@@ -117,7 +117,7 @@ export function HostPropertiesContent() {
                     
                     {/* Quick Stats Overlay */}
                     {property.status === 'active' && (
-                      <div className="absolute bottom-3 left-3 right-3 bg-white/90 dark:bg-primary-900/90 backdrop-blur-sm rounded-lg p-2">
+                      <div className="absolute bottom-3 left-3 right-3 bg-white/95 dark:bg-primary-900/95 backdrop-blur-sm rounded-lg p-2">
                         <div className="flex items-center justify-around text-xs">
                           <div className="flex items-center gap-1 text-primary-900 dark:text-sand-50">
                             <Star className="w-3 h-3 text-yellow-500 fill-current" aria-hidden="true" />

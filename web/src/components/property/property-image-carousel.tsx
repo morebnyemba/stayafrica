@@ -98,7 +98,7 @@ export function PropertyImageCarousel({ images, title, mainImage }: PropertyImag
           </button>
 
           {/* Image indicators */}
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center space-x-2 bg-black/60 backdrop-blur-sm px-4 py-2 rounded-full">
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center space-x-2 bg-black/70 backdrop-blur-sm px-4 py-2 rounded-full">
             {processedImages.map((_, index) => (
               <button
                 key={index}
@@ -112,7 +112,7 @@ export function PropertyImageCarousel({ images, title, mainImage }: PropertyImag
           </div>
 
           {/* Image counter */}
-          <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm font-medium shadow-lg">
+          <div className="absolute top-4 right-4 bg-black/70 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm font-medium shadow-lg">
             {currentIndex + 1} / {processedImages.length}
           </div>
         </>
@@ -121,7 +121,7 @@ export function PropertyImageCarousel({ images, title, mainImage }: PropertyImag
       {/* Keyboard navigation hint */}
       {processedImages.length > 1 && (
         <div className="absolute bottom-20 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <p className="text-white text-xs bg-black/50 backdrop-blur-sm px-3 py-1 rounded-full">
+          <p className="text-white text-xs bg-black/60 backdrop-blur-sm px-3 py-1 rounded-full">
             Use arrow keys to navigate
           </p>
         </div>

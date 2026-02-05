@@ -67,7 +67,7 @@ export function FeaturedProperties() {
                     <p className="text-xs uppercase tracking-widest text-secondary-100">Experience</p>
                     <p className="text-xl font-semibold leading-tight drop-shadow-sm">{property.title}</p>
                   </div>
-                  <div className="inline-flex items-center gap-1 bg-primary-900/80 backdrop-blur px-3 py-1 rounded-full text-sm font-semibold">
+                  <div className="inline-flex items-center gap-1 bg-primary-900/90 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-semibold">
                     <Star className="w-4 h-4 text-secondary-200" fill="currentColor" />
                     <span>{property.rating}</span>
                   </div>

@@ -30,7 +30,7 @@ export function SearchSection() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <form
           onSubmit={handleSearch}
-          className="bg-ivory/95 backdrop-blur rounded-3xl shadow-elevated border border-primary-200 p-6 md:p-8"
+          className="bg-white/98 dark:bg-ivory/98 backdrop-blur-sm rounded-3xl shadow-elevated border border-primary-200 p-6 md:p-8"
         >
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {/* Location */}
