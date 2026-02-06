@@ -811,3 +811,5 @@ export default function NewPropertyScreen() {
     </SafeAreaView>
   );
 }
+
+NewPropertyScreen.displayName = 'NewPropertyScreen';

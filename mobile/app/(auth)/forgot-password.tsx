@@ -182,3 +182,5 @@ export default function ForgotPasswordScreen() {
     </SafeAreaView>
   );
 }
+
+ForgotPasswordScreen.displayName = 'ForgotPasswordScreen';

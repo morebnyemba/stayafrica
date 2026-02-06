@@ -357,3 +357,5 @@ export default function ConversationDetailScreen() {
     </SafeAreaView>
   );
 }
+
+ConversationDetailScreen.displayName = 'ConversationDetailScreen';

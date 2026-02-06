@@ -223,3 +223,5 @@ export default function HostBookingsScreen() {
     </SafeAreaView>
   );
 }
+
+HostBookingsScreen.displayName = 'HostBookingsScreen';

@@ -1,10 +1,11 @@
-import { View, Text, ScrollView, TouchableOpacity, Platform, Alert, ActivityIndicator, Modal, TextInput } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Platform, Alert, ActivityIndicator, Modal } from 'react-native';
 import { useState, useCallback } from 'react';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { apiClient } from '@/services/api-client';
+import Input from '@/components/common/Input';
 
 interface BankAccount {
   id: string;
@@ -245,56 +246,46 @@ export default function BankAccountsScreen() {
               showsVerticalScrollIndicator={false}
               keyboardShouldPersistTaps="handled"
             >
-              <View className="mb-4">
-                <Text className="text-forest font-semibold mb-2">Bank Name *</Text>
-                <TextInput
-                  className="bg-sand-50 rounded-xl px-4 py-3 text-forest"
-                  placeholder="e.g., CBZ Bank"
-                  value={formData.bank_name}
-                  onChangeText={(text) => setFormData({ ...formData, bank_name: text })}
-                />
-              </View>
+              <Input
+                label="Bank Name *"
+                value={formData.bank_name}
+                onChangeText={(text) => setFormData({ ...formData, bank_name: text })}
+                placeholder="e.g., CBZ Bank"
+                className="mb-4"
+              />
 
-              <View className="mb-4">
-                <Text className="text-forest font-semibold mb-2">Account Holder Name *</Text>
-                <TextInput
-                  className="bg-sand-50 rounded-xl px-4 py-3 text-forest"
-                  placeholder="e.g., John Doe"
-                  value={formData.account_name}
-                  onChangeText={(text) => setFormData({ ...formData, account_name: text })}
-                />
-              </View>
+              <Input
+                label="Account Holder Name *"
+                value={formData.account_name}
+                onChangeText={(text) => setFormData({ ...formData, account_name: text })}
+                placeholder="e.g., John Doe"
+                className="mb-4"
+              />
 
-              <View className="mb-4">
-                <Text className="text-forest font-semibold mb-2">Account Number *</Text>
-                <TextInput
-                  className="bg-sand-50 rounded-xl px-4 py-3 text-forest"
-                  placeholder="e.g., 1234567890"
-                  value={formData.account_number}
-                  onChangeText={(text) => setFormData({ ...formData, account_number: text })}
-                  keyboardType="numeric"
-                />
-              </View>
+              <Input
+                label="Account Number *"
+                value={formData.account_number}
+                onChangeText={(text) => setFormData({ ...formData, account_number: text })}
+                placeholder="e.g., 1234567890"
+                keyboardType="numeric"
+                className="mb-4"
+              />
 
-              <View className="mb-4">
-                <Text className="text-forest font-semibold mb-2">Branch Code (Optional)</Text>
-                <TextInput
-                  className="bg-sand-50 rounded-xl px-4 py-3 text-forest"
-                  placeholder="e.g., 0101"
-                  value={formData.branch_code}
-                  onChangeText={(text) => setFormData({ ...formData, branch_code: text })}
-                />
-              </View>
+              <Input
+                label="Branch Code (Optional)"
+                value={formData.branch_code}
+                onChangeText={(text) => setFormData({ ...formData, branch_code: text })}
+                placeholder="e.g., 0101"
+                className="mb-4"
+              />
 
-              <View className="mb-6">
-                <Text className="text-forest font-semibold mb-2">Country</Text>
-                <TextInput
-                  className="bg-sand-50 rounded-xl px-4 py-3 text-forest"
-                  placeholder="e.g., Zimbabwe"
-                  value={formData.country}
-                  onChangeText={(text) => setFormData({ ...formData, country: text })}
-                />
-              </View>
+              <Input
+                label="Country"
+                value={formData.country}
+                onChangeText={(text) => setFormData({ ...formData, country: text })}
+                placeholder="e.g., Zimbabwe"
+                className="mb-6"
+              />
 
               <TouchableOpacity
                 onPress={handleAddAccount}
@@ -309,3 +300,5 @@ export default function BankAccountsScreen() {
     </SafeAreaView>
   );
 }
+
+BankAccountsScreen.displayName = 'BankAccountsScreen';

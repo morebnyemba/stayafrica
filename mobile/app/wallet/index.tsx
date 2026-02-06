@@ -344,3 +344,5 @@ export default function WalletDashboardScreen() {
     </SafeAreaView>
   );
 }
+
+WalletDashboardScreen.displayName = 'WalletDashboardScreen';

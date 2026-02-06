@@ -7,3 +7,5 @@ export default function ProfileVerificationScreen() {
 
   return <VerificationWizard />;
 }
+
+ProfileVerificationScreen.displayName = 'ProfileVerificationScreen';

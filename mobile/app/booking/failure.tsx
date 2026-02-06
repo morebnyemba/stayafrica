@@ -147,3 +147,5 @@ export default function BookingFailureScreen() {
     </ScrollView>
   );
 }
+
+BookingFailureScreen.displayName = 'BookingFailureScreen';

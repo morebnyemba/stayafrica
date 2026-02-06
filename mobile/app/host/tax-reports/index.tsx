@@ -219,3 +219,5 @@ export default function HostTaxReportsScreen() {
     </SafeAreaView>
   );
 }
+
+HostTaxReportsScreen.displayName = 'HostTaxReportsScreen';

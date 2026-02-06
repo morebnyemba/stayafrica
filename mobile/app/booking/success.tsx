@@ -149,3 +149,5 @@ export default function BookingSuccessScreen() {
     </ScrollView>
   );
 }
+
+BookingSuccessScreen.displayName = 'BookingSuccessScreen';

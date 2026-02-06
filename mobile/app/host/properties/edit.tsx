@@ -500,3 +500,4 @@ export default function EditPropertyScreen() {
   </SafeAreaView>
   );
 }
+EditPropertyScreen.displayName = 'EditPropertyScreen';

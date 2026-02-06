@@ -282,3 +282,5 @@ export default function PaymentHistoryScreen() {
     </SafeAreaView>
   );
 }
+
+PaymentHistoryScreen.displayName = 'PaymentHistoryScreen';

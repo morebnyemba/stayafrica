@@ -13,3 +13,5 @@ export default function ReviewsLayout() {
     </Stack>
   );
 }
+
+ReviewsLayout.displayName = 'ReviewsLayout';

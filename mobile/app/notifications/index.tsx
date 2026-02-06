@@ -288,3 +288,5 @@ export default function NotificationsScreen() {
     </View>
   );
 }
+
+NotificationsScreen.displayName = 'NotificationsScreen';

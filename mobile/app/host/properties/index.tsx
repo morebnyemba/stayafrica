@@ -232,3 +232,5 @@ export default function HostPropertiesScreen() {
     </SafeAreaView>
   );
 }
+
+HostPropertiesScreen.displayName = 'HostPropertiesScreen';

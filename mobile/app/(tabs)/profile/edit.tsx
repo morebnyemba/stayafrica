@@ -298,3 +298,5 @@ export default function EditProfileScreen() {
     </KeyboardAvoidingView>
   );
 }
+
+EditProfileScreen.displayName = 'EditProfileScreen';

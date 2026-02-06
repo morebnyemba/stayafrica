@@ -159,3 +159,5 @@ export default function ExperiencesScreen() {
     </ScrollView>
   );
 }
+
+ExperiencesScreen.displayName = 'ExperiencesScreen';

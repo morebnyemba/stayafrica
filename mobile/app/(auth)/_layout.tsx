@@ -13,3 +13,5 @@ export default function AuthLayout() {
     </Stack>
   );
 }
+
+AuthLayout.displayName = 'AuthLayout';

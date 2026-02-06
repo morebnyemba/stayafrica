@@ -611,3 +611,5 @@ export default function HostScreen() {
     </SafeAreaView>
   );
 }
+
+HostScreen.displayName = 'HostScreen';

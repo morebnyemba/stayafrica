@@ -4,3 +4,5 @@ export default function TabsIndex() {
   // Redirect to the dashboard tab as the default
   return <Redirect href="/(tabs)/dashboard" />;
 }
+
+TabsIndex.displayName = 'TabsIndex';

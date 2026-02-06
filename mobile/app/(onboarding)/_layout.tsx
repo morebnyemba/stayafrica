@@ -13,3 +13,5 @@ export default function OnboardingLayout() {
     </Stack>
   );
 }
+
+OnboardingLayout.displayName = 'OnboardingLayout';

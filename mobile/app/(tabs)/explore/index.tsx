@@ -233,3 +233,5 @@ export default function ExploreScreen() {
     </SafeAreaView>
   );
 }
+
+ExploreScreen.displayName = 'ExploreScreen';

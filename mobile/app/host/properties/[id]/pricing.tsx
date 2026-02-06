@@ -303,3 +303,5 @@ export default function PropertyPricingPage() {
     </SafeAreaView>
   );
 }
+
+PropertyPricingPage.displayName = 'PropertyPricingPage';

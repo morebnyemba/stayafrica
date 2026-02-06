@@ -270,3 +270,5 @@ export default function PropertyEditScreen() {
     </SafeAreaView>
   );
 }
+
+PropertyEditScreen.displayName = 'PropertyEditScreen';

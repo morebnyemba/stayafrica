@@ -1,4 +1,7 @@
-﻿import { View, Text, ScrollView, TouchableOpacity, Platform, Alert, Modal, ActivityIndicator } from 'react-native';
+# Update mobile screens with proper date pickers and shared Input component
+
+$bookingCreateContent = @'
+import { View, Text, ScrollView, TouchableOpacity, Platform, Alert, Modal, ActivityIndicator } from 'react-native';
 import { useState } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -7,8 +10,7 @@ import { useAuth } from '@/context/auth-context';
 import { Calendar } from 'react-native-calendars';
 import { apiClient } from '@/services/api-client';
 import { format } from 'date-fns';
-import { Input } from '@/components/common/Input';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import Input from '@/components/common/Input';
 
 export default function CreateBookingScreen() {
   const router = useRouter();
@@ -35,17 +37,10 @@ export default function CreateBookingScreen() {
 
     setLoading(true);
     try {
-      console.log('Creating booking with data:', {
-        property_id: propertyId,
-        check_in_date: checkIn,
-        check_out_date: checkOut,
-        number_of_guests: parseInt(guests),
-      });
-
       const response = await apiClient.post('/bookings/', {
-        property_id: propertyId,
-        check_in_date: checkIn,
-        check_out_date: checkOut,
+        property: propertyId,
+        check_in: checkIn,
+        check_out: checkOut,
         number_of_guests: parseInt(guests),
       });
 
@@ -68,9 +63,7 @@ export default function CreateBookingScreen() {
       ]);
     } catch (error: any) {
       console.error('Error creating booking:', error);
-      console.error('Error status:', error.response?.status);
-      console.error('Error data:', error.response?.data);
-      const errorMessage = error.response?.data?.detail || error.response?.data?.message || error.response?.data?.non_field_errors?.[0] || 'Failed to create booking. Please try again.';
+      const errorMessage = error.response?.data?.detail || error.response?.data?.message || 'Failed to create booking. Please try again.';
       Alert.alert('Error', errorMessage);
     } finally {
       setLoading(false);
@@ -103,7 +96,7 @@ export default function CreateBookingScreen() {
 
   if (!isAuthenticated) {
     return (
-      <SafeAreaView className="flex-1 bg-sand-100">
+      <View className="flex-1 bg-sand-100">
         <LinearGradient
           colors={['#122F26', '#1d392f']}
           className="px-4 pb-6"
@@ -124,12 +117,12 @@ export default function CreateBookingScreen() {
             </LinearGradient>
           </TouchableOpacity>
         </View>
-      </SafeAreaView>
+      </View>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-sand-100">
+    <View className="flex-1">
       <ScrollView className="flex-1 bg-sand-100" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }} keyboardShouldPersistTaps="handled">
         <LinearGradient colors={['#122F26', '#1d392f']} className="px-4 pb-6" style={{ paddingTop: Platform.OS === 'ios' ? 50 : 35 }}>
           <View className="flex-row items-center">
@@ -201,8 +194,13 @@ export default function CreateBookingScreen() {
           </View>
         </View>
       </Modal>
-    </SafeAreaView>
+    </View>
   );
 }
+'@
 
-CreateBookingScreen.displayName = 'CreateBookingScreen';
+Write-Host "Writing updated booking create screen..."
+Set-Content -Path "app\(tabs)\bookings\create.tsx" -Value $bookingCreateContent -Encoding UTF8
+Write-Host "✓ Updated app\(tabs)\bookings\create.tsx"
+
+Write-Host "`n✓ All screens updated successfully!"

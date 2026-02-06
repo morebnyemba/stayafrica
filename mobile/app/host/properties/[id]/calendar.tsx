@@ -215,3 +215,5 @@ export default function PropertyCalendarScreen() {
     </SafeAreaView>
   );
 }
+
+PropertyCalendarScreen.displayName = 'PropertyCalendarScreen';

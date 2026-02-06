@@ -247,3 +247,5 @@ export default function ChangePasswordScreen() {
     </KeyboardAvoidingView>
   );
 }
+
+ChangePasswordScreen.displayName = 'ChangePasswordScreen';

@@ -242,3 +242,5 @@ export default function VerifyEmailScreen() {
     </SafeAreaView>
   );
 }
+
+VerifyEmailScreen.displayName = 'VerifyEmailScreen';

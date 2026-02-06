@@ -141,3 +141,5 @@ export default function TabsLayout() {
     </Tabs>
   );
 }
+
+TabsLayout.displayName = 'TabsLayout';

@@ -359,3 +359,5 @@ export default function PropertyDetailsScreen() {
     </View>
   );
 }
+
+PropertyDetailsScreen.displayName = 'PropertyDetailsScreen';

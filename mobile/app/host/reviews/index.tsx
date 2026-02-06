@@ -170,3 +170,5 @@ export default function HostReviewsScreen() {
     </SafeAreaView>
   );
 }
+
+HostReviewsScreen.displayName = 'HostReviewsScreen';

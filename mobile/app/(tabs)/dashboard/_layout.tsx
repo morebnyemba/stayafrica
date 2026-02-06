@@ -7,3 +7,5 @@ export default function DashboardLayout() {
     </Stack>
   );
 }
+
+DashboardLayout.displayName = 'DashboardLayout';
