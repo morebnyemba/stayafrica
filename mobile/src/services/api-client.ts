@@ -405,6 +405,62 @@ class APIClient {
     return (await this.client.post('/payments/withdraw/', { amount })).data;
   }
 
+  // Payment initiation for bookings
+  async initiatePayment(bookingId: string, provider: string): Promise<any> {
+    return (await this.client.post('/payments/initiate/', {
+      booking_id: bookingId,
+      provider,
+    })).data;
+  }
+
+  async getPaymentStatus(paymentId: string): Promise<any> {
+    return (await this.client.get(`/payments/${paymentId}/`)).data;
+  }
+
+  // Payment history
+  async getPaymentHistory(params?: any): Promise<any> {
+    return (await this.client.get('/payments/', { params })).data;
+  }
+
+  // Bank accounts
+  async getBankAccounts(): Promise<any> {
+    return (await this.client.get('/payments/bank-accounts/')).data;
+  }
+
+  async createBankAccount(data: any): Promise<any> {
+    return (await this.client.post('/payments/bank-accounts/', data)).data;
+  }
+
+  async updateBankAccount(accountId: string, data: any): Promise<any> {
+    return (await this.client.patch(`/payments/bank-accounts/${accountId}/`, data)).data;
+  }
+
+  async deleteBankAccount(accountId: string): Promise<void> {
+    return (await this.client.delete(`/payments/bank-accounts/${accountId}/`)).data;
+  }
+
+  async setPrimaryBankAccount(accountId: string): Promise<any> {
+    return (await this.client.post(`/payments/bank-accounts/${accountId}/set_primary/`)).data;
+  }
+
+  // Wallet management
+  async getMyWallet(): Promise<any> {
+    return (await this.client.get('/payments/wallets/my_wallet/')).data;
+  }
+
+  async getWalletTransactions(walletId: string, params?: any): Promise<any> {
+    return (await this.client.get(`/payments/wallets/${walletId}/transactions/`, { params })).data;
+  }
+
+  // Withdrawals
+  async getWithdrawals(params?: any): Promise<any> {
+    return (await this.client.get('/payments/withdrawals/', { params })).data;
+  }
+
+  async initiateWithdrawal(data: any): Promise<any> {
+    return (await this.client.post('/payments/withdrawals/', data)).data;
+  }
+
   // Generic request method
   get<T = any>(url: string, config?: any) {
     return this.client.get<T>(url, config);

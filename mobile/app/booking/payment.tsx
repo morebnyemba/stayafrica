@@ -79,42 +79,36 @@ export default function PaymentScreen() {
 
     setProcessing(true);
     try {
-      const response: PaymentResponse = await apiClient.post(
-        `/bookings/${bookingId}/pay/`,
-        { payment_method_id: selectedMethodId }
-      );
+      // Initiate payment using the payment gateway
+      const response = await apiClient.post('/payments/initiate/', {
+        booking_id: bookingId,
+        provider: paymentMethods.find(m => m.id === selectedMethodId)?.provider || 'stripe',
+      });
 
-      if (response.status === 'completed') {
+      if (response.data?.status === 'completed' || response.data?.status === 'success') {
         // Payment successful
         Alert.alert('Success', 'Payment processed successfully!', [
           {
             text: 'OK',
-            onPress: () => router.replace({
-              pathname: '/booking/[id]/success',
-              params: { id: bookingId }
-            })
+            onPress: () => router.replace(`/booking/success?bookingId=${bookingId}`)
           }
         ]);
-      } else if (response.checkout_url) {
+      } else if (response.data?.checkout_url) {
         // Redirect to payment provider
         Alert.alert('Redirecting', 'You will be redirected to complete the payment', [
           { text: 'OK' }
         ]);
-        // In production: use linking.openURL(response.checkout_url)
-        router.replace({
-          pathname: '/booking/[id]/pending',
-          params: { id: bookingId, transactionId: response.transaction_id }
-        });
+        // In production: use Linking.openURL(response.data.checkout_url)
+        router.replace(`/booking/success?bookingId=${bookingId}&pending=true`);
       } else {
         // Payment pending webhook confirmation
-        router.replace({
-          pathname: '/booking/[id]/pending',
-          params: { id: bookingId, transactionId: response.transaction_id }
-        });
+        router.replace(`/booking/success?bookingId=${bookingId}&pending=true`);
       }
     } catch (error) {
       console.error('Payment error:', error);
-      Alert.alert('Payment Failed', 'Unable to process payment. Please try again.');
+      Alert.alert('Payment Failed', 'Unable to process payment. Please try again.', [
+        { text: 'OK', onPress: () => router.replace(`/booking/failure?bookingId=${bookingId}`) }
+      ]);
     } finally {
       setProcessing(false);
     }
