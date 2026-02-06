@@ -579,3 +579,4 @@ export default function RegisterScreen() {
     </View>
   );
 }
+RegisterScreen.displayName = 'RegisterScreen';

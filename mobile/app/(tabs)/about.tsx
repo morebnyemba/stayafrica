@@ -251,3 +251,5 @@ export default function AboutScreen() {
     </SafeAreaView>
   );
 }
+
+AboutScreen.displayName = 'AboutScreen';

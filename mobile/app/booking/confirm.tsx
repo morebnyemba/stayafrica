@@ -350,3 +350,5 @@ export default function BookingConfirmScreen() {
     </ScrollView>
   );
 }
+
+BookingConfirmScreen.displayName = 'BookingConfirmScreen';

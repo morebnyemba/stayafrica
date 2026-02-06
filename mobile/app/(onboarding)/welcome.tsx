@@ -269,3 +269,5 @@ export default function WelcomeScreen() {
     </View>
   );
 }
+
+WelcomeScreen.displayName = 'WelcomeScreen';

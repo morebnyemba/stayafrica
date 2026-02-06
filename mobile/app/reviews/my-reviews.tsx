@@ -166,3 +166,5 @@ export default function MyReviewsScreen() {
     </ScrollView>
   );
 }
+
+MyReviewsScreen.displayName = 'MyReviewsScreen';

@@ -41,3 +41,5 @@ export default function HostVerificationScreen() {
     </SafeAreaView>
   );
 }
+
+HostVerificationScreen.displayName = 'HostVerificationScreen';

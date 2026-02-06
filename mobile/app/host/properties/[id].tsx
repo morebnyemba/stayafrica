@@ -181,3 +181,5 @@ export default function PropertyDetailScreen() {
     </SafeAreaView>
   );
 }
+
+PropertyDetailScreen.displayName = 'PropertyDetailScreen';

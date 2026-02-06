@@ -333,3 +333,5 @@ export default function MessagesScreen() {
   </SafeAreaView>
   );
 }
+
+MessagesScreen.displayName = 'MessagesScreen';

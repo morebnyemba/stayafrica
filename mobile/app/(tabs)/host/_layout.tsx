@@ -22,3 +22,5 @@ export default function HostLayout() {
     </Stack>
   );
 }
+
+HostLayout.displayName = 'HostLayout';

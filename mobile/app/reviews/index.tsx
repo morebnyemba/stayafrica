@@ -242,3 +242,5 @@ export default function ReviewsScreen() {
     </View>
   );
 }
+
+ReviewsScreen.displayName = 'ReviewsScreen';

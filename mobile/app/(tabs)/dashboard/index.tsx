@@ -466,3 +466,5 @@ export default function GuestDashboardScreen() {
     </SafeAreaView>
   );
 }
+
+GuestDashboardScreen.displayName = 'GuestDashboardScreen';

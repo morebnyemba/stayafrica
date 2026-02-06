@@ -9,3 +9,5 @@ export default function ProfileLayout() {
     </Stack>
   );
 }
+
+ProfileLayout.displayName = 'ProfileLayout';

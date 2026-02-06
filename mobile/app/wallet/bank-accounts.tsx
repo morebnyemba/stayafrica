@@ -300,3 +300,5 @@ export default function BankAccountsScreen() {
     </SafeAreaView>
   );
 }
+
+BankAccountsScreen.displayName = 'BankAccountsScreen';

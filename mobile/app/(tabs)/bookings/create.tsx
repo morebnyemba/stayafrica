@@ -204,3 +204,5 @@ export default function CreateBookingScreen() {
     </SafeAreaView>
   );
 }
+
+CreateBookingScreen.displayName = 'CreateBookingScreen';

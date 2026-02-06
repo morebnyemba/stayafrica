@@ -21,3 +21,5 @@ export default function NewMessageScreen() {
     </View>
   );
 }
+
+NewMessageScreen.displayName = 'NewMessageScreen';

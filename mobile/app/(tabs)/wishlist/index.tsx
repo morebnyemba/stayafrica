@@ -185,3 +185,5 @@ export default function WishlistScreen() {
     </SafeAreaView>
   );
 }
+
+WishlistScreen.displayName = 'WishlistScreen';

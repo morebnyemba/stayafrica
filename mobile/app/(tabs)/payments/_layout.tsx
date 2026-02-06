@@ -7,3 +7,5 @@ export default function PaymentsLayout() {
     </Stack>
   );
 }
+
+PaymentsLayout.displayName = 'PaymentsLayout';

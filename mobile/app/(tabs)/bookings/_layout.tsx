@@ -9,3 +9,5 @@ export default function BookingsLayout() {
     </Stack>
   );
 }
+
+BookingsLayout.displayName = 'BookingsLayout';

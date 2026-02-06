@@ -256,3 +256,5 @@ export default function LoginScreen() {
     </View>
   );
 }
+
+LoginScreen.displayName = 'LoginScreen';

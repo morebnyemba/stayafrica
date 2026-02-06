@@ -8,3 +8,5 @@ export default function ExploreLayout() {
     </Stack>
   );
 }
+
+ExploreLayout.displayName = 'ExploreLayout';

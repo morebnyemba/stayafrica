@@ -10,3 +10,5 @@ export default function WalletLayout() {
     </Stack>
   );
 }
+
+WalletLayout.displayName = 'WalletLayout';

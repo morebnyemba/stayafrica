@@ -544,3 +544,5 @@ export default function ProfileScreen() {
     </SafeAreaView>
   );
 }
+
+ProfileScreen.displayName = 'ProfileScreen';

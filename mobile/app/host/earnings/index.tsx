@@ -313,3 +313,5 @@ export default function HostEarningsScreen() {
     </SafeAreaView>
   );
 }
+
+HostEarningsScreen.displayName = 'HostEarningsScreen';

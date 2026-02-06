@@ -210,3 +210,5 @@ export default function ExperienceDetailScreen() {
     </ScrollView>
   );
 }
+
+ExperienceDetailScreen.displayName = 'ExperienceDetailScreen';

@@ -9,3 +9,5 @@ export default function MessagesLayout() {
     </Stack>
   );
 }
+
+MessagesLayout.displayName = 'MessagesLayout';

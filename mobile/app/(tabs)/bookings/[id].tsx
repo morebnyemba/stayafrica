@@ -146,3 +146,5 @@ export default function BookingDetailScreen() {
     </ScrollView>
   );
 }
+
+BookingDetailScreen.displayName = 'BookingDetailScreen';

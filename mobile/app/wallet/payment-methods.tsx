@@ -237,3 +237,5 @@ export default function PaymentMethodsScreen() {
     </SafeAreaView>
   );
 }
+
+PaymentMethodsScreen.displayName = 'PaymentMethodsScreen';

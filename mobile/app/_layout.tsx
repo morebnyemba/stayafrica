@@ -103,6 +103,8 @@ function RootLayoutContent() {
   );
 }
 
+RootLayoutContent.displayName = 'RootLayoutContent';
+
 export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -117,3 +119,5 @@ export default function RootLayout() {
     </GestureHandlerRootView>
   );
 }
+
+RootLayout.displayName = 'RootLayout';
