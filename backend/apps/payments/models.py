@@ -170,3 +170,86 @@ class Withdrawal(models.Model):
 
     def __str__(self):
         return f'{self.reference} - {self.amount} {self.currency}'
+
+
+class PaymentMethod(models.Model):
+    """
+    Stored payment methods for faster checkout
+    Supports tokenization from Stripe, Paynow, Flutterwave, Paystack
+    """
+    PROVIDER_CHOICES = [
+        ('stripe', 'Stripe'),
+        ('paynow', 'Paynow'),
+        ('flutterwave', 'Flutterwave'),
+        ('paystack', 'Paystack'),
+    ]
+    
+    METHOD_TYPE_CHOICES = [
+        ('card', 'Credit/Debit Card'),
+        ('mobile', 'Mobile Money'),
+        ('bank', 'Bank Transfer'),
+        ('ussd', 'USSD'),
+    ]
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='payment_methods')
+    provider = models.CharField(max_length=20, choices=PROVIDER_CHOICES)
+    method_type = models.CharField(max_length=20, choices=METHOD_TYPE_CHOICES)
+    
+    # Display name (e.g., "My Visa Card", "Ecocash Account")
+    name = models.CharField(max_length=100)
+    
+    # Tokenized data (NEVER store raw card data)
+    provider_token = models.CharField(max_length=500, help_text='Token from payment provider')
+    
+    # Display info (last 4 digits, expiry for cards)
+    last_four = models.CharField(max_length=4, blank=True)
+    expiry_month = models.IntegerField(null=True, blank=True)
+    expiry_year = models.IntegerField(null=True, blank=True)
+    
+    # Phone number for mobile money
+    phone_number = models.CharField(max_length=20, blank=True)
+    
+    # Flags
+    is_default = models.BooleanField(default=False)
+    is_verified = models.BooleanField(default=False)
+    
+    # Soft delete
+    deleted_at = models.DateTimeField(null=True, blank=True)
+    
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-is_default', '-created_at']
+        indexes = [
+            models.Index(fields=['user', 'deleted_at']),
+            models.Index(fields=['provider']),
+            models.Index(fields=['is_default']),
+        ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'provider', 'provider_token'],
+                condition=models.Q(deleted_at__isnull=True),
+                name='unique_active_payment_method'
+            )
+        ]
+    
+    def save(self, *args, **kwargs):
+        # If setting as default, unset other defaults for this user
+        if self.is_default:
+            PaymentMethod.objects.filter(
+                user=self.user,
+                deleted_at__isnull=True
+            ).exclude(id=self.id).update(is_default=False)
+        super().save(*args, **kwargs)
+    
+    def __str__(self):
+        return f'{self.user.email} - {self.name} ({self.get_provider_display()})'
+    
+    def soft_delete(self):
+        """Soft delete the payment method"""
+        from django.utils import timezone
+        self.deleted_at = timezone.now()
+        self.save()

@@ -1,8 +1,61 @@
 from rest_framework import serializers
-from apps.payments.models import Payment, Wallet, WalletTransaction, Withdrawal, BankAccount
+from apps.payments.models import Payment, Wallet, WalletTransaction, Withdrawal, BankAccount, PaymentMethod
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
+
+
+class PaymentMethodSerializer(serializers.ModelSerializer):
+    """Serializer for PaymentMethod model"""
+    
+    class Meta:
+        model = PaymentMethod
+        fields = [
+            'id', 'provider', 'method_type', 'name', 'last_four',
+            'expiry_month', 'expiry_year', 'phone_number',
+            'is_default', 'is_verified', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['id', 'created_at', 'updated_at', 'is_verified']
+        extra_kwargs = {
+            'phone_number': {'write_only': True}
+        }
+    
+    def validate(self, data):
+        """Validate payment method data"""
+        method_type = data.get('method_type')
+        
+        # Card validation
+        if method_type == 'card':
+            if not data.get('last_four'):
+                raise serializers.ValidationError({'last_four': 'Last four digits required for card'})
+        
+        # Mobile money validation
+        elif method_type == 'mobile':
+            if not data.get('phone_number'):
+                raise serializers.ValidationError({'phone_number': 'Phone number required for mobile money'})
+        
+        return data
+    
+    def create(self, validated_data):
+        """Create payment method"""
+        # Set user from request context
+        validated_data['user'] = self.context['request'].user
+        return super().create(validated_data)
+
+
+class PaymentMethodCreateSerializer(serializers.Serializer):
+    """Serializer for creating payment methods with tokenization"""
+    provider = serializers.ChoiceField(choices=PaymentMethod.PROVIDER_CHOICES)
+    method_type = serializers.ChoiceField(choices=PaymentMethod.METHOD_TYPE_CHOICES)
+    name = serializers.CharField(max_length=100)
+    token = serializers.CharField(max_length=500, write_only=True, help_text='Token from payment provider')
+    
+    # Optional fields based on method type
+    last_four = serializers.CharField(max_length=4, required=False)
+    expiry_month = serializers.IntegerField(required=False, min_value=1, max_value=12)
+    expiry_year = serializers.IntegerField(required=False, min_value=2024)
+    phone_number = serializers.CharField(max_length=20, required=False)
+    is_default = serializers.BooleanField(default=False)
 
 
 class PaymentSerializer(serializers.ModelSerializer):

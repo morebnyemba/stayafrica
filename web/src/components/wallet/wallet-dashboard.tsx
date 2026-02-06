@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/Button';
 export function WalletDashboard() {
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [showBankAccountModal, setShowBankAccountModal] = useState(false);
-  const [activeTab, setActiveTab] = useState<'transactions' | 'withdrawals' | 'banks'>('transactions');
+  const [activeTab, setActiveTab] = useState<'transactions' | 'withdrawals' | 'banks' | 'payment-methods'>('transactions');
 
   // Fetch wallet data
   const { data: wallet, isLoading: walletLoading } = useQuery({
@@ -139,6 +139,16 @@ export function WalletDashboard() {
               >
                 Bank Accounts
               </button>
+              <button
+                onClick={() => setActiveTab('payment-methods')}
+                className={`pb-3 px-1 font-semibold transition ${
+                  activeTab === 'payment-methods'
+                    ? 'border-b-2 border-primary-600 text-primary-900 dark:text-sand-50'
+                    : 'text-primary-600 dark:text-sand-400 hover:text-primary-900 dark:hover:text-sand-200'
+                }`}
+              >
+                Payment Methods
+              </button>
             </nav>
           </div>
 
@@ -155,6 +165,9 @@ export function WalletDashboard() {
               loading={banksLoading}
               onAddNew={() => setShowBankAccountModal(true)}
             />
+          )}
+          {activeTab === 'payment-methods' && (
+            <PaymentMethodsList />
           )}
 
           {/* Modals */}
@@ -428,6 +441,187 @@ function BankAccountsList({ bankAccounts, loading, onAddNew }: { bankAccounts: a
                 onClick={() => handleDelete(account.id)}
                 disabled={deleteMutation.isPending}
                 aria-label={`Delete ${account.bank_name} account`}
+                className="px-3 py-1 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200 transition disabled:opacity-50"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function PaymentMethodsList() {
+  const queryClient = useQueryClient();
+
+  // Fetch payment methods
+  const { data: paymentMethodsData, isLoading } = useQuery({
+    queryKey: ['payment-methods'],
+    queryFn: async () => {
+      const response = await apiClient.get('/payments/payment-methods/');
+      return response.data;
+    },
+  });
+
+  const paymentMethods = paymentMethodsData?.results || paymentMethodsData || [];
+
+  const setDefaultMutation = useMutation({
+    mutationFn: (methodId: string) => apiClient.patch(`/payments/payment-methods/${methodId}/set_default/`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['payment-methods'] });
+      toast.success('Default payment method updated!');
+    },
+    onError: () => {
+      toast.error('Failed to set default payment method. Please try again.');
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (methodId: string) => apiClient.delete(`/payments/payment-methods/${methodId}/`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['payment-methods'] });
+      toast.success('Payment method deleted successfully.');
+    },
+    onError: () => {
+      toast.error('Failed to delete payment method. Please try again.');
+    },
+  });
+
+  const handleDelete = (methodId: string) => {
+    toast((t) => (
+      <div className="flex flex-col gap-2">
+        <p className="font-medium">Delete this payment method?</p>
+        <p className="text-sm text-gray-500">This action cannot be undone.</p>
+        <div className="flex gap-2 mt-2">
+          <button
+            onClick={() => {
+              deleteMutation.mutate(methodId);
+              toast.dismiss(t.id);
+            }}
+            className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700"
+          >
+            Delete
+          </button>
+          <button
+            onClick={() => toast.dismiss(t.id)}
+            className="px-3 py-1 bg-gray-200 text-gray-800 text-sm rounded hover:bg-gray-300"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    ), { duration: 10000 });
+  };
+
+  const getMethodIcon = (methodType: string) => {
+    switch (methodType) {
+      case 'card':
+        return '💳';
+      case 'mobile':
+        return '📱';
+      case 'bank':
+        return '🏦';
+      case 'ussd':
+        return '📞';
+      default:
+        return '💰';
+    }
+  };
+
+  const getProviderColor = (provider: string) => {
+    switch (provider) {
+      case 'stripe':
+        return 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400';
+      case 'paynow':
+        return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400';
+      case 'flutterwave':
+        return 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400';
+      case 'paystack':
+        return 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400';
+      default:
+        return 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400';
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-3" role="status" aria-busy="true" aria-label="Loading payment methods">
+        {[1, 2].map(i => (
+          <div key={i} className="animate-pulse h-24 bg-white dark:bg-primary-800 rounded-lg"></div>
+        ))}
+        <span className="sr-only">Loading payment methods</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      <a
+        href="/wallet/add-payment-method"
+        className="w-full bg-white dark:bg-primary-800 rounded-lg p-4 border-2 border-dashed border-primary-300 dark:border-primary-600 hover:border-primary-500 dark:hover:border-primary-500 transition flex items-center justify-center gap-2 text-primary-700 dark:text-sand-300 font-semibold"
+        aria-label="Add a new payment method"
+      >
+        <Plus className="w-5 h-5" aria-hidden="true" />
+        Add Payment Method
+      </a>
+
+      {paymentMethods.length === 0 && (
+        <div className="bg-white dark:bg-primary-800 rounded-lg p-8 text-center border border-primary-200 dark:border-primary-700">
+          <p className="text-primary-600 dark:text-sand-300">No payment methods added yet</p>
+          <p className="text-sm text-primary-500 dark:text-sand-400 mt-2">
+            Add a payment method to make bookings easier
+          </p>
+        </div>
+      )}
+
+      {paymentMethods.map((method: any) => (
+        <div
+          key={method.id}
+          className="bg-white dark:bg-primary-800 rounded-lg p-4 border border-primary-100 dark:border-primary-700"
+        >
+          <div className="flex items-start justify-between">
+            <div className="flex items-start gap-3">
+              <div className="text-3xl" aria-hidden="true">
+                {getMethodIcon(method.method_type)}
+              </div>
+              <div>
+                <div className="font-semibold text-primary-900 dark:text-sand-50">
+                  {method.name || `${method.method_type} payment`}
+                </div>
+                <div className="text-sm text-primary-600 dark:text-sand-400 capitalize">
+                  {method.method_type}
+                  {method.last_four && ` •••• ${method.last_four}`}
+                  {method.phone_number && ` • ${method.phone_number}`}
+                </div>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className={`inline-block px-2 py-1 text-xs rounded capitalize ${getProviderColor(method.provider)}`}>
+                    {method.provider}
+                  </span>
+                  {method.is_default && (
+                    <span className="inline-block px-2 py-1 bg-primary-600 text-white text-xs rounded">
+                      Default
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              {!method.is_default && (
+                <button
+                  onClick={() => setDefaultMutation.mutate(method.id)}
+                  disabled={setDefaultMutation.isPending}
+                  aria-busy={setDefaultMutation.isPending}
+                  className="px-3 py-1 text-sm bg-primary-100 dark:bg-primary-700 text-primary-700 dark:text-sand-300 rounded hover:bg-primary-200 dark:hover:bg-primary-600 transition disabled:opacity-50"
+                >
+                  Set Default
+                </button>
+              )}
+              <button
+                onClick={() => handleDelete(method.id)}
+                disabled={deleteMutation.isPending}
+                aria-label={`Delete ${method.name || 'payment method'}`}
                 className="px-3 py-1 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200 transition disabled:opacity-50"
               >
                 Delete
