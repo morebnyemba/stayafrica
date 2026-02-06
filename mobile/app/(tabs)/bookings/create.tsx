@@ -4,6 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Calendar } from 'react-native-calendars';
+import { format } from 'date-fns';
 import { useAuth } from '@/context/auth-context';
 import { apiClient } from '@/services/api-client';
 
@@ -43,6 +44,7 @@ export default function CreateBookingScreen() {
         rental_property: propertyId,
         check_in: checkIn,
         check_out: checkOut,
+        guests: guestCount,
         cleaning_fee: 0, // Optional, will be calculated by backend
         special_requests: specialRequests || undefined,
       };
@@ -67,8 +69,8 @@ export default function CreateBookingScreen() {
   const handleCheckInDateSelect = (date: string) => {
     setCheckIn(date);
     setShowCheckInCalendar(false);
-    // Clear check-out if it's before the new check-in
-    if (checkOut && date >= checkOut) {
+    // Clear check-out if it's before or equal to the new check-in
+    if (checkOut && new Date(date) >= new Date(checkOut)) {
       setCheckOut('');
     }
   };
@@ -80,12 +82,13 @@ export default function CreateBookingScreen() {
 
   const formatDate = (dateStr: string) => {
     if (!dateStr) return '';
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric' 
-    });
+    try {
+      // Parse the ISO date string and format it
+      const date = new Date(dateStr + 'T00:00:00');
+      return format(date, 'MMM dd, yyyy');
+    } catch (error) {
+      return dateStr;
+    }
   };
 
   const getMinCheckOutDate = () => {
