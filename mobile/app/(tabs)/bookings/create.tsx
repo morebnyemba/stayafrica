@@ -1,9 +1,11 @@
-import { View, Text, ScrollView, TouchableOpacity, Platform, TextInput, Alert, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Platform, TextInput, Alert, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, Modal } from 'react-native';
 import { useState } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Calendar } from 'react-native-calendars';
 import { useAuth } from '@/context/auth-context';
+import { apiClient } from '@/services/api-client';
 
 export default function CreateBookingScreen() {
   const router = useRouter();
@@ -13,6 +15,9 @@ export default function CreateBookingScreen() {
   const [checkIn, setCheckIn] = useState('');
   const [checkOut, setCheckOut] = useState('');
   const [guests, setGuests] = useState('1');
+  const [showCheckInCalendar, setShowCheckInCalendar] = useState(false);
+  const [showCheckOutCalendar, setShowCheckOutCalendar] = useState(false);
+  const [specialRequests, setSpecialRequests] = useState('');
 
   const handleCreateBooking = async () => {
     if (!checkIn || !checkOut) {
@@ -20,18 +25,74 @@ export default function CreateBookingScreen() {
       return;
     }
 
+    if (!propertyId) {
+      Alert.alert('Error', 'Property ID is missing');
+      return;
+    }
+
+    const guestCount = parseInt(guests);
+    if (isNaN(guestCount) || guestCount < 1) {
+      Alert.alert('Error', 'Please enter a valid number of guests');
+      return;
+    }
+
     setLoading(true);
     try {
-      // TODO: Implement booking API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Create booking with correct API format expected by backend
+      const bookingData = {
+        rental_property: propertyId,
+        check_in: checkIn,
+        check_out: checkOut,
+        cleaning_fee: 0, // Optional, will be calculated by backend
+        special_requests: specialRequests || undefined,
+      };
+
+      await apiClient.createBooking(bookingData);
+      
       Alert.alert('Success', 'Booking request submitted!', [
         { text: 'OK', onPress: () => router.replace('/(tabs)/bookings') }
       ]);
-    } catch (error) {
-      Alert.alert('Error', 'Failed to create booking');
+    } catch (error: any) {
+      console.error('Error creating booking:', error);
+      const errorMessage = error?.response?.data?.detail || 
+                          error?.response?.data?.message || 
+                          error?.message || 
+                          'Failed to create booking';
+      Alert.alert('Error', errorMessage);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleCheckInDateSelect = (date: string) => {
+    setCheckIn(date);
+    setShowCheckInCalendar(false);
+    // Clear check-out if it's before the new check-in
+    if (checkOut && date >= checkOut) {
+      setCheckOut('');
+    }
+  };
+
+  const handleCheckOutDateSelect = (date: string) => {
+    setCheckOut(date);
+    setShowCheckOutCalendar(false);
+  };
+
+  const formatDate = (dateStr: string) => {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric' 
+    });
+  };
+
+  const getMinCheckOutDate = () => {
+    if (!checkIn) return undefined;
+    const minDate = new Date(checkIn);
+    minDate.setDate(minDate.getDate() + 1);
+    return minDate.toISOString().split('T')[0];
   };
 
   if (!isAuthenticated) {
@@ -105,45 +166,47 @@ export default function CreateBookingScreen() {
       <View className="px-4 py-6">
         {/* Check-in Date */}
         <Text className="text-base font-semibold text-forest mb-2">Check-in Date</Text>
-        <View className="bg-white rounded-2xl p-4 mb-4 flex-row items-center" style={{
-          shadowColor: '#122F26',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.05,
-          shadowRadius: 4,
-          elevation: 2,
-        }}>
+        <TouchableOpacity
+          onPress={() => setShowCheckInCalendar(true)}
+          className="bg-white rounded-2xl p-4 mb-4 flex-row items-center"
+          style={{
+            shadowColor: '#122F26',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.05,
+            shadowRadius: 4,
+            elevation: 2,
+          }}
+        >
           <Ionicons name="calendar" size={24} color="#3A5C50" />
-          <TextInput
-            className="flex-1 ml-3 text-base text-forest"
-            placeholder="Select check-in date"
-            placeholderTextColor="#94a3b8"
-            value={checkIn}
-            onChangeText={setCheckIn}
-          />
-        </View>
+          <Text className={`flex-1 ml-3 text-base ${checkIn ? 'text-forest' : 'text-slate-400'}`}>
+            {checkIn ? formatDate(checkIn) : 'Select check-in date'}
+          </Text>
+        </TouchableOpacity>
 
         {/* Check-out Date */}
         <Text className="text-base font-semibold text-forest mb-2">Check-out Date</Text>
-        <View className="bg-white rounded-2xl p-4 mb-4 flex-row items-center" style={{
-          shadowColor: '#122F26',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.05,
-          shadowRadius: 4,
-          elevation: 2,
-        }}>
+        <TouchableOpacity
+          onPress={() => setShowCheckOutCalendar(true)}
+          disabled={!checkIn}
+          className="bg-white rounded-2xl p-4 mb-4 flex-row items-center"
+          style={{
+            shadowColor: '#122F26',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.05,
+            shadowRadius: 4,
+            elevation: 2,
+            opacity: !checkIn ? 0.5 : 1,
+          }}
+        >
           <Ionicons name="calendar" size={24} color="#3A5C50" />
-          <TextInput
-            className="flex-1 ml-3 text-base text-forest"
-            placeholder="Select check-out date"
-            placeholderTextColor="#94a3b8"
-            value={checkOut}
-            onChangeText={setCheckOut}
-          />
-        </View>
+          <Text className={`flex-1 ml-3 text-base ${checkOut ? 'text-forest' : 'text-slate-400'}`}>
+            {checkOut ? formatDate(checkOut) : 'Select check-out date'}
+          </Text>
+        </TouchableOpacity>
 
         {/* Guests */}
         <Text className="text-base font-semibold text-forest mb-2">Number of Guests</Text>
-        <View className="bg-white rounded-2xl p-4 mb-6 flex-row items-center" style={{
+        <View className="bg-white rounded-2xl p-4 mb-4 flex-row items-center" style={{
           shadowColor: '#122F26',
           shadowOffset: { width: 0, height: 2 },
           shadowOpacity: 0.05,
@@ -158,6 +221,27 @@ export default function CreateBookingScreen() {
             keyboardType="number-pad"
             value={guests}
             onChangeText={setGuests}
+          />
+        </View>
+
+        {/* Special Requests */}
+        <Text className="text-base font-semibold text-forest mb-2">Special Requests (Optional)</Text>
+        <View className="bg-white rounded-2xl p-4 mb-6" style={{
+          shadowColor: '#122F26',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.05,
+          shadowRadius: 4,
+          elevation: 2,
+        }}>
+          <TextInput
+            className="text-base text-forest min-h-[80px]"
+            placeholder="Any special requests or requirements..."
+            placeholderTextColor="#94a3b8"
+            multiline
+            numberOfLines={4}
+            textAlignVertical="top"
+            value={specialRequests}
+            onChangeText={setSpecialRequests}
           />
         </View>
 
@@ -189,6 +273,69 @@ export default function CreateBookingScreen() {
       </View>
         </ScrollView>
       </TouchableWithoutFeedback>
+
+      {/* Check-in Calendar Modal */}
+      <Modal
+        visible={showCheckInCalendar}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowCheckInCalendar(false)}
+      >
+        <View className="flex-1 justify-center items-center bg-black/50">
+          <View className="bg-white rounded-3xl p-4 mx-4 w-full max-w-md">
+            <View className="flex-row justify-between items-center mb-4">
+              <Text className="text-xl font-bold text-forest">Select Check-in Date</Text>
+              <TouchableOpacity onPress={() => setShowCheckInCalendar(false)}>
+                <Ionicons name="close" size={24} color="#122F26" />
+              </TouchableOpacity>
+            </View>
+            <Calendar
+              minDate={new Date().toISOString().split('T')[0]}
+              onDayPress={(day) => handleCheckInDateSelect(day.dateString)}
+              markedDates={{
+                [checkIn]: { selected: true, selectedColor: '#D9B168' },
+              }}
+              theme={{
+                selectedDayBackgroundColor: '#D9B168',
+                todayTextColor: '#D9B168',
+                arrowColor: '#D9B168',
+              }}
+            />
+          </View>
+        </View>
+      </Modal>
+
+      {/* Check-out Calendar Modal */}
+      <Modal
+        visible={showCheckOutCalendar}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowCheckOutCalendar(false)}
+      >
+        <View className="flex-1 justify-center items-center bg-black/50">
+          <View className="bg-white rounded-3xl p-4 mx-4 w-full max-w-md">
+            <View className="flex-row justify-between items-center mb-4">
+              <Text className="text-xl font-bold text-forest">Select Check-out Date</Text>
+              <TouchableOpacity onPress={() => setShowCheckOutCalendar(false)}>
+                <Ionicons name="close" size={24} color="#122F26" />
+              </TouchableOpacity>
+            </View>
+            <Calendar
+              minDate={getMinCheckOutDate()}
+              onDayPress={(day) => handleCheckOutDateSelect(day.dateString)}
+              markedDates={{
+                [checkOut]: { selected: true, selectedColor: '#D9B168' },
+                [checkIn]: { marked: true, dotColor: '#10B981' },
+              }}
+              theme={{
+                selectedDayBackgroundColor: '#D9B168',
+                todayTextColor: '#D9B168',
+                arrowColor: '#D9B168',
+              }}
+            />
+          </View>
+        </View>
+      </Modal>
     </KeyboardAvoidingView>
   );
 }
