@@ -1,4 +1,4 @@
-                                      Q/**
+/**
  * Error Pages - 404 and 500 error pages
  */
 'use client';
