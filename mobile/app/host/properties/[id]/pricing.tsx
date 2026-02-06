@@ -5,21 +5,23 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '@/context/auth-context';
 import { usePropertyById } from '@/hooks/api-hooks';
 import PricingCalendar from '@/components/pricing/PricingCalendar';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function PropertyPricingPage() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { isAuthenticated } = useAuth();
+  const insets = useSafeAreaInsets();
   
   const { data: property, isLoading } = usePropertyById(id || '');
 
   if (!isAuthenticated) {
     return (
-      <View className="flex-1 bg-sand-100">
+      <SafeAreaView className="flex-1 bg-sand-100">
         <LinearGradient
           colors={['#122F26', '#1d392f']}
           className="px-4 pb-6"
-          style={{ paddingTop: Platform.OS === 'ios' ? 50 : 35 }}
+          style={{ paddingTop: insets.top + 12 }}
         >
           <TouchableOpacity onPress={() => router.back()} className="mb-4">
             <View className="w-10 h-10 rounded-xl items-center justify-center" style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}>
@@ -33,19 +35,19 @@ export default function PropertyPricingPage() {
         <View className="flex-1 items-center justify-center px-6">
           <Text className="text-forest text-lg">Please sign in to access pricing</Text>
         </View>
-      </View>
+      </SafeAreaView>
     );
   }
 
   if (isLoading) {
     return (
-      <View className="flex-1 bg-sand-100">
+      <SafeAreaView className="flex-1 bg-sand-100">
         <LinearGradient
           colors={['#122F26', '#1d392f', '#2d4a40']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           className="px-4 pb-6"
-          style={{ paddingTop: Platform.OS === 'ios' ? 50 : 35 }}
+          style={{ paddingTop: insets.top + 12 }}
         >
           <TouchableOpacity onPress={() => router.back()} className="mb-4">
             <View className="w-10 h-10 rounded-xl items-center justify-center" style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}>
@@ -60,19 +62,19 @@ export default function PropertyPricingPage() {
           <ActivityIndicator size="large" color="#3A5C50" />
           <Text className="text-moss mt-4">Loading property...</Text>
         </View>
-      </View>
+      </SafeAreaView>
     );
   }
 
   return (
-    <View className="flex-1 bg-sand-100">
+    <SafeAreaView className="flex-1 bg-sand-100">
       {/* Header */}
       <LinearGradient
         colors={['#122F26', '#1d392f', '#2d4a40']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         className="px-4 pb-6"
-        style={{ paddingTop: Platform.OS === 'ios' ? 50 : 35 }}
+        style={{ paddingTop: insets.top + 12 }}
       >
         <View className="flex-row items-center justify-between mb-4">
           <TouchableOpacity onPress={() => router.back()}>
@@ -298,6 +300,6 @@ export default function PropertyPricingPage() {
           </TouchableOpacity>
         </View>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }

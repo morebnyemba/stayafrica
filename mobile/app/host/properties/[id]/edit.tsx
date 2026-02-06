@@ -6,10 +6,12 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '@/context/auth-context';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function PropertyEditScreen() {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
+  const insets = useSafeAreaInsets();
   const params = useLocalSearchParams();
   const queryClient = useQueryClient();
   
@@ -87,37 +89,38 @@ export default function PropertyEditScreen() {
 
   if (!isAuthenticated) {
     return (
-      <View className="flex-1 bg-sand-100 items-center justify-center">
+      <SafeAreaView className="flex-1 bg-sand-100 items-center justify-center">
         <Text className="text-forest text-lg">Please sign in to edit properties</Text>
-      </View>
+      </SafeAreaView>
     );
   }
 
   if (isLoading) {
     return (
-      <View className="flex-1 bg-sand-100 items-center justify-center">
+      <SafeAreaView className="flex-1 bg-sand-100 items-center justify-center">
         <ActivityIndicator size="large" color="#D9B168" />
         <Text className="mt-4 text-moss">Loading property...</Text>
-      </View>
+      </SafeAreaView>
     );
   }
 
   return (
-    <KeyboardAvoidingView 
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      className="flex-1"
-    >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <ScrollView 
-          className="flex-1 bg-sand-100" 
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 40 }}
-          keyboardShouldPersistTaps="handled"
-        >
+    <SafeAreaView className="flex-1 bg-sand-100">
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        className="flex-1"
+      >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <ScrollView 
+            className="flex-1 bg-sand-100" 
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 40 }}
+            keyboardShouldPersistTaps="handled"
+          >
       <LinearGradient
         colors={['#122F26', '#1d392f']}
         className="px-4 pb-6"
-        style={{ paddingTop: Platform.OS === 'ios' ? 50 : 35 }}
+        style={{ paddingTop: insets.top + 12 }}
       >
         <TouchableOpacity onPress={() => router.back()} className="mb-4">
           <View className="w-10 h-10 rounded-xl items-center justify-center" style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}>
@@ -264,5 +267,6 @@ export default function PropertyEditScreen() {
         </ScrollView>
       </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }

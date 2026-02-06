@@ -172,7 +172,7 @@ export default function LoginScreen() {
                 />
 
                 {/* Password Input */}
-                <View className="mb-6">
+                <View>
                   <View className="flex-row justify-between items-center mb-2 ml-1">
                     <Text className="text-sm font-semibold text-forest">
                       Password <Text className="text-red-500">*</Text>
@@ -195,7 +195,6 @@ export default function LoginScreen() {
                     showPasswordToggle
                     autoComplete="password"
                     editable={!loading}
-                    containerClassName="-mt-5"
                   />
                 </View>
 

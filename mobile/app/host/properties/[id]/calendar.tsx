@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, TouchableOpacity, Platform, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useState } from 'react';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -7,10 +7,12 @@ import { useAuth } from '@/context/auth-context';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
 import { Calendar } from 'react-native-calendars';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function PropertyCalendarScreen() {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
+  const insets = useSafeAreaInsets();
   const params = useLocalSearchParams();
   
   const propertyId = params.id as string;
@@ -61,31 +63,32 @@ export default function PropertyCalendarScreen() {
 
   if (!isAuthenticated) {
     return (
-      <View className="flex-1 bg-sand-100 items-center justify-center">
+      <SafeAreaView className="flex-1 bg-sand-100 items-center justify-center">
         <Text className="text-forest text-lg">Please sign in to view calendar</Text>
-      </View>
+      </SafeAreaView>
     );
   }
 
   if (loadingProperty || loadingBookings) {
     return (
-      <View className="flex-1 bg-sand-100 items-center justify-center">
+      <SafeAreaView className="flex-1 bg-sand-100 items-center justify-center">
         <ActivityIndicator size="large" color="#D9B168" />
         <Text className="mt-4 text-moss">Loading calendar...</Text>
-      </View>
+      </SafeAreaView>
     );
   }
 
   return (
-    <ScrollView 
-      className="flex-1 bg-sand-100" 
-      showsVerticalScrollIndicator={false}
-      contentContainerStyle={{ paddingBottom: 40 }}
-    >
+    <SafeAreaView className="flex-1 bg-sand-100">
+      <ScrollView 
+        className="flex-1 bg-sand-100" 
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 40 }}
+      >
       <LinearGradient
         colors={['#122F26', '#1d392f']}
         className="px-4 pb-6"
-        style={{ paddingTop: Platform.OS === 'ios' ? 50 : 35 }}
+        style={{ paddingTop: insets.top + 12 }}
       >
         <TouchableOpacity onPress={() => router.back()} className="mb-4">
           <View className="w-10 h-10 rounded-xl items-center justify-center" style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}>
@@ -208,6 +211,7 @@ export default function PropertyCalendarScreen() {
           )}
         </View>
       </View>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 }

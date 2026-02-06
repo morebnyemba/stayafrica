@@ -1,20 +1,22 @@
-import { View, Text, ScrollView, TouchableOpacity, Platform, FlatList } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, FlatList } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '@/context/auth-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function HostReviewsScreen() {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
+  const insets = useSafeAreaInsets();
 
   if (!isAuthenticated) {
     return (
-      <View className="flex-1 bg-sand-100">
+      <SafeAreaView className="flex-1 bg-sand-100">
         <LinearGradient
           colors={['#122F26', '#1d392f']}
           className="px-4 pb-6"
-          style={{ paddingTop: Platform.OS === 'ios' ? 50 : 35 }}
+          style={{ paddingTop: insets.top + 12 }}
         >
           <TouchableOpacity 
             onPress={() => router.back()} 
@@ -30,7 +32,7 @@ export default function HostReviewsScreen() {
         <View className="flex-1 items-center justify-center px-6">
           <Text className="text-forest text-lg">Please sign in to view reviews</Text>
         </View>
-      </View>
+      </SafeAreaView>
     );
   }
 
@@ -109,14 +111,14 @@ export default function HostReviewsScreen() {
   );
 
   return (
-    <View className="flex-1 bg-sand-100">
+    <SafeAreaView className="flex-1 bg-sand-100">
       {/* Header */}
       <LinearGradient
         colors={['#122F26', '#1d392f', '#2d4a40']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         className="px-4 pb-8"
-        style={{ paddingTop: Platform.OS === 'ios' ? 50 : 35 }}
+        style={{ paddingTop: insets.top + 12 }}
       >
         <TouchableOpacity onPress={() => router.back()} className="mb-4">
           <View className="w-10 h-10 rounded-xl items-center justify-center" style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}>
@@ -165,6 +167,6 @@ export default function HostReviewsScreen() {
           )}
         </View>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }

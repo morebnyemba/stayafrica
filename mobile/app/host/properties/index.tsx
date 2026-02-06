@@ -1,25 +1,27 @@
-import { View, Text, FlatList, TouchableOpacity, Image, ActivityIndicator, Platform } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '@/context/auth-context';
 import { useHostProperties } from '@/hooks/api-hooks';
 import type { Property } from '@/types';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function HostPropertiesScreen() {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
+  const insets = useSafeAreaInsets();
   const { data: propertiesData, isLoading } = useHostProperties();
   const properties = propertiesData?.results || [];
 
   if (!isAuthenticated) {
     return (
-      <View className="flex-1 bg-sand-100">
+      <SafeAreaView className="flex-1 bg-sand-100">
         {/* Header */}
         <LinearGradient
           colors={['#122F26', '#1d392f']}
           className="px-4 pb-6"
-          style={{ paddingTop: Platform.OS === 'ios' ? 50 : 35 }}
+          style={{ paddingTop: insets.top + 12 }}
         >
           <Text className="text-3xl font-black text-white tracking-tight">
             My Properties
@@ -57,7 +59,7 @@ export default function HostPropertiesScreen() {
             </TouchableOpacity>
           </View>
         </View>
-      </View>
+      </SafeAreaView>
     );
   }
 
@@ -124,6 +126,16 @@ export default function HostPropertiesScreen() {
                   {property.is_available ? 'Available' : 'Unavailable'}
                 </Text>
               </View>
+              
+              <TouchableOpacity 
+                onPress={(e) => {
+                  e.stopPropagation();
+                  router.push(`/host/properties/edit?id=${property.id}`);
+                }}
+                className="ml-2 p-2 bg-sand-200 rounded-full"
+              >
+                <Ionicons name="create-outline" size={20} color="#3A5C50" />
+              </TouchableOpacity>
             </View>
           </View>
         </View>
@@ -132,49 +144,49 @@ export default function HostPropertiesScreen() {
   );
 
   return (
-    <View className="flex-1 bg-sand-100">
+    <SafeAreaView className="flex-1 bg-sand-100">
       {/* Header */}
       <LinearGradient
-        colors={['#122F26', '#1d392f', '#2d4a40']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        className="px-4 pb-6"
-        style={{ paddingTop: Platform.OS === 'ios' ? 50 : 35 }}
-      >
-        <View className="flex-row items-center justify-between mb-4">
-          <TouchableOpacity 
-            onPress={() => router.back()}
-            className="w-10 h-10 rounded-xl items-center justify-center"
-            style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
-          >
-            <Ionicons name="arrow-back" size={24} color="#fff" />
-          </TouchableOpacity>
-          
-          <TouchableOpacity
-            onPress={() => router.push('/host/properties/new')}
-          >
-            <LinearGradient
-              colors={['#D9B168', '#bea04f']}
-              className="px-4 py-2 rounded-xl flex-row items-center"
+          colors={['#122F26', '#1d392f', '#2d4a40']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          className="px-4 pb-6"
+          style={{ paddingTop: insets.top + 12 }}
+        >
+          <View className="flex-row items-center justify-between mb-4">
+            <TouchableOpacity 
+              onPress={() => router.back()}
+              className="w-10 h-10 rounded-xl items-center justify-center"
+              style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
             >
-              <Ionicons name="add" size={20} color="#122F26" />
-              <Text className="text-forest font-bold ml-1">Add</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-        </View>
+              <Ionicons name="arrow-back" size={24} color="#fff" />
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              onPress={() => router.push('/host/properties/new')}
+            >
+              <LinearGradient
+                colors={['#D9B168', '#bea04f']}
+                className="px-4 py-2 rounded-xl flex-row items-center"
+              >
+                <Ionicons name="add" size={20} color="#122F26" />
+                <Text className="text-forest font-bold ml-1">Add</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
 
-        <Text className="text-3xl font-black text-white tracking-tight mb-2">
-          My Properties
-        </Text>
-        <View className="flex-row items-center">
-          <Ionicons name="home" size={16} color="#D9B168" />
-          <Text className="text-sand-100 ml-2">
-            {properties.length} {properties.length === 1 ? 'property' : 'properties'}
+          <Text className="text-3xl font-black text-white tracking-tight mb-2">
+            My Properties
           </Text>
-        </View>
-      </LinearGradient>
+          <View className="flex-row items-center">
+            <Ionicons name="home" size={16} color="#D9B168" />
+            <Text className="text-sand-100 ml-2">
+              {properties.length} {properties.length === 1 ? 'property' : 'properties'}
+            </Text>
+          </View>
+        </LinearGradient>
 
-      {/* Properties List */}
+        {/* Properties List */}
       {isLoading ? (
         <View className="flex-1 justify-center items-center">
           <ActivityIndicator size="large" color="#3A5C50" />
@@ -217,6 +229,6 @@ export default function HostPropertiesScreen() {
           contentContainerStyle={{ paddingVertical: 16 }}
         />
       )}
-    </View>
+    </SafeAreaView>
   );
 }

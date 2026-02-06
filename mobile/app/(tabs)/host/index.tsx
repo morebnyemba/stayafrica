@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
 import { useState, useMemo } from 'react';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -38,10 +38,28 @@ export default function HostScreen() {
   const [sidebarVisible, setSidebarVisible] = useState(false);
   
   // Fetch host data
-  const { data: propertiesData } = useHostProperties();
-  const { data: analyticsData } = useHostAnalytics();
-  const { data: pendingData } = usePendingActions();
-  const { data: performanceData } = usePropertyPerformance();
+  const { data: propertiesData, refetch: refetchProperties } = useHostProperties();
+  const { data: analyticsData, refetch: refetchAnalytics } = useHostAnalytics();
+  const { data: pendingData, refetch: refetchPending } = usePendingActions();
+  const { data: performanceData, refetch: refetchPerformance } = usePropertyPerformance();
+
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await Promise.all([
+        refetchProperties(),
+        refetchAnalytics(),
+        refetchPending(),
+        refetchPerformance(),
+      ]);
+    } catch (error) {
+      console.error('Error refreshing dashboard:', error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
   
   // Calculate totals
   const properties = propertiesData?.results || [];
@@ -57,12 +75,12 @@ export default function HostScreen() {
 
   if (!isAuthenticated) {
     return (
-      <SafeAreaView className="flex-1 bg-sand-100">
+      <SafeAreaView className="flex-1 bg-[#122F26]">
         {/* Header */}
         <LinearGradient
           colors={['#122F26', '#1d392f']}
           className="px-4 pb-6"
-          style={{ paddingTop: insets.top + 12 }}
+          style={{ paddingTop: 12 }}
         >
           <Text className="text-3xl font-black text-white tracking-tight">
             Become a Host
@@ -72,7 +90,7 @@ export default function HostScreen() {
           </Text>
         </LinearGradient>
 
-        <View className="flex-1 items-center justify-center px-6">
+        <View className="flex-1 items-center justify-center px-6 bg-sand-100">
           <View className="bg-white rounded-3xl p-8 items-center" style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.1, shadowRadius: 16, elevation: 8 }}>
             <View className="bg-sand-200 rounded-full p-8 mb-6">
               <Ionicons name="home-outline" size={72} color="#D9B168" />
@@ -354,7 +372,18 @@ export default function HostScreen() {
         onClose={() => setSidebarVisible(false)}
       />
       
-      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+      <ScrollView 
+        className="flex-1 bg-sand-100" 
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#D9B168"
+            colors={['#D9B168']}
+          />
+        }
+      >
       {/* Modern Header with Tabs */}
       <LinearGradient
         colors={['#122F26', '#1d392f', '#2d4a40']}

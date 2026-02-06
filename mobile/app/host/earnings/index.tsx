@@ -1,23 +1,25 @@
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Platform } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '@/context/auth-context';
 import { useHostEarnings } from '@/hooks/api-hooks';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function HostEarningsScreen() {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
+  const insets = useSafeAreaInsets();
   const { data: earnings, isLoading } = useHostEarnings();
 
   if (!isAuthenticated) {
     return (
-      <View className="flex-1 bg-sand-100">
+      <SafeAreaView className="flex-1 bg-sand-100">
         {/* Header */}
         <LinearGradient
           colors={['#122F26', '#1d392f']}
           className="px-4 pb-6"
-          style={{ paddingTop: Platform.OS === 'ios' ? 50 : 35 }}
+          style={{ paddingTop: insets.top + 12 }}
         >
           <Text className="text-3xl font-black text-white tracking-tight">
             Earnings & Payouts
@@ -55,7 +57,7 @@ export default function HostEarningsScreen() {
             </TouchableOpacity>
           </View>
         </View>
-      </View>
+      </SafeAreaView>
     );
   }
 
@@ -117,19 +119,20 @@ export default function HostEarningsScreen() {
   );
 
   return (
-    <ScrollView 
-      className="flex-1 bg-sand-100" 
-      showsVerticalScrollIndicator={false}
-      contentContainerStyle={{ paddingBottom: 40 }}
-    >
-      {/* Header */}
-      <LinearGradient
-        colors={['#122F26', '#1d392f', '#2d4a40']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        className="px-4 pb-8"
-        style={{ paddingTop: Platform.OS === 'ios' ? 50 : 35 }}
+    <SafeAreaView className="flex-1 bg-sand-100">
+      <ScrollView 
+        className="flex-1 bg-sand-100" 
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 40 }}
       >
+        {/* Header */}
+        <LinearGradient
+          colors={['#122F26', '#1d392f', '#2d4a40']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          className="px-4 pb-8"
+          style={{ paddingTop: insets.top + 12 }}
+        >
         <TouchableOpacity onPress={() => router.back()} className="mb-4">
           <View className="w-10 h-10 rounded-xl items-center justify-center" style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}>
             <Ionicons name="arrow-back" size={24} color="#fff" />
@@ -306,6 +309,7 @@ export default function HostEarningsScreen() {
           </View>
         </View>
       )}
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 }

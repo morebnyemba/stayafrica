@@ -1,4 +1,4 @@
-import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Platform } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -7,21 +7,23 @@ import { useHostBookings } from '@/hooks/api-hooks';
 import { Skeleton } from '@/components/common/Skeletons';
 import { format } from 'date-fns';
 import type { Booking } from '@/types';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function HostBookingsScreen() {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
+  const insets = useSafeAreaInsets();
   const { data: bookingsData, isLoading } = useHostBookings();
   const bookings = bookingsData?.results || [];
 
   if (!isAuthenticated) {
     return (
-      <View className="flex-1 bg-sand-100">
+      <SafeAreaView className="flex-1 bg-sand-100">
         {/* Header */}
         <LinearGradient
           colors={['#122F26', '#1d392f']}
           className="px-4 pb-6"
-          style={{ paddingTop: Platform.OS === 'ios' ? 50 : 35 }}
+          style={{ paddingTop: insets.top + 12 }}
         >
           <Text className="text-3xl font-black text-white tracking-tight">
             Property Bookings
@@ -59,7 +61,7 @@ export default function HostBookingsScreen() {
             </TouchableOpacity>
           </View>
         </View>
-      </View>
+      </SafeAreaView>
     );
   }
 
@@ -166,14 +168,14 @@ export default function HostBookingsScreen() {
   );
 
   return (
-    <View className="flex-1 bg-sand-100">
+    <SafeAreaView className="flex-1 bg-sand-100">
       {/* Modern Header */}
       <LinearGradient
         colors={['#122F26', '#1d392f', '#2d4a40']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         className="px-4 pb-6"
-        style={{ paddingTop: Platform.OS === 'ios' ? 50 : 35 }}
+        style={{ paddingTop: insets.top + 12 }}
       >
         <TouchableOpacity onPress={() => router.back()} className="mb-4">
           <View className="w-10 h-10 rounded-xl items-center justify-center" style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}>
@@ -218,6 +220,6 @@ export default function HostBookingsScreen() {
           contentContainerStyle={{ paddingVertical: 12, paddingBottom: 40 }}
         />
       )}
-    </View>
+    </SafeAreaView>
   );
 }

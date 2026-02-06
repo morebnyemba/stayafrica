@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
 import { useState } from 'react';
 import { Redirect, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -34,8 +34,20 @@ interface ActivityItemProps {
 export default function GuestDashboardScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const { user, isAuthenticated, isLoading, refreshUser } = useAuth();
   const [sidebarVisible, setSidebarVisible] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await refreshUser();
+    } catch (error) {
+      console.error('Error refreshing dashboard:', error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   if (isAuthenticated && user?.role === 'host') {
     return <Redirect href="/(tabs)/host" />;
@@ -254,7 +266,18 @@ export default function GuestDashboardScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-sand-100">
-      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+      <ScrollView 
+        className="flex-1" 
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#D9B168"
+            colors={['#D9B168']}
+          />
+        }
+      >
       {/* Sidebar */}
       <Sidebar
         isVisible={sidebarVisible}

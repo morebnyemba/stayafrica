@@ -1,13 +1,15 @@
-import { View, Text, ScrollView, TouchableOpacity, Platform, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '@/context/auth-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function HostBookingDetailScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { isAuthenticated } = useAuth();
+  const insets = useSafeAreaInsets();
 
   // TODO: Fetch booking details from API
   const booking = null;
@@ -15,11 +17,11 @@ export default function HostBookingDetailScreen() {
 
   if (!isAuthenticated) {
     return (
-      <View className="flex-1 bg-sand-100">
+      <SafeAreaView className="flex-1 bg-sand-100">
         <LinearGradient
           colors={['#122F26', '#1d392f']}
           className="px-4 pb-6"
-          style={{ paddingTop: Platform.OS === 'ios' ? 50 : 35 }}
+          style={{ paddingTop: insets.top + 12 }}
         >
           <View className="flex-row items-center">
             <TouchableOpacity
@@ -47,25 +49,26 @@ export default function HostBookingDetailScreen() {
             </LinearGradient>
           </TouchableOpacity>
         </View>
-      </View>
+      </SafeAreaView>
     );
   }
 
   if (loading) {
     return (
-      <View className="flex-1 bg-sand-100 items-center justify-center">
+      <SafeAreaView className="flex-1 bg-sand-100 items-center justify-center">
         <ActivityIndicator size="large" color="#D9B168" />
-      </View>
+      </SafeAreaView>
     );
   }
 
   return (
-    <ScrollView className="flex-1 bg-sand-100" showsVerticalScrollIndicator={false}>
+    <SafeAreaView className="flex-1 bg-sand-100">
+      <ScrollView className="flex-1 bg-sand-100" showsVerticalScrollIndicator={false}>
       {/* Header */}
       <LinearGradient
         colors={['#122F26', '#1d392f']}
         className="px-4 pb-6"
-        style={{ paddingTop: Platform.OS === 'ios' ? 50 : 35 }}
+        style={{ paddingTop: insets.top + 12 }}
       >
         <View className="flex-row items-center">
           <TouchableOpacity
@@ -138,5 +141,6 @@ export default function HostBookingDetailScreen() {
         )}
       </View>
     </ScrollView>
+    </SafeAreaView>
   );
 }
