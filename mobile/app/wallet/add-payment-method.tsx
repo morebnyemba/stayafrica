@@ -181,7 +181,11 @@ export default function AddPaymentMethodScreen() {
         </View>
       </LinearGradient>
 
-      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+      <ScrollView
+        className="flex-1"
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
         {/* Provider Selection Step */}
         {currentStep === 'provider' && (
           <View className="px-4 py-6">

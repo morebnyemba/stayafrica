@@ -6,6 +6,7 @@ import {
   TextInput, 
   TouchableOpacity, 
   Image,
+  Modal,
   Animated,
   Dimensions,
   KeyboardAvoidingView,
@@ -22,6 +23,21 @@ import { Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 const { width, height } = Dimensions.get('window');
 
 type Step = 1 | 2 | 3;
+
+const COUNTRIES = [
+  'Afghanistan', 'Albania', 'Algeria', 'Angola', 'Argentina', 'Australia', 'Austria',
+  'Bangladesh', 'Belgium', 'Benin', 'Botswana', 'Brazil', 'Burkina Faso', 'Burundi',
+  'Cameroon', 'Canada', 'Central African Republic', 'Chad', 'Chile', 'China', 'Colombia',
+  'Congo', 'Croatia', 'Czech Republic', 'Denmark', 'Egypt', 'Ethiopia', 'Finland', 'France',
+  'Gabon', 'Gambia', 'Germany', 'Ghana', 'Greece', 'Guinea', 'Hungary', 'India', 'Indonesia',
+  'Ireland', 'Israel', 'Italy', 'Ivory Coast', 'Japan', 'Kenya', 'Lesotho', 'Liberia',
+  'Madagascar', 'Malawi', 'Malaysia', 'Mali', 'Mauritius', 'Mexico', 'Morocco', 'Mozambique',
+  'Namibia', 'Netherlands', 'New Zealand', 'Niger', 'Nigeria', 'Norway', 'Pakistan', 'Peru',
+  'Philippines', 'Poland', 'Portugal', 'Romania', 'Russia', 'Rwanda', 'Saudi Arabia', 'Senegal',
+  'Sierra Leone', 'Singapore', 'South Africa', 'South Korea', 'Spain', 'Sudan', 'Swaziland',
+  'Sweden', 'Switzerland', 'Tanzania', 'Thailand', 'Togo', 'Tunisia', 'Turkey', 'Uganda',
+  'Ukraine', 'United Arab Emirates', 'United Kingdom', 'United States', 'Vietnam', 'Zambia', 'Zimbabwe'
+];
 
 // Animated Step Indicator with StayAfrica colors
 const AnimatedStepIndicator = ({ currentStep, steps }: { currentStep: Step; steps: number }) => {
@@ -109,6 +125,7 @@ export default function RegisterScreen() {
   const [focusedInput, setFocusedInput] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showCountryPicker, setShowCountryPicker] = useState(false);
   const { register } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -231,8 +248,8 @@ export default function RegisterScreen() {
           placeholderTextColor="#94a3b8"
           value={(formData as any)[field]}
           onChangeText={(value) => {
-            setFormData({ ...formData, [field]: value });
-            if (errors[field]) setErrors({ ...errors, [field]: '' });
+            setFormData((prev) => ({ ...prev, [field]: value }));
+            if (errors[field]) setErrors((prev) => ({ ...prev, [field]: '' }));
           }}
           onFocus={() => setFocusedInput(field)}
           onBlur={() => setFocusedInput(null)}
@@ -331,17 +348,17 @@ export default function RegisterScreen() {
                 <Ionicons name="location-outline" size={18} color="#3A5C50" />
                 <Text className="ml-2 text-sm font-semibold text-forest">Country</Text>
               </View>
-              <View className="flex-row items-center rounded-xl bg-white px-4 border-2 border-sand-200">
-                <TextInput
-                  className="flex-1 py-4 text-base text-forest"
-                  placeholder="Select your country"
-                  placeholderTextColor="#94a3b8"
-                  value={formData.country}
-                  onChangeText={(value) => setFormData({ ...formData, country: value })}
-                  editable={!loading}
-                />
+              <TouchableOpacity
+                onPress={() => setShowCountryPicker(true)}
+                disabled={loading}
+                className="flex-row items-center rounded-xl bg-white px-4 border-2 border-sand-200"
+                activeOpacity={0.8}
+              >
+                <Text className="flex-1 py-4 text-base text-forest">
+                  {formData.country || 'Select your country'}
+                </Text>
                 <Ionicons name="chevron-down" size={22} color="#94a3b8" />
-              </View>
+              </TouchableOpacity>
             </View>
 
             {/* Role Selection */}
@@ -444,7 +461,8 @@ export default function RegisterScreen() {
             paddingBottom: insets.bottom + 20,
           }}
           showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
+          keyboardShouldPersistTaps="always"
+          keyboardDismissMode="none"
         >
           <View className="flex-1 px-6">
             {/* Header */}
@@ -552,6 +570,41 @@ export default function RegisterScreen() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      <Modal
+        visible={showCountryPicker}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowCountryPicker(false)}
+      >
+        <View className="flex-1 bg-black/40 justify-end">
+          <View className="bg-white rounded-t-3xl pt-6 pb-8" style={{ paddingBottom: insets.bottom + 32 }}>
+            <View className="px-6 pb-4 border-b border-sand-100 flex-row items-center justify-between">
+              <Text className="text-xl font-bold text-forest">Select Country</Text>
+              <TouchableOpacity onPress={() => setShowCountryPicker(false)}>
+                <Ionicons name="close" size={26} color="#3A5C50" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView className="px-6 pt-4" showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+              {COUNTRIES.map((country) => (
+                <TouchableOpacity
+                  key={country}
+                  onPress={() => {
+                    setFormData({ ...formData, country });
+                    setShowCountryPicker(false);
+                  }}
+                  className={`py-3 border-b border-sand-100 ${formData.country === country ? 'bg-gold/10' : ''}`}
+                >
+                  <Text className={`text-base ${formData.country === country ? 'text-forest font-semibold' : 'text-moss'}`}>
+                    {country}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }

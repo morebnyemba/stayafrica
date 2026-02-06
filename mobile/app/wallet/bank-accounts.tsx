@@ -240,7 +240,11 @@ export default function BankAccountsScreen() {
               </TouchableOpacity>
             </View>
 
-            <ScrollView className="px-6 pt-6" showsVerticalScrollIndicator={false}>
+            <ScrollView
+              className="px-6 pt-6"
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+            >
               <View className="mb-4">
                 <Text className="text-forest font-semibold mb-2">Bank Name *</Text>
                 <TextInput
