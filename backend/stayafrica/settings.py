@@ -154,8 +154,8 @@ else:
             'HOST': os.getenv('DB_HOST', 'localhost'),
             'PORT': os.getenv('DB_PORT', '5432'),
             'OPTIONS': {
-                # Use SSL for database connections in production
-                'sslmode': os.getenv('DB_SSLMODE', 'require' if not DEBUG else 'prefer'),
+                # Disable SSL requirement for database connections
+                'sslmode': os.getenv('DB_SSLMODE', 'disable'),
                 # Connection timeout (seconds)
                 'connect_timeout': 10,
                 # Query timeout (milliseconds) - 30 seconds
