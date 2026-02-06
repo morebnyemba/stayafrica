@@ -4,7 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Calendar } from 'react-native-calendars';
-import { format } from 'date-fns';
+import { format, parseISO, addDays, isAfter } from 'date-fns';
 import { useAuth } from '@/context/auth-context';
 import { apiClient } from '@/services/api-client';
 
@@ -40,14 +40,18 @@ export default function CreateBookingScreen() {
     setLoading(true);
     try {
       // Create booking with correct API format expected by backend
-      const bookingData = {
+      const bookingData: any = {
         rental_property: propertyId,
         check_in: checkIn,
         check_out: checkOut,
         guests: guestCount,
         cleaning_fee: 0, // Optional, will be calculated by backend
-        special_requests: specialRequests || undefined,
       };
+
+      // Only include special_requests if it has content
+      if (specialRequests?.trim()) {
+        bookingData.special_requests = specialRequests.trim();
+      }
 
       await apiClient.createBooking(bookingData);
       
@@ -69,8 +73,8 @@ export default function CreateBookingScreen() {
   const handleCheckInDateSelect = (date: string) => {
     setCheckIn(date);
     setShowCheckInCalendar(false);
-    // Clear check-out if it's before or equal to the new check-in
-    if (checkOut && new Date(date) >= new Date(checkOut)) {
+    // Clear check-out if it's before or equal to the new check-in (compare as strings)
+    if (checkOut && date >= checkOut) {
       setCheckOut('');
     }
   };
@@ -83,8 +87,8 @@ export default function CreateBookingScreen() {
   const formatDate = (dateStr: string) => {
     if (!dateStr) return '';
     try {
-      // Parse the ISO date string and format it
-      const date = new Date(dateStr + 'T00:00:00');
+      // Parse ISO date string safely and format it
+      const date = parseISO(dateStr);
       return format(date, 'MMM dd, yyyy');
     } catch (error) {
       return dateStr;
@@ -93,9 +97,13 @@ export default function CreateBookingScreen() {
 
   const getMinCheckOutDate = () => {
     if (!checkIn) return undefined;
-    const minDate = new Date(checkIn);
-    minDate.setDate(minDate.getDate() + 1);
-    return minDate.toISOString().split('T')[0];
+    try {
+      // Use date-fns to add 1 day safely
+      const minDate = addDays(parseISO(checkIn), 1);
+      return format(minDate, 'yyyy-MM-dd');
+    } catch (error) {
+      return undefined;
+    }
   };
 
   if (!isAuthenticated) {
