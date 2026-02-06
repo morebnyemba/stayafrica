@@ -3,7 +3,6 @@ import {
   Text, 
   View, 
   ScrollView, 
-  TextInput, 
   TouchableOpacity, 
   Image,
   Modal,
@@ -19,6 +18,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/context/auth-context';
 import { Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
+import { Input } from '@/components/common/Input';
 
 const { width, height } = Dimensions.get('window');
 
@@ -122,9 +122,6 @@ export default function RegisterScreen() {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
-  const [focusedInput, setFocusedInput] = useState<string | null>(null);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showCountryPicker, setShowCountryPicker] = useState(false);
   const { register } = useAuth();
   const router = useRouter();
@@ -210,106 +207,56 @@ export default function RegisterScreen() {
     }
   };
 
-  // Enhanced Input Component
-  const InputField = ({ 
-    label, 
-    icon, 
-    field, 
-    placeholder, 
-    keyboardType = 'default',
-    secureTextEntry = false,
-    showToggle = false,
-    toggleState = false,
-    onToggle = () => {},
-  }: {
-    label: string;
-    icon: string;
-    field: string;
-    placeholder: string;
-    keyboardType?: any;
-    secureTextEntry?: boolean;
-    showToggle?: boolean;
-    toggleState?: boolean;
-    onToggle?: () => void;
-  }) => (
-    <View className="mb-5">
-      <View className="flex-row items-center mb-2">
-        <Ionicons name={icon as any} size={18} color="#3A5C50" />
-        <Text className="ml-2 text-sm font-semibold text-forest">{label}</Text>
-      </View>
-      <View 
-        className={`flex-row items-center rounded-xl bg-white px-4 border-2 ${
-          errors[field] ? 'border-red-400' : focusedInput === field ? 'border-gold' : 'border-sand-200'
-        }`}
-      >
-        <TextInput
-          className="flex-1 py-4 text-base text-forest"
-          placeholder={placeholder}
-          placeholderTextColor="#94a3b8"
-          value={(formData as any)[field]}
-          onChangeText={(value) => {
-            setFormData((prev) => ({ ...prev, [field]: value }));
-            if (errors[field]) setErrors((prev) => ({ ...prev, [field]: '' }));
-          }}
-          onFocus={() => setFocusedInput(field)}
-          onBlur={() => setFocusedInput(null)}
-          editable={!loading}
-          keyboardType={keyboardType}
-          autoCapitalize={field === 'email' ? 'none' : 'words'}
-          secureTextEntry={secureTextEntry && !toggleState}
-          blurOnSubmit={false}
-          returnKeyType="next"
-        />
-        {showToggle && (
-          <TouchableOpacity onPress={onToggle}>
-            <Ionicons 
-              name={toggleState ? "eye-outline" : "eye-off-outline"} 
-              size={22} 
-              color="#94a3b8" 
-            />
-          </TouchableOpacity>
-        )}
-      </View>
-      {errors[field] && (
-        <View className="flex-row items-center mt-2">
-          <Ionicons name="alert-circle" size={16} color="#ef4444" />
-          <Text className="ml-1 text-red-500 text-sm">{errors[field]}</Text>
-        </View>
-      )}
-    </View>
-  );
-
   const renderStepContent = () => {
     switch (currentStep) {
       case 1:
         return (
           <>
-            <InputField 
-              label="Email Address" 
-              icon="mail-outline" 
-              field="email" 
+            <Input
+              label="Email Address"
+              icon="mail-outline"
               placeholder="you@example.com"
+              value={formData.email}
+              onChangeText={(value) => {
+                setFormData((prev) => ({ ...prev, email: value }));
+                if (errors.email) setErrors((prev) => ({ ...prev, email: '' }));
+              }}
               keyboardType="email-address"
+              autoCapitalize="none"
+              autoComplete="email"
+              editable={!loading}
+              error={errors.email}
+              required
             />
-            <InputField 
-              label="Password" 
-              icon="lock-closed-outline" 
-              field="password" 
+            <Input
+              label="Password"
+              icon="lock-closed-outline"
               placeholder="Create a strong password"
+              value={formData.password}
+              onChangeText={(value) => {
+                setFormData((prev) => ({ ...prev, password: value }));
+                if (errors.password) setErrors((prev) => ({ ...prev, password: '' }));
+              }}
               secureTextEntry
-              showToggle
-              toggleState={showPassword}
-              onToggle={() => setShowPassword(!showPassword)}
+              showPasswordToggle
+              editable={!loading}
+              error={errors.password}
+              required
             />
-            <InputField 
-              label="Confirm Password" 
-              icon="lock-closed-outline" 
-              field="confirmPassword" 
+            <Input
+              label="Confirm Password"
+              icon="lock-closed-outline"
               placeholder="Confirm your password"
+              value={formData.confirmPassword}
+              onChangeText={(value) => {
+                setFormData((prev) => ({ ...prev, confirmPassword: value }));
+                if (errors.confirmPassword) setErrors((prev) => ({ ...prev, confirmPassword: '' }));
+              }}
               secureTextEntry
-              showToggle
-              toggleState={showConfirmPassword}
-              onToggle={() => setShowConfirmPassword(!showConfirmPassword)}
+              showPasswordToggle
+              editable={!loading}
+              error={errors.confirmPassword}
+              required
             />
           </>
         );
@@ -317,24 +264,48 @@ export default function RegisterScreen() {
       case 2:
         return (
           <>
-            <InputField 
-              label="First Name" 
-              icon="person-outline" 
-              field="firstName" 
+            <Input
+              label="First Name"
+              icon="person-outline"
               placeholder="Enter your first name"
+              value={formData.firstName}
+              onChangeText={(value) => {
+                setFormData((prev) => ({ ...prev, firstName: value }));
+                if (errors.firstName) setErrors((prev) => ({ ...prev, firstName: '' }));
+              }}
+              autoCapitalize="words"
+              editable={!loading}
+              error={errors.firstName}
+              required
             />
-            <InputField 
-              label="Last Name" 
-              icon="person-outline" 
-              field="lastName" 
+            <Input
+              label="Last Name"
+              icon="person-outline"
               placeholder="Enter your last name"
+              value={formData.lastName}
+              onChangeText={(value) => {
+                setFormData((prev) => ({ ...prev, lastName: value }));
+                if (errors.lastName) setErrors((prev) => ({ ...prev, lastName: '' }));
+              }}
+              autoCapitalize="words"
+              editable={!loading}
+              error={errors.lastName}
+              required
             />
-            <InputField 
-              label="Phone Number" 
-              icon="call-outline" 
-              field="phone" 
+            <Input
+              label="Phone Number"
+              icon="call-outline"
               placeholder="+27 12 345 6789"
+              value={formData.phone}
+              onChangeText={(value) => {
+                setFormData((prev) => ({ ...prev, phone: value }));
+                if (errors.phone) setErrors((prev) => ({ ...prev, phone: '' }));
+              }}
               keyboardType="phone-pad"
+              autoComplete="tel"
+              editable={!loading}
+              error={errors.phone}
+              required
             />
           </>
         );

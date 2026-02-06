@@ -1,8 +1,9 @@
-import { View, Text, ScrollView, TouchableOpacity, TextInput, Platform, Alert, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Platform, Alert } from 'react-native';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import Input from '@/components/common/Input';
 
 export default function AddFundsScreen() {
   const router = useRouter();
@@ -43,17 +44,12 @@ export default function AddFundsScreen() {
   };
 
   return (
-    <KeyboardAvoidingView 
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      className="flex-1"
+    <ScrollView 
+      className="flex-1 bg-sand-100" 
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={{ paddingBottom: 40 }}
+      keyboardShouldPersistTaps="handled"
     >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <ScrollView 
-          className="flex-1 bg-sand-100" 
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 40 }}
-          keyboardShouldPersistTaps="handled"
-        >
       {/* Header */}
       <LinearGradient
         colors={['#122F26', '#1d392f']}
@@ -75,24 +71,14 @@ export default function AddFundsScreen() {
       <View className="px-4 py-6">
         {/* Amount Input */}
         <Text className="text-lg font-bold text-forest mb-3">Enter Amount</Text>
-        <View className="bg-white rounded-2xl p-4 mb-4" style={{
-          shadowColor: '#122F26',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.05,
-          shadowRadius: 4,
-          elevation: 2,
-        }}>
-          <View className="flex-row items-center">
-            <Text className="text-2xl font-bold text-forest mr-2">$</Text>
-            <TextInput
-              className="flex-1 text-2xl font-bold text-forest"
-              placeholder="0.00"
-              placeholderTextColor="#94a3b8"
-              keyboardType="decimal-pad"
-              value={amount}
-              onChangeText={setAmount}
-            />
-          </View>
+        <View className="mb-4">
+          <Input
+            value={amount}
+            onChangeText={setAmount}
+            placeholder="0.00"
+            keyboardType="decimal-pad"
+            leftIcon={<Text className="text-2xl font-bold text-forest">$</Text>}
+          />
         </View>
 
         {/* Quick Amounts */}
@@ -180,7 +166,5 @@ export default function AddFundsScreen() {
         </TouchableOpacity>
       </View>
     </ScrollView>
-      </TouchableWithoutFeedback>
-    </KeyboardAvoidingView>
   );
 }

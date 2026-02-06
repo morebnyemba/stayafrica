@@ -1,10 +1,11 @@
-import { View, Text, ScrollView, TouchableOpacity, Platform, TextInput, Alert, ActivityIndicator, Modal } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Platform, Alert, ActivityIndicator, Modal } from 'react-native';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { apiClient } from '@/services/api-client';
+import Input from '@/components/common/Input';
 
 type PaymentStep = 'provider' | 'method' | 'details' | 'confirmation';
 type PaymentProvider = 'stripe' | 'paynow' | 'flutterwave' | 'paystack';
