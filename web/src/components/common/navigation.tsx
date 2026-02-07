@@ -47,7 +47,7 @@ export function Navigation() {
   return (
     <>
       <MobileSearchBar />
-      <nav className="sticky top-[52px] md:top-0 z-40 bg-primary-900 backdrop-blur-sm text-sand-100 shadow-lg">
+      <nav className="sticky top-[52px] md:top-0 z-40 bg-primary-800 backdrop-blur-sm text-sand-100 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14">
           {/* Logo */}
@@ -144,7 +144,7 @@ export function Navigation() {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden py-4 space-y-1 bg-primary-800/95 text-sand-100 border-t border-primary-700">
+          <div className="md:hidden py-4 space-y-1 bg-primary-700 text-sand-100 border-t border-primary-600">
             <Link href="/explore" className="block text-sand-200 hover:text-secondary-300 hover:bg-primary-700/60 px-4 py-3 rounded-md mx-2 transition">
               Stays
             </Link>
