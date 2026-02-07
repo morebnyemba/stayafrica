@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '@/context/auth-context';
 import { apiClient } from '@/services/api-client';
+import { logApiError } from '@/utils/logger';
 
 export default function WithdrawScreen() {
   const router = useRouter();
@@ -25,7 +26,7 @@ export default function WithdrawScreen() {
       const wallet = await apiClient.getMyWallet();
       setBalance(wallet.balance || 0);
     } catch (error: any) {
-      console.error('Failed to fetch wallet balance:', error);
+      logApiError('/wallets/my_wallet/', error, { action: 'fetch balance' });
       // Don't show error alert, just keep balance at 0
     } finally {
       setLoadingBalance(false);

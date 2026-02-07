@@ -5,6 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '@/context/auth-context';
 import { useBookingById } from '@/hooks/api-hooks';
 import { apiClient } from '@/services/api-client';
+import { logApiError } from '@/utils/logger';
 
 export default function BookingDetailScreen() {
   const router = useRouter();
@@ -276,7 +277,10 @@ export default function BookingDetailScreen() {
                         router.push('/(tabs)/messages');
                       }
                     } catch (error: any) {
-                      console.error('Failed to create conversation:', error);
+                      logApiError('/messaging/conversations/', error, { 
+                        action: 'create conversation',
+                        propertyId 
+                      });
                       // Fallback to messages list
                       router.push('/(tabs)/messages');
                     }
