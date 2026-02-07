@@ -304,12 +304,51 @@ export const adminApi = {
     return response.data;
   },
 
+  async createTaxJurisdiction(data: any): Promise<any> {
+    const response = await apiClient.post('/payments/tax-jurisdictions/', data);
+    return response.data;
+  },
+
+  async updateTaxJurisdiction(id: string, data: any): Promise<any> {
+    const response = await apiClient.patch(`/payments/tax-jurisdictions/${id}/`, data);
+    return response.data;
+  },
+
   async getTaxRates(params?: {
     search?: string;
     page?: number;
     per_page?: number;
   }): Promise<{ results: any[]; count: number }> {
     const response = await apiClient.get('/payments/tax-rates/', { params });
+    return response.data;
+  },
+
+  async createTaxRate(data: any): Promise<any> {
+    const response = await apiClient.post('/payments/tax-rates/', data);
+    return response.data;
+  },
+
+  async updateTaxRate(id: string, data: any): Promise<any> {
+    const response = await apiClient.patch(`/payments/tax-rates/${id}/`, data);
+    return response.data;
+  },
+
+  async getTaxExemptions(params?: {
+    search?: string;
+    page?: number;
+    per_page?: number;
+  }): Promise<{ results: any[]; count: number }> {
+    const response = await apiClient.get('/payments/tax-exemptions/', { params });
+    return response.data;
+  },
+
+  async getTaxRemittances(params?: {
+    search?: string;
+    page?: number;
+    per_page?: number;
+    status?: string;
+  }): Promise<{ results: any[]; count: number }> {
+    const response = await apiClient.get('/payments/tax-remittances/', { params });
     return response.data;
   },
 
