@@ -11,6 +11,12 @@
       "resizeMode": "contain",
       "backgroundColor": "#F5F5DC"
     },
+    "statusBar": {
+      "barStyle": "dark-content",
+      "hidden": false,
+      "translucent": true,
+      "backgroundColor": "transparent"
+    },
     "updates": {
       "fallbackToCacheTimeout": 0
     },
@@ -20,6 +26,11 @@
     "ios": {
       "supportsTabletMode": true,
       "bundleIdentifier": "com.stayafrica.app",
+      "statusBar": {
+        "barStyle": "dark-content",
+        "translucent": true,
+        "backgroundColor": "transparent"
+      },
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "StayAfrica needs your location to show nearby properties and experiences.",
         "NSLocationAlwaysAndWhenInUseUsageDescription": "StayAfrica uses your location to provide personalized recommendations.",
@@ -36,6 +47,11 @@
         "backgroundColor": "#F5F5DC"
       },
       "package": "com.stayafrica.app",
+      "statusBar": {
+        "barStyle": "dark-content",
+        "translucent": true,
+        "backgroundColor": "transparent"
+      },
       "permissions": [
         "android.permission.ACCESS_COARSE_LOCATION",
         "android.permission.ACCESS_FINE_LOCATION",

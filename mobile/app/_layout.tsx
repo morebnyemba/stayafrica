@@ -4,7 +4,7 @@ import { Stack } from 'expo-router';
 import { useRouter, SplashScreen } from 'expo-router';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { ActivityIndicator, View, Platform } from 'react-native';
+import { ActivityIndicator, View, Platform, StatusBar } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Providers } from '@/context/providers';
 import { useAuth } from '@/context/auth-context';
@@ -48,6 +48,15 @@ function RootLayoutContent() {
   const [hasSeenOnboarding, setHasSeenOnboarding] = useState<boolean | null>(null);
   const [checkingOnboarding, setCheckingOnboarding] = useState(true);
   const [fontsLoaded, setFontsLoaded] = useState(false);
+
+  // Set status bar style
+  useEffect(() => {
+    StatusBar.setBarStyle('dark-content');
+    if (Platform.OS === 'android') {
+      StatusBar.setBackgroundColor('transparent');
+      StatusBar.setTranslucent(true);
+    }
+  }, []);
 
   // Load fonts
   useEffect(() => {
@@ -107,6 +116,7 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
+        <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent={true} />
         <Providers>
           <RootLayoutContent />
         </Providers>
