@@ -109,9 +109,9 @@ export default function HostBookingsScreen() {
             </LinearGradient>
             <View className="flex-1">
               <Text className="text-sm font-semibold text-forest">
-                {booking.guest?.first_name} {booking.guest?.last_name}
+                Guest
               </Text>
-              <Text className="text-xs text-moss">{booking.guest?.email}</Text>
+              <Text className="text-xs text-moss">{booking.guest_email || 'No email'}</Text>
             </View>
           </View>
 
@@ -119,7 +119,7 @@ export default function HostBookingsScreen() {
           <View className="flex-row items-center mb-2">
             <Ionicons name="calendar" size={16} color="#3A5C50" />
             <Text className="text-sm text-moss ml-2">
-              {format(new Date(booking.check_in_date), 'MMM dd')} - {format(new Date(booking.check_out_date), 'MMM dd, yyyy')}
+              {format(new Date(booking.check_in), 'MMM dd')} - {format(new Date(booking.check_out), 'MMM dd, yyyy')}
             </Text>
           </View>
 
@@ -140,7 +140,7 @@ export default function HostBookingsScreen() {
               </Text>
             </View>
             <Text className="text-lg font-bold text-gold">
-              ${booking.total_price}
+              ${booking.grand_total}
             </Text>
           </View>
         </View>

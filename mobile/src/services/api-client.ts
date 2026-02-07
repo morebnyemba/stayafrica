@@ -222,6 +222,10 @@ class APIClient {
     ).data;
   }
 
+  async getBookingById(id: string): Promise<any> {
+    return (await this.client.get(`/bookings/${id}/`)).data;
+  }
+
   async createBooking(data: any): Promise<any> {
     return (await this.client.post('/bookings/', data)).data;
   }

@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '@/context/auth-context';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useBookingById } from '@/hooks/api-hooks';
 
 export default function HostBookingDetailScreen() {
   const router = useRouter();
@@ -11,9 +12,8 @@ export default function HostBookingDetailScreen() {
   const { isAuthenticated } = useAuth();
   const insets = useSafeAreaInsets();
 
-  // TODO: Fetch booking details from API
-  const booking = null;
-  const loading = false;
+  // Fetch booking details from API
+  const { data: booking, isLoading: loading } = useBookingById(id);
 
   if (!isAuthenticated) {
     return (
@@ -85,6 +85,24 @@ export default function HostBookingDetailScreen() {
       <View className="px-4 py-6">
         {booking ? (
           <>
+            {/* Status Badge */}
+            <View className="mb-4">
+              <View className="bg-white rounded-2xl p-4" style={{
+                shadowColor: '#122F26',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.05,
+                shadowRadius: 4,
+                elevation: 2,
+              }}>
+                <View className="flex-row items-center justify-between">
+                  <Text className="text-moss text-sm font-medium">Booking Status</Text>
+                  <View className="bg-green-100 px-3 py-1.5 rounded-full">
+                    <Text className="text-green-800 text-xs font-semibold capitalize">{booking.status}</Text>
+                  </View>
+                </View>
+              </View>
+            </View>
+
             {/* Guest Info */}
             <View className="bg-white rounded-2xl p-4 mb-4" style={{
               shadowColor: '#122F26',
@@ -93,8 +111,19 @@ export default function HostBookingDetailScreen() {
               shadowRadius: 4,
               elevation: 2,
             }}>
-              <Text className="text-lg font-bold text-forest mb-2">Guest Information</Text>
-              {/* Add guest details here */}
+              <Text className="text-lg font-bold text-forest mb-4">Guest Information</Text>
+              <View className="flex-row items-center mb-3">
+                <View className="bg-gold/20 rounded-full p-3">
+                  <Ionicons name="person" size={24} color="#D9B168" />
+                </View>
+                <View className="ml-3">
+                  <Text className="text-forest font-bold">{booking.guest_email || 'Guest'}</Text>
+                  <View className="flex-row items-center mt-1">
+                    <Ionicons name="people" size={14} color="#3A5C50" />
+                    <Text className="text-moss text-sm ml-1">{booking.number_of_guests} {booking.number_of_guests === 1 ? 'guest' : 'guests'}</Text>
+                  </View>
+                </View>
+              </View>
             </View>
 
             {/* Booking Details */}
@@ -105,19 +134,128 @@ export default function HostBookingDetailScreen() {
               shadowRadius: 4,
               elevation: 2,
             }}>
-              <Text className="text-lg font-bold text-forest mb-2">Booking Details</Text>
-              {/* Add booking dates, property info, etc */}
+              <Text className="text-lg font-bold text-forest mb-4">Booking Details</Text>
+              
+              {/* Dates */}
+              <View className="mb-4">
+                <View className="flex-row items-center justify-between mb-3">
+                  <View className="flex-1">
+                    <Text className="text-moss text-xs font-medium mb-1">Check-in</Text>
+                    <View className="flex-row items-center">
+                      <Ionicons name="calendar" size={16} color="#3A5C50" />
+                      <Text className="text-forest font-bold ml-2">
+                        {new Date(booking.check_in).toLocaleDateString('en-US', { 
+                          weekday: 'short',
+                          month: 'short', 
+                          day: 'numeric',
+                          year: 'numeric'
+                        })}
+                      </Text>
+                    </View>
+                  </View>
+                  <Ionicons name="arrow-forward" size={20} color="#D9B168" />
+                  <View className="flex-1 items-end">
+                    <Text className="text-moss text-xs font-medium mb-1">Check-out</Text>
+                    <View className="flex-row items-center">
+                      <Ionicons name="calendar" size={16} color="#3A5C50" />
+                      <Text className="text-forest font-bold ml-2">
+                        {new Date(booking.check_out).toLocaleDateString('en-US', { 
+                          weekday: 'short',
+                          month: 'short', 
+                          day: 'numeric',
+                          year: 'numeric'
+                        })}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+              </View>
+
+              {/* Duration */}
+              <View className="border-t border-sand-200 pt-4">
+                <View className="flex-row justify-between">
+                  <View className="flex-row items-center">
+                    <Ionicons name="moon" size={20} color="#3A5C50" />
+                    <Text className="text-moss ml-2">Total Nights</Text>
+                  </View>
+                  <Text className="text-forest font-bold">{booking.nights || booking.number_of_nights}</Text>
+                </View>
+              </View>
             </View>
 
-            {/* Actions */}
-            <View className="flex-row gap-3">
-              <TouchableOpacity className="flex-1 bg-green-500 py-4 rounded-2xl items-center">
-                <Text className="text-white font-bold">Approve</Text>
-              </TouchableOpacity>
-              <TouchableOpacity className="flex-1 bg-red-500 py-4 rounded-2xl items-center">
-                <Text className="text-white font-bold">Decline</Text>
-              </TouchableOpacity>
+            {/* Earnings Breakdown */}
+            <View className="bg-white rounded-2xl p-4 mb-4" style={{
+              shadowColor: '#122F26',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.05,
+              shadowRadius: 4,
+              elevation: 2,
+            }}>
+              <Text className="text-lg font-bold text-forest mb-4">Earnings</Text>
+              
+              <View className="space-y-3">
+                <View className="flex-row justify-between mb-2">
+                  <Text className="text-moss">Nightly total × {booking.nights || booking.number_of_nights} nights</Text>
+                  <Text className="text-forest font-semibold">${booking.nightly_total || booking.total_before_tax}</Text>
+                </View>
+                <View className="flex-row justify-between mb-2">
+                  <Text className="text-moss">Service fee (StayAfrica)</Text>
+                  <Text className="text-moss font-semibold">-${booking.service_fee || 0}</Text>
+                </View>
+                {booking.commission_fee && parseFloat(booking.commission_fee) > 0 && (
+                  <View className="flex-row justify-between mb-2">
+                    <Text className="text-moss">Commission fee</Text>
+                    <Text className="text-moss font-semibold">-${booking.commission_fee}</Text>
+                  </View>
+                )}
+                <View className="border-t border-sand-200 pt-3 mt-2">
+                  <View className="flex-row justify-between">
+                    <Text className="text-forest font-bold text-lg">Total Earnings</Text>
+                    <Text className="text-gold font-black text-2xl">${booking.grand_total}</Text>
+                  </View>
+                </View>
+              </View>
             </View>
+
+            {/* Special Requests */}
+            {booking.special_requests && (
+              <View className="bg-white rounded-2xl p-4 mb-4" style={{
+                shadowColor: '#122F26',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.05,
+                shadowRadius: 4,
+                elevation: 2,
+              }}>
+                <Text className="text-lg font-bold text-forest mb-2">Special Requests</Text>
+                <View className="bg-sand-100 rounded-xl p-3">
+                  <Text className="text-moss">{booking.special_requests}</Text>
+                </View>
+              </View>
+            )}
+
+            {/* Actions for pending bookings */}
+            {booking.status === 'pending' && (
+              <View className="flex-row gap-3">
+                <TouchableOpacity className="flex-1 bg-green-500 py-4 rounded-2xl items-center">
+                  <Text className="text-white font-bold">Approve</Text>
+                </TouchableOpacity>
+                <TouchableOpacity className="flex-1 bg-red-500 py-4 rounded-2xl items-center">
+                  <Text className="text-white font-bold">Decline</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {/* Contact guest button for confirmed bookings */}
+            {booking.status === 'confirmed' && (
+              <TouchableOpacity>
+                <LinearGradient
+                  colors={['#D9B168', '#bea04f']}
+                  className="py-4 rounded-2xl items-center"
+                >
+                  <Text className="text-forest font-bold">Contact Guest</Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            )}
           </>
         ) : (
           <View className="items-center py-12">

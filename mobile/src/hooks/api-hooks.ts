@@ -47,6 +47,14 @@ export function useBookings(status?: string) {
   });
 }
 
+export function useBookingById(id: string) {
+  return useQuery<Booking>({
+    queryKey: ['booking', id],
+    queryFn: () => apiClient.getBookingById(id),
+    enabled: !!id,
+  });
+}
+
 export function useCreateBooking() {
   const queryClient = useQueryClient();
   return useMutation<Booking, Error, CreateBookingRequest>({

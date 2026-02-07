@@ -38,20 +38,36 @@ export interface Property {
 // Booking Types
 export interface Booking {
   id: string;
-  property_id: string;
-  guest_id: string;
+  booking_ref?: string;
+  property_id?: string;
+  rental_property?: string;
+  property?: {
+    id: string;
+    title: string;
+    city?: string;
+  };
+  property_title?: string;
+  guest_id?: string;
+  guest?: string;
+  guest_email?: string;
   check_in: string;
   check_out: string;
   number_of_guests: number;
-  number_of_nights: number;
-  price_per_night: number;
-  total_before_tax: number;
-  tax: number;
-  service_fee: number;
+  number_of_nights?: number;
+  nights?: number;
+  price_per_night?: number;
+  nightly_total?: number;
+  total_before_tax?: number;
+  tax?: number;
+  service_fee?: number;
+  commission_fee?: number;
+  cleaning_fee?: number;
   grand_total: number;
-  status: 'pending' | 'confirmed' | 'checked_in' | 'checked_out' | 'cancelled';
-  special_requests: string;
+  currency?: string;
+  status: 'pending' | 'confirmed' | 'checked_in' | 'checked_out' | 'cancelled' | 'completed';
+  special_requests?: string;
   created_at: string;
+  updated_at?: string;
 }
 
 // Review Types

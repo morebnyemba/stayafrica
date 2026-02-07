@@ -3,15 +3,15 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '@/context/auth-context';
+import { useBookingById } from '@/hooks/api-hooks';
 
 export default function BookingDetailScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { isAuthenticated } = useAuth();
 
-  // TODO: Fetch booking details from API
-  const booking = null;
-  const loading = false;
+  // Fetch booking details from API
+  const { data: booking, isLoading: loading } = useBookingById(id);
 
   if (!isAuthenticated) {
     return (
@@ -86,16 +86,22 @@ export default function BookingDetailScreen() {
       <View className="px-4 py-6 pb-8">
         {booking ? (
           <>
-            {/* Property Info */}
-            <View className="bg-white rounded-2xl p-4 mb-4" style={{
-              shadowColor: '#122F26',
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.05,
-              shadowRadius: 4,
-              elevation: 2,
-            }}>
-              <Text className="text-lg font-bold text-forest mb-2">Property Details</Text>
-              {/* Add property details here */}
+            {/* Status Badge */}
+            <View className="mb-4">
+              <View className="bg-white rounded-2xl p-4" style={{
+                shadowColor: '#122F26',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.05,
+                shadowRadius: 4,
+                elevation: 2,
+              }}>
+                <View className="flex-row items-center justify-between">
+                  <Text className="text-moss text-sm font-medium">Status</Text>
+                  <View className="bg-green-100 px-3 py-1.5 rounded-full">
+                    <Text className="text-green-800 text-xs font-semibold capitalize">{booking.status}</Text>
+                  </View>
+                </View>
+              </View>
             </View>
 
             {/* Booking Details */}
@@ -106,21 +112,123 @@ export default function BookingDetailScreen() {
               shadowRadius: 4,
               elevation: 2,
             }}>
-              <Text className="text-lg font-bold text-forest mb-2">Booking Details</Text>
-              {/* Add booking dates, guests, etc */}
+              <Text className="text-lg font-bold text-forest mb-4">Booking Details</Text>
+              
+              {/* Dates */}
+              <View className="mb-4">
+                <View className="flex-row items-center justify-between mb-3">
+                  <View className="flex-1">
+                    <Text className="text-moss text-xs font-medium mb-1">Check-in</Text>
+                    <View className="flex-row items-center">
+                      <Ionicons name="calendar" size={16} color="#3A5C50" />
+                      <Text className="text-forest font-bold ml-2">
+                        {new Date(booking.check_in).toLocaleDateString('en-US', { 
+                          weekday: 'short',
+                          month: 'short', 
+                          day: 'numeric',
+                          year: 'numeric'
+                        })}
+                      </Text>
+                    </View>
+                  </View>
+                  <Ionicons name="arrow-forward" size={20} color="#D9B168" />
+                  <View className="flex-1 items-end">
+                    <Text className="text-moss text-xs font-medium mb-1">Check-out</Text>
+                    <View className="flex-row items-center">
+                      <Ionicons name="calendar" size={16} color="#3A5C50" />
+                      <Text className="text-forest font-bold ml-2">
+                        {new Date(booking.check_out).toLocaleDateString('en-US', { 
+                          weekday: 'short',
+                          month: 'short', 
+                          day: 'numeric',
+                          year: 'numeric'
+                        })}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+              </View>
+
+              {/* Guests & Nights */}
+              <View className="border-t border-sand-200 pt-4">
+                <View className="flex-row justify-between mb-3">
+                  <View className="flex-row items-center">
+                    <Ionicons name="people" size={20} color="#3A5C50" />
+                    <Text className="text-moss ml-2">Guests</Text>
+                  </View>
+                  <Text className="text-forest font-bold">{booking.number_of_guests}</Text>
+                </View>
+                <View className="flex-row justify-between">
+                  <View className="flex-row items-center">
+                    <Ionicons name="moon" size={20} color="#3A5C50" />
+                    <Text className="text-moss ml-2">Nights</Text>
+                  </View>
+                  <Text className="text-forest font-bold">{booking.nights || booking.number_of_nights}</Text>
+                </View>
+              </View>
             </View>
 
-            {/* Actions */}
-            <View className="flex-row gap-3">
-              <TouchableOpacity className="flex-1">
-                <LinearGradient
-                  colors={['#D9B168', '#bea04f']}
-                  className="py-4 rounded-2xl items-center"
-                >
-                  <Text className="text-forest font-bold">Contact Host</Text>
-                </LinearGradient>
-              </TouchableOpacity>
+            {/* Price Breakdown */}
+            <View className="bg-white rounded-2xl p-4 mb-4" style={{
+              shadowColor: '#122F26',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.05,
+              shadowRadius: 4,
+              elevation: 2,
+            }}>
+              <Text className="text-lg font-bold text-forest mb-4">Price Details</Text>
+              
+              <View className="space-y-3">
+                <View className="flex-row justify-between mb-2">
+                  <Text className="text-moss">Accommodation ({booking.nights || booking.number_of_nights} nights)</Text>
+                  <Text className="text-forest font-semibold">${booking.nightly_total || booking.total_before_tax}</Text>
+                </View>
+                <View className="flex-row justify-between mb-2">
+                  <Text className="text-moss">Service fee</Text>
+                  <Text className="text-forest font-semibold">${booking.service_fee || 0}</Text>
+                </View>
+                {booking.cleaning_fee && parseFloat(booking.cleaning_fee) > 0 && (
+                  <View className="flex-row justify-between mb-2">
+                    <Text className="text-moss">Cleaning fee</Text>
+                    <Text className="text-forest font-semibold">${booking.cleaning_fee}</Text>
+                  </View>
+                )}
+                <View className="border-t border-sand-200 pt-3 mt-2">
+                  <View className="flex-row justify-between">
+                    <Text className="text-forest font-bold text-lg">Total</Text>
+                    <Text className="text-gold font-black text-2xl">${booking.grand_total}</Text>
+                  </View>
+                </View>
+              </View>
             </View>
+
+            {/* Special Requests */}
+            {booking.special_requests && (
+              <View className="bg-white rounded-2xl p-4 mb-4" style={{
+                shadowColor: '#122F26',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.05,
+                shadowRadius: 4,
+                elevation: 2,
+              }}>
+                <Text className="text-lg font-bold text-forest mb-2">Special Requests</Text>
+                <Text className="text-moss">{booking.special_requests}</Text>
+              </View>
+            )}
+
+            {/* Actions */}
+            {booking.status === 'confirmed' && (
+              <View className="flex-row gap-3">
+                <TouchableOpacity className="flex-1">
+                  <LinearGradient
+                    colors={['#D9B168', '#bea04f']}
+                    className="py-4 rounded-2xl items-center"
+                  >
+                    <Text className="text-forest font-bold">Contact Host</Text>
+                  </LinearGradient>
+                </TouchableOpacity>
+              </View>
+            )}
           </>
         ) : (
           <View className="items-center py-12">
