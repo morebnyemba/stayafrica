@@ -198,4 +198,99 @@ export const adminApi = {
     const response = await apiClient.get('/users/verification/statistics/');
     return response.data;
   },
+
+  // Reviews Management
+  async getReviews(params?: {
+    search?: string;
+    rating?: number;
+    page?: number;
+    per_page?: number;
+  }): Promise<{ results: any[]; count: number }> {
+    const response = await apiClient.get('/reviews/', { params });
+    return response.data;
+  },
+
+  async moderateReview(id: string): Promise<any> {
+    const response = await apiClient.patch(`/reviews/${id}/`, {
+      text: '[MODERATED - This review has been hidden by administrators]'
+    });
+    return response.data;
+  },
+
+  async hideReview(id: string): Promise<any> {
+    const response = await apiClient.patch(`/reviews/${id}/`, {
+      text: '[HIDDEN]'
+    });
+    return response.data;
+  },
+
+  async deleteReview(id: string): Promise<void> {
+    await apiClient.delete(`/reviews/${id}/`);
+  },
+
+  // Wallets Management
+  async getWallets(params?: {
+    search?: string;
+    status?: string;
+    page?: number;
+    per_page?: number;
+  }): Promise<{ results: any[]; count: number }> {
+    const response = await apiClient.get('/payments/wallets/', { params });
+    return response.data;
+  },
+
+  async activateWallet(id: string): Promise<any> {
+    const response = await apiClient.patch(`/payments/wallets/${id}/`, {
+      status: 'active'
+    });
+    return response.data;
+  },
+
+  async suspendWallet(id: string): Promise<any> {
+    const response = await apiClient.patch(`/payments/wallets/${id}/`, {
+      status: 'suspended'
+    });
+    return response.data;
+  },
+
+  async closeWallet(id: string): Promise<any> {
+    const response = await apiClient.patch(`/payments/wallets/${id}/`, {
+      status: 'closed'
+    });
+    return response.data;
+  },
+
+  // Withdrawals Management
+  async getWithdrawals(params?: {
+    search?: string;
+    status?: string;
+    page?: number;
+    per_page?: number;
+  }): Promise<{ results: any[]; count: number }> {
+    const response = await apiClient.get('/payments/withdrawals/', { params });
+    return response.data;
+  },
+
+  async markWithdrawalProcessing(id: string): Promise<any> {
+    const response = await apiClient.patch(`/payments/withdrawals/${id}/`, {
+      status: 'processing'
+    });
+    return response.data;
+  },
+
+  async markWithdrawalCompleted(id: string, notes?: string): Promise<any> {
+    const response = await apiClient.patch(`/payments/withdrawals/${id}/`, {
+      status: 'completed',
+      admin_notes: notes
+    });
+    return response.data;
+  },
+
+  async markWithdrawalFailed(id: string, notes?: string): Promise<any> {
+    const response = await apiClient.patch(`/payments/withdrawals/${id}/`, {
+      status: 'failed',
+      admin_notes: notes
+    });
+    return response.data;
+  },
 };

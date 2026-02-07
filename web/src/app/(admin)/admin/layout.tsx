@@ -17,6 +17,8 @@ import {
   Menu,
   X,
   Shield,
+  Star,
+  Wallet,
 } from 'lucide-react';
 
 const adminNavItems = [
@@ -24,7 +26,9 @@ const adminNavItems = [
   { label: 'Users', href: '/admin/users', icon: Users },
   { label: 'Properties', href: '/admin/properties', icon: Home },
   { label: 'Bookings', href: '/admin/bookings', icon: Calendar },
+  { label: 'Reviews', href: '/admin/reviews', icon: Star },
   { label: 'Payments', href: '/admin/payments', icon: CreditCard },
+  { label: 'Wallets', href: '/admin/wallets', icon: Wallet },
   { label: 'Identity Verification', href: '/admin/identity-verification', icon: Shield },
   { label: 'Audit Logs', href: '/admin/audit-logs', icon: FileText },
   { label: 'Settings', href: '/admin/settings', icon: Settings },
