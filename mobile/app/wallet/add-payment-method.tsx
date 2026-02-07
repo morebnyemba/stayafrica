@@ -82,7 +82,7 @@ export default function AddPaymentMethodScreen() {
     setLoading(true);
     try {
       // Call backend API to add payment method
-      const response = await apiClient.post('/payments/payment-methods/', {
+      const response = await apiClient.post('/payment-methods/', {
         provider: paymentData.provider,
         method_type: paymentData.method,
         name: paymentData.provider === 'stripe' ? 'Credit Card' : 

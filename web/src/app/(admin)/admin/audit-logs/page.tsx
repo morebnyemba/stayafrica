@@ -11,6 +11,7 @@ export default function AuditLogsPage() {
   const [actionFilter, setActionFilter] = useState<string>('');
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
+  const ITEMS_PER_PAGE = 25;
 
   useEffect(() => {
     loadLogs();
@@ -22,12 +23,14 @@ export default function AuditLogsPage() {
       const data = await adminApi.getAuditLogs({ 
         page, 
         action: actionFilter || undefined,
+        per_page: ITEMS_PER_PAGE,
       });
-      setLogs(data.results);
-      setTotalCount(data.count);
-    } catch (err) {
-      toast.error('Failed to load audit logs');
-      console.error(err);
+      setLogs(data.results || []);
+      setTotalCount(data.count || 0);
+    } catch (err: any) {
+      const errorMsg = err?.response?.data?.detail || 'Failed to load audit logs';
+      toast.error(errorMsg);
+      console.error('Audit logs load error:', err);
     } finally {
       setLoading(false);
     }

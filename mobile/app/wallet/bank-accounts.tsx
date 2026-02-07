@@ -40,7 +40,7 @@ export default function BankAccountsScreen() {
   const fetchBankAccounts = async () => {
     try {
       setLoading(true);
-      const response = await apiClient.get('/payments/bank-accounts/');
+      const response = await apiClient.get('/bank-accounts/');
       setBankAccounts(response.data.results || response.data || []);
     } catch (error) {
       console.error('Error fetching bank accounts:', error);
@@ -51,7 +51,7 @@ export default function BankAccountsScreen() {
 
   const handleSetPrimary = async (id: string) => {
     try {
-      await apiClient.post(`/payments/bank-accounts/${id}/set_primary/`);
+      await apiClient.post(`/bank-accounts/${id}/set_primary/`);
       setBankAccounts(accounts =>
         accounts.map(a => ({ ...a, is_primary: a.id === id }))
       );
@@ -73,7 +73,7 @@ export default function BankAccountsScreen() {
           style: 'destructive',
           onPress: async () => {
             try {
-              await apiClient.delete(`/payments/bank-accounts/${id}/`);
+              await apiClient.delete(`/bank-accounts/${id}/`);
               setBankAccounts(accounts => accounts.filter(a => a.id !== id));
               Alert.alert('Success', 'Bank account deleted');
             } catch (error) {
@@ -93,7 +93,7 @@ export default function BankAccountsScreen() {
     }
 
     try {
-      const response = await apiClient.post('/payments/bank-accounts/', {
+      const response = await apiClient.post('/bank-accounts/', {
         ...formData,
         is_primary: bankAccounts.length === 0, // Auto-set as primary if first account
       });

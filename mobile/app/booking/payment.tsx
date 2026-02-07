@@ -54,7 +54,7 @@ export default function PaymentScreen() {
   const fetchPaymentMethods = async () => {
     try {
       setLoading(true);
-      const response = await apiClient.get('/payments/payment-methods/');
+      const response = await apiClient.get('/payment-methods/');
       const methods = response.data.results || [];
       setPaymentMethods(methods);
       

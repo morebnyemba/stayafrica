@@ -13,10 +13,11 @@ export default function BookingsManagement() {
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
+  const ITEMS_PER_PAGE = 20;
 
   useEffect(() => {
     loadBookings();
-  }, [page, statusFilter]);
+  }, [page, statusFilter, search]);
 
   const loadBookings = async () => {
     try {
@@ -24,13 +25,15 @@ export default function BookingsManagement() {
       const data = await adminApi.getBookings({ 
         page, 
         status: statusFilter || undefined,
-        search: search || undefined,
+        search: search.trim() || undefined,
+        per_page: ITEMS_PER_PAGE,
       });
-      setBookings(data.results);
-      setTotalCount(data.count);
-    } catch (err) {
-      toast.error('Failed to load bookings');
-      console.error(err);
+      setBookings(data.results || []);
+      setTotalCount(data.count || 0);
+    } catch (err: any) {
+      const errorMsg = err?.response?.data?.detail || 'Failed to load bookings';
+      toast.error(errorMsg);
+      console.error('Bookings load error:', err);
     } finally {
       setLoading(false);
     }
@@ -38,7 +41,6 @@ export default function BookingsManagement() {
 
   const handleSearch = () => {
     setPage(1);
-    loadBookings();
   };
 
   const getStatusColor = (status: string) => {

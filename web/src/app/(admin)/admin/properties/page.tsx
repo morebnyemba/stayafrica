@@ -14,10 +14,11 @@ export default function PropertiesManagement() {
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const [selectedProperties, setSelectedProperties] = useState<string[]>([]);
+  const ITEMS_PER_PAGE = 20;
 
   useEffect(() => {
     loadProperties();
-  }, [page, statusFilter]);
+  }, [page, statusFilter, search]);
 
   const loadProperties = async () => {
     try {
@@ -25,13 +26,15 @@ export default function PropertiesManagement() {
       const data = await adminApi.getProperties({ 
         page, 
         status: statusFilter || undefined,
-        search: search || undefined,
+        search: search.trim() || undefined,
+        per_page: ITEMS_PER_PAGE,
       });
-      setProperties(data.results);
-      setTotalCount(data.count);
-    } catch (err) {
-      toast.error('Failed to load properties');
-      console.error(err);
+      setProperties(data.results || []);
+      setTotalCount(data.count || 0);
+    } catch (err: any) {
+      const errorMsg = err?.response?.data?.detail || 'Failed to load properties';
+      toast.error(errorMsg);
+      console.error('Properties load error:', err);
     } finally {
       setLoading(false);
     }
@@ -39,7 +42,6 @@ export default function PropertiesManagement() {
 
   const handleSearch = () => {
     setPage(1);
-    loadProperties();
   };
 
   const handleApprove = async (propertyId: string) => {
@@ -321,7 +323,7 @@ export default function PropertiesManagement() {
             {/* Pagination */}
             <div className="bg-gray-50 px-6 py-4 flex items-center justify-between border-t">
               <div className="text-sm text-[#122F26]">
-                Showing {(page - 1) * 30 + 1} to {Math.min(page * 30, totalCount)} of {totalCount} properties
+                Showing {totalCount > 0 ? (page - 1) * ITEMS_PER_PAGE + 1 : 0} to {Math.min(page * ITEMS_PER_PAGE, totalCount)} of {totalCount} properties
               </div>
               <div className="flex space-x-2">
                 <button
@@ -333,7 +335,7 @@ export default function PropertiesManagement() {
                 </button>
                 <button
                   onClick={() => setPage(p => p + 1)}
-                  disabled={page * 30 >= totalCount}
+                  disabled={page * ITEMS_PER_PAGE >= totalCount}
                   className="px-4 py-2 border border-[#3A5C50] rounded-lg text-sm font-medium text-[#122F26] hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Next

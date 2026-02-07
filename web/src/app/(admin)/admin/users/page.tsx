@@ -19,10 +19,11 @@ export default function UsersManagement() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [confirmAction, setConfirmAction] = useState<{ type: string; userId: string; data?: any } | null>(null);
+  const ITEMS_PER_PAGE = 20;
 
   useEffect(() => {
     loadUsers();
-  }, [page, roleFilter]);
+  }, [page, roleFilter, search]);
 
   const loadUsers = async () => {
     try {
@@ -30,13 +31,15 @@ export default function UsersManagement() {
       const data = await adminApi.getUsers({ 
         page, 
         role: roleFilter || undefined,
-        search: search || undefined,
+        search: search.trim() || undefined,
+        per_page: ITEMS_PER_PAGE,
       });
-      setUsers(data.results);
-      setTotalCount(data.count);
-    } catch (err) {
-      toast.error('Failed to load users');
-      console.error(err);
+      setUsers(data.results || []);
+      setTotalCount(data.count || 0);
+    } catch (err: any) {
+      const errorMsg = err?.response?.data?.detail || 'Failed to load users';
+      toast.error(errorMsg);
+      console.error('Users load error:', err);
     } finally {
       setLoading(false);
     }
@@ -44,7 +47,6 @@ export default function UsersManagement() {
 
   const handleSearch = () => {
     setPage(1);
-    loadUsers();
   };
 
   const handleVerify = async (userId: string) => {
@@ -331,7 +333,7 @@ export default function UsersManagement() {
             {/* Pagination */}
             <div className="bg-gray-50 px-6 py-4 flex items-center justify-between border-t">
               <div className="text-sm text-gray-700">
-                Showing {(page - 1) * 30 + 1} to {Math.min(page * 30, totalCount)} of {totalCount} users
+                Showing {totalCount > 0 ? (page - 1) * ITEMS_PER_PAGE + 1 : 0} to {Math.min(page * ITEMS_PER_PAGE, totalCount)} of {totalCount} users
               </div>
               <div className="flex space-x-2">
                 <button
@@ -343,7 +345,7 @@ export default function UsersManagement() {
                 </button>
                 <button
                   onClick={() => setPage(p => p + 1)}
-                  disabled={page * 30 >= totalCount}
+                  disabled={page * ITEMS_PER_PAGE >= totalCount}
                   className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Next

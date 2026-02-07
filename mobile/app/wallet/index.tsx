@@ -44,11 +44,11 @@ export default function WalletDashboardScreen() {
       setLoading(true);
       
       // Fetch wallet balance
-      const walletResponse = await apiClient.get('/payments/wallets/my_wallet/');
+      const walletResponse = await apiClient.get('/wallets/my_wallet/');
       setWallet(walletResponse.data);
 
       // Fetch recent transactions
-      const transactionsResponse = await apiClient.get('/payments/wallets/' + walletResponse.data.id + '/transactions/', {
+      const transactionsResponse = await apiClient.get('/wallets/' + walletResponse.data.id + '/transactions/', {
         params: { page_size: 20, ordering: '-created_at' }
       });
       setTransactions(transactionsResponse.data.results || []);

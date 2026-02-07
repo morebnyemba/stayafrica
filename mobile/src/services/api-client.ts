@@ -402,11 +402,11 @@ class APIClient {
 
   // Wallet/Payments
   async getWalletBalance(): Promise<WalletBalance> {
-    return (await this.client.get('/payments/wallet/')).data;
+    return (await this.client.get('/wallets/my_wallet/')).data;
   }
 
   async getTransactions(): Promise<{ results: Transaction[] }> {
-    return (await this.client.get('/payments/transactions/')).data;
+    return (await this.client.get('/transactions/')).data;
   }
 
   async withdrawFunds(amount: number): Promise<{ message: string; balance: number }> {
@@ -432,41 +432,41 @@ class APIClient {
 
   // Bank accounts
   async getBankAccounts(): Promise<any> {
-    return (await this.client.get('/payments/bank-accounts/')).data;
+    return (await this.client.get('/bank-accounts/')).data;
   }
 
   async createBankAccount(data: any): Promise<any> {
-    return (await this.client.post('/payments/bank-accounts/', data)).data;
+    return (await this.client.post('/bank-accounts/', data)).data;
   }
 
   async updateBankAccount(accountId: string, data: any): Promise<any> {
-    return (await this.client.patch(`/payments/bank-accounts/${accountId}/`, data)).data;
+    return (await this.client.patch(`/bank-accounts/${accountId}/`, data)).data;
   }
 
   async deleteBankAccount(accountId: string): Promise<void> {
-    return (await this.client.delete(`/payments/bank-accounts/${accountId}/`)).data;
+    return (await this.client.delete(`/bank-accounts/${accountId}/`)).data;
   }
 
   async setPrimaryBankAccount(accountId: string): Promise<any> {
-    return (await this.client.post(`/payments/bank-accounts/${accountId}/set_primary/`)).data;
+    return (await this.client.post(`/bank-accounts/${accountId}/set_primary/`)).data;
   }
 
   // Wallet management
   async getMyWallet(): Promise<any> {
-    return (await this.client.get('/payments/wallets/my_wallet/')).data;
+    return (await this.client.get('/wallets/my_wallet/')).data;
   }
 
   async getWalletTransactions(walletId: string, params?: any): Promise<any> {
-    return (await this.client.get(`/payments/wallets/${walletId}/transactions/`, { params })).data;
+    return (await this.client.get(`/wallets/${walletId}/transactions/`, { params })).data;
   }
 
   // Withdrawals
   async getWithdrawals(params?: any): Promise<any> {
-    return (await this.client.get('/payments/withdrawals/', { params })).data;
+    return (await this.client.get('/withdrawals/', { params })).data;
   }
 
   async initiateWithdrawal(data: any): Promise<any> {
-    return (await this.client.post('/payments/withdrawals/', data)).data;
+    return (await this.client.post('/withdrawals/', data)).data;
   }
 
   // Generic request method

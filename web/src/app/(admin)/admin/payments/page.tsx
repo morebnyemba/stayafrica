@@ -12,6 +12,7 @@ export default function PaymentsManagement() {
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
+  const ITEMS_PER_PAGE = 20;
 
   useEffect(() => {
     loadPayments();
@@ -23,12 +24,14 @@ export default function PaymentsManagement() {
       const data = await adminApi.getPayments({ 
         page, 
         status: statusFilter || undefined,
+        per_page: ITEMS_PER_PAGE,
       });
-      setPayments(data.results);
-      setTotalCount(data.count);
-    } catch (err) {
-      toast.error('Failed to load payments');
-      console.error(err);
+      setPayments(data.results || []);
+      setTotalCount(data.count || 0);
+    } catch (err: any) {
+      const errorMsg = err?.response?.data?.detail || 'Failed to load payments';
+      toast.error(errorMsg);
+      console.error('Payments load error:', err);
     } finally {
       setLoading(false);
     }

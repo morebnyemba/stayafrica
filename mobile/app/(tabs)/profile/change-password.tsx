@@ -1,16 +1,89 @@
-import { View, Text, TouchableOpacity, ScrollView, TextInput, Alert, Platform, ActivityIndicator, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard } from 'react-native';
-import { useState } from 'react';
+import { View, Text, TouchableOpacity, ScrollView, TextInput, Alert, Platform, ActivityIndicator, KeyboardAvoidingView, Pressable } from 'react-native';
+import { useState, useRef } from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { apiClient } from '@/services/api-client';
 
+interface PasswordFieldProps {
+  label: string;
+  value: string;
+  onChangeText: (text: string) => void;
+  placeholder: string;
+  showPassword: boolean;
+  onTogglePassword: () => void;
+  inputRef?: React.RefObject<TextInput>;
+}
+
+const PasswordField = ({ 
+  label, 
+  value, 
+  onChangeText, 
+  placeholder,
+  showPassword,
+  onTogglePassword,
+  inputRef,
+}: PasswordFieldProps) => {
+  const handleToggle = () => {
+    onTogglePassword();
+    // Refocus the input immediately after toggling
+    setTimeout(() => {
+      inputRef?.current?.focus();
+    }, 50);
+  };
+
+  return (
+    <View className="mb-4">
+      <Text className="text-sm font-medium text-forest mb-2">{label}</Text>
+      <View className="flex-row items-center bg-white rounded-2xl border border-sand-300">
+        <View className="pl-4" pointerEvents="none">
+          <Ionicons name="lock-closed-outline" size={20} color="#3A5C50" />
+        </View>
+        <View className="flex-1">
+          <TextInput
+            ref={inputRef}
+            value={value}
+            onChangeText={onChangeText}
+            placeholder={placeholder}
+            secureTextEntry={!showPassword}
+            className="px-4 py-4 text-forest"
+            placeholderTextColor="#94a3b8"
+            autoCapitalize="none"
+            autoCorrect={false}
+            blurOnSubmit={false}
+            returnKeyType="next"
+            contextMenuHidden={false}
+            underlineColorAndroid="transparent"
+          />
+        </View>
+        <Pressable 
+          onPressIn={handleToggle}
+          className="pr-4"
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
+          <Ionicons 
+            name={showPassword ? "eye-off-outline" : "eye-outline"} 
+            size={20} 
+            color="#3A5C50" 
+          />
+        </Pressable>
+      </View>
+    </View>
+  );
+};
+
 export default function ChangePasswordScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [isLoading, setIsLoading] = useState(false);
   const [showOldPassword, setShowOldPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  
+  const oldPasswordRef = useRef<TextInput>(null);
+  const newPasswordRef = useRef<TextInput>(null);
+  const confirmPasswordRef = useRef<TextInput>(null);
 
   const [formData, setFormData] = useState({
     old_password: '',
@@ -57,51 +130,22 @@ export default function ChangePasswordScreen() {
     }
   };
 
-  const PasswordField = ({ 
-    label, 
-    value, 
-    onChangeText, 
-    placeholder,
-    showPassword,
-    onTogglePassword,
-  }: any) => (
-    <View className="mb-4">
-      <Text className="text-sm font-medium text-forest mb-2">{label}</Text>
-      <View className="flex-row items-center bg-white rounded-2xl border border-sand-300">
-        <View className="pl-4">
-          <Ionicons name="lock-closed-outline" size={20} color="#3A5C50" />
-        </View>
-        <TextInput
-          value={value}
-          onChangeText={onChangeText}
-          placeholder={placeholder}
-          secureTextEntry={!showPassword}
-          className="flex-1 px-4 py-4 text-forest"
-          placeholderTextColor="#94a3b8"
-        />
-        <TouchableOpacity onPress={onTogglePassword} className="pr-4">
-          <Ionicons 
-            name={showPassword ? "eye-off-outline" : "eye-outline"} 
-            size={20} 
-            color="#3A5C50" 
-          />
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
-
   return (
     <KeyboardAvoidingView 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       className="flex-1"
+      keyboardVerticalOffset={0}
     >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <ScrollView 
-          className="flex-1 bg-sand-100" 
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{ paddingBottom: 40 }}
-        >
+      <ScrollView 
+        className="flex-1 bg-sand-100" 
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{
+          flexGrow: 1,
+          paddingTop: insets.top + 20,
+          paddingBottom: insets.bottom + 40,
+        }}
+      >
       {/* Header */}
       <LinearGradient
         colors={['#122F26', '#1d392f', '#2d4a40']}
@@ -154,6 +198,7 @@ export default function ChangePasswordScreen() {
             placeholder="Enter your current password"
             showPassword={showOldPassword}
             onTogglePassword={() => setShowOldPassword(!showOldPassword)}
+            inputRef={oldPasswordRef}
           />
 
           <PasswordField
@@ -163,6 +208,7 @@ export default function ChangePasswordScreen() {
             placeholder="Enter your new password"
             showPassword={showNewPassword}
             onTogglePassword={() => setShowNewPassword(!showNewPassword)}
+            inputRef={newPasswordRef}
           />
 
           <PasswordField
@@ -172,6 +218,7 @@ export default function ChangePasswordScreen() {
             placeholder="Confirm your new password"
             showPassword={showConfirmPassword}
             onTogglePassword={() => setShowConfirmPassword(!showConfirmPassword)}
+            inputRef={confirmPasswordRef}
           />
 
           {/* Password requirements */}
@@ -242,8 +289,7 @@ export default function ChangePasswordScreen() {
           </View>
         </TouchableOpacity>
       </View>
-        </ScrollView>
-      </TouchableWithoutFeedback>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }

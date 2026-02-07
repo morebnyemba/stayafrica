@@ -1,5 +1,6 @@
-import { View, Text, TouchableOpacity, ScrollView, TextInput, Alert, Platform, ActivityIndicator, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, TextInput, Alert, Platform, ActivityIndicator, KeyboardAvoidingView } from 'react-native';
 import { useState, useEffect } from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '@/context/auth-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -21,9 +22,48 @@ const COUNTRIES = [
   'Ukraine', 'United Arab Emirates', 'United Kingdom', 'United States', 'Vietnam', 'Zambia', 'Zimbabwe'
 ];
 
+interface InputFieldProps {
+  icon: keyof typeof Ionicons.glyphMap;
+  label: string;
+  value: string;
+  onChangeText: (text: string) => void;
+  placeholder: string;
+  keyboardType?: string;
+  editable?: boolean;
+}
+
+const InputField = ({ 
+  icon, 
+  label, 
+  value, 
+  onChangeText, 
+  placeholder,
+  keyboardType = 'default',
+  editable = true,
+}: InputFieldProps) => (
+  <View className="mb-4">
+    <Text className="text-sm font-medium text-forest mb-2">{label}</Text>
+    <View className="flex-row items-center bg-white rounded-2xl border border-sand-300">
+      <View className="pl-4">
+        <Ionicons name={icon} size={20} color="#3A5C50" />
+      </View>
+      <TextInput
+        value={value}
+        onChangeText={onChangeText}
+        placeholder={placeholder}
+        keyboardType={keyboardType}
+        editable={editable}
+        className={`flex-1 px-4 py-4 text-forest ${!editable ? 'opacity-50' : ''}`}
+        placeholderTextColor="#94a3b8"
+      />
+    </View>
+  </View>
+);
+
 export default function EditProfileScreen() {
   const { user, updateProfile } = useAuth();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [isLoading, setIsLoading] = useState(false);
   const [showCountryPicker, setShowCountryPicker] = useState(false);
 
@@ -88,46 +128,21 @@ export default function EditProfileScreen() {
     }
   };
 
-  const InputField = ({ 
-    icon, 
-    label, 
-    value, 
-    onChangeText, 
-    placeholder,
-    keyboardType = 'default',
-    editable = true,
-  }: any) => (
-    <View className="mb-4">
-      <Text className="text-sm font-medium text-forest mb-2">{label}</Text>
-      <View className="flex-row items-center bg-white rounded-2xl border border-sand-300">
-        <View className="pl-4">
-          <Ionicons name={icon} size={20} color="#3A5C50" />
-        </View>
-        <TextInput
-          value={value}
-          onChangeText={onChangeText}
-          placeholder={placeholder}
-          keyboardType={keyboardType}
-          editable={editable}
-          className={`flex-1 px-4 py-4 text-forest ${!editable ? 'opacity-50' : ''}`}
-          placeholderTextColor="#94a3b8"
-        />
-      </View>
-    </View>
-  );
-
   return (
     <KeyboardAvoidingView 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       className="flex-1"
     >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <ScrollView 
-          className="flex-1 bg-sand-100" 
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{ paddingBottom: 40 }}
-        >
+      <ScrollView 
+        className="flex-1 bg-sand-100" 
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{
+          flexGrow: 1,
+          paddingTop: insets.top + 20,
+          paddingBottom: insets.bottom + 40,
+        }}
+      >
       {/* Header */}
       <LinearGradient
         colors={['#122F26', '#1d392f', '#2d4a40']}
@@ -293,8 +308,7 @@ export default function EditProfileScreen() {
           </View>
         </TouchableOpacity>
       </View>
-        </ScrollView>
-      </TouchableWithoutFeedback>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }

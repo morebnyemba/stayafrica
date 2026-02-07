@@ -32,7 +32,7 @@ export default function PaymentMethodsScreen() {
   const fetchPaymentMethods = async () => {
     try {
       setLoading(true);
-      const response = await apiClient.get('/payments/payment-methods/');
+      const response = await apiClient.get('/payment-methods/');
       setPaymentMethods(response.data.results || []);
     } catch (error) {
       console.error('Error fetching payment methods:', error);
@@ -62,7 +62,7 @@ export default function PaymentMethodsScreen() {
 
   const handleSetDefault = async (id: string) => {
     try {
-      await apiClient.patch(`/payments/payment-methods/${id}/set_default/`, {});
+      await apiClient.patch(`/payment-methods/${id}/set_default/`, {});
       setPaymentMethods(methods => 
         methods.map(m => ({ ...m, is_default: m.id === id }))
       );
@@ -84,7 +84,7 @@ export default function PaymentMethodsScreen() {
           style: 'destructive',
           onPress: async () => {
             try {
-              await apiClient.delete(`/payments/payment-methods/${id}/`);
+              await apiClient.delete(`/payment-methods/${id}/`);
               setPaymentMethods(methods => methods.filter(m => m.id !== id));
               Alert.alert('Success', 'Payment method deleted');
             } catch (error) {

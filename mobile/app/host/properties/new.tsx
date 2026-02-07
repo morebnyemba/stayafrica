@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, TouchableOpacity, Platform, TextInput, Alert, KeyboardTypeOptions, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, Image, Modal, FlatList } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Platform, TextInput, Alert, KeyboardTypeOptions, KeyboardAvoidingView, Image, Modal, FlatList } from 'react-native';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -352,7 +352,6 @@ export default function NewPropertyScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         className="flex-1"
       >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <ScrollView 
           className="flex-1 bg-sand-100" 
           showsVerticalScrollIndicator={false}
@@ -806,7 +805,6 @@ export default function NewPropertyScreen() {
         </View>
       </Modal>
         </ScrollView>
-        </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
