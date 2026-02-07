@@ -1,5 +1,5 @@
 import { View, Text, ScrollView, TouchableOpacity, Platform, TextInput, Alert, KeyboardTypeOptions, KeyboardAvoidingView, Image, Modal, FlatList } from 'react-native';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -144,7 +144,7 @@ export default function NewPropertyScreen() {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const pickImages = async () => {
+  const pickImages = useCallback(async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
       Alert.alert('Permission Denied', 'Camera roll permission is required');
@@ -161,13 +161,13 @@ export default function NewPropertyScreen() {
     if (!result.canceled && result.assets) {
       setImages(prev => [...prev, ...result.assets.map(asset => asset.uri)]);
     }
-  };
+  }, [images.length]);
 
-  const removeImage = (index: number) => {
+  const removeImage = useCallback((index: number) => {
     setImages(prev => prev.filter((_, i) => i !== index));
-  };
+  }, []);
 
-  const getCurrentLocation = async () => {
+  const getCurrentLocation = useCallback(async () => {
     const { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== 'granted') {
       Alert.alert('Permission Denied', 'Location permission is required');
@@ -180,9 +180,9 @@ export default function NewPropertyScreen() {
       latitude: location.coords.latitude,
       longitude: location.coords.longitude,
     }));
-  };
+  }, []);
 
-  const handleGeocode = async () => {
+  const handleGeocode = useCallback(async () => {
     if (!formData.address || !formData.city || !formData.country) {
       Alert.alert('Missing Info', 'Please enter address, city and country first');
       return;
@@ -205,7 +205,7 @@ export default function NewPropertyScreen() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [formData.address, formData.suburb, formData.city, formData.country]);
 
   const validateStep = (): boolean => {
     switch (currentStep) {
