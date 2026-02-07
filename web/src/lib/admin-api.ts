@@ -312,4 +312,65 @@ export const adminApi = {
     const response = await apiClient.get('/payments/tax-rates/', { params });
     return response.data;
   },
+
+  // POI Management
+  async getPOIs(params?: {
+    search?: string;
+    page?: number;
+    per_page?: number;
+  }): Promise<{ results: any[]; count: number }> {
+    const response = await apiClient.get('/properties/pois/', { params });
+    return response.data;
+  },
+
+  async getPOICategories(params?: {
+    search?: string;
+    page?: number;
+    per_page?: number;
+  }): Promise<{ results: any[]; count: number }> {
+    const response = await apiClient.get('/properties/poi-categories/', { params });
+    return response.data;
+  },
+
+  async verifyPOI(id: string): Promise<any> {
+    const response = await apiClient.patch(`/properties/pois/${id}/`, {
+      is_verified: true
+    });
+    return response.data;
+  },
+
+  async unverifyPOI(id: string): Promise<any> {
+    const response = await apiClient.patch(`/properties/pois/${id}/`, {
+      is_verified: false
+    });
+    return response.data;
+  },
+
+  // Messaging Automation
+  async getAutomatedMessages(params?: {
+    search?: string;
+    page?: number;
+    per_page?: number;
+  }): Promise<{ results: any[]; count: number }> {
+    const response = await apiClient.get('/messaging/automated-messages/', { params });
+    return response.data;
+  },
+
+  async getScheduledMessages(params?: {
+    search?: string;
+    page?: number;
+    per_page?: number;
+  }): Promise<{ results: any[]; count: number }> {
+    const response = await apiClient.get('/messaging/scheduled-messages/', { params });
+    return response.data;
+  },
+
+  async getQuickReplies(params?: {
+    search?: string;
+    page?: number;
+    per_page?: number;
+  }): Promise<{ results: any[]; count: number }> {
+    const response = await apiClient.get('/messaging/quick-replies/', { params });
+    return response.data;
+  },
 };
