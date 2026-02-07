@@ -1,6 +1,7 @@
 import React, { Component, ReactNode } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { logError } from '@/utils/logger';
 
 interface Props {
   children: ReactNode;
@@ -29,7 +30,11 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
+    // Use centralized logger instead of console.error
+    logError('ErrorBoundary caught an error', error, {
+      componentStack: errorInfo.componentStack,
+      errorInfo,
+    });
   }
 
   handleReset = () => {
