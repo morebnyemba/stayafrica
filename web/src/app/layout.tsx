@@ -3,8 +3,7 @@ import type { ReactNode } from 'react';
 import './globals.css';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { Providers } from '@/context/providers';
-import { Navigation, BottomNav } from '@/components/common/navigation';
-import { Footer } from '@/components/common/footer';
+import { AppShell } from '@/components/common/AppShell';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 
 export const metadata: Metadata = {
@@ -26,14 +25,7 @@ export default function RootLayout({
       <body className="antialiased bg-sand-100 text-primary-900">
         <ErrorBoundary>
           <Providers>
-            <div className="flex flex-col min-h-screen pb-16 lg:pb-0">
-              <Navigation />
-              <main id="main-content" className="flex-grow">
-                {children}
-              </main>
-              <BottomNav />
-              <Footer />
-            </div>
+            <AppShell>{children}</AppShell>
           </Providers>
         </ErrorBoundary>
       </body>
