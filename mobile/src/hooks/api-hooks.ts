@@ -134,8 +134,8 @@ export function useConversationMessages(conversationId: string) {
 export function useSendMessage() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ conversationId, message }: { conversationId: string; message: string }) =>
-      apiClient.sendMessage(conversationId, message),
+    mutationFn: ({ conversationId, receiverId, message }: { conversationId: string; receiverId: string; message: string }) =>
+      apiClient.sendMessage(conversationId, receiverId, message),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['conversations'] });
       if (variables?.conversationId) {

@@ -51,11 +51,19 @@ export default function ConversationDetailScreen() {
 
   const handleSend = async () => {
     const trimmed = message.trim();
-    if (!conversationId || !trimmed || !receiverId) return;
+    if (!conversationId || !trimmed) {
+      Alert.alert('Error', 'Conversation ID or message is missing');
+      return;
+    }
 
-    await sendMessage({ conversationId, receiverId, message: trimmed });
-    setMessage('');
-    refetch();
+    try {
+      await sendMessage({ conversationId, receiverId: receiverId || '', message: trimmed });
+      setMessage('');
+      refetch();
+    } catch (error: any) {
+      console.error('Send message error:', error?.response?.data || error?.message);
+      Alert.alert('Error', `Failed to send message: ${error?.response?.data?.detail || error?.message || 'Unknown error'}`);
+    }
   };
 
   const handleEditMessage = (messageId: string, currentText: string) => {

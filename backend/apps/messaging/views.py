@@ -2,6 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import PermissionDenied
 from django.db.models import Q, Prefetch
 from django.utils import timezone
 from django.contrib.auth import get_user_model
@@ -27,12 +28,12 @@ class ConversationViewSet(viewsets.ModelViewSet):
         return ConversationSerializer
     
     def get_queryset(self):
-        """Get conversations for the current user"""
+        """Get conversations for the current user only"""
         user = self.request.user
         
-        # Filter out archived conversations
+        # Filter conversations where current user is a participant
         queryset = Conversation.objects.filter(
-            participants=user
+            participants__id=user.id
         ).prefetch_related(
             'participants',
             'property',
@@ -40,11 +41,18 @@ class ConversationViewSet(viewsets.ModelViewSet):
             Prefetch('messages', queryset=Message.objects.select_related('sender', 'receiver'))
         ).distinct()
         
-        # Filter archived conversations
+        # Filter out archived conversations unless explicitly requested
         if self.request.query_params.get('archived') != 'true':
-            queryset = queryset.exclude(archived_by=user)
+            queryset = queryset.exclude(archived_by__id=user.id)
         
         return queryset.order_by('-updated_at')
+    
+    def retrieve(self, request, *args, **kwargs):
+        """Retrieve a conversation - ensure user is a participant"""
+        conversation = self.get_object()
+        if request.user not in conversation.participants.all():
+            raise PermissionDenied("You are not a participant in this conversation")
+        return super().retrieve(request, *args, **kwargs)
     
     def create(self, request, *args, **kwargs):
         """Create a new conversation"""
@@ -153,22 +161,26 @@ class MessageViewSet(viewsets.ModelViewSet):
     
     def perform_create(self, serializer):
         """Set the sender to the current user and route through Erlang if available"""
-        message = serializer.save(sender=self.request.user)
-        
-        # Try to route through Erlang for real-time delivery
         try:
-            from services.erlang_messaging import erlang_client
-            erlang_client.send_message(
-                conversation_id=message.conversation.id,
-                sender_id=message.sender.id,
-                receiver_id=message.receiver.id,
-                text=message.text,
-                message_type=message.message_type,
-                priority='high' if message.message_type == 'system' else 'normal',
-                metadata=message.metadata
-            )
+            message = serializer.save(sender=self.request.user)
+            
+            # Try to route through Erlang for real-time delivery
+            try:
+                from services.erlang_messaging import erlang_client
+                erlang_client.send_message(
+                    conversation_id=message.conversation.id,
+                    sender_id=message.sender.id,
+                    receiver_id=message.receiver.id,
+                    text=message.text,
+                    message_type=message.message_type,
+                    priority='high' if message.message_type == 'system' else 'normal',
+                    metadata=message.metadata
+                )
+            except Exception as e:
+                logger.warning(f"Failed to route message through Erlang: {str(e)}")
         except Exception as e:
-            logger.warning(f"Failed to route message through Erlang: {str(e)}")
+            logger.error(f"Error creating message: {str(e)}")
+            raise
     
     def destroy(self, request, *args, **kwargs):
         """Soft delete message"""

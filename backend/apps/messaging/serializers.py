@@ -117,12 +117,23 @@ class MessageCreateSerializer(serializers.ModelSerializer):
         receiver = data.get('receiver')
         sender = self.context['request'].user
         
+        # Validate message text is not empty
+        if not data.get('text', '').strip():
+            raise serializers.ValidationError({"text": "Message text cannot be empty."})
+        
+        # Validate conversation exists and sender is participant
         if conversation:
             participants = conversation.participants.all()
             if sender not in participants:
-                raise serializers.ValidationError("Sender must be a participant in the conversation")
+                raise serializers.ValidationError({"conversation": "Sender must be a participant in the conversation."})
+            if not receiver:
+                raise serializers.ValidationError({"receiver": "Receiver is required."})
             if receiver not in participants:
-                raise serializers.ValidationError("Receiver must be a participant in the conversation")
+                raise serializers.ValidationError({"receiver": "Receiver must be a participant in the conversation."})
+            if receiver == sender:
+                raise serializers.ValidationError({"receiver": "You cannot send a message to yourself."})
+        else:
+            raise serializers.ValidationError({"conversation": "Conversation is required."})
         
         return data
 
