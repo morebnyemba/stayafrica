@@ -71,6 +71,18 @@ export function useCancelBooking() {
     mutationFn: (id: string) => apiClient.cancelBooking(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bookings'] });
+      queryClient.invalidateQueries({ queryKey: ['host', 'bookings'] });
+    },
+  });
+}
+
+export function useConfirmBooking() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => apiClient.confirmBooking(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['bookings'] });
+      queryClient.invalidateQueries({ queryKey: ['host', 'bookings'] });
     },
   });
 }

@@ -234,6 +234,10 @@ class APIClient {
     return (await this.client.post(`/bookings/${id}/cancel/`)).data;
   }
 
+  async confirmBooking(id: string): Promise<any> {
+    return (await this.client.post(`/bookings/${id}/confirm/`)).data;
+  }
+
   // User
   async getUserProfile(): Promise<User> {
     return (await this.client.get('/users/profile/')).data;

@@ -245,7 +245,7 @@ export default function PropertyDetailsScreen() {
           >
             <View className="flex-row items-baseline">
               <Text className="text-4xl font-black text-forest">${pricePerNight}</Text>
-              <Text className="text-forest/80 ml-2 text-lg font-semibold">/night</Text>
+              <Text className="text-forest/80 ml-2 text-lg font-semibold">per night</Text>
             </View>
             {property.cleaning_fee && (
               <Text className="text-sm text-forest/70 mt-2">+ ${property.cleaning_fee} cleaning fee</Text>

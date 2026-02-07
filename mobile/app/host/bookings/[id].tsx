@@ -1,10 +1,11 @@
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '@/context/auth-context';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useBookingById } from '@/hooks/api-hooks';
+import { useBookingById, useConfirmBooking, useCancelBooking } from '@/hooks/api-hooks';
+import { useQueryClient } from '@tanstack/react-query';
 
 export default function HostBookingDetailScreen() {
   const router = useRouter();
@@ -14,6 +15,55 @@ export default function HostBookingDetailScreen() {
 
   // Fetch booking details from API
   const { data: booking, isLoading: loading } = useBookingById(id);
+  const confirmBooking = useConfirmBooking();
+  const cancelBooking = useCancelBooking();
+  const queryClient = useQueryClient();
+
+  const handleApprove = () => {
+    Alert.alert(
+      'Confirm Booking',
+      'Are you sure you want to approve this booking?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Approve',
+          onPress: async () => {
+            try {
+              await confirmBooking.mutateAsync(id);
+              queryClient.invalidateQueries({ queryKey: ['booking', id] });
+              Alert.alert('Success', 'Booking has been approved!');
+            } catch (error: any) {
+              Alert.alert('Error', error.response?.data?.error || 'Failed to approve booking');
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const handleDecline = () => {
+    Alert.alert(
+      'Decline Booking',
+      'Are you sure you want to decline this booking?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Decline',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await cancelBooking.mutateAsync(id);
+              queryClient.invalidateQueries({ queryKey: ['booking', id] });
+              Alert.alert('Declined', 'Booking has been declined.');
+              router.back();
+            } catch (error: any) {
+              Alert.alert('Error', error.response?.data?.error || 'Failed to decline booking');
+            }
+          },
+        },
+      ]
+    );
+  };
 
   if (!isAuthenticated) {
     return (
@@ -116,8 +166,13 @@ export default function HostBookingDetailScreen() {
                 <View className="bg-gold/20 rounded-full p-3">
                   <Ionicons name="person" size={24} color="#D9B168" />
                 </View>
-                <View className="ml-3">
-                  <Text className="text-forest font-bold">{booking.guest_email || 'Guest'}</Text>
+                <View className="ml-3 flex-1">
+                  <Text className="text-forest font-bold">
+                    {booking.guest_first_name && booking.guest_last_name
+                      ? `${booking.guest_first_name} ${booking.guest_last_name}`
+                      : 'Guest'}
+                  </Text>
+                  <Text className="text-moss text-sm">{booking.guest_email}</Text>
                   <View className="flex-row items-center mt-1">
                     <Ionicons name="people" size={14} color="#3A5C50" />
                     <Text className="text-moss text-sm ml-1">{booking.number_of_guests} {booking.number_of_guests === 1 ? 'guest' : 'guests'}</Text>
@@ -236,11 +291,23 @@ export default function HostBookingDetailScreen() {
             {/* Actions for pending bookings */}
             {booking.status === 'pending' && (
               <View className="flex-row gap-3">
-                <TouchableOpacity className="flex-1 bg-green-500 py-4 rounded-2xl items-center">
-                  <Text className="text-white font-bold">Approve</Text>
+                <TouchableOpacity 
+                  className="flex-1 bg-green-500 py-4 rounded-2xl items-center"
+                  onPress={handleApprove}
+                  disabled={confirmBooking.isPending || cancelBooking.isPending}
+                >
+                  <Text className="text-white font-bold">
+                    {confirmBooking.isPending ? 'Approving...' : 'Approve'}
+                  </Text>
                 </TouchableOpacity>
-                <TouchableOpacity className="flex-1 bg-red-500 py-4 rounded-2xl items-center">
-                  <Text className="text-white font-bold">Decline</Text>
+                <TouchableOpacity 
+                  className="flex-1 bg-red-500 py-4 rounded-2xl items-center"
+                  onPress={handleDecline}
+                  disabled={confirmBooking.isPending || cancelBooking.isPending}
+                >
+                  <Text className="text-white font-bold">
+                    {cancelBooking.isPending ? 'Declining...' : 'Decline'}
+                  </Text>
                 </TouchableOpacity>
               </View>
             )}

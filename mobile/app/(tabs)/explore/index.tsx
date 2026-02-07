@@ -29,14 +29,15 @@ export default function ExploreScreen() {
   const properties = propertiesData?.results || [];
   
   const filteredProperties = properties.filter((property: any) => {
+    const city = property.location?.city || property.city || '';
     const matchesSearch = property.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      property.location?.city?.toLowerCase().includes(searchQuery.toLowerCase());
+      city.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesSearch;
   });
 
   const featuredSections = useMemo(() => {
     const counts = filteredProperties.reduce<Record<string, number>>((acc, property: any) => {
-      const city = property.location?.city?.trim();
+      const city = (property.location?.city || property.city || '').trim();
       if (!city) return acc;
       acc[city] = (acc[city] || 0) + 1;
       return acc;
@@ -51,9 +52,22 @@ export default function ExploreScreen() {
       id: city,
       title: `Popular homes in ${city}`,
       city,
-      data: filteredProperties.filter((property: any) => property.location?.city === city).slice(0, 8),
+      data: filteredProperties.filter((property: any) => {
+        const propertyCity = property.location?.city || property.city;
+        return propertyCity === city;
+      }).slice(0, 8),
     }));
   }, [filteredProperties]);
+
+  // Get IDs of properties already shown in featured sections to avoid duplicates
+  const featuredPropertyIds = useMemo(() => {
+    return new Set(featuredSections.flatMap(section => section.data.map((p: any) => p.id)));
+  }, [featuredSections]);
+
+  // Filter out properties already shown in featured sections
+  const gridProperties = useMemo(() => {
+    return filteredProperties.filter((property: any) => !featuredPropertyIds.has(property.id));
+  }, [filteredProperties, featuredPropertyIds]);
 
   const handlePropertyPress = (id: string) => {
     router.push(`/(tabs)/explore/${id}`);
@@ -176,7 +190,7 @@ export default function ExploreScreen() {
           </View>
         ) : (
           <FlatList
-            data={filteredProperties}
+            data={gridProperties}
             numColumns={2}
             renderItem={({ item }) => (
               <View style={{ width: '48%' }} className="mb-4">

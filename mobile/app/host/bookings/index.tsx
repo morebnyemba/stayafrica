@@ -109,7 +109,9 @@ export default function HostBookingsScreen() {
             </LinearGradient>
             <View className="flex-1">
               <Text className="text-sm font-semibold text-forest">
-                Guest
+                {booking.guest_first_name && booking.guest_last_name
+                  ? `${booking.guest_first_name} ${booking.guest_last_name}`
+                  : 'Guest'}
               </Text>
               <Text className="text-xs text-moss">{booking.guest_email || 'No email'}</Text>
             </View>

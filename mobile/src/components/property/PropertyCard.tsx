@@ -46,9 +46,17 @@ export function PropertyCard({
     (property as any).main_image ||
     (property as any).image ||
     null;
-  const location = property.location || {};
-  const cityName = location.city || 'Unknown location';
-  const countryName = location.country || '';
+  
+  // Handle both nested location object and flat structure from backend
+  const cityName = 
+    property.location?.city || 
+    (property as any).city || 
+    'Unknown location';
+  const countryName = 
+    property.location?.country || 
+    (property as any).country || 
+    '';
+  
   const imageHeight = variant === 'list' ? 220 : variant === 'grid' ? 160 : 140;
   const containerMargin = variant === 'list' ? 'mb-6' : 'mb-4';
   const isCompact = variant !== 'list';

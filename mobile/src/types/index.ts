@@ -22,13 +22,17 @@ export interface Property {
   max_guests: number;
   price_per_night: number;
   image_urls: string[];
-  location: {
+  // Location can be either nested object or flat fields at top level
+  location?: {
     address: string;
     city: string;
     country: string;
     latitude: number;
     longitude: number;
   };
+  // Flat location fields (from backend)
+  city?: string;
+  country?: string;
   amenities: string[];
   rating: number;
   review_count: number;
@@ -45,11 +49,21 @@ export interface Booking {
     id: string;
     title: string;
     city?: string;
+    country?: string;
+    location?: {
+      address: string;
+      city: string;
+      country: string;
+      latitude: number;
+      longitude: number;
+    };
   };
   property_title?: string;
   guest_id?: string;
   guest?: string;
   guest_email?: string;
+  guest_first_name?: string;
+  guest_last_name?: string;
   check_in: string;
   check_out: string;
   number_of_guests: number;

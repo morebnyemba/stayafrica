@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, TouchableOpacity, Platform, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Platform, ActivityIndicator, Alert, Linking } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -217,18 +217,134 @@ export default function BookingDetailScreen() {
             )}
 
             {/* Actions */}
-            {booking.status === 'confirmed' && (
-              <View className="flex-row gap-3">
-                <TouchableOpacity className="flex-1">
+            <View className="space-y-3">
+              {/* Payment button for confirmed bookings */}
+              {booking.status === 'confirmed' && (
+                <TouchableOpacity
+                  onPress={() => router.push({
+                    pathname: '/booking/payment',
+                    params: {
+                      bookingId: booking.id,
+                      total: booking.grand_total,
+                      propertyName: booking.property?.title || booking.property_title,
+                      checkIn: booking.check_in,
+                      checkOut: booking.check_out,
+                      guests: booking.number_of_guests,
+                    }
+                  })}
+                >
                   <LinearGradient
                     colors={['#D9B168', '#bea04f']}
                     className="py-4 rounded-2xl items-center"
+                    style={{
+                      shadowColor: '#D9B168',
+                      shadowOffset: { width: 0, height: 4 },
+                      shadowOpacity: 0.3,
+                      shadowRadius: 8,
+                      elevation: 5,
+                    }}
                   >
-                    <Text className="text-forest font-bold">Contact Host</Text>
+                    <View className="flex-row items-center">
+                      <Ionicons name="card" size={20} color="#122F26" />
+                      <Text className="text-forest font-bold ml-2">Proceed to Payment</Text>
+                    </View>
                   </LinearGradient>
                 </TouchableOpacity>
-              </View>
-            )}
+              )}
+
+              {/* Contact Host button */}
+              {(booking.status === 'pending' || booking.status === 'confirmed') && (
+                <TouchableOpacity
+                  onPress={() => {
+                    // TODO: Navigate to messages/conversation with host
+                    router.push('/messages');
+                  }}
+                >
+                  <View className="bg-white border-2 border-forest py-4 rounded-2xl items-center">
+                    <View className="flex-row items-center">
+                      <Ionicons name="chatbubble-outline" size={20} color="#122F26" />
+                      <Text className="text-forest font-bold ml-2">Contact Host</Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              )}
+
+              {/* View Property and Get Directions buttons */}
+              {booking.property?.id && (
+                <View className="flex-row space-x-3">
+                  <TouchableOpacity
+                    onPress={() => router.push(`/(tabs)/explore/${booking.property.id}`)}
+                    className="flex-1"
+                  >
+                    <View className="bg-white border border-sand-300 py-3 rounded-2xl items-center">
+                      <View className="flex-row items-center">
+                        <Ionicons name="home-outline" size={18} color="#3A5C50" />
+                        <Text className="text-moss font-semibold ml-2">View Property</Text>
+                      </View>
+                    </View>
+                  </TouchableOpacity>
+
+                  {booking.property.location?.latitude && booking.property.location?.longitude && (
+                    <TouchableOpacity
+                      onPress={() => {
+                        const { latitude, longitude } = booking.property.location;
+                        const address = booking.property.location.address || '';
+                        const url = Platform.select({
+                          ios: `maps:?q=${encodeURIComponent(address)}&ll=${latitude},${longitude}`,
+                          android: `geo:${latitude},${longitude}?q=${latitude},${longitude}(${encodeURIComponent(address)})`,
+                        });
+                        
+                        if (url) {
+                          Linking.canOpenURL(url).then((supported) => {
+                            if (supported) {
+                              Linking.openURL(url);
+                            } else {
+                              Alert.alert('Error', 'Unable to open maps application');
+                            }
+                          });
+                        }
+                      }}
+                      className="flex-1"
+                    >
+                      <View className="bg-white border border-sand-300 py-3 rounded-2xl items-center">
+                        <View className="flex-row items-center">
+                          <Ionicons name="navigate-outline" size={18} color="#3A5C50" />
+                          <Text className="text-moss font-semibold ml-2">Get Directions</Text>
+                        </View>
+                      </View>
+                    </TouchableOpacity>
+                  )}
+                </View>
+              )}
+
+              {/* Cancel booking button for pending/confirmed */}
+              {(booking.status === 'pending' || booking.status === 'confirmed') && (
+                <TouchableOpacity
+                  onPress={() => {
+                    Alert.alert(
+                      'Cancel Booking',
+                      'Are you sure you want to cancel this booking?',
+                      [
+                        { text: 'No', style: 'cancel' },
+                        {
+                          text: 'Yes, Cancel',
+                          style: 'destructive',
+                          onPress: async () => {
+                            // TODO: Implement cancel booking
+                            Alert.alert('Cancelled', 'Your booking has been cancelled.');
+                            router.back();
+                          },
+                        },
+                      ]
+                    );
+                  }}
+                >
+                  <View className="bg-red-50 border border-red-200 py-3 rounded-2xl items-center">
+                    <Text className="text-red-600 font-semibold">Cancel Booking</Text>
+                  </View>
+                </TouchableOpacity>
+              )}
+            </View>
           </>
         ) : (
           <View className="items-center py-12">

@@ -178,15 +178,82 @@ export default function BookingsScreen() {
             </View>
           </View>
 
-          {/* Price and Action */}
-          <View className="flex-row items-center justify-between">
-            <View>
-              <Text className="text-moss text-xs font-medium mb-1">Total Amount</Text>
-              <Text className="text-2xl font-black text-gold">${booking.grand_total}</Text>
+          {/* Price and Actions */}
+          <View className="space-y-3">
+            <View className="flex-row items-center justify-between">
+              <View>
+                <Text className="text-moss text-xs font-medium mb-1">Total Amount</Text>
+                <Text className="text-2xl font-black text-gold">${booking.grand_total}</Text>
+              </View>
+              <TouchableOpacity 
+                onPress={() => router.push(`/(tabs)/bookings/${booking.id}`)}
+                className="bg-forest px-5 py-3 rounded-xl"
+              >
+                <Text className="text-gold font-bold text-sm">View Details</Text>
+              </TouchableOpacity>
             </View>
-            <View className="bg-forest px-5 py-3 rounded-xl">
-              <Text className="text-gold font-bold text-sm">View Details</Text>
-            </View>
+
+            {/* Quick Actions */}
+            {booking.status === 'confirmed' && (
+              <View className="flex-row gap-2 pt-2">
+                <TouchableOpacity
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    router.push({
+                      pathname: '/booking/payment',
+                      params: {
+                        bookingId: booking.id,
+                        total: booking.grand_total,
+                        propertyName: booking.property?.title || 'Property',
+                        checkIn: booking.check_in,
+                        checkOut: booking.check_out,
+                        guests: booking.number_of_guests,
+                      }
+                    });
+                  }}
+                  className="flex-1"
+                >
+                  <LinearGradient
+                    colors={['#D9B168', '#bea04f']}
+                    className="py-2.5 rounded-xl items-center"
+                  >
+                    <View className="flex-row items-center">
+                      <Ionicons name="card" size={16} color="#122F26" />
+                      <Text className="text-forest font-bold text-xs ml-1">Pay Now</Text>
+                    </View>
+                  </LinearGradient>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    router.push('/messages');
+                  }}
+                  className="flex-1 bg-white border border-forest py-2.5 rounded-xl items-center"
+                >
+                  <View className="flex-row items-center">
+                    <Ionicons name="chatbubble-outline" size={16} color="#122F26" />
+                    <Text className="text-forest font-bold text-xs ml-1">Chat</Text>
+                  </View>
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {booking.status === 'pending' && (
+              <View className="flex-row gap-2 pt-2">
+                <TouchableOpacity
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    router.push('/messages');
+                  }}
+                  className="flex-1 bg-white border border-moss py-2.5 rounded-xl items-center"
+                >
+                  <View className="flex-row items-center">
+                    <Ionicons name="chatbubble-outline" size={16} color="#3A5C50" />
+                    <Text className="text-moss font-semibold text-xs ml-1">Contact Host</Text>
+                  </View>
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
         </View>
       </TouchableOpacity>
