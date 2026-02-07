@@ -16,6 +16,7 @@ import {
   LogOut,
   Menu,
   X,
+  Shield,
 } from 'lucide-react';
 
 const adminNavItems = [
@@ -24,6 +25,7 @@ const adminNavItems = [
   { label: 'Properties', href: '/admin/properties', icon: Home },
   { label: 'Bookings', href: '/admin/bookings', icon: Calendar },
   { label: 'Payments', href: '/admin/payments', icon: CreditCard },
+  { label: 'Identity Verification', href: '/admin/identity-verification', icon: Shield },
   { label: 'Audit Logs', href: '/admin/audit-logs', icon: FileText },
   { label: 'Settings', href: '/admin/settings', icon: Settings },
 ];

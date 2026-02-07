@@ -96,3 +96,41 @@ export interface PropertyAnalytics {
     count: number;
   }>;
 }
+
+// Identity Verification / KYC Types
+export interface IdentityVerification {
+  id: string | number;
+  user: {
+    id: string | number;
+    email: string;
+    first_name: string;
+    last_name: string;
+  };
+  document_type: 'passport' | 'national_id' | 'drivers_license';
+  document_number: string;
+  document_country: string;
+  document_expiry_date: string | null;
+  document_front_image?: string;
+  document_back_image?: string;
+  selfie_image?: string;
+  verification_method: 'manual' | 'automated' | 'third_party';
+  status: 'pending' | 'under_review' | 'approved' | 'rejected' | 'expired';
+  submitted_at: string;
+  reviewed_at?: string;
+  reviewed_by?: {
+    id: string | number;
+    email: string;
+  };
+  rejection_reason?: string;
+  admin_notes?: string;
+  is_expired?: boolean;
+}
+
+export interface VerificationStats {
+  total_verifications: number;
+  by_status: Record<string, number>;
+  recent_submissions: number;
+  recent_approved: number;
+  approval_rate: number;
+  pending_review: number;
+}

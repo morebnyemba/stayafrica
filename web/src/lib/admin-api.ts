@@ -1,5 +1,5 @@
 import { apiClient } from '@/services/api-client';
-import { AdminStats, AuditLog, SystemConfig } from '@/types/admin-types';
+import { AdminStats, AuditLog, SystemConfig, IdentityVerification, VerificationStats } from '@/types/admin-types';
 import { User, Property, Booking, Payment } from '@/types';
 
 export const adminApi = {
@@ -32,7 +32,8 @@ export const adminApi = {
   },
 
   async verifyUser(id: string): Promise<User> {
-    const response = await apiClient.post(`/users/${id}/verify/`);
+    // Verify user by updating the is_verified field
+    const response = await apiClient.patch(`/users/${id}/`, { is_verified: true });
     return response.data;
   },
 
@@ -160,5 +161,41 @@ export const adminApi = {
   }): Promise<any> {
     // TODO: Backend needs to implement these endpoints
     return { data: [] };
+  },
+
+  // Identity Verification / KYC Management
+  async getPendingVerifications(params?: {
+    page?: number;
+    per_page?: number;
+  }): Promise<{ count: number; results: IdentityVerification[] }> {
+    const response = await apiClient.get('/users/verification/pending_reviews/', { params });
+    return response.data;
+  },
+
+  async getVerificationById(id: string | number): Promise<IdentityVerification> {
+    const response = await apiClient.get(`/users/verification/${id}/`);
+    return response.data;
+  },
+
+  async approveVerification(id: string | number, notes?: string): Promise<IdentityVerification> {
+    const response = await apiClient.post(`/users/verification/${id}/review/`, {
+      action: 'approve',
+      notes: notes || '',
+    });
+    return response.data.verification;
+  },
+
+  async rejectVerification(id: string | number, reason: string, notes?: string): Promise<IdentityVerification> {
+    const response = await apiClient.post(`/users/verification/${id}/review/`, {
+      action: 'reject',
+      reason,
+      notes: notes || '',
+    });
+    return response.data.verification;
+  },
+
+  async getVerificationStats(): Promise<VerificationStats> {
+    const response = await apiClient.get('/users/verification/statistics/');
+    return response.data;
   },
 };
