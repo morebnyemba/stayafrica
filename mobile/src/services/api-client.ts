@@ -7,6 +7,8 @@ import type {
   Property,
   Booking,
   Review,
+  Message,
+  Conversation,
   UpdateProfileRequest,
   CreateBookingRequest,
   CreatePropertyRequest,
@@ -15,6 +17,22 @@ import type {
   WalletBalance,
   Transaction,
   HostEarnings,
+  Wallet,
+  WithdrawalRequest,
+  WithdrawalResponse,
+  VerificationData,
+  VerificationResponse,
+  ApiListResponse,
+  PaymentInitiationRequest,
+  PaymentInitiationResponse,
+  PaymentStatusResponse,
+  BankAccount,
+  CreateBankAccountRequest,
+  HostAnalytics,
+  PropertyPerformance,
+  BookingCalendarEvent,
+  UpcomingCheckin,
+  PendingAction,
 } from '@/types';
 
 const API_VERSION = process.env.EXPO_PUBLIC_API_VERSION || 'v1';
@@ -193,7 +211,7 @@ class APIClient {
   }
 
   // Properties
-  async getProperties(): Promise<any> {
+  async getProperties(): Promise<ApiListResponse<Property>> {
     return (await this.client.get('/properties/')).data;
   }
 
@@ -201,7 +219,7 @@ class APIClient {
     latitude: number,
     longitude: number,
     radius: number
-  ): Promise<any> {
+  ): Promise<ApiListResponse<Property>> {
     return (
       await this.client.get('/properties/', {
         params: { latitude, longitude, radius },
@@ -209,12 +227,12 @@ class APIClient {
     ).data;
   }
 
-  async getPropertyById(id: string): Promise<any> {
+  async getPropertyById(id: string): Promise<Property> {
     return (await this.client.get(`/properties/${id}/`)).data;
   }
 
   // Bookings
-  async getBookings(status?: string): Promise<any> {
+  async getBookings(status?: string): Promise<ApiListResponse<Booking>> {
     return (
       await this.client.get('/bookings/', {
         params: { status },
@@ -222,19 +240,19 @@ class APIClient {
     ).data;
   }
 
-  async getBookingById(id: string): Promise<any> {
+  async getBookingById(id: string): Promise<Booking> {
     return (await this.client.get(`/bookings/${id}/`)).data;
   }
 
-  async createBooking(data: any): Promise<any> {
+  async createBooking(data: CreateBookingRequest): Promise<Booking> {
     return (await this.client.post('/bookings/', data)).data;
   }
 
-  async cancelBooking(id: string): Promise<any> {
+  async cancelBooking(id: string): Promise<{ message: string; booking: Booking }> {
     return (await this.client.post(`/bookings/${id}/cancel/`)).data;
   }
 
-  async confirmBooking(id: string): Promise<any> {
+  async confirmBooking(id: string): Promise<{ message: string; booking: Booking }> {
     return (await this.client.post(`/bookings/${id}/confirm/`)).data;
   }
 
@@ -323,23 +341,23 @@ class APIClient {
     ).data;
   }
 
-  async getTotalUnreadCount(): Promise<any> {
+  async getTotalUnreadCount(): Promise<{ unread_count: number }> {
     return (
       await this.client.get('/messaging/conversations/unread_count/')
     ).data;
   }
 
   // Reviews
-  async submitReview(bookingId: string, data: any): Promise<any> {
+  async submitReview(bookingId: string, data: SubmitReviewRequest): Promise<Review> {
     return (await this.client.post(`/reviews/`, { booking_id: bookingId, ...data })).data;
   }
 
-  async getPropertyReviews(propertyId: string): Promise<{ results: Review[] }> {
+  async getPropertyReviews(propertyId: string): Promise<ApiListResponse<Review>> {
     return (await this.client.get(`/reviews/`, { params: { property_id: propertyId } })).data;
   }
 
   // Wishlist
-  async getWishlist(): Promise<{ results: Property[] }> {
+  async getWishlist(): Promise<ApiListResponse<Property>> {
     return (await this.client.get('/users/wishlist/')).data;
   }
 
@@ -352,7 +370,7 @@ class APIClient {
   }
 
   // Host - Properties
-  async getHostProperties(): Promise<{ results: Property[] }> {
+  async getHostProperties(): Promise<ApiListResponse<Property>> {
     return (await this.client.get('/properties/host_properties/')).data;
   }
 
@@ -369,34 +387,34 @@ class APIClient {
   }
 
   // Host - Analytics & Dashboard
-  async getHostAnalytics(): Promise<any> {
+  async getHostAnalytics(): Promise<HostAnalytics> {
     return (await this.client.get('/properties/host_analytics/')).data;
   }
 
-  async getHostEarnings(period: string = 'month'): Promise<{ earnings: any[] }> {
+  async getHostEarnings(period: string = 'month'): Promise<HostEarnings> {
     return (await this.client.get('/properties/host_earnings/', { params: { period } })).data;
   }
 
-  async getPropertyPerformance(): Promise<{ properties: any[] }> {
+  async getPropertyPerformance(): Promise<ApiListResponse<PropertyPerformance>> {
     return (await this.client.get('/properties/property_performance/')).data;
   }
 
-  async getBookingCalendar(propertyId: string, start?: string, end?: string): Promise<any> {
+  async getBookingCalendar(propertyId: string, start?: string, end?: string): Promise<ApiListResponse<BookingCalendarEvent>> {
     return (await this.client.get(`/properties/${propertyId}/booking_calendar/`, {
       params: { start, end },
     })).data;
   }
 
-  async getUpcomingCheckins(days: number = 7): Promise<any> {
+  async getUpcomingCheckins(days: number = 7): Promise<ApiListResponse<UpcomingCheckin>> {
     return (await this.client.get('/properties/upcoming_checkins/', { params: { days } })).data;
   }
 
-  async getPendingActions(): Promise<any> {
+  async getPendingActions(): Promise<ApiListResponse<PendingAction>> {
     return (await this.client.get('/properties/pending_actions/')).data;
   }
 
   // Host - Bookings
-  async getHostBookings(): Promise<{ results: Booking[] }> {
+  async getHostBookings(): Promise<ApiListResponse<Booking>> {
     return (await this.client.get('/bookings/')).data;
   }
 
@@ -405,7 +423,7 @@ class APIClient {
     return (await this.client.get('/wallets/my_wallet/')).data;
   }
 
-  async getTransactions(): Promise<{ results: Transaction[] }> {
+  async getTransactions(): Promise<ApiListResponse<Transaction>> {
     return (await this.client.get('/transactions/')).data;
   }
 
@@ -414,32 +432,32 @@ class APIClient {
   }
 
   // Payment initiation for bookings
-  async initiatePayment(bookingId: string, provider: string): Promise<any> {
+  async initiatePayment(bookingId: string, provider: string): Promise<PaymentInitiationResponse> {
     return (await this.client.post('/payments/initiate/', {
       booking_id: bookingId,
       provider,
     })).data;
   }
 
-  async getPaymentStatus(paymentId: string): Promise<any> {
+  async getPaymentStatus(paymentId: string): Promise<PaymentStatusResponse> {
     return (await this.client.get(`/payments/${paymentId}/`)).data;
   }
 
   // Payment history
-  async getPaymentHistory(params?: any): Promise<any> {
+  async getPaymentHistory(params?: any): Promise<ApiListResponse<Payment>> {
     return (await this.client.get('/payments/', { params })).data;
   }
 
   // Bank accounts
-  async getBankAccounts(): Promise<any> {
+  async getBankAccounts(): Promise<ApiListResponse<BankAccount>> {
     return (await this.client.get('/bank-accounts/')).data;
   }
 
-  async createBankAccount(data: any): Promise<any> {
+  async createBankAccount(data: CreateBankAccountRequest): Promise<BankAccount> {
     return (await this.client.post('/bank-accounts/', data)).data;
   }
 
-  async updateBankAccount(accountId: string, data: any): Promise<any> {
+  async updateBankAccount(accountId: string, data: Partial<CreateBankAccountRequest>): Promise<BankAccount> {
     return (await this.client.patch(`/bank-accounts/${accountId}/`, data)).data;
   }
 
@@ -447,25 +465,25 @@ class APIClient {
     return (await this.client.delete(`/bank-accounts/${accountId}/`)).data;
   }
 
-  async setPrimaryBankAccount(accountId: string): Promise<any> {
+  async setPrimaryBankAccount(accountId: string): Promise<BankAccount> {
     return (await this.client.post(`/bank-accounts/${accountId}/set_primary/`)).data;
   }
 
   // Wallet management
-  async getMyWallet(): Promise<any> {
+  async getMyWallet(): Promise<Wallet> {
     return (await this.client.get('/wallets/my_wallet/')).data;
   }
 
-  async getWalletTransactions(walletId: string, params?: any): Promise<any> {
+  async getWalletTransactions(walletId: string, params?: any): Promise<ApiListResponse<Transaction>> {
     return (await this.client.get(`/wallets/${walletId}/transactions/`, { params })).data;
   }
 
   // Withdrawals
-  async getWithdrawals(params?: any): Promise<any> {
+  async getWithdrawals(params?: any): Promise<ApiListResponse<WithdrawalResponse>> {
     return (await this.client.get('/withdrawals/', { params })).data;
   }
 
-  async initiateWithdrawal(data: any): Promise<any> {
+  async initiateWithdrawal(data: WithdrawalRequest): Promise<WithdrawalResponse> {
     return (await this.client.post('/withdrawals/', data)).data;
   }
 

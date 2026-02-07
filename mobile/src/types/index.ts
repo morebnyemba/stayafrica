@@ -208,3 +208,156 @@ export interface HostEarnings {
     property: string;
   }>;
 }
+
+// Wallet Types
+export interface Wallet {
+  id: string;
+  balance: number;
+  currency: string;
+  status: 'active' | 'suspended' | 'closed';
+  user_id?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface WithdrawalRequest {
+  amount: number;
+  method: 'bank' | 'mobile' | 'paypal';
+  account_id?: string;
+}
+
+export interface WithdrawalResponse {
+  id: string;
+  amount: number;
+  method: string;
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  created_at: string;
+  estimated_arrival?: string;
+}
+
+// Verification Types
+export interface VerificationData {
+  document_type: 'PASSPORT' | 'NATIONAL_ID' | 'DRIVERS_LICENSE';
+  document_number: string;
+  issued_country: string;
+  expiry_date: string | null;
+  front_image_url: string;
+  back_image_url: string | null;
+  selfie_url: string;
+}
+
+export interface VerificationResponse {
+  id: string;
+  status: 'pending' | 'approved' | 'rejected';
+  submitted_at: string;
+  reviewed_at?: string;
+  rejection_reason?: string;
+}
+
+// API Response Wrapper Types
+export interface ApiListResponse<T> {
+  count?: number;
+  next?: string | null;
+  previous?: string | null;
+  results: T[];
+}
+
+export interface ApiResponse<T> {
+  data: T;
+  message?: string;
+  status: number;
+}
+
+// Payment Types Extended
+export interface PaymentInitiationRequest {
+  booking_id: string;
+  provider: 'stripe' | 'paypal' | 'mobile_money';
+  amount?: number;
+}
+
+export interface PaymentInitiationResponse {
+  payment_id: string;
+  client_secret?: string; // For Stripe
+  checkout_url?: string; // For PayPal or other redirect-based providers
+  mobile_money_reference?: string;
+  status: 'pending' | 'requires_action' | 'processing';
+}
+
+export interface PaymentStatusResponse {
+  payment_id: string;
+  status: 'pending' | 'processing' | 'completed' | 'failed' | 'refunded';
+  amount: number;
+  currency: string;
+  booking_id: string;
+  created_at: string;
+  completed_at?: string;
+  failure_reason?: string;
+}
+
+// Bank Account Types
+export interface BankAccount {
+  id: string;
+  account_holder_name: string;
+  account_number: string;
+  bank_name: string;
+  bank_code?: string;
+  is_primary: boolean;
+  created_at: string;
+}
+
+export interface CreateBankAccountRequest {
+  account_holder_name: string;
+  account_number: string;
+  bank_name: string;
+  bank_code?: string;
+}
+
+// Host Analytics Types
+export interface HostAnalytics {
+  total_properties: number;
+  active_properties: number;
+  total_bookings: number;
+  upcoming_bookings: number;
+  total_revenue: number;
+  occupancy_rate: number;
+  average_rating: number;
+  total_reviews: number;
+}
+
+export interface PropertyPerformance {
+  property_id: string;
+  property_title: string;
+  total_bookings: number;
+  revenue: number;
+  occupancy_rate: number;
+  average_rating: number;
+  cancellation_rate: number;
+}
+
+// Booking Calendar Types
+export interface BookingCalendarEvent {
+  booking_id: string;
+  guest_name: string;
+  check_in: string;
+  check_out: string;
+  status: 'pending' | 'confirmed' | 'checked_in' | 'checked_out' | 'cancelled';
+}
+
+export interface UpcomingCheckin {
+  booking_id: string;
+  property_id: string;
+  property_title: string;
+  guest_name: string;
+  guest_email: string;
+  check_in: string;
+  number_of_guests: number;
+}
+
+export interface PendingAction {
+  type: 'booking_request' | 'review_needed' | 'verification_required' | 'payout_ready';
+  id: string;
+  title: string;
+  description: string;
+  created_at: string;
+  priority: 'high' | 'medium' | 'low';
+}
