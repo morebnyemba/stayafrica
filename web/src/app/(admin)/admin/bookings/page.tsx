@@ -3,8 +3,9 @@
 import { useEffect, useState } from 'react';
 import { adminApi } from '@/lib/admin-api';
 import { Booking } from '@/types';
-import { Search, Eye, Calendar } from 'lucide-react';
+import { Search, Eye, Calendar, CheckCircle, XCircle, ChevronDown } from 'lucide-react';
 import toast from 'react-hot-toast';
+import ConfirmDialog from '@/components/admin/ConfirmDialog';
 
 export default function BookingsManagement() {
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -13,6 +14,10 @@ export default function BookingsManagement() {
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
+  const [selectedBookings, setSelectedBookings] = useState<string[]>([]);
+  const [showBulkActions, setShowBulkActions] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [confirmAction, setConfirmAction] = useState<{ type: string; bookingId?: string } | null>(null);
   const ITEMS_PER_PAGE = 20;
 
   useEffect(() => {
@@ -51,6 +56,75 @@ export default function BookingsManagement() {
       cancelled: 'bg-red-100 text-red-800',
     };
     return colors[status] || 'bg-gray-100 text-gray-800';
+  };
+
+  const toggleSelectBooking = (bookingId: string) => {
+    setSelectedBookings(prev => 
+      prev.includes(bookingId) 
+        ? prev.filter(id => id !== bookingId)
+        : [...prev, bookingId]
+    );
+  };
+
+  const handleMarkConfirmed = (bookingId: string) => {
+    setConfirmAction({ type: 'confirm', bookingId });
+    setShowConfirmDialog(true);
+  };
+
+  const handleCancelBooking = (bookingId: string) => {
+    setConfirmAction({ type: 'cancel', bookingId });
+    setShowConfirmDialog(true);
+  };
+
+  const handleBulkAction = async (action: string) => {
+    if (selectedBookings.length === 0) {
+      toast.error('No bookings selected');
+      return;
+    }
+
+    try {
+      switch (action) {
+        case 'confirm':
+          // Would need API endpoint for bulk confirm
+          toast.info('Bulk confirm action needs API implementation');
+          break;
+        case 'cancel':
+          await Promise.all(selectedBookings.map(id => adminApi.cancelBooking(id, 'Bulk cancelled by admin')));
+          toast.success(`${selectedBookings.length} bookings cancelled`);
+          break;
+        case 'complete':
+          // Would need API endpoint for bulk complete
+          toast.info('Bulk complete action needs API implementation');
+          break;
+        default:
+          toast.error('Unknown action');
+          return;
+      }
+      setSelectedBookings([]);
+      setShowBulkActions(false);
+      loadBookings();
+    } catch (err) {
+      toast.error('Failed to perform bulk action');
+      console.error(err);
+    }
+  };
+
+  const handleConfirm = async () => {
+    if (!confirmAction || !confirmAction.bookingId) return;
+
+    try {
+      if (confirmAction.type === 'cancel') {
+        await adminApi.cancelBooking(confirmAction.bookingId, 'Cancelled by admin');
+        toast.success('Booking cancelled successfully');
+      } else if (confirmAction.type === 'confirm') {
+        // Would need API endpoint for this
+        toast.info('Confirm booking action needs API implementation');
+      }
+      loadBookings();
+    } catch (err) {
+      toast.error(`Failed to ${confirmAction.type} booking`);
+      console.error(err);
+    }
   };
 
   return (
@@ -107,6 +181,46 @@ export default function BookingsManagement() {
             </select>
           </div>
         </div>
+
+        {/* Bulk Actions */}
+        {selectedBookings.length > 0 && (
+          <div className="mt-4 flex items-center justify-between bg-[#F4F1EA] px-4 py-3 rounded-lg">
+            <p className="text-sm text-[#122F26] font-medium">
+              {selectedBookings.length} booking{selectedBookings.length > 1 ? 's' : ''} selected
+            </p>
+            <div className="relative">
+              <button
+                onClick={() => setShowBulkActions(!showBulkActions)}
+                className="flex items-center space-x-2 px-4 py-2 bg-[#D9B168] text-[#122F26] font-medium rounded-lg hover:bg-[#c9a158] transition-colors"
+              >
+                <span>Bulk Actions</span>
+                <ChevronDown className="w-4 h-4" />
+              </button>
+              {showBulkActions && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
+                  <button
+                    onClick={() => handleBulkAction('confirm')}
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 first:rounded-t-lg"
+                  >
+                    Confirm Bookings
+                  </button>
+                  <button
+                    onClick={() => handleBulkAction('cancel')}
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    Cancel Bookings
+                  </button>
+                  <button
+                    onClick={() => handleBulkAction('complete')}
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 last:rounded-b-lg"
+                  >
+                    Mark as Completed
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Stats Cards */}
@@ -147,6 +261,20 @@ export default function BookingsManagement() {
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
+                    <th className="px-6 py-3 text-left">
+                      <input
+                        type="checkbox"
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedBookings(bookings.map(b => b.id));
+                          } else {
+                            setSelectedBookings([]);
+                          }
+                        }}
+                        checked={selectedBookings.length === bookings.length && bookings.length > 0}
+                        className="rounded border-gray-300"
+                      />
+                    </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-[#3A5C50] uppercase tracking-wider">
                       Booking Ref
                     </th>
@@ -173,6 +301,14 @@ export default function BookingsManagement() {
                 <tbody className="bg-white divide-y divide-gray-200">
                   {bookings.map((booking) => (
                     <tr key={booking.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4">
+                        <input
+                          type="checkbox"
+                          checked={selectedBookings.includes(booking.id)}
+                          onChange={() => toggleSelectBooking(booking.id)}
+                          className="rounded border-gray-300"
+                        />
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-[#122F26]">
                           {booking.booking_ref}
@@ -208,9 +344,29 @@ export default function BookingsManagement() {
                         {new Date(booking.created_at).toLocaleDateString()}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <button className="text-[#D9B168] hover:text-[#c9a158]">
-                          <Eye className="w-5 h-5" />
-                        </button>
+                        <div className="flex items-center space-x-2">
+                          {booking.status === 'pending' && (
+                            <button
+                              onClick={() => handleMarkConfirmed(booking.id)}
+                              className="text-green-600 hover:text-green-900"
+                              title="Confirm booking"
+                            >
+                              <CheckCircle className="w-5 h-5" />
+                            </button>
+                          )}
+                          {booking.status !== 'cancelled' && booking.status !== 'completed' && (
+                            <button
+                              onClick={() => handleCancelBooking(booking.id)}
+                              className="text-red-600 hover:text-red-900"
+                              title="Cancel booking"
+                            >
+                              <XCircle className="w-5 h-5" />
+                            </button>
+                          )}
+                          <button className="text-[#D9B168] hover:text-[#c9a158]" title="View details">
+                            <Eye className="w-5 h-5" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -243,6 +399,21 @@ export default function BookingsManagement() {
           </>
         )}
       </div>
+
+      {/* Confirm Dialog */}
+      <ConfirmDialog
+        isOpen={showConfirmDialog}
+        onClose={() => setShowConfirmDialog(false)}
+        onConfirm={handleConfirm}
+        title={confirmAction?.type === 'cancel' ? 'Cancel Booking' : 'Confirm Booking'}
+        message={
+          confirmAction?.type === 'cancel'
+            ? 'Are you sure you want to cancel this booking? This action cannot be undone.'
+            : 'Are you sure you want to confirm this booking?'
+        }
+        variant={confirmAction?.type === 'cancel' ? 'danger' : 'primary'}
+        confirmText={confirmAction?.type === 'cancel' ? 'Cancel Booking' : 'Confirm'}
+      />
     </div>
   );
 }
