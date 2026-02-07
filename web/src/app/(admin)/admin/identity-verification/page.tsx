@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { adminApi } from '@/lib/admin-api';
 import { IdentityVerification, VerificationStats } from '@/types/admin-types';
 import { CheckCircle, XCircle, Clock, AlertCircle, Eye } from 'lucide-react';
@@ -8,6 +9,9 @@ import toast from 'react-hot-toast';
 import VerificationModal from '@/components/admin/VerificationModal';
 
 export default function IdentityVerificationManagement() {
+  const searchParams = useSearchParams();
+  const userIdFilter = searchParams.get('user');
+  
   const [verifications, setVerifications] = useState<IdentityVerification[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -59,6 +63,16 @@ export default function IdentityVerificationManagement() {
       toast.error(errorMsg);
     }
   };
+
+  // Auto-open modal if user filter is present and there's a verification for that user
+  useEffect(() => {
+    if (userIdFilter && verifications.length > 0) {
+      const userVerification = verifications.find(v => v.user.id.toString() === userIdFilter);
+      if (userVerification && !showModal) {
+        handleViewDetails(userVerification.id);
+      }
+    }
+  }, [verifications, userIdFilter, showModal]);
 
   const handleApproveVerification = async (notes: string) => {
     if (!selectedVerification) return;
@@ -147,7 +161,12 @@ export default function IdentityVerificationManagement() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Identity Verification</h1>
-          <p className="text-gray-600">Review and approve user identity verifications (KYC)</p>
+          <p className="text-gray-600">
+            {userIdFilter 
+              ? `Review identity verification for user ${userIdFilter}`
+              : 'Review and approve user identity verifications (KYC)'
+            }
+          </p>
         </div>
 
         {/* Statistics Cards */}
@@ -196,14 +215,14 @@ export default function IdentityVerificationManagement() {
                       Loading...
                     </td>
                   </tr>
-                ) : verifications.length === 0 ? (
+                ) : (verifications.filter(v => !userIdFilter || v.user.id.toString() === userIdFilter)).length === 0 ? (
                   <tr>
                     <td colSpan={5} className="px-6 py-4 text-center text-gray-500">
-                      No verifications found
+                      {userIdFilter ? 'No verifications found for this user' : 'No verifications found'}
                     </td>
                   </tr>
                 ) : (
-                  verifications.map((verification) => (
+                  (verifications.filter(v => !userIdFilter || v.user.id.toString() === userIdFilter)).map((verification) => (
                     <tr key={verification.id} className="hover:bg-gray-50 transition">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div>

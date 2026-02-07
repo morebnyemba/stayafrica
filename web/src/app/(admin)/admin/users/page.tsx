@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { adminApi } from '@/lib/admin-api';
 import { User } from '@/types';
 import { Search, CheckCircle, XCircle, Edit, UserPlus, Ban, Trash2 } from 'lucide-react';
@@ -9,6 +10,7 @@ import UserModal from '@/components/admin/UserModal';
 import ConfirmDialog from '@/components/admin/ConfirmDialog';
 
 export default function UsersManagement() {
+  const router = useRouter();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -49,15 +51,9 @@ export default function UsersManagement() {
     setPage(1);
   };
 
-  const handleVerify = async (userId: string) => {
-    try {
-      await adminApi.verifyUser(userId);
-      toast.success('User verified successfully');
-      loadUsers();
-    } catch (err) {
-      toast.error('Failed to verify user');
-      console.error(err);
-    }
+  const handleVerify = (userId: string) => {
+    // Navigate to identity verification page for this user
+    router.push(`/admin/identity-verification?user=${userId}`);
   };
 
   const handleRoleChange = async (userId: string, newRole: 'admin' | 'guest' | 'host') => {
