@@ -198,4 +198,218 @@ export const adminApi = {
     const response = await apiClient.get('/users/verification/statistics/');
     return response.data;
   },
+
+  // Reviews Management
+  async getReviews(params?: {
+    search?: string;
+    rating?: number;
+    page?: number;
+    per_page?: number;
+  }): Promise<{ results: any[]; count: number }> {
+    const response = await apiClient.get('/reviews/', { params });
+    return response.data;
+  },
+
+  async moderateReview(id: string): Promise<any> {
+    const response = await apiClient.patch(`/reviews/${id}/`, {
+      text: '[MODERATED - This review has been hidden by administrators]'
+    });
+    return response.data;
+  },
+
+  async hideReview(id: string): Promise<any> {
+    const response = await apiClient.patch(`/reviews/${id}/`, {
+      text: '[HIDDEN]'
+    });
+    return response.data;
+  },
+
+  async deleteReview(id: string): Promise<void> {
+    await apiClient.delete(`/reviews/${id}/`);
+  },
+
+  // Wallets Management
+  async getWallets(params?: {
+    search?: string;
+    status?: string;
+    page?: number;
+    per_page?: number;
+  }): Promise<{ results: any[]; count: number }> {
+    const response = await apiClient.get('/payments/wallets/', { params });
+    return response.data;
+  },
+
+  async activateWallet(id: string): Promise<any> {
+    const response = await apiClient.patch(`/payments/wallets/${id}/`, {
+      status: 'active'
+    });
+    return response.data;
+  },
+
+  async suspendWallet(id: string): Promise<any> {
+    const response = await apiClient.patch(`/payments/wallets/${id}/`, {
+      status: 'suspended'
+    });
+    return response.data;
+  },
+
+  async closeWallet(id: string): Promise<any> {
+    const response = await apiClient.patch(`/payments/wallets/${id}/`, {
+      status: 'closed'
+    });
+    return response.data;
+  },
+
+  // Withdrawals Management
+  async getWithdrawals(params?: {
+    search?: string;
+    status?: string;
+    page?: number;
+    per_page?: number;
+  }): Promise<{ results: any[]; count: number }> {
+    const response = await apiClient.get('/payments/withdrawals/', { params });
+    return response.data;
+  },
+
+  async markWithdrawalProcessing(id: string): Promise<any> {
+    const response = await apiClient.patch(`/payments/withdrawals/${id}/`, {
+      status: 'processing'
+    });
+    return response.data;
+  },
+
+  async markWithdrawalCompleted(id: string, notes?: string): Promise<any> {
+    const response = await apiClient.patch(`/payments/withdrawals/${id}/`, {
+      status: 'completed',
+      admin_notes: notes
+    });
+    return response.data;
+  },
+
+  async markWithdrawalFailed(id: string, notes?: string): Promise<any> {
+    const response = await apiClient.patch(`/payments/withdrawals/${id}/`, {
+      status: 'failed',
+      admin_notes: notes
+    });
+    return response.data;
+  },
+
+  // Tax Configuration Management
+  async getTaxJurisdictions(params?: {
+    search?: string;
+    page?: number;
+    per_page?: number;
+  }): Promise<{ results: any[]; count: number }> {
+    const response = await apiClient.get('/payments/tax-jurisdictions/', { params });
+    return response.data;
+  },
+
+  async createTaxJurisdiction(data: any): Promise<any> {
+    const response = await apiClient.post('/payments/tax-jurisdictions/', data);
+    return response.data;
+  },
+
+  async updateTaxJurisdiction(id: string, data: any): Promise<any> {
+    const response = await apiClient.patch(`/payments/tax-jurisdictions/${id}/`, data);
+    return response.data;
+  },
+
+  async getTaxRates(params?: {
+    search?: string;
+    page?: number;
+    per_page?: number;
+  }): Promise<{ results: any[]; count: number }> {
+    const response = await apiClient.get('/payments/tax-rates/', { params });
+    return response.data;
+  },
+
+  async createTaxRate(data: any): Promise<any> {
+    const response = await apiClient.post('/payments/tax-rates/', data);
+    return response.data;
+  },
+
+  async updateTaxRate(id: string, data: any): Promise<any> {
+    const response = await apiClient.patch(`/payments/tax-rates/${id}/`, data);
+    return response.data;
+  },
+
+  async getTaxExemptions(params?: {
+    search?: string;
+    page?: number;
+    per_page?: number;
+  }): Promise<{ results: any[]; count: number }> {
+    const response = await apiClient.get('/payments/tax-exemptions/', { params });
+    return response.data;
+  },
+
+  async getTaxRemittances(params?: {
+    search?: string;
+    page?: number;
+    per_page?: number;
+    status?: string;
+  }): Promise<{ results: any[]; count: number }> {
+    const response = await apiClient.get('/payments/tax-remittances/', { params });
+    return response.data;
+  },
+
+  // POI Management
+  async getPOIs(params?: {
+    search?: string;
+    page?: number;
+    per_page?: number;
+  }): Promise<{ results: any[]; count: number }> {
+    const response = await apiClient.get('/properties/pois/', { params });
+    return response.data;
+  },
+
+  async getPOICategories(params?: {
+    search?: string;
+    page?: number;
+    per_page?: number;
+  }): Promise<{ results: any[]; count: number }> {
+    const response = await apiClient.get('/properties/poi-categories/', { params });
+    return response.data;
+  },
+
+  async verifyPOI(id: string): Promise<any> {
+    const response = await apiClient.patch(`/properties/pois/${id}/`, {
+      is_verified: true
+    });
+    return response.data;
+  },
+
+  async unverifyPOI(id: string): Promise<any> {
+    const response = await apiClient.patch(`/properties/pois/${id}/`, {
+      is_verified: false
+    });
+    return response.data;
+  },
+
+  // Messaging Automation
+  async getAutomatedMessages(params?: {
+    search?: string;
+    page?: number;
+    per_page?: number;
+  }): Promise<{ results: any[]; count: number }> {
+    const response = await apiClient.get('/messaging/automated-messages/', { params });
+    return response.data;
+  },
+
+  async getScheduledMessages(params?: {
+    search?: string;
+    page?: number;
+    per_page?: number;
+  }): Promise<{ results: any[]; count: number }> {
+    const response = await apiClient.get('/messaging/scheduled-messages/', { params });
+    return response.data;
+  },
+
+  async getQuickReplies(params?: {
+    search?: string;
+    page?: number;
+    per_page?: number;
+  }): Promise<{ results: any[]; count: number }> {
+    const response = await apiClient.get('/messaging/quick-replies/', { params });
+    return response.data;
+  },
 };

@@ -4,9 +4,10 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { adminApi } from '@/lib/admin-api';
 import { User } from '@/types';
-import { Search, CheckCircle, XCircle, Edit, UserPlus, Ban, Trash2 } from 'lucide-react';
+import { Search, CheckCircle, XCircle, Edit, UserPlus, Ban, Trash2, Eye, ChevronDown } from 'lucide-react';
 import toast from 'react-hot-toast';
 import UserModal from '@/components/admin/UserModal';
+import UserDetailsModal from '@/components/admin/UserDetailsModal';
 import ConfirmDialog from '@/components/admin/ConfirmDialog';
 
 export default function UsersManagement() {
@@ -19,8 +20,12 @@ export default function UsersManagement() {
   const [totalCount, setTotalCount] = useState(0);
   const [showUserModal, setShowUserModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [showUserDetailsModal, setShowUserDetailsModal] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [confirmAction, setConfirmAction] = useState<{ type: string; userId: string; data?: any } | null>(null);
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+  const [showBulkActions, setShowBulkActions] = useState(false);
   const ITEMS_PER_PAGE = 20;
 
   useEffect(() => {
@@ -116,6 +121,56 @@ export default function UsersManagement() {
     }
   };
 
+  const handleViewDetails = (userId: string) => {
+    setSelectedUserId(userId);
+    setShowUserDetailsModal(true);
+  };
+
+  const toggleSelectUser = (userId: string) => {
+    setSelectedUsers(prev => 
+      prev.includes(userId) 
+        ? prev.filter(id => id !== userId)
+        : [...prev, userId]
+    );
+  };
+
+  const handleBulkAction = async (action: string) => {
+    if (selectedUsers.length === 0) {
+      toast.error('No users selected');
+      return;
+    }
+
+    try {
+      switch (action) {
+        case 'activate':
+          await Promise.all(selectedUsers.map(id => adminApi.updateUser(id, { is_active: true })));
+          toast.success(`${selectedUsers.length} users activated`);
+          break;
+        case 'deactivate':
+          await Promise.all(selectedUsers.map(id => adminApi.updateUser(id, { is_active: false })));
+          toast.success(`${selectedUsers.length} users deactivated`);
+          break;
+        case 'verify':
+          await Promise.all(selectedUsers.map(id => adminApi.verifyUser(id)));
+          toast.success(`${selectedUsers.length} users verified`);
+          break;
+        case 'unverify':
+          await Promise.all(selectedUsers.map(id => adminApi.updateUser(id, { is_verified: false })));
+          toast.success(`${selectedUsers.length} users unverified`);
+          break;
+        default:
+          toast.error('Unknown action');
+          return;
+      }
+      setSelectedUsers([]);
+      setShowBulkActions(false);
+      loadUsers();
+    } catch (err) {
+      toast.error('Failed to perform bulk action');
+      console.error(err);
+    }
+  };
+
   return (
     <div className="p-8">
       <div className="mb-8 flex justify-between items-center">
@@ -178,6 +233,52 @@ export default function UsersManagement() {
             </select>
           </div>
         </div>
+
+        {/* Bulk Actions */}
+        {selectedUsers.length > 0 && (
+          <div className="mt-4 flex items-center justify-between bg-[#F4F1EA] px-4 py-3 rounded-lg">
+            <p className="text-sm text-[#122F26] font-medium">
+              {selectedUsers.length} user{selectedUsers.length > 1 ? 's' : ''} selected
+            </p>
+            <div className="relative">
+              <button
+                onClick={() => setShowBulkActions(!showBulkActions)}
+                className="flex items-center space-x-2 px-4 py-2 bg-[#D9B168] text-[#122F26] font-medium rounded-lg hover:bg-[#c9a158] transition-colors"
+              >
+                <span>Bulk Actions</span>
+                <ChevronDown className="w-4 h-4" />
+              </button>
+              {showBulkActions && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
+                  <button
+                    onClick={() => handleBulkAction('activate')}
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 first:rounded-t-lg"
+                  >
+                    Activate Users
+                  </button>
+                  <button
+                    onClick={() => handleBulkAction('deactivate')}
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    Deactivate Users
+                  </button>
+                  <button
+                    onClick={() => handleBulkAction('verify')}
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    Verify Users
+                  </button>
+                  <button
+                    onClick={() => handleBulkAction('unverify')}
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 last:rounded-b-lg"
+                  >
+                    Unverify Users
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Stats Cards */}
@@ -218,6 +319,20 @@ export default function UsersManagement() {
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
+                    <th className="px-6 py-3 text-left">
+                      <input
+                        type="checkbox"
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedUsers(users.map(u => u.id));
+                          } else {
+                            setSelectedUsers([]);
+                          }
+                        }}
+                        checked={selectedUsers.length === users.length && users.length > 0}
+                        className="rounded border-gray-300"
+                      />
+                    </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       User
                     </th>
@@ -241,6 +356,14 @@ export default function UsersManagement() {
                 <tbody className="bg-white divide-y divide-gray-200">
                   {users.map((user) => (
                     <tr key={user.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4">
+                        <input
+                          type="checkbox"
+                          checked={selectedUsers.includes(user.id)}
+                          onChange={() => toggleSelectUser(user.id)}
+                          className="rounded border-gray-300"
+                        />
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className="h-10 w-10 rounded-full bg-[#F4F1EA] flex items-center justify-center">
@@ -289,6 +412,13 @@ export default function UsersManagement() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex items-center space-x-2">
+                          <button
+                            onClick={() => handleViewDetails(user.id)}
+                            className="p-1 text-blue-600 hover:text-blue-800 transition-colors"
+                            title="View details"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
                           {!user.is_verified && (
                             <button
                               onClick={() => handleVerify(user.id)}
@@ -358,6 +488,12 @@ export default function UsersManagement() {
         onClose={() => setShowUserModal(false)}
         onSave={handleSaveUser}
         user={selectedUser}
+      />
+      
+      <UserDetailsModal
+        isOpen={showUserDetailsModal}
+        onClose={() => setShowUserDetailsModal(false)}
+        userId={selectedUserId || ''}
       />
       
       <ConfirmDialog

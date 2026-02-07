@@ -3,8 +3,9 @@
 import { useEffect, useState } from 'react';
 import { adminApi } from '@/lib/admin-api';
 import { Property } from '@/types';
-import { Search, CheckCircle, XCircle, Eye } from 'lucide-react';
+import { Search, CheckCircle, XCircle, Eye, ChevronDown, Ban, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import ConfirmDialog from '@/components/admin/ConfirmDialog';
 
 export default function PropertiesManagement() {
   const [properties, setProperties] = useState<Property[]>([]);
@@ -14,6 +15,9 @@ export default function PropertiesManagement() {
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const [selectedProperties, setSelectedProperties] = useState<string[]>([]);
+  const [showBulkActions, setShowBulkActions] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [confirmAction, setConfirmAction] = useState<{ type: string; propertyId?: string; data?: any } | null>(null);
   const ITEMS_PER_PAGE = 20;
 
   useEffect(() => {
@@ -79,6 +83,64 @@ export default function PropertiesManagement() {
       loadProperties();
     } catch (err) {
       toast.error('Failed to bulk approve properties');
+      console.error(err);
+    }
+  };
+
+  const handleSuspend = (propertyId: string) => {
+    setConfirmAction({ type: 'suspend', propertyId });
+    setShowConfirmDialog(true);
+  };
+
+  const handleBulkAction = async (action: string) => {
+    if (selectedProperties.length === 0) {
+      toast.error('No properties selected');
+      return;
+    }
+
+    try {
+      switch (action) {
+        case 'approve':
+          await Promise.all(selectedProperties.map(id => adminApi.approveProperty(id)));
+          toast.success(`${selectedProperties.length} properties approved`);
+          break;
+        case 'reject':
+          await Promise.all(selectedProperties.map(id => adminApi.rejectProperty(id, 'Bulk rejected by admin')));
+          toast.success(`${selectedProperties.length} properties rejected`);
+          break;
+        case 'activate':
+          // Would need API endpoint for this
+          toast.info('Activate action needs API implementation');
+          break;
+        case 'deactivate':
+          // Would need API endpoint for this
+          toast.info('Deactivate action needs API implementation');
+          break;
+        default:
+          toast.error('Unknown action');
+          return;
+      }
+      setSelectedProperties([]);
+      setShowBulkActions(false);
+      loadProperties();
+    } catch (err) {
+      toast.error('Failed to perform bulk action');
+      console.error(err);
+    }
+  };
+
+  const handleConfirm = async () => {
+    if (!confirmAction) return;
+
+    try {
+      if (confirmAction.type === 'suspend' && confirmAction.propertyId) {
+        // Suspend by marking as inactive
+        await adminApi.rejectProperty(confirmAction.propertyId, 'Suspended by admin');
+        toast.success('Property suspended successfully');
+        loadProperties();
+      }
+    } catch (err) {
+      toast.error('Failed to suspend property');
       console.error(err);
     }
   };
@@ -150,12 +212,43 @@ export default function PropertiesManagement() {
             <p className="text-sm text-[#122F26]">
               {selectedProperties.length} properties selected
             </p>
-            <button
-              onClick={handleBulkApprove}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-            >
-              Bulk Approve
-            </button>
+            <div className="relative">
+              <button
+                onClick={() => setShowBulkActions(!showBulkActions)}
+                className="flex items-center space-x-2 px-4 py-2 bg-[#D9B168] text-[#122F26] font-medium rounded-lg hover:bg-[#c9a158] transition-colors"
+              >
+                <span>Bulk Actions</span>
+                <ChevronDown className="w-4 h-4" />
+              </button>
+              {showBulkActions && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
+                  <button
+                    onClick={() => handleBulkAction('approve')}
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 first:rounded-t-lg"
+                  >
+                    Approve Properties
+                  </button>
+                  <button
+                    onClick={() => handleBulkAction('reject')}
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    Reject Properties
+                  </button>
+                  <button
+                    onClick={() => handleBulkAction('activate')}
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    Activate Properties
+                  </button>
+                  <button
+                    onClick={() => handleBulkAction('deactivate')}
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 last:rounded-b-lg"
+                  >
+                    Deactivate Properties
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>
@@ -299,18 +392,29 @@ export default function PropertiesManagement() {
                             <button
                               onClick={() => handleApprove(property.id)}
                               className="text-green-600 hover:text-green-900"
+                              title="Approve"
                             >
                               <CheckCircle className="w-5 h-5" />
                             </button>
                             <button
                               onClick={() => handleReject(property.id)}
                               className="text-red-600 hover:text-red-900"
+                              title="Reject"
                             >
                               <XCircle className="w-5 h-5" />
                             </button>
                           </>
                         )}
-                        <button className="text-[#D9B168] hover:text-[#c9a158]">
+                        {property.status === 'active' && (
+                          <button
+                            onClick={() => handleSuspend(property.id)}
+                            className="text-yellow-600 hover:text-yellow-900"
+                            title="Suspend"
+                          >
+                            <Ban className="w-5 h-5" />
+                          </button>
+                        )}
+                        <button className="text-[#D9B168] hover:text-[#c9a158]" title="View details">
                           <Eye className="w-5 h-5" />
                         </button>
                       </td>
@@ -345,6 +449,17 @@ export default function PropertiesManagement() {
           </>
         )}
       </div>
+
+      {/* Confirm Dialog */}
+      <ConfirmDialog
+        isOpen={showConfirmDialog}
+        onClose={() => setShowConfirmDialog(false)}
+        onConfirm={handleConfirm}
+        title="Suspend Property"
+        message="Are you sure you want to suspend this property? It will be marked as inactive."
+        variant="warning"
+        confirmText="Suspend"
+      />
     </div>
   );
 }

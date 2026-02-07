@@ -7,3 +7,7 @@ class PropertiesConfig(AppConfig):
 
     def ready(self):
         import apps.properties.signals  # noqa: F401
+        # Import additional admin modules
+        import apps.properties.analytics_admin  # noqa: F401
+        import apps.properties.poi_admin  # noqa: F401
+        import apps.properties.wishlist_admin  # noqa: F401
