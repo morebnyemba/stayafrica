@@ -8,7 +8,6 @@ import toast from 'react-hot-toast';
 export default function SettingsPage() {
   const [config, setConfig] = useState<SystemConfig | null>(null);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     loadConfig();
@@ -25,21 +24,6 @@ export default function SettingsPage() {
       console.error('Config load error:', err);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleSaveConfig = async (updatedConfig: Partial<SystemConfig>) => {
-    try {
-      setSaving(true);
-      const updated = await adminApi.updateSystemConfig(updatedConfig);
-      setConfig(updated);
-      toast.success('Configuration updated successfully');
-    } catch (err: any) {
-      const errorMsg = err?.response?.data?.detail || 'Failed to update configuration';
-      toast.error(errorMsg);
-      console.error('Config save error:', err);
-    } finally {
-      setSaving(false);
     }
   };
 
