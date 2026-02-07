@@ -1,9 +1,10 @@
-import { View, Text, ScrollView, TouchableOpacity, TextInput, Platform, Alert, KeyboardAvoidingView } from 'react-native';
-import { useState } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, TextInput, Platform, Alert, KeyboardAvoidingView, ActivityIndicator } from 'react-native';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '@/context/auth-context';
+import { apiClient } from '@/services/api-client';
 
 export default function WithdrawScreen() {
   const router = useRouter();
@@ -11,6 +12,25 @@ export default function WithdrawScreen() {
   const [amount, setAmount] = useState('');
   const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [balance, setBalance] = useState<number>(0);
+  const [loadingBalance, setLoadingBalance] = useState(true);
+
+  useEffect(() => {
+    fetchBalance();
+  }, []);
+
+  const fetchBalance = async () => {
+    try {
+      setLoadingBalance(true);
+      const wallet = await apiClient.getMyWallet();
+      setBalance(wallet.balance || 0);
+    } catch (error: any) {
+      console.error('Failed to fetch wallet balance:', error);
+      // Don't show error alert, just keep balance at 0
+    } finally {
+      setLoadingBalance(false);
+    }
+  };
 
   const withdrawalMethods = [
     { id: 'bank', name: 'Bank Transfer', icon: 'business', description: '2-3 business days' },
@@ -27,16 +47,28 @@ export default function WithdrawScreen() {
       Alert.alert('Error', 'Please select a withdrawal method');
       return;
     }
+    if (parseFloat(amount) > balance) {
+      Alert.alert('Error', 'Insufficient balance');
+      return;
+    }
 
     setLoading(true);
     try {
-      // TODO: Implement actual withdrawal API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      Alert.alert('Success', 'Withdrawal request submitted successfully', [
-        { text: 'OK', onPress: () => router.back() }
-      ]);
-    } catch (error) {
-      Alert.alert('Error', 'Failed to process withdrawal');
+      await apiClient.initiateWithdrawal({
+        amount: parseFloat(amount),
+        method: selectedMethod,
+      });
+      
+      Alert.alert(
+        'Success', 
+        'Withdrawal request submitted successfully. You will receive your funds within the specified timeframe.', 
+        [{ text: 'OK', onPress: () => router.back() }]
+      );
+    } catch (error: any) {
+      const errorMessage = error?.response?.data?.detail || 
+                          error?.response?.data?.message || 
+                          'Failed to process withdrawal. Please try again.';
+      Alert.alert('Error', errorMessage);
     } finally {
       setLoading(false);
     }
@@ -70,11 +102,14 @@ export default function WithdrawScreen() {
           <Text className="text-xl font-bold text-white">Withdraw Funds</Text>
         </View>
 
-        {/* Balance Card - Shows placeholder until API provides actual balance */}
+        {/* Balance Card - Shows actual balance from API */}
         <View className="bg-white/10 rounded-2xl p-4">
           <Text className="text-sand-200 text-sm">Available Balance</Text>
-          <Text className="text-3xl font-black text-white mt-1">$0.00</Text>
-          <Text className="text-sand-300 text-xs mt-1">Balance will update when connected to wallet API</Text>
+          {loadingBalance ? (
+            <ActivityIndicator color="#fff" size="small" style={{ marginVertical: 8 }} />
+          ) : (
+            <Text className="text-3xl font-black text-white mt-1">${balance.toFixed(2)}</Text>
+          )}
         </View>
       </LinearGradient>
 
