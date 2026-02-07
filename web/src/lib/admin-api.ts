@@ -293,4 +293,23 @@ export const adminApi = {
     });
     return response.data;
   },
+
+  // Tax Configuration Management
+  async getTaxJurisdictions(params?: {
+    search?: string;
+    page?: number;
+    per_page?: number;
+  }): Promise<{ results: any[]; count: number }> {
+    const response = await apiClient.get('/payments/tax-jurisdictions/', { params });
+    return response.data;
+  },
+
+  async getTaxRates(params?: {
+    search?: string;
+    page?: number;
+    per_page?: number;
+  }): Promise<{ results: any[]; count: number }> {
+    const response = await apiClient.get('/payments/tax-rates/', { params });
+    return response.data;
+  },
 };
