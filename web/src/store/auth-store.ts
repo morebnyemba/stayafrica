@@ -207,6 +207,11 @@ export const useAuth = () => {
   if (typeof window !== 'undefined' && store.isLoading && !store.user) {
     store.initializeAuth();
   }
+
+  // If user is already persisted, stop loading immediately
+  if (typeof window !== 'undefined' && store.isLoading && store.user) {
+    store.setLoading(false);
+  }
   
   return store;
 };
