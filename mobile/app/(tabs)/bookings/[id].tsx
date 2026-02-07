@@ -4,6 +4,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '@/context/auth-context';
 import { useBookingById } from '@/hooks/api-hooks';
+import { apiClient } from '@/services/api-client';
+import { logApiError } from '@/utils/logger';
 
 export default function BookingDetailScreen() {
   const router = useRouter();
@@ -255,9 +257,33 @@ export default function BookingDetailScreen() {
               {/* Contact Host button */}
               {(booking.status === 'pending' || booking.status === 'confirmed') && (
                 <TouchableOpacity
-                  onPress={() => {
-                    // TODO: Navigate to messages/conversation with host
-                    router.push('/messages');
+                  onPress={async () => {
+                    try {
+                      // Get property ID from booking
+                      const propertyId = booking.property_id || booking.rental_property || booking.property?.id;
+                      
+                      if (!propertyId) {
+                        Alert.alert('Error', 'Unable to find property information');
+                        return;
+                      }
+
+                      // Create or get conversation with host
+                      const conversation = await apiClient.createConversation(propertyId);
+                      
+                      if (conversation && conversation.id) {
+                        router.push(`/(tabs)/messages/${conversation.id}`);
+                      } else {
+                        // Fallback to messages list if conversation creation fails
+                        router.push('/(tabs)/messages');
+                      }
+                    } catch (error: any) {
+                      logApiError('/messaging/conversations/', error, { 
+                        action: 'create conversation',
+                        propertyId 
+                      });
+                      // Fallback to messages list
+                      router.push('/(tabs)/messages');
+                    }
                   }}
                 >
                   <View className="bg-white border-2 border-forest py-4 rounded-2xl items-center">
@@ -330,9 +356,17 @@ export default function BookingDetailScreen() {
                           text: 'Yes, Cancel',
                           style: 'destructive',
                           onPress: async () => {
-                            // TODO: Implement cancel booking
-                            Alert.alert('Cancelled', 'Your booking has been cancelled.');
-                            router.back();
+                            try {
+                              await apiClient.cancelBooking(id as string);
+                              Alert.alert('Cancelled', 'Your booking has been cancelled successfully.', [
+                                { text: 'OK', onPress: () => router.back() }
+                              ]);
+                            } catch (error: any) {
+                              const errorMessage = error?.response?.data?.detail || 
+                                                  error?.response?.data?.message || 
+                                                  'Failed to cancel booking. Please try again.';
+                              Alert.alert('Error', errorMessage);
+                            }
                           },
                         },
                       ]

@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { apiClient } from '@/services/api-client';
+import { logError, logApiError } from '@/utils/logger';
 
 interface WalletData {
   id: string;
@@ -32,6 +33,7 @@ export default function WalletDashboardScreen() {
   const [wallet, setWallet] = useState<WalletData | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [activeTab, setActiveTab] = useState<'transactions' | 'withdrawals'>('transactions');
+  const [error, setError] = useState<string | null>(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -42,6 +44,7 @@ export default function WalletDashboardScreen() {
   const fetchWalletData = async () => {
     try {
       setLoading(true);
+      setError(null);
       
       // Fetch wallet balance
       const walletResponse = await apiClient.get('/wallets/my_wallet/');
@@ -52,8 +55,12 @@ export default function WalletDashboardScreen() {
         params: { page_size: 20, ordering: '-created_at' }
       });
       setTransactions(transactionsResponse.data.results || []);
-    } catch (error) {
-      console.error('Error fetching wallet data:', error);
+    } catch (error: any) {
+      logApiError('/wallets/my_wallet/', error, { action: 'fetch wallet data' });
+      const errorMessage = error?.response?.data?.detail || 
+                          error?.response?.data?.message || 
+                          'Failed to load wallet data. Please try again.';
+      setError(errorMessage);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -99,6 +106,53 @@ export default function WalletDashboardScreen() {
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator size="large" color="#D9B168" />
           <Text className="text-moss font-semibold mt-4">Loading wallet...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (error && !wallet) {
+    return (
+      <SafeAreaView className="flex-1 bg-sand-100">
+        <LinearGradient
+          colors={['#122F26', '#1d392f']}
+          className="px-4 pb-6"
+          style={{ paddingTop: insets.top + 12 }}
+        >
+          <View className="flex-row items-center">
+            <TouchableOpacity
+              onPress={() => router.back()}
+              className="w-10 h-10 rounded-xl items-center justify-center mr-3"
+              style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
+            >
+              <Ionicons name="arrow-back" size={24} color="#fff" />
+            </TouchableOpacity>
+            <Text className="text-xl font-bold text-white">My Wallet</Text>
+          </View>
+        </LinearGradient>
+        
+        <View className="flex-1 items-center justify-center px-6">
+          <View className="bg-red-50 rounded-2xl p-6 items-center">
+            <Ionicons name="alert-circle" size={48} color="#EF4444" />
+            <Text className="text-red-800 font-bold text-lg mt-4 text-center">
+              Failed to Load Wallet
+            </Text>
+            <Text className="text-red-600 text-center mt-2">{error}</Text>
+            <TouchableOpacity
+              onPress={() => {
+                setError(null);
+                fetchWalletData();
+              }}
+              className="mt-6"
+            >
+              <LinearGradient
+                colors={['#D9B168', '#bea04f']}
+                className="px-8 py-4 rounded-2xl"
+              >
+                <Text className="text-forest font-bold">Try Again</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
         </View>
       </SafeAreaView>
     );

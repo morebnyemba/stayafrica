@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { apiClient } from '@/services/api-client';
 
 export default function AddFundsScreen() {
   const router = useRouter();
@@ -30,13 +31,20 @@ export default function AddFundsScreen() {
 
     setLoading(true);
     try {
-      // TODO: Implement actual payment API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      Alert.alert('Success', 'Funds added successfully', [
-        { text: 'OK', onPress: () => router.back() }
-      ]);
-    } catch (error) {
-      Alert.alert('Error', 'Failed to add funds');
+      // Navigate to payment confirmation screen with payment details
+      router.push({
+        pathname: '/booking/payment',
+        params: {
+          amount: parseFloat(amount).toFixed(2),
+          type: 'wallet_topup',
+          method: selectedMethod,
+        },
+      });
+    } catch (error: any) {
+      const errorMessage = error?.response?.data?.detail || 
+                          error?.response?.data?.message || 
+                          'Failed to process payment. Please try again.';
+      Alert.alert('Error', errorMessage);
     } finally {
       setLoading(false);
     }

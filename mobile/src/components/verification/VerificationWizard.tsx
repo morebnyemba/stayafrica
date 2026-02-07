@@ -15,6 +15,8 @@ import { DocumentUpload } from './DocumentUpload';
 import { SelfieCapture } from './SelfieCapture';
 import { GlassmorphicView } from '../common/GlassmorphicView';
 import { useRouter } from 'expo-router';
+import { apiClient } from '@/services/api-client';
+import { logError, logInfo, logApiError } from '@/utils/logger';
 
 type WizardStep = 'document-info' | 'document-upload' | 'selfie' | 'review';
 
@@ -108,12 +110,21 @@ export function VerificationWizard() {
     try {
       setIsSubmitting(true);
 
-      // TODO: Integrate with actual API endpoint
-      // await apiClient.post('/users/verification/', data);
+      // Submit verification data to API
+      const verificationData = {
+        document_type: data.documentType,
+        document_number: data.documentNumber,
+        issued_country: data.issuedCountry,
+        expiry_date: data.expiryDate || null,
+        front_image_url: data.frontImageUrl,
+        back_image_url: data.backImageUrl || null,
+        selfie_url: data.selfieUrl,
+      };
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      await apiClient.post('/users/verification/', verificationData);
 
+      logInfo('Verification submitted successfully');
+      
       Alert.alert(
         'Success!',
         "Your verification has been submitted. We'll review your documents within 1-2 business days.",
@@ -124,9 +135,12 @@ export function VerificationWizard() {
           },
         ]
       );
-    } catch (error) {
-      console.error('Verification submission failed:', error);
-      Alert.alert('Error', 'Failed to submit verification. Please try again.');
+    } catch (error: any) {
+      logApiError('/users/verification/', error, { action: 'submit verification' });
+      const errorMessage = error?.response?.data?.detail || 
+                          error?.response?.data?.message || 
+                          'Failed to submit verification. Please try again.';
+      Alert.alert('Error', errorMessage);
     } finally {
       setIsSubmitting(false);
     }

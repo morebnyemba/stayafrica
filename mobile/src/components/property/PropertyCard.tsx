@@ -4,6 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { GlassmorphicView } from '@/components/common/GlassmorphicView';
 import { Property } from '@/types';
+import { memo } from 'react';
 
 interface PropertyCardProps {
   property: Property;
@@ -209,3 +210,6 @@ export function PropertyCard({
     </Animated.View>
   );
 }
+
+// Wrap with React.memo to prevent unnecessary re-renders
+export default memo(PropertyCard);
