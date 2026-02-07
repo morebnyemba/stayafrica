@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { apiClient } from '@/services/api-client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { logError, logInfo } from '@/utils/logger';
 
 interface User {
   id: string;
@@ -63,7 +64,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       }
     } catch (error) {
-      console.error('Bootstrap error:', error);
+      logError('Bootstrap/session restore error', error);
       await apiClient.clearTokens();
       setUser(null);
       setIsAuthenticated(false);
@@ -78,7 +79,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const profile = await apiClient.getUserProfile();
       setUser(profile);
       setIsAuthenticated(true);
+      logInfo('User logged in successfully', { userId: profile.id });
     } catch (error) {
+      logError('Login failed', error, { email });
       throw error;
     }
   };
@@ -89,7 +92,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const profile = await apiClient.getUserProfile();
       setUser(profile);
       setIsAuthenticated(true);
+      logInfo('User registered successfully', { userId: profile.id });
     } catch (error) {
+      logError('Registration failed', error, { email: userData.email });
       throw error;
     }
   };
@@ -99,8 +104,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await apiClient.clearTokens();
       setUser(null);
       setIsAuthenticated(false);
+      logInfo('User logged out successfully');
     } catch (error) {
-      console.error('Logout error:', error);
+      logError('Logout error', error);
     }
   };
 

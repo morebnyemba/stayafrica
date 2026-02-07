@@ -16,6 +16,7 @@ import { SelfieCapture } from './SelfieCapture';
 import { GlassmorphicView } from '../common/GlassmorphicView';
 import { useRouter } from 'expo-router';
 import { apiClient } from '@/services/api-client';
+import { logError, logInfo, logApiError } from '@/utils/logger';
 
 type WizardStep = 'document-info' | 'document-upload' | 'selfie' | 'review';
 
@@ -122,6 +123,8 @@ export function VerificationWizard() {
 
       await apiClient.post('/users/verification/', verificationData);
 
+      logInfo('Verification submitted successfully');
+      
       Alert.alert(
         'Success!',
         "Your verification has been submitted. We'll review your documents within 1-2 business days.",
@@ -133,7 +136,7 @@ export function VerificationWizard() {
         ]
       );
     } catch (error: any) {
-      console.error('Verification submission failed:', error);
+      logApiError('/users/verification/', error, { action: 'submit verification' });
       const errorMessage = error?.response?.data?.detail || 
                           error?.response?.data?.message || 
                           'Failed to submit verification. Please try again.';
