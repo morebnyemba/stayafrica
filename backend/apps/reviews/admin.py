@@ -3,7 +3,7 @@ from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 from unfold.admin import ModelAdmin as UnfoldModelAdmin
 from unfold.decorators import display
-from apps.reviews.models import Review
+from apps.reviews.models import Review, ReviewVote
 
 
 @admin.register(Review)
@@ -132,3 +132,46 @@ class ReviewAdmin(UnfoldModelAdmin):
     def hide_reviews(self, request, queryset):
         updated = queryset.update(text='[HIDDEN]')
         self.message_user(request, f'{updated} review(s) hidden.')
+
+
+@admin.register(ReviewVote)
+class ReviewVoteAdmin(UnfoldModelAdmin):
+    """Admin interface for review votes (helpful/unhelpful)"""
+    
+    list_display = ['review_display', 'user_display', 'vote_type_badge', 'created_at']
+    list_filter = ['vote_type', 'created_at']
+    search_fields = ['review__guest__email', 'user__email']
+    readonly_fields = ['review', 'user', 'vote_type', 'created_at']
+    list_select_related = ['review', 'review__guest', 'user']
+    list_per_page = 25
+    date_hierarchy = 'created_at'
+    
+    fieldsets = (
+        (_('Vote Information'), {
+            'fields': ('review', 'user', 'vote_type'),
+        }),
+        (_('Timestamp'), {
+            'fields': ('created_at',),
+        }),
+    )
+    
+    @display(description=_('Review'))
+    def review_display(self, obj):
+        return f"Review #{obj.review.id} by {obj.review.guest.email}"
+    
+    @display(description=_('Voter'))
+    def user_display(self, obj):
+        return obj.user.get_full_name() or obj.user.email
+    
+    @display(description=_('Vote'), label=True)
+    def vote_type_badge(self, obj):
+        return {
+            'value': obj.get_vote_type_display(),
+            'color': 'success' if obj.vote_type == 'helpful' else 'warning',
+        }
+    
+    def has_add_permission(self, request):
+        return False
+    
+    def has_change_permission(self, request, obj=None):
+        return False
