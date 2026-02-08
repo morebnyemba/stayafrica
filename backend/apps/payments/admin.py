@@ -3,8 +3,9 @@ from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 from unfold.admin import ModelAdmin as UnfoldModelAdmin
 from unfold.decorators import display
-from apps.payments.models import Payment, Wallet, WalletTransaction, Withdrawal, BankAccount
+from apps.payments.models import Payment, Wallet, WalletTransaction, Withdrawal, BankAccount, PaymentMethod
 from apps.payments.pricing_models import PricingRule, PropertyFee, PropertyTax, CurrencyExchangeRate
+from apps.payments.tax_models import TaxJurisdiction, TaxRate, BookingTax, TaxRemittance, TaxExemption
 
 
 @admin.register(Payment)
@@ -560,6 +561,316 @@ class CurrencyExchangeRateAdmin(UnfoldModelAdmin):
     @display(description=_('Currency Pair'))
     def currency_pair(self, obj):
         return f"{obj.from_currency} → {obj.to_currency}"
+    
+    @display(description=_('Active'), label=True)
+    def active_badge(self, obj):
+        return {
+            'value': 'Active' if obj.is_active else 'Inactive',
+            'color': 'success' if obj.is_active else 'secondary',
+        }
+
+
+@admin.register(PaymentMethod)
+class PaymentMethodAdmin(UnfoldModelAdmin):
+    """Admin interface for stored payment methods"""
+    
+    list_display = ['user_display', 'name', 'provider', 'method_type', 'masked_info', 
+                    'default_badge', 'verified_badge', 'created_at']
+    list_filter = ['provider', 'method_type', 'is_default', 'is_verified', 'created_at']
+    search_fields = ['user__email', 'name', 'last_four', 'phone_number']
+    readonly_fields = ['id', 'provider_token', 'created_at', 'updated_at']
+    list_select_related = ['user']
+    list_per_page = 25
+    actions = ['verify_methods', 'set_as_default']
+    
+    fieldsets = (
+        (_('User'), {
+            'fields': ('user',),
+        }),
+        (_('Payment Method'), {
+            'fields': ('name', 'provider', 'method_type'),
+        }),
+        (_('Token Information'), {
+            'fields': ('provider_token',),
+            'classes': ['collapse'],
+        }),
+        (_('Display Information'), {
+            'fields': ('last_four', 'expiry_month', 'expiry_year', 'phone_number'),
+        }),
+        (_('Flags'), {
+            'fields': ('is_default', 'is_verified'),
+        }),
+        (_('Metadata'), {
+            'fields': ('id', 'deleted_at', 'created_at', 'updated_at'),
+            'classes': ['collapse'],
+        }),
+    )
+    
+    @display(description=_('User'))
+    def user_display(self, obj):
+        return obj.user.get_full_name() or obj.user.email
+    
+    @display(description=_('Payment Info'))
+    def masked_info(self, obj):
+        if obj.last_four:
+            return f"****{obj.last_four}"
+        elif obj.phone_number:
+            return obj.phone_number
+        return '-'
+    
+    @display(description=_('Default'), label=True)
+    def default_badge(self, obj):
+        return {
+            'value': 'Default' if obj.is_default else 'Secondary',
+            'color': 'success' if obj.is_default else 'secondary',
+        }
+    
+    @display(description=_('Verified'), label=True)
+    def verified_badge(self, obj):
+        return {
+            'value': 'Verified' if obj.is_verified else 'Unverified',
+            'color': 'success' if obj.is_verified else 'warning',
+        }
+    
+    @admin.action(description=_('Verify selected payment methods'))
+    def verify_methods(self, request, queryset):
+        updated = queryset.update(is_verified=True)
+        self.message_user(request, f'{updated} payment method(s) verified.')
+    
+    @admin.action(description=_('Set as default'))
+    def set_as_default(self, request, queryset):
+        for method in queryset:
+            PaymentMethod.objects.filter(user=method.user).update(is_default=False)
+            method.is_default = True
+            method.save()
+        self.message_user(request, f'{queryset.count()} payment method(s) set as default.')
+
+
+@admin.register(TaxJurisdiction)
+class TaxJurisdictionAdmin(UnfoldModelAdmin):
+    """Admin interface for tax jurisdictions"""
+    
+    list_display = ['name', 'jurisdiction_type', 'code', 'country_code', 'active_badge', 'created_at']
+    list_filter = ['jurisdiction_type', 'is_active', 'country_code', 'created_at']
+    search_fields = ['name', 'code', 'country_code', 'city_name']
+    readonly_fields = ['created_at', 'updated_at']
+    list_per_page = 25
+    
+    fieldsets = (
+        (_('Basic Information'), {
+            'fields': ('name', 'jurisdiction_type', 'code', 'is_active'),
+        }),
+        (_('Geographic Information'), {
+            'fields': ('country_code', 'state_province_code', 'city_name'),
+        }),
+        (_('Hierarchy'), {
+            'fields': ('parent_jurisdiction',),
+            'classes': ['collapse'],
+        }),
+        (_('Timestamps'), {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ['collapse'],
+        }),
+    )
+    
+    @display(description=_('Active'), label=True)
+    def active_badge(self, obj):
+        return {
+            'value': 'Active' if obj.is_active else 'Inactive',
+            'color': 'success' if obj.is_active else 'secondary',
+        }
+
+
+@admin.register(TaxRate)
+class TaxRateAdmin(UnfoldModelAdmin):
+    """Admin interface for tax rates"""
+    
+    list_display = ['name', 'jurisdiction', 'tax_type', 'rate_display', 'active_badge', 'created_at']
+    list_filter = ['tax_type', 'is_active', 'created_at']
+    search_fields = ['name', 'jurisdiction__name', 'jurisdiction__code']
+    readonly_fields = ['created_at', 'updated_at']
+    list_select_related = ['jurisdiction']
+    list_per_page = 25
+    
+    fieldsets = (
+        (_('Basic Information'), {
+            'fields': ('jurisdiction', 'name', 'tax_type', 'is_active'),
+        }),
+        (_('Rate Configuration'), {
+            'fields': ('rate', 'is_compound'),
+        }),
+        (_('Applicability'), {
+            'fields': ('applies_to_accommodation', 'applies_to_cleaning_fee', 'applies_to_service_fee'),
+        }),
+        (_('Timestamps'), {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ['collapse'],
+        }),
+    )
+    
+    @display(description=_('Rate'))
+    def rate_display(self, obj):
+        return f"{obj.rate}%"
+    
+    @display(description=_('Active'), label=True)
+    def active_badge(self, obj):
+        return {
+            'value': 'Active' if obj.is_active else 'Inactive',
+            'color': 'success' if obj.is_active else 'secondary',
+        }
+
+
+@admin.register(BookingTax)
+class BookingTaxAdmin(UnfoldModelAdmin):
+    """Admin interface for booking taxes"""
+    
+    list_display = ['booking_ref', 'tax_name', 'tax_amount_display', 'tax_rate_display', 'created_at']
+    list_filter = ['tax_rate__tax_type', 'created_at']
+    search_fields = ['booking__booking_ref', 'tax_rate__name']
+    readonly_fields = ['booking', 'tax_rate', 'tax_amount', 'created_at', 'updated_at']
+    list_select_related = ['booking', 'tax_rate', 'tax_rate__jurisdiction']
+    list_per_page = 25
+    date_hierarchy = 'created_at'
+    
+    fieldsets = (
+        (_('Booking'), {
+            'fields': ('booking',),
+        }),
+        (_('Tax Information'), {
+            'fields': ('tax_rate', 'tax_amount'),
+        }),
+        (_('Timestamps'), {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ['collapse'],
+        }),
+    )
+    
+    @display(description=_('Booking'))
+    def booking_ref(self, obj):
+        return obj.booking.booking_ref
+    
+    @display(description=_('Tax Name'))
+    def tax_name(self, obj):
+        return obj.tax_rate.name
+    
+    @display(description=_('Tax Amount'))
+    def tax_amount_display(self, obj):
+        return f"${obj.tax_amount:.2f}"
+    
+    @display(description=_('Rate'))
+    def tax_rate_display(self, obj):
+        return f"{obj.tax_rate.rate}%"
+    
+    def has_add_permission(self, request):
+        return False
+    
+    def has_change_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(TaxRemittance)
+class TaxRemittanceAdmin(UnfoldModelAdmin):
+    """Admin interface for tax remittances"""
+    
+    list_display = ['reference', 'jurisdiction', 'period_display', 'total_amount_display', 
+                    'status_badge', 'remitted_at']
+    list_filter = ['status', 'jurisdiction__jurisdiction_type', 'created_at']
+    search_fields = ['reference', 'jurisdiction__name']
+    readonly_fields = ['reference', 'created_at', 'updated_at']
+    list_select_related = ['jurisdiction']
+    list_per_page = 25
+    date_hierarchy = 'period_start'
+    actions = ['mark_remitted', 'mark_pending']
+    
+    fieldsets = (
+        (_('Reference'), {
+            'fields': ('reference', 'jurisdiction', 'status'),
+        }),
+        (_('Period'), {
+            'fields': ('period_start', 'period_end'),
+        }),
+        (_('Amounts'), {
+            'fields': ('total_collected', 'total_remitted', 'currency'),
+        }),
+        (_('Remittance'), {
+            'fields': ('remitted_at', 'remittance_notes'),
+            'classes': ['collapse'],
+        }),
+        (_('Timestamps'), {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ['collapse'],
+        }),
+    )
+    
+    @display(description=_('Period'))
+    def period_display(self, obj):
+        return f"{obj.period_start} to {obj.period_end}"
+    
+    @display(description=_('Total Amount'))
+    def total_amount_display(self, obj):
+        return f"{obj.currency} {obj.total_collected:.2f}"
+    
+    @display(description=_('Status'), label=True)
+    def status_badge(self, obj):
+        colors = {
+            'pending': 'warning',
+            'remitted': 'success',
+            'overdue': 'danger',
+        }
+        return {
+            'value': obj.get_status_display() if hasattr(obj, 'get_status_display') else obj.status,
+            'color': colors.get(obj.status, 'secondary'),
+        }
+    
+    @admin.action(description=_('Mark as remitted'))
+    def mark_remitted(self, request, queryset):
+        from django.utils import timezone
+        updated = queryset.update(status='remitted', remitted_at=timezone.now())
+        self.message_user(request, f'{updated} remittance(s) marked as remitted.')
+    
+    @admin.action(description=_('Mark as pending'))
+    def mark_pending(self, request, queryset):
+        updated = queryset.update(status='pending')
+        self.message_user(request, f'{updated} remittance(s) marked as pending.')
+
+
+@admin.register(TaxExemption)
+class TaxExemptionAdmin(UnfoldModelAdmin):
+    """Admin interface for tax exemptions"""
+    
+    list_display = ['exemption_name', 'user_display', 'jurisdiction', 'exemption_type', 
+                    'active_badge', 'valid_until']
+    list_filter = ['exemption_type', 'is_active', 'created_at']
+    search_fields = ['exemption_name', 'user__email', 'jurisdiction__name', 'exemption_code']
+    readonly_fields = ['created_at', 'updated_at']
+    list_select_related = ['user', 'jurisdiction']
+    list_per_page = 25
+    
+    fieldsets = (
+        (_('Exemption Details'), {
+            'fields': ('exemption_name', 'exemption_type', 'exemption_code', 'is_active'),
+        }),
+        (_('Applies To'), {
+            'fields': ('user', 'jurisdiction'),
+        }),
+        (_('Validity'), {
+            'fields': ('valid_from', 'valid_until'),
+        }),
+        (_('Documentation'), {
+            'fields': ('documentation',),
+            'classes': ['collapse'],
+        }),
+        (_('Timestamps'), {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ['collapse'],
+        }),
+    )
+    
+    @display(description=_('User'))
+    def user_display(self, obj):
+        if obj.user:
+            return obj.user.get_full_name() or obj.user.email
+        return 'Global'
     
     @display(description=_('Active'), label=True)
     def active_badge(self, obj):
