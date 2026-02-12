@@ -10,6 +10,7 @@ export interface User {
   profile_picture?: string;
   country_of_residence: string;
   is_verified: boolean;
+  is_active?: boolean;
   created_at: string;
   updated_at: string;
 }
