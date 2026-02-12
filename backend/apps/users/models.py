@@ -24,6 +24,16 @@ class User(AbstractUser):
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='guest')
     country_of_residence = models.CharField(max_length=100, blank=True, null=True)
     is_verified = models.BooleanField(default=False)
+    
+    # Two-Factor Authentication fields
+    two_factor_enabled = models.BooleanField(default=False)
+    two_factor_secret = models.CharField(max_length=32, blank=True, null=True)
+    backup_codes = models.JSONField(default=list, blank=True)
+    
+    # Social Authentication fields
+    google_id = models.CharField(max_length=255, blank=True, null=True, unique=True)
+    facebook_id = models.CharField(max_length=255, blank=True, null=True, unique=True)
+    apple_id = models.CharField(max_length=255, blank=True, null=True, unique=True)
     profile_picture = models.ImageField(upload_to='profile_pictures/%Y/%m/%d/', null=True, blank=True)
     bio = models.TextField(blank=True, null=True)
     is_online = models.BooleanField(default=False)

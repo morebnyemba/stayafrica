@@ -8,6 +8,7 @@ import { toast } from 'react-hot-toast';
 import { Button } from '@/components/ui';
 import { validateEmail, validatePassword, validatePhoneNumber } from '@/lib/validation';
 import { getCountriesByContext, getUserCountryByLocation } from '@/lib/countries';
+import SocialAuthButtons from '@/components/auth/SocialAuthButtons';
 
 type Step = 1 | 2 | 3;
 
@@ -455,6 +456,23 @@ export function RegisterContent() {
               </Button>
             </div>
           </form>
+
+          {/* Social Auth (only on step 1) */}
+          {currentStep === 1 && (
+            <>
+              <div className="relative my-6">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-primary-200 dark:border-primary-700"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-4 bg-white dark:bg-primary-800 text-primary-500 dark:text-sand-400">
+                    or sign up with
+                  </span>
+                </div>
+              </div>
+              <SocialAuthButtons mode="signup" />
+            </>
+          )}
 
           {/* Sign In Link */}
           <div className="mt-6 text-center">

@@ -137,6 +137,38 @@ class APIClient {
       email,
       password,
     });
+
+    // Check if 2FA is required
+    if (response.data?.two_factor_required) {
+      return response.data; // Return without saving tokens — caller must verify 2FA
+    }
+
+    const { access, refresh } = response.data || {};
+    if (access && refresh) {
+      await this.saveTokens(String(access), String(refresh));
+    }
+    return response.data;
+  }
+
+  async loginWith2FA(email: string, password: string, token: string): Promise<TokenResponse> {
+    const response = await this.client.post('/auth/login/2fa/', {
+      email,
+      password,
+      token,
+    });
+    const { access, refresh } = response.data || {};
+    if (access && refresh) {
+      await this.saveTokens(String(access), String(refresh));
+    }
+    return response.data;
+  }
+
+  async loginWithBackupCode(email: string, password: string, backupCode: string): Promise<TokenResponse> {
+    const response = await this.client.post('/auth/login/2fa/', {
+      email,
+      password,
+      backup_code: backupCode,
+    });
     const { access, refresh } = response.data || {};
     if (access && refresh) {
       await this.saveTokens(String(access), String(refresh));

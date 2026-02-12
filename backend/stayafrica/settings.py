@@ -72,6 +72,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.gis',
+    'django.contrib.sites',  # Required for allauth
     
     # Third-party apps
     'rest_framework',
@@ -81,6 +82,19 @@ INSTALLED_APPS = [
     'django_celery_beat',
     'django_celery_results',
     'channels',
+    
+    # 2FA and Social Auth
+    'django_otp',
+    'django_otp.plugins.otp_totp',
+    'django_otp.plugins.otp_static',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
+    'allauth.socialaccount.providers.facebook',
+    'allauth.socialaccount.providers.apple',
+    'dj_rest_auth',
+    'dj_rest_auth.registration',
     
     # Local apps
     'apps.users',
@@ -170,6 +184,14 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
     {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
+]
+
+# Authentication Backends
+AUTHENTICATION_BACKENDS = [
+    # Django default
+    'django.contrib.auth.backends.ModelBackend',
+    # Allauth social authentication
+    'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
 # Internationalization
@@ -750,4 +772,87 @@ def dashboard_callback(request, context):
         ],
     })
     return context
+
+
+# ============================================================================
+# SOCIAL AUTHENTICATION CONFIGURATION
+# ============================================================================
+
+# Django Allauth Configuration
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_EMAIL_VERIFICATION = 'optional'  # Change to 'mandatory' for production
+ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_USER_MODEL_USERNAME_FIELD = 'username'
+ACCOUNT_USER_MODEL_EMAIL_FIELD = 'email'
+
+# Social Account Configuration
+SOCIALACCOUNT_AUTO_SIGNUP = True
+SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'  # Handled by providers
+SOCIALACCOUNT_QUERY_EMAIL = True
+
+# Provider-specific settings
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'online',
+        },
+        'APP': {
+            'client_id': os.getenv('GOOGLE_CLIENT_ID', ''),
+            'secret': os.getenv('GOOGLE_CLIENT_SECRET', ''),
+            'key': ''
+        }
+    },
+    'facebook': {
+        'METHOD': 'oauth2',
+        'SCOPE': ['email', 'public_profile'],
+        'AUTH_PARAMS': {'auth_type': 'reauthenticate'},
+        'FIELDS': [
+            'id',
+            'email',
+            'name',
+            'first_name',
+            'last_name',
+            'verified',
+            'locale',
+            'timezone',
+            'link',
+            'gender',
+            'updated_time',
+        ],
+        'EXCHANGE_TOKEN': True,
+        'VERIFIED_EMAIL': False,
+        'VERSION': 'v13.0',
+        'APP': {
+            'client_id': os.getenv('FACEBOOK_APP_ID', ''),
+            'secret': os.getenv('FACEBOOK_APP_SECRET', ''),
+            'key': ''
+        }
+    },
+    'apple': {
+        'APP': {
+            'client_id': os.getenv('APPLE_SERVICE_ID', ''),
+            'secret': os.getenv('APPLE_KEY_ID', ''),
+            'key': os.getenv('APPLE_TEAM_ID', ''),
+            'certificate_key': os.getenv('APPLE_PRIVATE_KEY', ''),
+        }
+    }
+}
+
+# REST Auth Configuration
+REST_AUTH = {
+    'USE_JWT': True,
+    'JWT_AUTH_COOKIE': 'stayafrica-auth',
+    'JWT_AUTH_REFRESH_COOKIE': 'stayafrica-refresh-token',
+    'JWT_AUTH_HTTPONLY': True,
+    'USER_DETAILS_SERIALIZER': 'apps.users.serializers.UserSerializer',
+}
+
+# Site ID for django.contrib.sites (required by allauth)
+SITE_ID = 1
 

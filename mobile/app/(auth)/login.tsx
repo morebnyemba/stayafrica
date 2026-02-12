@@ -25,7 +25,11 @@ export default function LoginScreen() {
   const [loginSuccess, setLoginSuccess] = useState(false);
   const [emailError, setEmailError] = useState<string>("");
   const [passwordError, setPasswordError] = useState<string>("");
-  const { login, user } = useAuth();
+  const [show2FA, setShow2FA] = useState(false);
+  const [twoFactorCode, setTwoFactorCode] = useState("");
+  const [useBackupCode, setUseBackupCode] = useState(false);
+  const [backupCode, setBackupCode] = useState("");
+  const { login, loginWith2FA, loginWithBackupCode, clearTwoFactorPending, user } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
@@ -75,12 +79,167 @@ export default function LoginScreen() {
       await login(email.trim().toLowerCase(), password);
       setLoginSuccess(true);
     } catch (err: any) {
-      console.error("Login failed:", err);
-      setError(err?.response?.data?.detail || "Invalid email or password. Please try again.");
-      setLoginSuccess(false);
+      if (err?.twoFactorRequired || err?.message === '2FA_REQUIRED') {
+        setShow2FA(true);
+        setError(null);
+      } else {
+        console.error("Login failed:", err);
+        setError(err?.response?.data?.detail || "Invalid email or password. Please try again.");
+        setLoginSuccess(false);
+      }
       setLoading(false);
     }
   };
+
+  const handle2FAVerify = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      if (useBackupCode) {
+        await loginWithBackupCode(backupCode.trim());
+      } else {
+        await loginWith2FA(twoFactorCode.trim());
+      }
+      setLoginSuccess(true);
+    } catch (err: any) {
+      console.error("2FA verification failed:", err);
+      setError(err?.response?.data?.detail || "Invalid verification code. Please try again.");
+      setLoading(false);
+    }
+  };
+
+  const handleCancel2FA = () => {
+    setShow2FA(false);
+    setTwoFactorCode("");
+    setBackupCode("");
+    setUseBackupCode(false);
+    setError(null);
+    clearTwoFactorPending();
+  };
+
+  // 2FA Verification Screen
+  if (show2FA) {
+    return (
+      <View className="flex-1 bg-sand-100">
+        <LinearGradient
+          colors={["#122F26", "#1d4a3d", "#F4F1EA"]}
+          locations={[0, 0.3, 0.6]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 1 }}
+          style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
+        />
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          className="flex-1"
+        >
+          <ScrollView
+            className="flex-1"
+            contentContainerStyle={{
+              flexGrow: 1,
+              paddingTop: insets.top + 20,
+              paddingBottom: insets.bottom + 20,
+            }}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+          >
+            <View className="flex-1 justify-center px-6">
+              <View className="items-center mb-10">
+                <View className="mb-6">
+                  <View className="bg-white/95 rounded-3xl p-5 shadow-2xl">
+                    <Ionicons name="shield-checkmark" size={60} color="#122F26" />
+                  </View>
+                </View>
+                <Text className="text-4xl font-black text-white mb-2 text-center tracking-tight">
+                  Two-Factor Auth
+                </Text>
+                <Text className="text-lg text-white/80 text-center">
+                  Enter the code from your authenticator app
+                </Text>
+              </View>
+
+              <View
+                className="rounded-3xl overflow-hidden bg-white mb-6"
+                style={{
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 10 },
+                  shadowOpacity: 0.15,
+                  shadowRadius: 20,
+                  elevation: 10,
+                }}
+              >
+                <View className="p-6">
+                  {error && (
+                    <View className="mb-4 p-4 bg-red-50 rounded-xl flex-row items-start border-2 border-red-200">
+                      <Ionicons name="alert-circle" size={20} color="#ef4444" style={{ marginTop: 2 }} />
+                      <Text className="text-red-600 ml-2 flex-1 text-sm leading-5">{error}</Text>
+                      <TouchableOpacity onPress={() => setError(null)}>
+                        <Ionicons name="close" size={20} color="#ef4444" />
+                      </TouchableOpacity>
+                    </View>
+                  )}
+
+                  {!useBackupCode ? (
+                    <Input
+                      label="Verification Code"
+                      icon="keypad-outline"
+                      placeholder="Enter 6-digit code"
+                      value={twoFactorCode}
+                      onChangeText={setTwoFactorCode}
+                      keyboardType="number-pad"
+                      maxLength={6}
+                      editable={!loading}
+                    />
+                  ) : (
+                    <Input
+                      label="Backup Code"
+                      icon="key-outline"
+                      placeholder="Enter backup code"
+                      value={backupCode}
+                      onChangeText={setBackupCode}
+                      autoCapitalize="none"
+                      editable={!loading}
+                    />
+                  )}
+
+                  <Button
+                    title="Verify"
+                    onPress={handle2FAVerify}
+                    loading={loading}
+                    disabled={loading || (!useBackupCode && twoFactorCode.length !== 6) || (useBackupCode && !backupCode.trim())}
+                    icon="checkmark-circle"
+                    iconPosition="right"
+                    size="lg"
+                    fullWidth
+                  />
+
+                  <TouchableOpacity
+                    onPress={() => {
+                      setUseBackupCode(!useBackupCode);
+                      setError(null);
+                    }}
+                    className="mt-4 items-center"
+                  >
+                    <Text className="text-sm font-bold text-gold">
+                      {useBackupCode ? 'Use authenticator code instead' : 'Use a backup code instead'}
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    onPress={handleCancel2FA}
+                    className="mt-3 items-center"
+                  >
+                    <Text className="text-sm text-forest/70">
+                      Cancel and go back
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </View>
+    );
+  }
 
   return (
     <View className="flex-1 bg-sand-100">

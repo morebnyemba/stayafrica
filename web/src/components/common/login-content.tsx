@@ -7,10 +7,13 @@ import { Mail, Lock } from 'lucide-react';
 import { Input, Button } from '@/components/ui';
 import { toast } from 'react-hot-toast';
 import { validateEmail, validatePassword } from '@/lib/validation';
+import SocialAuthButtons from '@/components/auth/SocialAuthButtons';
+import TwoFactorVerify from '@/components/auth/TwoFactorVerify';
 
 export function LoginContent() {
-  const { login } = useAuth();
+  const { login, setUser, twoFactorPending, clearTwoFactorPending } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const [showTwoFactor, setShowTwoFactor] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -47,13 +50,62 @@ export function LoginContent() {
       // Force a full-page navigation so middleware/SSR see the new cookie
       // This avoids needing a manual refresh after login
       window.location.replace('/dashboard');
-    } catch (error) {
-      toast.error('Invalid email or password');
-      console.error('Login error:', error);
+    } catch (error: any) {
+      if (error?.twoFactorRequired || error?.message === '2FA_REQUIRED') {
+        setShowTwoFactor(true);
+      } else {
+        toast.error('Invalid email or password');
+        console.error('Login error:', error);
+      }
     } finally {
       setIsLoading(false);
     }
   };
+
+  // Show 2FA verification screen when required
+  if (showTwoFactor && twoFactorPending) {
+    return (
+      <div className="min-h-screen flex items-center justify-center py-12 px-4 bg-gradient-to-br from-sand-100 via-secondary-50 to-primary-50 dark:from-primary-900 dark:via-primary-800 dark:to-primary-900">
+        <div className="w-full max-w-md">
+          <div className="text-center mb-8">
+            <Link href="/" className="inline-flex items-center justify-center">
+              <img src="/logo.png" alt="StayAfrica" className="h-28 w-auto" />
+            </Link>
+          </div>
+          <TwoFactorVerify
+            email={twoFactorPending.email}
+            password={twoFactorPending.password}
+            onSuccess={(data) => {
+              // Store tokens and user from the 2FA response
+              if (data.access) {
+                localStorage.setItem('access_token', data.access);
+                localStorage.setItem('refresh_token', data.refresh);
+                // Set cookie for SSR
+                fetch('/api/auth/set-cookie', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ token: data.access, maxAge: 86400 }),
+                }).catch(() => {
+                  const isSecure = window.location.protocol === 'https:';
+                  document.cookie = `access_token=${data.access}; path=/; max-age=86400; SameSite=Lax${isSecure ? '; Secure' : ''}`;
+                });
+              }
+              if (data.user) {
+                setUser(data.user);
+              }
+              clearTwoFactorPending();
+              toast.success('Welcome back!');
+              window.location.replace('/dashboard');
+            }}
+            onBack={() => {
+              setShowTwoFactor(false);
+              clearTwoFactorPending();
+            }}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center py-12 px-4 bg-gradient-to-br from-sand-100 via-secondary-50 to-primary-50 dark:from-primary-900 dark:via-primary-800 dark:to-primary-900">
@@ -128,6 +180,21 @@ export function LoginContent() {
               {isLoading ? 'Signing In...' : 'Sign In'}
             </Button>
           </form>
+
+          {/* Divider */}
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-primary-200 dark:border-primary-700"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-4 bg-white dark:bg-primary-800 text-primary-500 dark:text-sand-400">
+                or continue with
+              </span>
+            </div>
+          </div>
+
+          {/* Social Auth */}
+          <SocialAuthButtons mode="signin" />
 
           {/* Divider */}
           <div className="relative my-6">

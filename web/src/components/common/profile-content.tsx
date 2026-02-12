@@ -8,6 +8,7 @@ import { User, Mail, Phone, MapPin, CreditCard, Shield, Bell, Camera, Save, Load
 import { toast } from 'react-hot-toast';
 import { WORLD_COUNTRIES } from '@/lib/countries';
 import { Button } from '@/components/ui/Button';
+import TwoFactorSettings from '@/components/settings/TwoFactorSettings';
 
 type Tab = 'profile' | 'security' | 'payments' | 'notifications';
 
@@ -283,9 +284,7 @@ export function ProfileContent() {
                       <p className="text-sm text-primary-600 dark:text-sand-300 mb-4">
                         Add an extra layer of security to your account
                       </p>
-                      <Button variant="primary" size="sm">
-                        Enable 2FA
-                      </Button>
+                      <TwoFactorSettings />
                     </div>
                   </div>
                 </div>

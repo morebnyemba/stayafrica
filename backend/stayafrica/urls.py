@@ -26,6 +26,11 @@ urlpatterns = [
     path('api/v1/', include('apps.notifications.urls')),
     path('api/v1/messaging/', include('apps.messaging.urls')),
     path('api/v1/admin/', include('apps.admin_dashboard.urls')),
+    
+    # Social Authentication
+    path('api/v1/auth/', include('dj_rest_auth.urls')),
+    path('api/v1/auth/registration/', include('dj_rest_auth.registration.urls')),
+    path('api/v1/auth/social/', include('allauth.socialaccount.urls')),
 ]
 
 if settings.DEBUG:

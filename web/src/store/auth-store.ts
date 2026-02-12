@@ -2,13 +2,23 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { User } from '@/types';
 
+interface TwoFactorRequired {
+  two_factor_required: true;
+  email: string;
+  password: string;
+}
+
 interface AuthState {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+  twoFactorPending: TwoFactorRequired | null;
   setUser: (user: User | null) => void;
   setLoading: (loading: boolean) => void;
   login: (email: string, password: string) => Promise<void>;
+  loginWith2FA: (email: string, password: string, token: string) => Promise<void>;
+  loginWithBackupCode: (email: string, password: string, backupCode: string) => Promise<void>;
+  clearTwoFactorPending: () => void;
   register: (userData: any) => Promise<void>;
   logout: () => void;
   updateProfile: (userData: Partial<User>) => Promise<void>;
@@ -49,10 +59,13 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       isLoading: true,
       isAuthenticated: false,
+      twoFactorPending: null,
 
       setUser: (user) => set({ user, isAuthenticated: !!user }),
       
       setLoading: (isLoading) => set({ isLoading }),
+
+      clearTwoFactorPending: () => set({ twoFactorPending: null }),
 
       fetchUserProfile: async (token: string) => {
         try {
@@ -97,13 +110,64 @@ export const useAuthStore = create<AuthState>()(
             body: JSON.stringify({ email, password }),
           });
 
+          const data = await response.json();
+
+          if (response.ok) {
+            // Check if 2FA is required
+            if (data.two_factor_required) {
+              set({ twoFactorPending: { two_factor_required: true, email, password } });
+              const err = new Error('2FA_REQUIRED');
+              (err as any).twoFactorRequired = true;
+              throw err;
+            }
+
+            const { access, refresh, user: userData } = data;
+            await setSession(access, refresh);
+            set({ user: userData, isAuthenticated: true, twoFactorPending: null });
+          } else {
+            throw new Error(data.detail || 'Login failed');
+          }
+        } catch (error) {
+          throw error;
+        }
+      },
+
+      loginWith2FA: async (email: string, password: string, token: string) => {
+        try {
+          const response = await fetch(`${API_BASE}/auth/login/2fa/`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password, token }),
+          });
+
           if (response.ok) {
             const { access, refresh, user: userData } = await response.json();
             await setSession(access, refresh);
-            set({ user: userData, isAuthenticated: true });
+            set({ user: userData, isAuthenticated: true, twoFactorPending: null });
           } else {
             const error = await response.json();
-            throw new Error(error.detail || 'Login failed');
+            throw new Error(error.detail || '2FA verification failed');
+          }
+        } catch (error) {
+          throw error;
+        }
+      },
+
+      loginWithBackupCode: async (email: string, password: string, backupCode: string) => {
+        try {
+          const response = await fetch(`${API_BASE}/auth/login/2fa/`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password, backup_code: backupCode }),
+          });
+
+          if (response.ok) {
+            const { access, refresh, user: userData } = await response.json();
+            await setSession(access, refresh);
+            set({ user: userData, isAuthenticated: true, twoFactorPending: null });
+          } else {
+            const error = await response.json();
+            throw new Error(error.detail || 'Backup code verification failed');
           }
         } catch (error) {
           throw error;

@@ -21,11 +21,20 @@ interface UpdateProfileData {
   country_of_residence?: string;
 }
 
+interface TwoFactorPending {
+  email: string;
+  password: string;
+}
+
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  twoFactorPending: TwoFactorPending | null;
   login: (email: string, password: string) => Promise<void>;
+  loginWith2FA: (token: string) => Promise<void>;
+  loginWithBackupCode: (backupCode: string) => Promise<void>;
+  clearTwoFactorPending: () => void;
   register: (userData: any) => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
@@ -38,6 +47,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [twoFactorPending, setTwoFactorPending] = useState<TwoFactorPending | null>(null);
 
   // Check if user is authenticated on mount
   useEffect(() => {
@@ -75,15 +85,59 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (email: string, password: string) => {
     try {
-      await apiClient.login(email, password);
+      const result = await apiClient.login(email, password);
+
+      // Check if 2FA is required
+      if (result.two_factor_required) {
+        setTwoFactorPending({ email, password });
+        const err = new Error('2FA_REQUIRED');
+        (err as any).twoFactorRequired = true;
+        throw err;
+      }
+
       const profile = await apiClient.getUserProfile();
       setUser(profile);
       setIsAuthenticated(true);
+      setTwoFactorPending(null);
       logInfo('User logged in successfully', { userId: profile.id });
     } catch (error) {
       logError('Login failed', error, { email });
       throw error;
     }
+  };
+
+  const loginWith2FA = async (token: string) => {
+    if (!twoFactorPending) throw new Error('No pending 2FA session');
+    try {
+      await apiClient.loginWith2FA(twoFactorPending.email, twoFactorPending.password, token);
+      const profile = await apiClient.getUserProfile();
+      setUser(profile);
+      setIsAuthenticated(true);
+      setTwoFactorPending(null);
+      logInfo('User logged in with 2FA', { userId: profile.id });
+    } catch (error) {
+      logError('2FA verification failed', error);
+      throw error;
+    }
+  };
+
+  const loginWithBackupCode = async (backupCode: string) => {
+    if (!twoFactorPending) throw new Error('No pending 2FA session');
+    try {
+      await apiClient.loginWithBackupCode(twoFactorPending.email, twoFactorPending.password, backupCode);
+      const profile = await apiClient.getUserProfile();
+      setUser(profile);
+      setIsAuthenticated(true);
+      setTwoFactorPending(null);
+      logInfo('User logged in with backup code', { userId: profile.id });
+    } catch (error) {
+      logError('Backup code verification failed', error);
+      throw error;
+    }
+  };
+
+  const clearTwoFactorPending = () => {
+    setTwoFactorPending(null);
   };
 
   const register = async (userData: any) => {
@@ -138,7 +192,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         user,
         isAuthenticated,
         isLoading,
+        twoFactorPending,
         login,
+        loginWith2FA,
+        loginWithBackupCode,
+        clearTwoFactorPending,
         register,
         logout,
         refreshUser,
