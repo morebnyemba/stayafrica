@@ -31,57 +31,59 @@ class POICategoryAdmin(UnfoldModelAdmin):
 class PointOfInterestAdmin(UnfoldModelAdmin):
     """Admin interface for points of interest"""
     
-    list_display = ['name', 'category', 'city', 'country', 'poi_type', 'verified_badge']
-    list_filter = ['category', 'poi_type', 'is_verified', 'country']
+    list_display = ['name', 'category', 'city', 'country', 'poi_type', 'active_badge']
+    list_filter = ['category', 'poi_type', 'is_active', 'country']
     search_fields = ['name', 'city', 'country', 'address']
     readonly_fields = ['created_at', 'updated_at']
     list_select_related = ['category']
     list_per_page = 25
-    actions = ['verify_pois', 'unverify_pois']
+    actions = ['activate_pois', 'deactivate_pois']
     
     fieldsets = (
         (_('Basic Information'), {
-            'fields': ('name', 'category', 'poi_type', 'is_verified'),
+            'fields': ('name', 'category', 'poi_type', 'is_active'),
         }),
         (_('Location'), {
-            'fields': ('latitude', 'longitude', 'address', 'city', 'country'),
+            'fields': ('location', 'address', 'city', 'country'),
         }),
         (_('Details'), {
-            'fields': ('description', 'website', 'phone', 'opening_hours'),
+            'fields': ('description', 'website', 'phone', 'opening_hours',
+                       'rating', 'review_count', 'price_level', 'image_url'),
             'classes': ['collapse'],
         }),
         (_('Metadata'), {
-            'fields': ('google_place_id', 'created_at', 'updated_at'),
+            'fields': ('source', 'external_id', 'created_at', 'updated_at'),
             'classes': ['collapse'],
         }),
     )
     
-    @display(description=_('Verified'), label=True)
-    def verified_badge(self, obj):
+    @display(description=_('Active'), label=True)
+    def active_badge(self, obj):
         return {
-            'value': 'Verified' if obj.is_verified else 'Unverified',
-            'color': 'success' if obj.is_verified else 'warning',
+            'value': 'Active' if obj.is_active else 'Inactive',
+            'color': 'success' if obj.is_active else 'warning',
         }
     
-    @admin.action(description=_('Mark selected POIs as verified'))
-    def verify_pois(self, request, queryset):
-        updated = queryset.update(is_verified=True)
-        self.message_user(request, f'{updated} POI(s) verified.')
+    @admin.action(description=_('Activate selected POIs'))
+    def activate_pois(self, request, queryset):
+        updated = queryset.update(is_active=True)
+        self.message_user(request, f'{updated} POI(s) activated.')
     
-    @admin.action(description=_('Mark selected POIs as unverified'))
-    def unverify_pois(self, request, queryset):
-        updated = queryset.update(is_verified=False)
-        self.message_user(request, f'{updated} POI(s) unverified.')
+    @admin.action(description=_('Deactivate selected POIs'))
+    def deactivate_pois(self, request, queryset):
+        updated = queryset.update(is_active=False)
+        self.message_user(request, f'{updated} POI(s) deactivated.')
 
 
 @admin.register(PropertyPOI)
 class PropertyPOIAdmin(UnfoldModelAdmin):
     """Admin interface for property-POI relationships"""
     
-    list_display = ['property_display', 'poi_display', 'distance_display', 'travel_time', 'created_at']
-    list_filter = ['transport_mode', 'created_at']
+    list_display = ['property_display', 'poi_display', 'distance_display', 
+                    'walking_time_minutes', 'driving_time_minutes', 'created_at']
+    list_filter = ['is_recommended', 'created_at']
     search_fields = ['linked_property__title', 'poi__name']
-    readonly_fields = ['linked_property', 'poi', 'distance_km', 'created_at', 'updated_at']
+    readonly_fields = ['linked_property', 'poi', 'created_at', 'updated_at']
     list_select_related = ['linked_property', 'poi', 'poi__category']
     list_per_page = 25
     
@@ -90,7 +92,10 @@ class PropertyPOIAdmin(UnfoldModelAdmin):
             'fields': ('linked_property', 'poi'),
         }),
         (_('Distance & Travel'), {
-            'fields': ('distance_km', 'travel_time', 'transport_mode'),
+            'fields': ('distance_meters', 'walking_time_minutes', 'driving_time_minutes'),
+        }),
+        (_('Host Info'), {
+            'fields': ('host_notes', 'is_recommended'),
         }),
         (_('Timestamps'), {
             'fields': ('created_at', 'updated_at'),
@@ -108,7 +113,11 @@ class PropertyPOIAdmin(UnfoldModelAdmin):
     
     @display(description=_('Distance'))
     def distance_display(self, obj):
-        return f"{obj.distance_km:.2f} km"
+        if obj.distance_meters:
+            if obj.distance_meters >= 1000:
+                return f"{obj.distance_meters / 1000:.1f} km"
+            return f"{obj.distance_meters:.0f} m"
+        return '-'
     
     def has_add_permission(self, request):
         return False

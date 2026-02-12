@@ -724,23 +724,23 @@ class TaxRateAdmin(UnfoldModelAdmin):
 class BookingTaxAdmin(UnfoldModelAdmin):
     """Admin interface for booking taxes"""
     
-    list_display = ['booking_ref', 'tax_name', 'tax_amount_display', 'tax_rate_display', 'created_at']
-    list_filter = ['tax_rate__tax_type', 'created_at']
+    list_display = ['booking_ref', 'tax_name', 'tax_amount_display', 'tax_rate_display', 'calculation_date']
+    list_filter = ['tax_rate__tax_type', 'calculation_date']
     search_fields = ['booking__booking_ref', 'tax_rate__name']
-    readonly_fields = ['booking', 'tax_rate', 'tax_amount', 'created_at', 'updated_at']
+    readonly_fields = ['booking', 'tax_rate', 'tax_amount', 'taxable_amount', 'calculation_date']
     list_select_related = ['booking', 'tax_rate', 'tax_rate__jurisdiction']
     list_per_page = 25
-    date_hierarchy = 'created_at'
+    date_hierarchy = 'calculation_date'
     
     fieldsets = (
         (_('Booking'), {
             'fields': ('booking',),
         }),
         (_('Tax Information'), {
-            'fields': ('tax_rate', 'tax_amount'),
+            'fields': ('tax_rate', 'taxable_amount', 'tax_amount'),
         }),
         (_('Timestamps'), {
-            'fields': ('created_at', 'updated_at'),
+            'fields': ('calculation_date',),
             'classes': ['collapse'],
         }),
     )
@@ -759,7 +759,7 @@ class BookingTaxAdmin(UnfoldModelAdmin):
     
     @display(description=_('Rate'))
     def tax_rate_display(self, obj):
-        return f"{obj.tax_rate.rate}%"
+        return f"{obj.tax_rate.rate_percentage}%"
     
     def has_add_permission(self, request):
         return False
@@ -772,11 +772,11 @@ class BookingTaxAdmin(UnfoldModelAdmin):
 class TaxRemittanceAdmin(UnfoldModelAdmin):
     """Admin interface for tax remittances"""
     
-    list_display = ['reference', 'jurisdiction', 'period_display', 'total_amount_display', 
-                    'status_badge', 'remitted_at']
+    list_display = ['remittance_reference', 'jurisdiction', 'period_display', 'total_amount_display', 
+                    'status_badge', 'remittance_date']
     list_filter = ['status', 'jurisdiction__jurisdiction_type', 'created_at']
-    search_fields = ['reference', 'jurisdiction__name']
-    readonly_fields = ['reference', 'created_at', 'updated_at']
+    search_fields = ['remittance_reference', 'jurisdiction__name']
+    readonly_fields = ['remittance_reference', 'created_at', 'updated_at']
     list_select_related = ['jurisdiction']
     list_per_page = 25
     date_hierarchy = 'period_start'
@@ -784,16 +784,16 @@ class TaxRemittanceAdmin(UnfoldModelAdmin):
     
     fieldsets = (
         (_('Reference'), {
-            'fields': ('reference', 'jurisdiction', 'status'),
+            'fields': ('remittance_reference', 'jurisdiction', 'status'),
         }),
         (_('Period'), {
             'fields': ('period_start', 'period_end'),
         }),
         (_('Amounts'), {
-            'fields': ('total_collected', 'total_remitted', 'currency'),
+            'fields': ('total_tax_collected', 'total_bookings'),
         }),
         (_('Remittance'), {
-            'fields': ('remitted_at', 'remittance_notes'),
+            'fields': ('remittance_date', 'report_file_url', 'confirmation_file_url', 'notes'),
             'classes': ['collapse'],
         }),
         (_('Timestamps'), {
@@ -808,7 +808,7 @@ class TaxRemittanceAdmin(UnfoldModelAdmin):
     
     @display(description=_('Total Amount'))
     def total_amount_display(self, obj):
-        return f"{obj.currency} {obj.total_collected:.2f}"
+        return f"${obj.total_tax_collected:.2f}"
     
     @display(description=_('Status'), label=True)
     def status_badge(self, obj):
@@ -825,7 +825,7 @@ class TaxRemittanceAdmin(UnfoldModelAdmin):
     @admin.action(description=_('Mark as remitted'))
     def mark_remitted(self, request, queryset):
         from django.utils import timezone
-        updated = queryset.update(status='remitted', remitted_at=timezone.now())
+        updated = queryset.update(status='remitted', remittance_date=timezone.now())
         self.message_user(request, f'{updated} remittance(s) marked as remitted.')
     
     @admin.action(description=_('Mark as pending'))
@@ -838,26 +838,26 @@ class TaxRemittanceAdmin(UnfoldModelAdmin):
 class TaxExemptionAdmin(UnfoldModelAdmin):
     """Admin interface for tax exemptions"""
     
-    list_display = ['exemption_name', 'user_display', 'jurisdiction', 'exemption_type', 
-                    'active_badge', 'valid_until']
+    list_display = ['exemption_type', 'host_display', 'jurisdiction', 'certificate_number', 
+                    'active_badge', 'valid_to']
     list_filter = ['exemption_type', 'is_active', 'created_at']
-    search_fields = ['exemption_name', 'user__email', 'jurisdiction__name', 'exemption_code']
+    search_fields = ['exemption_certificate_number', 'host__email', 'jurisdiction__name']
     readonly_fields = ['created_at', 'updated_at']
-    list_select_related = ['user', 'jurisdiction']
+    list_select_related = ['host', 'jurisdiction', 'property', 'tax_rate']
     list_per_page = 25
     
     fieldsets = (
         (_('Exemption Details'), {
-            'fields': ('exemption_name', 'exemption_type', 'exemption_code', 'is_active'),
+            'fields': ('exemption_type', 'exemption_certificate_number', 'is_active'),
         }),
         (_('Applies To'), {
-            'fields': ('user', 'jurisdiction'),
+            'fields': ('host', 'property', 'jurisdiction', 'tax_rate'),
         }),
         (_('Validity'), {
-            'fields': ('valid_from', 'valid_until'),
+            'fields': ('valid_from', 'valid_to'),
         }),
-        (_('Documentation'), {
-            'fields': ('documentation',),
+        (_('Reason'), {
+            'fields': ('reason',),
             'classes': ['collapse'],
         }),
         (_('Timestamps'), {
@@ -866,11 +866,15 @@ class TaxExemptionAdmin(UnfoldModelAdmin):
         }),
     )
     
-    @display(description=_('User'))
-    def user_display(self, obj):
-        if obj.user:
-            return obj.user.get_full_name() or obj.user.email
+    @display(description=_('Host'))
+    def host_display(self, obj):
+        if obj.host:
+            return obj.host.get_full_name() or obj.host.email
         return 'Global'
+    
+    @display(description=_('Certificate #'))
+    def certificate_number(self, obj):
+        return obj.exemption_certificate_number or '-'
     
     @display(description=_('Active'), label=True)
     def active_badge(self, obj):

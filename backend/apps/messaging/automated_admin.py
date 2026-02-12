@@ -13,9 +13,9 @@ from apps.messaging.automated_models import (
 class HostMessageSettingsAdmin(UnfoldModelAdmin):
     """Admin interface for host messaging settings"""
     
-    list_display = ['host_display', 'auto_reply_enabled_badge', 'greeting_enabled_badge', 
-                    'check_in_enabled_badge', 'updated_at']
-    list_filter = ['enable_auto_reply', 'enable_greeting_message', 'enable_check_in_reminder', 'updated_at']
+    list_display = ['host_display', 'auto_responses_badge', 'quick_replies_badge', 
+                    'scheduled_messages_badge', 'updated_at']
+    list_filter = ['enable_auto_responses', 'enable_quick_replies', 'enable_scheduled_messages', 'updated_at']
     search_fields = ['host__email', 'host__username']
     readonly_fields = ['host', 'created_at', 'updated_at']
     list_select_related = ['host']
@@ -25,14 +25,14 @@ class HostMessageSettingsAdmin(UnfoldModelAdmin):
         (_('Host'), {
             'fields': ('host',),
         }),
-        (_('Auto-Reply Settings'), {
-            'fields': ('enable_auto_reply', 'auto_reply_message', 'auto_reply_delay_minutes'),
+        (_('Feature Toggles'), {
+            'fields': ('enable_auto_responses', 'enable_quick_replies', 'enable_scheduled_messages'),
         }),
-        (_('Greeting Message'), {
-            'fields': ('enable_greeting_message', 'greeting_message_template', 'greeting_delay_hours'),
+        (_('Away Mode'), {
+            'fields': ('away_mode_enabled', 'away_message'),
         }),
-        (_('Check-in Reminder'), {
-            'fields': ('enable_check_in_reminder', 'check_in_reminder_template', 'check_in_reminder_hours'),
+        (_('Response Settings'), {
+            'fields': ('target_response_time_hours',),
         }),
         (_('Timestamps'), {
             'fields': ('created_at', 'updated_at'),
@@ -44,25 +44,25 @@ class HostMessageSettingsAdmin(UnfoldModelAdmin):
     def host_display(self, obj):
         return obj.host.get_full_name() or obj.host.email
     
-    @display(description=_('Auto Reply'), label=True)
-    def auto_reply_enabled_badge(self, obj):
+    @display(description=_('Auto Responses'), label=True)
+    def auto_responses_badge(self, obj):
         return {
-            'value': 'Enabled' if obj.enable_auto_reply else 'Disabled',
-            'color': 'success' if obj.enable_auto_reply else 'secondary',
+            'value': 'Enabled' if obj.enable_auto_responses else 'Disabled',
+            'color': 'success' if obj.enable_auto_responses else 'secondary',
         }
     
-    @display(description=_('Greeting'), label=True)
-    def greeting_enabled_badge(self, obj):
+    @display(description=_('Quick Replies'), label=True)
+    def quick_replies_badge(self, obj):
         return {
-            'value': 'Enabled' if obj.enable_greeting_message else 'Disabled',
-            'color': 'success' if obj.enable_greeting_message else 'secondary',
+            'value': 'Enabled' if obj.enable_quick_replies else 'Disabled',
+            'color': 'success' if obj.enable_quick_replies else 'secondary',
         }
     
-    @display(description=_('Check-in'), label=True)
-    def check_in_enabled_badge(self, obj):
+    @display(description=_('Scheduled'), label=True)
+    def scheduled_messages_badge(self, obj):
         return {
-            'value': 'Enabled' if obj.enable_check_in_reminder else 'Disabled',
-            'color': 'success' if obj.enable_check_in_reminder else 'secondary',
+            'value': 'Enabled' if obj.enable_scheduled_messages else 'Disabled',
+            'color': 'success' if obj.enable_scheduled_messages else 'secondary',
         }
 
 
@@ -70,23 +70,23 @@ class HostMessageSettingsAdmin(UnfoldModelAdmin):
 class AutomatedMessageAdmin(UnfoldModelAdmin):
     """Admin interface for automated messages"""
     
-    list_display = ['host_display', 'message_type', 'trigger_event', 'active_badge', 'created_at']
-    list_filter = ['message_type', 'trigger_event', 'is_active', 'created_at']
-    search_fields = ['host__email', 'name', 'message_content']
+    list_display = ['host_display', 'name', 'trigger_type', 'active_badge', 'created_at']
+    list_filter = ['trigger_type', 'is_active', 'created_at']
+    search_fields = ['host__email', 'name', 'custom_message']
     readonly_fields = ['host', 'created_at', 'updated_at']
-    list_select_related = ['host']
+    list_select_related = ['host', 'template']
     list_per_page = 25
     actions = ['activate_messages', 'deactivate_messages']
     
     fieldsets = (
         (_('Basic Information'), {
-            'fields': ('host', 'name', 'message_type', 'is_active'),
+            'fields': ('host', 'name', 'trigger_type', 'is_active'),
         }),
-        (_('Trigger'), {
-            'fields': ('trigger_event', 'trigger_delay_hours'),
+        (_('Template & Delay'), {
+            'fields': ('template', 'delay_hours'),
         }),
-        (_('Message Content'), {
-            'fields': ('message_content',),
+        (_('Custom Message'), {
+            'fields': ('custom_message',),
         }),
         (_('Timestamps'), {
             'fields': ('created_at', 'updated_at'),
@@ -120,30 +120,26 @@ class AutomatedMessageAdmin(UnfoldModelAdmin):
 class ScheduledMessageAdmin(UnfoldModelAdmin):
     """Admin interface for scheduled messages"""
     
-    list_display = ['host_display', 'recipient_display', 'scheduled_for', 
+    list_display = ['host_display', 'message_preview', 'scheduled_time', 
                     'status_badge', 'sent_at']
-    list_filter = ['status', 'scheduled_for', 'sent_at']
-    search_fields = ['host__email', 'recipient__email', 'message_content']
-    readonly_fields = ['host', 'recipient', 'booking', 'automated_message', 
-                       'created_at', 'sent_at', 'error_message']
-    list_select_related = ['host', 'recipient', 'booking', 'automated_message']
+    list_filter = ['status', 'scheduled_time', 'sent_at']
+    search_fields = ['host__email', 'message_text']
+    readonly_fields = ['host', 'conversation', 'booking', 
+                       'created_at', 'sent_at']
+    list_select_related = ['host', 'conversation', 'booking']
     list_per_page = 25
-    date_hierarchy = 'scheduled_for'
+    date_hierarchy = 'scheduled_time'
     actions = ['mark_sent', 'mark_cancelled']
     
     fieldsets = (
         (_('Participants'), {
-            'fields': ('host', 'recipient', 'booking'),
+            'fields': ('host', 'conversation', 'booking'),
         }),
         (_('Message'), {
-            'fields': ('automated_message', 'message_content'),
+            'fields': ('message_text',),
         }),
         (_('Scheduling'), {
-            'fields': ('scheduled_for', 'status', 'sent_at'),
-        }),
-        (_('Error'), {
-            'fields': ('error_message',),
-            'classes': ['collapse'],
+            'fields': ('scheduled_time', 'status', 'sent_at'),
         }),
         (_('Timestamp'), {
             'fields': ('created_at',),
@@ -155,9 +151,11 @@ class ScheduledMessageAdmin(UnfoldModelAdmin):
     def host_display(self, obj):
         return obj.host.get_full_name() or obj.host.email
     
-    @display(description=_('Recipient'))
-    def recipient_display(self, obj):
-        return obj.recipient.get_full_name() or obj.recipient.email
+    @display(description=_('Message'))
+    def message_preview(self, obj):
+        if obj.message_text:
+            return obj.message_text[:60] + '...' if len(obj.message_text) > 60 else obj.message_text
+        return '-'
     
     @display(description=_('Status'), label=True)
     def status_badge(self, obj):
@@ -188,23 +186,23 @@ class ScheduledMessageAdmin(UnfoldModelAdmin):
 class QuickReplyAdmin(UnfoldModelAdmin):
     """Admin interface for quick reply templates"""
     
-    list_display = ['host_display', 'shortcut', 'title', 'active_badge', 'usage_count', 'created_at']
-    list_filter = ['is_active', 'created_at']
-    search_fields = ['host__email', 'shortcut', 'title', 'message_content']
-    readonly_fields = ['host', 'usage_count', 'created_at', 'updated_at']
+    list_display = ['host_display', 'shortcut', 'category', 'active_badge', 'use_count', 'created_at']
+    list_filter = ['is_active', 'category', 'created_at']
+    search_fields = ['host__email', 'shortcut', 'message_text']
+    readonly_fields = ['host', 'use_count', 'created_at', 'updated_at']
     list_select_related = ['host']
     list_per_page = 25
     actions = ['activate_replies', 'deactivate_replies']
     
     fieldsets = (
         (_('Basic Information'), {
-            'fields': ('host', 'shortcut', 'title', 'is_active'),
+            'fields': ('host', 'shortcut', 'category', 'is_active'),
         }),
         (_('Message Content'), {
-            'fields': ('message_content',),
+            'fields': ('message_text',),
         }),
         (_('Statistics'), {
-            'fields': ('usage_count',),
+            'fields': ('use_count',),
         }),
         (_('Timestamps'), {
             'fields': ('created_at', 'updated_at'),
@@ -238,25 +236,30 @@ class QuickReplyAdmin(UnfoldModelAdmin):
 class MessageAnalyticsAdmin(UnfoldModelAdmin):
     """Admin interface for message analytics"""
     
-    list_display = ['host_display', 'period_display', 'total_sent', 'total_received',
-                    'avg_response_time_display', 'response_rate_display']
-    list_filter = ['period_type', 'year', 'month']
+    list_display = ['host_display', 'date', 'messages_sent', 'messages_received',
+                    'avg_response_time_display', 'automated_messages_sent']
+    list_filter = ['date']
     search_fields = ['host__email']
-    readonly_fields = ['host', 'period_type', 'year', 'month', 'quarter', 'week',
-                       'total_sent', 'total_received', 'total_automated', 
-                       'avg_response_time_minutes', 'response_rate', 'created_at', 'updated_at']
+    readonly_fields = ['host', 'date', 'messages_sent', 'messages_received',
+                       'conversations_started', 'conversations_resolved',
+                       'avg_response_time_minutes', 'quick_replies_used',
+                       'automated_messages_sent', 'created_at', 'updated_at']
     list_select_related = ['host']
     list_per_page = 25
+    date_hierarchy = 'date'
     
     fieldsets = (
-        (_('Host & Period'), {
-            'fields': ('host', 'period_type', 'year', 'month', 'quarter', 'week'),
+        (_('Host & Date'), {
+            'fields': ('host', 'date'),
         }),
         (_('Message Counts'), {
-            'fields': ('total_sent', 'total_received', 'total_automated'),
+            'fields': ('messages_sent', 'messages_received', 'automated_messages_sent'),
+        }),
+        (_('Conversations'), {
+            'fields': ('conversations_started', 'conversations_resolved'),
         }),
         (_('Performance'), {
-            'fields': ('avg_response_time_minutes', 'response_rate'),
+            'fields': ('avg_response_time_minutes', 'quick_replies_used'),
         }),
         (_('Timestamps'), {
             'fields': ('created_at', 'updated_at'),
@@ -268,16 +271,6 @@ class MessageAnalyticsAdmin(UnfoldModelAdmin):
     def host_display(self, obj):
         return obj.host.get_full_name() or obj.host.email
     
-    @display(description=_('Period'))
-    def period_display(self, obj):
-        if obj.period_type == 'monthly':
-            return f"{obj.year}-{obj.month:02d}"
-        elif obj.period_type == 'quarterly':
-            return f"{obj.year} Q{obj.quarter}"
-        elif obj.period_type == 'weekly':
-            return f"{obj.year} W{obj.week}"
-        return f"{obj.year}"
-    
     @display(description=_('Avg Response Time'))
     def avg_response_time_display(self, obj):
         if obj.avg_response_time_minutes:
@@ -285,12 +278,6 @@ class MessageAnalyticsAdmin(UnfoldModelAdmin):
             if hours < 1:
                 return f"{obj.avg_response_time_minutes:.0f} min"
             return f"{hours:.1f} hrs"
-        return '-'
-    
-    @display(description=_('Response Rate'))
-    def response_rate_display(self, obj):
-        if obj.response_rate:
-            return f"{obj.response_rate:.1f}%"
         return '-'
     
     def has_add_permission(self, request):
