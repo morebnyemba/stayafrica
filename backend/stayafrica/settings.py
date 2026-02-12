@@ -837,6 +837,7 @@ REST_AUTH = {
     'JWT_AUTH_REFRESH_COOKIE': 'stayafrica-refresh-token',
     'JWT_AUTH_HTTPONLY': True,
     'USER_DETAILS_SERIALIZER': 'apps.users.serializers.UserSerializer',
+    'TOKEN_MODEL': None,
 }
 
 # Site ID for django.contrib.sites (required by allauth)
