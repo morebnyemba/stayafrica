@@ -94,7 +94,7 @@ export default function BookingsManagement() {
           break;
         case 'complete':
           // Would need API endpoint for bulk complete
-          toast.info('Bulk complete action needs API implementation');
+          toast('Bulk complete action needs API implementation');
           break;
         default:
           toast.error('Unknown action');
@@ -118,7 +118,7 @@ export default function BookingsManagement() {
         toast.success('Booking cancelled successfully');
       } else if (confirmAction.type === 'confirm') {
         // Would need API endpoint for this
-        toast.info('Confirm booking action needs API implementation');
+        toast('Confirm booking action needs API implementation');
       }
       loadBookings();
     } catch (err) {

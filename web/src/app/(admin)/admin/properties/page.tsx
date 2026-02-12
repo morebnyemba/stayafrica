@@ -110,11 +110,11 @@ export default function PropertiesManagement() {
           break;
         case 'activate':
           // Would need API endpoint for this
-          toast.info('Activate action needs API implementation');
+          toast('Activate action needs API implementation');
           break;
         case 'deactivate':
           // Would need API endpoint for this
-          toast.info('Deactivate action needs API implementation');
+          toast('Deactivate action needs API implementation');
           break;
         default:
           toast.error('Unknown action');
