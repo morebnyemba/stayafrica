@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/store/auth-store';
 import Link from 'next/link';
-import { Mail, Lock, User, Phone, MapPin, CheckCircle2, ArrowLeft } from 'lucide-react';
+import { Mail, Lock, User, Phone, MapPin, CheckCircle2, ArrowLeft, Luggage, Home } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { Input, Button } from '@/components/ui';
 import { validateEmail, validatePassword, validatePhoneNumber } from '@/lib/validation';
@@ -157,9 +157,6 @@ export function RegisterContent() {
         <div className="flex items-center justify-between mb-6">
           <Link href="/" className="text-secondary-600 dark:text-secondary-400 hover:underline font-medium">
             Home
-          </Link>
-          <Link href="/login" className="text-secondary-600 dark:text-secondary-400 hover:underline font-medium">
-            Have an account? Sign in
           </Link>
         </div>
 
@@ -322,7 +319,9 @@ export function RegisterContent() {
                       }`}
                     >
                       <div className="text-center">
-                        <div className="text-2xl mb-2">🏖️</div>
+                        <div className="flex justify-center mb-2">
+                          <Luggage className="w-8 h-8 text-secondary-600 dark:text-secondary-400" />
+                        </div>
                         <div className="font-semibold text-primary-900 dark:text-sand-100">Book Stays</div>
                         <div className="text-sm text-primary-600 dark:text-sand-300">I&apos;m looking for places to stay</div>
                       </div>
@@ -337,7 +336,9 @@ export function RegisterContent() {
                       }`}
                     >
                       <div className="text-center">
-                        <div className="text-2xl mb-2">🏡</div>
+                        <div className="flex justify-center mb-2">
+                          <Home className="w-8 h-8 text-secondary-600 dark:text-secondary-400" />
+                        </div>
                         <div className="font-semibold text-primary-900 dark:text-sand-100">Host Properties</div>
                         <div className="text-sm text-primary-600 dark:text-sand-300">I want to list my property</div>
                       </div>
