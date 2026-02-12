@@ -411,7 +411,7 @@ export default function BookingsManagement() {
             ? 'Are you sure you want to cancel this booking? This action cannot be undone.'
             : 'Are you sure you want to confirm this booking?'
         }
-        variant={confirmAction?.type === 'cancel' ? 'danger' : 'primary'}
+        variant={confirmAction?.type === 'cancel' ? 'danger' : 'info'}
         confirmText={confirmAction?.type === 'cancel' ? 'Cancel Booking' : 'Confirm'}
       />
     </div>
