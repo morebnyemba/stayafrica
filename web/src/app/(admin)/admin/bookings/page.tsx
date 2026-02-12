@@ -86,7 +86,7 @@ export default function BookingsManagement() {
       switch (action) {
         case 'confirm':
           // Would need API endpoint for bulk confirm
-          toast.info('Bulk confirm action needs API implementation');
+          toast('Bulk confirm action needs API implementation');
           break;
         case 'cancel':
           await Promise.all(selectedBookings.map(id => adminApi.cancelBooking(id, 'Bulk cancelled by admin')));
