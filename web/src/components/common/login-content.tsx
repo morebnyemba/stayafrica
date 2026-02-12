@@ -183,7 +183,7 @@ export function LoginContent() {
             </Button>
           </form>
 
-          <AuthDivider text="or continue with" />
+          <AuthDivider text="or" />
 
           {/* Social Auth */}
           <SocialAuthButtons mode="signin" />

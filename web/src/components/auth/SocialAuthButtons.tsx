@@ -19,7 +19,7 @@ interface SocialAuthButtonsProps {
   onSuccess?: (data: any) => void;
 }
 
-export default function SocialAuthButtons({ mode = 'signin', onSuccess: _onSuccess }: SocialAuthButtonsProps) {
+export default function SocialAuthButtons({ mode: _mode = 'signin', onSuccess: _onSuccess }: SocialAuthButtonsProps) {
   const [providers, setProviders] = useState<Record<string, ProviderConfig>>({});
 
   useEffect(() => {
@@ -68,17 +68,6 @@ export default function SocialAuthButtons({ mode = 'signin', onSuccess: _onSucce
 
   return (
     <div className="space-y-3">
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-gray-300" />
-        </div>
-        <div className="relative flex justify-center text-sm">
-          <span className="bg-white px-2 text-gray-500">
-            Or {mode === 'signin' ? 'sign in' : 'sign up'} with
-          </span>
-        </div>
-      </div>
-
       <div className="grid grid-cols-1 gap-3">
         {/* Google */}
         <button

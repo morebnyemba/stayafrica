@@ -380,7 +380,7 @@ export function RegisterContent() {
           {/* Social Auth (only on step 1) */}
           {currentStep === 1 && (
             <>
-              <AuthDivider text="or sign up with" />
+              <AuthDivider text="or" bgClassName="bg-white dark:bg-primary-900" />
               <SocialAuthButtons mode="signup" />
             </>
           )}
