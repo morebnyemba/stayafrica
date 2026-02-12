@@ -117,7 +117,7 @@ class PointOfInterest(models.Model):
 
 class PropertyPOI(models.Model):
     """Relationship between properties and nearby POIs with distance"""
-    property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name='nearby_pois')
+    linked_property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name='nearby_pois', db_column='property_id')
     poi = models.ForeignKey(PointOfInterest, on_delete=models.CASCADE, related_name='nearby_properties')
     
     distance_meters = models.FloatField(help_text='Distance in meters')
@@ -147,14 +147,14 @@ class PropertyPOI(models.Model):
     
     class Meta:
         ordering = ['distance_meters']
-        unique_together = ('property', 'poi')
+        unique_together = ('linked_property', 'poi')
         indexes = [
-            models.Index(fields=['property', 'distance_meters']),
-            models.Index(fields=['property', 'is_recommended']),
+            models.Index(fields=['linked_property', 'distance_meters']),
+            models.Index(fields=['linked_property', 'is_recommended']),
         ]
     
     def __str__(self):
-        return f"{self.poi.name} - {self.distance_meters}m from {self.property.title}"
+        return f"{self.poi.name} - {self.distance_meters}m from {self.linked_property.title}"
     
     @property
     def distance_km(self):

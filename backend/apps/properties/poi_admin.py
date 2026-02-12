@@ -80,14 +80,14 @@ class PropertyPOIAdmin(UnfoldModelAdmin):
     
     list_display = ['property_display', 'poi_display', 'distance_display', 'travel_time', 'created_at']
     list_filter = ['transport_mode', 'created_at']
-    search_fields = ['property__title', 'poi__name']
-    readonly_fields = ['property', 'poi', 'distance_km', 'created_at', 'updated_at']
-    list_select_related = ['property', 'poi', 'poi__category']
+    search_fields = ['linked_property__title', 'poi__name']
+    readonly_fields = ['linked_property', 'poi', 'distance_km', 'created_at', 'updated_at']
+    list_select_related = ['linked_property', 'poi', 'poi__category']
     list_per_page = 25
     
     fieldsets = (
         (_('Relationship'), {
-            'fields': ('property', 'poi'),
+            'fields': ('linked_property', 'poi'),
         }),
         (_('Distance & Travel'), {
             'fields': ('distance_km', 'travel_time', 'transport_mode'),
@@ -100,7 +100,7 @@ class PropertyPOIAdmin(UnfoldModelAdmin):
     
     @display(description=_('Property'))
     def property_display(self, obj):
-        return obj.property.title
+        return obj.linked_property.title
     
     @display(description=_('POI'))
     def poi_display(self, obj):
