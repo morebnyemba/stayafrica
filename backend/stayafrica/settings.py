@@ -793,6 +793,9 @@ SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'  # Handled by providers
 SOCIALACCOUNT_QUERY_EMAIL = True
 
 # Provider-specific settings
+# NOTE: OAuth client IDs/secrets are stored in the database via allauth's SocialApp model.
+# Manage them via Django Admin at /admin/socialaccount/socialapp/
+# Only scope/behaviour config goes here — no hardcoded credentials.
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
         'SCOPE': [
@@ -802,11 +805,6 @@ SOCIALACCOUNT_PROVIDERS = {
         'AUTH_PARAMS': {
             'access_type': 'online',
         },
-        'APP': {
-            'client_id': os.getenv('GOOGLE_CLIENT_ID', ''),
-            'secret': os.getenv('GOOGLE_CLIENT_SECRET', ''),
-            'key': ''
-        }
     },
     'facebook': {
         'METHOD': 'oauth2',
@@ -828,20 +826,8 @@ SOCIALACCOUNT_PROVIDERS = {
         'EXCHANGE_TOKEN': True,
         'VERIFIED_EMAIL': False,
         'VERSION': 'v13.0',
-        'APP': {
-            'client_id': os.getenv('FACEBOOK_APP_ID', ''),
-            'secret': os.getenv('FACEBOOK_APP_SECRET', ''),
-            'key': ''
-        }
     },
-    'apple': {
-        'APP': {
-            'client_id': os.getenv('APPLE_SERVICE_ID', ''),
-            'secret': os.getenv('APPLE_KEY_ID', ''),
-            'key': os.getenv('APPLE_TEAM_ID', ''),
-            'certificate_key': os.getenv('APPLE_PRIVATE_KEY', ''),
-        }
-    }
+    'apple': {},
 }
 
 # REST Auth Configuration

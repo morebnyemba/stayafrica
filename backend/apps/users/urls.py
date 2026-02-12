@@ -3,6 +3,7 @@ from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenRefreshView
 from apps.users.views import UserViewSet, CustomTokenObtainPairView, UserPreferenceViewSet, UserPropertyInteractionViewSet
 from apps.users import views_2fa
+from apps.users import views_social
 
 app_name = 'users'
 
@@ -24,4 +25,8 @@ urlpatterns = [
     path('2fa/status/', views_2fa.get_2fa_status, name='2fa_status'),
     path('2fa/verify/', views_2fa.verify_token, name='2fa_verify'),
     path('2fa/backup-codes/regenerate/', views_2fa.regenerate_backup_codes, name='2fa_backup_codes_regenerate'),
+
+    # Social Authentication (DB-stored credentials)
+    path('auth/social/config/', views_social.social_auth_config, name='social_auth_config'),
+    path('auth/social/<str:provider>/login/', views_social.social_login, name='social_login'),
 ]

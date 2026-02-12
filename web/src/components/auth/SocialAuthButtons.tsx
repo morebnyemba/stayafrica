@@ -1,6 +1,18 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
+
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL
+  ? `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1`
+  : (typeof window !== 'undefined' && window.location.origin.includes('localhost')
+      ? 'http://localhost:8000/api/v1'
+      : 'https://api.zimlegend.online/api/v1');
+
+interface ProviderConfig {
+  client_id: string;
+  name: string;
+}
 
 interface SocialAuthButtonsProps {
   mode?: 'signin' | 'signup';
@@ -8,11 +20,20 @@ interface SocialAuthButtonsProps {
 }
 
 export default function SocialAuthButtons({ mode = 'signin', onSuccess }: SocialAuthButtonsProps) {
+  const [providers, setProviders] = useState<Record<string, ProviderConfig>>({});
+
+  useEffect(() => {
+    // Fetch OAuth client IDs from backend (DB-stored)
+    fetch(`${API_BASE}/auth/social/config/`)
+      .then(r => r.json())
+      .then(data => setProviders(data.providers || {}))
+      .catch(() => {}); // silent — buttons will show "not configured" on click
+  }, []);
+
   const handleGoogleAuth = () => {
-    // Redirect to Google OAuth
     const redirectUri = encodeURIComponent(`${window.location.origin}/auth/callback/google`);
-    const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
-    
+    const clientId = providers.google?.client_id;
+
     if (!clientId) {
       toast.error('Google authentication is not configured');
       return;
@@ -22,10 +43,9 @@ export default function SocialAuthButtons({ mode = 'signin', onSuccess }: Social
   };
 
   const handleFacebookAuth = () => {
-    // Redirect to Facebook OAuth
     const redirectUri = encodeURIComponent(`${window.location.origin}/auth/callback/facebook`);
-    const appId = process.env.NEXT_PUBLIC_FACEBOOK_APP_ID;
-    
+    const appId = providers.facebook?.client_id;
+
     if (!appId) {
       toast.error('Facebook authentication is not configured');
       return;
@@ -35,10 +55,9 @@ export default function SocialAuthButtons({ mode = 'signin', onSuccess }: Social
   };
 
   const handleAppleAuth = () => {
-    // Redirect to Apple OAuth
     const redirectUri = encodeURIComponent(`${window.location.origin}/auth/callback/apple`);
-    const clientId = process.env.NEXT_PUBLIC_APPLE_CLIENT_ID;
-    
+    const clientId = providers.apple?.client_id;
+
     if (!clientId) {
       toast.error('Apple authentication is not configured');
       return;

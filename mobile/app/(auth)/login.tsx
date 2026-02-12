@@ -29,7 +29,7 @@ export default function LoginScreen() {
   const [twoFactorCode, setTwoFactorCode] = useState("");
   const [useBackupCode, setUseBackupCode] = useState(false);
   const [backupCode, setBackupCode] = useState("");
-  const { login, loginWith2FA, loginWithBackupCode, clearTwoFactorPending, user } = useAuth();
+  const { login, loginWith2FA, loginWithBackupCode, loginWithGoogle, loginWithFacebook, loginWithApple, clearTwoFactorPending, user } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
@@ -115,6 +115,29 @@ export default function LoginScreen() {
     setUseBackupCode(false);
     setError(null);
     clearTwoFactorPending();
+  };
+
+  const handleSocialLogin = async (provider: 'Google' | 'Apple' | 'Facebook') => {
+    try {
+      setLoading(true);
+      setError(null);
+      if (provider === 'Google') {
+        await loginWithGoogle();
+      } else if (provider === 'Facebook') {
+        await loginWithFacebook();
+      } else if (provider === 'Apple') {
+        await loginWithApple();
+      }
+      setLoginSuccess(true);
+    } catch (err: any) {
+      if (err?.message?.includes('cancelled') || err?.message?.includes('dismiss')) {
+        // User cancelled — don't show error
+      } else {
+        setError(err?.message || `${provider} sign-in failed. Please try again.`);
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   // 2FA Verification Screen
@@ -377,20 +400,23 @@ export default function LoginScreen() {
             {/* Social Login Options */}
             <View className="flex-row justify-center gap-4 mb-8">
               {[
-                { name: "Google", icon: "logo-google", color: "#DB4437" },
-                { name: "Apple", icon: "logo-apple", color: "#000000" },
-                { name: "Facebook", icon: "logo-facebook", color: "#4267B2" },
+                { name: "Google" as const, icon: "logo-google", color: "#DB4437" },
+                { name: "Apple" as const, icon: "logo-apple", color: "#000000" },
+                { name: "Facebook" as const, icon: "logo-facebook", color: "#4267B2" },
               ].map((provider) => (
                 <TouchableOpacity
                   key={provider.name}
                   className="w-16 h-16 rounded-2xl bg-white items-center justify-center"
                   activeOpacity={0.7}
+                  onPress={() => handleSocialLogin(provider.name)}
+                  disabled={loading}
                   style={{
                     shadowColor: '#000',
                     shadowOffset: { width: 0, height: 2 },
                     shadowOpacity: 0.1,
                     shadowRadius: 8,
                     elevation: 3,
+                    opacity: loading ? 0.5 : 1,
                   }}
                 >
                   <Ionicons name={provider.icon as any} size={28} color={provider.color} />

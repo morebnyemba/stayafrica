@@ -44,7 +44,7 @@ export default function OAuthCallbackPage() {
 
       try {
         // Exchange authorization code for tokens via backend
-        const response = await fetch(`${API_BASE}/auth/social/${provider}/`, {
+        const response = await fetch(`${API_BASE}/auth/social/${provider}/login/`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

@@ -70,7 +70,7 @@ interface TokenResponse {
 }
 
 class APIClient {
-  private client: AxiosInstance;
+  public client: AxiosInstance;
   private refreshPromise: Promise<string> | null = null;
 
   constructor() {
@@ -517,6 +517,40 @@ class APIClient {
 
   async initiateWithdrawal(data: WithdrawalRequest): Promise<WithdrawalResponse> {
     return (await this.client.post('/withdrawals/', data)).data;
+  }
+
+  // Two-Factor Authentication
+  async get2FAStatus(): Promise<{
+    two_factor_enabled: boolean;
+    has_backup_codes: boolean;
+    backup_codes_remaining: number;
+  }> {
+    return (await this.client.get('/2fa/status/')).data;
+  }
+
+  async setup2FA(): Promise<{
+    secret: string;
+    qr_code: string;
+    backup_codes: string[];
+    message: string;
+  }> {
+    return (await this.client.post('/2fa/setup/')).data;
+  }
+
+  async enable2FA(token: string): Promise<{ message: string; two_factor_enabled: boolean }> {
+    return (await this.client.post('/2fa/enable/', { token })).data;
+  }
+
+  async disable2FA(password: string): Promise<{ message: string; two_factor_enabled: boolean }> {
+    return (await this.client.post('/2fa/disable/', { password })).data;
+  }
+
+  async verify2FAToken(token: string): Promise<{ message: string; valid: boolean }> {
+    return (await this.client.post('/2fa/verify/', { token })).data;
+  }
+
+  async regenerateBackupCodes(password: string): Promise<{ message: string; backup_codes: string[] }> {
+    return (await this.client.post('/2fa/backup-codes/regenerate/', { password })).data;
   }
 
   // Generic request method

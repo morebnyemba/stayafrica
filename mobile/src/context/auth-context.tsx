@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { apiClient } from '@/services/api-client';
+import { socialAuthService } from '@/services/social-auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { logError, logInfo } from '@/utils/logger';
 
@@ -34,6 +35,9 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   loginWith2FA: (token: string) => Promise<void>;
   loginWithBackupCode: (backupCode: string) => Promise<void>;
+  loginWithGoogle: () => Promise<void>;
+  loginWithFacebook: () => Promise<void>;
+  loginWithApple: () => Promise<void>;
   clearTwoFactorPending: () => void;
   register: (userData: any) => Promise<void>;
   logout: () => Promise<void>;
@@ -140,6 +144,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setTwoFactorPending(null);
   };
 
+  const loginWithGoogle = async () => {
+    try {
+      const result = await socialAuthService.loginWithGoogle();
+      setUser(result.user);
+      setIsAuthenticated(true);
+      logInfo('User logged in with Google', { userId: result.user?.id });
+    } catch (error) {
+      logError('Google login failed', error);
+      throw error;
+    }
+  };
+
+  const loginWithFacebook = async () => {
+    try {
+      const result = await socialAuthService.loginWithFacebook();
+      setUser(result.user);
+      setIsAuthenticated(true);
+      logInfo('User logged in with Facebook', { userId: result.user?.id });
+    } catch (error) {
+      logError('Facebook login failed', error);
+      throw error;
+    }
+  };
+
+  const loginWithApple = async () => {
+    try {
+      const result = await socialAuthService.loginWithApple();
+      setUser(result.user);
+      setIsAuthenticated(true);
+      logInfo('User logged in with Apple', { userId: result.user?.id });
+    } catch (error) {
+      logError('Apple login failed', error);
+      throw error;
+    }
+  };
+
   const register = async (userData: any) => {
     try {
       await apiClient.register(userData);
@@ -196,6 +236,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         login,
         loginWith2FA,
         loginWithBackupCode,
+        loginWithGoogle,
+        loginWithFacebook,
+        loginWithApple,
         clearTwoFactorPending,
         register,
         logout,

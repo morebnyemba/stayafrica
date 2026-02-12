@@ -502,6 +502,14 @@ export default function ProfileScreen() {
         />
 
         <MenuItem
+          iconName="shield-checkmark-outline"
+          label="Security & 2FA"
+          value="Two-factor authentication"
+          onPress={() => router.push('/(tabs)/profile/security')}
+          highlighted={true}
+        />
+
+        <MenuItem
           iconName="notifications-outline"
           label="Notifications"
           value="Manage notification preferences"
