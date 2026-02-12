@@ -70,6 +70,7 @@ export default function PropertiesManagement() {
     }
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleBulkApprove = async () => {
     if (selectedProperties.length === 0) {
       toast.error('No properties selected');
