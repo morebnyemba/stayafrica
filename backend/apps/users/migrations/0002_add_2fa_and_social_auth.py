@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0001_initial'),  # Adjust this to your latest migration
+        ('users', '0002_user_online_status'),
     ]
 
     operations = [
