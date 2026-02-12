@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { adminApi } from '@/lib/admin-api';
 import { Property } from '@/types';
-import { Search, CheckCircle, XCircle, Eye, ChevronDown, Ban, Loader2 } from 'lucide-react';
+import { Search, CheckCircle, XCircle, Eye, ChevronDown, Ban } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ConfirmDialog from '@/components/admin/ConfirmDialog';
 
