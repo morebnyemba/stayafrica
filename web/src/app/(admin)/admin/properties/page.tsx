@@ -70,24 +70,6 @@ export default function PropertiesManagement() {
     }
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const handleBulkApprove = async () => {
-    if (selectedProperties.length === 0) {
-      toast.error('No properties selected');
-      return;
-    }
-
-    try {
-      await Promise.all(selectedProperties.map(id => adminApi.approveProperty(id)));
-      toast.success(`${selectedProperties.length} properties approved`);
-      setSelectedProperties([]);
-      loadProperties();
-    } catch (err) {
-      toast.error('Failed to bulk approve properties');
-      console.error(err);
-    }
-  };
-
   const handleSuspend = (propertyId: string) => {
     setConfirmAction({ type: 'suspend', propertyId });
     setShowConfirmDialog(true);
