@@ -9,6 +9,8 @@ import { toast } from 'react-hot-toast';
 import { validateEmail, validatePassword } from '@/lib/validation';
 import SocialAuthButtons from '@/components/auth/SocialAuthButtons';
 import TwoFactorVerify from '@/components/auth/TwoFactorVerify';
+import { AuthDivider } from '@/components/auth/AuthDivider';
+import { AuthFooter } from '@/components/auth/AuthFooter';
 
 export function LoginContent() {
   const { login, setUser, twoFactorPending, clearTwoFactorPending } = useAuth();
@@ -181,35 +183,14 @@ export function LoginContent() {
             </Button>
           </form>
 
-          {/* Divider */}
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-primary-200 dark:border-primary-700"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-white dark:bg-primary-800 text-primary-500 dark:text-sand-400">
-                or continue with
-              </span>
-            </div>
-          </div>
+          <AuthDivider text="or continue with" />
 
           {/* Social Auth */}
           <SocialAuthButtons mode="signin" />
 
-          {/* Divider */}
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-primary-200 dark:border-primary-700"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-white dark:bg-primary-800 text-primary-500 dark:text-sand-400">
-                New to StayAfrica?
-              </span>
-            </div>
-          </div>
-
           {/* Sign Up Link */}
-          <div className="text-center">
+          <div className="mt-6 text-center">
+            <p className="text-sm text-primary-600 dark:text-sand-400 mb-3">New to StayAfrica?</p>
             <Link
               href="/register"
               className="inline-flex w-full items-center justify-center rounded-lg bg-secondary-500 px-6 py-3 text-lg font-medium text-neutral-900 hover:bg-secondary-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-secondary-500"
@@ -219,19 +200,7 @@ export function LoginContent() {
           </div>
         </div>
 
-        {/* Footer Links */}
-        <div className="mt-6 text-center text-sm text-primary-600 dark:text-sand-400">
-          <p>
-            By signing in, you agree to our{' '}
-            <Link href="/terms" className="text-secondary-600 dark:text-secondary-400 hover:underline">
-              Terms of Service
-            </Link>{' '}
-            and{' '}
-            <Link href="/privacy" className="text-secondary-600 dark:text-secondary-400 hover:underline">
-              Privacy Policy
-            </Link>
-          </p>
-        </div>
+        <AuthFooter action="signin" />
       </div>
     </div>
   );

@@ -3,20 +3,20 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/store/auth-store';
 import Link from 'next/link';
-import { Mail, Lock, Eye, EyeOff, User, Phone, MapPin, CheckCircle2, ArrowLeft } from 'lucide-react';
+import { Mail, Lock, User, Phone, MapPin, CheckCircle2, ArrowLeft } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { Button } from '@/components/ui';
+import { Input, Button } from '@/components/ui';
 import { validateEmail, validatePassword, validatePhoneNumber } from '@/lib/validation';
 import { getCountriesByContext, getUserCountryByLocation } from '@/lib/countries';
 import SocialAuthButtons from '@/components/auth/SocialAuthButtons';
+import { AuthDivider } from '@/components/auth/AuthDivider';
+import { AuthFooter } from '@/components/auth/AuthFooter';
 
 type Step = 1 | 2 | 3;
 
 export function RegisterContent() {
   const { register } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [currentStep, setCurrentStep] = useState<Step>(1);
   const [availableCountries, setAvailableCountries] = useState<string[]>([]);
   const [formData, setFormData] = useState({
@@ -215,81 +215,38 @@ export function RegisterContent() {
             {/* Step 1: Credentials */}
             {currentStep === 1 && (
               <>
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-primary-900 dark:text-sand-100 mb-2">
-                    Email Address
-                  </label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-primary-400 dark:text-sand-400" />
-                    <input
-                      id="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className={`w-full pl-10 pr-4 py-3 bg-sand-50 dark:bg-primary-700 border rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent transition ${
-                        errors.email ? 'border-red-500' : 'border-primary-200 dark:border-primary-600'
-                      } text-primary-900 dark:text-sand-100`}
-                      placeholder="you@example.com"
-                    />
-                  </div>
-                  {errors.email && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.email}</p>}
-                </div>
+                <Input
+                  label="Email Address"
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  placeholder="you@example.com"
+                  error={errors.email}
+                  icon={<Mail className="w-5 h-5" />}
+                  required
+                />
 
-                <div>
-                  <label htmlFor="password" className="block text-sm font-medium text-primary-900 dark:text-sand-100 mb-2">
-                    Password
-                  </label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-primary-400 dark:text-sand-400" />
-                    <input
-                      id="password"
-                      type={showPassword ? 'text' : 'password'}
-                      value={formData.password}
-                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                      className={`w-full pl-10 pr-12 py-3 bg-sand-50 dark:bg-primary-700 border rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent transition ${
-                        errors.password ? 'border-red-500' : 'border-primary-200 dark:border-primary-600'
-                      } text-primary-900 dark:text-sand-100`}
-                      placeholder="••••••••"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-primary-400 dark:text-sand-400"
-                      aria-label={showPassword ? 'Hide password' : 'Show password'}
-                    >
-                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                    </button>
-                  </div>
-                  {errors.password && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.password}</p>}
-                </div>
+                <Input
+                  label="Password"
+                  type="password"
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  placeholder="••••••••"
+                  error={errors.password}
+                  icon={<Lock className="w-5 h-5" />}
+                  required
+                />
 
-                <div>
-                  <label htmlFor="confirmPassword" className="block text-sm font-medium text-primary-900 dark:text-sand-100 mb-2">
-                    Confirm Password
-                  </label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-primary-400 dark:text-sand-400" />
-                    <input
-                      id="confirmPassword"
-                      type={showConfirmPassword ? 'text' : 'password'}
-                      value={formData.confirmPassword}
-                      onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                      className={`w-full pl-10 pr-12 py-3 bg-sand-50 dark:bg-primary-700 border rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent transition ${
-                        errors.confirmPassword ? 'border-red-500' : 'border-primary-200 dark:border-primary-600'
-                      } text-primary-900 dark:text-sand-100`}
-                      placeholder="••••••••"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-primary-400 dark:text-sand-400"
-                      aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
-                    >
-                      {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                    </button>
-                  </div>
-                  {errors.confirmPassword && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.confirmPassword}</p>}
-                </div>
+                <Input
+                  label="Confirm Password"
+                  type="password"
+                  value={formData.confirmPassword}
+                  onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                  placeholder="••••••••"
+                  error={errors.confirmPassword}
+                  icon={<Lock className="w-5 h-5" />}
+                  required
+                />
               </>
             )}
 
@@ -297,96 +254,58 @@ export function RegisterContent() {
             {currentStep === 2 && (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label htmlFor="first_name" className="block text-sm font-medium text-primary-900 dark:text-sand-100 mb-2">
-                      First Name
-                    </label>
-                    <div className="relative">
-                      <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-primary-400 dark:text-sand-400" />
-                      <input
-                        id="first_name"
-                        type="text"
-                        value={formData.first_name}
-                        onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
-                        className={`w-full pl-10 pr-4 py-3 bg-sand-50 dark:bg-primary-700 border rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent transition ${
-                          errors.first_name ? 'border-red-500' : 'border-primary-200 dark:border-primary-600'
-                        } text-primary-900 dark:text-sand-100`}
-                        placeholder="John"
-                      />
-                    </div>
-                    {errors.first_name && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.first_name}</p>}
-                  </div>
+                  <Input
+                    label="First Name"
+                    type="text"
+                    value={formData.first_name}
+                    onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
+                    placeholder="John"
+                    error={errors.first_name}
+                    icon={<User className="w-5 h-5" />}
+                    required
+                  />
 
-                  <div>
-                    <label htmlFor="last_name" className="block text-sm font-medium text-primary-900 dark:text-sand-100 mb-2">
-                      Last Name
-                    </label>
-                    <div className="relative">
-                      <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-primary-400 dark:text-sand-400" />
-                      <input
-                        id="last_name"
-                        type="text"
-                        value={formData.last_name}
-                        onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
-                        className={`w-full pl-10 pr-4 py-3 bg-sand-50 dark:bg-primary-700 border rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent transition ${
-                          errors.last_name ? 'border-red-500' : 'border-primary-200 dark:border-primary-600'
-                        } text-primary-900 dark:text-sand-100`}
-                        placeholder="Doe"
-                      />
-                    </div>
-                    {errors.last_name && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.last_name}</p>}
-                  </div>
+                  <Input
+                    label="Last Name"
+                    type="text"
+                    value={formData.last_name}
+                    onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
+                    placeholder="Doe"
+                    error={errors.last_name}
+                    icon={<User className="w-5 h-5" />}
+                    required
+                  />
                 </div>
 
-                <div>
-                  <label htmlFor="phone_number" className="block text-sm font-medium text-primary-900 dark:text-sand-100 mb-2">
-                    Phone Number
-                  </label>
-                  <div className="relative">
-                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-primary-400 dark:text-sand-400" />
-                    <input
-                      id="phone_number"
-                      type="tel"
-                      value={formData.phone_number}
-                      onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
-                      className={`w-full pl-10 pr-4 py-3 bg-sand-50 dark:bg-primary-700 border rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent transition ${
-                        errors.phone_number ? 'border-red-500' : 'border-primary-200 dark:border-primary-600'
-                      } text-primary-900 dark:text-sand-100`}
-                      placeholder="+1 (555) 123-4567"
-                    />
-                  </div>
-                  {errors.phone_number && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.phone_number}</p>}
-                </div>
+                <Input
+                  label="Phone Number"
+                  type="tel"
+                  value={formData.phone_number}
+                  onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
+                  placeholder="+1 (555) 123-4567"
+                  error={errors.phone_number}
+                  icon={<Phone className="w-5 h-5" />}
+                  required
+                />
               </>
             )}
 
             {/* Step 3: Additional Details */}
             {currentStep === 3 && (
               <>
-                <div>
-                  <label htmlFor="country_of_residence" className="block text-sm font-medium text-primary-900 dark:text-sand-100 mb-2">
-                    Country of Residence
-                  </label>
-                  <div className="relative">
-                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-primary-400 dark:text-sand-400" />
-                    <select
-                      id="country_of_residence"
-                      value={formData.country_of_residence}
-                      onChange={(e) => setFormData({ ...formData, country_of_residence: e.target.value })}
-                      className={`w-full pl-10 pr-4 py-3 bg-sand-50 dark:bg-primary-700 border rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent transition ${
-                        errors.country_of_residence ? 'border-red-500' : 'border-primary-200 dark:border-primary-600'
-                      } text-primary-900 dark:text-sand-100`}
-                    >
-                      <option value="">Select your country</option>
-                      {availableCountries.map((country) => (
-                        <option key={country} value={country}>
-                          {country}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  {errors.country_of_residence && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.country_of_residence}</p>}
-                </div>
+                <Input
+                  label="Country of Residence"
+                  select
+                  options={[
+                    { value: '', label: 'Select your country' },
+                    ...availableCountries.map((c) => ({ value: c, label: c })),
+                  ]}
+                  value={formData.country_of_residence}
+                  onChange={(e) => setFormData({ ...formData, country_of_residence: e.target.value })}
+                  error={errors.country_of_residence}
+                  icon={<MapPin className="w-5 h-5" />}
+                  required
+                />
 
                 <div>
                   <label className="block text-sm font-medium text-primary-900 dark:text-sand-100 mb-3">
@@ -460,16 +379,7 @@ export function RegisterContent() {
           {/* Social Auth (only on step 1) */}
           {currentStep === 1 && (
             <>
-              <div className="relative my-6">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-primary-200 dark:border-primary-700"></div>
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-4 bg-white dark:bg-primary-800 text-primary-500 dark:text-sand-400">
-                    or sign up with
-                  </span>
-                </div>
-              </div>
+              <AuthDivider text="or sign up with" />
               <SocialAuthButtons mode="signup" />
             </>
           )}
@@ -485,19 +395,7 @@ export function RegisterContent() {
           </div>
         </div>
 
-        {/* Footer Links */}
-        <div className="mt-6 text-center text-sm text-primary-600 dark:text-sand-400">
-          <p>
-            By creating an account, you agree to our{' '}
-            <Link href="/terms" className="text-secondary-600 dark:text-secondary-400 hover:underline">
-              Terms of Service
-            </Link>{' '}
-            and{' '}
-            <Link href="/privacy" className="text-secondary-600 dark:text-secondary-400 hover:underline">
-              Privacy Policy
-            </Link>
-          </p>
-        </div>
+        <AuthFooter action="signup" />
       </div>
     </div>
   );
