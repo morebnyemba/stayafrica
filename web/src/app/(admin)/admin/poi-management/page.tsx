@@ -419,7 +419,7 @@ export default function POIManagement() {
         onConfirm={handleConfirm}
         title={confirmAction?.type === 'verify' ? 'Verify POIs' : 'Unverify POIs'}
         message={`Are you sure you want to ${confirmAction?.type} ${confirmAction?.ids.length} POI(s)?`}
-        variant={confirmAction?.type === 'verify' ? 'primary' : 'warning'}
+        variant={confirmAction?.type === 'verify' ? 'info' : 'warning'}
         confirmText={confirmAction?.type === 'verify' ? 'Verify' : 'Unverify'}
       />
     </div>
