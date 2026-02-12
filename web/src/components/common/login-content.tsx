@@ -118,7 +118,7 @@ export function LoginContent() {
             <img src="/logo.png" alt="StayAfrica" className="h-28 w-auto" />
           </Link>
           <p className="text-primary-600 dark:text-sand-300 mt-2">
-            Welcome back! Sign in to continue
+            Welcome back to StayAfrica
           </p>
         </div>
 

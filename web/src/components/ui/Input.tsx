@@ -3,7 +3,7 @@
  */
 'use client';
 
-import React, { useState } from 'react';
+import React, { useId, useState } from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 import { Eye, EyeOff } from 'lucide-react';
@@ -68,15 +68,21 @@ export const Input = React.forwardRef<HTMLInputElement | HTMLTextAreaElement | H
     const isPasswordType = type === 'password';
     const effectiveType = isPasswordType && showPassword ? 'text' : type;
     const isCheckbox = type === 'checkbox';
+    const autoId = useId();
+    const inputId = (props as any).id || autoId;
+    const errorId = error ? `${inputId}-error` : undefined;
+    const helpId = helpText && !error ? `${inputId}-help` : undefined;
 
     if (isCheckbox) {
       return (
         <div className="w-full">
-          <label className={cn('inline-flex items-center gap-2 cursor-pointer', className)}>
+          <label htmlFor={inputId} className={cn('inline-flex items-center gap-2 cursor-pointer', className)}>
             <input
               ref={ref as React.Ref<HTMLInputElement>}
+              id={inputId}
               type="checkbox"
               className="h-5 w-5 rounded border-2 border-neutral-300 bg-white text-primary-600 focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-white transition dark:border-neutral-600 dark:bg-primary-800 dark:text-secondary-300 dark:focus:ring-primary-400 dark:focus:ring-offset-primary-900"
+              aria-describedby={errorId || helpId}
               {...(props as React.InputHTMLAttributes<HTMLInputElement>)}
             />
             {label && (
@@ -86,8 +92,8 @@ export const Input = React.forwardRef<HTMLInputElement | HTMLTextAreaElement | H
               </span>
             )}
           </label>
-          {error && <p className="mt-1 text-sm text-error-500">{error}</p>}
-          {helpText && !error && <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-300">{helpText}</p>}
+          {error && <p id={errorId} className="mt-1 text-sm text-error-500" role="alert">{error}</p>}
+          {helpText && !error && <p id={helpId} className="mt-1 text-sm text-neutral-500 dark:text-neutral-300">{helpText}</p>}
         </div>
       );
     }
@@ -95,7 +101,7 @@ export const Input = React.forwardRef<HTMLInputElement | HTMLTextAreaElement | H
     return (
       <div className="w-full">
         {label && (
-          <label className="mb-2 block text-sm font-medium text-neutral-700 dark:text-sand-100">
+          <label htmlFor={inputId} className="mb-2 block text-sm font-medium text-neutral-700 dark:text-sand-100">
             {label}
             {props.required && <span className="ml-1 text-error-500">*</span>}
           </label>
@@ -108,6 +114,10 @@ export const Input = React.forwardRef<HTMLInputElement | HTMLTextAreaElement | H
           {select ? (
             <select
               ref={ref as React.Ref<HTMLSelectElement>}
+              id={inputId}
+              aria-label={label}
+              aria-describedby={errorId || helpId}
+              aria-invalid={!!error}
               className={cn(
                 inputVariants({ variant: variantClass as any }),
                 icon && iconPosition === 'left' && 'pl-10',
@@ -124,6 +134,10 @@ export const Input = React.forwardRef<HTMLInputElement | HTMLTextAreaElement | H
           ) : multiline ? (
             <textarea
               ref={ref as React.Ref<HTMLTextAreaElement>}
+              id={inputId}
+              aria-label={label}
+              aria-describedby={errorId || helpId}
+              aria-invalid={!!error}
               rows={rows}
               className={cn(
                 inputVariants({ variant: variantClass as any }),
@@ -135,7 +149,11 @@ export const Input = React.forwardRef<HTMLInputElement | HTMLTextAreaElement | H
           ) : (
             <input
               ref={ref as React.Ref<HTMLInputElement>}
+              id={inputId}
               type={effectiveType}
+              aria-label={label}
+              aria-describedby={errorId || helpId}
+              aria-invalid={!!error}
               className={cn(
                 inputVariants({ variant: variantClass as any }),
                 icon && iconPosition === 'left' && 'pl-10',
@@ -160,8 +178,8 @@ export const Input = React.forwardRef<HTMLInputElement | HTMLTextAreaElement | H
             </button>
           )}
         </div>
-        {error && <p className="mt-1 text-sm text-error-500">{error}</p>}
-        {helpText && !error && <p className="mt-1 text-sm text-neutral-500 dark:text-sand-400">{helpText}</p>}
+        {error && <p id={errorId} className="mt-1 text-sm text-error-500" role="alert">{error}</p>}
+        {helpText && !error && <p id={helpId} className="mt-1 text-sm text-neutral-500 dark:text-sand-400">{helpText}</p>}
       </div>
     );
   }
