@@ -9,8 +9,12 @@ export interface User {
   is_staff?: boolean;
   profile_picture?: string;
   country_of_residence: string;
+  username?: string;
   is_verified: boolean;
   is_active?: boolean;
+  is_superuser?: boolean;
+  bio?: string;
+  last_login?: string;
   created_at: string;
   updated_at: string;
 }

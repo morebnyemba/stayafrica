@@ -19,7 +19,7 @@ interface SocialAuthButtonsProps {
   onSuccess?: (data: any) => void;
 }
 
-export default function SocialAuthButtons({ mode = 'signin', onSuccess }: SocialAuthButtonsProps) {
+export default function SocialAuthButtons({ mode = 'signin', onSuccess: _onSuccess }: SocialAuthButtonsProps) {
   const [providers, setProviders] = useState<Record<string, ProviderConfig>>({});
 
   useEffect(() => {
