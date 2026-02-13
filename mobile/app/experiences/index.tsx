@@ -3,24 +3,36 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { AnimatedCompassIcon } from '@/components/common/AnimatedCompassIcon';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useQuery } from '@tanstack/react-query';
-import { apiClient } from '@/services/api-client';
+import { useState } from 'react';
+import { useExperiences, useExperienceCategories } from '@/hooks/api-hooks';
+import type { Experience } from '@/types';
+
+const durationLabels: Record<string, string> = {
+  half_day: 'Half Day',
+  full_day: 'Full Day',
+  multi_day: 'Multi-Day',
+  hourly: 'Hourly',
+};
 
 export default function ExperiencesScreen() {
   const router = useRouter();
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [searchParams, setSearchParams] = useState<any>({});
 
-  // Fetch experiences
-  const { data: experiencesData, isLoading } = useQuery({
-    queryKey: ['experiences'],
-    queryFn: async () => {
-      const response = await apiClient.get('/experiences/');
-      return response.data;
-    },
-  });
+  const queryParams = {
+    ...searchParams,
+    ...(selectedCategory ? { category: selectedCategory } : {}),
+  };
 
-  const experiences = experiencesData?.results || [];
+  const { data: experiencesData, isLoading } = useExperiences(
+    Object.keys(queryParams).length > 0 ? queryParams : undefined
+  );
+  const { data: categoriesData } = useExperienceCategories();
 
-  const ExperienceCard = ({ experience }: any) => (
+  const experiences: Experience[] = experiencesData?.results || [];
+  const categories = categoriesData || [];
+
+  const ExperienceCard = ({ experience }: { experience: Experience }) => (
     <TouchableOpacity
       onPress={() => router.push(`/experiences/${experience.id}`)}
       className="mb-4"
@@ -35,43 +47,58 @@ export default function ExperiencesScreen() {
           elevation: 4,
         }}
       >
-        {experience.images?.[0] && (
+        {experience.cover_image && (
           <Image
-            source={{ uri: experience.images[0] }}
+            source={{ uri: experience.cover_image }}
             style={{ width: '100%', height: 200 }}
             resizeMode="cover"
           />
         )}
         <View className="p-4 bg-white rounded-2xl">
+          {experience.category_name && (
+            <View className="bg-gold/20 self-start px-3 py-1 rounded-full mb-2">
+              <Text className="text-xs font-semibold text-forest">{experience.category_name}</Text>
+            </View>
+          )}
           <Text className="text-lg font-bold text-forest mb-1">
             {experience.title}
           </Text>
           <View className="flex-row items-center mb-2">
             <Ionicons name="location" size={14} color="#3A5C50" />
             <Text className="text-sm text-moss ml-1">
-              {experience.location}
+              {experience.city}, {experience.country}
             </Text>
           </View>
-          <Text className="text-sm text-moss mb-3 line-clamp-2">
+          <Text className="text-sm text-moss mb-3" numberOfLines={2}>
             {experience.description}
           </Text>
           <View className="flex-row justify-between items-center">
             <View className="flex-row items-center">
               <Ionicons name="time" size={16} color="#D9B168" />
-              <Text className="text-sm text-moss ml-1">{experience.duration}</Text>
-            </View>
-            <Text className="text-lg font-bold text-forest">
-              ${experience.price}
-            </Text>
-          </View>
-          {experience.rating && (
-            <View className="flex-row items-center mt-2">
-              <Ionicons name="star" size={14} color="#F59E0B" />
               <Text className="text-sm text-moss ml-1">
-                {experience.rating} ({experience.review_count} reviews)
+                {experience.duration_hours}h · {durationLabels[experience.duration_type] || experience.duration_type}
               </Text>
             </View>
-          )}
+            <Text className="text-lg font-bold text-forest">
+              {experience.currency} {experience.price_per_person}/person
+            </Text>
+          </View>
+          <View className="flex-row items-center justify-between mt-2">
+            {experience.average_rating > 0 && (
+              <View className="flex-row items-center">
+                <Ionicons name="star" size={14} color="#F59E0B" />
+                <Text className="text-sm text-moss ml-1">
+                  {experience.average_rating.toFixed(1)} ({experience.review_count} reviews)
+                </Text>
+              </View>
+            )}
+            <View className="flex-row items-center">
+              <Ionicons name="people" size={14} color="#3A5C50" />
+              <Text className="text-sm text-moss ml-1">
+                {experience.min_participants}-{experience.max_participants} people
+              </Text>
+            </View>
+          </View>
         </View>
       </View>
     </TouchableOpacity>
@@ -109,15 +136,34 @@ export default function ExperiencesScreen() {
         {/* Category Pills */}
         <View className="mb-4">
           <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row">
-            {['All', 'Adventure', 'Culture', 'Food & Drink', 'Wellness', 'Nature'].map((category) => (
+            <TouchableOpacity
+              onPress={() => setSelectedCategory('')}
+              className="mr-2"
+            >
+              <View
+                className="px-4 py-2 rounded-full"
+                style={{
+                  backgroundColor: selectedCategory === '' ? '#D9B168' : '#ffffff',
+                  shadowColor: '#122F26',
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.05,
+                  shadowRadius: 4,
+                  elevation: 2,
+                }}
+              >
+                <Text className={`font-semibold ${selectedCategory === '' ? 'text-white' : 'text-forest'}`}>All</Text>
+              </View>
+            </TouchableOpacity>
+            {categories.map((cat) => (
               <TouchableOpacity
-                key={category}
+                key={cat.id}
+                onPress={() => setSelectedCategory(String(cat.id))}
                 className="mr-2"
               >
                 <View
                   className="px-4 py-2 rounded-full"
                   style={{
-                    backgroundColor: '#ffffff',
+                    backgroundColor: selectedCategory === String(cat.id) ? '#D9B168' : '#ffffff',
                     shadowColor: '#122F26',
                     shadowOffset: { width: 0, height: 2 },
                     shadowOpacity: 0.05,
@@ -125,7 +171,9 @@ export default function ExperiencesScreen() {
                     elevation: 2,
                   }}
                 >
-                  <Text className="text-forest font-semibold">{category}</Text>
+                  <Text className={`font-semibold ${selectedCategory === String(cat.id) ? 'text-white' : 'text-forest'}`}>
+                    {cat.name}
+                  </Text>
                 </View>
               </TouchableOpacity>
             ))}
@@ -140,7 +188,7 @@ export default function ExperiencesScreen() {
           </View>
         ) : experiences.length > 0 ? (
           <View>
-            {experiences.map((experience: any) => (
+            {experiences.map((experience) => (
               <ExperienceCard key={experience.id} experience={experience} />
             ))}
           </View>

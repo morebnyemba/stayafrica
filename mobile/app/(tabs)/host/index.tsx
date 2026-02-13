@@ -521,6 +521,22 @@ export default function HostScreen() {
             />
             
             <MenuItem
+              icon="compass"
+              title="Experiences"
+              description="Manage your hosted experiences"
+              onPress={() => router.push('/host/experiences')}
+              color="#06B6D4"
+            />
+            
+            <MenuItem
+              icon="receipt"
+              title="Experience Bookings"
+              description="Manage guest experience reservations"
+              onPress={() => router.push('/host/experiences/bookings')}
+              color="#8B5CF6"
+            />
+            
+            <MenuItem
               icon="cash"
               title="Earnings & Payouts"
               description="Track your income and payments"

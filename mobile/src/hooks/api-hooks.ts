@@ -13,6 +13,8 @@ import type {
   WalletBalance,
   Transaction,
   HostEarnings,
+  Experience,
+  ExperienceBooking,
 } from '@/types';
 
 // Properties
@@ -359,6 +361,132 @@ export function useWithdrawFunds() {
     mutationFn: (amount: number) => apiClient.withdrawFunds(amount),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['wallet'] });
+    },
+  });
+}
+
+// Experiences - Guest
+export function useExperiences(params?: any) {
+  return useQuery({
+    queryKey: ['experiences', params],
+    queryFn: () => apiClient.getExperiences(params),
+  });
+}
+
+export function useExperienceById(id: string) {
+  return useQuery({
+    queryKey: ['experiences', id],
+    queryFn: () => apiClient.getExperienceById(id),
+    enabled: !!id,
+  });
+}
+
+export function useExperienceCategories() {
+  return useQuery({
+    queryKey: ['experience-categories'],
+    queryFn: () => apiClient.getExperienceCategories(),
+  });
+}
+
+export function useNearbyExperiences(lat: number, lng: number, radius: number = 50) {
+  return useQuery({
+    queryKey: ['experiences', 'nearby', lat, lng, radius],
+    queryFn: () => apiClient.getNearbyExperiences(lat, lng, radius),
+    enabled: !!lat && !!lng,
+  });
+}
+
+export function useExperienceBookings(params?: any) {
+  return useQuery({
+    queryKey: ['experience-bookings', params],
+    queryFn: () => apiClient.getExperienceBookings(params),
+  });
+}
+
+export function useBookExperience() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { experience: string; booking_date: string; num_participants: number; special_requests?: string }) =>
+      apiClient.bookExperience(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['experience-bookings'] });
+    },
+  });
+}
+
+export function useCancelExperienceBooking() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => apiClient.cancelExperienceBooking(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['experience-bookings'] });
+    },
+  });
+}
+
+// Experiences - Host
+export function useHostExperiences(params?: any) {
+  return useQuery({
+    queryKey: ['host-experiences', params],
+    queryFn: () => apiClient.getHostExperiences(params),
+  });
+}
+
+export function useHostExperienceBookings(params?: any) {
+  return useQuery({
+    queryKey: ['host-experience-bookings', params],
+    queryFn: () => apiClient.getHostExperienceBookings(params),
+  });
+}
+
+export function useCreateExperience() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: FormData | Record<string, any>) => apiClient.createExperience(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['host-experiences'] });
+    },
+  });
+}
+
+export function useUpdateExperience() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: FormData | Record<string, any> }) =>
+      apiClient.updateExperience(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['host-experiences'] });
+      queryClient.invalidateQueries({ queryKey: ['experiences'] });
+    },
+  });
+}
+
+export function useDeleteExperience() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => apiClient.deleteExperience(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['host-experiences'] });
+    },
+  });
+}
+
+export function useConfirmExperienceBooking() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => apiClient.confirmExperienceBooking(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['host-experience-bookings'] });
+    },
+  });
+}
+
+export function useCompleteExperienceBooking() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => apiClient.completeExperienceBooking(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['host-experience-bookings'] });
     },
   });
 }

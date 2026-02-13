@@ -2,9 +2,21 @@ import { View, Text, ScrollView, TouchableOpacity, Platform, ActivityIndicator, 
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useQuery } from '@tanstack/react-query';
-import { apiClient } from '@/services/api-client';
+import { useExperienceById } from '@/hooks/api-hooks';
 import { useState } from 'react';
+
+const durationLabels: Record<string, string> = {
+  half_day: 'Half Day',
+  full_day: 'Full Day',
+  multi_day: 'Multi-Day',
+  hourly: 'Hourly',
+};
+
+const difficultyColors: Record<string, string> = {
+  easy: '#10B981',
+  moderate: '#F59E0B',
+  challenging: '#EF4444',
+};
 
 export default function ExperienceDetailScreen() {
   const router = useRouter();
@@ -12,15 +24,7 @@ export default function ExperienceDetailScreen() {
   const experienceId = params.id as string;
   const [selectedDate, setSelectedDate] = useState('');
 
-  // Fetch experience details
-  const { data: experience, isLoading } = useQuery({
-    queryKey: ['experience', experienceId],
-    queryFn: async () => {
-      const response = await apiClient.get(`/experiences/${experienceId}/`);
-      return response.data;
-    },
-    enabled: !!experienceId,
-  });
+  const { data: experience, isLoading } = useExperienceById(experienceId);
 
   const handleBookNow = () => {
     // Navigate to booking page for experiences
@@ -60,10 +64,10 @@ export default function ExperienceDetailScreen() {
       contentContainerStyle={{ paddingBottom: 40 }}
     >
       {/* Header Image */}
-      {experience.images?.[0] && (
+      {experience.cover_image && (
         <View style={{ height: 300 }}>
           <Image
-            source={{ uri: experience.images[0] }}
+            source={{ uri: experience.cover_image }}
             style={{ width: '100%', height: 300 }}
             resizeMode="cover"
           />
@@ -94,15 +98,20 @@ export default function ExperienceDetailScreen() {
           <Text className="text-2xl font-black text-forest mb-2">
             {experience.title}
           </Text>
+          {experience.category_name && (
+            <View className="bg-gold/20 self-start px-3 py-1 rounded-full mb-3">
+              <Text className="text-xs font-semibold text-forest">{experience.category_name}</Text>
+            </View>
+          )}
           <View className="flex-row items-center mb-3">
             <Ionicons name="location" size={16} color="#3A5C50" />
-            <Text className="text-moss ml-1">{experience.location}</Text>
+            <Text className="text-moss ml-1">{experience.city}, {experience.country}</Text>
           </View>
-          {experience.rating && (
+          {experience.average_rating > 0 && (
             <View className="flex-row items-center">
               <Ionicons name="star" size={16} color="#F59E0B" />
               <Text className="text-moss ml-1">
-                {experience.rating} ({experience.review_count} reviews)
+                {experience.average_rating.toFixed(1)} ({experience.review_count} reviews)
               </Text>
             </View>
           )}
@@ -122,21 +131,23 @@ export default function ExperienceDetailScreen() {
                 <Ionicons name="time" size={24} color="#D9B168" />
               </View>
               <Text className="text-xs text-moss">Duration</Text>
-              <Text className="font-semibold text-forest">{experience.duration}</Text>
+              <Text className="font-semibold text-forest">
+                {experience.duration_hours}h · {durationLabels[experience.duration_type] || experience.duration_type}
+              </Text>
             </View>
             <View className="items-center">
               <View className="bg-gold/20 rounded-full p-3 mb-2">
                 <Ionicons name="people" size={24} color="#D9B168" />
               </View>
               <Text className="text-xs text-moss">Group Size</Text>
-              <Text className="font-semibold text-forest">{experience.max_participants || 'Varies'}</Text>
+              <Text className="font-semibold text-forest">{experience.min_participants}-{experience.max_participants}</Text>
             </View>
             <View className="items-center">
               <View className="bg-gold/20 rounded-full p-3 mb-2">
-                <Ionicons name="language" size={24} color="#D9B168" />
+                <Ionicons name="fitness" size={24} color={difficultyColors[experience.difficulty] || '#D9B168'} />
               </View>
-              <Text className="text-xs text-moss">Language</Text>
-              <Text className="font-semibold text-forest">{experience.language || 'English'}</Text>
+              <Text className="text-xs text-moss">Difficulty</Text>
+              <Text className="font-semibold text-forest capitalize">{experience.difficulty}</Text>
             </View>
           </View>
         </View>
@@ -154,7 +165,7 @@ export default function ExperienceDetailScreen() {
         </View>
 
         {/* What's Included */}
-        {experience.inclusions && experience.inclusions.length > 0 && (
+        {experience.included_items && experience.included_items.length > 0 && (
           <View className="bg-white rounded-2xl p-5 mb-4" style={{
             shadowColor: '#122F26',
             shadowOffset: { width: 0, height: 4 },
@@ -163,12 +174,45 @@ export default function ExperienceDetailScreen() {
             elevation: 4,
           }}>
             <Text className="text-lg font-bold text-forest mb-3">What's Included</Text>
-            {experience.inclusions.map((item: string, index: number) => (
+            {experience.included_items.map((item: string, index: number) => (
               <View key={index} className="flex-row items-center mb-2">
                 <Ionicons name="checkmark-circle" size={20} color="#10B981" />
                 <Text className="text-moss ml-2">{item}</Text>
               </View>
             ))}
+          </View>
+        )}
+
+        {/* Requirements */}
+        {experience.requirements && experience.requirements.length > 0 && (
+          <View className="bg-white rounded-2xl p-5 mb-4" style={{
+            shadowColor: '#122F26',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.08,
+            shadowRadius: 8,
+            elevation: 4,
+          }}>
+            <Text className="text-lg font-bold text-forest mb-3">Requirements</Text>
+            {experience.requirements.map((item: string, index: number) => (
+              <View key={index} className="flex-row items-center mb-2">
+                <Ionicons name="information-circle" size={20} color="#D9B168" />
+                <Text className="text-moss ml-2">{item}</Text>
+              </View>
+            ))}
+          </View>
+        )}
+
+        {/* Cancellation Policy */}
+        {experience.cancellation_policy && (
+          <View className="bg-white rounded-2xl p-5 mb-4" style={{
+            shadowColor: '#122F26',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.08,
+            shadowRadius: 8,
+            elevation: 4,
+          }}>
+            <Text className="text-lg font-bold text-forest mb-3">Cancellation Policy</Text>
+            <Text className="text-moss leading-6">{experience.cancellation_policy}</Text>
           </View>
         )}
 
@@ -181,8 +225,13 @@ export default function ExperienceDetailScreen() {
           elevation: 4,
         }}>
           <View className="flex-row justify-between items-center mb-4">
-            <Text className="text-lg font-bold text-forest">Price</Text>
-            <Text className="text-3xl font-black text-forest">${experience.price}</Text>
+            <View>
+              <Text className="text-lg font-bold text-forest">Price Per Person</Text>
+              <Text className="text-xs text-moss">Hosted by {experience.host_name}</Text>
+            </View>
+            <Text className="text-3xl font-black text-forest">
+              {experience.currency} {experience.price_per_person}
+            </Text>
           </View>
           <TouchableOpacity
             onPress={handleBookNow}

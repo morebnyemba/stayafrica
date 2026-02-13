@@ -33,6 +33,9 @@ import type {
   BookingCalendarEvent,
   UpcomingCheckin,
   PendingAction,
+  Experience,
+  ExperienceCategory,
+  ExperienceBooking,
 } from '@/types';
 
 const API_VERSION = process.env.EXPO_PUBLIC_API_VERSION || 'v1';
@@ -551,6 +554,75 @@ class APIClient {
 
   async regenerateBackupCodes(password: string): Promise<{ message: string; backup_codes: string[] }> {
     return (await this.client.post('/2fa/backup-codes/regenerate/', { password })).data;
+  }
+
+  // Experiences - Guest
+  async getExperiences(params?: any): Promise<ApiListResponse<Experience>> {
+    return (await this.client.get('/experiences/', { params })).data;
+  }
+
+  async getExperienceById(id: string): Promise<Experience> {
+    return (await this.client.get(`/experiences/${id}/`)).data;
+  }
+
+  async getExperienceCategories(): Promise<ExperienceCategory[]> {
+    return (await this.client.get('/categories/')).data;
+  }
+
+  async getExperienceAvailability(id: string): Promise<any> {
+    return (await this.client.get(`/experiences/${id}/availability/`)).data;
+  }
+
+  async getNearbyExperiences(lat: number, lng: number, radius: number = 50): Promise<ApiListResponse<Experience>> {
+    return (await this.client.get('/experiences/nearby/', { params: { lat, lng, radius } })).data;
+  }
+
+  async bookExperience(data: {
+    experience: string;
+    booking_date: string;
+    num_participants: number;
+    special_requests?: string;
+  }): Promise<ExperienceBooking> {
+    return (await this.client.post('/bookings/', data)).data;
+  }
+
+  async getExperienceBookings(params?: any): Promise<ApiListResponse<ExperienceBooking>> {
+    return (await this.client.get('/bookings/', { params })).data;
+  }
+
+  async cancelExperienceBooking(id: number): Promise<ExperienceBooking> {
+    return (await this.client.post(`/bookings/${id}/cancel/`)).data;
+  }
+
+  // Experiences - Host
+  async getHostExperiences(params?: any): Promise<ApiListResponse<Experience>> {
+    return (await this.client.get('/experiences/mine/', { params })).data;
+  }
+
+  async createExperience(data: FormData | Record<string, any>): Promise<Experience> {
+    const headers = data instanceof FormData ? { 'Content-Type': 'multipart/form-data' } : {};
+    return (await this.client.post('/experiences/', data, { headers })).data;
+  }
+
+  async updateExperience(id: string, data: FormData | Record<string, any>): Promise<Experience> {
+    const headers = data instanceof FormData ? { 'Content-Type': 'multipart/form-data' } : {};
+    return (await this.client.patch(`/experiences/${id}/`, data, { headers })).data;
+  }
+
+  async deleteExperience(id: string): Promise<void> {
+    return (await this.client.delete(`/experiences/${id}/`)).data;
+  }
+
+  async getHostExperienceBookings(params?: any): Promise<ApiListResponse<ExperienceBooking>> {
+    return (await this.client.get('/bookings/', { params: { ...params, role: 'host' } })).data;
+  }
+
+  async confirmExperienceBooking(id: number): Promise<ExperienceBooking> {
+    return (await this.client.post(`/bookings/${id}/confirm/`)).data;
+  }
+
+  async completeExperienceBooking(id: number): Promise<ExperienceBooking> {
+    return (await this.client.post(`/bookings/${id}/complete/`)).data;
   }
 
   // Generic request method

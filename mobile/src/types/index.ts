@@ -99,6 +99,72 @@ export interface Review {
   created_at: string;
 }
 
+// Experience Types
+export type ExperienceDuration = 'hourly' | 'half_day' | 'full_day' | 'multi_day';
+export type ExperienceDifficulty = 'easy' | 'moderate' | 'challenging';
+export type ExperienceStatus = 'active' | 'inactive' | 'pending_approval';
+export type ExperienceBookingStatus = 'pending' | 'confirmed' | 'cancelled' | 'completed';
+
+export interface ExperienceCategory {
+  id: number;
+  name: string;
+  slug: string;
+  description: string;
+  icon: string;
+}
+
+export interface Experience {
+  id: string;
+  title: string;
+  description: string;
+  host: string;
+  host_name: string;
+  category: number;
+  category_name: string;
+  country: string;
+  city: string;
+  address: string;
+  latitude: number;
+  longitude: number;
+  price_per_person: number;
+  currency: string;
+  duration_type: ExperienceDuration;
+  duration_hours: number;
+  difficulty: ExperienceDifficulty;
+  min_participants: number;
+  max_participants: number;
+  included_items: string[];
+  requirements: string[];
+  cancellation_policy: string;
+  cover_image: string | null;
+  images: string[];
+  status: ExperienceStatus;
+  average_rating: number;
+  review_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ExperienceBooking {
+  id: number;
+  booking_ref: string;
+  guest: number;
+  guest_name: string;
+  experience: string;
+  experience_title: string;
+  booking_date: string;
+  booking_time: string | null;
+  num_participants: number;
+  price_per_person: number;
+  service_fee: number;
+  total_amount: number;
+  currency: string;
+  status: ExperienceBookingStatus;
+  special_requests: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 // Message Types
 export interface Message {
   id: string;
