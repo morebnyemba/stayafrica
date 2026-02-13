@@ -484,23 +484,23 @@ class ApiClient {
 
   async getHostExperienceBookings(params?: any) {
     // Host sees bookings for their own experiences
-    return this.client.get('/bookings/', { params: { ...params, role: 'host' } });
+    return this.client.get('/experience-bookings/', { params: { ...params, role: 'host' } });
   }
 
   async updateExperienceBookingStatus(bookingId: number, status: string) {
-    return this.client.patch(`/bookings/${bookingId}/`, { status });
+    return this.client.patch(`/experience-bookings/${bookingId}/`, { status });
   }
 
   async confirmExperienceBooking(bookingId: number) {
-    return this.client.post(`/bookings/${bookingId}/confirm/`);
+    return this.client.post(`/experience-bookings/${bookingId}/confirm/`);
   }
 
   async completeExperienceBooking(bookingId: number) {
-    return this.client.post(`/bookings/${bookingId}/complete/`);
+    return this.client.post(`/experience-bookings/${bookingId}/complete/`);
   }
 
   async cancelExperienceBooking(bookingId: number) {
-    return this.client.post(`/bookings/${bookingId}/cancel/`);
+    return this.client.post(`/experience-bookings/${bookingId}/cancel/`);
   }
 
   async getHostExperiences(params?: any) {
@@ -508,11 +508,11 @@ class ApiClient {
   }
 
   async createExperienceBooking(data: any) {
-    return this.client.post('/bookings/', data);
+    return this.client.post('/experience-bookings/', data);
   }
 
   async getExperienceBookings(params?: any) {
-    return this.client.get('/bookings/', { params });
+    return this.client.get('/experience-bookings/', { params });
   }
 
   // Review voting

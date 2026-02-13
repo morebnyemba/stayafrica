@@ -345,8 +345,8 @@ class APIClient {
   async sendMessage(conversationId: string, receiverId: string, message: string): Promise<any> {
     return (
       await this.client.post('/messaging/messages/', {
-        conversation: conversationId,
-        receiver: receiverId,
+        conversation: Number(conversationId),
+        receiver: Number(receiverId),
         text: message,
       })
     ).data;
@@ -566,7 +566,8 @@ class APIClient {
   }
 
   async getExperienceCategories(): Promise<ExperienceCategory[]> {
-    return (await this.client.get('/categories/')).data;
+    const res = (await this.client.get('/categories/')).data;
+    return Array.isArray(res) ? res : res.results ?? [];
   }
 
   async getExperienceAvailability(id: string): Promise<any> {
@@ -583,15 +584,15 @@ class APIClient {
     num_participants: number;
     special_requests?: string;
   }): Promise<ExperienceBooking> {
-    return (await this.client.post('/bookings/', data)).data;
+    return (await this.client.post('/experience-bookings/', data)).data;
   }
 
   async getExperienceBookings(params?: any): Promise<ApiListResponse<ExperienceBooking>> {
-    return (await this.client.get('/bookings/', { params })).data;
+    return (await this.client.get('/experience-bookings/', { params })).data;
   }
 
   async cancelExperienceBooking(id: number): Promise<ExperienceBooking> {
-    return (await this.client.post(`/bookings/${id}/cancel/`)).data;
+    return (await this.client.post(`/experience-bookings/${id}/cancel/`)).data;
   }
 
   // Experiences - Host
@@ -614,15 +615,15 @@ class APIClient {
   }
 
   async getHostExperienceBookings(params?: any): Promise<ApiListResponse<ExperienceBooking>> {
-    return (await this.client.get('/bookings/', { params: { ...params, role: 'host' } })).data;
+    return (await this.client.get('/experience-bookings/', { params: { ...params, role: 'host' } })).data;
   }
 
   async confirmExperienceBooking(id: number): Promise<ExperienceBooking> {
-    return (await this.client.post(`/bookings/${id}/confirm/`)).data;
+    return (await this.client.post(`/experience-bookings/${id}/confirm/`)).data;
   }
 
   async completeExperienceBooking(id: number): Promise<ExperienceBooking> {
-    return (await this.client.post(`/bookings/${id}/complete/`)).data;
+    return (await this.client.post(`/experience-bookings/${id}/complete/`)).data;
   }
 
   // Generic request method

@@ -56,11 +56,12 @@ export function ExperienceForm({ experience, mode }: ExperienceFormProps) {
     queryKey: ['experience-categories'],
     queryFn: async () => {
       const response = await apiClient.getExperienceCategories();
-      return response.data as ExperienceCategory[];
+      const data = response.data;
+      return Array.isArray(data) ? data : (data?.results ?? []) as ExperienceCategory[];
     },
   });
 
-  const categories = categoriesData || [];
+  const categories: ExperienceCategory[] = categoriesData || [];
 
   const validate = (): boolean => {
     const newErrors: Record<string, string> = {};

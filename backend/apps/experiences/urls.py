@@ -9,7 +9,7 @@ app_name = 'experiences'
 router = DefaultRouter()
 router.register(r'categories', ExperienceCategoryViewSet, basename='experience-category')
 router.register(r'experiences', ExperienceViewSet, basename='experience')
-router.register(r'bookings', ExperienceBookingViewSet, basename='experience-booking')
+router.register(r'experience-bookings', ExperienceBookingViewSet, basename='experience-booking')
 
 urlpatterns = [
     path('', include(router.urls)),

@@ -37,20 +37,20 @@ export default function HostExperienceBookingsScreen() {
   const completeMutation = useCompleteExperienceBooking();
   const cancelMutation = useCancelExperienceBooking();
 
+  const allBookings: ExperienceBooking[] = Array.isArray(bookings) ? bookings : (bookings as any)?.results ?? [];
+
   const filtered = useMemo(() => {
-    const list = (bookings as ExperienceBooking[]) || [];
-    if (activeFilter === 'all') return list;
-    return list.filter((b) => b.status === activeFilter);
-  }, [bookings, activeFilter]);
+    if (activeFilter === 'all') return allBookings;
+    return allBookings.filter((b) => b.status === activeFilter);
+  }, [allBookings, activeFilter]);
 
   const stats = useMemo(() => {
-    const list = (bookings as ExperienceBooking[]) || [];
     return {
-      pending: list.filter((b) => b.status === 'pending').length,
-      confirmed: list.filter((b) => b.status === 'confirmed').length,
-      completed: list.filter((b) => b.status === 'completed').length,
+      pending: allBookings.filter((b) => b.status === 'pending').length,
+      confirmed: allBookings.filter((b) => b.status === 'confirmed').length,
+      completed: allBookings.filter((b) => b.status === 'completed').length,
     };
-  }, [bookings]);
+  }, [allBookings]);
 
   const handleConfirm = (id: number) => {
     Alert.alert('Confirm Booking', 'Confirm this experience booking?', [

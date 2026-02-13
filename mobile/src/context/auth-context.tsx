@@ -77,8 +77,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
         }
       }
-    } catch (error) {
-      logError('Bootstrap/session restore error', error);
+    } catch (error: any) {
+      // Network errors during bootstrap are expected when backend is unreachable
+      const isNetworkError = error?.code === 'ERR_NETWORK' || error?.message === 'Network Error';
+      if (isNetworkError) {
+        logInfo('Bootstrap: backend unreachable, continuing as guest');
+      } else {
+        logError('Bootstrap/session restore error', error);
+      }
       await apiClient.clearTokens();
       setUser(null);
       setIsAuthenticated(false);

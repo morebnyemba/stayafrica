@@ -1,22 +1,29 @@
 import { View, Text, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { useBookings } from '@/hooks/api-hooks';
+import { useBookings, useExperienceBookings } from '@/hooks/api-hooks';
 import { useAuth } from '@/context/auth-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BookingCardSkeleton } from '@/components/common/Skeletons';
-import { Booking } from '@/types';
+import { Booking, ExperienceBooking } from '@/types';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Sidebar } from '@/components/common/Sidebar';
+
+type BookingTab = 'properties' | 'experiences';
 
 export default function BookingsScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { isAuthenticated } = useAuth();
-  const { data: bookingsData, isLoading } = useBookings();
+  const { data: bookingsData, isLoading: propLoading } = useBookings();
+  const { data: expBookingsRaw, isLoading: expLoading } = useExperienceBookings();
   const bookings = bookingsData?.results || [];
+  const expBookings: ExperienceBooking[] = Array.isArray(expBookingsRaw)
+    ? expBookingsRaw
+    : (expBookingsRaw as any)?.results ?? [];
   const [sidebarVisible, setSidebarVisible] = useState(false);
+  const [activeTab, setActiveTab] = useState<BookingTab>('properties');
 
   if (!isAuthenticated) {
     return (
@@ -260,6 +267,87 @@ export default function BookingsScreen() {
     );
   };
 
+  const EXP_STATUS_COLORS: Record<string, { bgColor: string; textColor: string; icon: string }> = {
+    confirmed: { bgColor: '#10B98120', textColor: '#10B981', icon: 'checkmark-circle' },
+    pending: { bgColor: '#F59E0B20', textColor: '#F59E0B', icon: 'time' },
+    cancelled: { bgColor: '#EF444420', textColor: '#EF4444', icon: 'close-circle' },
+    completed: { bgColor: '#8B5CF620', textColor: '#8B5CF6', icon: 'checkbox' },
+  };
+
+  const ExperienceBookingCard = ({ booking }: { booking: ExperienceBooking }) => {
+    const sc = EXP_STATUS_COLORS[booking.status] || EXP_STATUS_COLORS.pending;
+    return (
+      <View
+        className="mx-4 mb-4 rounded-3xl overflow-hidden bg-white"
+        style={{ shadowColor: '#122F26', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.12, shadowRadius: 12, elevation: 6 }}
+      >
+        {/* Header */}
+        <LinearGradient
+          colors={['#3A5C50', '#4a6f62']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          className="p-4"
+        >
+          <View className="flex-row justify-between items-start">
+            <View className="flex-1">
+              <View className="flex-row items-center mb-1">
+                <Ionicons name="compass" size={14} color="#D9B168" />
+                <Text className="text-sand-200 text-xs ml-1 font-medium">EXPERIENCE</Text>
+              </View>
+              <Text className="text-xl font-bold text-white">
+                {(booking as any).experience_title || (booking as any).experience?.title || 'Experience'}
+              </Text>
+            </View>
+            <View className="px-3 py-1.5 rounded-full" style={{ backgroundColor: sc.bgColor }}>
+              <View className="flex-row items-center">
+                <Ionicons name={sc.icon as any} size={14} color={sc.textColor} />
+                <Text className="text-xs font-semibold capitalize ml-1" style={{ color: sc.textColor }}>
+                  {booking.status}
+                </Text>
+              </View>
+            </View>
+          </View>
+        </LinearGradient>
+
+        {/* Content */}
+        <View className="p-4">
+          <View className="bg-sand-100 rounded-2xl p-4 mb-4">
+            <View className="flex-row items-center justify-between">
+              <View className="flex-1">
+                <Text className="text-moss text-xs font-medium mb-1">Date</Text>
+                <View className="flex-row items-center">
+                  <Ionicons name="calendar" size={16} color="#3A5C50" />
+                  <Text className="text-forest font-bold ml-2">
+                    {new Date(booking.booking_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                  </Text>
+                </View>
+              </View>
+              <View className="flex-1 items-end">
+                <Text className="text-moss text-xs font-medium mb-1">Participants</Text>
+                <View className="flex-row items-center">
+                  <Ionicons name="people" size={16} color="#3A5C50" />
+                  <Text className="text-forest font-bold ml-2">{booking.num_participants}</Text>
+                </View>
+              </View>
+            </View>
+          </View>
+
+          <View className="flex-row items-center justify-between">
+            <View>
+              <Text className="text-moss text-xs font-medium mb-1">Total Amount</Text>
+              <Text className="text-2xl font-black text-gold">${booking.total_amount}</Text>
+            </View>
+            {booking.status === 'pending' && (
+              <TouchableOpacity onPress={() => router.push('/messages')} className="bg-forest px-5 py-3 rounded-xl">
+                <Text className="text-gold font-bold text-sm">Contact Host</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
+      </View>
+    );
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-sand-100">
       {/* Sidebar */}
@@ -295,55 +383,113 @@ export default function BookingsScreen() {
           <View className="flex-row items-center">
             <Ionicons name="calendar" size={16} color="#D9B168" />
             <Text className="text-sand-100 ml-2">
-              {bookings.length} active {bookings.length === 1 ? 'booking' : 'bookings'}
+              {activeTab === 'properties'
+                ? `${bookings.length} ${bookings.length === 1 ? 'stay' : 'stays'}`
+                : `${expBookings.length} ${expBookings.length === 1 ? 'experience' : 'experiences'}`}
             </Text>
+          </View>
+
+          {/* Tab Toggle */}
+          <View className="flex-row mt-4 bg-white/15 rounded-xl p-1">
+            <TouchableOpacity
+              onPress={() => setActiveTab('properties')}
+              className={`flex-1 py-2.5 rounded-lg items-center flex-row justify-center ${activeTab === 'properties' ? 'bg-gold' : ''}`}
+            >
+              <Ionicons name="home-outline" size={16} color={activeTab === 'properties' ? '#122F26' : '#fff'} />
+              <Text className={`ml-1.5 font-bold text-sm ${activeTab === 'properties' ? 'text-forest' : 'text-white'}`}>
+                Stays
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setActiveTab('experiences')}
+              className={`flex-1 py-2.5 rounded-lg items-center flex-row justify-center ${activeTab === 'experiences' ? 'bg-gold' : ''}`}
+            >
+              <Ionicons name="compass-outline" size={16} color={activeTab === 'experiences' ? '#122F26' : '#fff'} />
+              <Text className={`ml-1.5 font-bold text-sm ${activeTab === 'experiences' ? 'text-forest' : 'text-white'}`}>
+                Experiences
+              </Text>
+            </TouchableOpacity>
           </View>
         </LinearGradient>
 
-      {/* Bookings List */}
-      {isLoading ? (
-        <View className="pt-4">
-          {[1, 2, 3, 4].map((i) => (
-            <BookingCardSkeleton key={i} />
-          ))}
-        </View>
-      ) : (
-        <FlatList
-          data={bookings}
-          renderItem={({ item }) => <BookingCard booking={item} />}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={{ paddingVertical: 12, paddingBottom: 40 }}
-          ListEmptyComponent={
-            <View className="flex-1 justify-center items-center py-20 px-6">
-              <View className="bg-white rounded-3xl p-8 items-center" style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.1, shadowRadius: 16, elevation: 8 }}>
-                <View className="bg-sand-200 rounded-full p-8 mb-6">
-                  <Ionicons name="calendar-outline" size={72} color="#3A5C50" />
+      {/* Property Bookings List */}
+      {activeTab === 'properties' && (
+        propLoading ? (
+          <View className="pt-4">
+            {[1, 2, 3, 4].map((i) => (
+              <BookingCardSkeleton key={i} />
+            ))}
+          </View>
+        ) : (
+          <FlatList
+            data={bookings}
+            renderItem={({ item }) => <BookingCard booking={item} />}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={{ paddingVertical: 12, paddingBottom: 40 }}
+            ListEmptyComponent={
+              <View className="flex-1 justify-center items-center py-20 px-6">
+                <View className="bg-white rounded-3xl p-8 items-center" style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.1, shadowRadius: 16, elevation: 8 }}>
+                  <View className="bg-sand-200 rounded-full p-8 mb-6">
+                    <Ionicons name="calendar-outline" size={72} color="#3A5C50" />
+                  </View>
+                  <Text className="text-2xl font-bold text-forest mb-3">No Stays Yet</Text>
+                  <Text className="text-moss text-center mb-8 px-4 leading-6">
+                    Start exploring amazing properties and make your first booking
+                  </Text>
+                  <TouchableOpacity onPress={() => router.push('/(tabs)/explore')}>
+                    <LinearGradient
+                      colors={['#122F26', '#1d392f']}
+                      className="px-8 py-4 rounded-2xl"
+                      style={{ shadowColor: '#122F26', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 5 }}
+                    >
+                      <Text className="text-gold font-bold text-base">Explore Properties</Text>
+                    </LinearGradient>
+                  </TouchableOpacity>
                 </View>
-                <Text className="text-2xl font-bold text-forest mb-3">No Bookings Yet</Text>
-                <Text className="text-moss text-center mb-8 px-4 leading-6">
-                  Start exploring amazing properties and make your first booking
-                </Text>
-                <TouchableOpacity
-                  onPress={() => router.push('/(tabs)/explore')}
-                >
-                  <LinearGradient
-                    colors={['#122F26', '#1d392f']}
-                    className="px-8 py-4 rounded-2xl"
-                    style={{
-                      shadowColor: '#122F26',
-                      shadowOffset: { width: 0, height: 4 },
-                      shadowOpacity: 0.3,
-                      shadowRadius: 8,
-                      elevation: 5,
-                    }}
-                  >
-                    <Text className="text-gold font-bold text-base">Start Exploring</Text>
-                  </LinearGradient>
-                </TouchableOpacity>
               </View>
-            </View>
-          }
-        />
+            }
+          />
+        )
+      )}
+
+      {/* Experience Bookings List */}
+      {activeTab === 'experiences' && (
+        expLoading ? (
+          <View className="pt-4">
+            {[1, 2, 3, 4].map((i) => (
+              <BookingCardSkeleton key={i} />
+            ))}
+          </View>
+        ) : (
+          <FlatList
+            data={expBookings}
+            renderItem={({ item }) => <ExperienceBookingCard booking={item} />}
+            keyExtractor={(item) => String(item.id)}
+            contentContainerStyle={{ paddingVertical: 12, paddingBottom: 40 }}
+            ListEmptyComponent={
+              <View className="flex-1 justify-center items-center py-20 px-6">
+                <View className="bg-white rounded-3xl p-8 items-center" style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.1, shadowRadius: 16, elevation: 8 }}>
+                  <View className="bg-sand-200 rounded-full p-8 mb-6">
+                    <Ionicons name="compass-outline" size={72} color="#3A5C50" />
+                  </View>
+                  <Text className="text-2xl font-bold text-forest mb-3">No Experiences Yet</Text>
+                  <Text className="text-moss text-center mb-8 px-4 leading-6">
+                    Discover exciting experiences and activities to book
+                  </Text>
+                  <TouchableOpacity onPress={() => router.push('/(tabs)/explore')}>
+                    <LinearGradient
+                      colors={['#122F26', '#1d392f']}
+                      className="px-8 py-4 rounded-2xl"
+                      style={{ shadowColor: '#122F26', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 5 }}
+                    >
+                      <Text className="text-gold font-bold text-base">Explore Experiences</Text>
+                    </LinearGradient>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            }
+          />
+        )
       )}
       </View>
     </SafeAreaView>
