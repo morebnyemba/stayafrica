@@ -459,6 +459,54 @@ class ApiClient {
     });
   }
 
+  async createExperience(data: FormData | Record<string, any>) {
+    return this.client.post('/experiences/', data, {
+      headers: data instanceof FormData ? { 'Content-Type': 'multipart/form-data' } : {},
+    });
+  }
+
+  async updateExperience(id: string, data: FormData | Record<string, any>) {
+    const safeId = this.assertId(id, 'Experience ID');
+    return this.client.patch(`/experiences/${safeId}/`, data, {
+      headers: data instanceof FormData ? { 'Content-Type': 'multipart/form-data' } : {},
+    });
+  }
+
+  async deleteExperience(id: string) {
+    const safeId = this.assertId(id, 'Experience ID');
+    return this.client.delete(`/experiences/${safeId}/`);
+  }
+
+  async getExperienceAvailability(id: string) {
+    const safeId = this.assertId(id, 'Experience ID');
+    return this.client.get(`/experiences/${safeId}/availability/`);
+  }
+
+  async getHostExperienceBookings(params?: any) {
+    // Host sees bookings for their own experiences
+    return this.client.get('/bookings/', { params: { ...params, role: 'host' } });
+  }
+
+  async updateExperienceBookingStatus(bookingId: number, status: string) {
+    return this.client.patch(`/bookings/${bookingId}/`, { status });
+  }
+
+  async confirmExperienceBooking(bookingId: number) {
+    return this.client.post(`/bookings/${bookingId}/confirm/`);
+  }
+
+  async completeExperienceBooking(bookingId: number) {
+    return this.client.post(`/bookings/${bookingId}/complete/`);
+  }
+
+  async cancelExperienceBooking(bookingId: number) {
+    return this.client.post(`/bookings/${bookingId}/cancel/`);
+  }
+
+  async getHostExperiences(params?: any) {
+    return this.client.get('/experiences/mine/', { params });
+  }
+
   async createExperienceBooking(data: any) {
     return this.client.post('/bookings/', data);
   }

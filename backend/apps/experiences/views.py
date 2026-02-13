@@ -144,6 +144,29 @@ class ExperienceViewSet(viewsets.ModelViewSet):
         serializer = ExperienceAvailabilitySerializer(availability, many=True)
         return Response(serializer.data)
 
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    def mine(self, request):
+        """Get all experiences owned by the current host (all statuses)"""
+        queryset = Experience.objects.filter(
+            host=request.user
+        ).select_related('category').order_by('-created_at')
+
+        status_filter = request.query_params.get('status')
+        if status_filter:
+            queryset = queryset.filter(status=status_filter)
+
+        search = request.query_params.get('search')
+        if search:
+            queryset = queryset.filter(
+                Q(title__icontains=search) | Q(description__icontains=search)
+            )
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response({
+            'count': queryset.count(),
+            'results': serializer.data
+        })
+
 
 class ExperienceBookingViewSet(viewsets.ModelViewSet):
     """ViewSet for experience bookings"""
@@ -151,15 +174,22 @@ class ExperienceBookingViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     
     def get_queryset(self):
-        """Return bookings for current user"""
+        """Return bookings for current user (as guest or host)"""
         user = self.request.user
         
         # Allow filtering by status
         status_filter = self.request.query_params.get('status')
+        # Allow host to view bookings on their experiences
+        role = self.request.query_params.get('role', 'guest')
         
-        queryset = ExperienceBooking.objects.filter(
-            guest=user
-        ).select_related('experience', 'experience__host')
+        if role == 'host':
+            queryset = ExperienceBooking.objects.filter(
+                experience__host=user
+            ).select_related('experience', 'guest')
+        else:
+            queryset = ExperienceBooking.objects.filter(
+                guest=user
+            ).select_related('experience', 'experience__host')
         
         if status_filter:
             queryset = queryset.filter(status=status_filter)
@@ -202,10 +232,10 @@ class ExperienceBookingViewSet(viewsets.ModelViewSet):
         """Cancel a booking"""
         booking = self.get_object()
         
-        # Check permissions
-        if request.user != booking.guest:
+        # Check permissions - guest or host can cancel
+        if request.user != booking.guest and request.user != booking.experience.host:
             return Response(
-                {'error': 'You can only cancel your own bookings'},
+                {'error': 'You can only cancel your own bookings or bookings on your experiences'},
                 status=status.HTTP_403_FORBIDDEN
             )
         
@@ -218,6 +248,52 @@ class ExperienceBookingViewSet(viewsets.ModelViewSet):
         
         # Update status
         booking.status = 'cancelled'
+        booking.save()
+        
+        serializer = self.get_serializer(booking)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['post'])
+    def confirm(self, request, pk=None):
+        """Confirm a booking (host only)"""
+        booking = self.get_object()
+        
+        if request.user != booking.experience.host:
+            return Response(
+                {'error': 'Only the experience host can confirm bookings'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        if booking.status != 'pending':
+            return Response(
+                {'error': f'Cannot confirm a booking with status: {booking.status}'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        booking.status = 'confirmed'
+        booking.save()
+        
+        serializer = self.get_serializer(booking)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['post'])
+    def complete(self, request, pk=None):
+        """Mark a booking as completed (host only)"""
+        booking = self.get_object()
+        
+        if request.user != booking.experience.host:
+            return Response(
+                {'error': 'Only the experience host can complete bookings'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        if booking.status != 'confirmed':
+            return Response(
+                {'error': f'Cannot complete a booking with status: {booking.status}'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        booking.status = 'completed'
         booking.save()
         
         serializer = self.get_serializer(booking)

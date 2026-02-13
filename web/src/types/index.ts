@@ -166,3 +166,86 @@ export interface PaginatedResponse<T> {
   next?: string;
   previous?: string;
 }
+
+// ── Experiences ──────────────────────────────────────────────
+
+export interface ExperienceCategory {
+  id: number;
+  name: string;
+  description: string;
+  icon: string;
+}
+
+export type ExperienceDuration = 'half_day' | 'full_day' | 'multi_day' | 'hourly';
+export type ExperienceDifficulty = 'easy' | 'moderate' | 'challenging' | 'expert';
+export type ExperienceStatus = 'active' | 'inactive' | 'pending_approval';
+
+export interface ExperienceImage {
+  id: number;
+  image: string;
+  caption: string;
+  order: number;
+}
+
+export interface Experience {
+  id: string;
+  host: number;
+  host_name: string;
+  title: string;
+  description: string;
+  category: number | null;
+  category_name: string;
+  latitude: number | null;
+  longitude: number | null;
+  country: string;
+  city: string;
+  address: string;
+  price_per_person: number;
+  currency: string;
+  duration: ExperienceDuration;
+  duration_hours: number;
+  difficulty: ExperienceDifficulty;
+  min_participants: number;
+  max_participants: number;
+  included_items: string;
+  requirements: string;
+  cancellation_policy: string;
+  main_image: string | null;
+  images: ExperienceImage[];
+  status: ExperienceStatus;
+  is_available: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export type ExperienceBookingStatus = 'pending' | 'confirmed' | 'cancelled' | 'completed';
+
+export interface ExperienceBooking {
+  id: number;
+  booking_ref: string;
+  guest: number;
+  guest_name: string;
+  experience: string;
+  experience_title: string;
+  booking_date: string;
+  booking_time: string | null;
+  num_participants: number;
+  price_per_person: number;
+  service_fee: number;
+  total_amount: number;
+  currency: string;
+  status: ExperienceBookingStatus;
+  special_requests: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ExperienceAvailability {
+  id: number;
+  experience: string;
+  weekday: number | null;
+  specific_date: string | null;
+  start_time: string;
+  end_time: string;
+  is_available: boolean;
+}

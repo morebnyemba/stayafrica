@@ -17,6 +17,7 @@ import {
   Receipt,
   Settings,
   TrendingUp,
+  Compass,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { AnalyticsDashboard } from '@/components/analytics';
@@ -156,6 +157,20 @@ export function HostDashboard() {
       icon: Calendar,
       link: '/host/bookings',
       color: 'bg-green-500',
+    },
+    {
+      title: 'Experiences',
+      description: 'Manage your experiences',
+      icon: Compass,
+      link: '/host/experiences',
+      color: 'bg-cyan-500',
+    },
+    {
+      title: 'Exp. Bookings',
+      description: 'Experience reservations',
+      icon: Calendar,
+      link: '/host/experiences/bookings',
+      color: 'bg-emerald-500',
     },
     {
       title: 'Earnings',
