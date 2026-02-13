@@ -102,6 +102,20 @@ class ExperienceViewSet(viewsets.ModelViewSet):
         except (ValueError, TypeError) as e:
             raise serializers.ValidationError(f'Invalid location coordinates: {str(e)}')
     
+    def perform_update(self, serializer):
+        """Update experience, handling lat/lng to Point conversion"""
+        lat = self.request.data.get('latitude')
+        lng = self.request.data.get('longitude')
+        
+        extra_kwargs = {}
+        if lat and lng:
+            try:
+                extra_kwargs['location'] = Point(float(lng), float(lat), srid=4326)
+            except (ValueError, TypeError) as e:
+                raise serializers.ValidationError(f'Invalid location coordinates: {str(e)}')
+        
+        serializer.save(**extra_kwargs)
+    
     @action(detail=False, methods=['get'], permission_classes=[AllowAny])
     def nearby(self, request):
         """Get experiences near a specific location"""

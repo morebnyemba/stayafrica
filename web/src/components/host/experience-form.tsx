@@ -12,7 +12,6 @@ import {
   DollarSign,
   FileText,
   Tag,
-  ArrowLeft,
   Save,
   ImageIcon,
   X,
@@ -148,25 +147,6 @@ export function ExperienceForm({ experience, mode }: ExperienceFormProps) {
   };
 
   return (
-    <div className="min-h-screen bg-sand-100 dark:bg-primary-900">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
-          <Button variant="outline" size="sm" onClick={() => router.back()}>
-            <ArrowLeft className="w-4 h-4" />
-          </Button>
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-primary-900 dark:text-sand-50">
-              {mode === 'create' ? 'Create Experience' : 'Edit Experience'}
-            </h1>
-            <p className="text-primary-600 dark:text-sand-300 mt-1">
-              {mode === 'create'
-                ? 'Set up a new activity for your guests'
-                : 'Update your experience details'}
-            </p>
-          </div>
-        </div>
-
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* Basic Info */}
           <section className="card p-6">
@@ -250,6 +230,7 @@ export function ExperienceForm({ experience, mode }: ExperienceFormProps) {
                 <Input
                   label="Latitude"
                   type="number"
+                  step="any"
                   value={formData.latitude}
                   onChange={(e) => update('latitude', e.target.value)}
                   placeholder="-1.2921"
@@ -259,6 +240,7 @@ export function ExperienceForm({ experience, mode }: ExperienceFormProps) {
                 <Input
                   label="Longitude"
                   type="number"
+                  step="any"
                   value={formData.longitude}
                   onChange={(e) => update('longitude', e.target.value)}
                   placeholder="36.8219"
@@ -280,6 +262,8 @@ export function ExperienceForm({ experience, mode }: ExperienceFormProps) {
                 <Input
                   label="Price per Person"
                   type="number"
+                  step="any"
+                  min="0"
                   value={formData.price_per_person}
                   onChange={(e) => update('price_per_person', e.target.value)}
                   placeholder="50.00"
@@ -321,6 +305,8 @@ export function ExperienceForm({ experience, mode }: ExperienceFormProps) {
                 <Input
                   label="Duration (hours)"
                   type="number"
+                  step="any"
+                  min="0"
                   value={formData.duration_hours}
                   onChange={(e) => update('duration_hours', e.target.value)}
                   placeholder="4"
@@ -392,7 +378,7 @@ export function ExperienceForm({ experience, mode }: ExperienceFormProps) {
                   </button>
                 </div>
               ) : (
-                <label className="w-full h-48 border-2 border-dashed border-primary-300 dark:border-primary-600 rounded-lg cursor-pointer hover:border-secondary-500 transition flex items-center justify-center">
+                <label className="w-full h-48 border-2 border-dashed border-primary-300 dark:border-primary-600 rounded-lg cursor-pointer hover:border-secondary-500 transition-colors flex items-center justify-center">
                   <div className="text-center">
                     <ImageIcon className="w-10 h-10 text-primary-400 dark:text-sand-500 mx-auto mb-2" />
                     <p className="text-sm text-primary-600 dark:text-sand-300">
@@ -470,7 +456,5 @@ export function ExperienceForm({ experience, mode }: ExperienceFormProps) {
             </Button>
           </div>
         </form>
-      </div>
-    </div>
   );
 }
