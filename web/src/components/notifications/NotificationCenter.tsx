@@ -34,21 +34,15 @@ export const NotificationCenter = () => {
   const markAllAsReadMutation = useMutation({
     mutationFn: async () => {
       const token = localStorage.getItem('access_token');
-      const unreadIds = notifications?.filter(n => !n.is_read).map(n => n.id) || [];
-      
-      await Promise.all(
-        unreadIds.map(id =>
-          axios.patch(
-            `${API_BASE_URL}/api/v1/notifications/${id}/`,
-            { is_read: true },
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                'Content-Type': 'application/json',
-              },
-            }
-          )
-        )
+      await axios.post(
+        `${API_BASE_URL}/api/v1/notifications/mark_all_read/`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
       );
     },
     onSuccess: () => {

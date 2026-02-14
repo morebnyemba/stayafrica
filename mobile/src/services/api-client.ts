@@ -36,6 +36,9 @@ import type {
   Experience,
   ExperienceCategory,
   ExperienceBooking,
+  AppNotification,
+  NotificationPreference,
+  PushTokenData,
 } from '@/types';
 
 const API_VERSION = process.env.EXPO_PUBLIC_API_VERSION || 'v1';
@@ -624,6 +627,44 @@ class APIClient {
 
   async completeExperienceBooking(id: number): Promise<ExperienceBooking> {
     return (await this.client.post(`/experience-bookings/${id}/complete/`)).data;
+  }
+
+  // ── Notifications ──────────────────────────────────────────────────────
+
+  async getNotifications(params?: { page?: number }): Promise<ApiListResponse<AppNotification>> {
+    return (await this.client.get('/notifications/', { params })).data;
+  }
+
+  async getUnreadNotificationCount(): Promise<{ unread_count: number }> {
+    return (await this.client.get('/notifications/unread_count/')).data;
+  }
+
+  async markNotificationRead(id: string): Promise<AppNotification> {
+    return (await this.client.post(`/notifications/${id}/mark_read/`)).data;
+  }
+
+  async markAllNotificationsRead(): Promise<{ message: string }> {
+    return (await this.client.post('/notifications/mark_all_read/')).data;
+  }
+
+  // ── Notification Preferences ────────────────────────────────────────────
+
+  async getNotificationPreferences(): Promise<NotificationPreference> {
+    return (await this.client.get('/preferences/')).data;
+  }
+
+  async updateNotificationPreferences(data: Partial<NotificationPreference>): Promise<NotificationPreference> {
+    return (await this.client.put('/preferences/', data)).data;
+  }
+
+  // ── Push Tokens ────────────────────────────────────────────────────────
+
+  async registerPushToken(data: PushTokenData): Promise<any> {
+    return (await this.client.post('/tokens/', data)).data;
+  }
+
+  async deactivatePushToken(tokenId: string): Promise<any> {
+    return (await this.client.post(`/tokens/${tokenId}/deactivate/`)).data;
   }
 
   // Generic request method

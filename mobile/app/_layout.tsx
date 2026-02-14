@@ -1,15 +1,22 @@
 import '../global.css';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { Stack } from 'expo-router';
 import { useRouter, SplashScreen } from 'expo-router';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ActivityIndicator, View, Platform, StatusBar } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Notifications from 'expo-notifications';
 import { Providers } from '@/context/providers';
 import { useAuth } from '@/context/auth-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Font from 'expo-font';
+import {
+  registerForPushNotificationsAsync,
+  addNotificationReceivedListener,
+  addNotificationResponseListener,
+  setBadgeCount,
+} from '@/services/push-notifications';
 
 const ONBOARDING_KEY = 'has_seen_onboarding';
 
@@ -44,10 +51,12 @@ async function loadFontsWithFallback() {
 
 function RootLayoutContent() {
   const router = useRouter();
-  const { isLoading } = useAuth();
+  const { isLoading, user } = useAuth();
   const [hasSeenOnboarding, setHasSeenOnboarding] = useState<boolean | null>(null);
   const [checkingOnboarding, setCheckingOnboarding] = useState(true);
   const [fontsLoaded, setFontsLoaded] = useState(false);
+  const notificationListener = useRef<Notifications.EventSubscription>();
+  const responseListener = useRef<Notifications.EventSubscription>();
 
   // Set status bar style
   useEffect(() => {
@@ -57,6 +66,51 @@ function RootLayoutContent() {
       StatusBar.setTranslucent(true);
     }
   }, []);
+
+  // Register for push notifications when user is authenticated
+  useEffect(() => {
+    if (user) {
+      registerForPushNotificationsAsync().catch(console.warn);
+    }
+  }, [user]);
+
+  // Listen for incoming notifications & tap responses
+  useEffect(() => {
+    // Notification received while app is in foreground
+    notificationListener.current = addNotificationReceivedListener((notification) => {
+      console.log('Notification received:', notification.request.content.title);
+    });
+
+    // User tapped on a notification
+    responseListener.current = addNotificationResponseListener((response) => {
+      const data = response.notification.request.content.data;
+      // Navigate based on deep_link or notification type
+      if (data?.deep_link) {
+        const link = data.deep_link as string;
+        if (link.includes('bookings/')) {
+          const bookingId = link.split('bookings/').pop();
+          if (bookingId) router.push(`/booking/${bookingId}` as any);
+        } else if (link.includes('messages/')) {
+          router.push(`/(tabs)/inbox` as any);
+        } else if (link.includes('properties/')) {
+          const propId = link.split('properties/').pop();
+          if (propId) router.push(`/property/${propId}` as any);
+        } else if (link.includes('reviews/')) {
+          router.push(`/reviews` as any);
+        }
+      } else {
+        // Default: open notifications screen
+        router.push('/notifications' as any);
+      }
+      // Clear badge
+      setBadgeCount(0);
+    });
+
+    return () => {
+      notificationListener.current?.remove();
+      responseListener.current?.remove();
+    };
+  }, [router]);
 
   // Load fonts
   useEffect(() => {

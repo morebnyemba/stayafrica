@@ -1,140 +1,156 @@
-import { View, Text, ScrollView, TouchableOpacity, Platform, FlatList } from 'react-native';
-import { useState } from 'react';
+import { View, Text, TouchableOpacity, FlatList, RefreshControl } from 'react-native';
+import { useState, useCallback } from 'react';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {
+  useNotifications,
+  useUnreadNotificationCount,
+  useMarkNotificationRead,
+  useMarkAllNotificationsRead,
+} from '@/hooks/api-hooks';
+import type { AppNotification, NotificationType } from '@/types';
 
-interface Notification {
-  id: string;
-  type: 'booking' | 'message' | 'review' | 'payment' | 'system';
-  title: string;
-  message: string;
-  timestamp: string;
-  read: boolean;
-  actionUrl?: string;
+const getNotificationIcon = (type: NotificationType): string => {
+  switch (type) {
+    case 'booking_confirmed':
+      return 'checkmark-circle';
+    case 'booking_cancelled':
+      return 'close-circle';
+    case 'booking_reminder':
+      return 'calendar';
+    case 'new_message':
+      return 'chatbubble';
+    case 'payment_received':
+      return 'wallet';
+    case 'payment_required':
+      return 'card';
+    case 'review_received':
+      return 'star';
+    case 'review_reminder':
+      return 'star-half';
+    case 'price_drop':
+      return 'trending-down';
+    case 'system':
+      return 'information-circle';
+    default:
+      return 'notifications';
+  }
+};
+
+const getNotificationColor = (type: NotificationType): string => {
+  switch (type) {
+    case 'booking_confirmed':
+      return '#10B981';
+    case 'booking_cancelled':
+      return '#EF4444';
+    case 'booking_reminder':
+      return '#3B82F6';
+    case 'new_message':
+      return '#8B5CF6';
+    case 'payment_received':
+      return '#10B981';
+    case 'payment_required':
+      return '#F59E0B';
+    case 'review_received':
+      return '#F59E0B';
+    case 'review_reminder':
+      return '#F97316';
+    case 'price_drop':
+      return '#06B6D4';
+    case 'system':
+      return '#6B7280';
+    default:
+      return '#3A5C50';
+  }
+};
+
+function formatTimeAgo(dateStr: string): string {
+  const now = new Date();
+  const date = new Date(dateStr);
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMins < 1) return 'Just now';
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays < 7) return `${diffDays}d ago`;
+  return date.toLocaleDateString();
 }
-
-// Mock data - replace with actual API call
-const MOCK_NOTIFICATIONS: Notification[] = [
-  {
-    id: '1',
-    type: 'booking',
-    title: 'New Booking Request',
-    message: 'John Doe wants to book your Safari Lodge for 3 nights',
-    timestamp: '2 hours ago',
-    read: false,
-  },
-  {
-    id: '2',
-    type: 'message',
-    title: 'New Message',
-    message: 'Sarah replied to your message about check-in time',
-    timestamp: '5 hours ago',
-    read: false,
-  },
-  {
-    id: '3',
-    type: 'review',
-    title: 'New Review',
-    message: 'Michael left you a 5-star review for Beach Villa',
-    timestamp: '1 day ago',
-    read: true,
-  },
-  {
-    id: '4',
-    type: 'payment',
-    title: 'Payment Received',
-    message: 'Payment of $450 has been processed for your booking',
-    timestamp: '2 days ago',
-    read: true,
-  },
-  {
-    id: '5',
-    type: 'system',
-    title: 'Verification Complete',
-    message: 'Your identity verification has been approved!',
-    timestamp: '3 days ago',
-    read: true,
-  },
-];
 
 export default function NotificationsScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const [notifications, setNotifications] = useState<Notification[]>(MOCK_NOTIFICATIONS);
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  const { data: notificationsData, isLoading, refetch, isRefetching } = useNotifications();
+  const { data: unreadData } = useUnreadNotificationCount();
+  const markReadMutation = useMarkNotificationRead();
+  const markAllReadMutation = useMarkAllNotificationsRead();
 
-  const getNotificationIcon = (type: Notification['type']) => {
-    switch (type) {
-      case 'booking':
-        return 'calendar';
-      case 'message':
-        return 'chatbubble';
-      case 'review':
-        return 'star';
-      case 'payment':
-        return 'wallet';
-      case 'system':
-        return 'information-circle';
-      default:
-        return 'notifications';
-    }
-  };
-
-  const getNotificationColor = (type: Notification['type']) => {
-    switch (type) {
-      case 'booking':
-        return '#3B82F6';
-      case 'message':
-        return '#10B981';
-      case 'review':
-        return '#F59E0B';
-      case 'payment':
-        return '#8B5CF6';
-      case 'system':
-        return '#6B7280';
-      default:
-        return '#3A5C50';
-    }
-  };
-
-  const markAsRead = (id: string) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
-    );
-  };
-
-  const markAllAsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-  };
-
-  const deleteNotification = (id: string) => {
-    setNotifications((prev) => prev.filter((n) => n.id !== id));
-  };
+  const notifications = notificationsData?.results || [];
+  const unreadCount = unreadData?.unread_count || 0;
 
   const filteredNotifications =
-    filter === 'unread' ? notifications.filter((n) => !n.read) : notifications;
+    filter === 'unread'
+      ? notifications.filter((n) => !n.is_read)
+      : notifications;
 
-  const renderNotification = ({ item }: { item: Notification }) => {
-    const color = getNotificationColor(item.type);
-    const icon = getNotificationIcon(item.type);
+  const handleNotificationPress = useCallback(
+    (notification: AppNotification) => {
+      // Mark as read
+      if (!notification.is_read) {
+        markReadMutation.mutate(notification.id);
+      }
+
+      // Navigate via deep link if available
+      if (notification.deep_link) {
+        const link = notification.deep_link;
+        if (link.includes('bookings/')) {
+          const bookingId = link.split('bookings/').pop();
+          if (bookingId) router.push(`/booking/${bookingId}` as any);
+        } else if (link.includes('messages/')) {
+          router.push(`/(tabs)/inbox` as any);
+        } else if (link.includes('properties/')) {
+          const propId = link.split('properties/').pop();
+          if (propId) router.push(`/property/${propId}` as any);
+        } else if (link.includes('reviews/')) {
+          router.push(`/reviews` as any);
+        }
+      }
+    },
+    [markReadMutation, router]
+  );
+
+  const handleMarkAllRead = useCallback(() => {
+    markAllReadMutation.mutate();
+  }, [markAllReadMutation]);
+
+  const onRefresh = useCallback(() => {
+    refetch();
+  }, [refetch]);
+
+  const renderNotification = ({ item }: { item: AppNotification }) => {
+    const color = getNotificationColor(item.notification_type);
+    const icon = getNotificationIcon(item.notification_type);
 
     return (
       <TouchableOpacity
-        onPress={() => markAsRead(item.id)}
+        onPress={() => handleNotificationPress(item)}
         className="mb-3"
+        activeOpacity={0.7}
       >
         <View
-          className={`bg-white rounded-2xl p-4 ${!item.read ? 'border-2 border-gold' : ''}`}
+          className={`bg-white rounded-2xl p-4 ${!item.is_read ? 'border-2 border-gold' : ''}`}
           style={{
             shadowColor: '#122F26',
             shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: !item.read ? 0.08 : 0.04,
+            shadowOpacity: !item.is_read ? 0.08 : 0.04,
             shadowRadius: 4,
-            elevation: !item.read ? 3 : 2,
+            elevation: !item.is_read ? 3 : 2,
           }}
         >
           <View className="flex-row items-start">
@@ -149,23 +165,22 @@ export default function NotificationsScreen() {
             {/* Content */}
             <View className="flex-1">
               <View className="flex-row items-center justify-between mb-1">
-                <Text className="text-base font-bold text-forest flex-1">
+                <Text
+                  className={`text-base ${!item.is_read ? 'font-bold' : 'font-semibold'} text-forest flex-1`}
+                  numberOfLines={1}
+                >
                   {item.title}
                 </Text>
-                {!item.read && (
-                  <View className="w-2 h-2 rounded-full bg-gold ml-2" />
+                {!item.is_read && (
+                  <View className="w-2.5 h-2.5 rounded-full bg-gold ml-2" />
                 )}
               </View>
-              <Text className="text-sm text-moss mb-2">{item.message}</Text>
-              <View className="flex-row items-center justify-between">
-                <Text className="text-xs text-moss/70">{item.timestamp}</Text>
-                <TouchableOpacity
-                  onPress={() => deleteNotification(item.id)}
-                  className="px-3 py-1"
-                >
-                  <Text className="text-xs text-red-500 font-semibold">Delete</Text>
-                </TouchableOpacity>
-              </View>
+              <Text className="text-sm text-moss mb-2" numberOfLines={2}>
+                {item.body}
+              </Text>
+              <Text className="text-xs text-moss/70">
+                {formatTimeAgo(item.created_at)}
+              </Text>
             </View>
           </View>
         </View>
@@ -204,12 +219,15 @@ export default function NotificationsScreen() {
             </View>
 
             {unreadCount > 0 && (
-              <TouchableOpacity 
-                onPress={markAllAsRead}
+              <TouchableOpacity
+                onPress={handleMarkAllRead}
+                disabled={markAllReadMutation.isPending}
                 className="px-3 py-1.5 rounded-lg"
                 style={{ backgroundColor: 'rgba(217, 177, 104, 0.2)' }}
               >
-                <Text className="text-gold text-xs font-semibold">Mark all read</Text>
+                <Text className="text-gold text-xs font-semibold">
+                  {markAllReadMutation.isPending ? 'Marking...' : 'Mark all read'}
+                </Text>
               </TouchableOpacity>
             )}
           </View>
@@ -249,9 +267,27 @@ export default function NotificationsScreen() {
       </LinearGradient>
 
       {/* Notifications List */}
-      {filteredNotifications.length === 0 ? (
-        <View className="flex-1 items-center justify-center px-6">
+      {isLoading ? (
+        <View className="flex-1 items-center justify-center">
           <View className="bg-white rounded-3xl p-8 items-center"
+            style={{
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 8 },
+              shadowOpacity: 0.1,
+              shadowRadius: 16,
+              elevation: 8,
+            }}
+          >
+            <View className="bg-sand-200 rounded-full p-6 mb-4">
+              <Ionicons name="notifications-outline" size={48} color="#3A5C50" />
+            </View>
+            <Text className="text-lg font-semibold text-forest">Loading notifications...</Text>
+          </View>
+        </View>
+      ) : filteredNotifications.length === 0 ? (
+        <View className="flex-1 items-center justify-center px-6">
+          <View
+            className="bg-white rounded-3xl p-8 items-center"
             style={{
               shadowColor: '#000',
               shadowOffset: { width: 0, height: 8 },
@@ -283,6 +319,14 @@ export default function NotificationsScreen() {
             paddingBottom: insets.bottom + 16,
           }}
           showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefetching}
+              onRefresh={onRefresh}
+              tintColor="#3A5C50"
+              colors={['#3A5C50']}
+            />
+          }
         />
       )}
     </View>

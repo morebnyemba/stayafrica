@@ -56,6 +56,9 @@ paypal-server-sdk==2.1.0
 # Images
 Pillow>=10.2.0
 
+# Push Notifications
+firebase-admin==6.4.0
+
 # Development Tools
 django-extensions==3.2.3
 pytest==7.4.3

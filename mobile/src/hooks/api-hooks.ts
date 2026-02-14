@@ -15,6 +15,8 @@ import type {
   HostEarnings,
   Experience,
   ExperienceBooking,
+  AppNotification,
+  NotificationPreference,
 } from '@/types';
 
 // Properties
@@ -487,6 +489,66 @@ export function useCompleteExperienceBooking() {
     mutationFn: (id: number) => apiClient.completeExperienceBooking(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['host-experience-bookings'] });
+    },
+  });
+}
+
+// ── Notifications ──────────────────────────────────────────────────────
+
+export function useNotifications() {
+  return useQuery<{ results: AppNotification[] }>({
+    queryKey: ['notifications'],
+    queryFn: () => apiClient.getNotifications(),
+    refetchInterval: 30000, // Poll every 30 seconds
+  });
+}
+
+export function useUnreadNotificationCount() {
+  return useQuery<{ unread_count: number }>({
+    queryKey: ['notification-unread-count'],
+    queryFn: () => apiClient.getUnreadNotificationCount(),
+    refetchInterval: 30000,
+  });
+}
+
+export function useMarkNotificationRead() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => apiClient.markNotificationRead(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      queryClient.invalidateQueries({ queryKey: ['notification-unread-count'] });
+    },
+  });
+}
+
+export function useMarkAllNotificationsRead() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => apiClient.markAllNotificationsRead(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      queryClient.invalidateQueries({ queryKey: ['notification-unread-count'] });
+    },
+  });
+}
+
+// ── Notification Preferences ────────────────────────────────────────────
+
+export function useNotificationPreferences() {
+  return useQuery<NotificationPreference>({
+    queryKey: ['notification-preferences'],
+    queryFn: () => apiClient.getNotificationPreferences(),
+  });
+}
+
+export function useUpdateNotificationPreferences() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: Partial<NotificationPreference>) =>
+      apiClient.updateNotificationPreferences(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notification-preferences'] });
     },
   });
 }

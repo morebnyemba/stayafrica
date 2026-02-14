@@ -6,7 +6,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8
 
 interface PushTokenData {
   token: string;
-  device_type: 'web' | 'android' | 'ios';
+  platform: 'web' | 'android' | 'ios';
 }
 
 export const usePushNotifications = () => {
@@ -20,13 +20,16 @@ export const usePushNotifications = () => {
       setIsSupported(true);
       setPermission(Notification.permission);
     }
+    // Restore cached token
+    const cached = typeof window !== 'undefined' ? localStorage.getItem('fcm_token') : null;
+    if (cached) setFcmToken(cached);
   }, []);
 
   const registerTokenMutation = useMutation({
     mutationFn: async (data: PushTokenData) => {
       const token = localStorage.getItem('access_token');
       const response = await axios.post(
-        `${API_BASE_URL}/api/v1/push-tokens/`,
+        `${API_BASE_URL}/api/v1/tokens/`,
         data,
         {
           headers: {
@@ -50,6 +53,17 @@ export const usePushNotifications = () => {
     try {
       const result = await Notification.requestPermission();
       setPermission(result);
+
+      // Register service worker for background notifications
+      if (result === 'granted' && 'serviceWorker' in navigator) {
+        try {
+          await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+          console.log('Firebase messaging service worker registered');
+        } catch (swError) {
+          console.warn('Service worker registration failed:', swError);
+        }
+      }
+
       return result;
     } catch (error) {
       console.error('Error requesting notification permission:', error);
@@ -61,7 +75,7 @@ export const usePushNotifications = () => {
     try {
       await registerTokenMutation.mutateAsync({
         token,
-        device_type: 'web',
+        platform: 'web',
       });
       setFcmToken(token);
       localStorage.setItem('fcm_token', token);
@@ -77,7 +91,11 @@ export const usePushNotifications = () => {
       return null;
     }
 
-    return new Notification(title, options);
+    return new Notification(title, {
+      icon: '/logo.png',
+      badge: '/logo.png',
+      ...options,
+    });
   };
 
   return {

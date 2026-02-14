@@ -54,9 +54,9 @@ export const NotificationItem = ({ notification }: NotificationItemProps) => {
   const markAsReadMutation = useMutation({
     mutationFn: async (notificationId: string) => {
       const token = localStorage.getItem('access_token');
-      const response = await axios.patch(
-        `${API_BASE_URL}/api/v1/notifications/${notificationId}/`,
-        { is_read: true },
+      const response = await axios.post(
+        `${API_BASE_URL}/api/v1/notifications/${notificationId}/mark_read/`,
+        {},
         {
           headers: {
             Authorization: `Bearer ${token}`,

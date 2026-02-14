@@ -427,3 +427,52 @@ export interface PendingAction {
   created_at: string;
   priority: 'high' | 'medium' | 'low';
 }
+
+// Notification Types
+export type NotificationType =
+  | 'booking_confirmed'
+  | 'booking_cancelled'
+  | 'booking_reminder'
+  | 'new_message'
+  | 'payment_received'
+  | 'payment_required'
+  | 'review_received'
+  | 'review_reminder'
+  | 'price_drop'
+  | 'system';
+
+export interface AppNotification {
+  id: string;
+  user: string;
+  notification_type: NotificationType;
+  title: string;
+  body: string;
+  data: Record<string, any>;
+  deep_link: string;
+  status: 'pending' | 'sent' | 'delivered' | 'failed' | 'read';
+  is_read: boolean;
+  sent_at: string | null;
+  delivered_at: string | null;
+  read_at: string | null;
+  created_at: string;
+}
+
+export interface NotificationPreference {
+  id: string;
+  user: string;
+  booking_confirmed: boolean;
+  booking_cancelled: boolean;
+  booking_reminder: boolean;
+  new_message: boolean;
+  payment_received: boolean;
+  payment_required: boolean;
+  review_reminder: boolean;
+  review_received: boolean;
+  price_drop: boolean;
+}
+
+export interface PushTokenData {
+  token: string;
+  platform: 'ios' | 'android' | 'web';
+  device_name?: string;
+}

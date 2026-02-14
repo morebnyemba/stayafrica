@@ -19,7 +19,7 @@ export const useNotificationPreferences = () => {
     queryKey: ['notification-preferences'],
     queryFn: async () => {
       const response = await axios.get(
-        `${API_BASE_URL}/api/v1/notifications/preferences/`,
+        `${API_BASE_URL}/api/v1/preferences/`,
         { headers: getAuthHeaders() }
       );
       return response.data;
@@ -28,8 +28,8 @@ export const useNotificationPreferences = () => {
 
   const updateMutation = useMutation({
     mutationFn: async (data: Partial<NotificationPreferences>) => {
-      const response = await axios.patch(
-        `${API_BASE_URL}/api/v1/notifications/preferences/`,
+      const response = await axios.put(
+        `${API_BASE_URL}/api/v1/preferences/`,
         data,
         { headers: getAuthHeaders() }
       );
