@@ -92,18 +92,22 @@ export default function BookingPaymentPage() {
       const response = await apiClient.initiatePayment(bookingId!, provider);
       return response.data;
     },
-    onSuccess: () => {
-      // For now, redirect to success page
-      // In production, this would redirect to payment gateway
+    onSuccess: (data) => {
       if (selectedProvider === 'cash_on_arrival') {
         toast.success('Booking confirmed! You can pay cash on arrival.');
         router.push(`/booking/success?bookingId=${bookingId}&provider=${selectedProvider}`);
+      } else if (data?.checkout_url || data?.redirect_url || data?.payment_link) {
+        // Redirect to the payment gateway (Stripe Checkout, PayPal, etc.)
+        toast.success('Redirecting to payment gateway...');
+        const redirectUrl = data.checkout_url || data.redirect_url || data.payment_link;
+        window.location.href = redirectUrl;
+      } else if (data?.status === 'success' || data?.status === 'completed') {
+        toast.success('Payment completed!');
+        router.push(`/booking/success?bookingId=${bookingId}&provider=${selectedProvider}`);
       } else {
-        toast.success('Payment initiated. Redirecting to payment gateway...');
-        // Simulate redirect to payment gateway
-        setTimeout(() => {
-          router.push(`/booking/success?bookingId=${bookingId}&provider=${selectedProvider}`);
-        }, 2000);
+        // Payment initiated but pending webhook confirmation
+        toast.success('Payment initiated. You will be notified once confirmed.');
+        router.push(`/booking/success?bookingId=${bookingId}&provider=${selectedProvider}&pending=true`);
       }
     },
     onError: (error: any) => {

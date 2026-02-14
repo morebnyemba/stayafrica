@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Alert, ActivityIndicator, Linking } from 'react-native';
 import { useState, useEffect } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -86,23 +86,38 @@ export default function PaymentScreen() {
       });
 
       if (response.data?.status === 'completed' || response.data?.status === 'success') {
-        // Payment successful
+        // Payment already completed (e.g. cash on arrival)
         Alert.alert('Success', 'Payment processed successfully!', [
           {
             text: 'OK',
             onPress: () => router.replace(`/booking/success?bookingId=${bookingId}`)
           }
         ]);
-      } else if (response.data?.checkout_url) {
-        // Redirect to payment provider
-        Alert.alert('Redirecting', 'You will be redirected to complete the payment', [
-          { text: 'OK' }
-        ]);
-        // In production: use Linking.openURL(response.data.checkout_url)
-        router.replace(`/booking/success?bookingId=${bookingId}&pending=true`);
+      } else if (response.data?.checkout_url || response.data?.redirect_url || response.data?.payment_link) {
+        // Open payment gateway in browser (Stripe Checkout, PayPal, etc.)
+        const paymentUrl = response.data.checkout_url || response.data.redirect_url || response.data.payment_link;
+        Alert.alert(
+          'Complete Payment',
+          'You will be redirected to the payment gateway to complete your payment securely.',
+          [
+            {
+              text: 'Continue',
+              onPress: async () => {
+                try {
+                  await Linking.openURL(paymentUrl);
+                } catch (e) {
+                  Alert.alert('Error', 'Could not open payment page. Please try again.');
+                }
+              },
+            },
+            { text: 'Cancel', style: 'cancel' },
+          ]
+        );
       } else {
-        // Payment pending webhook confirmation
-        router.replace(`/booking/success?bookingId=${bookingId}&pending=true`);
+        // Payment initiated, pending webhook confirmation
+        Alert.alert('Payment Pending', 'Your payment is being processed. You will be notified once confirmed.', [
+          { text: 'OK', onPress: () => router.replace(`/booking/success?bookingId=${bookingId}&pending=true`) }
+        ]);
       }
     } catch (error) {
       console.error('Payment error:', error);
