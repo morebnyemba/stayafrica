@@ -10,17 +10,13 @@ class TestSecuritySettings:
 
     def test_debug_defaults_to_false(self):
         """DEBUG should default to False when the env var is missing."""
-        # The settings module reads os.getenv('DEBUG', 'False')
-        # In CI without DEBUG set, this ensures safety.
-        # This test documents the expected default behaviour.
+        # In CI (where DEBUG env is typically 'True' for test DB), we verify
+        # the default logic: os.getenv('DEBUG', 'False') == 'True'
+        # When the env var is absent the expression evaluates to False.
         import os
-        from importlib import import_module
-
-        env_val = os.getenv('DEBUG', 'False')
-        result = env_val == 'True'
-        # If DEBUG env is not set to 'True', it should be False
-        if os.getenv('DEBUG') != 'True':
-            assert result is False
+        raw = os.getenv('DEBUG')
+        if raw is None:
+            assert settings.DEBUG is False
 
     def test_secret_key_is_set(self):
         """SECRET_KEY should not be the insecure placeholder in production."""

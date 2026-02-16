@@ -42,7 +42,6 @@ const nextConfig = {
     {
       source: '/api/:path*',
       headers: [
-        { key: 'Access-Control-Allow-Origin', value: process.env.NEXT_PUBLIC_API_BASE_URL || '*' },
         { key: 'Access-Control-Allow-Methods', value: 'GET,POST,PUT,DELETE,OPTIONS' },
       ],
     },
