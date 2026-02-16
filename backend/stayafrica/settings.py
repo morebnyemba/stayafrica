@@ -51,7 +51,7 @@ except Exception:
 
 # Security
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-dev-key-change-in-production')
-DEBUG = os.getenv('DEBUG', 'True') == 'True'
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
 ALLOWED_HOSTS = os.getenv(
     'ALLOWED_HOSTS',
     'localhost,127.0.0.1,backend,api.zimlegend.online,zimlegend.online,stayafrica.app,www.stayafrica.app,api.stayafrica.app'
@@ -121,6 +121,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware',
+    'utils.exception_handlers.RequestLoggingMiddleware',
 ]
 
 ROOT_URLCONF = 'stayafrica.urls'
@@ -256,6 +257,7 @@ REST_FRAMEWORK = {
         'user': '1000/day',  # Authenticated users: 1000 requests per day
         'login': '10/minute',  # Stricter scope for login to prevent brute force
     },
+    'EXCEPTION_HANDLER': 'utils.exception_handlers.custom_exception_handler',
 }
 
 # JWT Configuration
@@ -317,6 +319,18 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 # Secure cookies in production
 SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
+
+# Production security settings
+if not DEBUG:
+    SECURE_HSTS_SECONDS = 31536000  # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_SSL_REDIRECT = bool(os.getenv('SECURE_SSL_REDIRECT', 'True') == 'True')
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = 'DENY'
+    SESSION_COOKIE_HTTPONLY = True
+    CSRF_COOKIE_HTTPONLY = True
 
 # Celery Configuration
 CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379/0')
