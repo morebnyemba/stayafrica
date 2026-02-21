@@ -26,7 +26,8 @@ export default function PaymentReturnPage() {
       if (stored) {
         try {
           setPendingPayment(JSON.parse(stored));
-        } catch {
+        } catch (e) {
+          console.error('Failed to parse pending payment data:', e);
           setPendingPayment(null);
         }
       }

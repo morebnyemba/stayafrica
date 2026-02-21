@@ -186,16 +186,17 @@ class PaymentViewSet(viewsets.ModelViewSet):
             integration_key = getattr(config, 'paynow_integration_key', '')
             if integration_key and paynow_hash:
                 import hashlib
-                # Paynow hash: SHA512 of all values (except hash) concatenated with integration key
-                values = []
-                for key in sorted(request.data.keys()):
-                    if key.lower() != 'hash':
-                        values.append(str(request.data[key]))
+                # Paynow hash: SHA512 of field values in the order received, then integration key
+                # Use the specific fields Paynow sends, in their expected order
+                hash_fields = ['reference', 'amount', 'status', 'paynowreference', 'pollurl']
+                values = [str(request.data.get(f, '')) for f in hash_fields if f in request.data]
                 values.append(integration_key)
                 expected_hash = hashlib.sha512(''.join(values).encode('utf-8')).hexdigest().upper()
                 if expected_hash != paynow_hash.upper():
                     logger.error(f"Invalid Paynow webhook hash for reference: {gateway_ref}")
                     return Response({'error': 'Invalid hash'}, status=status.HTTP_403_FORBIDDEN)
+            elif not integration_key:
+                logger.warning("Paynow webhook received but integration key not configured - skipping hash verification")
             
             logger.info(f"Paynow webhook received: reference={gateway_ref}, status={payment_status}")
         
