@@ -174,6 +174,32 @@ class PaymentViewSet(viewsets.ModelViewSet):
             else:
                 return Response({'status': 'ignored'})
         
+        elif provider == 'paynow':
+            # Paynow sends: reference, paynowreference, amount, status, pollurl, hash
+            gateway_ref = request.data.get('reference')
+            payment_status = request.data.get('status', '')
+            paynow_hash = request.data.get('hash')
+            
+            # Verify Paynow hash if integration key is configured
+            from apps.admin_dashboard.models import SystemConfiguration
+            config = SystemConfiguration.get_config()
+            integration_key = getattr(config, 'paynow_integration_key', '')
+            if integration_key and paynow_hash:
+                import hashlib
+                # Paynow hash: SHA512 of field values in the order received, then integration key
+                # Use the specific fields Paynow sends, in their expected order
+                hash_fields = ['reference', 'amount', 'status', 'paynowreference', 'pollurl']
+                values = [str(request.data.get(f, '')) for f in hash_fields if f in request.data]
+                values.append(integration_key)
+                expected_hash = hashlib.sha512(''.join(values).encode('utf-8')).hexdigest().upper()
+                if expected_hash != paynow_hash.upper():
+                    logger.error(f"Invalid Paynow webhook hash for reference: {gateway_ref}")
+                    return Response({'error': 'Invalid hash'}, status=status.HTTP_403_FORBIDDEN)
+            elif not integration_key:
+                logger.warning("Paynow webhook received but integration key not configured - skipping hash verification")
+            
+            logger.info(f"Paynow webhook received: reference={gateway_ref}, status={payment_status}")
+        
         elif provider == 'paypal':
             # Verify PayPal webhook
             if not payment_service.verify_paypal_webhook(dict(request.headers), request.body.decode('utf-8')):
@@ -245,8 +271,9 @@ class PaymentViewSet(viewsets.ModelViewSet):
         with transaction.atomic():
             old_status = payment.status
             
-            # Map provider status to our status
-            if payment_status in ['success', 'completed', 'paid', 'succeeded', 'successful']:
+            # Map provider status to our status (case-insensitive for providers like Paynow)
+            normalized_status = payment_status.lower() if payment_status else ''
+            if normalized_status in ['success', 'completed', 'paid', 'succeeded', 'successful']:
                 payment.status = 'success'
                 # Update booking status
                 payment.booking.status = 'confirmed'
@@ -255,7 +282,7 @@ class PaymentViewSet(viewsets.ModelViewSet):
                 # Send receipt email
                 send_payment_receipt_email.delay(payment.id)
                 
-            elif payment_status in ['failed', 'cancelled', 'declined', 'canceled']:
+            elif normalized_status in ['failed', 'cancelled', 'declined', 'canceled']:
                 payment.status = 'failed'
             else:
                 payment.status = 'pending'

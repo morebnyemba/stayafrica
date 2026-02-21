@@ -126,7 +126,7 @@ export function HeroSection() {
         {/* Property Type Quick Select - Mobile optimized */}
         <div className="mb-6 sm:mb-8">
           <p className="text-center text-sand-100 mb-3 sm:mb-4 text-xs sm:text-sm font-medium">Browse by type:</p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3 mb-6 sm:mb-8 overflow-x-auto pb-2">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3 mb-6 sm:mb-8">
             {FEATURED_PROPERTY_TYPES.map((typeId) => {
               const typeConfig = PROPERTY_TYPES[typeId];
               const Icon = iconMap[typeConfig.icon];
@@ -134,7 +134,7 @@ export function HeroSection() {
                 <button
                   key={typeId}
                   onClick={() => setSelectedType(typeId)}
-                  className={`flex-shrink-0 p-2 sm:p-4 rounded-lg sm:rounded-xl transition-all duration-200 flex flex-col items-center justify-center gap-1 sm:gap-2 min-w-max sm:min-w-fit ${
+                  className={`flex-shrink-0 p-2 sm:p-4 rounded-lg sm:rounded-xl transition-all duration-200 flex flex-col items-center justify-center gap-1 sm:gap-2 ${
                     selectedType === typeId
                       ? 'bg-secondary-500 text-primary-900 shadow-lg scale-105'
                       : 'bg-primary-700/50 hover:bg-primary-600/70 text-sand-50 border border-sand-200/20'

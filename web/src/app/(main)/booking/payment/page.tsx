@@ -97,7 +97,15 @@ export default function BookingPaymentPage() {
         toast.success('Booking confirmed! You can pay cash on arrival.');
         router.push(`/booking/success?bookingId=${bookingId}&provider=${selectedProvider}`);
       } else if (data?.checkout_url || data?.redirect_url || data?.payment_link) {
-        // Redirect to the payment gateway (Stripe Checkout, PayPal, etc.)
+        // Store payment info for the return page before redirecting
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('pending_payment', JSON.stringify({
+            bookingId,
+            provider: selectedProvider,
+            paymentId: data.id,
+            gateway_ref: data.gateway_ref,
+          }));
+        }
         toast.success('Redirecting to payment gateway...');
         const redirectUrl = data.checkout_url || data.redirect_url || data.payment_link;
         window.location.href = redirectUrl;
