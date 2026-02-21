@@ -47,6 +47,8 @@ export function Navigation() {
   return (
     <>
       <MobileSearchBar />
+      {/* Spacer for fixed MobileSearchBar on mobile */}
+      <div className="h-[52px] md:hidden" aria-hidden="true" />
       <nav className="sticky top-[52px] md:top-0 z-40 bg-primary-800 backdrop-blur-sm text-sand-100 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14">
