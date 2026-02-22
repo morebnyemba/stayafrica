@@ -42,46 +42,35 @@ export default function BookingPaymentPage() {
   const { data: providersData, isLoading: loadingProviders } = useQuery({
     queryKey: ['providers', user?.country_of_residence],
     queryFn: async () => {
-      // Mock providers based on country - in reality this would come from backend
-      const country = user?.country_of_residence || 'International';
-      const allProviders: PaymentProvider[] = [
-        {
-          id: 'paynow',
-          name: 'Paynow',
-          description: 'Pay with Ecocash, Visa, or Mastercard',
-          icon: Wallet,
-          available: country === 'Zimbabwe',
-        },
-        {
-          id: 'payfast',
-          name: 'PayFast',
-          description: 'Secure payment gateway for South Africa',
-          icon: CreditCard,
-          available: country === 'South Africa',
-        },
-        {
-          id: 'ozow',
-          name: 'Ozow',
-          description: 'Instant EFT payments',
-          icon: DollarSign,
-          available: country === 'South Africa',
-        },
-        {
-          id: 'stripe',
-          name: 'Stripe',
-          description: 'Pay with credit or debit card',
-          icon: CreditCard,
-          available: !['Zimbabwe', 'South Africa'].includes(country),
-        },
-        {
-          id: 'cash_on_arrival',
-          name: 'Cash on Arrival',
-          description: 'Pay in cash when you arrive',
-          icon: DollarSign,
-          available: ['Zimbabwe', 'South Africa'].includes(country),
-        },
-      ];
-      return allProviders.filter(p => p.available);
+      const response = await apiClient.getAvailableProviders(user?.country_of_residence || 'International');
+      const providerList: { id: string; name: string }[] = response.data?.providers || [];
+      const iconMap: Record<string, any> = {
+        paynow: Wallet,
+        payfast: CreditCard,
+        ozow: DollarSign,
+        stripe: CreditCard,
+        flutterwave: CreditCard,
+        paystack: CreditCard,
+        paypal: CreditCard,
+        cash_on_arrival: DollarSign,
+      };
+      const descriptionMap: Record<string, string> = {
+        paynow: 'Pay with Ecocash, Visa, or Mastercard',
+        payfast: 'Secure payment gateway for South Africa',
+        ozow: 'Instant EFT payments',
+        stripe: 'Pay with credit or debit card',
+        flutterwave: 'Pay with cards and mobile money',
+        paystack: 'Pay with cards and bank transfer',
+        paypal: 'Pay with your PayPal account',
+        cash_on_arrival: 'Pay in cash when you arrive',
+      };
+      return providerList.map((p) => ({
+        id: p.id,
+        name: p.name,
+        description: descriptionMap[p.id] || `Pay with ${p.name}`,
+        icon: iconMap[p.id] || CreditCard,
+        available: true,
+      })) as PaymentProvider[];
     },
     enabled: !!user,
   });
