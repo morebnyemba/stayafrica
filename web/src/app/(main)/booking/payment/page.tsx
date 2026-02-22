@@ -39,7 +39,7 @@ export default function BookingPaymentPage() {
   });
 
   // Fetch available payment providers
-  const { data: providersData, isLoading: loadingProviders } = useQuery({
+  const { data: providersData, isLoading: loadingProviders, isError: providersError } = useQuery({
     queryKey: ['providers', user?.country_of_residence],
     queryFn: async () => {
       const response = await apiClient.getAvailableProviders(user?.country_of_residence || 'International');
@@ -73,6 +73,7 @@ export default function BookingPaymentPage() {
       })) as PaymentProvider[];
     },
     enabled: !!user,
+    retry: 2,
   });
 
   // Initiate payment mutation
@@ -220,7 +221,9 @@ export default function BookingPaymentPage() {
                 <div className="card p-8 text-center">
                   <AlertCircle className="w-12 h-12 text-amber-500 mx-auto mb-4" />
                   <p className="text-primary-700 dark:text-sand-200">
-                    No payment methods available for your region.
+                    {providersError
+                      ? 'Failed to load payment methods. Please try again later.'
+                      : 'No payment methods available for your region.'}
                   </p>
                 </div>
               )}

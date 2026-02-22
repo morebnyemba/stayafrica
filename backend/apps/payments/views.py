@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.db import transaction
 from django.conf import settings
+from decimal import Decimal
 from apps.payments.models import Payment
 from apps.payments.serializers import PaymentSerializer
 from services.payment_gateway_enhanced import PaymentGatewayService
@@ -355,9 +356,11 @@ class PaymentViewSet(viewsets.ModelViewSet):
                 from apps.admin_dashboard.models import SystemConfiguration
                 config = SystemConfiguration.get_config()
                 stripe.api_key = config.stripe_secret_key
+                # gateway_ref stores the checkout session ID; retrieve payment_intent from it
+                session = stripe.checkout.Session.retrieve(payment.gateway_ref)
                 stripe_refund = stripe.Refund.create(
-                    payment_intent=payment.gateway_ref,
-                    amount=int(refund_amount * 100),  # Convert to cents
+                    payment_intent=session.payment_intent,
+                    amount=int(Decimal(str(refund_amount)) * 100),  # Convert to cents
                 )
                 logger.info(f'Stripe refund created: {stripe_refund.id} for payment {payment.gateway_ref}')
             except Exception as e:
