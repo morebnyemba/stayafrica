@@ -387,6 +387,9 @@ DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'StayAfrica <noreply@stayaf
 # Frontend URL for emails
 FRONTEND_URL = os.getenv('FRONTEND_URL', 'https://zimlegend.online')
 
+# Site URL used for payment gateway redirect URLs (Stripe checkout, Paynow, etc.)
+SITE_URL = os.getenv('SITE_URL', FRONTEND_URL)
+
 # Create logs directory if it doesn't exist
 import os as log_os
 log_os.makedirs(BASE_DIR / 'logs', exist_ok=True)

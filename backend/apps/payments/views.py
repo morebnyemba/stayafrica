@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.db import transaction
 from django.conf import settings
+from decimal import Decimal
 from apps.payments.models import Payment
 from apps.payments.serializers import PaymentSerializer
 from services.payment_gateway_enhanced import PaymentGatewayService
@@ -26,6 +27,18 @@ class PaymentViewSet(viewsets.ModelViewSet):
         if user.is_admin_user:
             return Payment.objects.all().select_related('booking__guest', 'booking__rental_property')
         return Payment.objects.filter(booking__guest=user).select_related('booking__rental_property')
+    
+    @action(detail=False, methods=['get'])
+    def providers(self, request):
+        """Get available payment providers for the current user's country"""
+        payment_service = PaymentGatewayService()
+        country = getattr(request.user, 'country_of_residence', '') or 'International'
+        provider_ids = payment_service.get_available_providers(country)
+        providers = [
+            {'id': pid, 'name': payment_service.get_provider_label(pid)}
+            for pid in provider_ids
+        ]
+        return Response({'providers': providers, 'country': country})
     
     @action(detail=False, methods=['post'])
     @api_ratelimit(rate='5/m')
@@ -329,14 +342,34 @@ class PaymentViewSet(viewsets.ModelViewSet):
         payment = self.get_object()
         amount = request.data.get('amount')
         
-        if payment.status != 'completed':
+        if payment.status != 'success':
             return Response(
-                {'error': 'Only completed payments can be refunded'},
+                {'error': 'Only successful payments can be refunded'},
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # TODO: Integrate with actual payment gateway to process refund
-        # For now, just update status
+        # Process refund through payment provider
+        refund_amount = amount or payment.amount
+        if payment.provider == 'stripe':
+            try:
+                import stripe
+                from apps.admin_dashboard.models import SystemConfiguration
+                config = SystemConfiguration.get_config()
+                stripe.api_key = config.stripe_secret_key
+                # gateway_ref stores the checkout session ID; retrieve payment_intent from it
+                session = stripe.checkout.Session.retrieve(payment.gateway_ref)
+                stripe_refund = stripe.Refund.create(
+                    payment_intent=session.payment_intent,
+                    amount=int(Decimal(str(refund_amount)) * 100),  # Convert to cents
+                )
+                logger.info(f'Stripe refund created: {stripe_refund.id} for payment {payment.gateway_ref}')
+            except Exception as e:
+                logger.error(f'Stripe refund failed for {payment.gateway_ref}: {str(e)}')
+                return Response(
+                    {'error': f'Refund failed: {str(e)}'},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+        
         payment.status = 'refunded'
         payment.save()
         
@@ -351,7 +384,7 @@ class PaymentViewSet(viewsets.ModelViewSet):
             object_id=payment.id,
             changes={
                 'status': 'refunded',
-                'refund_amount': amount or payment.amount,
+                'refund_amount': str(refund_amount),
                 'refunded_by': request.user.id
             }
         )
