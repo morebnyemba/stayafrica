@@ -52,24 +52,24 @@ export function Footer() {
             <h4 className="text-lg font-semibold text-secondary-100 mb-4">Support</h4>
             <ul className="space-y-3 text-sm text-secondary-200/70">
               <li>
-                <a href="#" className="hover:text-secondary-50 transition">
+                <Link href="/help" className="hover:text-secondary-50 transition">
                   Help Center
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-secondary-50 transition">
+                <a href="mailto:support@stayafrica.app" className="hover:text-secondary-50 transition">
                   Contact Us
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-secondary-50 transition">
+                <Link href="/privacy" className="hover:text-secondary-50 transition">
                   Privacy Policy
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-secondary-50 transition">
+                <Link href="/terms" className="hover:text-secondary-50 transition">
                   Terms & Conditions
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -80,8 +80,8 @@ export function Footer() {
             <ul className="space-y-4 text-sm text-secondary-200/80">
               <li className="flex items-center space-x-3">
                 <Mail className="w-4 h-4 text-secondary-200" />
-                <a href="mailto:support@stayafrica.com" className="hover:text-secondary-50">
-                  support@stayafrica.com
+                <a href="mailto:support@stayafrica.app" className="hover:text-secondary-50">
+                  support@stayafrica.app
                 </a>
               </li>
               <li className="flex items-center space-x-3">
@@ -105,15 +105,15 @@ export function Footer() {
               &copy; {currentYear} <span className="font-semibold">StayAfrica Property</span>. All rights reserved.
             </p>
             <div className="flex items-center gap-6 text-secondary-200/70 text-sm">
-              <a href="#" className="hover:text-secondary-50 transition">
+              <Link href="/privacy" className="hover:text-secondary-50 transition">
                 Privacy
-              </a>
-              <a href="#" className="hover:text-secondary-50 transition">
+              </Link>
+              <Link href="/cookies" className="hover:text-secondary-50 transition">
                 Cookies
-              </a>
-              <a href="#" className="hover:text-secondary-50 transition">
-                Accessibility
-              </a>
+              </Link>
+              <Link href="/terms" className="hover:text-secondary-50 transition">
+                Terms
+              </Link>
             </div>
             <div className="flex items-center gap-4">
               <a href="#" aria-label="StayAfrica on Facebook" className="text-secondary-200/70 hover:text-secondary-50 transition">
