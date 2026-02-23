@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { apiClient } from '@/services/api-client';
-import { BarChart3, TrendingUp, TrendingDown, Star, Eye, Calendar, DollarSign, ArrowUpRight, ArrowDownRight, Minus } from 'lucide-react';
+import { BarChart3, TrendingUp, Star, Eye, Calendar, DollarSign, ArrowUpRight, ArrowDownRight, Minus } from 'lucide-react';
 
 interface Benchmark {
     property_id: string;
