@@ -92,8 +92,8 @@ export function HomeProperties() {
           <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-primary-900 dark:text-sand-50">
             Stays nearby
           </h2>
-          <Link 
-            href="/explore" 
+          <Link
+            href="/explore"
             className="text-secondary-600 hover:text-secondary-700 font-semibold underline text-xs sm:text-sm"
           >
             Show all
@@ -136,7 +136,7 @@ export function HomeProperties() {
                       </div>
                     )}
                   </div>
-                  
+
                   {/* Content */}
                   <div className="p-4">
                     <div className="mb-2">
@@ -147,7 +147,7 @@ export function HomeProperties() {
                         {property.title}
                       </p>
                     </div>
-                    
+
                     {/* Property details */}
                     {(property.bedrooms || property.max_guests) && (
                       <div className="flex items-center gap-3 text-xs text-primary-500 dark:text-sand-400 mb-3">
@@ -156,7 +156,7 @@ export function HomeProperties() {
                         {property.max_guests && <span>{property.max_guests} guest{property.max_guests > 1 ? 's' : ''}</span>}
                       </div>
                     )}
-                    
+
                     <div className="flex items-baseline justify-between">
                       <div>
                         <span className="font-bold text-lg text-primary-900 dark:text-sand-50">
