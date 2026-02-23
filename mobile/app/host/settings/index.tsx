@@ -22,8 +22,8 @@ export default function HostSettingsScreen() {
           className="px-4 pb-6"
           style={{ paddingTop: insets.top + 12 }}
         >
-          <TouchableOpacity 
-            onPress={() => router.back()} 
+          <TouchableOpacity
+            onPress={() => router.back()}
             className="mb-4 w-10 h-10 rounded-xl items-center justify-center"
             style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
           >
@@ -111,125 +111,125 @@ export default function HostSettingsScreen() {
           className="px-4 pb-8"
           style={{ paddingTop: insets.top + 12 }}
         >
-        <TouchableOpacity onPress={() => router.back()} className="mb-4">
-          <View className="w-10 h-10 rounded-xl items-center justify-center" style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}>
-            <Ionicons name="arrow-back" size={24} color="#fff" />
-          </View>
-        </TouchableOpacity>
-        <Text className="text-3xl font-black text-white tracking-tight mb-2">
-          Host Settings
-        </Text>
-        <View className="flex-row items-center">
-          <Ionicons name="settings" size={16} color="#D9B168" />
-          <Text className="text-sand-100 ml-2">
-            Manage your hosting preferences
+          <TouchableOpacity onPress={() => router.back()} className="mb-4">
+            <View className="w-10 h-10 rounded-xl items-center justify-center" style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}>
+              <Ionicons name="arrow-back" size={24} color="#fff" />
+            </View>
+          </TouchableOpacity>
+          <Text className="text-3xl font-black text-white tracking-tight mb-2">
+            Host Settings
           </Text>
+          <View className="flex-row items-center">
+            <Ionicons name="settings" size={16} color="#D9B168" />
+            <Text className="text-sand-100 ml-2">
+              Manage your hosting preferences
+            </Text>
+          </View>
+        </LinearGradient>
+
+        <View className="px-4 -mt-4">
+          {/* Booking Settings */}
+          <Text className="text-lg font-bold text-forest mb-3 mt-4">Booking Settings</Text>
+
+          <SettingToggle
+            icon="flash-outline"
+            title="Instant Booking"
+            description="Allow guests to book without approval"
+            value={instantBooking}
+            onToggle={setInstantBooking}
+          />
+
+          <SettingLink
+            icon="calendar-outline"
+            title="Availability Calendar"
+            description="Set your property availability"
+            onPress={() => router.push('/host/calendar')}
+            color="#6366F1"
+          />
+
+          <SettingLink
+            icon="cash-outline"
+            title="Pricing Rules"
+            description="Configure dynamic pricing"
+            onPress={() => router.push('/host/pricing')}
+            color="#10B981"
+          />
+
+          {/* Notification Settings */}
+          <Text className="text-lg font-bold text-forest mb-3 mt-6">Notifications</Text>
+
+          <SettingToggle
+            icon="mail-outline"
+            title="Email Notifications"
+            description="Receive booking updates via email"
+            value={emailNotifications}
+            onToggle={setEmailNotifications}
+          />
+
+          <SettingToggle
+            icon="chatbubble-outline"
+            title="SMS Notifications"
+            description="Receive booking updates via SMS"
+            value={smsNotifications}
+            onToggle={setSmsNotifications}
+          />
+
+          {/* Account Settings */}
+          <Text className="text-lg font-bold text-forest mb-3 mt-6">Account</Text>
+
+          <SettingLink
+            icon="person-outline"
+            title="Profile Settings"
+            description="Update your host profile"
+            onPress={() => router.push('/(tabs)/profile/edit')}
+            color="#3A5C50"
+          />
+
+          <SettingLink
+            icon="shield-checkmark-outline"
+            title="Verification Status"
+            description="Verify your identity"
+            onPress={() => router.push('/host/verification')}
+            color="#F59E0B"
+          />
+
+          <SettingLink
+            icon="card-outline"
+            title="Payout Methods"
+            description="Manage your payout preferences"
+            onPress={() => router.push('/(tabs)/wallet')}
+            color="#8B5CF6"
+          />
+
+          <SettingLink
+            icon="receipt-outline"
+            title="Tax Information"
+            description="View and update tax details"
+            onPress={() => router.push('/host/tax-reports')}
+            color="#14B8A6"
+          />
+
+          {/* Help Section */}
+          <Text className="text-lg font-bold text-forest mb-3 mt-6">Help & Support</Text>
+
+          <SettingLink
+            icon="help-circle-outline"
+            title="Help Center"
+            description="Get help with hosting"
+            onPress={() => router.push('/help')}
+            color="#6B7280"
+          />
+
+          <SettingLink
+            icon="document-text-outline"
+            title="Hosting Guidelines"
+            description="View hosting policies"
+            onPress={() => router.push('/help')}
+            color="#6B7280"
+          />
+
+          <View className="h-8" />
         </View>
-      </LinearGradient>
-
-      <View className="px-4 -mt-4">
-        {/* Booking Settings */}
-        <Text className="text-lg font-bold text-forest mb-3 mt-4">Booking Settings</Text>
-
-        <SettingToggle
-          icon="flash-outline"
-          title="Instant Booking"
-          description="Allow guests to book without approval"
-          value={instantBooking}
-          onToggle={setInstantBooking}
-        />
-
-        <SettingLink
-          icon="calendar-outline"
-          title="Availability Calendar"
-          description="Set your property availability"
-          onPress={() => {}}
-          color="#6366F1"
-        />
-
-        <SettingLink
-          icon="cash-outline"
-          title="Pricing Rules"
-          description="Configure dynamic pricing"
-          onPress={() => router.push('/host/pricing')}
-          color="#10B981"
-        />
-
-        {/* Notification Settings */}
-        <Text className="text-lg font-bold text-forest mb-3 mt-6">Notifications</Text>
-
-        <SettingToggle
-          icon="mail-outline"
-          title="Email Notifications"
-          description="Receive booking updates via email"
-          value={emailNotifications}
-          onToggle={setEmailNotifications}
-        />
-
-        <SettingToggle
-          icon="chatbubble-outline"
-          title="SMS Notifications"
-          description="Receive booking updates via SMS"
-          value={smsNotifications}
-          onToggle={setSmsNotifications}
-        />
-
-        {/* Account Settings */}
-        <Text className="text-lg font-bold text-forest mb-3 mt-6">Account</Text>
-
-        <SettingLink
-          icon="person-outline"
-          title="Profile Settings"
-          description="Update your host profile"
-          onPress={() => router.push('/(tabs)/profile/edit')}
-          color="#3A5C50"
-        />
-
-        <SettingLink
-          icon="shield-checkmark-outline"
-          title="Verification Status"
-          description="Verify your identity"
-          onPress={() => router.push('/host/verification')}
-          color="#F59E0B"
-        />
-
-        <SettingLink
-          icon="card-outline"
-          title="Payout Methods"
-          description="Manage your payout preferences"
-          onPress={() => router.push('/(tabs)/wallet')}
-          color="#8B5CF6"
-        />
-
-        <SettingLink
-          icon="receipt-outline"
-          title="Tax Information"
-          description="View and update tax details"
-          onPress={() => router.push('/host/tax-reports')}
-          color="#14B8A6"
-        />
-
-        {/* Help Section */}
-        <Text className="text-lg font-bold text-forest mb-3 mt-6">Help & Support</Text>
-
-        <SettingLink
-          icon="help-circle-outline"
-          title="Help Center"
-          description="Get help with hosting"
-          onPress={() => {}}
-          color="#6B7280"
-        />
-
-        <SettingLink
-          icon="document-text-outline"
-          title="Hosting Guidelines"
-          description="View hosting policies"
-          onPress={() => {}}
-          color="#6B7280"
-        />
-
-        <View className="h-8" />
-      </View>
       </ScrollView>
     </SafeAreaView>
   );

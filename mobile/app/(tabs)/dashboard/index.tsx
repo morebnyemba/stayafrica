@@ -172,8 +172,8 @@ export default function GuestDashboardScreen() {
 
   // Stats Card Component
   const StatCard = ({ icon, label, value, color, onPress }: StatCardProps) => (
-    <TouchableOpacity 
-      className="flex-1 bg-white rounded-2xl p-4 bg-white rounded-2xl m-1.5" 
+    <TouchableOpacity
+      className="flex-1 bg-white rounded-2xl p-4 bg-white rounded-2xl m-1.5"
       onPress={onPress}
       style={{
         shadowColor: '#122F26',
@@ -249,7 +249,7 @@ export default function GuestDashboardScreen() {
 
     return (
       <View className="flex-row items-center py-3 border-b border-sand-100">
-        <View 
+        <View
           className="w-10 h-10 rounded-full items-center justify-center mr-3"
           style={{ backgroundColor: `${getTypeColor()}20` }}
         >
@@ -266,8 +266,8 @@ export default function GuestDashboardScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-sand-100">
-      <ScrollView 
-        className="flex-1" 
+      <ScrollView
+        className="flex-1"
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
@@ -278,190 +278,190 @@ export default function GuestDashboardScreen() {
           />
         }
       >
-      {/* Sidebar */}
-      <Sidebar
-        isVisible={sidebarVisible}
-        onClose={() => setSidebarVisible(false)}
-      />
+        {/* Sidebar */}
+        <Sidebar
+          isVisible={sidebarVisible}
+          onClose={() => setSidebarVisible(false)}
+        />
 
-      {/* Header */}
-      <LinearGradient
-        colors={['#122F26', '#1d392f', '#2d4a40']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        className="px-4 pb-6"
-        style={{ paddingTop: insets.top + 12 }}
-      >
-        {/* Top Navigation */}
-        <View className="flex-row items-center justify-between mb-4">
-          <TouchableOpacity
-            onPress={() => setSidebarVisible(true)}
-            className="w-10 h-10 rounded-xl items-center justify-center"
-            style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
-          >
-            <Ionicons name="menu" size={24} color="#fff" />
-          </TouchableOpacity>
+        {/* Header */}
+        <LinearGradient
+          colors={['#122F26', '#1d392f', '#2d4a40']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          className="px-4 pb-6"
+          style={{ paddingTop: insets.top + 12 }}
+        >
+          {/* Top Navigation */}
+          <View className="flex-row items-center justify-between mb-4">
+            <TouchableOpacity
+              onPress={() => setSidebarVisible(true)}
+              className="w-10 h-10 rounded-xl items-center justify-center"
+              style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
+            >
+              <Ionicons name="menu" size={24} color="#fff" />
+            </TouchableOpacity>
 
-          <TouchableOpacity
-            onPress={() => router.push('/(tabs)/messages')}
-            className="w-10 h-10 rounded-xl items-center justify-center"
-            style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
-          >
-            <Ionicons name="notifications-outline" size={22} color="#fff" />
-          </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => router.push('/notifications')}
+              className="w-10 h-10 rounded-xl items-center justify-center"
+              style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
+            >
+              <Ionicons name="notifications-outline" size={22} color="#fff" />
+            </TouchableOpacity>
+          </View>
+
+          {/* Welcome Message */}
+          <Text className="text-2xl font-black text-white tracking-tight mb-1">
+            Welcome back, {user?.first_name}! 👋
+          </Text>
+          <Text className="text-sand-200 text-sm">
+            Here's what's happening with your travels
+          </Text>
+        </LinearGradient>
+
+        {/* Verification Banner */}
+        <VerificationBanner />
+
+        {/* Stats Grid */}
+        <View className="px-2.5 mt-4">
+          <View className="flex-row">
+            <StatCard
+              icon="calendar"
+              label="Upcoming Trips"
+              value="0"
+              color="#3B82F6"
+              onPress={() => router.push('/(tabs)/bookings')}
+            />
+            <StatCard
+              icon="heart"
+              label="Saved Properties"
+              value="0"
+              color="#EF4444"
+              onPress={() => router.push('/(tabs)/wishlist')}
+            />
+          </View>
+          <View className="flex-row">
+            <StatCard
+              icon="checkmark-circle"
+              label="Total Bookings"
+              value="0"
+              color="#10B981"
+              onPress={() => router.push('/(tabs)/bookings')}
+            />
+            <StatCard
+              icon="chatbubbles"
+              label="Messages"
+              value="0"
+              color="#8B5CF6"
+              onPress={() => router.push('/(tabs)/messages')}
+            />
+          </View>
         </View>
 
-        {/* Welcome Message */}
-        <Text className="text-2xl font-black text-white tracking-tight mb-1">
-          Welcome back, {user?.first_name}! 👋
-        </Text>
-        <Text className="text-sand-200 text-sm">
-          Here's what's happening with your travels
-        </Text>
-      </LinearGradient>
+        {/* Quick Actions */}
+        <View className="px-4 mt-6">
+          <Text className="text-lg font-bold text-forest mb-3">Quick Actions</Text>
 
-      {/* Verification Banner */}
-      <VerificationBanner />
+          <QuickAction
+            icon="compass"
+            title="Explore Properties"
+            description="Discover new places to stay"
+            onPress={() => router.push('/(tabs)/explore')}
+            color="#D9B168"
+          />
 
-      {/* Stats Grid */}
-      <View className="px-2.5 mt-4">
-        <View className="flex-row">
-          <StatCard
+          <QuickAction
             icon="calendar"
-            label="Upcoming Trips"
-            value="0"
+            title="View Bookings"
+            description="Manage your reservations"
+            onPress={() => router.push('/(tabs)/bookings')}
             color="#3B82F6"
-            onPress={() => router.push('/(tabs)/bookings')}
           />
-          <StatCard
-            icon="heart"
-            label="Saved Properties"
-            value="0"
-            color="#EF4444"
-            onPress={() => router.push('/(tabs)/wishlist')}
-          />
-        </View>
-        <View className="flex-row">
-          <StatCard
-            icon="checkmark-circle"
-            label="Total Bookings"
-            value="0"
+
+          <QuickAction
+            icon="person"
+            title="My Profile"
+            description="Update your information"
+            onPress={() => router.push('/(tabs)/profile')}
             color="#10B981"
-            onPress={() => router.push('/(tabs)/bookings')}
           />
-          <StatCard
-            icon="chatbubbles"
-            label="Messages"
-            value="0"
+
+          <QuickAction
+            icon="card"
+            title="Payment Methods"
+            description="Manage payment options"
+            onPress={() => router.push('/(tabs)/wallet')}
             color="#8B5CF6"
-            onPress={() => router.push('/(tabs)/messages')}
+          />
+
+          <QuickAction
+            icon="star"
+            title="My Reviews"
+            description="See reviews you wrote"
+            onPress={() => router.push('/reviews/my-reviews')}
+            color="#EC4899"
+          />
+
+          <QuickAction
+            icon="shield-checkmark"
+            title="Verify Identity"
+            description="Get verified for more trust"
+            onPress={() => router.push('/profile/verification')}
+            color="#6366F1"
           />
         </View>
-      </View>
 
-      {/* Quick Actions */}
-      <View className="px-4 mt-6">
-        <Text className="text-lg font-bold text-forest mb-3">Quick Actions</Text>
+        {/* Recent Activity */}
+        <View className="px-4 mt-6 mb-8">
+          <View className="flex-row items-center justify-between mb-3">
+            <Text className="text-lg font-bold text-forest">Recent Activity</Text>
+            <TouchableOpacity>
+              <Text className="text-gold font-semibold text-sm">View All</Text>
+            </TouchableOpacity>
+          </View>
 
-        <QuickAction
-          icon="compass"
-          title="Explore Properties"
-          description="Discover new places to stay"
-          onPress={() => router.push('/(tabs)/explore')}
-          color="#D9B168"
-        />
-
-        <QuickAction
-          icon="calendar"
-          title="View Bookings"
-          description="Manage your reservations"
-          onPress={() => router.push('/(tabs)/bookings')}
-          color="#3B82F6"
-        />
-
-        <QuickAction
-          icon="person"
-          title="My Profile"
-          description="Update your information"
-          onPress={() => router.push('/(tabs)/profile')}
-          color="#10B981"
-        />
-
-        <QuickAction
-          icon="card"
-          title="Payment Methods"
-          description="Manage payment options"
-          onPress={() => router.push('/(tabs)/wallet')}
-          color="#8B5CF6"
-        />
-
-        <QuickAction
-          icon="star"
-          title="My Reviews"
-          description="See reviews you wrote"
-          onPress={() => router.push('/reviews/my-reviews')}
-          color="#EC4899"
-        />
-
-        <QuickAction
-          icon="shield-checkmark"
-          title="Verify Identity"
-          description="Get verified for more trust"
-          onPress={() => router.push('/profile/verification')}
-          color="#6366F1"
-        />
-      </View>
-
-      {/* Recent Activity */}
-      <View className="px-4 mt-6 mb-8">
-        <View className="flex-row items-center justify-between mb-3">
-          <Text className="text-lg font-bold text-forest">Recent Activity</Text>
-          <TouchableOpacity>
-            <Text className="text-gold font-semibold text-sm">View All</Text>
-          </TouchableOpacity>
+          <View className="bg-white rounded-2xl p-4 bg-white rounded-2xl" style={{
+            shadowColor: '#122F26',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.08,
+            shadowRadius: 8,
+            elevation: 4,
+          }}>
+            {/* Empty state */}
+            <View className="items-center py-6">
+              <View className="bg-sand-100 rounded-full p-4 bg-white rounded-2xl mb-3">
+                <Ionicons name="time-outline" size={32} color="#94a3b8" />
+              </View>
+              <Text className="text-forest font-semibold">No Recent Activity</Text>
+              <Text className="text-moss text-sm text-center mt-1 px-4">
+                Your bookings, reviews, and activity will appear here
+              </Text>
+            </View>
+          </View>
         </View>
 
-        <View className="bg-white rounded-2xl p-4 bg-white rounded-2xl" style={{
-          shadowColor: '#122F26',
+        {/* Tips Section */}
+        <View className="mx-4 mb-8 rounded-2xl overflow-hidden" style={{
+          shadowColor: '#3B82F6',
           shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.08,
+          shadowOpacity: 0.15,
           shadowRadius: 8,
           elevation: 4,
         }}>
-          {/* Empty state */}
-          <View className="items-center py-6">
-            <View className="bg-sand-100 rounded-full p-4 bg-white rounded-2xl mb-3">
-              <Ionicons name="time-outline" size={32} color="#94a3b8" />
+          <LinearGradient
+            colors={['#DBEAFE', '#BFDBFE']}
+            className="p-4 bg-white rounded-2xl"
+          >
+            <View className="flex-row items-center mb-2">
+              <Ionicons name="bulb" size={20} color="#3B82F6" />
+              <Text className="text-base font-semibold text-blue-900 ml-2">Travel Tip</Text>
             </View>
-            <Text className="text-forest font-semibold">No Recent Activity</Text>
-            <Text className="text-moss text-sm text-center mt-1 px-4">
-              Your bookings, reviews, and activity will appear here
+            <Text className="text-sm text-blue-800">
+              Complete your profile and verify your identity to unlock faster bookings and exclusive deals!
             </Text>
-          </View>
+          </LinearGradient>
         </View>
-      </View>
-
-      {/* Tips Section */}
-      <View className="mx-4 mb-8 rounded-2xl overflow-hidden" style={{
-        shadowColor: '#3B82F6',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.15,
-        shadowRadius: 8,
-        elevation: 4,
-      }}>
-        <LinearGradient
-          colors={['#DBEAFE', '#BFDBFE']}
-          className="p-4 bg-white rounded-2xl"
-        >
-          <View className="flex-row items-center mb-2">
-            <Ionicons name="bulb" size={20} color="#3B82F6" />
-            <Text className="text-base font-semibold text-blue-900 ml-2">Travel Tip</Text>
-          </View>
-          <Text className="text-sm text-blue-800">
-            Complete your profile and verify your identity to unlock faster bookings and exclusive deals!
-          </Text>
-        </LinearGradient>
-      </View>
       </ScrollView>
     </SafeAreaView>
   );

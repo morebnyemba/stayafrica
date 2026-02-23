@@ -136,7 +136,7 @@ function RootLayoutContent() {
   useEffect(() => {
     if (!isLoading && !checkingOnboarding && fontsLoaded) {
       SplashScreen.hideAsync();
-      
+
       // Show onboarding for first-time users
       if (hasSeenOnboarding === false) {
         router.replace('/(onboarding)/welcome');
@@ -162,6 +162,10 @@ function RootLayoutContent() {
       <Stack.Screen name="(tabs)" options={{ animation: 'none' }} />
       <Stack.Screen name="host" options={{ animation: 'fade' }} />
       <Stack.Screen name="reviews" options={{ animation: 'fade' }} />
+      <Stack.Screen name="booking" options={{ animation: 'slide_from_right' }} />
+      <Stack.Screen name="experiences" options={{ animation: 'slide_from_right' }} />
+      <Stack.Screen name="notifications" options={{ animation: 'slide_from_right' }} />
+      <Stack.Screen name="help" options={{ animation: 'slide_from_right' }} />
     </Stack>
   );
 }
