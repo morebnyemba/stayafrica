@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, ChevronDown, ChevronRight, Mail, MessageSquare, HelpCircle, Shield, CreditCard, Home, Calendar, Users, MapPin, ExternalLink } from 'lucide-react';
+import { Search, ChevronDown, ChevronRight, Mail, MessageSquare, HelpCircle, Shield, CreditCard, Home, Calendar } from 'lucide-react';
 
 interface FaqItem {
     question: string;
