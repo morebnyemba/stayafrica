@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { apiClient } from '@/services/api-client';
-import { Bell, BellOff, Check, CheckCheck, Clock, AlertCircle, Home, Calendar, CreditCard, MessageSquare, Star, Trash2 } from 'lucide-react';
+import { Bell, BellOff, CheckCheck, Clock, Home, Calendar, CreditCard, MessageSquare, Star } from 'lucide-react';
 
 interface Notification {
     id: string;
@@ -121,8 +121,8 @@ export function NotificationsContent() {
                 <button
                     onClick={() => setFilter('all')}
                     className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${filter === 'all'
-                            ? 'bg-white dark:bg-primary-700 text-primary-900 dark:text-sand-100 shadow-sm'
-                            : 'text-primary-500 dark:text-sand-400 hover:text-primary-700'
+                        ? 'bg-white dark:bg-primary-700 text-primary-900 dark:text-sand-100 shadow-sm'
+                        : 'text-primary-500 dark:text-sand-400 hover:text-primary-700'
                         }`}
                 >
                     All
@@ -130,8 +130,8 @@ export function NotificationsContent() {
                 <button
                     onClick={() => setFilter('unread')}
                     className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${filter === 'unread'
-                            ? 'bg-white dark:bg-primary-700 text-primary-900 dark:text-sand-100 shadow-sm'
-                            : 'text-primary-500 dark:text-sand-400 hover:text-primary-700'
+                        ? 'bg-white dark:bg-primary-700 text-primary-900 dark:text-sand-100 shadow-sm'
+                        : 'text-primary-500 dark:text-sand-400 hover:text-primary-700'
                         }`}
                 >
                     Unread {unreadCount > 0 && `(${unreadCount})`}
@@ -168,14 +168,14 @@ export function NotificationsContent() {
                             key={notification.id}
                             onClick={() => !notification.is_read && markAsRead(notification.id)}
                             className={`w-full text-left flex gap-4 p-4 rounded-xl transition-all duration-200 ${notification.is_read
-                                    ? 'bg-white dark:bg-primary-800/30 hover:bg-sand-50 dark:hover:bg-primary-800/50'
-                                    : 'bg-accent-50/50 dark:bg-accent-900/20 hover:bg-accent-50 dark:hover:bg-accent-900/30 border-l-4 border-accent-500'
+                                ? 'bg-white dark:bg-primary-800/30 hover:bg-sand-50 dark:hover:bg-primary-800/50'
+                                : 'bg-accent-50/50 dark:bg-accent-900/20 hover:bg-accent-50 dark:hover:bg-accent-900/30 border-l-4 border-accent-500'
                                 }`}
                         >
                             {/* Icon */}
                             <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${notification.is_read
-                                    ? 'bg-sand-200 dark:bg-primary-700 text-primary-500 dark:text-sand-400'
-                                    : 'bg-accent-100 dark:bg-accent-900/40 text-accent-600 dark:text-accent-400'
+                                ? 'bg-sand-200 dark:bg-primary-700 text-primary-500 dark:text-sand-400'
+                                : 'bg-accent-100 dark:bg-accent-900/40 text-accent-600 dark:text-accent-400'
                                 }`}>
                                 {getNotificationIcon(notification.notification_type)}
                             </div>
@@ -183,8 +183,8 @@ export function NotificationsContent() {
                             {/* Content */}
                             <div className="flex-1 min-w-0">
                                 <p className={`text-sm ${notification.is_read
-                                        ? 'text-primary-700 dark:text-sand-300'
-                                        : 'text-primary-900 dark:text-sand-100 font-semibold'
+                                    ? 'text-primary-700 dark:text-sand-300'
+                                    : 'text-primary-900 dark:text-sand-100 font-semibold'
                                     }`}>
                                     {notification.title}
                                 </p>

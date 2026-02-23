@@ -43,7 +43,6 @@ export function HostCalendarContent() {
     const [events, setEvents] = useState<CalendarEvent[]>([]);
     const [properties, setProperties] = useState<Property[]>([]);
     const [selectedProperty, setSelectedProperty] = useState<string>('all');
-    const [loading, setLoading] = useState(true);
     const [selectedDay, setSelectedDay] = useState<number | null>(null);
 
     const year = currentDate.getFullYear();
@@ -51,7 +50,6 @@ export function HostCalendarContent() {
 
     const fetchCalendarData = useCallback(async () => {
         try {
-            setLoading(true);
             const startDate = new Date(year, month, 1).toISOString().split('T')[0];
             const endDate = new Date(year, month + 1, 0).toISOString().split('T')[0];
 
@@ -82,8 +80,6 @@ export function HostCalendarContent() {
             }
         } catch (error) {
             console.error('Failed to fetch calendar data:', error);
-        } finally {
-            setLoading(false);
         }
     }, [year, month, selectedProperty]);
 
@@ -177,15 +173,15 @@ export function HostCalendarContent() {
                                     key={day}
                                     onClick={() => setSelectedDay(day)}
                                     className={`h-14 rounded-lg flex flex-col items-center justify-start pt-1 transition-all relative ${isSelected
-                                            ? 'bg-accent-100 dark:bg-accent-900/30 ring-2 ring-accent-500'
-                                            : isToday
-                                                ? 'bg-accent-50 dark:bg-accent-900/10'
-                                                : 'hover:bg-sand-50 dark:hover:bg-primary-700/50'
+                                        ? 'bg-accent-100 dark:bg-accent-900/30 ring-2 ring-accent-500'
+                                        : isToday
+                                            ? 'bg-accent-50 dark:bg-accent-900/10'
+                                            : 'hover:bg-sand-50 dark:hover:bg-primary-700/50'
                                         }`}
                                 >
                                     <span className={`text-sm ${isToday
-                                            ? 'font-bold text-accent-600 dark:text-accent-400'
-                                            : 'text-primary-700 dark:text-sand-300'
+                                        ? 'font-bold text-accent-600 dark:text-accent-400'
+                                        : 'text-primary-700 dark:text-sand-300'
                                         }`}>
                                         {day}
                                     </span>
@@ -195,9 +191,9 @@ export function HostCalendarContent() {
                                                 <div
                                                     key={idx}
                                                     className={`w-1.5 h-1.5 rounded-full ${event.status === 'confirmed' ? 'bg-green-500'
-                                                            : event.status === 'pending' ? 'bg-yellow-500'
-                                                                : event.status === 'completed' ? 'bg-blue-500'
-                                                                    : 'bg-red-500'
+                                                        : event.status === 'pending' ? 'bg-yellow-500'
+                                                            : event.status === 'completed' ? 'bg-blue-500'
+                                                                : 'bg-red-500'
                                                         }`}
                                                 />
                                             ))}
@@ -213,9 +209,9 @@ export function HostCalendarContent() {
                         {['confirmed', 'pending', 'completed', 'cancelled'].map(status => (
                             <div key={status} className="flex items-center gap-1.5">
                                 <div className={`w-2.5 h-2.5 rounded-full ${status === 'confirmed' ? 'bg-green-500'
-                                        : status === 'pending' ? 'bg-yellow-500'
-                                            : status === 'completed' ? 'bg-blue-500'
-                                                : 'bg-red-500'
+                                    : status === 'pending' ? 'bg-yellow-500'
+                                        : status === 'completed' ? 'bg-blue-500'
+                                            : 'bg-red-500'
                                     }`} />
                                 <span className="text-xs text-primary-500 dark:text-sand-400 capitalize">{status}</span>
                             </div>
