@@ -3,8 +3,13 @@ Tests for Property, Amenity, PropertyImage, and SavedProperty models.
 """
 import pytest
 from decimal import Decimal
-from django.contrib.gis.geos import Point
 from apps.properties.models import Property, Amenity, PropertyImage, SavedProperty
+
+try:
+    from django.contrib.gis.geos import Point
+    HAS_GIS = True
+except Exception:
+    HAS_GIS = False
 
 
 @pytest.mark.django_db
@@ -48,6 +53,7 @@ class TestPropertyModel:
             ids.add(prop.id)
         assert len(ids) == 5  # All unique
 
+    @pytest.mark.skipif(not HAS_GIS, reason='GDAL not available')
     def test_geospatial_location(self, property_factory):
         prop = property_factory()
         assert isinstance(prop.location, Point)
