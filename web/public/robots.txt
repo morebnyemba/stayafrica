@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /dashboard/
+Disallow: /profile/
+Disallow: /messages/
+Disallow: /bookings/
+Disallow: /host/dashboard/
+Disallow: /host/properties/
+Disallow: /host/earnings/
+Disallow: /host/settings/
+
+Sitemap: https://stayafrica.app/sitemap.xml
+
+# Crawl-delay for responsible crawling
+Crawl-delay: 1

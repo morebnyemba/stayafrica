@@ -255,7 +255,7 @@ REST_FRAMEWORK = {
     'DEFAULT_THROTTLE_RATES': {
         'anon': '100/day',   # Anonymous users: 100 requests per day
         'user': '1000/day',  # Authenticated users: 1000 requests per day
-        'login': '10/minute',  # Stricter scope for login to prevent brute force
+        'login': '5/minute',  # Stricter scope for login to prevent brute force
     },
     'EXCEPTION_HANDLER': 'utils.exception_handlers.custom_exception_handler',
 }
@@ -267,6 +267,9 @@ SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=int(os.getenv('JWT_REFRESH_EXPIRATION_DAYS', '7'))),
     'ALGORITHM': os.getenv('JWT_ALGORITHM', 'HS256'),
     'SIGNING_KEY': os.getenv('JWT_SECRET_KEY', SECRET_KEY),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'UPDATE_LAST_LOGIN': True,
 }
 
 # CORS Configuration
@@ -330,6 +333,8 @@ if not DEBUG:
     SECURE_CONTENT_TYPE_NOSNIFF = True
     X_FRAME_OPTIONS = 'DENY'
     SESSION_COOKIE_HTTPONLY = True
+    CSRF_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_AGE = 86400  # 24 hours
 
 # Celery Configuration
 CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379/0')
@@ -492,13 +497,6 @@ CACHES = {
 # Use Redis for session storage (faster than database)
 SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
 SESSION_CACHE_ALIAS = 'session'
-#         'OPTIONS': {
-#             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-#         },
-#         'KEY_PREFIX': 'stayafrica',
-#         'TIMEOUT': 300,
-#     }
-# }
 
 # Channels Layer Configuration (WebSockets)
 # Configuration for real-time message passing between server instances

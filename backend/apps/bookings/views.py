@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from apps.bookings.models import Booking
 from apps.bookings.serializers import BookingSerializer
-from services.payment_gateway import PaymentGatewayService
+from services.payment_gateway_enhanced import PaymentGatewayService
 from utils.validators import validate_booking_dates
 from utils.helpers import is_booking_date_available, calculate_nights, calculate_booking_total
 from utils.decorators import api_ratelimit, log_action

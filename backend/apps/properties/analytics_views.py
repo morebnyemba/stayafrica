@@ -22,7 +22,7 @@ from apps.properties.analytics_serializers import (
     PerformanceBenchmarkSerializer,
     AnalyticsDashboardSerializer
 )
-from services.host_analytics_service import HostAnalyticsService
+from services.host_analytics_advanced import HostAnalyticsService
 import logging
 
 logger = logging.getLogger(__name__)
