@@ -26,6 +26,9 @@ class PaymentGatewayService:
         'International': ['stripe', 'paypal', 'flutterwave'],
     }
     
+    # Globally available providers that should show up regardless of region
+    GLOBAL_PROVIDERS = ['stripe', 'paypal']
+    
     PAYMENT_METHODS = {
         'paynow': 'Paynow (Ecocash/Visa)',
         'paystack': 'Paystack',
@@ -74,7 +77,47 @@ class PaymentGatewayService:
     
     def get_available_providers(self, user_country: str) -> list:
         """Get available payment providers for a specific country"""
-        return self.REGIONAL_PROVIDERS.get(user_country, self.REGIONAL_PROVIDERS['International'])
+        # Normalize country for better matching
+        country = (user_country or '').strip().title()
+        
+        # Get regional providers, fallback to International if not found
+        providers = self.REGIONAL_PROVIDERS.get(country)
+        if not providers:
+            # Try case-insensitive lookup
+            for key, val in self.REGIONAL_PROVIDERS.items():
+                if key.lower() == country.lower():
+                    providers = val
+                    break
+        
+        if not providers:
+            providers = self.REGIONAL_PROVIDERS['International']
+            
+        # Ensure global providers are always included
+        for global_provider in self.GLOBAL_PROVIDERS:
+            if global_provider not in providers:
+                providers.append(global_provider)
+                
+        # Only return providers that are actually configured in the admin panel
+        configured_providers = []
+        for provider in providers:
+            if provider == 'stripe' and self.config.stripe_secret_key:
+                configured_providers.append(provider)
+            elif provider == 'paynow' and getattr(self.config, 'paynow_integration_id', ''):
+                configured_providers.append(provider)
+            elif provider == 'payfast' and getattr(self.config, 'payfast_merchant_id', ''):
+                configured_providers.append(provider)
+            elif provider == 'ozow' and getattr(self.config, 'ozow_site_code', ''):
+                configured_providers.append(provider)
+            elif provider == 'flutterwave' and getattr(self.config, 'flutterwave_secret_key', ''):
+                configured_providers.append(provider)
+            elif provider == 'paystack' and getattr(self.config, 'paystack_secret_key', ''):
+                configured_providers.append(provider)
+            elif provider == 'paypal' and getattr(self.config, 'paypal_client_id', ''):
+                configured_providers.append(provider)
+            elif provider in ['cash_on_arrival', 'mpesa']: # Assuming these require no API keys for now
+                configured_providers.append(provider)
+                
+        return configured_providers
     
     def get_provider_label(self, provider: str) -> str:
         """Get display name for provider"""
