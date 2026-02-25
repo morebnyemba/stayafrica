@@ -23,18 +23,18 @@ class SystemConfigurationAdmin(UnfoldModelAdmin):
         }),
         (_('🇿🇼 Paynow (Zimbabwe)'), {
             'fields': ('paynow_integration_id', 'paynow_integration_key', 'paynow_webhook_secret'),
-            'classes': ['collapse', 'tab'],
+            'classes': ['tab'],
             'description': 'Paynow payment gateway configuration for Zimbabwe',
         }),
         (_('🇿🇦 PayFast (South Africa)'), {
             'fields': ('payfast_merchant_id', 'payfast_merchant_key', 'payfast_passphrase', 
                       'payfast_webhook_secret'),
-            'classes': ['collapse', 'tab'],
+            'classes': ['tab'],
             'description': 'PayFast payment gateway configuration for South Africa',
         }),
         (_('💳 Stripe (International)'), {
             'fields': ('stripe_secret_key', 'stripe_publishable_key', 'stripe_webhook_secret'),
-            'classes': ['collapse', 'tab'],
+            'classes': ['tab'],
             'description': 'Stripe payment gateway configuration for international payments',
         }),
         (_('📋 Business Rules'), {
@@ -45,17 +45,17 @@ class SystemConfigurationAdmin(UnfoldModelAdmin):
         }),
         (_('✉️ Email Settings'), {
             'fields': ('admin_email', 'support_email'),
-            'classes': ['collapse', 'tab'],
+            'classes': ['tab'],
             'description': 'Configure email addresses for system notifications',
         }),
         (_('🔧 Maintenance'), {
             'fields': ('maintenance_mode', 'maintenance_message'),
-            'classes': ['collapse', 'tab'],
+            'classes': ['tab'],
             'description': 'Enable maintenance mode to temporarily disable the site',
         }),
         (_('⏰ Timestamps'), {
             'fields': ('created_at', 'updated_at'),
-            'classes': ['collapse', 'tab'],
+            'classes': ['tab'],
         }),
     )
     
