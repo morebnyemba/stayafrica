@@ -37,6 +37,26 @@ class SystemConfigurationAdmin(UnfoldModelAdmin):
             'classes': ['tab'],
             'description': 'Stripe payment gateway configuration for international payments',
         }),
+        (_('🇿🇦 Ozow (South Africa)'), {
+            'fields': ('ozow_site_code', 'ozow_private_key', 'ozow_api_key'),
+            'classes': ['tab'],
+            'description': 'Ozow automated EFT payment gateway configuration for South Africa',
+        }),
+        (_('🌍 Flutterwave (Pan-African)'), {
+            'fields': ('flutterwave_public_key', 'flutterwave_secret_key', 'flutterwave_encryption_key'),
+            'classes': ['tab'],
+            'description': 'Flutterwave payment gateway configuration for multiple African countries',
+        }),
+        (_('🇳🇬 Paystack (Africa)'), {
+            'fields': ('paystack_public_key', 'paystack_secret_key'),
+            'classes': ['tab'],
+            'description': 'Paystack payment gateway configuration for multiple African countries',
+        }),
+        (_('🌐 PayPal (International)'), {
+            'fields': ('paypal_client_id', 'paypal_secret'),
+            'classes': ['tab'],
+            'description': 'PayPal payment gateway configuration for international payments',
+        }),
         (_('📋 Business Rules'), {
             'fields': ('max_advance_booking_days', 'max_stay_duration_days', 
                       'review_window_days', 'review_edit_window_days'),
@@ -86,11 +106,6 @@ class SystemConfigurationAdmin(UnfoldModelAdmin):
     @display(description=_('System Configuration Summary'))
     def configuration_summary(self, obj):
         if obj and obj.id:
-            # Payment gateways status
-            paynow_status = '✓' if obj.paynow_integration_id else '✗'
-            payfast_status = '✓' if obj.payfast_merchant_id else '✗'
-            stripe_status = '✓' if obj.stripe_secret_key else '✗'
-            
             summary = f"""
             <div style="padding: 15px; background: #F4F1EA; border-left: 4px solid #D9B168; 
                         border-radius: 6px; margin-bottom: 15px;">
@@ -113,9 +128,13 @@ class SystemConfigurationAdmin(UnfoldModelAdmin):
                                 border-left: 3px solid #D9B168;">
                         <strong style="color: #122F26;">💳 Payment Gateways</strong><br/>
                         <span style="color: #3A5C50;">
-                            Paynow (ZW): {paynow_status}<br/>
-                            PayFast (ZA): {payfast_status}<br/>
-                            Stripe (Intl): {stripe_status}
+                            Paynow (ZW): {'✓' if obj.paynow_integration_id else '✗'}<br/>
+                            PayFast (ZA): {'✓' if obj.payfast_merchant_id else '✗'}<br/>
+                            Ozow (ZA): {'✓' if getattr(obj, 'ozow_site_code', '') else '✗'}<br/>
+                            Stripe (Intl): {'✓' if obj.stripe_secret_key else '✗'}<br/>
+                            Flutterwave: {'✓' if getattr(obj, 'flutterwave_secret_key', '') else '✗'}<br/>
+                            Paystack: {'✓' if getattr(obj, 'paystack_secret_key', '') else '✗'}<br/>
+                            PayPal: {'✓' if getattr(obj, 'paypal_client_id', '') else '✗'}
                         </span>
                     </div>
                     

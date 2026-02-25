@@ -85,6 +85,61 @@ class SystemConfiguration(models.Model):
         help_text="Stripe Webhook Secret"
     )
     
+    # Other Gateways Configuration
+    ozow_site_code = models.CharField(
+        max_length=255, 
+        blank=True,
+        help_text="Ozow Site Code"
+    )
+    ozow_private_key = models.CharField(
+        max_length=255, 
+        blank=True,
+        help_text="Ozow Private Key"
+    )
+    ozow_api_key = models.CharField(
+        max_length=255, 
+        blank=True,
+        help_text="Ozow API Key"
+    )
+    
+    flutterwave_public_key = models.CharField(
+        max_length=255, 
+        blank=True,
+        help_text="Flutterwave Public Key"
+    )
+    flutterwave_secret_key = models.CharField(
+        max_length=255, 
+        blank=True,
+        help_text="Flutterwave Secret Key"
+    )
+    flutterwave_encryption_key = models.CharField(
+        max_length=255, 
+        blank=True,
+        help_text="Flutterwave Encryption Key"
+    )
+    
+    paystack_public_key = models.CharField(
+        max_length=255, 
+        blank=True,
+        help_text="Paystack Public Key"
+    )
+    paystack_secret_key = models.CharField(
+        max_length=255, 
+        blank=True,
+        help_text="Paystack Secret Key"
+    )
+    
+    paypal_client_id = models.CharField(
+        max_length=255, 
+        blank=True,
+        help_text="PayPal Client ID"
+    )
+    paypal_secret = models.CharField(
+        max_length=255, 
+        blank=True,
+        help_text="PayPal Secret Key"
+    )
+    
     # Business Rules
     max_advance_booking_days = models.IntegerField(
         default=365,
