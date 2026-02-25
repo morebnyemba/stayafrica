@@ -42,6 +42,16 @@ class SystemConfiguration(models.Model):
         blank=True,
         help_text="Paynow Integration Key"
     )
+    paynow_return_url = models.CharField(
+        max_length=255, 
+        blank=True,
+        help_text="Paynow Return URL (Optional. Defaults to SITE_URL/payment/return)"
+    )
+    paynow_result_url = models.CharField(
+        max_length=255, 
+        blank=True,
+        help_text="Paynow Result URL for webhooks (Optional. Defaults to backend API webhook)"
+    )
     
     payfast_merchant_id = models.CharField(
         max_length=255, 

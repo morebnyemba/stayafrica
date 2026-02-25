@@ -22,7 +22,10 @@ class SystemConfigurationAdmin(UnfoldModelAdmin):
             'classes': ['tab'],
         }),
         (_('🇿🇼 Paynow (Zimbabwe)'), {
-            'fields': ('paynow_integration_id', 'paynow_integration_key'),
+            'fields': (
+                'paynow_integration_id', 'paynow_integration_key', 
+                'paynow_return_url', 'paynow_result_url'
+            ),
             'classes': ['tab'],
             'description': 'Paynow payment gateway configuration for Zimbabwe',
         }),
