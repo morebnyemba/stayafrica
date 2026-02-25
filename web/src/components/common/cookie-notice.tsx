@@ -59,7 +59,7 @@ export function CookieNotice() {
 
                 <p className="text-sm text-primary-600 dark:text-sand-400 mb-5 leading-relaxed">
                     We use cookies to enhance your browsing experience, serve personalized content, and analyze our traffic. By clicking &quot;Accept All&quot;, you consent to our use of cookies.
-                    <Link href="/cookies" className="text-accent-600 dark:text-accent-400 hover:underline ml-1 font-medium">
+                    <Link href="/cookies" className="text-secondary-600 dark:text-secondary-400 hover:underline ml-1 font-medium">
                         Read more
                     </Link>
                 </p>
@@ -67,7 +67,7 @@ export function CookieNotice() {
                 <div className="flex flex-col sm:flex-row gap-3">
                     <button
                         onClick={() => hide('accepted')}
-                        className="flex-1 px-4 py-2.5 bg-accent-600 hover:bg-accent-700 text-white rounded-xl text-sm font-semibold transition-colors"
+                        className="flex-1 px-4 py-2.5 bg-secondary-600 hover:bg-secondary-700 text-primary-900 rounded-xl text-sm font-semibold transition-colors"
                     >
                         Accept All
                     </button>

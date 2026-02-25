@@ -7,7 +7,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 
 export function HostContent() {
-  const { user, isAuthenticated, upgradeToHost } = useAuth();
+  const { user, isAuthenticated, upgradeToHost, switchProfile } = useAuth();
   const router = useRouter();
   const [hostLoading, setHostLoading] = useState(false);
 
@@ -17,8 +17,19 @@ export function HostContent() {
       return;
     }
 
-    if (user?.role === 'host') {
-      router.push('/host/dashboard');
+    if (user?.role === 'host' || user?.role === 'admin') {
+      // Already a host — switch to host mode and go to dashboard
+      try {
+        setHostLoading(true);
+        if (user?.active_profile !== 'host') {
+          await switchProfile('host');
+        }
+        router.push('/host/dashboard');
+      } catch {
+        router.push('/host/dashboard');
+      } finally {
+        setHostLoading(false);
+      }
       return;
     }
 
@@ -243,8 +254,15 @@ export function HostContent() {
           <p className="text-lg text-primary-600 dark:text-sand-200 mb-8 max-w-2xl mx-auto">
             Join StayAfrica today and start earning from your property.
           </p>
-          <Button variant="primary" size="lg" className="text-lg font-semibold px-10 py-4">
-            List Your Property
+          <Button
+            variant="primary"
+            size="lg"
+            className="text-lg font-semibold px-10 py-4"
+            onClick={handleGetStarted}
+            disabled={hostLoading}
+          >
+            {hostLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : null}
+            <span>List Your Property</span>
           </Button>
         </div>
       </div>
