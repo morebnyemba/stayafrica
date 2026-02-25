@@ -396,6 +396,58 @@ class UserViewSet(viewsets.ModelViewSet):
             'refresh': str(refresh),
         }, status=status.HTTP_200_OK)
 
+    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
+    @log_action('switch_profile')
+    def switch_profile(self, request):
+        """Switch active profile between 'guest' and 'host' mode.
+        Only users with role='host' or role='admin' can switch to host mode.
+        """
+        user = request.user
+        target_profile = request.data.get('profile')
+
+        if target_profile not in ['guest', 'host']:
+            return Response(
+                {'error': "Invalid profile. Must be 'guest' or 'host'."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Security check: Only actual hosts/admins can activate host mode
+        if target_profile == 'host' and user.role not in ['host', 'admin']:
+            return Response(
+                {'error': 'You must be a registered host to switch to host mode. Please upgrade your account first.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        if user.active_profile == target_profile:
+            return Response({'status': 'already_in_mode', 'active_profile': user.active_profile})
+
+        with transaction.atomic():
+            user.active_profile = target_profile
+            user.save(update_fields=['active_profile'])
+
+            AuditLoggerService.log_action(
+                user=user,
+                action='switch_profile',
+                model=User,
+                object_id=user.id,
+                changes={'active_profile': target_profile}
+            )
+
+        # Issue fresh tokens so the new active_profile claim is reflected immediately
+        refresh = RefreshToken.for_user(user)
+        access = refresh.access_token
+
+        profile = UserProfileSerializer(user).data
+
+        logger.info(f"User {user.id} switched active_profile to {target_profile}")
+        return Response({
+            'status': 'switched',
+            'active_profile': target_profile,
+            'user': profile,
+            'access': str(access),
+            'refresh': str(refresh),
+        }, status=status.HTTP_200_OK)
+
 
 class UserPreferenceViewSet(viewsets.ModelViewSet):
     """Manage user preferences for personalized recommendations"""

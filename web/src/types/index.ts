@@ -6,6 +6,7 @@ export interface User {
   first_name: string;
   last_name: string;
   role: 'guest' | 'host' | 'admin';
+  active_profile: 'guest' | 'host';
   is_staff?: boolean;
   profile_picture?: string;
   country_of_residence: string;

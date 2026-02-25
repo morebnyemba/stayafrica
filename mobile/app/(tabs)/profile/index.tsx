@@ -9,10 +9,28 @@ import { Sidebar } from '@/components/common/Sidebar';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function ProfileScreen() {
-  const { user, logout, isAuthenticated } = useAuth();
+  const { user, logout, isAuthenticated, switchProfile } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const [sidebarVisible, setSidebarVisible] = useState(false);
+  const [switchLoading, setSwitchLoading] = useState(false);
+
+  const isHost = user?.role === 'host' || user?.role === 'admin';
+  const activeProfile = user?.active_profile ?? 'guest';
+
+  const handleSwitchProfile = async (target: 'guest' | 'host') => {
+    try {
+      setSwitchLoading(true);
+      await switchProfile(target);
+      if (target === 'host') {
+        router.push('/(tabs)/host');
+      }
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'Failed to switch profile');
+    } finally {
+      setSwitchLoading(false);
+    }
+  };
 
   if (!isAuthenticated) {
     return (
@@ -22,7 +40,7 @@ export default function ProfileScreen() {
           isVisible={sidebarVisible}
           onClose={() => setSidebarVisible(false)}
         />
-        
+
         {/* Header */}
         <LinearGradient
           colors={['#122F26', '#1d392f']}
@@ -40,7 +58,7 @@ export default function ProfileScreen() {
               <Ionicons name="menu" size={24} color="#fff" />
             </TouchableOpacity>
           </View>
-          
+
           <View className="px-4">
             <Text className="text-3xl font-black text-white tracking-tight">
               Profile
@@ -281,7 +299,7 @@ export default function ProfileScreen() {
               <Ionicons name="menu" size={24} color="#fff" />
             </TouchableOpacity>
           </View>
-          
+
           <View className="px-4">
             {/* Avatar */}
             <View className="items-center mt-4">
@@ -318,237 +336,314 @@ export default function ProfileScreen() {
           </View>
         </LinearGradient>
 
-      {/* Verification Banner */}
-      <VerificationBanner />
+        {/* Verification Banner */}
+        <VerificationBanner />
 
-      {/* Quick Stats */}
-      <QuickStats />
+        {/* Quick Stats */}
+        <QuickStats />
 
-      {/* Account Information */}
-      <View className="px-4 mt-6">
-        <Text className="text-lg font-bold text-forest mb-4 px-2">Account Information</Text>
-        
-        <MenuItem
-          iconName="person"
-          label="Full Name"
-          value={`${user?.first_name} ${user?.last_name}`}
-          gradient={false}
-        />
-        <MenuItem
-          iconName="call"
-          label="Phone Number"
-          value={user?.phone_number || 'Not provided'}
-          gradient={false}
-        />
-        <MenuItem
-          iconName="location"
-          label="Country"
-          value={user?.country_of_residence || 'Not provided'}
-          gradient={false}
-        />
-      </View>
+        {/* Account Information */}
+        <View className="px-4 mt-6">
+          <Text className="text-lg font-bold text-forest mb-4 px-2">Account Information</Text>
 
-      {/* Quick Actions */}
-      <View className="px-4 mt-6">
-        <Text className="text-lg font-bold text-forest mb-4 px-2">Quick Actions</Text>
-        
-        <View className="flex-row flex-wrap">
-          <TouchableOpacity 
-            className="w-1/3 p-2"
-            onPress={() => router.push('/(tabs)/bookings')}
-          >
-            <View
-              className="p-4 bg-white rounded-2xl items-center"
-              style={{
-                shadowColor: '#122F26',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.05,
-                shadowRadius: 4,
-                elevation: 2,
-              }}
+          <MenuItem
+            iconName="person"
+            label="Full Name"
+            value={`${user?.first_name} ${user?.last_name}`}
+            gradient={false}
+          />
+          <MenuItem
+            iconName="call"
+            label="Phone Number"
+            value={user?.phone_number || 'Not provided'}
+            gradient={false}
+          />
+          <MenuItem
+            iconName="location"
+            label="Country"
+            value={user?.country_of_residence || 'Not provided'}
+            gradient={false}
+          />
+        </View>
+
+        {/* Quick Actions */}
+        <View className="px-4 mt-6">
+          <Text className="text-lg font-bold text-forest mb-4 px-2">Quick Actions</Text>
+
+          <View className="flex-row flex-wrap">
+            <TouchableOpacity
+              className="w-1/3 p-2"
+              onPress={() => router.push('/(tabs)/bookings')}
             >
-              <View className="bg-blue-100 rounded-full p-3 mb-2">
-                <Ionicons name="calendar" size={24} color="#3B82F6" />
+              <View
+                className="p-4 bg-white rounded-2xl items-center"
+                style={{
+                  shadowColor: '#122F26',
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.05,
+                  shadowRadius: 4,
+                  elevation: 2,
+                }}
+              >
+                <View className="bg-blue-100 rounded-full p-3 mb-2">
+                  <Ionicons name="calendar" size={24} color="#3B82F6" />
+                </View>
+                <Text className="text-forest font-semibold text-xs text-center">Bookings</Text>
               </View>
-              <Text className="text-forest font-semibold text-xs text-center">Bookings</Text>
-            </View>
-          </TouchableOpacity>
+            </TouchableOpacity>
 
-          <TouchableOpacity 
-            className="w-1/3 p-2"
-            onPress={() => router.push('/(tabs)/wishlist')}
-          >
-            <View
-              className="p-4 bg-white rounded-2xl items-center"
-              style={{
-                shadowColor: '#122F26',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.05,
-                shadowRadius: 4,
-                elevation: 2,
-              }}
+            <TouchableOpacity
+              className="w-1/3 p-2"
+              onPress={() => router.push('/(tabs)/wishlist')}
             >
-              <View className="bg-red-100 rounded-full p-3 mb-2">
-                <Ionicons name="heart" size={24} color="#EF4444" />
+              <View
+                className="p-4 bg-white rounded-2xl items-center"
+                style={{
+                  shadowColor: '#122F26',
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.05,
+                  shadowRadius: 4,
+                  elevation: 2,
+                }}
+              >
+                <View className="bg-red-100 rounded-full p-3 mb-2">
+                  <Ionicons name="heart" size={24} color="#EF4444" />
+                </View>
+                <Text className="text-forest font-semibold text-xs text-center">Wishlist</Text>
               </View>
-              <Text className="text-forest font-semibold text-xs text-center">Wishlist</Text>
-            </View>
-          </TouchableOpacity>
+            </TouchableOpacity>
 
-          <TouchableOpacity 
-            className="w-1/3 p-2"
-            onPress={() => router.push('/(tabs)/messages')}
-          >
-            <View
-              className="p-4 bg-white rounded-2xl items-center"
-              style={{
-                shadowColor: '#122F26',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.05,
-                shadowRadius: 4,
-                elevation: 2,
-              }}
+            <TouchableOpacity
+              className="w-1/3 p-2"
+              onPress={() => router.push('/(tabs)/messages')}
             >
-              <View className="bg-purple-100 rounded-full p-3 mb-2">
-                <Ionicons name="chatbubbles" size={24} color="#8B5CF6" />
+              <View
+                className="p-4 bg-white rounded-2xl items-center"
+                style={{
+                  shadowColor: '#122F26',
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.05,
+                  shadowRadius: 4,
+                  elevation: 2,
+                }}
+              >
+                <View className="bg-purple-100 rounded-full p-3 mb-2">
+                  <Ionicons name="chatbubbles" size={24} color="#8B5CF6" />
+                </View>
+                <Text className="text-forest font-semibold text-xs text-center">Messages</Text>
               </View>
-              <Text className="text-forest font-semibold text-xs text-center">Messages</Text>
-            </View>
-          </TouchableOpacity>
+            </TouchableOpacity>
 
-          <TouchableOpacity 
-            className="w-1/3 p-2"
+            <TouchableOpacity
+              className="w-1/3 p-2"
+              onPress={() => router.push('/(tabs)/wallet')}
+            >
+              <View
+                className="p-4 bg-white rounded-2xl items-center"
+                style={{
+                  shadowColor: '#122F26',
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.05,
+                  shadowRadius: 4,
+                  elevation: 2,
+                }}
+              >
+                <View className="bg-green-100 rounded-full p-3 mb-2">
+                  <Ionicons name="wallet" size={24} color="#10B981" />
+                </View>
+                <Text className="text-forest font-semibold text-xs text-center">Wallet</Text>
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              className="w-1/3 p-2"
+              onPress={() => router.push('/reviews/my-reviews')}
+            >
+              <View
+                className="p-4 bg-white rounded-2xl items-center"
+                style={{
+                  shadowColor: '#122F26',
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.05,
+                  shadowRadius: 4,
+                  elevation: 2,
+                }}
+              >
+                <View className="bg-yellow-100 rounded-full p-3 mb-2">
+                  <Ionicons name="star" size={24} color="#F59E0B" />
+                </View>
+                <Text className="text-forest font-semibold text-xs text-center">Reviews</Text>
+              </View>
+            </TouchableOpacity>
+
+            {/* Host/Guest mode switcher — only shown to verified hosts */}
+            {isHost && (
+              <View className="w-full p-2 mt-2">
+                <View
+                  className="bg-white rounded-2xl overflow-hidden"
+                  style={{
+                    shadowColor: '#122F26',
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 8,
+                    elevation: 4,
+                  }}
+                >
+                  <LinearGradient
+                    colors={activeProfile === 'host' ? ['#122F26', '#1d392f'] : ['#D9B168', '#bea04f']}
+                    className="p-4"
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                  >
+                    <View className="flex-row items-center justify-between">
+                      <View className="flex-1">
+                        <Text className="text-white font-bold text-base">
+                          {activeProfile === 'host' ? '🏠 Hosting Mode' : '✈ Traveling Mode'}
+                        </Text>
+                        <Text className="text-white/80 text-xs mt-0.5">
+                          {activeProfile === 'host'
+                            ? 'Tap to switch to traveling'
+                            : 'Tap to switch to hosting'}
+                        </Text>
+                      </View>
+                      <TouchableOpacity
+                        disabled={switchLoading}
+                        onPress={() => handleSwitchProfile(activeProfile === 'host' ? 'guest' : 'host')}
+                        className="ml-3 bg-white/20 rounded-xl px-4 py-2"
+                      >
+                        <Text className="text-white font-semibold text-sm">
+                          {switchLoading ? 'Switching...' : (activeProfile === 'host' ? 'Go Traveling' : 'Go Hosting')}
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  </LinearGradient>
+                </View>
+              </View>
+            )}
+
+            {/* Hosting quick-action: only for actual hosts */}
+            {isHost ? (
+              <TouchableOpacity
+                className="w-1/3 p-2"
+                onPress={() => {
+                  if (activeProfile !== 'host') {
+                    handleSwitchProfile('host');
+                  } else {
+                    router.push('/(tabs)/host');
+                  }
+                }}
+              >
+                <View
+                  className="p-4 bg-white rounded-2xl items-center"
+                  style={{
+                    shadowColor: '#122F26',
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.05,
+                    shadowRadius: 4,
+                    elevation: 2,
+                  }}
+                >
+                  <View className="bg-orange-100 rounded-full p-3 mb-2">
+                    <Ionicons name="business" size={24} color="#F97316" />
+                  </View>
+                  <Text className="text-forest font-semibold text-xs text-center">
+                    {activeProfile === 'host' ? 'Dashboard' : 'Host Mode'}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity
+                className="w-1/3 p-2"
+                onPress={() => router.push('/(tabs)/host')}
+              >
+                <View
+                  className="p-4 bg-white rounded-2xl items-center"
+                  style={{
+                    shadowColor: '#122F26',
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.05,
+                    shadowRadius: 4,
+                    elevation: 2,
+                  }}
+                >
+                  <View className="bg-orange-100 rounded-full p-3 mb-2">
+                    <Ionicons name="add-circle-outline" size={24} color="#F97316" />
+                  </View>
+                  <Text className="text-forest font-semibold text-xs text-center">Become Host</Text>
+                </View>
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
+
+        {/* Settings */}
+        <View className="px-4 mt-6">
+          <Text className="text-lg font-bold text-forest mb-4 px-2">Settings</Text>
+
+          <MenuItem
+            iconName="create-outline"
+            label="Edit Profile"
+            value="Update your information"
+            onPress={() => router.push('/(tabs)/profile/edit')}
+            highlighted={true}
+          />
+
+          <MenuItem
+            iconName="lock-closed-outline"
+            label="Change Password"
+            value="Secure your account"
+            onPress={() => router.push('/(tabs)/profile/change-password')}
+            highlighted={true}
+          />
+
+          <MenuItem
+            iconName="shield-checkmark-outline"
+            label="Security & 2FA"
+            value="Two-factor authentication"
+            onPress={() => router.push('/(tabs)/profile/security')}
+            highlighted={true}
+          />
+
+          <MenuItem
+            iconName="notifications-outline"
+            label="Notifications"
+            value="Manage notification preferences"
+            onPress={() => { }}
+            highlighted={true}
+          />
+
+          <MenuItem
+            iconName="card-outline"
+            label="Payment Methods"
+            value="Manage your payment options"
             onPress={() => router.push('/(tabs)/wallet')}
-          >
-            <View
-              className="p-4 bg-white rounded-2xl items-center"
-              style={{
-                shadowColor: '#122F26',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.05,
-                shadowRadius: 4,
-                elevation: 2,
-              }}
-            >
-              <View className="bg-green-100 rounded-full p-3 mb-2">
-                <Ionicons name="wallet" size={24} color="#10B981" />
-              </View>
-              <Text className="text-forest font-semibold text-xs text-center">Wallet</Text>
-            </View>
-          </TouchableOpacity>
+            highlighted={true}
+          />
+        </View>
 
-          <TouchableOpacity 
-            className="w-1/3 p-2"
-            onPress={() => router.push('/reviews/my-reviews')}
+        {/* Logout */}
+        <View className="px-4 mt-6 mb-8">
+          <TouchableOpacity
+            className="rounded-2xl overflow-hidden"
+            onPress={handleLogout}
+            style={{
+              shadowColor: '#EF4444',
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.3,
+              shadowRadius: 8,
+              elevation: 5,
+            }}
           >
-            <View
-              className="p-4 bg-white rounded-2xl items-center"
-              style={{
-                shadowColor: '#122F26',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.05,
-                shadowRadius: 4,
-                elevation: 2,
-              }}
+            <LinearGradient
+              colors={['#EF4444', '#DC2626']}
+              className="py-4 flex-row items-center justify-center"
             >
-              <View className="bg-yellow-100 rounded-full p-3 mb-2">
-                <Ionicons name="star" size={24} color="#F59E0B" />
-              </View>
-              <Text className="text-forest font-semibold text-xs text-center">Reviews</Text>
-            </View>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            className="w-1/3 p-2"
-            onPress={() => router.push('/(tabs)/host')}
-          >
-            <View
-              className="p-4 bg-white rounded-2xl items-center"
-              style={{
-                shadowColor: '#122F26',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.05,
-                shadowRadius: 4,
-                elevation: 2,
-              }}
-            >
-              <View className="bg-orange-100 rounded-full p-3 mb-2">
-                <Ionicons name="business" size={24} color="#F97316" />
-              </View>
-              <Text className="text-forest font-semibold text-xs text-center">Hosting</Text>
-            </View>
+              <Ionicons name="log-out-outline" size={22} color="white" />
+              <Text className="text-white font-bold ml-2 text-base">Logout</Text>
+            </LinearGradient>
           </TouchableOpacity>
         </View>
-      </View>
-
-      {/* Settings */}
-      <View className="px-4 mt-6">
-        <Text className="text-lg font-bold text-forest mb-4 px-2">Settings</Text>
-        
-        <MenuItem
-          iconName="create-outline"
-          label="Edit Profile"
-          value="Update your information"
-          onPress={() => router.push('/(tabs)/profile/edit')}
-          highlighted={true}
-        />
-
-        <MenuItem
-          iconName="lock-closed-outline"
-          label="Change Password"
-          value="Secure your account"
-          onPress={() => router.push('/(tabs)/profile/change-password')}
-          highlighted={true}
-        />
-
-        <MenuItem
-          iconName="shield-checkmark-outline"
-          label="Security & 2FA"
-          value="Two-factor authentication"
-          onPress={() => router.push('/(tabs)/profile/security')}
-          highlighted={true}
-        />
-
-        <MenuItem
-          iconName="notifications-outline"
-          label="Notifications"
-          value="Manage notification preferences"
-          onPress={() => {}}
-          highlighted={true}
-        />
-
-        <MenuItem
-          iconName="card-outline"
-          label="Payment Methods"
-          value="Manage your payment options"
-          onPress={() => router.push('/(tabs)/wallet')}
-          highlighted={true}
-        />
-      </View>
-
-      {/* Logout */}
-      <View className="px-4 mt-6 mb-8">
-        <TouchableOpacity
-          className="rounded-2xl overflow-hidden"
-          onPress={handleLogout}
-          style={{
-            shadowColor: '#EF4444',
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.3,
-            shadowRadius: 8,
-            elevation: 5,
-          }}
-        >
-          <LinearGradient
-            colors={['#EF4444', '#DC2626']}
-            className="py-4 flex-row items-center justify-center"
-          >
-            <Ionicons name="log-out-outline" size={22} color="white" />
-            <Text className="text-white font-bold ml-2 text-base">Logout</Text>
-          </LinearGradient>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+      </ScrollView>
     </SafeAreaView>
   );
 }

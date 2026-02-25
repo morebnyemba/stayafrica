@@ -29,9 +29,10 @@ class BookingViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     
     def get_queryset(self):
-        """Return bookings for current user"""
+        """Return bookings for current user based on their active_profile"""
         user = self.request.user
-        if user.is_host:
+        active_profile = getattr(user, 'active_profile', user.role)
+        if active_profile == 'host':
             return Booking.objects.filter(rental_property__host=user).select_related('guest', 'rental_property')
         return Booking.objects.filter(guest=user).select_related('rental_property__host')
     

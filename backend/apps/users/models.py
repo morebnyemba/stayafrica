@@ -9,6 +9,11 @@ class User(AbstractUser):
         ('admin', 'Admin'),
     ]
     
+    PROFILE_CHOICES = [
+        ('guest', 'Guest Mode'),
+        ('host', 'Host Mode'),
+    ]
+    
     email = models.EmailField(unique=True)
     phone_number = models.CharField(
         max_length=20,
@@ -22,6 +27,12 @@ class User(AbstractUser):
         null=True
     )
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='guest')
+    active_profile = models.CharField(
+        max_length=10, 
+        choices=PROFILE_CHOICES, 
+        default='guest',
+        help_text="The mode the user is currently operating in"
+    )
     country_of_residence = models.CharField(max_length=100, blank=True, null=True)
     is_verified = models.BooleanField(default=False)
     
@@ -54,6 +65,18 @@ class User(AbstractUser):
     
     def __str__(self):
         return f'{self.email} ({self.get_role_display()})'
+        
+    def clean(self):
+        super().clean()
+        # Security constraint: Only official hosts/admins can set active_profile to 'host'
+        if self.active_profile == 'host' and self.role not in ['host', 'admin']:
+            raise ValidationError({
+                'active_profile': 'Only verified hosts or admins can switch to host mode.'
+            })
+            
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
     
     @property
     def is_host(self):

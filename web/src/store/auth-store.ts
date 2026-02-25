@@ -23,22 +23,23 @@ interface AuthState {
   logout: () => void;
   updateProfile: (userData: Partial<User>) => Promise<void>;
   upgradeToHost: () => Promise<User>;
+  switchProfile: (mode: 'guest' | 'host') => Promise<void>;
   fetchUserProfile: (token: string) => Promise<void>;
   initializeAuth: () => Promise<void>;
 }
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL 
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL
   ? `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1`
   : (typeof window !== 'undefined' && window.location.origin.includes('localhost')
-      ? 'http://localhost:8000/api/v1'
-      : 'https://api.zimlegend.online/api/v1');
+    ? 'http://localhost:8000/api/v1'
+    : 'https://api.zimlegend.online/api/v1');
 
 const setSession = async (access: string, refresh: string) => {
   if (typeof window === 'undefined') return;
-  
+
   localStorage.setItem('access_token', access);
   localStorage.setItem('refresh_token', refresh);
-  
+
   // Set cookie server-side so middleware/SSR see it immediately
   try {
     await fetch('/api/auth/set-cookie', {
@@ -62,7 +63,7 @@ export const useAuthStore = create<AuthState>()(
       twoFactorPending: null,
 
       setUser: (user) => set({ user, isAuthenticated: !!user }),
-      
+
       setLoading: (isLoading) => set({ isLoading }),
 
       clearTwoFactorPending: () => set({ twoFactorPending: null }),
@@ -90,7 +91,7 @@ export const useAuthStore = create<AuthState>()(
 
       initializeAuth: async () => {
         if (typeof window === 'undefined') return;
-        
+
         const token = localStorage.getItem('access_token');
         if (token) {
           // Set cookie for middleware
@@ -197,7 +198,7 @@ export const useAuthStore = create<AuthState>()(
 
       logout: () => {
         if (typeof window === 'undefined') return;
-        
+
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
         document.cookie = 'access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
@@ -255,6 +256,32 @@ export const useAuthStore = create<AuthState>()(
         set({ user: updatedUser, isAuthenticated: true });
         return updatedUser;
       },
+
+      switchProfile: async (mode: 'guest' | 'host') => {
+        const token = localStorage.getItem('access_token');
+        if (!token) throw new Error('Not authenticated');
+
+        const response = await fetch(`${API_BASE}/users/switch_profile/`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ profile: mode }),
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || error.detail || 'Failed to switch profile');
+        }
+
+        const data = await response.json();
+        if (data.access && data.refresh) {
+          await setSession(data.access, data.refresh);
+        }
+        const updatedUser = data.user || data;
+        set({ user: updatedUser, isAuthenticated: true });
+      },
     }),
     {
       name: 'auth-storage',
@@ -266,7 +293,7 @@ export const useAuthStore = create<AuthState>()(
 // Hook for easy access to auth methods
 export const useAuth = () => {
   const store = useAuthStore();
-  
+
   // Initialize auth on first mount
   if (typeof window !== 'undefined' && store.isLoading && !store.user) {
     store.initializeAuth();
@@ -276,6 +303,6 @@ export const useAuth = () => {
   if (typeof window !== 'undefined' && store.isLoading && store.user) {
     store.setLoading(false);
   }
-  
+
   return store;
 };

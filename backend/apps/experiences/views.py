@@ -188,15 +188,14 @@ class ExperienceBookingViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     
     def get_queryset(self):
-        """Return bookings for current user (as guest or host)"""
+        """Return bookings for current user based on their active_profile"""
         user = self.request.user
+        active_profile = getattr(user, 'active_profile', 'guest')
         
         # Allow filtering by status
         status_filter = self.request.query_params.get('status')
-        # Allow host to view bookings on their experiences
-        role = self.request.query_params.get('role', 'guest')
         
-        if role == 'host':
+        if active_profile == 'host':
             queryset = ExperienceBooking.objects.filter(
                 experience__host=user
             ).select_related('experience', 'guest')

@@ -7,6 +7,7 @@ export interface User {
   phone_number: string;
   country_of_residence: string;
   role: 'guest' | 'host' | 'admin';
+  active_profile: 'guest' | 'host';
   is_verified: boolean;
 }
 
@@ -232,7 +233,7 @@ export interface CreatePropertyRequest {
   amenities: string[];
 }
 
-export interface UpdatePropertyRequest extends Partial<CreatePropertyRequest> {}
+export interface UpdatePropertyRequest extends Partial<CreatePropertyRequest> { }
 
 export interface SubmitReviewRequest {
   booking_id: string;

@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { apiClient } from '@/services/api-client';
 import { socialAuthService } from '@/services/social-auth';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { logError, logInfo } from '@/utils/logger';
 
 interface User {
@@ -12,6 +11,7 @@ interface User {
   phone_number: string;
   country_of_residence: string;
   role: 'guest' | 'host' | 'admin';
+  active_profile: 'guest' | 'host';
   is_verified: boolean;
 }
 
@@ -43,6 +43,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
   updateProfile: (data: UpdateProfileData) => Promise<void>;
+  switchProfile: (mode: 'guest' | 'host') => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -232,6 +233,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const switchProfile = async (mode: 'guest' | 'host') => {
+    try {
+      const response = await apiClient.post('/users/switch_profile/', { profile: mode });
+      const data = response.data;
+      if (data.access && data.refresh) {
+        await apiClient.saveTokens(data.access, data.refresh);
+      }
+      // Update user state with returned user data
+      const updatedUser = data.user || user;
+      setUser(updatedUser);
+      logInfo('Profile switched to', { mode });
+    } catch (error) {
+      console.error('Switch profile error:', error);
+      throw error;
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -250,6 +268,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         logout,
         refreshUser,
         updateProfile,
+        switchProfile,
       }}
     >
       {children}
