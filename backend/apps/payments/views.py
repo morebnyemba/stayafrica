@@ -243,7 +243,6 @@ class PaymentViewSet(viewsets.ModelViewSet):
             config = SystemConfiguration.get_config()
             
             webhook_secrets = {
-                'paynow': config.paynow_webhook_secret,
                 'payfast': config.payfast_webhook_secret,
                 'flutterwave': getattr(config, 'flutterwave_webhook_secret', ''),
                 'ozow': '',

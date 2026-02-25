@@ -42,11 +42,6 @@ class SystemConfiguration(models.Model):
         blank=True,
         help_text="Paynow Integration Key"
     )
-    paynow_webhook_secret = models.CharField(
-        max_length=255, 
-        blank=True,
-        help_text="Paynow Webhook Secret"
-    )
     
     payfast_merchant_id = models.CharField(
         max_length=255, 

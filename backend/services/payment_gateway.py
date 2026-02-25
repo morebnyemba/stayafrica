@@ -63,7 +63,6 @@ class PaymentGatewayService:
             credentials = {
                 'integration_id': self.config.paynow_integration_id,
                 'integration_key': self.config.paynow_integration_key,
-                'webhook_secret': self.config.paynow_webhook_secret,
             }
         elif provider == 'payfast':
             credentials = {
