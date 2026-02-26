@@ -10,7 +10,6 @@ const ProtectedRoute = dynamic(() => import('@/components/auth/protected-route')
 import { CreditCard, Wallet, DollarSign, CheckCircle, ArrowLeft, AlertCircle, Loader2, Globe } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import Link from 'next/link';
-import { Button } from '@/components/ui';
 
 interface PaymentProvider {
   id: string;
@@ -31,7 +30,7 @@ export default function BookingPaymentPage() {
   const [selectedProvider, setSelectedProvider] = useState<string>(providerFromConfirm || '');
 
   // Fetch booking details
-  const { data: booking, isLoading: loadingBooking } = useQuery({
+  const { data: booking, isLoading: loadingBooking, isError: bookingError } = useQuery({
     queryKey: ['booking', bookingId],
     queryFn: async () => {
       const response = await apiClient.getBookingById(bookingId!);
@@ -137,7 +136,9 @@ export default function BookingPaymentPage() {
               Please create a booking first.
             </p>
             <Link href="/explore">
-              <Button variant="primary" size="lg">Browse Properties</Button>
+              <button className="bg-secondary-600 hover:bg-secondary-700 text-white font-medium py-2 px-6 rounded-lg transition">
+                Browse Properties
+              </button>
             </Link>
           </div>
         </div>
@@ -158,13 +159,41 @@ export default function BookingPaymentPage() {
     );
   }
 
+  if (bookingError || !booking) {
+    return (
+      <ProtectedRoute>
+        <div className="min-h-screen bg-sand-100 dark:bg-primary-900 flex items-center justify-center">
+          <div className="card p-8 text-center max-w-md">
+            <AlertCircle className="w-16 h-16 text-amber-500 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-primary-900 dark:text-sand-50 mb-4">
+              Booking Not Found
+            </h2>
+            <p className="text-primary-600 dark:text-sand-300 mb-6">
+              We couldn&apos;t load the booking details. Please go back and try again.
+            </p>
+            <Link href="/explore">
+              <button className="bg-secondary-600 hover:bg-secondary-700 text-white font-medium py-2 px-6 rounded-lg transition">
+                Browse Properties
+              </button>
+            </Link>
+          </div>
+        </div>
+      </ProtectedRoute>
+    );
+  }
+
+  // Safely extract property info from booking response
+  // The serializer returns: rental_property (FK integer), property (nested object), property_title (string)
+  const propertyId = booking.property?.id || booking.rental_property;
+  const propertyTitle = booking.property_title || booking.property?.title || 'Property';
+
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-sand-100 dark:bg-primary-900">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Back button */}
           <Link 
-            href={`/booking/confirm?propertyId=${booking.rental_property.id}&checkIn=${booking.check_in}&checkOut=${booking.check_out}&guests=${booking.number_of_guests}`}
+            href={`/booking/confirm?propertyId=${propertyId}&checkIn=${booking.check_in}&checkOut=${booking.check_out}&guests=1`}
             className="inline-flex items-center gap-2 text-primary-700 dark:text-sand-300 hover:text-secondary-600 dark:hover:text-secondary-400 mb-6 transition"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -330,7 +359,7 @@ export default function BookingPaymentPage() {
                   <div className="flex justify-between">
                     <span className="text-primary-700 dark:text-sand-200">Property:</span>
                     <span className="font-medium text-primary-900 dark:text-sand-50 text-right truncate ml-2">
-                      {booking.rental_property.title}
+                      {propertyTitle}
                     </span>
                   </div>
                   <div className="flex justify-between">
