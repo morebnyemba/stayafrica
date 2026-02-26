@@ -365,6 +365,7 @@ export default function BookingConfirmPage() {
                         rental_property: Number(propertyId),
                         check_in: checkIn,
                         check_out: checkOut,
+                        number_of_guests: guests,
                         cleaning_fee: costs.cleaningFee || 0,
                       });
                       const booking = response.data;

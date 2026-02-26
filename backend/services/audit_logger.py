@@ -44,7 +44,7 @@ class AuditLoggerService:
                 user=user,
                 action=action,
                 content_type=content_type,
-                object_id=object_id or 0,
+                object_id=str(object_id) if object_id else '',
                 changes=changes or {}
             )
         except Exception as e:

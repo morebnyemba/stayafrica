@@ -27,6 +27,8 @@ except (ImportError, ModuleNotFoundError) as e:
 class BookingViewSet(viewsets.ModelViewSet):
     serializer_class = BookingSerializer
     permission_classes = [IsAuthenticated]
+    lookup_field = 'pk'
+    lookup_value_regex = r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
     
     def get_queryset(self):
         """Return bookings for current user based on their active_profile"""
@@ -74,6 +76,7 @@ class BookingViewSet(viewsets.ModelViewSet):
         # Create booking with calculated values
         booking = serializer.save(
             guest=self.request.user,
+            number_of_guests=serializer.validated_data.get('number_of_guests', 1),
             nightly_total=totals['nightly_total'],
             service_fee=totals['service_fee'],
             commission_fee=totals['commission_fee'],
@@ -112,7 +115,7 @@ class BookingViewSet(viewsets.ModelViewSet):
         # Send confirmation email if Celery is available
         if CELERY_AVAILABLE and send_booking_confirmation_email:
             try:
-                send_booking_confirmation_email.delay(booking.id)
+                send_booking_confirmation_email.delay(str(booking.id))
             except Exception as e:
                 logger.warning(f"Could not queue booking confirmation email: {e}")
         else:

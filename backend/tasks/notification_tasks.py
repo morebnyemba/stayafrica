@@ -153,7 +153,7 @@ def send_daily_notifications():
             status='confirmed'
         )
         for booking in tomorrow_bookings:
-            send_booking_reminder.delay(booking.id)
+            send_booking_reminder.delay(str(booking.id))
         
         # Send review requests (after checkout)
         recent_checkouts = Booking.objects.filter(
@@ -163,7 +163,7 @@ def send_daily_notifications():
         )
         for booking in recent_checkouts:
             if not hasattr(booking, 'review'):
-                send_review_request.delay(booking.id)
+                send_review_request.delay(str(booking.id))
         
         logger.info("Daily notification task completed")
         return True

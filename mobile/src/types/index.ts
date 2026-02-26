@@ -207,10 +207,11 @@ export interface UpdateProfileRequest {
 }
 
 export interface CreateBookingRequest {
-  property_id: string;
-  check_in_date: string;
-  check_out_date: string;
+  rental_property: number;
+  check_in: string;
+  check_out: string;
   number_of_guests: number;
+  cleaning_fee?: number;
   special_requests?: string;
 }
 

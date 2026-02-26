@@ -51,9 +51,9 @@ export function BookingContent() {
       if (!user) throw new Error('User not authenticated');
       
       const response = await apiClient.createConversation({
-        participants: [parseInt(booking.property?.host_id || booking.host_id), parseInt(user.id)],
-        property: parseInt(booking.property?.id || booking.property_id),
-        booking: parseInt(booking.id),
+        participants: [booking.property?.host_id || booking.host_id, user.id].map(String),
+        property: String(booking.property?.id || booking.property_id),
+        booking: String(booking.id),
         subject: `Booking inquiry for ${booking.property?.title || booking.property_title}`,
       });
       return response.data;

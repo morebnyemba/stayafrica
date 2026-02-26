@@ -12,12 +12,14 @@ class Booking(models.Model):
         ('completed', 'Completed'),
     ]
     
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     booking_ref = models.CharField(max_length=50, unique=True, db_index=True)
     guest = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bookings')
     rental_property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name='bookings')
     
     check_in = models.DateField()
     check_out = models.DateField()
+    number_of_guests = models.PositiveIntegerField(default=1)
     
     nightly_total = models.DecimalField(max_digits=10, decimal_places=2)
     service_fee = models.DecimalField(max_digits=10, decimal_places=2, default=3.00)

@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, TouchableOpacity, Platform, ActivityIndicator, Image } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Platform, ActivityIndicator, Image, Alert } from 'react-native';
 import { useState } from 'react';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -50,6 +50,7 @@ export default function BookingConfirmScreen() {
 
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [selectedProvider, setSelectedProvider] = useState<string>('');
+  const [isCreatingBooking, setIsCreatingBooking] = useState(false);
 
   // Calculate nights
   const checkInDate = checkIn ? new Date(checkIn) : null;
@@ -101,20 +102,45 @@ export default function BookingConfirmScreen() {
   const regionalProviders = providers.filter(p => p.category === 'regional');
   const internationalProviders = providers.filter(p => p.category === 'international');
 
-  const handleConfirmBooking = () => {
-    if (!agreedToTerms || !selectedProvider) return;
-    // Navigate to payment page
-    router.push({
-      pathname: '/booking/payment',
-      params: {
-        propertyId,
-        checkIn,
-        checkOut,
-        guests: guests.toString(),
-        provider: selectedProvider,
-        total: total.toString(),
-      },
-    });
+  const handleConfirmBooking = async () => {
+    if (!agreedToTerms || !selectedProvider) {
+      if (!selectedProvider) Alert.alert('Error', 'Please select a payment method');
+      else if (!agreedToTerms) Alert.alert('Error', 'Please agree to the terms and conditions');
+      return;
+    }
+
+    setIsCreatingBooking(true);
+    try {
+      const booking = await apiClient.createBooking({
+        rental_property: Number(propertyId),
+        check_in: checkIn,
+        check_out: checkOut,
+        number_of_guests: guests,
+        cleaning_fee: cleaningFee || 0,
+      });
+
+      router.push({
+        pathname: '/booking/payment',
+        params: {
+          bookingId: String(booking.id),
+          propertyName: property?.title || '',
+          checkIn,
+          checkOut,
+          guests: guests.toString(),
+          provider: selectedProvider,
+          total: total.toString(),
+        },
+      });
+    } catch (error: any) {
+      const msg =
+        error.response?.data?.detail ||
+        error.response?.data?.non_field_errors?.[0] ||
+        error.response?.data?.error ||
+        'Failed to create booking. Please try again.';
+      Alert.alert('Booking Error', msg);
+    } finally {
+      setIsCreatingBooking(false);
+    }
   };
 
   if (!isAuthenticated) {
@@ -420,9 +446,9 @@ export default function BookingConfirmScreen() {
         {/* Confirm Button */}
         <TouchableOpacity
           onPress={handleConfirmBooking}
-          disabled={!agreedToTerms || !selectedProvider}
+          disabled={!agreedToTerms || !selectedProvider || isCreatingBooking}
           className={`rounded-2xl overflow-hidden ${
-            (!agreedToTerms || !selectedProvider) ? 'opacity-50' : ''
+            (!agreedToTerms || !selectedProvider || isCreatingBooking) ? 'opacity-50' : ''
           }`}
         >
           <LinearGradient
@@ -437,8 +463,17 @@ export default function BookingConfirmScreen() {
             }}
           >
             <View className="flex-row items-center">
-              <Ionicons name="card" size={20} color="#122F26" />
-              <Text className="text-forest font-bold text-base ml-2">Confirm and Pay</Text>
+              {isCreatingBooking ? (
+                <>
+                  <ActivityIndicator size="small" color="#122F26" />
+                  <Text className="text-forest font-bold text-base ml-2">Creating Booking...</Text>
+                </>
+              ) : (
+                <>
+                  <Ionicons name="card" size={20} color="#122F26" />
+                  <Text className="text-forest font-bold text-base ml-2">Confirm and Pay</Text>
+                </>
+              )}
             </View>
           </LinearGradient>
         </TouchableOpacity>

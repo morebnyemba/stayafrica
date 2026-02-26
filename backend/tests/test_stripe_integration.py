@@ -2,6 +2,7 @@
 Tests for Stripe payment integration
 """
 import pytest
+import uuid
 from unittest.mock import patch, MagicMock
 from decimal import Decimal
 
@@ -28,7 +29,7 @@ class TestStripePaymentInitiation:
         payment_obj.gateway_ref = 'BK123-stripe-abc'
 
         booking = MagicMock()
-        booking.id = 1
+        booking.id = uuid.UUID('550e8400-e29b-41d4-a716-446655440000')
         booking.rental_property.title = 'Test Property'
         booking.check_in = '2024-06-01'
         booking.check_out = '2024-06-05'
