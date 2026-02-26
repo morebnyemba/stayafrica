@@ -11,7 +11,10 @@ done
 
 echo "✅ Database ready"
 
-echo "🔄 Running database migrations..."
+echo "� Generating migration files..."
+python manage.py makemigrations --noinput
+
+echo "�🔄 Running database migrations..."
 if ! python manage.py migrate --noinput; then
   echo "❌ Migration failed"
   exit 1
