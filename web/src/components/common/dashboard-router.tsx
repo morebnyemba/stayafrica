@@ -10,15 +10,17 @@ export function DashboardRouter() {
   const { user, isLoading } = useAuth();
   const router = useRouter();
 
+  const activeProfile = user?.active_profile ?? 'guest';
+
   useEffect(() => {
     // Don't do anything while loading
     if (isLoading) return;
 
-    // If user is a host, redirect to host dashboard
-    if (user?.role === 'host') {
+    // Only redirect to host dashboard if actively in host mode
+    if (activeProfile === 'host') {
       router.replace('/host/dashboard');
     }
-  }, [user, isLoading, router]);
+  }, [user, isLoading, router, activeProfile]);
 
   // Show loading state while checking auth
   if (isLoading) {
@@ -32,11 +34,11 @@ export function DashboardRouter() {
     );
   }
 
-  // For hosts, show their dashboard (or it will redirect)
-  if (user?.role === 'host') {
+  // If active profile is host, show host dashboard (or it will redirect)
+  if (activeProfile === 'host') {
     return <HostDashboard />;
   }
 
-  // For guests and others, show the regular dashboard
+  // For guests (or hosts in guest/travelling mode), show the traveller dashboard
   return <DashboardContent />;
 }

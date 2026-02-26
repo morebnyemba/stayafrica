@@ -112,7 +112,7 @@ export function Navigation() {
                     disabled={hostLoading}
                   >
                     {hostLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-                    <span>{isHost ? (activeProfile === 'host' ? 'Host Dashboard' : 'Become a Host') : 'Become a Host'}</span>
+                    <span>{isHost ? 'Host Dashboard' : 'Become a Host'}</span>
                   </button>
                   {isHost && (
                     <button
@@ -124,7 +124,7 @@ export function Navigation() {
                       <span>{activeProfile === 'host' ? '✈ Switch to Traveling' : '🏠 Switch to Hosting'}</span>
                     </button>
                   )}
-                  <Link href="/dashboard" className="text-sand-200 hover:text-sand-50 transition font-medium">
+                  <Link href={activeProfile === 'host' ? '/host/dashboard' : '/dashboard'} className="text-sand-200 hover:text-sand-50 transition font-medium">
                     Dashboard
                   </Link>
                   <Link href="/profile" className="flex items-center space-x-2">
@@ -201,7 +201,7 @@ export function Navigation() {
                 disabled={hostLoading}
               >
                 {hostLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-                <span>{isHost ? (activeProfile === 'host' ? 'Host Dashboard' : 'Go to Host Dashboard') : 'Become a Host'}</span>
+                <span>{isHost ? 'Host Dashboard' : 'Become a Host'}</span>
               </button>
               {isHost && isAuthenticated && (
                 <button
@@ -219,7 +219,7 @@ export function Navigation() {
               </div>
               {isAuthenticated ? (
                 <>
-                  <Link href="/dashboard" className="block w-full px-2">
+                  <Link href={activeProfile === 'host' ? '/host/dashboard' : '/dashboard'} className="block w-full px-2">
                     <Button variant="secondary" className="w-full">Dashboard</Button>
                   </Link>
                   <button
