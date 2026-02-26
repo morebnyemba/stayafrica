@@ -14,7 +14,6 @@ import {
   XCircle,
   AlertCircle,
   FileText,
-  Camera,
   Shield,
   RefreshCw,
   Eye,
