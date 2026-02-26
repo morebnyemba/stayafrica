@@ -486,6 +486,14 @@ class APIClient {
     return (await this.client.get('/payments/', { params })).data;
   }
 
+  // Get available payment providers for user's country
+  async getAvailableProviders(country?: string): Promise<{
+    providers: { id: string; name: string; category: string }[];
+    country: string;
+  }> {
+    return (await this.client.get('/payments/providers/', { params: { country } })).data;
+  }
+
   // Bank accounts
   async getBankAccounts(): Promise<ApiListResponse<BankAccount>> {
     return (await this.client.get('/bank-accounts/')).data;

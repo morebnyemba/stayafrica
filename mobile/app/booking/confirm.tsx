@@ -7,6 +7,36 @@ import { useAuth } from '@/context/auth-context';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
 
+interface ProviderItem {
+  id: string;
+  name: string;
+  description: string;
+  icon: keyof typeof Ionicons.glyphMap;
+  category: 'regional' | 'international';
+}
+
+const providerIcons: Record<string, keyof typeof Ionicons.glyphMap> = {
+  paynow: 'phone-portrait',
+  paystack: 'card',
+  flutterwave: 'card',
+  stripe: 'card',
+  paypal: 'logo-paypal',
+  cash_on_arrival: 'cash',
+  mpesa: 'phone-portrait',
+  ozow: 'swap-horizontal',
+};
+
+const providerDescriptions: Record<string, string> = {
+  paynow: 'EcoCash, Visa, Mastercard',
+  paystack: 'Cards & bank transfer',
+  flutterwave: 'Cards & mobile money',
+  stripe: 'Credit or debit card',
+  paypal: 'Pay with PayPal',
+  cash_on_arrival: 'Pay cash when you arrive',
+  mpesa: 'M-Pesa mobile money',
+  ozow: 'Instant EFT',
+};
+
 export default function BookingConfirmScreen() {
   const router = useRouter();
   const { isAuthenticated, user } = useAuth();
@@ -52,12 +82,23 @@ export default function BookingConfirmScreen() {
   const serviceFee = basePrice * 0.10; // 10% service fee
   const total = basePrice + serviceFee + cleaningFee;
 
-  // Payment providers mock data (should come from API)
-  const paymentProviders = [
-    { id: 'card', name: 'Credit/Debit Card', description: 'Visa, Mastercard' },
-    { id: 'mobile', name: 'Mobile Money', description: 'EcoCash, OneMoney' },
-    { id: 'paypal', name: 'PayPal', description: 'Pay with PayPal' },
-  ];
+  // Fetch available payment providers
+  const { data: providersData, isLoading: loadingProviders } = useQuery({
+    queryKey: ['payment-providers', user?.country_of_residence],
+    queryFn: () => apiClient.getAvailableProviders(user?.country_of_residence),
+    enabled: isAuthenticated,
+  });
+
+  const providers: ProviderItem[] = (providersData?.providers || []).map((p: { id: string; name: string; category: 'regional' | 'international' }) => ({
+    id: p.id,
+    name: p.name,
+    description: providerDescriptions[p.id] || p.name,
+    icon: providerIcons[p.id] || 'card',
+    category: p.category,
+  }));
+
+  const regionalProviders = providers.filter(p => p.category === 'regional');
+  const internationalProviders = providers.filter(p => p.category === 'international');
 
   const handleConfirmBooking = () => {
     if (!agreedToTerms || !selectedProvider) return;
@@ -243,25 +284,76 @@ export default function BookingConfirmScreen() {
           elevation: 4,
         }}>
           <Text className="text-lg font-bold text-forest mb-3">Payment Method</Text>
-          {paymentProviders.map((provider) => (
-            <TouchableOpacity
-              key={provider.id}
-              onPress={() => setSelectedProvider(provider.id)}
-              className={`p-4 rounded-xl mb-2 ${
-                selectedProvider === provider.id ? 'bg-gold/20' : 'bg-sand-100'
-              }`}
-            >
-              <View className="flex-row justify-between items-center">
-                <View className="flex-1">
-                  <Text className="font-semibold text-forest">{provider.name}</Text>
-                  <Text className="text-sm text-moss">{provider.description}</Text>
+
+          {loadingProviders ? (
+            <ActivityIndicator color="#122F26" />
+          ) : providers.length === 0 ? (
+            <Text className="text-moss text-center py-4">No payment providers available for your region.</Text>
+          ) : (
+            <>
+              {regionalProviders.length > 0 && (
+                <View className="mb-3">
+                  <View className="flex-row items-center mb-2">
+                    <Ionicons name="location" size={16} color="#5A7A6C" />
+                    <Text className="text-sm font-semibold text-moss ml-1">Local Payment Methods</Text>
+                  </View>
+                  {regionalProviders.map((provider) => (
+                    <TouchableOpacity
+                      key={provider.id}
+                      onPress={() => setSelectedProvider(provider.id)}
+                      className={`p-4 rounded-xl mb-2 ${
+                        selectedProvider === provider.id ? 'bg-gold/20' : 'bg-sand-100'
+                      }`}
+                    >
+                      <View className="flex-row justify-between items-center">
+                        <View className="flex-row items-center flex-1">
+                          <Ionicons name={provider.icon} size={20} color="#122F26" style={{ marginRight: 10 }} />
+                          <View>
+                            <Text className="font-semibold text-forest">{provider.name}</Text>
+                            <Text className="text-sm text-moss">{provider.description}</Text>
+                          </View>
+                        </View>
+                        {selectedProvider === provider.id && (
+                          <Ionicons name="checkmark-circle" size={24} color="#D9B168" />
+                        )}
+                      </View>
+                    </TouchableOpacity>
+                  ))}
                 </View>
-                {selectedProvider === provider.id && (
-                  <Ionicons name="checkmark-circle" size={24} color="#D9B168" />
-                )}
-              </View>
-            </TouchableOpacity>
-          ))}
+              )}
+
+              {internationalProviders.length > 0 && (
+                <View>
+                  <View className="flex-row items-center mb-2">
+                    <Ionicons name="globe" size={16} color="#5A7A6C" />
+                    <Text className="text-sm font-semibold text-moss ml-1">International Payment Methods</Text>
+                  </View>
+                  {internationalProviders.map((provider) => (
+                    <TouchableOpacity
+                      key={provider.id}
+                      onPress={() => setSelectedProvider(provider.id)}
+                      className={`p-4 rounded-xl mb-2 ${
+                        selectedProvider === provider.id ? 'bg-gold/20' : 'bg-sand-100'
+                      }`}
+                    >
+                      <View className="flex-row justify-between items-center">
+                        <View className="flex-row items-center flex-1">
+                          <Ionicons name={provider.icon} size={20} color="#122F26" style={{ marginRight: 10 }} />
+                          <View>
+                            <Text className="font-semibold text-forest">{provider.name}</Text>
+                            <Text className="text-sm text-moss">{provider.description}</Text>
+                          </View>
+                        </View>
+                        {selectedProvider === provider.id && (
+                          <Ionicons name="checkmark-circle" size={24} color="#D9B168" />
+                        )}
+                      </View>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              )}
+            </>
+          )}
         </View>
 
         {/* Price Breakdown */}
