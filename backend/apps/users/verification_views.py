@@ -102,7 +102,7 @@ class IdentityVerificationViewSet(viewsets.ModelViewSet):
         # Check if expired
         verification.check_and_expire()
         
-        serializer = VerificationStatusSerializer(verification)
+        serializer = IdentityVerificationSerializer(verification)
         return Response({
             'has_verification': True,
             'is_verified': request.user.is_verified,

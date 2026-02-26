@@ -34,11 +34,21 @@ const transformVerificationResponse = (data: any): VerificationStatus | null => 
     id: v.id,
     user: v.user_email || '',
     status: normalizeStatus(v.status),
+    document_type: v.document_type,
+    document_type_display: v.document_type_display,
+    document_number: v.document_number,
+    document_country: v.document_country,
+    document_expiry_date: v.document_expiry_date,
+    document_front_image: v.document_front_image,
+    document_back_image: v.document_back_image,
+    selfie_image: v.selfie_image,
     rejection_reason: v.rejection_reason,
     admin_notes: v.admin_notes,
     verified_at: v.reviewed_at,
     created_at: v.submitted_at,
     updated_at: v.reviewed_at || v.submitted_at,
+    expires_at: v.expires_at,
+    is_expired: v.is_expired,
   };
 };
 

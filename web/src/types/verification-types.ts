@@ -19,6 +19,14 @@ export interface VerificationStatus {
   id: string;
   user: string;
   status: 'PENDING' | 'UNDER_REVIEW' | 'APPROVED' | 'REJECTED';
+  document_type?: string;
+  document_type_display?: string;
+  document_number?: string;
+  document_country?: string;
+  document_expiry_date?: string;
+  document_front_image?: string;
+  document_back_image?: string;
+  selfie_image?: string;
   document?: VerificationDocument;
   selfie?: VerificationSelfie;
   rejection_reason?: string;
@@ -26,6 +34,8 @@ export interface VerificationStatus {
   verified_at?: string;
   created_at: string;
   updated_at: string;
+  expires_at?: string;
+  is_expired?: boolean;
 }
 
 export interface DocumentUploadProgress {
