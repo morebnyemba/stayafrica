@@ -194,7 +194,7 @@ export default function InstantBookingSettings({ propertyId }: InstantBookingSet
                 className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
               />
               <span className="font-semibold text-gray-900 min-w-[60px] text-center">
-                {formData.min_rating === 0 ? 'None' : `${formData.min_rating.toFixed(1)} ⭐`}
+                {formData.min_rating === 0 ? 'None' : <><span>{formData.min_rating.toFixed(1)}</span> <Star className="h-4 w-4 inline-block fill-yellow-400 text-yellow-400" /></>}
               </span>
             </div>
             <p className="text-sm text-gray-600 mt-2">

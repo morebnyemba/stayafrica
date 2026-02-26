@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
-import { Wallet, ArrowUpRight, ArrowDownLeft, Building, Plus, CheckCircle, Clock, XCircle } from 'lucide-react';
+import { Wallet, ArrowUpRight, ArrowDownLeft, Building, Plus, CheckCircle, Clock, XCircle, CreditCard, Smartphone, Landmark, Phone, Banknote } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
@@ -518,15 +518,15 @@ function PaymentMethodsList() {
   const getMethodIcon = (methodType: string) => {
     switch (methodType) {
       case 'card':
-        return '💳';
+        return <CreditCard className="h-4 w-4" />;
       case 'mobile':
-        return '📱';
+        return <Smartphone className="h-4 w-4" />;
       case 'bank':
-        return '🏦';
+        return <Landmark className="h-4 w-4" />;
       case 'ussd':
-        return '📞';
+        return <Phone className="h-4 w-4" />;
       default:
-        return '💰';
+        return <Banknote className="h-4 w-4" />;
     }
   };
 

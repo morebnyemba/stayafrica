@@ -18,6 +18,7 @@ import {
   Settings,
   TrendingUp,
   Compass,
+  Home,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { AnalyticsDashboard } from '@/components/analytics';
@@ -248,7 +249,7 @@ export function HostDashboard() {
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>
                 <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary-900 dark:text-sand-50 mb-2">
-                  Welcome back, {user?.first_name}! 🏠
+                  Welcome back, {user?.first_name}! <Home className="inline-block h-7 w-7 ml-1" />
                 </h1>
                 <p className="text-base sm:text-lg text-primary-600 dark:text-sand-300">
                   Here&apos;s how your properties are performing

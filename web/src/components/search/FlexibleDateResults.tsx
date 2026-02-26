@@ -1,6 +1,6 @@
 'use client';
 
-import { Calendar, TrendingDown, MapPin } from 'lucide-react';
+import { Calendar, TrendingDown, MapPin, Star } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -147,8 +147,8 @@ export default function FlexibleDateResults({ results, isLoading }: FlexibleDate
                           ${property.price}
                         </span>
                         {property.rating && (
-                          <span className="text-sm text-gray-600">
-                            ⭐ {property.rating.toFixed(1)}
+                          <span className="text-sm text-gray-600 flex items-center gap-1">
+                            <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" /> {property.rating.toFixed(1)}
                           </span>
                         )}
                       </div>

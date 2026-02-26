@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '@/services/api-client';
 import { Input, Button } from '@/components/ui';
-import { MapPin, DollarSign, Home, Image as ImageIcon, X, Upload } from 'lucide-react';
+import { MapPin, DollarSign, Home, Image as ImageIcon, X, Upload, AlertTriangle, CheckCircle } from 'lucide-react';
 
 interface PropertyFormProps {
   initialData?: any;
@@ -572,21 +572,21 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
 
           <div className="space-y-3">
             <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 sm:p-4 text-xs sm:text-sm text-blue-800 dark:text-blue-200">
-              <p className="font-medium mb-1">📍 Location powered by GDAL/PostGIS</p>
+              <p className="font-medium mb-1 flex items-center gap-1.5"><MapPin className="h-4 w-4" /> Location powered by GDAL/PostGIS</p>
               <p className="leading-relaxed">Search for your property or enter the address, then click "Find Coordinates" or "Use Current Location" to populate coordinates.</p>
               <div className="mt-2 pt-2 border-t border-blue-200 dark:border-blue-700 space-y-2">
                 <p className="leading-relaxed">
                   <strong>Note:</strong> To use "Use Current Location", please ensure location services are enabled on your device and you've granted permission to this browser.
                 </p>
                 <p className="leading-relaxed text-yellow-700 dark:text-yellow-300 bg-yellow-50/50 dark:bg-yellow-900/20 px-2 py-1 rounded">
-                  ⚠️ <strong>Important:</strong> Desktop/computer locations may be inaccurate (within several kilometers). For precise coordinates, use a mobile device with GPS or manually enter the address for geocoding.
+                  <AlertTriangle className="h-4 w-4 inline-block mr-1 align-text-bottom" /> <strong>Important:</strong> Desktop/computer locations may be inaccurate (within several kilometers). For precise coordinates, use a mobile device with GPS or manually enter the address for geocoding.
                 </p>
               </div>
             </div>
             {premisesStatus.isOnPremises !== null && (
               <div className={`rounded-lg p-3 sm:p-4 text-xs sm:text-sm border ${premisesStatus.isOnPremises ? 'bg-green-50 border-green-200 text-green-800 dark:bg-green-900/20 dark:border-green-800 dark:text-green-200' : 'bg-yellow-50 border-yellow-200 text-yellow-800 dark:bg-yellow-900/20 dark:border-yellow-800 dark:text-yellow-200'}`}>
                 <p className="font-semibold flex items-center gap-2">
-                  <span className="text-base sm:text-lg">{premisesStatus.isOnPremises ? '✅' : '⚠️'}</span>
+                  <span className="text-base sm:text-lg">{premisesStatus.isOnPremises ? <CheckCircle className="h-5 w-5 text-green-600" /> : <AlertTriangle className="h-5 w-5 text-yellow-600" />}</span>
                   Premises Check
                 </p>
                 <p className="mt-2 leading-relaxed">{premisesStatus.message}</p>

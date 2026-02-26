@@ -1,6 +1,25 @@
 'use client';
 
-import { Filter } from 'lucide-react';
+import {
+  Filter,
+  UtensilsCrossed,
+  Coffee,
+  Beer,
+  Ferris,
+  Landmark,
+  TreePine,
+  Umbrella,
+  ShoppingBag,
+  ShoppingCart,
+  Pill,
+  Hospital,
+  Bus,
+  Train,
+  Plane,
+  Fuel,
+  MapPin,
+} from 'lucide-react';
+import type { ReactNode } from 'react';
 import { POIType } from '@/types/poi-types';
 
 interface POICategoryFilterProps {
@@ -9,23 +28,42 @@ interface POICategoryFilterProps {
   onChange: (categories: POIType[]) => void;
 }
 
+const categoryIcons: Record<POIType, ReactNode> = {
+  restaurant: <UtensilsCrossed className="h-4 w-4" />,
+  cafe: <Coffee className="h-4 w-4" />,
+  bar: <Beer className="h-4 w-4" />,
+  attraction: <Ferris className="h-4 w-4" />,
+  museum: <Landmark className="h-4 w-4" />,
+  park: <TreePine className="h-4 w-4" />,
+  beach: <Umbrella className="h-4 w-4" />,
+  shopping: <ShoppingBag className="h-4 w-4" />,
+  grocery: <ShoppingCart className="h-4 w-4" />,
+  pharmacy: <Pill className="h-4 w-4" />,
+  hospital: <Hospital className="h-4 w-4" />,
+  bus_station: <Bus className="h-4 w-4" />,
+  train_station: <Train className="h-4 w-4" />,
+  airport: <Plane className="h-4 w-4" />,
+  gas_station: <Fuel className="h-4 w-4" />,
+  other: <MapPin className="h-4 w-4" />,
+};
+
 const categoryLabels: Record<POIType, string> = {
-  restaurant: '🍽️ Restaurants',
-  cafe: '☕ Cafés',
-  bar: '🍺 Bars',
-  attraction: '🎡 Attractions',
-  museum: '🏛️ Museums',
-  park: '🌳 Parks',
-  beach: '🏖️ Beaches',
-  shopping: '🛍️ Shopping',
-  grocery: '🛒 Groceries',
-  pharmacy: '💊 Pharmacies',
-  hospital: '🏥 Hospitals',
-  bus_station: '🚌 Bus Stations',
-  train_station: '🚂 Train Stations',
-  airport: '✈️ Airports',
-  gas_station: '⛽ Gas Stations',
-  other: '📍 Other',
+  restaurant: 'Restaurants',
+  cafe: 'Cafés',
+  bar: 'Bars',
+  attraction: 'Attractions',
+  museum: 'Museums',
+  park: 'Parks',
+  beach: 'Beaches',
+  shopping: 'Shopping',
+  grocery: 'Groceries',
+  pharmacy: 'Pharmacies',
+  hospital: 'Hospitals',
+  bus_station: 'Bus Stations',
+  train_station: 'Train Stations',
+  airport: 'Airports',
+  gas_station: 'Gas Stations',
+  other: 'Other',
 };
 
 export default function POICategoryFilter({
@@ -77,7 +115,7 @@ export default function POICategoryFilter({
                 }
               `}
             >
-              {categoryLabels[category] || category}
+              <span className="flex items-center gap-1.5">{categoryIcons[category]} {categoryLabels[category] || category}</span>
             </button>
           );
         })}

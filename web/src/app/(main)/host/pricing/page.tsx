@@ -12,6 +12,7 @@ import {
   Building,
   Percent,
   AlertCircle,
+  Lightbulb,
 } from 'lucide-react';
 
 export default function DynamicPricingPage() {
@@ -187,8 +188,8 @@ export default function DynamicPricingPage() {
 
         {/* Tips Section */}
         <div className="mt-8 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6">
-          <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-3">
-            💡 Pricing Tips
+          <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-3 flex items-center gap-2">
+            <Lightbulb className="h-5 w-5" /> Pricing Tips
           </h3>
           <ul className="space-y-2 text-sm text-blue-800 dark:text-blue-200">
             <li>• Use seasonal pricing to capture peak demand during holidays</li>

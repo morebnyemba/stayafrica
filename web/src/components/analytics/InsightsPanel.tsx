@@ -146,8 +146,8 @@ export const InsightsPanel: React.FC<InsightsPanelProps> = ({
                       {/* Recommendation */}
                       {insight.recommendation && (
                         <div className={`mt-3 p-3 rounded-md bg-white/50 dark:bg-black/20`}>
-                          <p className={`text-sm font-medium mb-1 ${styles.title}`}>
-                            💡 Recommendation
+                          <p className={`text-sm font-medium mb-1 flex items-center gap-1.5 ${styles.title}`}>
+                            <Lightbulb className="h-4 w-4" /> Recommendation
                           </p>
                           <p className={`text-sm ${styles.text}`}>
                             {insight.recommendation}
