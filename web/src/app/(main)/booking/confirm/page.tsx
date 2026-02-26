@@ -43,6 +43,7 @@ export default function BookingConfirmPage() {
 
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [selectedProvider, setSelectedProvider] = useState<string>('');
+  const [isCreatingBooking, setIsCreatingBooking] = useState(false);
 
     // Fetch fee configuration
     const { data: feeConfig, isLoading: loadingFees } = useFeeConfiguration();
@@ -83,7 +84,8 @@ export default function BookingConfirmPage() {
   // Contact Host logic
   const [contactingHost, setContactingHost] = useState(false);
   const contactHost = async () => {
-    if (!property || !property.host_id || !user?.id) {
+    const hostId = property?.host?.id || property?.host_id;
+    if (!property || !hostId || !user?.id) {
       toast.error('Host or user information missing');
       return;
     }
@@ -91,8 +93,8 @@ export default function BookingConfirmPage() {
     try {
       // Create a new conversation with the host
       await apiClient.createConversation({
-        participants: [parseInt(property.host_id), parseInt(user.id)],
-        property: parseInt(property.id),
+        participants: [Number(hostId), Number(user.id)],
+        property: Number(property.id),
         subject: `Inquiry about ${property.title}`,
       });
       toast.success('Conversation started!');
@@ -351,11 +353,43 @@ export default function BookingConfirmPage() {
                 </div>
 
                 <button
-                  disabled={!agreedToTerms}
+                  onClick={async () => {
+                    if (!agreedToTerms || !selectedProvider) {
+                      if (!selectedProvider) toast.error('Please select a payment method');
+                      if (!agreedToTerms) toast.error('Please agree to the terms and conditions');
+                      return;
+                    }
+                    setIsCreatingBooking(true);
+                    try {
+                      const response = await apiClient.createBooking({
+                        rental_property: Number(propertyId),
+                        check_in: checkIn,
+                        check_out: checkOut,
+                        cleaning_fee: costs.cleaningFee || 0,
+                      });
+                      const booking = response.data;
+                      toast.success('Booking created! Redirecting to payment...');
+                      router.push(
+                        `/booking/payment?bookingId=${booking.id}&provider=${selectedProvider}`
+                      );
+                    } catch (error: any) {
+                      const msg = error.response?.data?.detail
+                        || error.response?.data?.non_field_errors?.[0]
+                        || error.response?.data?.error
+                        || 'Failed to create booking. Please try again.';
+                      toast.error(msg);
+                    } finally {
+                      setIsCreatingBooking(false);
+                    }
+                  }}
+                  disabled={!agreedToTerms || !selectedProvider || isCreatingBooking}
                   className="w-full bg-secondary-600 hover:bg-secondary-700 dark:bg-secondary-700 dark:hover:bg-secondary-600 text-white font-medium py-3 px-4 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                  <CreditCard className="w-5 h-5" />
-                  Confirm and Pay
+                  {isCreatingBooking ? (
+                    <><Loader2 className="w-5 h-5 animate-spin" /> Creating Booking...</>
+                  ) : (
+                    <><CreditCard className="w-5 h-5" /> Confirm and Pay</>
+                  )}
                 </button>
 
                 <p className="text-xs text-center text-primary-600 dark:text-sand-400 mt-4">
