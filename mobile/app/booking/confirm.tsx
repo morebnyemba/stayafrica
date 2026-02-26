@@ -8,36 +8,6 @@ import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-interface ProviderItem {
-  id: string;
-  name: string;
-  description: string;
-  icon: keyof typeof Ionicons.glyphMap;
-  category: 'regional' | 'international';
-}
-
-const providerIcons: Record<string, keyof typeof Ionicons.glyphMap> = {
-  paynow: 'phone-portrait',
-  paystack: 'card',
-  flutterwave: 'card',
-  stripe: 'card',
-  paypal: 'logo-paypal',
-  cash_on_arrival: 'cash',
-  mpesa: 'phone-portrait',
-  ozow: 'swap-horizontal',
-};
-
-const providerDescriptions: Record<string, string> = {
-  paynow: 'EcoCash, Visa, Mastercard',
-  paystack: 'Cards & bank transfer',
-  flutterwave: 'Cards & mobile money',
-  stripe: 'Credit or debit card',
-  paypal: 'Pay with PayPal',
-  cash_on_arrival: 'Pay cash when you arrive',
-  mpesa: 'M-Pesa mobile money',
-  ozow: 'Instant EFT',
-};
-
 export default function BookingConfirmScreen() {
   const router = useRouter();
   const { isAuthenticated, user } = useAuth();
@@ -49,7 +19,6 @@ export default function BookingConfirmScreen() {
   const guests = parseInt(params.guests as string || '1');
 
   const [agreedToTerms, setAgreedToTerms] = useState(false);
-  const [selectedProvider, setSelectedProvider] = useState<string>('');
   const [isCreatingBooking, setIsCreatingBooking] = useState(false);
 
   // Calculate nights
@@ -84,28 +53,9 @@ export default function BookingConfirmScreen() {
   const serviceFee = basePrice * 0.10; // 10% service fee
   const total = basePrice + serviceFee + cleaningFee;
 
-  // Fetch available payment providers
-  const { data: providersData, isLoading: loadingProviders } = useQuery({
-    queryKey: ['payment-providers', user?.country_of_residence],
-    queryFn: () => apiClient.getAvailableProviders(user?.country_of_residence),
-    enabled: isAuthenticated,
-  });
-
-  const providers: ProviderItem[] = (providersData?.providers || []).map((p: { id: string; name: string; category: 'regional' | 'international' }) => ({
-    id: p.id,
-    name: p.name,
-    description: providerDescriptions[p.id] || p.name,
-    icon: providerIcons[p.id] || 'card',
-    category: p.category,
-  }));
-
-  const regionalProviders = providers.filter(p => p.category === 'regional');
-  const internationalProviders = providers.filter(p => p.category === 'international');
-
   const handleConfirmBooking = async () => {
-    if (!agreedToTerms || !selectedProvider) {
-      if (!selectedProvider) Alert.alert('Error', 'Please select a payment method');
-      else if (!agreedToTerms) Alert.alert('Error', 'Please agree to the terms and conditions');
+    if (!agreedToTerms) {
+      Alert.alert('Error', 'Please agree to the terms and conditions');
       return;
     }
 
@@ -127,7 +77,6 @@ export default function BookingConfirmScreen() {
           checkIn,
           checkOut,
           guests: guests.toString(),
-          provider: selectedProvider,
           total: total.toString(),
         },
       });
@@ -309,87 +258,6 @@ export default function BookingConfirmScreen() {
           </View>
         </View>
 
-        {/* Payment Method Selection */}
-        <View className="bg-white rounded-2xl p-4 mb-4" style={{
-          shadowColor: '#122F26',
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.08,
-          shadowRadius: 8,
-          elevation: 4,
-        }}>
-          <Text className="text-lg font-bold text-forest mb-3">Payment Method</Text>
-
-          {loadingProviders ? (
-            <ActivityIndicator color="#122F26" />
-          ) : providers.length === 0 ? (
-            <Text className="text-moss text-center py-4">No payment providers available for your region.</Text>
-          ) : (
-            <>
-              {regionalProviders.length > 0 && (
-                <View className="mb-3">
-                  <View className="flex-row items-center mb-2">
-                    <Ionicons name="location" size={16} color="#5A7A6C" />
-                    <Text className="text-sm font-semibold text-moss ml-1">Local Payment Methods</Text>
-                  </View>
-                  {regionalProviders.map((provider) => (
-                    <TouchableOpacity
-                      key={provider.id}
-                      onPress={() => setSelectedProvider(provider.id)}
-                      className={`p-4 rounded-xl mb-2 ${
-                        selectedProvider === provider.id ? 'bg-gold/20' : 'bg-sand-100'
-                      }`}
-                    >
-                      <View className="flex-row justify-between items-center">
-                        <View className="flex-row items-center flex-1">
-                          <Ionicons name={provider.icon} size={20} color="#122F26" style={{ marginRight: 10 }} />
-                          <View>
-                            <Text className="font-semibold text-forest">{provider.name}</Text>
-                            <Text className="text-sm text-moss">{provider.description}</Text>
-                          </View>
-                        </View>
-                        {selectedProvider === provider.id && (
-                          <Ionicons name="checkmark-circle" size={24} color="#D9B168" />
-                        )}
-                      </View>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              )}
-
-              {internationalProviders.length > 0 && (
-                <View>
-                  <View className="flex-row items-center mb-2">
-                    <Ionicons name="globe" size={16} color="#5A7A6C" />
-                    <Text className="text-sm font-semibold text-moss ml-1">International Payment Methods</Text>
-                  </View>
-                  {internationalProviders.map((provider) => (
-                    <TouchableOpacity
-                      key={provider.id}
-                      onPress={() => setSelectedProvider(provider.id)}
-                      className={`p-4 rounded-xl mb-2 ${
-                        selectedProvider === provider.id ? 'bg-gold/20' : 'bg-sand-100'
-                      }`}
-                    >
-                      <View className="flex-row justify-between items-center">
-                        <View className="flex-row items-center flex-1">
-                          <Ionicons name={provider.icon} size={20} color="#122F26" style={{ marginRight: 10 }} />
-                          <View>
-                            <Text className="font-semibold text-forest">{provider.name}</Text>
-                            <Text className="text-sm text-moss">{provider.description}</Text>
-                          </View>
-                        </View>
-                        {selectedProvider === provider.id && (
-                          <Ionicons name="checkmark-circle" size={24} color="#D9B168" />
-                        )}
-                      </View>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              )}
-            </>
-          )}
-        </View>
-
         {/* Price Breakdown */}
         <View className="bg-white rounded-2xl p-4 mb-4" style={{
           shadowColor: '#122F26',
@@ -446,9 +314,9 @@ export default function BookingConfirmScreen() {
         {/* Confirm Button */}
         <TouchableOpacity
           onPress={handleConfirmBooking}
-          disabled={!agreedToTerms || !selectedProvider || isCreatingBooking}
+          disabled={!agreedToTerms || isCreatingBooking}
           className={`rounded-2xl overflow-hidden ${
-            (!agreedToTerms || !selectedProvider || isCreatingBooking) ? 'opacity-50' : ''
+            (!agreedToTerms || isCreatingBooking) ? 'opacity-50' : ''
           }`}
         >
           <LinearGradient
@@ -470,8 +338,8 @@ export default function BookingConfirmScreen() {
                 </>
               ) : (
                 <>
-                  <Ionicons name="card" size={20} color="#122F26" />
-                  <Text className="text-forest font-bold text-base ml-2">Confirm and Pay</Text>
+                  <Ionicons name="checkmark-circle" size={20} color="#122F26" />
+                  <Text className="text-forest font-bold text-base ml-2">Confirm Booking</Text>
                 </>
               )}
             </View>

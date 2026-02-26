@@ -26,8 +26,7 @@ export default function BookingPaymentPage() {
   const { user } = useAuth();
   
   const bookingId = searchParams.get('bookingId');
-  const providerFromConfirm = searchParams.get('provider');
-  const [selectedProvider, setSelectedProvider] = useState<string>(providerFromConfirm || '');
+  const [selectedProvider, setSelectedProvider] = useState<string>('');
 
   // Fetch booking details
   const { data: booking, isLoading: loadingBooking, isError: bookingError } = useQuery({

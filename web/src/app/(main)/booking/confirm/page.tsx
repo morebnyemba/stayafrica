@@ -8,16 +8,9 @@ import { useAuth } from '@/store/auth-store';
 import { useFeeConfiguration, calculateBookingCost } from '@/hooks/use-fees';
 import dynamic from 'next/dynamic';
 const ProtectedRoute = dynamic(() => import('@/components/auth/protected-route').then(m => m.ProtectedRoute), { ssr: false });
-import { MapPin, Calendar, Users, CreditCard, ArrowLeft, Loader2, AlertCircle, CheckCircle } from 'lucide-react';
+import { MapPin, Calendar, Users, ArrowLeft, Loader2, AlertCircle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import Link from 'next/link';
-
-interface PaymentProvider {
-  id: string;
-  name: string;
-  description: string;
-  icon?: any;
-}
 
 export default function BookingConfirmPage() {
   const router = useRouter();
@@ -42,7 +35,6 @@ export default function BookingConfirmPage() {
   };
 
   const [agreedToTerms, setAgreedToTerms] = useState(false);
-  const [selectedProvider, setSelectedProvider] = useState<string>('');
   const [isCreatingBooking, setIsCreatingBooking] = useState(false);
 
     // Fetch fee configuration
@@ -70,17 +62,6 @@ export default function BookingConfirmPage() {
   if (property && feeConfig && nights > 0) {
     costs = calculateBookingCost(property.price_per_night, nights, feeConfig, property.cleaning_fee);
   }
-  // Fetch available payment providers based on user's country
-  const userCountry = user?.country_of_residence || 'International';
-  const { data: providersData, isLoading: loadingProviders } = useQuery({
-    queryKey: ['providers', userCountry],
-    queryFn: async () => {
-      const response = await apiClient.getAvailableProviders(userCountry);
-      return (response.data?.providers || []) as PaymentProvider[];
-    },
-    enabled: !!user,
-  });
-
   // Contact Host logic
   const [contactingHost, setContactingHost] = useState(false);
   const contactHost = async () => {
@@ -108,7 +89,7 @@ export default function BookingConfirmPage() {
   };
 
 
-  if (loadingProperty || loadingFees || loadingProviders) {
+  if (loadingProperty || loadingFees) {
     return (
       <ProtectedRoute>
         <div className="min-h-screen bg-sand-100 dark:bg-primary-900 flex items-center justify-center">
@@ -141,41 +122,6 @@ export default function BookingConfirmPage() {
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Left column - Booking details */}
             <div className="lg:col-span-2 space-y-6">
-                            {/* Payment method selection */}
-                            <section className="card p-6">
-                              <h2 className="text-xl font-semibold text-primary-900 dark:text-sand-50 mb-4">
-                                Payment Method
-                              </h2>
-                              {providersData && Array.isArray(providersData) && providersData.length > 0 ? (
-                                <div className="space-y-3">
-                                  {providersData.map((provider: PaymentProvider) => (
-                                    <button
-                                      key={provider.id}
-                                      type="button"
-                                      onClick={() => setSelectedProvider(provider.id)}
-                                      className={`w-full flex items-center gap-4 p-4 rounded-lg border transition focus:outline-none ${
-                                        selectedProvider === provider.id
-                                          ? 'border-secondary-500 bg-secondary-50 dark:bg-secondary-900/20'
-                                          : 'border-primary-200 dark:border-primary-700'
-                                      }`}
-                                    >
-                                      <div className="flex-1 text-left">
-                                        <div className="font-semibold text-primary-900 dark:text-sand-50">{provider.name}</div>
-                                        <div className="text-sm text-primary-600 dark:text-sand-300">{provider.description}</div>
-                                      </div>
-                                      {selectedProvider === provider.id && (
-                                        <CheckCircle className="w-5 h-5 text-secondary-600 dark:text-secondary-400" />
-                                      )}
-                                    </button>
-                                  ))}
-                                </div>
-                              ) : (
-                                <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
-                                  <AlertCircle className="w-5 h-5" />
-                                  <span>No payment methods available for your region.</span>
-                                </div>
-                              )}
-                            </section>
               {/* Property card */}
               <section className="card p-6">
                 <h2 className="text-xl font-semibold text-primary-900 dark:text-sand-50 mb-4">
@@ -354,9 +300,8 @@ export default function BookingConfirmPage() {
 
                 <button
                   onClick={async () => {
-                    if (!agreedToTerms || !selectedProvider) {
-                      if (!selectedProvider) toast.error('Please select a payment method');
-                      if (!agreedToTerms) toast.error('Please agree to the terms and conditions');
+                    if (!agreedToTerms) {
+                      toast.error('Please agree to the terms and conditions');
                       return;
                     }
                     setIsCreatingBooking(true);
@@ -371,7 +316,7 @@ export default function BookingConfirmPage() {
                       const booking = response.data;
                       toast.success('Booking created! Redirecting to payment...');
                       router.push(
-                        `/booking/payment?bookingId=${booking.id}&provider=${selectedProvider}`
+                        `/booking/payment?bookingId=${booking.id}`
                       );
                     } catch (error: any) {
                       const msg = error.response?.data?.detail
@@ -383,13 +328,13 @@ export default function BookingConfirmPage() {
                       setIsCreatingBooking(false);
                     }
                   }}
-                  disabled={!agreedToTerms || !selectedProvider || isCreatingBooking}
+                  disabled={!agreedToTerms || isCreatingBooking}
                   className="w-full bg-secondary-600 hover:bg-secondary-700 dark:bg-secondary-700 dark:hover:bg-secondary-600 text-white font-medium py-3 px-4 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {isCreatingBooking ? (
                     <><Loader2 className="w-5 h-5 animate-spin" /> Creating Booking...</>
                   ) : (
-                    <><CreditCard className="w-5 h-5" /> Confirm and Pay</>
+                    'Confirm Booking'
                   )}
                 </button>
 
