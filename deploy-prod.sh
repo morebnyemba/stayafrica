@@ -60,13 +60,9 @@ else
 fi
 echo ""
 
-# Step 8: Generate migrations + apply
-echo -e "\033[0;33m📝 Step 8a: Generating migration files...\033[0m"
-docker compose -f docker-compose.prod.yml exec -T backend python manage.py makemigrations users properties bookings payments reviews messaging admin_dashboard experiences notifications health --noinput || true
-echo -e "\033[0;33m🔧 Step 8b: Fixing migration history...\033[0m"
-docker compose -f docker-compose.prod.yml exec -T backend python scripts/fix_migration_sequence.py
-echo -e "\033[0;33m🗄️  Step 8c: Running database migrations...\033[0m"
-docker compose -f docker-compose.prod.yml exec -T backend python manage.py migrate --fake-initial --noinput
+# Step 8: Run migrations
+echo -e "\033[0;33m🗄️  Step 8: Running database migrations...\033[0m"
+docker compose -f docker-compose.prod.yml exec -T backend python manage.py migrate --noinput
 echo -e "\033[0;32m✅ Migrations completed\033[0m"
 echo ""
 
