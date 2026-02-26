@@ -40,6 +40,7 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
+    lookup_value_regex = r'\d+'  # Only match numeric IDs, so /users/verification/ won't conflict
     
     def get_permissions(self):
         if self.action in ['create', 'register']:
