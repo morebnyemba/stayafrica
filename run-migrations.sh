@@ -39,9 +39,19 @@ fi
 echo "✅ Backend container is running"
 echo ""
 
+# Ensure migration files exist for local apps
+echo "📝 Generating migration files..."
+$DOCKER_COMPOSE exec backend python manage.py makemigrations users properties bookings payments reviews messaging admin_dashboard experiences notifications health --noinput || true
+echo ""
+
+# Clean stale migration records
+echo "🔧 Fixing migration history..."
+$DOCKER_COMPOSE exec backend python scripts/fix_migration_sequence.py
+echo ""
+
 # Run migrations
 echo "🔄 Running database migrations..."
-if $DOCKER_COMPOSE exec backend python manage.py migrate; then
+if $DOCKER_COMPOSE exec backend python manage.py migrate --fake-initial; then
     echo ""
     echo "✅ Migrations completed successfully"
     echo ""

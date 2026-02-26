@@ -10,11 +10,16 @@ until nc -z -w1 $DB_HOST $DB_PORT; do
 done
 
 echo "✅ Database ready"
-echo "🔧 Fixing migration sequence if needed..."
+
+# Generate migration files for local apps (they are not committed to the repo)
+echo "📝 Generating migration files..."
+python manage.py makemigrations users properties bookings payments reviews messaging admin_dashboard experiences notifications health --noinput || true
+
+echo "🔧 Fixing migration sequence / stale records if needed..."
 python scripts/fix_migration_sequence.py
 
 echo "🔄 Running database migrations..."
-if ! python manage.py migrate --noinput; then
+if ! python manage.py migrate --fake-initial --noinput; then
   echo "❌ Migration failed"
   exit 1
 fi
