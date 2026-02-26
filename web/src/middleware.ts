@@ -4,6 +4,7 @@ import type { NextRequest } from 'next/server';
 // Define which routes require authentication
 const protectedRoutes = [
   '/dashboard',
+  '/booking',
   '/bookings',
   '/profile',
   '/messages',
@@ -46,7 +47,8 @@ export function middleware(request: NextRequest) {
   if (isAdminRoute) {
     if (!isAuthenticated) {
       const url = new URL('/login', request.url);
-      url.searchParams.set('redirect', pathname);
+      const fullPath = request.nextUrl.search ? `${pathname}${request.nextUrl.search}` : pathname;
+      url.searchParams.set('redirect', fullPath);
       url.searchParams.set('error', 'admin_access_required');
       return NextResponse.redirect(url);
     }
@@ -58,12 +60,19 @@ export function middleware(request: NextRequest) {
   // Redirect to login if accessing protected route without authentication
   if (isProtectedRoute && !isAuthenticated) {
     const url = new URL('/login', request.url);
-    url.searchParams.set('redirect', pathname);
+    // Preserve the full path + query string so user returns here after login
+    const fullPath = request.nextUrl.search ? `${pathname}${request.nextUrl.search}` : pathname;
+    url.searchParams.set('redirect', fullPath);
     return NextResponse.redirect(url);
   }
 
   // Redirect to dashboard if accessing auth routes while authenticated
   if (isAuthRoute && isAuthenticated) {
+    // If user was being redirected, honour that destination
+    const redirect = request.nextUrl.searchParams.get('redirect');
+    if (redirect && redirect.startsWith('/')) {
+      return NextResponse.redirect(new URL(redirect, request.url));
+    }
     return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 

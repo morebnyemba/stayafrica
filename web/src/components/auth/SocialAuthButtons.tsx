@@ -17,9 +17,10 @@ interface ProviderConfig {
 interface SocialAuthButtonsProps {
   mode?: 'signin' | 'signup';
   onSuccess?: (data: any) => void;
+  redirectUrl?: string;
 }
 
-export default function SocialAuthButtons({ mode: _mode = 'signin', onSuccess: _onSuccess }: SocialAuthButtonsProps) {
+export default function SocialAuthButtons({ mode: _mode = 'signin', onSuccess: _onSuccess, redirectUrl }: SocialAuthButtonsProps) {
   const [providers, setProviders] = useState<Record<string, ProviderConfig>>({});
 
   useEffect(() => {
@@ -30,6 +31,13 @@ export default function SocialAuthButtons({ mode: _mode = 'signin', onSuccess: _
       .catch(() => {}); // silent — buttons will show "not configured" on click
   }, []);
 
+  // Persist the intended redirect URL so the OAuth callback can use it
+  const saveRedirect = () => {
+    if (redirectUrl && redirectUrl !== '/dashboard') {
+      localStorage.setItem('auth_redirect', redirectUrl);
+    }
+  };
+
   const handleGoogleAuth = () => {
     const redirectUri = encodeURIComponent(`${window.location.origin}/auth/callback/google`);
     const clientId = providers.google?.client_id;
@@ -39,6 +47,7 @@ export default function SocialAuthButtons({ mode: _mode = 'signin', onSuccess: _
       return;
     }
 
+    saveRedirect();
     window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=email%20profile`;
   };
 
@@ -51,6 +60,7 @@ export default function SocialAuthButtons({ mode: _mode = 'signin', onSuccess: _
       return;
     }
 
+    saveRedirect();
     window.location.href = `https://www.facebook.com/v13.0/dialog/oauth?client_id=${appId}&redirect_uri=${redirectUri}&response_type=code&scope=email,public_profile`;
   };
 
@@ -63,6 +73,7 @@ export default function SocialAuthButtons({ mode: _mode = 'signin', onSuccess: _
       return;
     }
 
+    saveRedirect();
     window.location.href = `https://appleid.apple.com/auth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=email%20name`;
   };
 

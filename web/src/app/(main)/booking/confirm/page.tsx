@@ -70,15 +70,14 @@ export default function BookingConfirmPage() {
     costs = calculateBookingCost(property.price_per_night, nights, feeConfig, property.cleaning_fee);
   }
   // Fetch available payment providers based on user's country
-  const userCountry = user ? user.country_of_residence : undefined;
+  const userCountry = user?.country_of_residence || 'International';
   const { data: providersData, isLoading: loadingProviders } = useQuery({
     queryKey: ['providers', userCountry],
     queryFn: async () => {
-      if (!userCountry) return [];
       const response = await apiClient.getAvailableProviders(userCountry);
-      return response.data;
+      return (response.data?.providers || []) as PaymentProvider[];
     },
-    enabled: !!userCountry,
+    enabled: !!user,
   });
 
   // Contact Host logic
@@ -145,7 +144,7 @@ export default function BookingConfirmPage() {
                               <h2 className="text-xl font-semibold text-primary-900 dark:text-sand-50 mb-4">
                                 Payment Method
                               </h2>
-                              {providersData && providersData.length > 0 ? (
+                              {providersData && Array.isArray(providersData) && providersData.length > 0 ? (
                                 <div className="space-y-3">
                                   {providersData.map((provider: PaymentProvider) => (
                                     <button

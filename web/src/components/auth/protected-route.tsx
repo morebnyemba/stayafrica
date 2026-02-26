@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/store/auth-store';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -14,19 +14,26 @@ interface ProtectedRouteProps {
 export function ProtectedRoute({ children, requireAuth = true, requiredRole }: ProtectedRouteProps) {
   const { isAuthenticated, isLoading, user } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     if (isLoading) return;
 
     if (requireAuth && !isAuthenticated) {
-      router.push('/login');
+      // Preserve the current URL so the user returns here after login
+      const currentUrl = searchParams.toString()
+        ? `${pathname}?${searchParams.toString()}`
+        : pathname;
+      const loginUrl = `/login?redirect=${encodeURIComponent(currentUrl)}`;
+      router.push(loginUrl);
       return;
     }
 
     if (requiredRole && user?.role !== requiredRole) {
       router.push(requiredRole === 'host' ? '/host' : '/');
     }
-  }, [isAuthenticated, isLoading, requireAuth, requiredRole, router, user?.role]);
+  }, [isAuthenticated, isLoading, requireAuth, requiredRole, router, user?.role, pathname, searchParams]);
 
   if (isLoading) {
     return (

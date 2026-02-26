@@ -77,9 +77,12 @@ export default function OAuthCallbackPage() {
           setUser(userData);
           setStatus('success');
 
-          // Redirect to dashboard after brief delay
+          // Redirect to the page the user was trying to access, or dashboard
+          const savedRedirect = localStorage.getItem('auth_redirect');
+          const destination = savedRedirect && savedRedirect.startsWith('/') ? savedRedirect : '/dashboard';
+          localStorage.removeItem('auth_redirect');
           setTimeout(() => {
-            window.location.replace('/dashboard');
+            window.location.replace(destination);
           }, 1500);
         } else {
           const errorData = await response.json();

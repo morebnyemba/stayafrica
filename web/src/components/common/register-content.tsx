@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/store/auth-store';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Mail, Lock, User, Phone, MapPin, CheckCircle2, ArrowLeft, Luggage, Home } from 'lucide-react';
 import { toast } from 'react-hot-toast';
@@ -14,8 +15,18 @@ import { AuthFooter } from '@/components/auth/AuthFooter';
 
 type Step = 1 | 2 | 3;
 
+function getRedirectUrl(searchParams: URLSearchParams): string {
+  const redirect = searchParams.get('redirect');
+  if (redirect && redirect.startsWith('/')) {
+    return redirect;
+  }
+  return '/dashboard';
+}
+
 export function RegisterContent() {
   const { register } = useAuth();
+  const searchParams = useSearchParams();
+  const redirectUrl = getRedirectUrl(searchParams);
   const [isLoading, setIsLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState<Step>(1);
   const [availableCountries, setAvailableCountries] = useState<string[]>([]);
@@ -142,7 +153,7 @@ export function RegisterContent() {
       });
       toast.success('Account created successfully!');
       // Force a full-page navigation so middleware/SSR see the new cookie
-      window.location.replace('/dashboard');
+      window.location.replace(redirectUrl);
     } catch (error) {
       toast.error('Registration failed. Please try again.');
       console.error('Registration error:', error);
@@ -381,7 +392,7 @@ export function RegisterContent() {
           {currentStep === 1 && (
             <>
               <AuthDivider text="or" bgClassName="bg-white dark:bg-primary-900" />
-              <SocialAuthButtons mode="signup" />
+              <SocialAuthButtons mode="signup" redirectUrl={redirectUrl} />
             </>
           )}
 
@@ -389,7 +400,7 @@ export function RegisterContent() {
           <div className="mt-6 text-center">
             <p className="text-sm text-primary-600 dark:text-sand-400">
               Already have an account?{' '}
-              <Link href="/login" className="text-secondary-600 dark:text-secondary-400 hover:underline font-medium">
+              <Link href={redirectUrl !== '/dashboard' ? `/login?redirect=${encodeURIComponent(redirectUrl)}` : '/login'} className="text-secondary-600 dark:text-secondary-400 hover:underline font-medium">
                 Sign In
               </Link>
             </p>

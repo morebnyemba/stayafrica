@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useAuth } from '@/store/auth-store';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Mail, Lock } from 'lucide-react';
 import { Input, Button } from '@/components/ui';
@@ -12,8 +13,19 @@ import TwoFactorVerify from '@/components/auth/TwoFactorVerify';
 import { AuthDivider } from '@/components/auth/AuthDivider';
 import { AuthFooter } from '@/components/auth/AuthFooter';
 
+function getRedirectUrl(searchParams: URLSearchParams): string {
+  const redirect = searchParams.get('redirect');
+  // Only allow relative paths to prevent open-redirect attacks
+  if (redirect && redirect.startsWith('/')) {
+    return redirect;
+  }
+  return '/dashboard';
+}
+
 export function LoginContent() {
   const { login, setUser, twoFactorPending, clearTwoFactorPending } = useAuth();
+  const searchParams = useSearchParams();
+  const redirectUrl = getRedirectUrl(searchParams);
   const [isLoading, setIsLoading] = useState(false);
   const [showTwoFactor, setShowTwoFactor] = useState(false);
   const [formData, setFormData] = useState({
@@ -50,8 +62,8 @@ export function LoginContent() {
       toast.success('Welcome back!');
       
       // Force a full-page navigation so middleware/SSR see the new cookie
-      // This avoids needing a manual refresh after login
-      window.location.replace('/dashboard');
+      // Redirect to the page the user was trying to access, or dashboard
+      window.location.replace(redirectUrl);
     } catch (error: any) {
       if (error?.twoFactorRequired || error?.message === '2FA_REQUIRED') {
         setShowTwoFactor(true);
@@ -97,7 +109,7 @@ export function LoginContent() {
               }
               clearTwoFactorPending();
               toast.success('Welcome back!');
-              window.location.replace('/dashboard');
+              window.location.replace(redirectUrl);
             }}
             onBack={() => {
               setShowTwoFactor(false);
@@ -186,13 +198,13 @@ export function LoginContent() {
           <AuthDivider text="or" />
 
           {/* Social Auth */}
-          <SocialAuthButtons mode="signin" />
+          <SocialAuthButtons mode="signin" redirectUrl={redirectUrl} />
 
           {/* Sign Up Link */}
           <div className="mt-6 text-center">
             <p className="text-sm text-primary-600 dark:text-sand-400 mb-3">New to StayAfrica?</p>
             <Link
-              href="/register"
+              href={redirectUrl !== '/dashboard' ? `/register?redirect=${encodeURIComponent(redirectUrl)}` : '/register'}
               className="inline-flex w-full items-center justify-center rounded-lg bg-secondary-500 px-6 py-3 text-lg font-medium text-neutral-900 hover:bg-secondary-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-secondary-500"
             >
               Create an Account
