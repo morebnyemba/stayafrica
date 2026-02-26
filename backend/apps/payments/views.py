@@ -30,15 +30,20 @@ class PaymentViewSet(viewsets.ModelViewSet):
     
     @action(detail=False, methods=['get'])
     def providers(self, request):
-        """Get available payment providers for the current user's country"""
+        """Get available payment providers for the current user's country.
+
+        Returns providers grouped by category (regional / international)
+        so the frontend can display them in separate sections.
+        """
         payment_service = PaymentGatewayService()
-        country = getattr(request.user, 'country_of_residence', '') or 'International'
-        provider_ids = payment_service.get_available_providers(country)
-        providers = [
-            {'id': pid, 'name': payment_service.get_provider_label(pid)}
-            for pid in provider_ids
-        ]
-        return Response({'providers': providers, 'country': country})
+        # Prefer the user's stored country; fall back to query param, then 'International'
+        country = (
+            getattr(request.user, 'country_of_residence', None)
+            or request.query_params.get('country', '')
+            or 'International'
+        )
+        detailed = payment_service.get_available_providers_detailed(country)
+        return Response({'providers': detailed, 'country': country})
     
     @action(detail=False, methods=['post'])
     @api_ratelimit(rate='5/m')

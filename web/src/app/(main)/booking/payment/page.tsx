@@ -7,7 +7,7 @@ import { apiClient } from '@/services/api-client';
 import { useAuth } from '@/store/auth-store';
 import dynamic from 'next/dynamic';
 const ProtectedRoute = dynamic(() => import('@/components/auth/protected-route').then(m => m.ProtectedRoute), { ssr: false });
-import { CreditCard, Wallet, DollarSign, CheckCircle, ArrowLeft, AlertCircle, Loader2 } from 'lucide-react';
+import { CreditCard, Wallet, DollarSign, CheckCircle, ArrowLeft, AlertCircle, Loader2, Globe } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import Link from 'next/link';
 import { Button } from '@/components/ui';
@@ -17,6 +17,7 @@ interface PaymentProvider {
   name: string;
   description: string;
   icon: any;
+  category: 'regional' | 'international';
   available: boolean;
 }
 
@@ -43,7 +44,7 @@ export default function BookingPaymentPage() {
     queryKey: ['providers', user?.country_of_residence],
     queryFn: async () => {
       const response = await apiClient.getAvailableProviders(user?.country_of_residence || 'International');
-      const providerList: { id: string; name: string }[] = response.data?.providers || [];
+      const providerList: { id: string; name: string; category?: string }[] = response.data?.providers || [];
       const iconMap: Record<string, any> = {
         paynow: Wallet,
         payfast: CreditCard,
@@ -69,6 +70,7 @@ export default function BookingPaymentPage() {
         name: p.name,
         description: descriptionMap[p.id] || `Pay with ${p.name}`,
         icon: iconMap[p.id] || CreditCard,
+        category: (p.category === 'international' ? 'international' : 'regional') as 'regional' | 'international',
         available: true,
       })) as PaymentProvider[];
     },
@@ -174,49 +176,115 @@ export default function BookingPaymentPage() {
 
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Left column - Payment methods */}
-            <div className="lg:col-span-2 space-y-4">
+            <div className="lg:col-span-2 space-y-6">
               {providersData && providersData.length > 0 ? (
-                providersData.map((provider) => {
-                  const IconComponent = provider.icon;
-                  return (
-                    <button
-                      key={provider.id}
-                      onClick={() => setSelectedProvider(provider.id)}
-                      className={`w-full card p-6 text-left transition hover:shadow-lg ${
-                        selectedProvider === provider.id
-                          ? 'ring-2 ring-secondary-500 dark:ring-secondary-400 bg-secondary-50 dark:bg-secondary-900/20'
-                          : ''
-                      }`}
-                    >
-                      <div className="flex items-start gap-4">
-                        <div className={`p-3 rounded-lg ${
-                          selectedProvider === provider.id
-                            ? 'bg-secondary-100 dark:bg-secondary-800'
-                            : 'bg-primary-100 dark:bg-primary-700'
-                        }`}>
-                          <IconComponent className={`w-6 h-6 ${
-                            selectedProvider === provider.id
-                              ? 'text-secondary-600 dark:text-secondary-400'
-                              : 'text-primary-600 dark:text-sand-400'
-                          }`} />
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between mb-2">
-                            <h3 className="font-semibold text-lg text-primary-900 dark:text-sand-50">
-                              {provider.name}
-                            </h3>
-                            {selectedProvider === provider.id && (
-                              <CheckCircle className="w-5 h-5 text-secondary-600 dark:text-secondary-400" />
-                            )}
-                          </div>
-                          <p className="text-sm text-primary-600 dark:text-sand-300">
-                            {provider.description}
-                          </p>
-                        </div>
+                <>
+                  {/* Regional payment methods */}
+                  {providersData.filter(p => p.category === 'regional').length > 0 && (
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <Wallet className="w-4 h-4 text-primary-500 dark:text-sand-400" />
+                        <h2 className="text-sm font-semibold uppercase tracking-wider text-primary-500 dark:text-sand-400">
+                          Local Payment Methods
+                        </h2>
                       </div>
-                    </button>
-                  );
-                })
+                      {providersData.filter(p => p.category === 'regional').map((provider) => {
+                        const IconComponent = provider.icon;
+                        return (
+                          <button
+                            key={provider.id}
+                            onClick={() => setSelectedProvider(provider.id)}
+                            className={`w-full card p-6 text-left transition hover:shadow-lg ${
+                              selectedProvider === provider.id
+                                ? 'ring-2 ring-secondary-500 dark:ring-secondary-400 bg-secondary-50 dark:bg-secondary-900/20'
+                                : ''
+                            }`}
+                          >
+                            <div className="flex items-start gap-4">
+                              <div className={`p-3 rounded-lg ${
+                                selectedProvider === provider.id
+                                  ? 'bg-secondary-100 dark:bg-secondary-800'
+                                  : 'bg-primary-100 dark:bg-primary-700'
+                              }`}>
+                                <IconComponent className={`w-6 h-6 ${
+                                  selectedProvider === provider.id
+                                    ? 'text-secondary-600 dark:text-secondary-400'
+                                    : 'text-primary-600 dark:text-sand-400'
+                                }`} />
+                              </div>
+                              <div className="flex-1">
+                                <div className="flex items-center justify-between mb-2">
+                                  <h3 className="font-semibold text-lg text-primary-900 dark:text-sand-50">
+                                    {provider.name}
+                                  </h3>
+                                  {selectedProvider === provider.id && (
+                                    <CheckCircle className="w-5 h-5 text-secondary-600 dark:text-secondary-400" />
+                                  )}
+                                </div>
+                                <p className="text-sm text-primary-600 dark:text-sand-300">
+                                  {provider.description}
+                                </p>
+                              </div>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {/* International payment methods */}
+                  {providersData.filter(p => p.category === 'international').length > 0 && (
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <Globe className="w-4 h-4 text-primary-500 dark:text-sand-400" />
+                        <h2 className="text-sm font-semibold uppercase tracking-wider text-primary-500 dark:text-sand-400">
+                          International Payment Methods
+                        </h2>
+                      </div>
+                      {providersData.filter(p => p.category === 'international').map((provider) => {
+                        const IconComponent = provider.icon;
+                        return (
+                          <button
+                            key={provider.id}
+                            onClick={() => setSelectedProvider(provider.id)}
+                            className={`w-full card p-6 text-left transition hover:shadow-lg ${
+                              selectedProvider === provider.id
+                                ? 'ring-2 ring-secondary-500 dark:ring-secondary-400 bg-secondary-50 dark:bg-secondary-900/20'
+                                : ''
+                            }`}
+                          >
+                            <div className="flex items-start gap-4">
+                              <div className={`p-3 rounded-lg ${
+                                selectedProvider === provider.id
+                                  ? 'bg-secondary-100 dark:bg-secondary-800'
+                                  : 'bg-primary-100 dark:bg-primary-700'
+                              }`}>
+                                <IconComponent className={`w-6 h-6 ${
+                                  selectedProvider === provider.id
+                                    ? 'text-secondary-600 dark:text-secondary-400'
+                                    : 'text-primary-600 dark:text-sand-400'
+                                }`} />
+                              </div>
+                              <div className="flex-1">
+                                <div className="flex items-center justify-between mb-2">
+                                  <h3 className="font-semibold text-lg text-primary-900 dark:text-sand-50">
+                                    {provider.name}
+                                  </h3>
+                                  {selectedProvider === provider.id && (
+                                    <CheckCircle className="w-5 h-5 text-secondary-600 dark:text-secondary-400" />
+                                  )}
+                                </div>
+                                <p className="text-sm text-primary-600 dark:text-sand-300">
+                                  {provider.description}
+                                </p>
+                              </div>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </>
               ) : (
                 <div className="card p-8 text-center">
                   <AlertCircle className="w-12 h-12 text-amber-500 mx-auto mb-4" />

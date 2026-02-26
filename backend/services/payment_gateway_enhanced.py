@@ -17,23 +17,40 @@ logger = logging.getLogger(__name__)
 class PaymentGatewayService:
     """Enhanced payment gateway with official SDK support"""
     
+    # Regional providers – these are specific to each country / zone.
+    # Stripe and PayPal are handled separately as INTERNATIONAL_PROVIDERS.
     REGIONAL_PROVIDERS = {
-        'Zimbabwe': ['paynow', 'flutterwave', 'paypal', 'cash_on_arrival'],
-        'South Africa': ['paystack', 'flutterwave', 'paypal', 'ozow'],
-        'Nigeria': ['paystack', 'flutterwave', 'paypal'],
-        'Kenya': ['flutterwave', 'paypal', 'mpesa'],
-        'Ghana': ['paystack', 'flutterwave', 'paypal'],
-        'International': ['stripe', 'paypal', 'flutterwave'],
+        'Zimbabwe': ['paynow', 'flutterwave', 'cash_on_arrival'],
+        'South Africa': ['paystack', 'flutterwave', 'ozow'],
+        'Nigeria': ['paystack', 'flutterwave'],
+        'Kenya': ['flutterwave', 'mpesa'],
+        'Ghana': ['paystack', 'flutterwave'],
+        'Uganda': ['flutterwave'],
+        'Tanzania': ['flutterwave'],
+        'International': [],   # no region-specific methods
     }
-    
-    # Globally available providers that should show up regardless of region
-    GLOBAL_PROVIDERS = ['stripe', 'paypal']
-    
+
+    # International providers shown in EVERY region alongside the regional ones.
+    # Stripe is excluded for Zimbabwe (Paynow already covers cards there).
+    INTERNATIONAL_PROVIDERS = ['stripe', 'paypal']
+    STRIPE_EXCLUDED_COUNTRIES = ['Zimbabwe']
+
+    # ISO-3166 country code aliases → canonical name used in REGIONAL_PROVIDERS
+    COUNTRY_ALIASES = {
+        'ZW': 'Zimbabwe', 'ZWE': 'Zimbabwe',
+        'ZA': 'South Africa', 'ZAF': 'South Africa',
+        'NG': 'Nigeria', 'NGA': 'Nigeria',
+        'KE': 'Kenya', 'KEN': 'Kenya',
+        'GH': 'Ghana', 'GHA': 'Ghana',
+        'UG': 'Uganda', 'UGA': 'Uganda',
+        'TZ': 'Tanzania', 'TZA': 'Tanzania',
+    }
+
     PAYMENT_METHODS = {
         'paynow': 'Paynow (Ecocash/Visa)',
         'paystack': 'Paystack',
         'flutterwave': 'Flutterwave',
-        'stripe': 'Stripe',
+        'stripe': 'Stripe (Card)',
         'paypal': 'PayPal',
         'cash_on_arrival': 'Cash on Arrival',
         'mpesa': 'M-Pesa',
@@ -75,50 +92,88 @@ class PaymentGatewayService:
         self.paypal_client_secret = getattr(self.config, 'paypal_client_secret', '')
         self.paypal_base_url = 'https://api-m.sandbox.paypal.com' if self.paypal_mode == 'sandbox' else 'https://api-m.paypal.com'
     
+    def _resolve_country(self, user_country: str) -> str:
+        """Resolve a raw country input to a canonical name.
+
+        Tries: exact match → case-insensitive → ISO-code alias → 'International'.
+        """
+        raw = (user_country or '').strip()
+        country = raw.title()
+
+        if country in self.REGIONAL_PROVIDERS:
+            return country
+
+        for key in self.REGIONAL_PROVIDERS:
+            if key.lower() == country.lower():
+                return key
+
+        canonical = self.COUNTRY_ALIASES.get(raw.upper())
+        if canonical and canonical in self.REGIONAL_PROVIDERS:
+            return canonical
+
+        return 'International'
+
+    def _is_provider_configured(self, provider: str) -> bool:
+        """Check whether a provider's API keys are set in SystemConfiguration."""
+        checks = {
+            'stripe': lambda: self.config.stripe_secret_key,
+            'paynow': lambda: getattr(self.config, 'paynow_integration_id', ''),
+            'payfast': lambda: getattr(self.config, 'payfast_merchant_id', ''),
+            'ozow': lambda: getattr(self.config, 'ozow_site_code', ''),
+            'flutterwave': lambda: getattr(self.config, 'flutterwave_secret_key', ''),
+            'paystack': lambda: getattr(self.config, 'paystack_secret_key', ''),
+            'paypal': lambda: getattr(self.config, 'paypal_client_id', ''),
+        }
+        check = checks.get(provider)
+        if check:
+            return bool(check())
+        # Providers with no API keys (cash_on_arrival, mpesa) are always available
+        return provider in ['cash_on_arrival', 'mpesa']
+
     def get_available_providers(self, user_country: str) -> list:
-        """Get available payment providers for a specific country"""
-        # Normalize country for better matching
-        country = (user_country or '').strip().title()
-        
-        # Get regional providers, fallback to International if not found
-        providers = self.REGIONAL_PROVIDERS.get(country)
-        if not providers:
-            # Try case-insensitive lookup
-            for key, val in self.REGIONAL_PROVIDERS.items():
-                if key.lower() == country.lower():
-                    providers = val
-                    break
-        
-        if not providers:
-            providers = self.REGIONAL_PROVIDERS['International']
-            
-        # Ensure global providers are always included
-        for global_provider in self.GLOBAL_PROVIDERS:
-            if global_provider not in providers:
-                providers.append(global_provider)
-                
-        # Only return providers that are actually configured in the admin panel
-        configured_providers = []
-        for provider in providers:
-            if provider == 'stripe' and self.config.stripe_secret_key:
-                configured_providers.append(provider)
-            elif provider == 'paynow' and getattr(self.config, 'paynow_integration_id', ''):
-                configured_providers.append(provider)
-            elif provider == 'payfast' and getattr(self.config, 'payfast_merchant_id', ''):
-                configured_providers.append(provider)
-            elif provider == 'ozow' and getattr(self.config, 'ozow_site_code', ''):
-                configured_providers.append(provider)
-            elif provider == 'flutterwave' and getattr(self.config, 'flutterwave_secret_key', ''):
-                configured_providers.append(provider)
-            elif provider == 'paystack' and getattr(self.config, 'paystack_secret_key', ''):
-                configured_providers.append(provider)
-            elif provider == 'paypal' and getattr(self.config, 'paypal_client_id', ''):
-                configured_providers.append(provider)
-            elif provider in ['cash_on_arrival', 'mpesa']: # Assuming these require no API keys for now
-                configured_providers.append(provider)
-                
-        return configured_providers
-    
+        """Return a flat list of configured provider IDs (kept for backward compat)."""
+        result = self.get_available_providers_detailed(user_country)
+        return [p['id'] for p in result]
+
+    def get_available_providers_detailed(self, user_country: str) -> list:
+        """Return providers with category metadata.
+
+        Each entry: ``{"id": "stripe", "name": "...", "category": "international"}``
+
+        Regional providers come from REGIONAL_PROVIDERS for the resolved
+        country. International providers (Stripe, PayPal) are appended
+        for every region, except Stripe is excluded for countries in
+        STRIPE_EXCLUDED_COUNTRIES.
+        """
+        country = self._resolve_country(user_country)
+        regional = list(self.REGIONAL_PROVIDERS.get(country, []))
+
+        # Build international list
+        international = []
+        for ip in self.INTERNATIONAL_PROVIDERS:
+            if ip == 'stripe' and country in self.STRIPE_EXCLUDED_COUNTRIES:
+                continue
+            international.append(ip)
+
+        # Filter to only configured providers and attach metadata
+        result = []
+        for pid in regional:
+            if self._is_provider_configured(pid):
+                result.append({
+                    'id': pid,
+                    'name': self.get_provider_label(pid),
+                    'category': 'regional',
+                })
+        for pid in international:
+            if self._is_provider_configured(pid):
+                result.append({
+                    'id': pid,
+                    'name': self.get_provider_label(pid),
+                    'category': 'international',
+                })
+
+        return result
+
     def get_provider_label(self, provider: str) -> str:
         """Get display name for provider"""
         return self.PAYMENT_METHODS.get(provider, provider)
