@@ -14,7 +14,8 @@ from apps.users.verification_serializers import (
     IdentityVerificationSerializer,
     VerificationReviewSerializer,
     VerificationStatusSerializer,
-    VerificationSettingsSerializer
+    VerificationSettingsSerializer,
+    VerificationSubmissionSerializer,
 )
 import logging
 import uuid
@@ -29,6 +30,12 @@ class IdentityVerificationViewSet(viewsets.ModelViewSet):
     """
     serializer_class = IdentityVerificationSerializer
     permission_classes = [IsAuthenticated]
+    
+    def get_serializer_class(self):
+        """Use submission serializer for create (accepts pre-uploaded file paths)"""
+        if self.action == 'create':
+            return VerificationSubmissionSerializer
+        return IdentityVerificationSerializer
     
     def get_queryset(self):
         """Return verifications for current user or all if admin"""
@@ -72,8 +79,10 @@ class IdentityVerificationViewSet(viewsets.ModelViewSet):
         
         logger.info(f"Identity verification submitted for user {request.user.email}")
         
+        # Return response using the read serializer for a complete representation
+        read_serializer = IdentityVerificationSerializer(verification, context={'request': request})
         return Response(
-            serializer.data,
+            read_serializer.data,
             status=status.HTTP_201_CREATED
         )
     
