@@ -16,6 +16,7 @@ import { useRouter } from "expo-router";
 import { Input } from "@/components/common/Input";
 import { Button } from "@/components/common/Button";
 import { Divider } from "@/components/common/Divider";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
@@ -33,16 +34,29 @@ export default function LoginScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
-  // Watch for user changes after successful login and redirect based on role
+  // Watch for user changes after successful login and redirect
   useEffect(() => {
     if (loginSuccess && user) {
       setLoading(false);
-      // Redirect based on user role
-      if (user.role === 'host') {
-        router.replace("/(tabs)/host");
-      } else {
-        router.replace("/(tabs)/dashboard");
-      }
+      // Check for a saved redirect destination (e.g. booking page)
+      AsyncStorage.getItem('auth_redirect').then((saved) => {
+        if (saved) {
+          AsyncStorage.removeItem('auth_redirect');
+          try {
+            const dest = JSON.parse(saved);
+            if (dest?.pathname) {
+              router.replace({ pathname: dest.pathname, params: dest.params });
+              return;
+            }
+          } catch {}
+        }
+        // Default: redirect based on user role
+        if (user.role === 'host') {
+          router.replace('/(tabs)/host');
+        } else {
+          router.replace('/(tabs)/dashboard');
+        }
+      });
     }
   }, [loginSuccess, user, router]);
 

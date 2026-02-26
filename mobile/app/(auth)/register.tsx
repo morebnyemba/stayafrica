@@ -19,6 +19,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/context/auth-context';
 import { Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width, height } = Dimensions.get('window');
 
@@ -177,6 +178,18 @@ export default function RegisterScreen() {
         country_of_residence: formData.country,
         role: formData.role,
       });
+      // Check for a saved redirect destination (e.g. booking page)
+      const saved = await AsyncStorage.getItem('auth_redirect');
+      if (saved) {
+        await AsyncStorage.removeItem('auth_redirect');
+        try {
+          const dest = JSON.parse(saved);
+          if (dest?.pathname) {
+            router.replace({ pathname: dest.pathname, params: dest.params });
+            return;
+          }
+        } catch {}
+      }
       // Redirect based on selected role
       if (formData.role === 'host') {
         router.replace('/(tabs)/host');

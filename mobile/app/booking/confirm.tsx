@@ -6,6 +6,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '@/context/auth-context';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface ProviderItem {
   id: string;
@@ -134,7 +135,14 @@ export default function BookingConfirmScreen() {
         <View className="flex-1 items-center justify-center px-6">
           <Text className="text-forest text-lg">Please sign in to continue</Text>
           <TouchableOpacity
-            onPress={() => router.push('/(auth)/login')}
+            onPress={async () => {
+              // Save booking params so user returns here after login
+              await AsyncStorage.setItem('auth_redirect', JSON.stringify({
+                pathname: '/booking/confirm',
+                params: { propertyId, checkIn, checkOut, guests: guests.toString() },
+              }));
+              router.push('/(auth)/login');
+            }}
             className="mt-4"
           >
             <LinearGradient colors={['#D9B168', '#bea04f']} className="px-8 py-4 rounded-2xl">
