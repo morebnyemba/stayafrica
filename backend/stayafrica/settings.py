@@ -82,6 +82,13 @@ INSTALLED_APPS = [
     'django_celery_beat',
     'django_celery_results',
     'channels',
+    'import_export',
+    'health_check',
+    'health_check.db',
+    'health_check.cache',
+    'health_check.contrib.migrations',
+    'health_check.contrib.celery',
+    'health_check.contrib.redis',
     
     # 2FA and Social Auth
     'django_otp',
@@ -496,6 +503,12 @@ CACHES = {
 
 # Use Redis for session storage (faster than database)
 SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+
+# Health Check Configuration
+HEALTH_CHECK = {
+    'DISK_USAGE_MAX': 90,  # percent
+    'MEMORY_MIN': 100,     # MB
+}
 SESSION_CACHE_ALIAS = 'session'
 
 # Channels Layer Configuration (WebSockets)

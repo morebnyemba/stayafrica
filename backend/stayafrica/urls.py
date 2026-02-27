@@ -10,6 +10,7 @@ urlpatterns = [
     
     # Health Checks
     path('api/health/', include('apps.health.urls')),
+    path('ht/', include('health_check.urls')),  # django-health-check standard endpoint
     
     # API Documentation
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
