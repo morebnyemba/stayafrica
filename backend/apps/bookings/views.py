@@ -27,8 +27,6 @@ except (ImportError, ModuleNotFoundError) as e:
 class BookingViewSet(viewsets.ModelViewSet):
     serializer_class = BookingSerializer
     permission_classes = [IsAuthenticated]
-    lookup_field = 'pk'
-    lookup_value_regex = r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
     
     def get_queryset(self):
         """Return bookings for current user based on their active_profile"""

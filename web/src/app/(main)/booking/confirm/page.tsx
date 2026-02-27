@@ -120,7 +120,7 @@ export default function BookingConfirmPage() {
             Back to property
           </Link>
 
-          <h1 className="text-3xl font-bold text-primary-900 dark:text-sand-50 mb-8">
+          <h1 className="text-3xl sm:text-4xl font-bold text-primary-900 dark:text-sand-50 mb-8">
             Confirm Your Booking
           </h1>
 
@@ -144,11 +144,11 @@ export default function BookingConfirmPage() {
                     <h3 className="font-semibold text-primary-900 dark:text-sand-50 mb-2">
                       {property?.title}
                     </h3>
-                    <div className="flex items-center gap-2 text-primary-600 dark:text-sand-300 text-sm mb-1">
+                    <div className="flex items-center gap-2 text-primary-600 dark:text-sand-300 text-base mb-1">
                       <MapPin className="w-4 h-4" />
                       <span>{property?.city}, {property?.country}</span>
                     </div>
-                    <div className="text-sm text-primary-600 dark:text-sand-300">
+                    <div className="text-base text-primary-600 dark:text-sand-300">
                       {property?.property_type}
                     </div>
                   </div>
@@ -186,10 +186,10 @@ export default function BookingConfirmPage() {
                     <Calendar className="w-5 h-5 text-secondary-600 dark:text-secondary-400 mt-0.5" />
                     <div>
                       <div className="font-medium text-primary-900 dark:text-sand-50">Dates</div>
-                      <div className="text-sm text-primary-600 dark:text-sand-300">
+                      <div className="text-base text-primary-600 dark:text-sand-300">
                         {formatDate(checkIn)} - {formatDate(checkOut)}
                       </div>
-                      <div className="text-sm text-primary-600 dark:text-sand-300">
+                      <div className="text-base text-primary-600 dark:text-sand-300">
                         {nights} {nights === 1 ? 'night' : 'nights'}
                       </div>
                     </div>
@@ -198,7 +198,7 @@ export default function BookingConfirmPage() {
                     <Users className="w-5 h-5 text-secondary-600 dark:text-secondary-400 mt-0.5" />
                     <div>
                       <div className="font-medium text-primary-900 dark:text-sand-50">Guests</div>
-                      <div className="text-sm text-primary-600 dark:text-sand-300">
+                      <div className="text-base text-primary-600 dark:text-sand-300">
                         {guests} {guests === 1 ? 'guest' : 'guests'}
                       </div>
                     </div>
@@ -211,7 +211,7 @@ export default function BookingConfirmPage() {
                 <h2 className="text-xl font-semibold text-primary-900 dark:text-sand-50 mb-4">
                   Guest Information
                 </h2>
-                <div className="space-y-2 text-sm">
+                <div className="space-y-3 text-base">
                   <div className="flex justify-between">
                     <span className="text-primary-600 dark:text-sand-300">Name:</span>
                     <span className="font-medium text-primary-900 dark:text-sand-50">
@@ -244,7 +244,7 @@ export default function BookingConfirmPage() {
                     onChange={(e) => setAgreedToTerms(e.target.checked)}
                     className="mt-1 w-5 h-5 rounded border-primary-300 dark:border-primary-600 text-secondary-600 focus:ring-secondary-500"
                   />
-                  <span className="text-sm text-primary-700 dark:text-sand-200 group-hover:text-primary-900 dark:group-hover:text-sand-50 transition">
+                  <span className="text-base text-primary-700 dark:text-sand-200 group-hover:text-primary-900 dark:group-hover:text-sand-50 transition">
                     I agree to the{' '}
                     <Link href="/terms" className="text-secondary-600 dark:text-secondary-400 hover:underline">
                       Terms and Conditions
@@ -266,7 +266,7 @@ export default function BookingConfirmPage() {
                 </h2>
                 
                 <div className="space-y-3 mb-6 pb-6 border-b border-primary-200 dark:border-primary-700">
-                  <div className="flex justify-between text-sm">
+                  <div className="flex justify-between text-base">
                     <span className="text-primary-700 dark:text-sand-200">
                       {property?.currency} {property?.price_per_night} × {nights} {nights === 1 ? 'night' : 'nights'}
                     </span>
@@ -274,20 +274,20 @@ export default function BookingConfirmPage() {
                       {property?.currency} {costs.basePrice.toFixed(2)}
                     </span>
                   </div>
-                  <div className="flex justify-between text-sm">
+                  <div className="flex justify-between text-base">
                     <span className="text-primary-700 dark:text-sand-200">Service fee</span>
                     <span className="font-medium text-primary-900 dark:text-sand-50">
                       {property?.currency} {costs.serviceFee.toFixed(2)}
                     </span>
                   </div>
-                  <div className="flex justify-between text-sm">
+                  <div className="flex justify-between text-base">
                     <span className="text-primary-700 dark:text-sand-200">Commission fee ({(costs.commissionRate * 100).toFixed(1)}%)</span>
                     <span className="font-medium text-primary-900 dark:text-sand-50">
                       {property?.currency} {costs.commissionFee.toFixed(2)}
                     </span>
                   </div>
                   {costs.cleaningFee > 0 && (
-                    <div className="flex justify-between text-sm">
+                    <div className="flex justify-between text-base">
                       <span className="text-primary-700 dark:text-sand-200">Cleaning fee</span>
                       <span className="font-medium text-primary-900 dark:text-sand-50">
                         {property?.currency} {costs.cleaningFee.toFixed(2)}
