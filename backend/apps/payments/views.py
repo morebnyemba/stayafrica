@@ -205,10 +205,9 @@ class PaymentViewSet(viewsets.ModelViewSet):
             integration_key = getattr(config, 'paynow_integration_key', '')
             if integration_key and paynow_hash:
                 import hashlib
-                # Paynow hash: SHA512 of field values in the order received, then integration key
-                # Use the specific fields Paynow sends, in their expected order
-                hash_fields = ['reference', 'amount', 'status', 'paynowreference', 'pollurl']
-                values = [str(request.data.get(f, '')) for f in hash_fields if f in request.data]
+                # Paynow hash: SHA512 of all POST field values (excluding 'hash')
+                # concatenated in the order they appear, then integration key appended.
+                values = [str(v) for k, v in request.data.items() if k.lower() != 'hash']
                 values.append(integration_key)
                 expected_hash = hashlib.sha512(''.join(values).encode('utf-8')).hexdigest().upper()
                 if expected_hash != paynow_hash.upper():
