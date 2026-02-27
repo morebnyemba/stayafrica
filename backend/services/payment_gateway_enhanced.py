@@ -55,9 +55,8 @@ class PaymentGatewayService:
     }
 
     # International providers shown in EVERY region alongside the regional ones.
-    # Stripe is excluded for Zimbabwe (Paynow already covers cards there).
     INTERNATIONAL_PROVIDERS = ['stripe', 'paypal']
-    STRIPE_EXCLUDED_COUNTRIES = ['Zimbabwe']
+    STRIPE_EXCLUDED_COUNTRIES = []  # Stripe available everywhere
 
     # ISO-3166 country code aliases → canonical name used in REGIONAL_PROVIDERS
     COUNTRY_ALIASES = {
