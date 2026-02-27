@@ -12,7 +12,6 @@ class Booking(models.Model):
         ('completed', 'Completed'),
     ]
     
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     booking_ref = models.CharField(max_length=50, unique=True, db_index=True)
     guest = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bookings')
     rental_property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name='bookings')

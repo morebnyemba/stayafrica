@@ -1,4 +1,4 @@
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, serializers as drf_serializers
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -51,16 +51,16 @@ class BookingViewSet(viewsets.ModelViewSet):
             validate_booking_dates(check_in, check_out)
         except ValidationError as e:
             logger.error(f"Date validation failed: {str(e)}")
-            raise ValidationError(str(e))
+            raise drf_serializers.ValidationError({'detail': str(e)})
         
         # Check availability
         if not is_booking_date_available(property_obj, check_in, check_out):
             logger.warning(f"Property {property_obj.id} not available for {check_in} to {check_out}")
-            raise ValidationError("Property is not available for the selected dates")
+            raise drf_serializers.ValidationError({'detail': 'Property is not available for the selected dates'})
         
         # Check if property is active
         if property_obj.status != 'active':
-            raise ValidationError("Property is not available for booking")
+            raise drf_serializers.ValidationError({'detail': 'Property is not available for booking'})
         
         # Calculate totals with dynamic pricing
         nights = calculate_nights(check_in, check_out)

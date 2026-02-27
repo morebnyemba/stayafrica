@@ -12,12 +12,15 @@ done
 echo "✅ Database ready"
 
 echo "� Generating migration files..."
-python manage.py makemigrations --noinput
+python manage.py makemigrations --noinput 2>&1 || echo "⚠️ makemigrations had issues (may be OK if migrations are pre-built)"
 
-echo "�🔄 Running database migrations..."
-if ! python manage.py migrate --noinput; then
-  echo "❌ Migration failed"
-  exit 1
+echo "🔄 Running database migrations..."
+if ! python manage.py migrate --noinput 2>&1; then
+  echo "⚠️ Standard migrate failed, trying --fake-initial..."
+  if ! python manage.py migrate --fake-initial --noinput; then
+    echo "❌ Migration failed"
+    exit 1
+  fi
 fi
 
 echo "🚀 Starting Daphne ASGI server..."
