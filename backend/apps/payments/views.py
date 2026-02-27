@@ -88,8 +88,9 @@ class PaymentViewSet(viewsets.ModelViewSet):
                     {'error': 'Payment already completed for this booking'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-            elif existing_payment.status in ('failed', 'pending'):
-                # Delete the failed/pending payment so a new one can be created
+            else:
+                # Delete any non-successful payment (failed, pending, initiated)
+                # so a fresh one can be created with a new checkout URL.
                 logger.info(f"Deleting {existing_payment.status} payment {existing_payment.gateway_ref} for re-initiation")
                 existing_payment.delete()
                 # Clear Django's cached reverse relation so the new create works
@@ -97,21 +98,6 @@ class PaymentViewSet(viewsets.ModelViewSet):
                     del booking.payment
                 except AttributeError:
                     pass
-            elif existing_payment.status == 'initiated':
-                # Check if it's stale (older than 10 minutes)
-                from django.utils import timezone
-                from datetime import timedelta
-                if existing_payment.created_at < timezone.now() - timedelta(minutes=10):
-                    logger.info(f"Deleting stale initiated payment {existing_payment.gateway_ref} for re-initiation")
-                    existing_payment.delete()
-                    try:
-                        del booking.payment
-                    except AttributeError:
-                        pass
-                else:
-                    # Return existing recent payment
-                    serializer = PaymentSerializer(existing_payment)
-                    return Response(serializer.data)
         
         # Check if payment provider is available for user's country
         payment_service = PaymentGatewayService()
@@ -129,54 +115,60 @@ class PaymentViewSet(viewsets.ModelViewSet):
             )
         
         # Initiate payment with provider SDK
-        with transaction.atomic():
-            import uuid
-            payment = Payment.objects.create(
-                booking=booking,
-                provider=provider,
-                gateway_ref=f'{booking.booking_ref}-{provider}-{uuid.uuid4().hex[:8]}',
-                amount=booking.grand_total,
-                currency=booking.currency,
-                status='initiated'
-            )
-            
-            # Call provider SDK to initiate payment
-            result = payment_service.initiate_payment(
-                payment,
-                booking,
-                provider,
-                request.user.email,
-                request.user.get_full_name()
-            )
-            
-            if not result['success']:
-                return Response(
-                    {'error': result.get('error', 'Payment initialization failed')},
-                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        try:
+            with transaction.atomic():
+                import uuid
+                payment = Payment.objects.create(
+                    booking=booking,
+                    provider=provider,
+                    gateway_ref=f'{booking.booking_ref}-{provider}-{uuid.uuid4().hex[:8]}',
+                    amount=booking.grand_total,
+                    currency=booking.currency,
+                    status='initiated'
                 )
-            
-            # Log the action
-            AuditLoggerService.log_action(
-                user=request.user,
-                action='initiate',
-                model=Payment,
-                object_id=payment.id,
-                changes={
-                    'gateway_ref': payment.gateway_ref,
-                    'provider': provider,
-                    'amount': str(booking.grand_total)
-                }
+                
+                # Call provider SDK to initiate payment
+                result = payment_service.initiate_payment(
+                    payment,
+                    booking,
+                    provider,
+                    request.user.email,
+                    request.user.get_full_name()
+                )
+                
+                if not result['success']:
+                    # Rollback the payment record if the SDK call failed
+                    raise Exception(result.get('error', 'Payment initialization failed'))
+                
+                
+                # Log the action
+                AuditLoggerService.log_action(
+                    user=request.user,
+                    action='initiate',
+                    model=Payment,
+                    object_id=payment.id,
+                    changes={
+                        'gateway_ref': payment.gateway_ref,
+                        'provider': provider,
+                        'amount': str(booking.grand_total)
+                    }
+                )
+                
+                # Add SDK response data – forward all provider-specific fields
+                response_data = PaymentSerializer(payment).data
+                for key in (
+                    'checkout_url', 'redirect_url', 'payment_link',
+                    'paypal_order_id', 'session_id', 'gateway_ref',
+                    'poll_url',
+                ):
+                    if key in result:
+                        response_data[key] = result[key]
+        except Exception as e:
+            logger.error(f"Payment initiation failed: {str(e)}")
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-            
-            # Add SDK response data – forward all provider-specific fields
-            response_data = PaymentSerializer(payment).data
-            for key in (
-                'checkout_url', 'redirect_url', 'payment_link',
-                'paypal_order_id', 'session_id', 'gateway_ref',
-                'poll_url',
-            ):
-                if key in result:
-                    response_data[key] = result[key]
         
         logger.info(f"Payment initiated: {payment.gateway_ref}")
         return Response(response_data, status=status.HTTP_201_CREATED)
