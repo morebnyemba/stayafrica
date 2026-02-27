@@ -186,7 +186,7 @@ class PropertyImageAdmin(UnfoldModelAdmin):
     """Enhanced admin interface for Property Image management"""
     
     list_display = ['property_display', 'image_preview', 'order', 'created_at']
-    list_filter = ['created_at', 'property__city', 'property__country']
+    list_filter = ['property', 'created_at', 'property__city', 'property__country']
     search_fields = ['property__title', 'property__host__email']
     ordering = ['property', 'order']
     readonly_fields = ['created_at', 'image_preview_large']

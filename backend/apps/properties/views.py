@@ -115,27 +115,52 @@ class PropertyViewSet(viewsets.ModelViewSet):
             raise PermissionError('You can only delete your own properties')
         instance.delete()
     
+    # Detail actions that require the host to see their own properties
+    # regardless of status (e.g. editing, managing images, calendars).
+    HOST_DETAIL_ACTIONS = {
+        'upload_images', 'host_detail', 'booking_calendar',
+        'toggle_instant_booking', 'discover_pois', 'approve', 'reject',
+    }
+
+    # Detail actions visible to the public on active properties,
+    # but hosts/admins may also access their own non-active ones.
+    PUBLIC_DETAIL_ACTIONS = {
+        'availability', 'reviews', 'pricing_calendar',
+        'instant_booking_info', 'nearby_pois',
+    }
+
     def get_queryset(self):
         """
         Return properties based on user role and action:
-        - retrieve: hosts see any of their own properties; public sees only active
-        - list: everyone sees active properties (hosts use /host_properties/ for management)
-        - update/partial_update/destroy: hosts see their own properties
+        - retrieve / public detail actions: hosts see all; public sees active
+        - host detail actions: hosts see own properties regardless of status
+        - update/partial_update/destroy: hosts see own properties
+        - list and other actions: everyone sees active properties
         """
         action = getattr(self, 'action', None)
+        user = self.request.user
+        is_host = user.is_authenticated and getattr(user, 'is_host', False)
+        is_admin = user.is_authenticated and getattr(user, 'is_staff', False)
 
-        if action == 'retrieve':
+        # Host management actions — host sees own, admin sees all
+        if action in self.HOST_DETAIL_ACTIONS:
+            if is_admin:
+                return Property.objects.all()
+            if is_host:
+                return Property.objects.filter(host=user)
+            return Property.objects.none()
+
+        # Retrieve + public detail actions — host/admin sees all, public sees active
+        if action in ('retrieve',) or action in self.PUBLIC_DETAIL_ACTIONS:
             qs = Property.objects.all()
-            if self.request.user.is_authenticated and self.request.user.is_host:
-                # Hosts can view their own properties regardless of status
+            if is_host or is_admin:
                 return qs
-            # Public users should not see non-active properties
             return qs.filter(status='active')
 
         if action in ('update', 'partial_update', 'destroy'):
             # Hosts manage only their own properties
-            if self.request.user.is_authenticated and self.request.user.is_host:
-                return Property.objects.filter(host=self.request.user)
+            if is_host:
+                return Property.objects.filter(host=user)
             return Property.objects.none()
 
         # List and other actions: everyone sees active properties
