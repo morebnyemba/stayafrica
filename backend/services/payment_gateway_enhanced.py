@@ -9,7 +9,31 @@ from paynow import Paynow as PaynowSDK
 import requests
 import base64
 import json
+import time
 import logging
+
+# PayPal Server SDK imports
+from paypalserversdk.http.auth.o_auth_2 import ClientCredentialsAuthCredentials
+from paypalserversdk.logging.configuration.api_logging_configuration import (
+    LoggingConfiguration,
+    RequestLoggingConfiguration,
+    ResponseLoggingConfiguration,
+)
+from paypalserversdk.paypal_serversdk_client import PaypalServersdkClient
+from paypalserversdk.controllers.orders_controller import OrdersController
+from paypalserversdk.controllers.payments_controller import PaymentsController
+from paypalserversdk.models.amount_with_breakdown import AmountWithBreakdown
+from paypalserversdk.models.checkout_payment_intent import CheckoutPaymentIntent
+from paypalserversdk.models.order_request import OrderRequest
+from paypalserversdk.models.purchase_unit_request import PurchaseUnitRequest
+from paypalserversdk.models.shipping_preference import ShippingPreference
+from paypalserversdk.models.user_action import UserAction
+from paypalserversdk.models.payment_source import PaymentSource
+from paypalserversdk.models.pay_pal_wallet import PayPalWallet
+from paypalserversdk.models.pay_pal_experience_context import PayPalExperienceContext
+from paypalserversdk.models.refund_request import RefundRequest
+from paypalserversdk.models.money import Money
+from paypalserversdk.api_helper import ApiHelper
 
 logger = logging.getLogger(__name__)
 
@@ -84,13 +108,49 @@ class PaymentGatewayService:
                 result_url
             )
         
-        # REST API configurations
+        # REST API configurations (Flutterwave, Paystack)
         self.flutterwave_secret_key = getattr(self.config, 'flutterwave_secret_key', '')
         self.paystack_secret_key = getattr(self.config, 'paystack_secret_key', '')
-        self.paypal_mode = getattr(self.config, 'paypal_mode', 'sandbox')
+
+        # PayPal Server SDK initialization
         self.paypal_client_id = getattr(self.config, 'paypal_client_id', '')
         self.paypal_client_secret = getattr(self.config, 'paypal_client_secret', '')
-        self.paypal_base_url = 'https://api-m.sandbox.paypal.com' if self.paypal_mode == 'sandbox' else 'https://api-m.paypal.com'
+        self.paypal_mode = getattr(self.config, 'paypal_mode', 'sandbox')
+        self.paypal_base_url = (
+            'https://api-m.sandbox.paypal.com'
+            if self.paypal_mode == 'sandbox'
+            else 'https://api-m.paypal.com'
+        )
+        self._paypal_token_cache = None  # (token, expiry_timestamp)
+
+        if self.paypal_client_id and self.paypal_client_secret:
+            from paypalserversdk.environment import Environment
+
+            paypal_environment = (
+                Environment.SANDBOX
+                if self.paypal_mode == 'sandbox'
+                else Environment.PRODUCTION
+            )
+
+            self.paypal_client = PaypalServersdkClient(
+                client_credentials_auth_credentials=ClientCredentialsAuthCredentials(
+                    o_auth_client_id=self.paypal_client_id,
+                    o_auth_client_secret=self.paypal_client_secret,
+                ),
+                environment=paypal_environment,
+                logging_configuration=LoggingConfiguration(
+                    log_level=logging.INFO,
+                    request_logging_config=RequestLoggingConfiguration(
+                        log_body=True
+                    ),
+                    response_logging_config=ResponseLoggingConfiguration(
+                        log_headers=True
+                    ),
+                ),
+            )
+            self.orders_controller = self.paypal_client.orders
+            self.payments_controller = self.paypal_client.payments
+            logger.info(f'PayPal Server SDK initialized ({self.paypal_mode} mode)')
     
     def _resolve_country(self, user_country: str) -> str:
         """Resolve a raw country input to a canonical name.
@@ -527,20 +587,33 @@ class PaymentGatewayService:
             }
     
     def _get_paypal_access_token(self) -> Optional[str]:
-        """Get PayPal OAuth2 access token"""
+        """Get PayPal OAuth2 access token with caching (used for webhook verification)"""
+        # Return cached token if still valid
+        if self._paypal_token_cache:
+            cached_token, expiry = self._paypal_token_cache
+            if time.time() < expiry:
+                return cached_token
+
         try:
-            auth = base64.b64encode(f"{self.paypal_client_id}:{self.paypal_client_secret}".encode()).decode()
+            auth = base64.b64encode(
+                f"{self.paypal_client_id}:{self.paypal_client_secret}".encode()
+            ).decode()
             headers = {
                 'Authorization': f'Basic {auth}',
-                'Content-Type': 'application/x-www-form-urlencoded'
+                'Content-Type': 'application/x-www-form-urlencoded',
             }
             response = requests.post(
                 f'{self.paypal_base_url}/v1/oauth2/token',
                 headers=headers,
-                data={'grant_type': 'client_credentials'}
+                data={'grant_type': 'client_credentials'},
             )
             if response.status_code == 200:
-                return response.json()['access_token']
+                data = response.json()
+                token = data['access_token']
+                expires_in = data.get('expires_in', 32400)  # default ~9 hours
+                # Cache with 5-minute buffer before expiry
+                self._paypal_token_cache = (token, time.time() + expires_in - 300)
+                return token
             return None
         except Exception as e:
             logger.error(f'PayPal auth error: {str(e)}')
@@ -553,82 +626,185 @@ class PaymentGatewayService:
         customer_email: str,
         customer_name: str = ''
     ) -> Dict:
-        """Initiate PayPal payment using REST API"""
+        """Initiate PayPal payment using official Server SDK"""
         try:
-            access_token = self._get_paypal_access_token()
-            if not access_token:
+            if not hasattr(self, 'orders_controller'):
                 return {
                     'success': False,
-                    'error': 'Failed to authenticate with PayPal'
+                    'error': 'PayPal payment gateway is not configured'
                 }
-            
-            headers = {
-                'Content-Type': 'application/json',
-                'Authorization': f'Bearer {access_token}'
-            }
-            
-            order_data = {
-                'intent': 'CAPTURE',
-                'purchase_units': [{
-                    'reference_id': payment_obj.gateway_ref,
-                    'amount': {
-                        'currency_code': payment_obj.currency,
-                        'value': str(payment_obj.amount)
-                    },
-                    'description': f'StayAfrica booking from {booking.check_in} to {booking.check_out}'
-                }],
-                'application_context': {
-                    'return_url': f'{settings.SITE_URL}/payment/success?gateway_ref={payment_obj.gateway_ref}',
-                    'cancel_url': f'{settings.SITE_URL}/payment/cancel',
-                    'brand_name': 'StayAfrica',
-                    'user_action': 'PAY_NOW'
-                }
-            }
-            
-            response = requests.post(
-                f'{self.paypal_base_url}/v2/checkout/orders',
-                headers=headers,
-                json=order_data
+
+            order_request = OrderRequest(
+                intent=CheckoutPaymentIntent.CAPTURE,
+                purchase_units=[
+                    PurchaseUnitRequest(
+                        reference_id=payment_obj.gateway_ref,
+                        amount=AmountWithBreakdown(
+                            currency_code=payment_obj.currency,
+                            value=str(payment_obj.amount),
+                        ),
+                        description=(
+                            f'StayAfrica booking: {booking.rental_property.title} '
+                            f'({booking.check_in} to {booking.check_out})'
+                        ),
+                    )
+                ],
+                payment_source=PaymentSource(
+                    paypal=PayPalWallet(
+                        experience_context=PayPalExperienceContext(
+                            brand_name='StayAfrica',
+                            shipping_preference=ShippingPreference.NO_SHIPPING,
+                            user_action=UserAction.PAY_NOW,
+                            return_url=(
+                                f'{settings.SITE_URL}/payment/success'
+                                f'?gateway_ref={payment_obj.gateway_ref}'
+                            ),
+                            cancel_url=f'{settings.SITE_URL}/payment/cancel',
+                        )
+                    )
+                ),
             )
-            
-            if response.status_code == 201:
-                order = response.json()
-                approval_url = None
-                for link in order.get('links', []):
-                    if link.get('rel') == 'approve':
-                        approval_url = link.get('href')
-                        break
-                
-                # Store PayPal order ID
-                payment_obj.gateway_ref = order['id']
-                payment_obj.save()
-                
-                logger.info(f'PayPal order created: {order["id"]}')
-                return {
-                    'success': True,
-                    'payment_link': approval_url,
-                    'paypal_order_id': order['id'],
-                    'gateway_ref': order['id']
-                }
-            else:
-                # Handle error response
-                try:
-                    error_data = response.json()
-                    error_msg = error_data.get('message', 'Failed to create PayPal order')
-                except ValueError:
-                    error_msg = f'HTTP {response.status_code}: {response.text[:100]}'
-                
-                logger.error(f'PayPal API error: {error_msg}')
-                return {
-                    'success': False,
-                    'error': error_msg
-                }
-                
+
+            response = self.orders_controller.orders_create(
+                {'body': order_request}
+            )
+
+            order = ApiHelper.json_deserialize(
+                ApiHelper.json_serialize(response.body)
+            )
+
+            # Extract approval URL (payer-action for SDK, approve for REST)
+            approval_url = None
+            for link in order.get('links', []):
+                if link.get('rel') in ('payer-action', 'approve'):
+                    approval_url = link.get('href')
+                    break
+
+            # Store PayPal order ID
+            payment_obj.gateway_ref = order['id']
+            payment_obj.save()
+
+            logger.info(f'PayPal order created: {order["id"]}')
+            return {
+                'success': True,
+                'payment_link': approval_url,
+                'paypal_order_id': order['id'],
+                'gateway_ref': order['id'],
+            }
+
         except Exception as e:
             logger.error(f'PayPal exception: {str(e)}')
             return {
                 'success': False,
-                'error': str(e)
+                'error': str(e),
+            }
+
+    def capture_paypal_order(self, order_id: str) -> Dict:
+        """Capture an approved PayPal order after customer approval"""
+        try:
+            if not hasattr(self, 'orders_controller'):
+                return {
+                    'success': False,
+                    'error': 'PayPal payment gateway is not configured'
+                }
+
+            response = self.orders_controller.orders_capture(
+                {'id': order_id}
+            )
+
+            result = ApiHelper.json_deserialize(
+                ApiHelper.json_serialize(response.body)
+            )
+
+            status = result.get('status')
+            capture_id = None
+
+            # Extract the capture ID from the response
+            purchase_units = result.get('purchase_units', [])
+            if purchase_units:
+                captures = (
+                    purchase_units[0]
+                    .get('payments', {})
+                    .get('captures', [])
+                )
+                if captures:
+                    capture_id = captures[0].get('id')
+
+            logger.info(
+                f'PayPal order captured: {order_id} '
+                f'(status={status}, capture={capture_id})'
+            )
+            return {
+                'success': status == 'COMPLETED',
+                'status': status,
+                'capture_id': capture_id,
+                'order_id': order_id,
+                'details': result,
+            }
+
+        except Exception as e:
+            logger.error(f'PayPal capture exception: {str(e)}')
+            return {
+                'success': False,
+                'error': str(e),
+            }
+
+    def refund_paypal_payment(
+        self,
+        capture_id: str,
+        amount: Optional[Decimal] = None,
+        currency: str = 'USD',
+        note: str = '',
+    ) -> Dict:
+        """Refund a captured PayPal payment (full or partial)"""
+        try:
+            if not hasattr(self, 'payments_controller'):
+                return {
+                    'success': False,
+                    'error': 'PayPal payment gateway is not configured'
+                }
+
+            refund_body = {}
+
+            # If amount is provided, do a partial refund
+            if amount is not None:
+                refund_body['amount'] = Money(
+                    currency_code=currency,
+                    value=str(amount),
+                )
+
+            if note:
+                refund_body['note_to_payer'] = note
+
+            refund_request = (
+                RefundRequest(**refund_body) if refund_body else RefundRequest()
+            )
+
+            response = self.payments_controller.captures_refund({
+                'capture_id': capture_id,
+                'body': refund_request,
+            })
+
+            result = ApiHelper.json_deserialize(
+                ApiHelper.json_serialize(response.body)
+            )
+
+            logger.info(
+                f'PayPal refund processed: capture={capture_id}, '
+                f'refund_id={result.get("id")}'
+            )
+            return {
+                'success': result.get('status') == 'COMPLETED',
+                'refund_id': result.get('id'),
+                'status': result.get('status'),
+                'details': result,
+            }
+
+        except Exception as e:
+            logger.error(f'PayPal refund exception: {str(e)}')
+            return {
+                'success': False,
+                'error': str(e),
             }
     
     def initiate_payment(
@@ -684,8 +860,8 @@ class PaymentGatewayService:
         try:
             webhook_id = getattr(self.config, 'paypal_webhook_id', '')
             if not webhook_id:
-                logger.warning('PayPal webhook ID not configured')
-                return True  # Allow in development
+                logger.error('PayPal webhook ID not configured — rejecting webhook')
+                return False  # Never accept unverified webhooks
             
             access_token = self._get_paypal_access_token()
             if not access_token:
