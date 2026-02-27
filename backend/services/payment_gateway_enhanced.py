@@ -26,14 +26,14 @@ from paypalserversdk.models.amount_with_breakdown import AmountWithBreakdown
 from paypalserversdk.models.checkout_payment_intent import CheckoutPaymentIntent
 from paypalserversdk.models.order_request import OrderRequest
 from paypalserversdk.models.purchase_unit_request import PurchaseUnitRequest
-from paypalserversdk.models.shipping_preference import ShippingPreference
-from paypalserversdk.models.user_action import UserAction
+from paypalserversdk.models.paypal_wallet_context_shipping_preference import PaypalWalletContextShippingPreference
+from paypalserversdk.models.paypal_experience_user_action import PaypalExperienceUserAction
 from paypalserversdk.models.payment_source import PaymentSource
-from paypalserversdk.models.pay_pal_wallet import PayPalWallet
-from paypalserversdk.models.pay_pal_experience_context import PayPalExperienceContext
+from paypalserversdk.models.paypal_wallet import PaypalWallet
+from paypalserversdk.models.paypal_wallet_experience_context import PaypalWalletExperienceContext
 from paypalserversdk.models.refund_request import RefundRequest
 from paypalserversdk.models.money import Money
-from paypalserversdk.api_helper import ApiHelper
+from paypalserversdk.api_helper import APIHelper
 
 logger = logging.getLogger(__name__)
 
@@ -652,11 +652,11 @@ class PaymentGatewayService:
                     )
                 ],
                 payment_source=PaymentSource(
-                    paypal=PayPalWallet(
-                        experience_context=PayPalExperienceContext(
+                    paypal=PaypalWallet(
+                        experience_context=PaypalWalletExperienceContext(
                             brand_name='StayAfrica',
-                            shipping_preference=ShippingPreference.NO_SHIPPING,
-                            user_action=UserAction.PAY_NOW,
+                            shipping_preference=PaypalWalletContextShippingPreference.NO_SHIPPING,
+                            user_action=PaypalExperienceUserAction.PAY_NOW,
                             return_url=(
                                 f'{settings.SITE_URL}/payment/return'
                                 f'?provider=paypal&gateway_ref={payment_obj.gateway_ref}'
@@ -671,8 +671,8 @@ class PaymentGatewayService:
                 {'body': order_request}
             )
 
-            order = ApiHelper.json_deserialize(
-                ApiHelper.json_serialize(response.body)
+            order = APIHelper.json_deserialize(
+                APIHelper.json_serialize(response.body)
             )
 
             # Extract approval URL (payer-action for SDK, approve for REST)
@@ -714,8 +714,8 @@ class PaymentGatewayService:
                 {'id': order_id}
             )
 
-            result = ApiHelper.json_deserialize(
-                ApiHelper.json_serialize(response.body)
+            result = APIHelper.json_deserialize(
+                APIHelper.json_serialize(response.body)
             )
 
             status = result.get('status')
@@ -787,8 +787,8 @@ class PaymentGatewayService:
                 'body': refund_request,
             })
 
-            result = ApiHelper.json_deserialize(
-                ApiHelper.json_serialize(response.body)
+            result = APIHelper.json_deserialize(
+                APIHelper.json_serialize(response.body)
             )
 
             logger.info(
