@@ -18,6 +18,20 @@ const adminRoutes = ['/admin'];
 // Define auth routes (redirect to dashboard if already logged in)
 const authRoutes = ['/login', '/register'];
 
+// Helper function to decode JWT and check if it's still valid (not expired)
+function isTokenValid(token: string): boolean {
+  try {
+    const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
+    // Check expiration — JWT exp is in seconds, Date.now() in milliseconds
+    if (payload.exp && Date.now() >= payload.exp * 1000) {
+      return false;
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 // Helper function to decode JWT and check if user is admin
 function isUserAdmin(token: string): boolean {
   try {
@@ -35,8 +49,14 @@ export function middleware(request: NextRequest) {
   
   // Get the token from cookies or headers
   const token = request.cookies.get('access_token')?.value;
-  const isAuthenticated = !!token;
+  const isAuthenticated = token ? isTokenValid(token) : false;
   const hasAdminAccess = token ? isUserAdmin(token) : false;
+
+  // Clear expired cookie so client doesn't keep sending it
+  const response = NextResponse.next();
+  if (token && !isAuthenticated) {
+    response.cookies.delete('access_token');
+  }
 
   // Check if the current route is protected or admin
   const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
@@ -76,7 +96,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
-  return NextResponse.next();
+  return response;
 }
 
 export const config = {
