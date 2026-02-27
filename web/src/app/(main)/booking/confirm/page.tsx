@@ -8,7 +8,7 @@ import { useAuth } from '@/store/auth-store';
 import { useFeeConfiguration, calculateBookingCost } from '@/hooks/use-fees';
 import dynamic from 'next/dynamic';
 const ProtectedRoute = dynamic(() => import('@/components/auth/protected-route').then(m => m.ProtectedRoute), { ssr: false });
-import { MapPin, Calendar, Users, ArrowLeft, Loader2, AlertCircle } from 'lucide-react';
+import { MapPin, Calendar, Users, ArrowLeft, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import Link from 'next/link';
 
