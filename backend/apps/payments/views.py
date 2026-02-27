@@ -147,14 +147,15 @@ class PaymentViewSet(viewsets.ModelViewSet):
                 }
             )
             
-            # Add SDK response data
+            # Add SDK response data – forward all provider-specific fields
             response_data = PaymentSerializer(payment).data
-            if 'checkout_url' in result:
-                response_data['checkout_url'] = result['checkout_url']
-            if 'redirect_url' in result:
-                response_data['redirect_url'] = result['redirect_url']
-            if 'payment_link' in result:
-                response_data['payment_link'] = result['payment_link']
+            for key in (
+                'checkout_url', 'redirect_url', 'payment_link',
+                'paypal_order_id', 'session_id', 'gateway_ref',
+                'poll_url',
+            ):
+                if key in result:
+                    response_data[key] = result[key]
         
         logger.info(f"Payment initiated: {payment.gateway_ref}")
         return Response(response_data, status=status.HTTP_201_CREATED)
@@ -334,6 +335,83 @@ class PaymentViewSet(viewsets.ModelViewSet):
             'created_at': payment.created_at,
         })
     
+    @action(detail=False, methods=['post'], url_path='capture-paypal')
+    @api_ratelimit(rate='10/m')
+    @log_action('capture_paypal')
+    def capture_paypal(self, request):
+        """Capture an approved PayPal order after customer returns from PayPal.
+
+        Expects JSON body: { "order_id": "<paypal_order_id>" }
+        """
+        order_id = request.data.get('order_id')
+        if not order_id:
+            return Response(
+                {'error': 'order_id is required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            payment = Payment.objects.select_related('booking__guest').get(
+                gateway_ref=order_id,
+                provider='paypal',
+                booking__guest=request.user,
+            )
+        except Payment.DoesNotExist:
+            logger.warning(f"PayPal capture: payment not found for order {order_id} / user {request.user.id}")
+            return Response(
+                {'error': 'Payment not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        if payment.status == 'success':
+            return Response({
+                'status': 'already_captured',
+                'payment_status': 'success',
+                'gateway_ref': payment.gateway_ref,
+            })
+
+        payment_service = PaymentGatewayService()
+        result = payment_service.capture_paypal_order(order_id)
+
+        if result.get('success'):
+            with transaction.atomic():
+                payment.status = 'success'
+                payment.save()
+                payment.booking.status = 'confirmed'
+                payment.booking.save()
+
+                AuditLoggerService.log_action(
+                    user=request.user,
+                    action='capture_paypal',
+                    model=Payment,
+                    object_id=payment.id,
+                    changes={
+                        'order_id': order_id,
+                        'capture_id': result.get('capture_id'),
+                        'status': result.get('status'),
+                    }
+                )
+
+                # Send receipt email
+                send_payment_receipt_email.delay(payment.id)
+
+            logger.info(f"PayPal order captured successfully: {order_id}")
+            return Response({
+                'status': 'captured',
+                'payment_status': 'success',
+                'capture_id': result.get('capture_id'),
+                'gateway_ref': payment.gateway_ref,
+            })
+        else:
+            logger.error(f"PayPal capture failed for order {order_id}: {result.get('error')}")
+            return Response(
+                {
+                    'error': result.get('error', 'Capture failed'),
+                    'status': 'capture_failed',
+                },
+                status=status.HTTP_502_BAD_GATEWAY
+            )
+
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
     def refund(self, request, pk=None):
         """Admin action to refund a payment"""

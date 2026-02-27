@@ -481,6 +481,16 @@ class APIClient {
     return (await this.client.get(`/payments/${paymentId}/`)).data;
   }
 
+  async capturePaypalOrder(orderId: string): Promise<{
+    status: string;
+    payment_status: string;
+    capture_id?: string;
+    gateway_ref: string;
+    error?: string;
+  }> {
+    return (await this.client.post('/payments/capture-paypal/', { order_id: orderId })).data;
+  }
+
   // Payment history
   async getPaymentHistory(params?: any): Promise<ApiListResponse<Payment>> {
     return (await this.client.get('/payments/', { params })).data;

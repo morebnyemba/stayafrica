@@ -95,6 +95,7 @@ export default function BookingPaymentPage() {
             provider: selectedProvider,
             paymentId: data.id,
             gateway_ref: data.gateway_ref,
+            paypal_order_id: data.paypal_order_id || null,
           }));
         }
         toast.success('Redirecting to payment gateway...');

@@ -363,8 +363,8 @@ class PaymentGatewayService:
                     'quantity': 1,
                 }],
                 mode='payment',
-                success_url=f'{settings.SITE_URL}/booking/success?session_id={{CHECKOUT_SESSION_ID}}',
-                cancel_url=f'{settings.SITE_URL}/booking/cancel',
+                success_url=f'{settings.SITE_URL}/payment/return',
+                cancel_url=f'{settings.SITE_URL}/booking/failure',
                 customer_email=customer_email,
                 metadata={
                     'payment_id': str(payment_obj.id),
@@ -658,10 +658,10 @@ class PaymentGatewayService:
                             shipping_preference=ShippingPreference.NO_SHIPPING,
                             user_action=UserAction.PAY_NOW,
                             return_url=(
-                                f'{settings.SITE_URL}/payment/success'
-                                f'?gateway_ref={payment_obj.gateway_ref}'
+                                f'{settings.SITE_URL}/payment/return'
+                                f'?provider=paypal&gateway_ref={payment_obj.gateway_ref}'
                             ),
-                            cancel_url=f'{settings.SITE_URL}/payment/cancel',
+                            cancel_url=f'{settings.SITE_URL}/booking/failure',
                         )
                     )
                 ),

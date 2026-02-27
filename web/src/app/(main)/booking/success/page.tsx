@@ -14,6 +14,7 @@ export default function BookingSuccessPage() {
   
   const bookingId = searchParams.get('bookingId');
   const provider = searchParams.get('provider');
+  const isPending = searchParams.get('pending') === 'true';
 
   // Fetch booking details
   const { data: booking, isLoading } = useQuery({
@@ -30,12 +31,21 @@ export default function BookingSuccessPage() {
       <ProtectedRoute>
         <div className="min-h-screen bg-sand-100 dark:bg-primary-900 flex items-center justify-center">
           <div className="card p-8 text-center max-w-md">
+            <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
             <h2 className="text-2xl font-bold text-primary-900 dark:text-sand-50 mb-4">
-              Invalid Request
+              Payment Received
             </h2>
-            <Link href="/explore" className="inline-block">
-              <Button>Browse Properties</Button>
-            </Link>
+            <p className="text-primary-600 dark:text-sand-300 mb-6">
+              Your payment has been processed. Check your bookings for details.
+            </p>
+            <div className="flex gap-3 justify-center">
+              <Link href="/bookings" className="inline-block">
+                <Button>View My Bookings</Button>
+              </Link>
+              <Link href="/" className="inline-block">
+                <Button variant="secondary">Home</Button>
+              </Link>
+            </div>
           </div>
         </div>
       </ProtectedRoute>
@@ -65,10 +75,10 @@ export default function BookingSuccessPage() {
               <CheckCircle className="w-12 h-12 text-green-600 dark:text-green-400" />
             </div>
             <h1 className="text-3xl md:text-4xl font-bold text-primary-900 dark:text-sand-50 mb-3">
-              Booking Confirmed!
+              {isPending ? 'Booking Submitted!' : 'Booking Confirmed!'}
             </h1>
             <p className="text-lg text-primary-600 dark:text-sand-300">
-              Your reservation has been successfully created
+              {isPending ? 'Your payment is being processed' : 'Your reservation has been successfully created'}
             </p>
           </div>
 

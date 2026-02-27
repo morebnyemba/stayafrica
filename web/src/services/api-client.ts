@@ -156,6 +156,14 @@ class ApiClient {
     return this.client.get(`/payments/${safeId}/`);
   }
 
+  async capturePaypalOrder(orderId: string) {
+    return this.client.post('/payments/capture-paypal/', { order_id: orderId });
+  }
+
+  async getPaymentByGatewayRef(gatewayRef: string) {
+    return this.client.get('/payments/', { params: { gateway_ref: gatewayRef } });
+  }
+
   // Reviews
   async getReviews(params?: any) {
     return this.client.get('/reviews/', { params });

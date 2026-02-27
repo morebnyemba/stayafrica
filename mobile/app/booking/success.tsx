@@ -1,11 +1,25 @@
-import { View, Text, ScrollView, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Platform, ActivityIndicator } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useQuery } from '@tanstack/react-query';
+import { apiClient } from '@/services/api-client';
 
 export default function BookingSuccessScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
+  const bookingId = params.bookingId as string;
+  const pending = params.pending as string;
+
+  // Fetch real booking data
+  const { data: booking, isLoading } = useQuery({
+    queryKey: ['booking-success', bookingId],
+    queryFn: async () => {
+      const resp = await apiClient.getBookingById(bookingId);
+      return resp;
+    },
+    enabled: !!bookingId,
+  });
 
   const handleViewBookings = () => {
     router.replace('/(tabs)/bookings');
@@ -48,24 +62,56 @@ export default function BookingSuccessScreen() {
           </View>
 
           <Text className="text-2xl font-bold text-forest mb-2 text-center">
-            Payment Successful
+            {pending ? 'Payment Processing' : 'Payment Successful'}
           </Text>
           <Text className="text-moss text-center mb-6">
-            Your booking has been confirmed. You'll receive a confirmation email shortly.
+            {pending
+              ? 'Your payment is being processed. We\'ll send a confirmation email once complete.'
+              : 'Your booking has been confirmed. You\'ll receive a confirmation email shortly.'}
           </Text>
 
-          <View className="w-full space-y-3 mb-6">
-            <View className="flex-row items-center justify-between py-3 border-b border-sand-200">
-              <Text className="text-moss">Booking Reference</Text>
-              <Text className="font-semibold text-forest">#{Math.random().toString(36).substr(2, 9).toUpperCase()}</Text>
-            </View>
-            <View className="flex-row items-center justify-between py-3 border-b border-sand-200">
-              <Text className="text-moss">Status</Text>
-              <View className="bg-green-100 px-3 py-1 rounded-full">
-                <Text className="text-green-800 font-semibold text-xs">Confirmed</Text>
+          {isLoading ? (
+            <ActivityIndicator size="small" color="#10B981" />
+          ) : (
+            <View className="w-full space-y-3 mb-6">
+              <View className="flex-row items-center justify-between py-3 border-b border-sand-200">
+                <Text className="text-moss">Booking Reference</Text>
+                <Text className="font-semibold text-forest">
+                  {booking?.booking_ref || (bookingId ? `#${bookingId}` : '—')}
+                </Text>
+              </View>
+              {booking?.rental_property?.title && (
+                <View className="flex-row items-center justify-between py-3 border-b border-sand-200">
+                  <Text className="text-moss">Property</Text>
+                  <Text className="font-semibold text-forest" numberOfLines={1} style={{ maxWidth: 180 }}>
+                    {booking.rental_property.title}
+                  </Text>
+                </View>
+              )}
+              {booking?.check_in && (
+                <View className="flex-row items-center justify-between py-3 border-b border-sand-200">
+                  <Text className="text-moss">Check-in</Text>
+                  <Text className="font-semibold text-forest">{booking.check_in}</Text>
+                </View>
+              )}
+              {booking?.grand_total && (
+                <View className="flex-row items-center justify-between py-3 border-b border-sand-200">
+                  <Text className="text-moss">Total</Text>
+                  <Text className="font-semibold text-forest">
+                    {booking.currency || 'USD'} {booking.grand_total}
+                  </Text>
+                </View>
+              )}
+              <View className="flex-row items-center justify-between py-3 border-b border-sand-200">
+                <Text className="text-moss">Status</Text>
+                <View className="bg-green-100 px-3 py-1 rounded-full">
+                  <Text className="text-green-800 font-semibold text-xs">
+                    {pending ? 'Processing' : 'Confirmed'}
+                  </Text>
+                </View>
               </View>
             </View>
-          </View>
+          )}
 
           {/* Action Buttons */}
           <TouchableOpacity

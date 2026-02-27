@@ -1,5 +1,5 @@
 import { View, Text, ScrollView, TouchableOpacity, Alert, ActivityIndicator, Linking } from 'react-native';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -7,6 +7,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useAuth } from '@/context/auth-context';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface ProviderItem {
   id: string;
@@ -61,12 +62,12 @@ export default function PaymentScreen() {
     enabled: isAuthenticated,
   });
 
-  const providers: ProviderItem[] = (providersData?.providers || []).map((p: { id: string; name: string; category: 'regional' | 'international' }) => ({
+  const providers: ProviderItem[] = (providersData?.providers || []).map((p: { id: string; name: string; category: string }) => ({
     id: p.id,
     name: p.name,
     description: providerDescriptions[p.id] || p.name,
     icon: providerIcons[p.id] || 'card',
-    category: p.category,
+    category: (p.category === 'international' ? 'international' : 'regional') as 'regional' | 'international',
   }));
 
   const regionalProviders = providers.filter(p => p.category === 'regional');
@@ -94,6 +95,17 @@ export default function PaymentScreen() {
         ]);
       } else if (response.data?.checkout_url || response.data?.redirect_url || response.data?.payment_link) {
         const paymentUrl = response.data.checkout_url || response.data.redirect_url || response.data.payment_link;
+        
+        // Store pending payment info for capture on return
+        const pendingInfo = {
+          bookingId,
+          provider: selectedProvider,
+          paymentId: response.data?.id,
+          gateway_ref: response.data?.gateway_ref,
+          paypal_order_id: response.data?.paypal_order_id || null,
+        };
+        await AsyncStorage.setItem('pending_payment', JSON.stringify(pendingInfo));
+
         Alert.alert(
           'Complete Payment',
           'You will be redirected to the payment gateway to complete your payment securely.',
@@ -126,6 +138,53 @@ export default function PaymentScreen() {
       setProcessing(false);
     }
   };
+
+  // Handle PayPal capture when user returns to the app after external browser payment
+  useEffect(() => {
+    const handleAppFocus = async () => {
+      try {
+        const stored = await AsyncStorage.getItem('pending_payment');
+        if (!stored) return;
+
+        const pending = JSON.parse(stored);
+        if (pending.provider !== 'paypal') return;
+
+        const orderId = pending.paypal_order_id || pending.gateway_ref;
+        if (!orderId) return;
+
+        setProcessing(true);
+        try {
+          const captureResult = await apiClient.capturePaypalOrder(orderId);
+          await AsyncStorage.removeItem('pending_payment');
+          
+          if (captureResult.status === 'captured' || captureResult.status === 'already_captured') {
+            Alert.alert('Payment Successful', 'Your PayPal payment has been confirmed!', [
+              { text: 'OK', onPress: () => router.replace(`/booking/success?bookingId=${pending.bookingId}`) }
+            ]);
+          } else {
+            Alert.alert('Payment Issue', captureResult.error || 'Could not confirm payment. Please check your bookings.');
+          }
+        } catch (err: any) {
+          console.error('PayPal capture error:', err);
+          // Don't remove pending_payment on network error — user can retry
+          const errMsg = err.response?.data?.error || 'Could not confirm payment. Please try again later.';
+          Alert.alert('Payment Issue', errMsg);
+        } finally {
+          setProcessing(false);
+        }
+      } catch (e) {
+        console.error('handleAppFocus error:', e);
+      }
+    };
+
+    // Listen for app coming back to foreground
+    const subscription = Linking.addEventListener('url', handleAppFocus);
+    
+    // Also check on mount (user may have returned manually)
+    handleAppFocus();
+
+    return () => subscription.remove();
+  }, [router]);
 
   if (!isAuthenticated) {
     return (
