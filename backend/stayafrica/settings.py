@@ -356,7 +356,7 @@ CELERY_TASK_TIME_LIMIT = 30 * 60  # 30 minutes
 # Celery Beat Configuration
 CELERY_BEAT_SCHEDULE = {
     'send-pending-emails': {
-        'task': 'apps.tasks.email_tasks.send_pending_emails',
+        'task': 'tasks.email_tasks.send_pending_emails',
         'schedule': timedelta(minutes=5),
     },
     'expire-stale-payments': {
