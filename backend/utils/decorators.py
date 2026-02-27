@@ -105,7 +105,29 @@ def cache_response(timeout=300):
 
 def api_ratelimit(key='ip', rate='100/h', method='ALL'):
     """
-    Rate limiting decorator for API endpoints
+    Rate limiting decorator for API endpoints.
+    Works with both function-based views and ViewSet methods.
     Usage: @api_ratelimit(rate='10/m')
     """
-    return ratelimit(key=key, rate=rate, method=method)
+    django_decorator = ratelimit(key=key, rate=rate, method=method)
+
+    def decorator(view_func):
+        @wraps(view_func)
+        def wrapper(*args, **kwargs):
+            # ViewSet method: args = (self, request, ...)
+            # Function-based view: args = (request, ...)
+            if args and not hasattr(args[0], 'method') and len(args) > 1:
+                # First arg is `self` (ViewSet), second is `request`
+                self_arg = args[0]
+                request = args[1]
+                # Apply django_ratelimit to a thin function whose 1st arg is request
+                @django_decorator
+                def _inner(request, *a, **kw):
+                    return view_func(self_arg, request, *a, **kw)
+                return _inner(request, *args[2:], **kwargs)
+            else:
+                # Function-based view — apply directly
+                decorated = django_decorator(view_func)
+                return decorated(*args, **kwargs)
+        return wrapper
+    return decorator
