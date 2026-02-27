@@ -82,7 +82,12 @@ export default function BookingConfirmPage() {
       // Redirect to messaging panel for this conversation
       router.push(`/messages`);
     } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Failed to start conversation');
+      const errMsg = typeof error.response?.data?.error === 'string'
+        ? error.response.data.error
+        : typeof error.response?.data?.detail === 'string'
+          ? error.response.data.detail
+          : 'Failed to start conversation';
+      toast.error(errMsg);
     } finally {
       setContactingHost(false);
     }
@@ -319,10 +324,10 @@ export default function BookingConfirmPage() {
                         `/booking/payment?bookingId=${booking.id}`
                       );
                     } catch (error: any) {
-                      const msg = error.response?.data?.detail
+                      const rawMsg = error.response?.data?.detail
                         || error.response?.data?.non_field_errors?.[0]
-                        || error.response?.data?.error
-                        || 'Failed to create booking. Please try again.';
+                        || error.response?.data?.error;
+                      const msg = typeof rawMsg === 'string' ? rawMsg : 'Failed to create booking. Please try again.';
                       toast.error(msg);
                     } finally {
                       setIsCreatingBooking(false);

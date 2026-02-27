@@ -110,7 +110,13 @@ export default function BookingPaymentPage() {
       }
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.error || 'Failed to initiate payment');
+      const errData = error.response?.data;
+      const msg = typeof errData?.error === 'string'
+        ? errData.error
+        : typeof errData?.detail === 'string'
+          ? errData.detail
+          : 'Failed to initiate payment. Please try again.';
+      toast.error(msg);
     },
   });
 

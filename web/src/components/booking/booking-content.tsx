@@ -63,7 +63,12 @@ export function BookingContent() {
       router.push('/messages');
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.error || 'Failed to start conversation');
+      const errMsg = typeof error.response?.data?.error === 'string'
+        ? error.response.data.error
+        : typeof error.response?.data?.detail === 'string'
+          ? error.response.data.detail
+          : 'Failed to start conversation';
+      toast.error(errMsg);
     },
     onSettled: () => {
       setContactingHost(null);
