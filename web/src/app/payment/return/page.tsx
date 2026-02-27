@@ -98,7 +98,7 @@ export default function PaymentReturnPage() {
   }, [pendingPayment]);
 
   // Poll for payment status (only after capture completes or for non-PayPal)
-  const { data: payment, isLoading, error } = useQuery({
+  const { data: payment, error } = useQuery({
     queryKey: ['payment-return-status', pendingPayment?.paymentId],
     queryFn: async () => {
       if (pendingPayment?.paymentId) {
