@@ -211,6 +211,10 @@ class PaymentViewSet(viewsets.ModelViewSet):
                 session = event['data']['object']
                 gateway_ref = session['id']
                 payment_status = 'succeeded'
+            elif event['type'] in ('checkout.session.expired', 'checkout.session.async_payment_failed'):
+                session = event['data']['object']
+                gateway_ref = session['id']
+                payment_status = 'Cancelled'
             else:
                 return Response({'status': 'ignored'})
         
