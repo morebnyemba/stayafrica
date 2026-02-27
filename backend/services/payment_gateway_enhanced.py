@@ -99,7 +99,7 @@ class PaymentGatewayService:
         self.paynow_integration_key = getattr(self.config, 'paynow_integration_key', '')
         if self.paynow_integration_id and self.paynow_integration_key:
             return_url = getattr(self.config, 'paynow_return_url', '') or f'{settings.SITE_URL}/payment/return'
-            result_url = getattr(self.config, 'paynow_result_url', '') or f'{settings.SITE_URL}/api/v1/payments/webhook/?provider=paynow'
+            result_url = getattr(self.config, 'paynow_result_url', '') or f'{settings.BACKEND_URL}/api/v1/payments/webhook/?provider=paynow'
             
             self.paynow = PaynowSDK(
                 self.paynow_integration_id,
