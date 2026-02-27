@@ -294,14 +294,16 @@ export const useAuthStore = create<AuthState>()(
 export const useAuth = () => {
   const store = useAuthStore();
 
-  // Initialize auth on first mount
+  // Initialize auth on first mount (no persisted user yet — need to fetch profile)
   if (typeof window !== 'undefined' && store.isLoading && !store.user) {
     store.initializeAuth();
   }
 
-  // If user is already persisted, stop loading immediately
+  // If user is already persisted (Zustand rehydration), mark authenticated immediately.
+  // `isAuthenticated` is not persisted so it defaults to false after rehydration —
+  // without this, ProtectedRoute would redirect to /login before initializeAuth runs.
   if (typeof window !== 'undefined' && store.isLoading && store.user) {
-    store.setLoading(false);
+    useAuthStore.setState({ isAuthenticated: true, isLoading: false });
   }
 
   return store;
