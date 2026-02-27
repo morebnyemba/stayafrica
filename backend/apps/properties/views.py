@@ -11,6 +11,7 @@ from django.db.models import Q
 from django.core.exceptions import ValidationError
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
+from django.views.decorators.vary import vary_on_headers
 from apps.properties.models import Property, Amenity, PropertyImage, SavedProperty
 from apps.properties.serializers import (
     PropertySerializer,
@@ -57,7 +58,8 @@ class AmenityViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = AmenitySerializer
     permission_classes = [AllowAny]
 
-@method_decorator(cache_page(60 * 15, key_prefix='property_list'), name='list')
+@method_decorator(cache_page(60 * 5, key_prefix='property_list'), name='list')
+@method_decorator(vary_on_headers('Authorization', 'Cookie'), name='list')
 class PropertyViewSet(viewsets.ModelViewSet):
     queryset = Property.objects.all()
     serializer_class = PropertySerializer
@@ -115,26 +117,28 @@ class PropertyViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         """
-        Return properties based on user role:
-        - Hosts see all their own properties (for management)
-        - Other users only see active/published properties
+        Return properties based on user role and action:
+        - retrieve: hosts see any of their own properties; public sees only active
+        - list: everyone sees active properties (hosts use /host_properties/ for management)
+        - update/partial_update/destroy: hosts see their own properties
         """
-        # For detail retrieval, widen queryset to avoid 404s caused by owner filter
-        # Object-level permissions and UI will gate editing appropriately.
         action = getattr(self, 'action', None)
+
         if action == 'retrieve':
             qs = Property.objects.all()
+            if self.request.user.is_authenticated and self.request.user.is_host:
+                # Hosts can view their own properties regardless of status
+                return qs
             # Public users should not see non-active properties
-            if not (self.request.user.is_authenticated and self.request.user.is_host):
-                qs = qs.filter(status='active')
-            return qs
-        
-        # List and other actions: apply role-based filtering
-        if self.request.user.is_authenticated and self.request.user.is_host:
-            # Hosts see all their own properties
-            return Property.objects.filter(host=self.request.user)
-        
-        # Public/buyers only see active properties
+            return qs.filter(status='active')
+
+        if action in ('update', 'partial_update', 'destroy'):
+            # Hosts manage only their own properties
+            if self.request.user.is_authenticated and self.request.user.is_host:
+                return Property.objects.filter(host=self.request.user)
+            return Property.objects.none()
+
+        # List and other actions: everyone sees active properties
         return Property.objects.filter(status='active')
     
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
