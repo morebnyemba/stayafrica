@@ -397,14 +397,14 @@ EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'StayAfrica <noreply@stayafrica.com>')
 
 # Frontend URL for emails
-FRONTEND_URL = os.getenv('FRONTEND_URL', 'https://zimlegend.online')
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'https://stayafrica.app')
 
 # Site URL used for payment gateway redirect URLs (Stripe checkout, Paynow, etc.)
 # This should be the FRONTEND URL – users are redirected here after payment.
 SITE_URL = os.getenv('SITE_URL', FRONTEND_URL)
 
 # Backend URL for server-to-server webhook notifications (Paynow result_url, etc.)
-BACKEND_URL = os.getenv('BACKEND_URL', 'https://api.zimlegend.online')
+BACKEND_URL = os.getenv('BACKEND_URL', 'https://api.stayafrica.app')
 
 # Create logs directory if it doesn't exist
 import os as log_os
