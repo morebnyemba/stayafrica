@@ -154,8 +154,9 @@ export function Navigation() {
   const handleLogout = useCallback(() => {
     setUserMenuOpen(false);
     logout();
-    router.push('/');
-  }, [logout, router]);
+    // Full page navigation ensures middleware sees the cleared cookie
+    window.location.replace('/');
+  }, [logout]);
 
   const handleBecomeHost = useCallback(async () => {
     if (!isAuthenticated) { router.push('/host'); return; }

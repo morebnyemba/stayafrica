@@ -2,6 +2,57 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { User } from '@/types';
 
+// ── JWT helpers ───────────────────────────────────────────────────────────────
+
+/** Decode a JWT payload without verification (browser-side only). */
+function decodeJwtPayload(token: string): Record<string, unknown> | null {
+  try {
+    const base64 = token.split('.')[1];
+    return JSON.parse(atob(base64));
+  } catch {
+    return null;
+  }
+}
+
+/** Returns the number of milliseconds until the token expires, or 0 if already expired. */
+function msUntilExpiry(token: string): number {
+  const payload = decodeJwtPayload(token);
+  if (!payload || typeof payload.exp !== 'number') return 0;
+  return Math.max(0, payload.exp * 1000 - Date.now());
+}
+
+/** True when the token exists AND is not yet expired. */
+function isTokenAlive(token: string | null): boolean {
+  if (!token) return false;
+  return msUntilExpiry(token) > 0;
+}
+
+// ── Auto-logout timer ─────────────────────────────────────────────────────────
+let _expiryTimer: ReturnType<typeof setTimeout> | null = null;
+
+function clearExpiryTimer() {
+  if (_expiryTimer) {
+    clearTimeout(_expiryTimer);
+    _expiryTimer = null;
+  }
+}
+
+/** Schedule an auto-logout just after the access token expires. */
+function scheduleAutoLogout(token: string) {
+  clearExpiryTimer();
+  const ms = msUntilExpiry(token);
+  if (ms <= 0) return; // already expired – caller should log out immediately
+  // Add a 2-second buffer so the token is definitely expired when we act
+  _expiryTimer = setTimeout(() => {
+    // Trigger the store's logout action
+    useAuthStore.getState().logout();
+    // Redirect to login
+    if (typeof window !== 'undefined') {
+      window.location.replace('/login?expired=1');
+    }
+  }, ms + 2000);
+}
+
 interface TwoFactorRequired {
   two_factor_required: true;
   email: string;
@@ -39,6 +90,9 @@ const setSession = async (access: string, refresh: string) => {
 
   localStorage.setItem('access_token', access);
   localStorage.setItem('refresh_token', refresh);
+
+  // Schedule auto-logout when this token expires
+  scheduleAutoLogout(access);
 
   // Set cookie server-side so middleware/SSR see it immediately
   try {
@@ -93,13 +147,24 @@ export const useAuthStore = create<AuthState>()(
         if (typeof window === 'undefined') return;
 
         const token = localStorage.getItem('access_token');
-        if (token) {
+        if (token && isTokenAlive(token)) {
           // Set cookie for middleware
           const isSecure = window.location.protocol === 'https:';
           document.cookie = `access_token=${token}; path=/; max-age=86400; SameSite=Lax${isSecure ? '; Secure' : ''}`;
+          // Schedule auto-logout when the token expires
+          scheduleAutoLogout(token);
           await get().fetchUserProfile(token);
         } else {
-          set({ isLoading: false });
+          // Token missing or expired – clean up
+          if (token) {
+            // Token existed but was expired
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+            fetch('/api/auth/clear-cookie', { method: 'POST' }).catch(() => {});
+            document.cookie = 'access_token=; path=/; max-age=0';
+            try { localStorage.removeItem('auth-storage'); } catch {}
+          }
+          set({ user: null, isAuthenticated: false, isLoading: false });
         }
       },
 
@@ -199,10 +264,20 @@ export const useAuthStore = create<AuthState>()(
       logout: () => {
         if (typeof window === 'undefined') return;
 
+        clearExpiryTimer();
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
+
+        // Clear via server-side route (removes the cookie the same way it was set)
+        fetch('/api/auth/clear-cookie', { method: 'POST' }).catch(() => {});
+        // Also clear client-side as a fallback
         document.cookie = 'access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-        set({ user: null, isAuthenticated: false });
+        document.cookie = 'access_token=; path=/; max-age=0';
+
+        // Clear persisted Zustand state so rehydration doesn't restore the user
+        try { localStorage.removeItem('auth-storage'); } catch {}
+
+        set({ user: null, isAuthenticated: false, isLoading: false });
       },
 
       updateProfile: async (userData: Partial<User>) => {
@@ -294,16 +369,26 @@ export const useAuthStore = create<AuthState>()(
 export const useAuth = () => {
   const store = useAuthStore();
 
-  // Initialize auth on first mount (no persisted user yet — need to fetch profile)
-  if (typeof window !== 'undefined' && store.isLoading && !store.user) {
-    store.initializeAuth();
-  }
+  if (typeof window !== 'undefined' && store.isLoading) {
+    const token = localStorage.getItem('access_token');
 
-  // If user is already persisted (Zustand rehydration), mark authenticated immediately.
-  // `isAuthenticated` is not persisted so it defaults to false after rehydration —
-  // without this, ProtectedRoute would redirect to /login before initializeAuth runs.
-  if (typeof window !== 'undefined' && store.isLoading && store.user) {
-    useAuthStore.setState({ isAuthenticated: true, isLoading: false });
+    if (store.user && isTokenAlive(token)) {
+      // Zustand rehydrated a user AND the token is still valid.
+      // Mark authenticated immediately so ProtectedRoute doesn't flash-redirect.
+      scheduleAutoLogout(token!);
+      useAuthStore.setState({ isAuthenticated: true, isLoading: false });
+    } else if (store.user && !isTokenAlive(token)) {
+      // User was persisted but the token is gone or expired — force logout.
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+      fetch('/api/auth/clear-cookie', { method: 'POST' }).catch(() => {});
+      document.cookie = 'access_token=; path=/; max-age=0';
+      try { localStorage.removeItem('auth-storage'); } catch {}
+      useAuthStore.setState({ user: null, isAuthenticated: false, isLoading: false });
+    } else {
+      // No persisted user — run full initialization (fetch profile etc.)
+      store.initializeAuth();
+    }
   }
 
   return store;
