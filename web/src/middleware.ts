@@ -44,6 +44,18 @@ function isUserAdmin(token: string): boolean {
   }
 }
 
+// Helper: delete expired cookie on any response (including redirects)
+function withExpiredCookieCleanup(
+  res: NextResponse,
+  token: string | undefined,
+  isAuthenticated: boolean
+): NextResponse {
+  if (token && !isAuthenticated) {
+    res.cookies.delete('access_token');
+  }
+  return res;
+}
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
@@ -51,12 +63,6 @@ export function middleware(request: NextRequest) {
   const token = request.cookies.get('access_token')?.value;
   const isAuthenticated = token ? isTokenValid(token) : false;
   const hasAdminAccess = token ? isUserAdmin(token) : false;
-
-  // Clear expired cookie so client doesn't keep sending it
-  const response = NextResponse.next();
-  if (token && !isAuthenticated) {
-    response.cookies.delete('access_token');
-  }
 
   // Check if the current route is protected or admin
   const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
@@ -67,10 +73,11 @@ export function middleware(request: NextRequest) {
   if (isAdminRoute) {
     if (!isAuthenticated) {
       const url = new URL('/login', request.url);
-      const fullPath = request.nextUrl.search ? `${pathname}${request.nextUrl.search}` : pathname;
-      url.searchParams.set('redirect', fullPath);
+      // Only pass the pathname as redirect target (no query params that include
+      // "redirect" — that pattern causes infinite nested redirect loops).
+      url.searchParams.set('redirect', pathname);
       url.searchParams.set('error', 'admin_access_required');
-      return NextResponse.redirect(url);
+      return withExpiredCookieCleanup(NextResponse.redirect(url), token, isAuthenticated);
     }
     if (!hasAdminAccess) {
       return NextResponse.redirect(new URL('/dashboard?error=unauthorized', request.url));
@@ -80,10 +87,10 @@ export function middleware(request: NextRequest) {
   // Redirect to login if accessing protected route without authentication
   if (isProtectedRoute && !isAuthenticated) {
     const url = new URL('/login', request.url);
-    // Preserve the full path + query string so user returns here after login
-    const fullPath = request.nextUrl.search ? `${pathname}${request.nextUrl.search}` : pathname;
-    url.searchParams.set('redirect', fullPath);
-    return NextResponse.redirect(url);
+    // Only preserve pathname — strip any query string that could carry nested
+    // "redirect" params and cause infinite loops.
+    url.searchParams.set('redirect', pathname);
+    return withExpiredCookieCleanup(NextResponse.redirect(url), token, isAuthenticated);
   }
 
   // Redirect to dashboard if accessing auth routes while authenticated
@@ -91,12 +98,18 @@ export function middleware(request: NextRequest) {
     // If user was being redirected, honour that destination
     const redirect = request.nextUrl.searchParams.get('redirect');
     if (redirect && redirect.startsWith('/')) {
-      return NextResponse.redirect(new URL(redirect, request.url));
+      // Sanitize: parse the redirect and strip any nested "redirect" params
+      // to break potential loops
+      const target = new URL(redirect, request.url);
+      target.searchParams.delete('redirect');
+      return NextResponse.redirect(target);
     }
     return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
-  return response;
+  // Normal response — also clear expired cookies
+  const response = NextResponse.next();
+  return withExpiredCookieCleanup(response, token, isAuthenticated);
 }
 
 export const config = {

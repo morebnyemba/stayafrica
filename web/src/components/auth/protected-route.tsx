@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter, usePathname, useSearchParams } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/store/auth-store';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -15,25 +15,22 @@ export function ProtectedRoute({ children, requireAuth = true, requiredRole }: P
   const { isAuthenticated, isLoading, user } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
 
   useEffect(() => {
     if (isLoading) return;
 
     if (requireAuth && !isAuthenticated) {
-      // Preserve the current URL so the user returns here after login
-      const currentUrl = searchParams.toString()
-        ? `${pathname}?${searchParams.toString()}`
-        : pathname;
-      const loginUrl = `/login?redirect=${encodeURIComponent(currentUrl)}`;
-      router.push(loginUrl);
+      // Only pass pathname as redirect — never include existing query params
+      // (especially "redirect") to prevent infinite nested redirect loops.
+      const loginUrl = `/login?redirect=${encodeURIComponent(pathname)}`;
+      router.replace(loginUrl);
       return;
     }
 
     if (requiredRole && user?.role !== requiredRole) {
-      router.push(requiredRole === 'host' ? '/host' : '/');
+      router.replace(requiredRole === 'host' ? '/host' : '/');
     }
-  }, [isAuthenticated, isLoading, requireAuth, requiredRole, router, user?.role, pathname, searchParams]);
+  }, [isAuthenticated, isLoading, requireAuth, requiredRole, router, user?.role, pathname]);
 
   if (isLoading) {
     return (
