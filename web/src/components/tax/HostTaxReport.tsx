@@ -47,11 +47,11 @@ export const HostTaxReport = () => {
     queryFn: async () => {
       const token = localStorage.getItem('access_token');
       const response = await axios.get(
-        `${API_BASE_URL}/api/v1/payments/tax/reports/host_summary/`,
+        `${API_BASE_URL}/api/v1/tax/reports/host_summary/`,
         {
           params: {
-            period_start: periodStart,
-            period_end: periodEnd,
+            start_date: periodStart,
+            end_date: periodEnd,
           },
           headers: {
             Authorization: `Bearer ${token}`,

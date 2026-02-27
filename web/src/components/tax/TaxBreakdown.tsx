@@ -27,7 +27,7 @@ export const TaxBreakdown = ({
     queryFn: async () => {
       const token = localStorage.getItem('access_token');
       const response = await axios.post(
-        `${API_BASE_URL}/api/v1/payments/tax/booking-taxes/`,
+        `${API_BASE_URL}/api/v1/tax/booking-taxes/`,
         {
           booking_id: bookingId,
           property_id: propertyId,
