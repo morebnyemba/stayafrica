@@ -40,5 +40,5 @@ RUN chmod +x /app/entrypoint.sh
 
 EXPOSE 8000
 
-# Backend: run entrypoint (wait for DB, migrate, then start Daphne)
+# Backend: run entrypoint (wait for DB, migrate, then start Uvicorn)
 ENTRYPOINT ["/app/entrypoint.sh"]

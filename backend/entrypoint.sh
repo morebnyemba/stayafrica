@@ -23,5 +23,5 @@ if ! python manage.py migrate --noinput 2>&1; then
   fi
 fi
 
-echo "🚀 Starting Daphne ASGI server..."
-exec daphne -b 0.0.0.0 -p 8000 stayafrica.asgi:application
+echo "🚀 Starting Uvicorn ASGI server..."
+exec uvicorn stayafrica.asgi:application --host 0.0.0.0 --port 8000 --workers 4 --loop uvloop --http httptools --ws websockets --log-level info
