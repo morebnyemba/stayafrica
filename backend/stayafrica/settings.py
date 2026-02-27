@@ -359,6 +359,10 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'apps.tasks.email_tasks.send_pending_emails',
         'schedule': timedelta(minutes=5),
     },
+    'expire-stale-payments': {
+        'task': 'tasks.payment_tasks.expire_stale_payments',
+        'schedule': timedelta(minutes=5),
+    },
 }
 
 # Sentry Configuration (Optional)
