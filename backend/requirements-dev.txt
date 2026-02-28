@@ -21,7 +21,7 @@ django-cors-headers==4.3.1
 django-filter==23.5
 
 # Admin & UI
-django-unfold==0.28.0
+django-unfold==0.81.0
 
 # Authentication
 djangorestframework-simplejwt==5.5.1

@@ -591,10 +591,7 @@ UNFOLD = {
         "redirect_after": lambda request: "/admin/",
     },
     "STYLES": [
-        f"{STATIC_URL}css/admin-custom.css",  # Full static URL path
-    ],
-    "SCRIPTS": [
-        f"{STATIC_URL}js/admin-custom.js",  # Full static URL path
+        f"{STATIC_URL}admin/css/custom.css",  # StayAfrica custom admin CSS
     ],
     "COLORS": {
         "primary": {
