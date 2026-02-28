@@ -194,7 +194,10 @@ class PaymentViewSet(viewsets.ModelViewSet):
             if not signature:
                 return Response({'error': 'Missing signature'}, status=status.HTTP_403_FORBIDDEN)
             
-            event = payment_service.verify_stripe_webhook(request.body, signature)
+            # Use the underlying Django request's body to avoid DRF's
+            # RawPostDataException (DRF consumes the stream during parsing).
+            raw_body = request._request.body
+            event = payment_service.verify_stripe_webhook(raw_body, signature)
             if not event:
                 return Response({'error': 'Invalid signature'}, status=status.HTTP_403_FORBIDDEN)
             
@@ -226,7 +229,7 @@ class PaymentViewSet(viewsets.ModelViewSet):
         
         elif provider == 'paypal':
             # Verify PayPal webhook
-            if not payment_service.verify_paypal_webhook(dict(request.headers), request.body.decode('utf-8')):
+            if not payment_service.verify_paypal_webhook(dict(request.headers), request._request.body.decode('utf-8')):
                 return Response({'error': 'Invalid signature'}, status=status.HTTP_403_FORBIDDEN)
             
             # Extract payment info from PayPal webhook
