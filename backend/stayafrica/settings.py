@@ -567,63 +567,85 @@ RATELIMIT_USE_CACHE = 'default'
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Helper function for lazy static file resolution in UNFOLD config
-# This avoids importing django.templatetags.static at settings load time
-# Remove the problematic _static_lazy function
-# Django Unfold can handle plain string paths which will be resolved to static URLs at runtime
-
-# Django Unfold Configuration - StayAfrica Brand Colors
+# Django Unfold Configuration - StayAfrica Brand Colors (v0.81.0 format)
 UNFOLD = {
     "SITE_TITLE": "StayAfrica Admin",
     "SITE_HEADER": "StayAfrica Administration",
     "SITE_URL": "/",
+    # SITE_ICON: small icon shown in sidebar header (callable returning URL)
     "SITE_ICON": {
-        "light": f"{STATIC_URL}logo.svg",  # Logo for light theme
-        "dark": f"{STATIC_URL}logo.svg",   # Logo for dark theme
+        "light": lambda request: f"{STATIC_URL}logo.png",
+        "dark": lambda request: f"{STATIC_URL}logo.png",
     },
-    "SITE_SYMBOL": "travel_explore",  # Material icon for favicon
+    # SITE_LOGO: larger logo (optional, shown on login / sidebar)
+    "SITE_LOGO": {
+        "light": lambda request: f"{STATIC_URL}logo.png",
+        "dark": lambda request: f"{STATIC_URL}logo.png",
+    },
+    "SITE_SYMBOL": "travel_explore",  # Material Symbols icon name
     "SHOW_HISTORY": True,
     "SHOW_VIEW_ON_SITE": True,
     "ENVIRONMENT": "stayafrica.settings.environment_callback",
     "DASHBOARD_CALLBACK": "stayafrica.settings.dashboard_callback",
     "LOGIN": {
-        "image": f"{STATIC_URL}images/login-bg.jpg",  # Full static URL path
         "redirect_after": lambda request: "/admin/",
     },
     "STYLES": [
-        f"{STATIC_URL}admin/css/custom.css",  # StayAfrica custom admin CSS
+        f"{STATIC_URL}admin/css/custom.css",
     ],
+    "BORDER_RADIUS": "6px",
     "COLORS": {
+        "base": {
+            "50": "244 241 234",    # Ivory Sand lightest
+            "100": "237 232 222",
+            "200": "218 210 194",
+            "300": "189 179 159",
+            "400": "143 133 114",
+            "500": "107 98 82",
+            "600": "82 74 61",
+            "700": "58 55 47",
+            "800": "36 34 29",
+            "900": "18 17 15",
+            "950": "10 9 8",
+        },
         "primary": {
-            "50": "250 248 245",   # Off-white/Ivory Sand - very light (#FAF8F5)
-            "100": "244 241 234",  # Light Ivory Sand (#F4F1EA)
-            "200": "217 177 104",  # Light Safari Gold (#D9B168)
-            "300": "189 147 79",   # Medium Safari Gold
-            "400": "162 118 54",   # Deep Safari Gold
-            "500": "58 92 80",     # Moss Green #3A5C50 (brand primary)
-            "600": "46 73 64",     # Dark Moss Green
-            "700": "29 57 47",     # Darker Moss Green
-            "800": "18 47 38",     # Deep Forest #122F26 (brand dark)
-            "900": "10 26 21",     # Savanna Text #0A1A15 (brand darkest)
-            "950": "5 13 11",      # Almost Black
+            "50": "240 247 244",    # Very light moss
+            "100": "220 237 229",   # Light moss
+            "200": "178 213 196",   # Lighter moss
+            "300": "128 182 157",   # Medium-light moss
+            "400": "84 148 118",    # Medium moss
+            "500": "58 92 80",      # Moss Green #3A5C50 (brand primary)
+            "600": "46 73 64",      # Dark Moss Green
+            "700": "29 57 47",      # Darker Moss Green
+            "800": "18 47 38",      # Deep Forest #122F26
+            "900": "10 26 21",      # Savanna Text #0A1A15
+            "950": "5 13 11",       # Almost Black
+        },
+        "font": {
+            "subtle-light": "var(--color-base-500)",
+            "subtle-dark": "var(--color-base-400)",
+            "default-light": "var(--color-base-700)",
+            "default-dark": "var(--color-base-300)",
+            "important-light": "var(--color-base-900)",
+            "important-dark": "var(--color-base-100)",
         },
     },
-    "THEME": "light",  # Force light theme as it works better with our earthy colors
+    "THEME": "light",
     "EXTENSIONS": {
         "modeltranslation": {
             "flags": {
-                "en": "🇬🇧",
-                "fr": "🇫🇷",
-                "sw": "🇹🇿",
+                "en": "\U0001F1EC\U0001F1E7",
+                "fr": "\U0001F1EB\U0001F1F7",
+                "sw": "\U0001F1F9\U0001F1FF",
             },
         },
     },
-    "FAVICONS": [
+    "SITE_FAVICONS": [
         {
             "rel": "icon",
             "sizes": "32x32",
-            "type": "image/svg+xml",
-            "href": f"{STATIC_URL}favicon.svg",  # Full static URL path
+            "type": "image/png",
+            "href": lambda request: f"{STATIC_URL}favicon.png",
         },
     ],
     "SIDEBAR": {

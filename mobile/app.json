@@ -4,7 +4,7 @@
     "slug": "stayafrica",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/IMG-20251208-WA0002(1).jpg",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",
@@ -43,7 +43,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/IMG-20251208-WA0002(1).jpg",
+        "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#F5F5DC"
       },
       "package": "com.stayafrica.app",

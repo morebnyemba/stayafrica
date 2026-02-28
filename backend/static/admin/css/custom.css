@@ -1,207 +1,63 @@
-/* StayAfrica Admin Custom Styles */
-/* Applies to both light and dark themes in Django Unfold */
+/* ============================================================
+   StayAfrica Admin — Brand Accent Overrides
+   Works WITH django-unfold v0.81.0 built-in styles.
+   The primary / base colors are already set via UNFOLD["COLORS"]
+   in settings.py.  This file only adds lightweight brand touches
+   that cannot be expressed through the COLORS config alone.
+   ============================================================ */
 
 :root {
-    --stayafrica-deep-forest: #122F26;
-    --stayafrica-safari-gold: #D9B168;
-    --stayafrica-ivory-sand: #F4F1EA;
-    --stayafrica-savanna-text: #0A1A15;
-    --stayafrica-moss-green: #3A5C50;
-    --stayafrica-pure-white: #FFFFFF;
+    --sa-deep-forest: #122F26;
+    --sa-safari-gold: #D9B168;
+    --sa-ivory-sand: #F4F1EA;
+    --sa-moss-green: #3A5C50;
 }
 
-body {
-    background-color: var(--stayafrica-ivory-sand) !important;
-    color: var(--stayafrica-savanna-text) !important;
+/* ---- Login page ---- */
+body.login {
+    background: linear-gradient(135deg, var(--sa-deep-forest), var(--sa-moss-green));
 }
 
-html.dark body {
-    background-color: var(--stayafrica-deep-forest) !important;
-    color: var(--stayafrica-ivory-sand) !important;
+/* ---- Sidebar brand accent ---- */
+#nav-sidebar h3,
+aside h3 {
+    color: var(--sa-safari-gold);
 }
 
-/* Sidebar styling */
-#nav-sidebar {
-    background-color: var(--stayafrica-deep-forest) !important;
-    border-right: 1px solid rgba(244, 241, 234, 0.18) !important;
-    color: var(--stayafrica-ivory-sand) !important;
+/* ---- Active sidebar link highlight ---- */
+#nav-sidebar a[aria-current="page"],
+aside a[aria-current="page"] {
+    border-left: 3px solid var(--sa-safari-gold);
 }
 
-#nav-sidebar h3 {
-    color: var(--stayafrica-safari-gold) !important;
+/* ---- Table header accent ---- */
+thead th {
+    background-color: var(--sa-deep-forest);
+    color: var(--sa-ivory-sand);
 }
 
-#nav-sidebar a {
-    color: var(--stayafrica-ivory-sand) !important;
-}
-
-#nav-sidebar a:hover {
-    background-color: rgba(217, 177, 104, 0.2) !important;
-    color: var(--stayafrica-safari-gold) !important;
-}
-
-#nav-sidebar a[class*='bg-gray-100'],
-#nav-sidebar a[class*='dark:bg-white'] {
-    background-color: rgba(217, 177, 104, 0.25) !important;
-    border-color: rgba(217, 177, 104, 0.35) !important;
-    color: var(--stayafrica-deep-forest) !important;
-}
-
-html.dark #nav-sidebar a {
-    color: var(--stayafrica-ivory-sand) !important;
-}
-
-html.dark #nav-sidebar a[class*='dark:bg-white'] {
-    color: var(--stayafrica-safari-gold) !important;
-}
-
-/* Header styling */
-div.border-b.border-gray-200.mb-6 {
-    background: linear-gradient(135deg, var(--stayafrica-deep-forest), var(--stayafrica-moss-green)) !important;
-    border-color: rgba(217, 177, 104, 0.35) !important;
-}
-
-div.border-b.border-gray-200.mb-6 a,
-div.border-b.border-gray-200.mb-6 span,
-div.border-b.border-gray-200.mb-6 .text-gray-700,
-div.border-b.border-gray-200.mb-6 .text-gray-500 {
-    color: var(--stayafrica-ivory-sand) !important;
-}
-
-/* Content area */
-#content {
-    background-color: var(--stayafrica-pure-white) !important;
-    border-radius: 1rem;
-    padding: 1.5rem 1.5rem 2rem 1.5rem;
-    box-shadow: 0 20px 45px rgba(18, 47, 38, 0.08);
-}
-
-html.dark #content {
-    background-color: rgba(18, 47, 38, 0.8) !important;
-    box-shadow: 0 20px 45px rgba(10, 26, 21, 0.45);
-}
-
-/* Forms, cards, list items */
-#content .module,
-.unfold-card,
-fieldset,
-.inline-group,
-tr,
-table {
-    background-color: transparent !important;
-}
-
-#content .module,
-fieldset,
-.inline-group {
-    border-color: rgba(58, 92, 80, 0.22) !important;
-}
-
-html.dark #content .module,
-html.dark fieldset,
-html.dark .inline-group {
-    border-color: rgba(217, 177, 104, 0.28) !important;
-}
-
-/* Buttons */
-button,
-input[type="submit"],
-input[type="button"],
-.button,
-.unfold-button,
-.unfold-btn-primary {
-    background-color: var(--stayafrica-moss-green) !important;
-    border-color: var(--stayafrica-moss-green) !important;
-    color: var(--stayafrica-ivory-sand) !important;
-}
-
-button:hover,
-input[type="submit"]:hover,
-input[type="button"]:hover,
-.button:hover,
-.unfold-button:hover,
-.unfold-btn-primary:hover {
-    background-color: var(--stayafrica-safari-gold) !important;
-    border-color: var(--stayafrica-safari-gold) !important;
-    color: var(--stayafrica-deep-forest) !important;
-}
-
-/* Links */
-a,
-.link,
-.text-primary-600 {
-    color: var(--stayafrica-moss-green) !important;
-}
-
-a:hover,
-.link:hover {
-    color: var(--stayafrica-safari-gold) !important;
-}
-
-/* Badges */
-.badge,
-.unfold-badge,
-.status-tag,
-.label {
-    background-color: var(--stayafrica-safari-gold) !important;
-    color: var(--stayafrica-savanna-text) !important;
-}
-
-html.dark .badge,
-html.dark .unfold-badge,
-html.dark .status-tag,
-html.dark .label {
-    background-color: rgba(217, 177, 104, 0.85) !important;
-    color: var(--stayafrica-deep-forest) !important;
-}
-
-/* Tables */
-thead,
-th {
-    background-color: var(--stayafrica-deep-forest) !important;
-    color: var(--stayafrica-ivory-sand) !important;
-}
-
-tbody tr:nth-child(even) {
-    background-color: rgba(244, 241, 234, 0.6) !important;
-}
-
-html.dark tbody tr:nth-child(even) {
-    background-color: rgba(58, 92, 80, 0.35) !important;
-}
-
-/* Inputs */
-input,
-textarea,
-select {
-    border-color: rgba(58, 92, 80, 0.35) !important;
-    background-color: rgba(255, 255, 255, 0.85) !important;
-}
-
+/* ---- Focus ring accent ---- */
 input:focus,
 textarea:focus,
 select:focus {
-    border-color: var(--stayafrica-safari-gold) !important;
-    box-shadow: 0 0 0 3px rgba(217, 177, 104, 0.2) !important;
+    outline-color: var(--sa-safari-gold);
+    box-shadow: 0 0 0 2px rgba(217, 177, 104, 0.25);
 }
 
-html.dark input,
-html.dark textarea,
-html.dark select {
-    background-color: rgba(18, 47, 38, 0.8) !important;
-    border-color: rgba(217, 177, 104, 0.3) !important;
-    color: var(--stayafrica-ivory-sand) !important;
+/* ---- Primary buttons ---- */
+.btn-primary,
+button[type="submit"],
+input[type="submit"] {
+    background-color: var(--sa-moss-green);
+    border-color: var(--sa-moss-green);
+    color: #fff;
 }
 
-html.dark input:focus,
-html.dark textarea:focus,
-html.dark select:focus {
-    border-color: var(--stayafrica-safari-gold) !important;
-    box-shadow: 0 0 0 3px rgba(217, 177, 104, 0.25) !important;
-}
-
-/* Login page background */
-body.login {
-    background: linear-gradient(135deg, var(--stayafrica-deep-forest), var(--stayafrica-moss-green)) !important;
+.btn-primary:hover,
+button[type="submit"]:hover,
+input[type="submit"]:hover {
+    background-color: var(--sa-safari-gold);
+    border-color: var(--sa-safari-gold);
+    color: var(--sa-deep-forest);
 }
 
