@@ -177,7 +177,12 @@ class PaymentViewSet(viewsets.ModelViewSet):
     @api_ratelimit(rate='100/h')
     def webhook(self, request):
         """Handle payment provider webhooks with SDK signature verification"""
-        provider = request.data.get('provider') or request.GET.get('provider')
+        # Read the raw body BEFORE DRF parses it — needed for Stripe/PayPal
+        # signature verification. Django caches it on first access.
+        raw_body = request._request.body
+        
+        # Provider comes from query string (?provider=stripe) or POST body
+        provider = request.GET.get('provider') or request.data.get('provider')
         
         if not provider:
             logger.error("Webhook received without provider")
@@ -194,9 +199,6 @@ class PaymentViewSet(viewsets.ModelViewSet):
             if not signature:
                 return Response({'error': 'Missing signature'}, status=status.HTTP_403_FORBIDDEN)
             
-            # Use the underlying Django request's body to avoid DRF's
-            # RawPostDataException (DRF consumes the stream during parsing).
-            raw_body = request._request.body
             event = payment_service.verify_stripe_webhook(raw_body, signature)
             if not event:
                 return Response({'error': 'Invalid signature'}, status=status.HTTP_403_FORBIDDEN)
@@ -229,7 +231,7 @@ class PaymentViewSet(viewsets.ModelViewSet):
         
         elif provider == 'paypal':
             # Verify PayPal webhook
-            if not payment_service.verify_paypal_webhook(dict(request.headers), request._request.body.decode('utf-8')):
+            if not payment_service.verify_paypal_webhook(dict(request.headers), raw_body.decode('utf-8')):
                 return Response({'error': 'Invalid signature'}, status=status.HTTP_403_FORBIDDEN)
             
             # Extract payment info from PayPal webhook
