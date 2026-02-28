@@ -23,5 +23,12 @@ if ! python manage.py migrate --noinput 2>&1; then
   fi
 fi
 
-echo "🚀 Starting Uvicorn ASGI server..."
-exec uvicorn stayafrica.asgi:application --host 0.0.0.0 --port 8000 --workers 4 --loop uvloop --http httptools --ws websockets --log-level info
+# If a command was passed (e.g. from docker-compose "command:"), run it.
+# Otherwise default to starting Uvicorn.
+if [ $# -gt 0 ]; then
+  echo "🚀 Running command: $@"
+  exec "$@"
+else
+  echo "🚀 Starting Uvicorn ASGI server..."
+  exec uvicorn stayafrica.asgi:application --host 0.0.0.0 --port 8000 --workers 4 --loop uvloop --http httptools --ws websockets --log-level info
+fi
