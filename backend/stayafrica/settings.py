@@ -764,7 +764,7 @@ UNFOLD = {
     "TABS": [
         {
             "models": [
-                "users.user",
+                {"name": "users.user", "detail": True},
             ],
             "items": [
                 {
@@ -786,7 +786,7 @@ UNFOLD = {
         },
         {
             "models": [
-                "properties.property",
+                {"name": "properties.property", "detail": True},
             ],
             "items": [
                 {
