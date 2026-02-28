@@ -9,7 +9,7 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#F5F5DC"
+      "backgroundColor": "#122F26"
     },
     "statusBar": {
       "barStyle": "dark-content",
@@ -44,7 +44,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#F5F5DC"
+        "backgroundColor": "#122F26"
       },
       "package": "com.stayafrica.app",
       "statusBar": {

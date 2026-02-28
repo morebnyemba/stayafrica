@@ -644,6 +644,12 @@ UNFOLD = {
         {
             "rel": "icon",
             "sizes": "32x32",
+            "type": "image/x-icon",
+            "href": lambda request: f"{STATIC_URL}favicon.ico",
+        },
+        {
+            "rel": "icon",
+            "sizes": "32x32",
             "type": "image/png",
             "href": lambda request: f"{STATIC_URL}favicon.png",
         },
