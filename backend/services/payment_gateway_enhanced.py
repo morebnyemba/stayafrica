@@ -346,8 +346,9 @@ class PaymentGatewayService:
         """Initiate Stripe payment using official SDK"""
         try:
             # Create Stripe checkout session
+            # Omit payment_method_types to let Stripe dynamically show all
+            # eligible methods (cards, Apple Pay, Google Pay, bank transfers, etc.)
             session = stripe.checkout.Session.create(
-                payment_method_types=['card'],
                 line_items=[{
                     'price_data': {
                         'currency': payment_obj.currency.lower(),
