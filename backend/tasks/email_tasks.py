@@ -193,7 +193,7 @@ def send_booking_confirmation_email(booking_id):
             'num_nights': booking.nights,
             'num_guests': booking.number_of_guests,
             'currency': booking.currency,
-            'host_payout': f"{(booking.nightly_total + booking.fees_total - getattr(booking, 'commission_fee', 0)):,.2f}",
+            'host_payout': f"{(booking.nightly_total + booking.service_fee + booking.cleaning_fee - booking.commission_fee):,.2f}",
             'booking_url': f"{settings.FRONTEND_URL}/host/bookings/{booking.id}",
             'message_url': f"{settings.FRONTEND_URL}/messages",
         }
