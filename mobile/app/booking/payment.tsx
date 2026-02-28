@@ -55,6 +55,25 @@ export default function PaymentScreen() {
   const checkOut = params.checkOut as string;
   const guests = params.guests as string;
 
+  // Fetch booking details to get fee breakdown
+  const { data: bookingData } = useQuery({
+    queryKey: ['booking', bookingId],
+    queryFn: async () => {
+      const res = await apiClient.get(`/bookings/${bookingId}/`);
+      return res.data;
+    },
+    enabled: !!bookingId && isAuthenticated,
+  });
+
+  const isCashOnArrival = selectedProvider === 'cash_on_arrival';
+  const serviceFee = parseFloat(bookingData?.service_fee || '0');
+  const commissionFee = parseFloat(bookingData?.commission_fee || '0');
+  const cleaningFee = parseFloat(bookingData?.cleaning_fee || '0');
+  const taxes = parseFloat(bookingData?.taxes || '0');
+  const nightlyTotal = parseFloat(bookingData?.nightly_total || '0');
+  const chargesOnly = serviceFee + commissionFee + cleaningFee + taxes;
+  const displayAmount = isCashOnArrival ? chargesOnly : total;
+
   // Fetch available payment providers
   const { data: providersData, isLoading: loadingProviders } = useQuery({
     queryKey: ['payment-providers', user?.country_of_residence],
@@ -87,7 +106,11 @@ export default function PaymentScreen() {
       });
 
       if (response.data?.status === 'completed' || response.data?.status === 'success') {
-        Alert.alert('Success', 'Payment processed successfully!', [
+        const isCOA = response.data?.payment_type === 'cash_on_arrival';
+        const msg = isCOA
+          ? `Booking confirmed! Platform charges ($${chargesOnly.toFixed(2)}) recorded. Pay $${nightlyTotal.toFixed(2)} accommodation on arrival.`
+          : 'Payment processed successfully!';
+        Alert.alert('Success', msg, [
           {
             text: 'OK',
             onPress: () => router.replace(`/booking/success?bookingId=${bookingId}`)
@@ -262,10 +285,43 @@ export default function PaymentScreen() {
         {/* Total Amount */}
         <View className="px-4">
           <View className="bg-gradient-to-r from-gold/20 to-gold/10 rounded-2xl p-5 mb-6">
-            <Text className="text-moss text-xs font-semibold mb-2">TOTAL AMOUNT</Text>
-            <Text className="text-4xl font-black text-forest">
-              ${total.toFixed(2)}
+            <Text className="text-moss text-xs font-semibold mb-2">
+              {isCashOnArrival ? 'PAY NOW (CHARGES)' : 'TOTAL AMOUNT'}
             </Text>
+            <Text className="text-4xl font-black text-forest">
+              ${displayAmount.toFixed(2)}
+            </Text>
+            {isCashOnArrival && (
+              <View className="mt-3">
+                <View className="flex-row justify-between mb-1">
+                  <Text className="text-xs text-moss">Service Fee</Text>
+                  <Text className="text-xs text-forest font-semibold">${serviceFee.toFixed(2)}</Text>
+                </View>
+                <View className="flex-row justify-between mb-1">
+                  <Text className="text-xs text-moss">Commission</Text>
+                  <Text className="text-xs text-forest font-semibold">${commissionFee.toFixed(2)}</Text>
+                </View>
+                {cleaningFee > 0 && (
+                  <View className="flex-row justify-between mb-1">
+                    <Text className="text-xs text-moss">Cleaning Fee</Text>
+                    <Text className="text-xs text-forest font-semibold">${cleaningFee.toFixed(2)}</Text>
+                  </View>
+                )}
+                {taxes > 0 && (
+                  <View className="flex-row justify-between mb-1">
+                    <Text className="text-xs text-moss">Taxes</Text>
+                    <Text className="text-xs text-forest font-semibold">${taxes.toFixed(2)}</Text>
+                  </View>
+                )}
+                <View className="border-t border-gold/30 mt-2 pt-2 flex-row justify-between">
+                  <Text className="text-sm font-bold text-amber-700">Pay on Arrival</Text>
+                  <Text className="text-sm font-bold text-amber-700">${nightlyTotal.toFixed(2)}</Text>
+                </View>
+                <Text className="text-xs text-amber-600 mt-1">
+                  Accommodation is paid in cash on arrival. Only charges are due now.
+                </Text>
+              </View>
+            )}
           </View>
         </View>
 
@@ -409,7 +465,9 @@ export default function PaymentScreen() {
               <View className="flex-row items-center">
                 <Ionicons name="shield-checkmark" size={20} color="#122F26" />
                 <Text className="text-forest font-bold text-base ml-2">
-                  Pay ${total.toFixed(2)}
+                  {isCashOnArrival
+                    ? `Pay Charges $${chargesOnly.toFixed(2)}`
+                    : `Pay $${total.toFixed(2)}`}
                 </Text>
               </View>
             )}

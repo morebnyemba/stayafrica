@@ -176,8 +176,10 @@ export default function BookingSuccessPage() {
               </li>
               {provider === 'cash_on_arrival' && (
                 <li className="flex items-start gap-3">
-                  <CheckCircle className="w-5 h-5 text-secondary-600 dark:text-secondary-400 mt-0.5 flex-shrink-0" />
-                  <span className="font-medium">Remember to bring cash payment on arrival</span>
+                  <CheckCircle className="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" />
+                  <span className="font-medium">
+                    Platform charges have been recorded. Please bring cash for the accommodation cost on arrival.
+                  </span>
                 </li>
               )}
             </ul>

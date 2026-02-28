@@ -193,6 +193,13 @@ export default function BookingPaymentPage() {
   const propertyId = booking.property?.id || booking.rental_property;
   const propertyTitle = booking.property_title || booking.property?.title || 'Property';
 
+  const isCashOnArrival = selectedProvider === 'cash_on_arrival';
+  // Calculate charges-only total for cash_on_arrival
+  const chargesOnly = booking
+    ? (parseFloat(booking.service_fee || '0') + parseFloat(booking.commission_fee || '0') + parseFloat(booking.cleaning_fee || '0') + parseFloat(booking.taxes || '0')).toFixed(2)
+    : '0.00';
+  const displayAmount = isCashOnArrival ? chargesOnly : booking?.grand_total;
+
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-sand-100 dark:bg-primary-900">
@@ -382,12 +389,32 @@ export default function BookingPaymentPage() {
                   </div>
                 </div>
 
-                <div className="flex justify-between text-lg font-semibold mb-6">
-                  <span className="text-primary-900 dark:text-sand-50">Total Amount</span>
+                <div className="flex justify-between text-lg font-semibold mb-2">
+                  <span className="text-primary-900 dark:text-sand-50">{isCashOnArrival ? 'Pay Now (Charges)' : 'Total Amount'}</span>
                   <span className="text-primary-900 dark:text-sand-50">
-                    {booking.currency} {booking.grand_total}
+                    {booking.currency} {displayAmount}
                   </span>
                 </div>
+
+                {isCashOnArrival && (
+                  <div className="mb-4 space-y-2">
+                    <div className="text-xs text-primary-500 dark:text-sand-400 space-y-1">
+                      <div className="flex justify-between"><span>Service Fee</span><span>{booking.currency} {booking.service_fee}</span></div>
+                      <div className="flex justify-between"><span>Commission</span><span>{booking.currency} {booking.commission_fee}</span></div>
+                      {parseFloat(booking.cleaning_fee || '0') > 0 && <div className="flex justify-between"><span>Cleaning Fee</span><span>{booking.currency} {booking.cleaning_fee}</span></div>}
+                      {parseFloat(booking.taxes || '0') > 0 && <div className="flex justify-between"><span>Taxes</span><span>{booking.currency} {booking.taxes}</span></div>}
+                    </div>
+                    <div className="flex justify-between text-sm font-medium text-amber-700 dark:text-amber-400 pt-2 border-t border-primary-200 dark:border-primary-700">
+                      <span>Pay on Arrival</span>
+                      <span>{booking.currency} {booking.nightly_total}</span>
+                    </div>
+                    <p className="text-xs text-amber-600 dark:text-amber-400">
+                      Accommodation cost ({booking.currency} {booking.nightly_total}) is paid in cash on arrival. Only platform charges are due now.
+                    </p>
+                  </div>
+                )}
+
+                <div className="mb-6" />
 
                 <button
                   onClick={handlePayment}
@@ -402,7 +429,9 @@ export default function BookingPaymentPage() {
                   ) : (
                     <>
                       <CreditCard className="w-5 h-5" />
-                      Pay {booking.currency} {booking.grand_total}
+                      {isCashOnArrival
+                        ? `Pay Charges ${booking.currency} ${chargesOnly}`
+                        : `Pay ${booking.currency} ${booking.grand_total}`}
                     </>
                   )}
                 </button>

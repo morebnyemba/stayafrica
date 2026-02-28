@@ -114,6 +114,20 @@ class PaymentViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
+        # For cash_on_arrival the guest only pays the platform charges
+        # (service_fee + commission_fee + cleaning_fee + taxes) upfront.
+        # The accommodation cost (nightly_total) is paid on arrival.
+        if provider == 'cash_on_arrival':
+            charges_only = (
+                booking.service_fee
+                + booking.commission_fee
+                + booking.cleaning_fee
+                + booking.taxes
+            )
+            payment_amount = charges_only
+        else:
+            payment_amount = booking.grand_total
+
         # Initiate payment with provider SDK
         try:
             with transaction.atomic():
@@ -122,7 +136,7 @@ class PaymentViewSet(viewsets.ModelViewSet):
                     booking=booking,
                     provider=provider,
                     gateway_ref=f'{booking.booking_ref}-{provider}-{uuid.uuid4().hex[:8]}',
-                    amount=booking.grand_total,
+                    amount=payment_amount,
                     currency=booking.currency,
                     status='initiated'
                 )
@@ -140,6 +154,12 @@ class PaymentViewSet(viewsets.ModelViewSet):
                     # Rollback the payment record if the SDK call failed
                     raise Exception(result.get('error', 'Payment initialization failed'))
                 
+                # Cash on arrival: mark payment as success and confirm booking
+                if provider == 'cash_on_arrival':
+                    payment.status = 'success'
+                    payment.save()
+                    booking.status = 'confirmed'
+                    booking.save()
                 
                 # Log the action
                 AuditLoggerService.log_action(
@@ -150,7 +170,7 @@ class PaymentViewSet(viewsets.ModelViewSet):
                     changes={
                         'gateway_ref': payment.gateway_ref,
                         'provider': provider,
-                        'amount': str(booking.grand_total)
+                        'amount': str(payment_amount)
                     }
                 )
                 
@@ -163,6 +183,19 @@ class PaymentViewSet(viewsets.ModelViewSet):
                 ):
                     if key in result:
                         response_data[key] = result[key]
+
+                # For cash_on_arrival, include charges breakdown so the
+                # frontend can display what was charged vs pay-on-arrival.
+                if provider == 'cash_on_arrival':
+                    response_data['payment_type'] = 'cash_on_arrival'
+                    response_data['charges_only'] = str(charges_only)
+                    response_data['pay_on_arrival'] = str(booking.nightly_total)
+                    response_data['charges_breakdown'] = {
+                        'service_fee': str(booking.service_fee),
+                        'commission_fee': str(booking.commission_fee),
+                        'cleaning_fee': str(booking.cleaning_fee),
+                        'taxes': str(booking.taxes),
+                    }
         except Exception as e:
             logger.error(f"Payment initiation failed: {str(e)}")
             return Response(
