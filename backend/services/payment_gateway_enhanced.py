@@ -807,6 +807,165 @@ class PaymentGatewayService:
                 'error': str(e),
             }
     
+    # ── Refund methods ──────────────────────────────────────────────
+
+    GATEWAY_REFUND_SUPPORTED = {'stripe', 'paypal', 'flutterwave', 'paystack'}
+
+    def refund_stripe_payment(
+        self,
+        gateway_ref: str,
+        amount: Optional[Decimal] = None,
+        currency: str = 'USD',
+        reason: str = 'requested_by_customer',
+    ) -> Dict:
+        """Refund a Stripe payment (full or partial)"""
+        try:
+            # Retrieve the checkout session to get the payment intent
+            session = stripe.checkout.Session.retrieve(gateway_ref)
+            payment_intent_id = session.get('payment_intent')
+            if not payment_intent_id:
+                return {'success': False, 'error': 'No payment intent found for session'}
+
+            refund_params: Dict = {
+                'payment_intent': payment_intent_id,
+                'reason': reason,
+            }
+            if amount is not None:
+                refund_params['amount'] = int(amount * 100)  # cents
+
+            refund = stripe.Refund.create(**refund_params)
+            logger.info(f'Stripe refund processed: {refund.id} for session {gateway_ref}')
+            return {
+                'success': refund.status in ('succeeded', 'pending'),
+                'refund_id': refund.id,
+                'status': refund.status,
+            }
+        except Exception as e:
+            logger.error(f'Stripe refund exception: {str(e)}')
+            return {'success': False, 'error': str(e)}
+
+    def refund_flutterwave_payment(
+        self,
+        gateway_ref: str,
+        amount: Optional[Decimal] = None,
+    ) -> Dict:
+        """Refund a Flutterwave payment (full or partial).
+
+        Flutterwave refund API requires the *transaction id* (numeric),
+        which we obtain by verifying the tx_ref first.
+        """
+        try:
+            headers = {
+                'Authorization': f'Bearer {self.flutterwave_secret_key}',
+                'Content-Type': 'application/json',
+            }
+
+            # Look up transaction id from our tx_ref
+            verify_resp = requests.get(
+                f'https://api.flutterwave.com/v3/transactions/verify_by_reference?tx_ref={gateway_ref}',
+                headers=headers,
+            )
+            if verify_resp.status_code != 200 or verify_resp.json().get('status') != 'success':
+                return {'success': False, 'error': 'Could not verify Flutterwave transaction'}
+
+            txn_id = verify_resp.json()['data']['id']
+
+            payload: Dict = {}
+            if amount is not None:
+                payload['amount'] = float(amount)
+
+            resp = requests.post(
+                f'https://api.flutterwave.com/v3/transactions/{txn_id}/refund',
+                headers=headers,
+                json=payload,
+            )
+            data = resp.json()
+            ok = resp.status_code == 200 and data.get('status') == 'success'
+            logger.info(f'Flutterwave refund {"succeeded" if ok else "failed"}: txn={txn_id}')
+            return {
+                'success': ok,
+                'refund_id': str(data.get('data', {}).get('id', '')),
+                'status': data.get('status'),
+                'details': data,
+            }
+        except Exception as e:
+            logger.error(f'Flutterwave refund exception: {str(e)}')
+            return {'success': False, 'error': str(e)}
+
+    def refund_paystack_payment(
+        self,
+        gateway_ref: str,
+        amount: Optional[Decimal] = None,
+        currency: str = 'USD',
+    ) -> Dict:
+        """Refund a Paystack payment (full or partial).
+
+        Paystack refund API requires the *transaction reference*.
+        """
+        try:
+            headers = {
+                'Authorization': f'Bearer {self.paystack_secret_key}',
+                'Content-Type': 'application/json',
+            }
+
+            payload: Dict = {'transaction': gateway_ref}
+            if amount is not None:
+                payload['amount'] = int(amount * 100)  # kobo/cents
+
+            resp = requests.post(
+                'https://api.paystack.co/refund',
+                headers=headers,
+                json=payload,
+            )
+            data = resp.json()
+            ok = resp.status_code == 200 and data.get('status') is True
+            logger.info(f'Paystack refund {"succeeded" if ok else "failed"}: ref={gateway_ref}')
+            return {
+                'success': ok,
+                'refund_id': str(data.get('data', {}).get('id', '')),
+                'status': 'success' if ok else 'failed',
+                'details': data,
+            }
+        except Exception as e:
+            logger.error(f'Paystack refund exception: {str(e)}')
+            return {'success': False, 'error': str(e)}
+
+    def process_refund(
+        self,
+        provider: str,
+        gateway_ref: str,
+        amount: Optional[Decimal] = None,
+        currency: str = 'USD',
+        reason: str = 'requested_by_customer',
+    ) -> Dict:
+        """Unified refund router — delegates to the correct gateway.
+
+        Returns {'success': True/False, ...}.  For gateways that do not
+        support programmatic refunds (e.g. Paynow) returns
+        {'success': False, 'manual': True, ...}.
+        """
+        if provider == 'stripe':
+            return self.refund_stripe_payment(gateway_ref, amount, currency, reason)
+        elif provider == 'paypal':
+            # PayPal refund needs the capture_id which is stored in gateway_ref
+            # after capture.  If the ref is still the order id we need to
+            # retrieve the capture id first.
+            return self.refund_paypal_payment(gateway_ref, amount, currency)
+        elif provider == 'flutterwave':
+            return self.refund_flutterwave_payment(gateway_ref, amount)
+        elif provider == 'paystack':
+            return self.refund_paystack_payment(gateway_ref, amount, currency)
+        else:
+            # Paynow, cash_on_arrival, etc. — no programmatic refund
+            logger.warning(f'Refund not supported for provider {provider} — manual action required')
+            return {
+                'success': False,
+                'manual': True,
+                'error': f'Provider {provider} does not support programmatic refunds. Please refund manually or credit the guest wallet.',
+            }
+
+    # ── Payment initiation ────────────────────────────────────────────
+
     def initiate_payment(
         self, 
         payment_obj, 

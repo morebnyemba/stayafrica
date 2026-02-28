@@ -345,6 +345,151 @@ class PaymentViewSet(viewsets.ModelViewSet):
             'created_at': payment.created_at,
         })
     
+    @action(detail=True, methods=['post'])
+    @api_ratelimit(rate='5/m')
+    @log_action('refund_payment')
+    def refund(self, request, pk=None):
+        """Refund a successful payment.
+
+        POST body:
+            refund_method: 'original' | 'wallet'   (required)
+            reason:        str                      (optional)
+            amount:        Decimal                  (optional, for partial refund — defaults to full)
+
+        Gateway refund is attempted for Stripe / PayPal / Flutterwave / Paystack.
+        If the gateway does not support programmatic refunds (Paynow, cash),
+        the amount is credited to the guest's wallet regardless of choice.
+        """
+        payment = self.get_object()
+
+        # Only the guest who paid, the host, or an admin can request a refund
+        is_guest = request.user == payment.booking.guest
+        is_host = request.user == payment.booking.rental_property.host
+        is_admin = request.user.is_admin_user
+        if not (is_guest or is_host or is_admin):
+            return Response(
+                {'error': 'You do not have permission to refund this payment'},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        if payment.status != 'success':
+            return Response(
+                {'error': f'Cannot refund a payment with status "{payment.status}"'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        refund_method = request.data.get('refund_method')  # 'original' or 'wallet'
+        if refund_method not in ('original', 'wallet'):
+            return Response(
+                {'error': 'refund_method is required: "original" or "wallet"'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        reason = request.data.get('reason', 'Booking cancelled')
+        partial_amount = request.data.get('amount')
+        refund_amount = Decimal(str(partial_amount)) if partial_amount else payment.amount
+
+        payment_service = PaymentGatewayService()
+        gateway_refund_ok = False
+        refund_details = {}
+        wallet_credited = False
+
+        if refund_method == 'original' and payment.provider in PaymentGatewayService.GATEWAY_REFUND_SUPPORTED:
+            # Try gateway refund
+            refund_details = payment_service.process_refund(
+                provider=payment.provider,
+                gateway_ref=payment.gateway_ref,
+                amount=refund_amount if partial_amount else None,  # None = full
+                currency=payment.currency,
+                reason=reason,
+            )
+            gateway_refund_ok = refund_details.get('success', False)
+
+            if not gateway_refund_ok:
+                # Gateway refund failed — fall back to wallet
+                logger.warning(
+                    f'Gateway refund failed for {payment.gateway_ref}, '
+                    f'falling back to wallet credit: {refund_details.get("error")}'
+                )
+                wallet_credited = self._credit_wallet(payment, refund_amount, reason)
+        else:
+            # Wallet refund (either chosen by user, or gateway unsupported)
+            wallet_credited = self._credit_wallet(payment, refund_amount, reason)
+
+        # Update payment status
+        if gateway_refund_ok or wallet_credited:
+            with transaction.atomic():
+                payment.status = 'refunded'
+                payment.save()
+
+                AuditLoggerService.log_action(
+                    user=request.user,
+                    action='refund',
+                    model=Payment,
+                    object_id=payment.id,
+                    changes={
+                        'refund_method': 'gateway' if gateway_refund_ok else 'wallet',
+                        'amount': str(refund_amount),
+                        'currency': payment.currency,
+                        'reason': reason,
+                        'refund_details': refund_details if gateway_refund_ok else None,
+                    },
+                )
+
+            return Response({
+                'status': 'refunded',
+                'refund_method': 'gateway' if gateway_refund_ok else 'wallet',
+                'amount': str(refund_amount),
+                'currency': payment.currency,
+                'gateway_refund': refund_details if gateway_refund_ok else None,
+                'wallet_credited': wallet_credited,
+            })
+        else:
+            return Response(
+                {'error': 'Refund failed. Please contact support.', 'details': refund_details},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+    @staticmethod
+    def _credit_wallet(payment, amount, reason='Refund'):
+        """Credit the guest's wallet with the refund amount."""
+        from apps.payments.models import Wallet, WalletTransaction
+        import uuid
+
+        try:
+            wallet, _created = Wallet.objects.get_or_create(
+                user=payment.booking.guest,
+                defaults={'currency': payment.currency, 'status': 'active'},
+            )
+            with transaction.atomic():
+                wallet.balance += amount
+                wallet.save()
+
+                WalletTransaction.objects.create(
+                    wallet=wallet,
+                    booking=payment.booking,
+                    txn_type='refund',
+                    status='completed',
+                    amount=amount,
+                    currency=payment.currency,
+                    reference=f'RF-{uuid.uuid4().hex[:12].upper()}',
+                    metadata={
+                        'payment_id': payment.id,
+                        'gateway_ref': payment.gateway_ref,
+                        'provider': payment.provider,
+                        'reason': reason,
+                    },
+                )
+
+            logger.info(
+                f'Wallet refund credited: {amount} {payment.currency} to '
+                f'user {payment.booking.guest.email}'
+            )
+            return True
+        except Exception as e:
+            logger.error(f'Wallet refund failed: {str(e)}')
+            return False
+
     @action(detail=False, methods=['post'], url_path='capture-paypal')
     @api_ratelimit(rate='10/m')
     @log_action('capture_paypal')

@@ -215,8 +215,53 @@ class BookingViewSet(viewsets.ModelViewSet):
                 changes={'status': old_status + ' -> cancelled'}
             )
         
+        # Auto-refund if payment was successful
+        refund_info = None
+        if hasattr(booking, 'payment') and booking.payment.status == 'success':
+            payment = booking.payment
+            cancelled_by = 'host' if request.user == booking.rental_property.host else 'guest'
+            reason = f'Booking cancelled by {cancelled_by}'
+            
+            from services.payment_gateway_enhanced import PaymentGatewayService
+            payment_service = PaymentGatewayService()
+
+            # Try gateway refund first for supported providers
+            if payment.provider in PaymentGatewayService.GATEWAY_REFUND_SUPPORTED:
+                result = payment_service.process_refund(
+                    provider=payment.provider,
+                    gateway_ref=payment.gateway_ref,
+                    currency=payment.currency,
+                    reason=reason,
+                )
+                if result.get('success'):
+                    payment.status = 'refunded'
+                    payment.save()
+                    refund_info = {'method': 'gateway', 'provider': payment.provider}
+                else:
+                    # Gateway refund failed — fall back to wallet
+                    from apps.payments.views import PaymentViewSet
+                    if PaymentViewSet._credit_wallet(payment, payment.amount, reason):
+                        payment.status = 'refunded'
+                        payment.save()
+                        refund_info = {'method': 'wallet'}
+            else:
+                # Provider doesn't support refunds — credit wallet
+                from apps.payments.views import PaymentViewSet
+                if PaymentViewSet._credit_wallet(payment, payment.amount, reason):
+                    payment.status = 'refunded'
+                    payment.save()
+                    refund_info = {'method': 'wallet'}
+
+            if refund_info:
+                logger.info(f"Auto-refund processed for {booking.booking_ref}: {refund_info}")
+            else:
+                logger.error(f"Auto-refund FAILED for {booking.booking_ref}")
+        
         logger.info(f"Booking cancelled: {booking.booking_ref}")
-        return Response({'status': 'cancelled', 'booking_ref': booking.booking_ref})
+        response_data = {'status': 'cancelled', 'booking_ref': booking.booking_ref}
+        if refund_info:
+            response_data['refund'] = refund_info
+        return Response(response_data)
     
     @action(detail=True, methods=['post'])
     @log_action('complete_booking')
