@@ -11,7 +11,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const isAdminRoute = pathname?.startsWith('/admin');
 
   return (
-    <div className="flex flex-col min-h-screen pb-16 lg:pb-0 relative">
+    <div className="flex flex-col min-h-screen pb-16 lg:pb-0 relative overflow-x-hidden w-full">
       {!isAdminRoute && <Navigation />}
       <main id="main-content" className="flex-grow">
         {children}

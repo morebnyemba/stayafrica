@@ -8,13 +8,17 @@ import { PropertyCard } from '@/components/property/PropertyCard';
 import type { Property } from '@/types';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Sidebar } from '@/components/common/Sidebar';
+import { useWishlist, useRemoveFromWishlist } from '@/hooks/api-hooks';
 
 export default function WishlistScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { isAuthenticated } = useAuth();
-  const [wishlistProperties, setWishlistProperties] = useState<Property[]>([]);
   const [sidebarVisible, setSidebarVisible] = useState(false);
+
+  const { data: wishlistData, isLoading } = useWishlist();
+  const removeFromWishlist = useRemoveFromWishlist();
+  const wishlistProperties: Property[] = wishlistData?.results || [];
 
   if (!isAuthenticated) {
     return (
@@ -91,7 +95,7 @@ export default function WishlistScreen() {
   };
 
   const handleRemoveFromWishlist = (id: string) => {
-    setWishlistProperties(prev => prev.filter(p => p.id !== id));
+    removeFromWishlist.mutate(id);
   };
 
   return (
@@ -135,7 +139,11 @@ export default function WishlistScreen() {
         </LinearGradient>
 
       {/* Wishlist Content */}
-      {wishlistProperties.length === 0 ? (
+      {isLoading ? (
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator size="large" color="#D9B168" />
+        </View>
+      ) : wishlistProperties.length === 0 ? (
         <View className="flex-1 justify-center items-center px-6">
           <View className="bg-white rounded-3xl p-8 items-center" style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.1, shadowRadius: 16, elevation: 8 }}>
             <View className="bg-sand-200 rounded-full p-8 mb-6">

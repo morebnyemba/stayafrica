@@ -7,6 +7,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '@/context/auth-context';
 import { Sidebar } from '@/components/common/Sidebar';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useBookings, useWishlist, useUnreadCount } from '@/hooks/api-hooks';
 
 interface StatCardProps {
   icon: keyof typeof Ionicons.glyphMap;
@@ -38,10 +39,22 @@ export default function GuestDashboardScreen() {
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
+  // Backend data
+  const { data: bookingsData, refetch: refetchBookings } = useBookings();
+  const { data: wishlistData, refetch: refetchWishlist } = useWishlist();
+  const { data: unreadData, refetch: refetchUnread } = useUnreadCount();
+
+  const totalBookings = bookingsData?.results?.length ?? 0;
+  const upcomingTrips = bookingsData?.results?.filter(
+    (b: any) => b.status === 'confirmed' && new Date(b.check_in) >= new Date()
+  ).length ?? 0;
+  const savedProperties = wishlistData?.results?.length ?? 0;
+  const unreadMessages = unreadData?.unread_count ?? 0;
+
   const onRefresh = async () => {
     setRefreshing(true);
     try {
-      await refreshUser();
+      await Promise.all([refreshUser(), refetchBookings(), refetchWishlist(), refetchUnread()]);
     } catch (error) {
       console.error('Error refreshing dashboard:', error);
     } finally {
@@ -329,14 +342,14 @@ export default function GuestDashboardScreen() {
             <StatCard
               icon="calendar"
               label="Upcoming Trips"
-              value="0"
+              value={upcomingTrips}
               color="#3B82F6"
               onPress={() => router.push('/(tabs)/bookings')}
             />
             <StatCard
               icon="heart"
               label="Saved Properties"
-              value="0"
+              value={savedProperties}
               color="#EF4444"
               onPress={() => router.push('/(tabs)/wishlist')}
             />
@@ -345,14 +358,14 @@ export default function GuestDashboardScreen() {
             <StatCard
               icon="checkmark-circle"
               label="Total Bookings"
-              value="0"
+              value={totalBookings}
               color="#10B981"
               onPress={() => router.push('/(tabs)/bookings')}
             />
             <StatCard
               icon="chatbubbles"
               label="Messages"
-              value="0"
+              value={unreadMessages}
               color="#8B5CF6"
               onPress={() => router.push('/(tabs)/messages')}
             />

@@ -8,6 +8,7 @@ import { Skeleton } from '@/components/common/Skeletons';
 import type { Transaction } from '@/types';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Sidebar } from '@/components/common/Sidebar';
+import { useWalletBalance, useTransactions } from '@/hooks/api-hooks';
 
 interface TransactionItemProps {
   icon: keyof typeof Ionicons.glyphMap;
@@ -21,10 +22,27 @@ export default function WalletScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { isAuthenticated } = useAuth();
-  const [balance, setBalance] = useState(0);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [sidebarVisible, setSidebarVisible] = useState(false);
+
+  const { data: walletData, isLoading: walletLoading } = useWalletBalance();
+  const { data: transactionsData, isLoading: txLoading } = useTransactions();
+
+  const balance = walletData?.available_balance ?? 0;
+  const transactions: Transaction[] = transactionsData?.results || [];
+  const isLoading = walletLoading || txLoading;
+
+  // Compute month totals from transactions
+  const now = new Date();
+  const thisMonthTx = transactions.filter((t: Transaction) => {
+    const d = new Date(t.created_at);
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  });
+  const monthEarned = thisMonthTx
+    .filter((t: Transaction) => t.type === 'credit')
+    .reduce((sum: number, t: Transaction) => sum + Number(t.amount || 0), 0);
+  const monthSpent = thisMonthTx
+    .filter((t: Transaction) => t.type === 'debit')
+    .reduce((sum: number, t: Transaction) => sum + Number(t.amount || 0), 0);
 
   if (!isAuthenticated) {
     return (
@@ -230,7 +248,7 @@ export default function WalletScreen() {
             </View>
             <Text className="text-xs text-moss font-semibold">This Month</Text>
           </View>
-          <Text className="text-2xl font-bold text-green-600">$0</Text>
+          <Text className="text-2xl font-bold text-green-600">${monthEarned.toFixed(2)}</Text>
           <Text className="text-xs text-moss mt-1">Earned</Text>
         </View>
         
@@ -247,7 +265,7 @@ export default function WalletScreen() {
             </View>
             <Text className="text-xs text-moss font-semibold">This Month</Text>
           </View>
-          <Text className="text-2xl font-bold text-red-600">$0</Text>
+          <Text className="text-2xl font-bold text-red-600">${monthSpent.toFixed(2)}</Text>
           <Text className="text-xs text-moss mt-1">Spent</Text>
         </View>
       </View>
@@ -285,8 +303,15 @@ export default function WalletScreen() {
           </View>
         ) : (
           <View>
-            {transactions.map((transaction, index) => (
-              <TransactionItem key={index} {...transaction} />
+            {transactions.slice(0, 10).map((transaction) => (
+              <TransactionItem
+                key={transaction.id}
+                icon={transaction.type === 'credit' ? 'arrow-down-circle' : 'arrow-up-circle'}
+                title={transaction.description || (transaction.type === 'credit' ? 'Payment Received' : 'Payment Sent')}
+                amount={Number(transaction.amount)}
+                date={new Date(transaction.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                type={transaction.type}
+              />
             ))}
           </View>
         )}
