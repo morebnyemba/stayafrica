@@ -39,7 +39,7 @@ export function AnimatedCompassIcon({
   });
 
   return (
-    <Animated.View style={[{ transform: [{ rotate }] }, style]}>
+    <Animated.View style={[{ transform: [{ rotate }], overflow: 'visible' }, style]}>
       <Ionicons name={filled ? 'compass' : 'compass-outline'} size={size} color={color} />
     </Animated.View>
   );

@@ -57,6 +57,7 @@ export default function TabsLayout() {
           paddingVertical: 4,
           alignItems: 'center',
           justifyContent: 'center',
+          overflow: 'visible',
         },
       })}
     >
