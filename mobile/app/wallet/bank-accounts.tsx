@@ -283,6 +283,7 @@ export default function BankAccountsScreen() {
                   placeholder="e.g., 0101"
                   value={formData.branch_code}
                   onChangeText={(text) => setFormData({ ...formData, branch_code: text })}
+                  keyboardType="numeric"
                 />
               </View>
 

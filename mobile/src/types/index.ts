@@ -38,6 +38,10 @@ export interface Property {
   rating: number;
   review_count: number;
   host_id: string;
+  cleaning_fee?: number;
+  currency?: string;
+  host?: { id: string; first_name?: string; last_name?: string; email?: string };
+  images?: { id: number; image: string; caption?: string }[];
 }
 
 // Booking Types
@@ -344,11 +348,17 @@ export interface PaymentInitiationRequest {
 }
 
 export interface PaymentInitiationResponse {
-  payment_id: string;
+  payment_id?: string;
+  id?: string;
   client_secret?: string; // For Stripe
   checkout_url?: string; // For PayPal or other redirect-based providers
+  redirect_url?: string;
+  payment_link?: string;
   mobile_money_reference?: string;
-  status: 'pending' | 'requires_action' | 'processing';
+  status: string;
+  payment_type?: string;
+  gateway_ref?: string;
+  paypal_order_id?: string;
 }
 
 export interface PaymentStatusResponse {

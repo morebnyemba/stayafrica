@@ -58,19 +58,16 @@ export default function PaymentScreen() {
   // Fetch booking details to get fee breakdown
   const { data: bookingData } = useQuery({
     queryKey: ['booking', bookingId],
-    queryFn: async () => {
-      const res = await apiClient.get(`/bookings/${bookingId}/`);
-      return res.data;
-    },
+    queryFn: () => apiClient.getBookingById(bookingId),
     enabled: !!bookingId && isAuthenticated,
   });
 
   const isCashOnArrival = selectedProvider === 'cash_on_arrival';
-  const serviceFee = parseFloat(bookingData?.service_fee || '0');
-  const commissionFee = parseFloat(bookingData?.commission_fee || '0');
-  const cleaningFee = parseFloat(bookingData?.cleaning_fee || '0');
-  const taxes = parseFloat(bookingData?.taxes || '0');
-  const nightlyTotal = parseFloat(bookingData?.nightly_total || '0');
+  const serviceFee = parseFloat(String(bookingData?.service_fee || '0'));
+  const commissionFee = parseFloat(String(bookingData?.commission_fee || '0'));
+  const cleaningFee = parseFloat(String(bookingData?.cleaning_fee || '0'));
+  const taxes = parseFloat(String((bookingData as any)?.taxes || (bookingData as any)?.tax || '0'));
+  const nightlyTotal = parseFloat(String(bookingData?.nightly_total || '0'));
   const chargesOnly = serviceFee + commissionFee + cleaningFee + taxes;
   const displayAmount = isCashOnArrival ? chargesOnly : total;
   const currency = bookingData?.currency || 'USD';
@@ -101,13 +98,10 @@ export default function PaymentScreen() {
 
     setProcessing(true);
     try {
-      const response = await apiClient.post('/payments/initiate/', {
-        booking_id: bookingId,
-        provider: selectedProvider,
-      });
+      const responseData = await apiClient.initiatePayment(bookingId, selectedProvider);
 
-      if (response.data?.status === 'completed' || response.data?.status === 'success') {
-        const isCOA = response.data?.payment_type === 'cash_on_arrival';
+      if (responseData?.status === 'completed' || responseData?.status === 'success') {
+        const isCOA = responseData?.payment_type === 'cash_on_arrival';
         const msg = isCOA
           ? `Booking confirmed! Platform charges (${currency} ${chargesOnly.toFixed(2)}) recorded. Pay ${currency} ${nightlyTotal.toFixed(2)} accommodation on arrival.`
           : 'Payment processed successfully!';
@@ -117,16 +111,16 @@ export default function PaymentScreen() {
             onPress: () => router.replace(`/booking/success?bookingId=${bookingId}`)
           }
         ]);
-      } else if (response.data?.checkout_url || response.data?.redirect_url || response.data?.payment_link) {
-        const paymentUrl = response.data.checkout_url || response.data.redirect_url || response.data.payment_link;
+      } else if (responseData?.checkout_url || responseData?.redirect_url || responseData?.payment_link) {
+        const paymentUrl = responseData.checkout_url || responseData.redirect_url || responseData.payment_link || '';
         
         // Store pending payment info for capture on return
         const pendingInfo = {
           bookingId,
           provider: selectedProvider,
-          paymentId: response.data?.id,
-          gateway_ref: response.data?.gateway_ref,
-          paypal_order_id: response.data?.paypal_order_id || null,
+          paymentId: responseData?.id,
+          gateway_ref: responseData?.gateway_ref,
+          paypal_order_id: responseData?.paypal_order_id || null,
         };
         await AsyncStorage.setItem('pending_payment', JSON.stringify(pendingInfo));
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   View,
   Text,
@@ -8,15 +8,16 @@ import {
   Alert,
   ActivityIndicator,
   Platform,
+  Modal,
+  FlatList,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { DocumentUpload } from './DocumentUpload';
 import { SelfieCapture } from './SelfieCapture';
-import { GlassmorphicView } from '../common/GlassmorphicView';
 import { useRouter } from 'expo-router';
 import { apiClient } from '@/services/api-client';
-import { logError, logInfo, logApiError } from '@/utils/logger';
+import { logInfo, logApiError } from '@/utils/logger';
 
 type WizardStep = 'document-info' | 'document-upload' | 'selfie' | 'review';
 
@@ -52,6 +53,8 @@ export function VerificationWizard() {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState<WizardStep>('document-info');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showCountryPicker, setShowCountryPicker] = useState(false);
+  const [countrySearch, setCountrySearch] = useState('');
   
   const [data, setData] = useState<Partial<VerificationData>>({
     documentType: 'PASSPORT',
@@ -112,16 +115,16 @@ export function VerificationWizard() {
 
       // Submit verification data to API
       const verificationData = {
-        document_type: data.documentType,
-        document_number: data.documentNumber,
-        issued_country: data.issuedCountry,
+        document_type: data.documentType!,
+        document_number: data.documentNumber!,
+        issued_country: data.issuedCountry!,
         expiry_date: data.expiryDate || null,
-        front_image_url: data.frontImageUrl,
+        front_image_url: data.frontImageUrl!,
         back_image_url: data.backImageUrl || null,
-        selfie_url: data.selfieUrl,
+        selfie_url: data.selfieUrl!,
       };
 
-      await apiClient.post('/users/verification/', verificationData);
+      await apiClient.submitVerification(verificationData);
 
       logInfo('Verification submitted successfully');
       
@@ -253,22 +256,62 @@ export function VerificationWizard() {
         />
       </View>
 
-      {/* Country & Expiry */}
+      {/* Country Selector */}
       <View className="mb-4">
         <Text className="text-sm font-semibold text-forest mb-2">Issued Country *</Text>
-        <View className="bg-white border-2 border-sand-200 rounded-xl">
-          <TextInput
-            value={data.issuedCountry}
-            onChangeText={(text) => setData({ ...data, issuedCountry: text })}
-            placeholder="Select or type country"
-            placeholderTextColor="#94a3b8"
-            className="px-4 py-3 text-forest"
-            style={{
-              fontSize: 16,
-            }}
-          />
-        </View>
+        <TouchableOpacity
+          onPress={() => setShowCountryPicker(true)}
+          className="bg-white border-2 border-sand-200 rounded-xl px-4 py-3 flex-row items-center justify-between"
+        >
+          <Text className={data.issuedCountry ? 'text-forest text-base' : 'text-slate-400 text-base'}>
+            {data.issuedCountry || 'Select country'}
+          </Text>
+          <Ionicons name="chevron-down" size={20} color="#5A7A6C" />
+        </TouchableOpacity>
       </View>
+
+      {/* Country Picker Modal */}
+      <Modal visible={showCountryPicker} animationType="slide" transparent>
+        <View className="flex-1 bg-black/50 justify-end">
+          <View className="bg-white rounded-t-3xl" style={{ maxHeight: '70%' }}>
+            <View className="flex-row items-center justify-between px-4 py-3 border-b border-sand-200">
+              <Text className="text-lg font-bold text-forest">Select Country</Text>
+              <TouchableOpacity onPress={() => { setShowCountryPicker(false); setCountrySearch(''); }}>
+                <Ionicons name="close" size={24} color="#122F26" />
+              </TouchableOpacity>
+            </View>
+            <View className="px-4 py-2">
+              <TextInput
+                placeholder="Search countries..."
+                placeholderTextColor="#94a3b8"
+                value={countrySearch}
+                onChangeText={setCountrySearch}
+                className="bg-sand-50 rounded-xl px-4 py-2.5 text-forest"
+                autoFocus
+              />
+            </View>
+            <FlatList
+              data={COUNTRIES.filter(c => c.toLowerCase().includes(countrySearch.toLowerCase()))}
+              keyExtractor={(item) => item}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  onPress={() => {
+                    setData({ ...data, issuedCountry: item });
+                    setShowCountryPicker(false);
+                    setCountrySearch('');
+                  }}
+                  className={`px-4 py-3 border-b border-sand-100 ${data.issuedCountry === item ? 'bg-gold/10' : ''}`}
+                >
+                  <Text className={`text-base ${data.issuedCountry === item ? 'text-forest font-semibold' : 'text-forest'}`}>
+                    {item}
+                  </Text>
+                </TouchableOpacity>
+              )}
+              keyboardShouldPersistTaps="handled"
+            />
+          </View>
+        </View>
+      </Modal>
 
       <View className="mb-4">
         <Text className="text-sm font-semibold text-forest mb-2">
@@ -276,13 +319,20 @@ export function VerificationWizard() {
         </Text>
         <TextInput
           value={data.expiryDate}
-          onChangeText={(text) => setData({ ...data, expiryDate: text })}
+          onChangeText={(text) => {
+            // Auto-format as YYYY-MM-DD
+            const cleaned = text.replace(/[^0-9]/g, '');
+            let formatted = cleaned;
+            if (cleaned.length > 4) formatted = cleaned.slice(0, 4) + '-' + cleaned.slice(4);
+            if (cleaned.length > 6) formatted = cleaned.slice(0, 4) + '-' + cleaned.slice(4, 6) + '-' + cleaned.slice(6, 8);
+            setData({ ...data, expiryDate: formatted });
+          }}
           placeholder="YYYY-MM-DD"
           placeholderTextColor="#94a3b8"
           className="bg-white border-2 border-sand-200 rounded-xl px-4 py-3 text-forest"
-          style={{
-            fontSize: 16,
-          }}
+          style={{ fontSize: 16 }}
+          keyboardType="numeric"
+          maxLength={10}
         />
       </View>
     </View>
@@ -460,7 +510,7 @@ export function VerificationWizard() {
 
   return (
     <View className="flex-1 bg-sand-100">
-      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+      <ScrollView className="flex-1" showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
         <LinearGradient
           colors={['#122F26', '#1d392f', '#2d4a40']}
           start={{ x: 0, y: 0 }}

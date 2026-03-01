@@ -42,10 +42,7 @@ export default function BookingConfirmScreen() {
   // Fetch property details
   const { data: property, isLoading: loadingProperty } = useQuery({
     queryKey: ['property', propertyId],
-    queryFn: async () => {
-      const response = await apiClient.get(`/properties/${propertyId}/`);
-      return response.data;
-    },
+    queryFn: () => apiClient.getPropertyById(propertyId),
     enabled: !!propertyId,
   });
 
@@ -169,6 +166,7 @@ export default function BookingConfirmScreen() {
     <ScrollView 
       className="flex-1 bg-sand-100" 
       showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
       contentContainerStyle={{ paddingBottom: 40 }}
     >
       {/* Header */}

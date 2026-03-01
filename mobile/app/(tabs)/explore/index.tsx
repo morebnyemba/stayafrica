@@ -1,4 +1,4 @@
-import { View, Text, FlatList, TextInput, ActivityIndicator, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, FlatList, TextInput, TouchableOpacity, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
@@ -82,16 +82,16 @@ export default function ExploreScreen() {
       />
       
       <View className="flex-1 bg-sand-100">
-        {/* Consistent Header with Sidebar */}
+        {/* Compact Header */}
         <LinearGradient
           colors={['#122F26', '#1d392f', '#2d4a40']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
-          className="pb-6"
-          style={{ paddingTop: insets.top + 12 }}
+          className="pb-3"
+          style={{ paddingTop: insets.top + 4 }}
         >
           {/* Top Navigation Bar with Menu */}
-          <View className="flex-row items-center justify-between px-4 mb-4">
+          <View className="flex-row items-center justify-between px-4 mb-2">
             {/* Hamburger Menu */}
             <TouchableOpacity
               onPress={() => setSidebarVisible(true)}
@@ -100,23 +100,17 @@ export default function ExploreScreen() {
             >
               <Ionicons name="menu" size={24} color="#fff" />
             </TouchableOpacity>
+            <Text className="text-xl font-bold text-white">Explore</Text>
+            <View className="w-10" />
           </View>
           
           <View className="px-4">
-            {/* Title */}
-            <Text className="text-3xl font-black text-white tracking-tight mb-1">
-              Explore
-            </Text>
-            <Text className="text-sand-200 text-sm mb-4">
-              Discover amazing places
-            </Text>
-
             {/* Search Bar */}
             <View 
-              className="flex-row items-center px-4 py-3"
+              className="flex-row items-center px-4 py-2.5"
               style={{ 
                 backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                borderRadius: 16
+                borderRadius: 12
               }}
             >
               <Ionicons name="search" size={22} color="#D9B168" />

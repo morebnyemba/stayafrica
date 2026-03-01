@@ -1,13 +1,19 @@
 import { View, Text, ScrollView, TouchableOpacity, Platform } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 
 export default function BookingFailureScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams();
+  const bookingId = params.bookingId as string;
 
   const handleTryAgain = () => {
-    router.back();
+    if (bookingId) {
+      router.replace(`/booking/payment?bookingId=${bookingId}`);
+    } else {
+      router.back();
+    }
   };
 
   const handleContactSupport = () => {

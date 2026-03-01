@@ -709,6 +709,29 @@ class APIClient {
     return (await this.client.post(`/tokens/${tokenId}/deactivate/`)).data;
   }
 
+  // ── Identity Verification ─────────────────────────────────────────────
+
+  async submitVerification(data: {
+    document_type: string;
+    document_number: string;
+    issued_country: string;
+    expiry_date?: string | null;
+    front_image_url: string;
+    back_image_url?: string | null;
+    selfie_url: string;
+  }): Promise<any> {
+    return (await this.client.post('/users/verification/', data)).data;
+  }
+
+  async getVerificationStatus(): Promise<{
+    has_verification: boolean;
+    is_verified: boolean;
+    status?: string;
+    verification?: any;
+  }> {
+    return (await this.client.get('/users/verification/current_status/')).data;
+  }
+
   // Generic request method
   get<T = any>(url: string, config?: any) {
     return this.client.get<T>(url, config);
