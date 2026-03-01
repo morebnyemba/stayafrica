@@ -6,6 +6,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '@/context/auth-context';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
+import { useFeeConfiguration, calculateBookingCost } from '@/hooks/api-hooks';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function BookingConfirmScreen() {
@@ -20,6 +21,7 @@ export default function BookingConfirmScreen() {
 
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [isCreatingBooking, setIsCreatingBooking] = useState(false);
+  const [contactingHost, setContactingHost] = useState(false);
 
   // Calculate nights
   const checkInDate = checkIn ? new Date(checkIn) : null;
@@ -47,11 +49,36 @@ export default function BookingConfirmScreen() {
     enabled: !!propertyId,
   });
 
-  // Calculate costs
-  const basePrice = property?.price_per_night ? property.price_per_night * nights : 0;
+  // Fetch fee configuration from backend
+  const { data: feeConfig, isLoading: loadingFees } = useFeeConfiguration();
+
+  // Calculate costs using backend fee config (matching web parity)
   const cleaningFee = property?.cleaning_fee || 0;
-  const serviceFee = basePrice * 0.10; // 10% service fee
-  const total = basePrice + serviceFee + cleaningFee;
+  let costs = { basePrice: 0, serviceFee: 0, commissionFee: 0, commissionRate: 0, cleaningFee: 0, total: 0 };
+  if (property && feeConfig && nights > 0) {
+    costs = calculateBookingCost(property.price_per_night, nights, feeConfig, cleaningFee);
+  }
+  const currency = property?.currency || 'USD';
+
+  const contactHost = async () => {
+    const hostId = property?.host?.id || property?.host_id;
+    if (!property || !hostId) {
+      Alert.alert('Error', 'Host information not available');
+      return;
+    }
+    setContactingHost(true);
+    try {
+      await apiClient.createConversation(String(property.id));
+      Alert.alert('Success', 'Conversation started!', [
+        { text: 'OK', onPress: () => router.push('/(tabs)/messages') }
+      ]);
+    } catch (error: any) {
+      const msg = error.response?.data?.error || error.response?.data?.detail || 'Failed to start conversation';
+      Alert.alert('Error', msg);
+    } finally {
+      setContactingHost(false);
+    }
+  };
 
   const handleConfirmBooking = async () => {
     if (!agreedToTerms) {
@@ -66,7 +93,7 @@ export default function BookingConfirmScreen() {
         check_in: checkIn,
         check_out: checkOut,
         number_of_guests: guests,
-        cleaning_fee: cleaningFee || 0,
+        cleaning_fee: costs.cleaningFee || 0,
       });
 
       router.push({
@@ -77,7 +104,7 @@ export default function BookingConfirmScreen() {
           checkIn,
           checkOut,
           guests: guests.toString(),
-          total: total.toString(),
+          total: costs.total.toString(),
         },
       });
     } catch (error: any) {
@@ -129,7 +156,7 @@ export default function BookingConfirmScreen() {
     );
   }
 
-  if (loadingProperty) {
+  if (loadingProperty || loadingFees) {
     return (
       <View className="flex-1 bg-sand-100 items-center justify-center">
         <ActivityIndicator size="large" color="#D9B168" />
@@ -194,6 +221,34 @@ export default function BookingConfirmScreen() {
             </View>
           </View>
         </View>
+
+        {/* Contact Host */}
+        <TouchableOpacity
+          onPress={contactHost}
+          disabled={contactingHost}
+          className="bg-white rounded-2xl p-4 mb-4"
+          style={{
+            shadowColor: '#122F26',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.08,
+            shadowRadius: 8,
+            elevation: 4,
+          }}
+        >
+          <View className="flex-row items-center justify-center">
+            {contactingHost ? (
+              <>
+                <ActivityIndicator size="small" color="#122F26" />
+                <Text className="text-forest font-semibold ml-2">Contacting Host...</Text>
+              </>
+            ) : (
+              <>
+                <Ionicons name="chatbubble-ellipses" size={20} color="#122F26" />
+                <Text className="text-forest font-semibold ml-2">Contact Host</Text>
+              </>
+            )}
+          </View>
+        </TouchableOpacity>
 
         {/* Trip Details */}
         <View className="bg-white rounded-2xl p-4 mb-4" style={{
@@ -269,23 +324,27 @@ export default function BookingConfirmScreen() {
           <Text className="text-lg font-bold text-forest mb-3">Price Details</Text>
           <View className="space-y-2 mb-3 pb-3 border-b border-sand-200">
             <View className="flex-row justify-between">
-              <Text className="text-moss">${property?.price_per_night} × {nights} nights</Text>
-              <Text className="font-semibold text-forest">${basePrice.toFixed(2)}</Text>
+              <Text className="text-moss">{currency} {property?.price_per_night} × {nights} nights</Text>
+              <Text className="font-semibold text-forest">{currency} {costs.basePrice.toFixed(2)}</Text>
             </View>
             <View className="flex-row justify-between">
               <Text className="text-moss">Service fee</Text>
-              <Text className="font-semibold text-forest">${serviceFee.toFixed(2)}</Text>
+              <Text className="font-semibold text-forest">{currency} {costs.serviceFee.toFixed(2)}</Text>
             </View>
-            {cleaningFee > 0 && (
+            <View className="flex-row justify-between">
+              <Text className="text-moss">Commission ({(costs.commissionRate * 100).toFixed(1)}%)</Text>
+              <Text className="font-semibold text-forest">{currency} {costs.commissionFee.toFixed(2)}</Text>
+            </View>
+            {costs.cleaningFee > 0 && (
               <View className="flex-row justify-between">
                 <Text className="text-moss">Cleaning fee</Text>
-                <Text className="font-semibold text-forest">${cleaningFee.toFixed(2)}</Text>
+                <Text className="font-semibold text-forest">{currency} {costs.cleaningFee.toFixed(2)}</Text>
               </View>
             )}
           </View>
           <View className="flex-row justify-between">
             <Text className="text-lg font-bold text-forest">Total</Text>
-            <Text className="text-lg font-bold text-forest">${total.toFixed(2)}</Text>
+            <Text className="text-lg font-bold text-forest">{currency} {costs.total.toFixed(2)}</Text>
           </View>
         </View>
 

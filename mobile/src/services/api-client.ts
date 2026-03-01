@@ -504,6 +504,18 @@ class APIClient {
     return (await this.client.get('/payments/providers/', { params: { country } })).data;
   }
 
+  // Fee configuration
+  async getFeeConfiguration(): Promise<{
+    commission_rate: number;
+    service_fee: number;
+    default_currency: string;
+    max_advance_booking_days: number;
+    max_stay_duration_days: number;
+    review_window_days: number;
+  }> {
+    return (await this.client.get('/admin/config/fees/')).data;
+  }
+
   // Bank accounts
   async getBankAccounts(): Promise<ApiListResponse<BankAccount>> {
     return (await this.client.get('/bank-accounts/')).data;

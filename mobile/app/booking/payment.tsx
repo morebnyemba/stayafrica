@@ -73,6 +73,7 @@ export default function PaymentScreen() {
   const nightlyTotal = parseFloat(bookingData?.nightly_total || '0');
   const chargesOnly = serviceFee + commissionFee + cleaningFee + taxes;
   const displayAmount = isCashOnArrival ? chargesOnly : total;
+  const currency = bookingData?.currency || 'USD';
 
   // Fetch available payment providers
   const { data: providersData, isLoading: loadingProviders } = useQuery({
@@ -108,7 +109,7 @@ export default function PaymentScreen() {
       if (response.data?.status === 'completed' || response.data?.status === 'success') {
         const isCOA = response.data?.payment_type === 'cash_on_arrival';
         const msg = isCOA
-          ? `Booking confirmed! Platform charges ($${chargesOnly.toFixed(2)}) recorded. Pay $${nightlyTotal.toFixed(2)} accommodation on arrival.`
+          ? `Booking confirmed! Platform charges (${currency} ${chargesOnly.toFixed(2)}) recorded. Pay ${currency} ${nightlyTotal.toFixed(2)} accommodation on arrival.`
           : 'Payment processed successfully!';
         Alert.alert('Success', msg, [
           {
@@ -289,33 +290,33 @@ export default function PaymentScreen() {
               {isCashOnArrival ? 'PAY NOW (CHARGES)' : 'TOTAL AMOUNT'}
             </Text>
             <Text className="text-4xl font-black text-forest">
-              ${displayAmount.toFixed(2)}
+              {currency} {displayAmount.toFixed(2)}
             </Text>
             {isCashOnArrival && (
               <View className="mt-3">
                 <View className="flex-row justify-between mb-1">
                   <Text className="text-xs text-moss">Service Fee</Text>
-                  <Text className="text-xs text-forest font-semibold">${serviceFee.toFixed(2)}</Text>
+                  <Text className="text-xs text-forest font-semibold">{currency} {serviceFee.toFixed(2)}</Text>
                 </View>
                 <View className="flex-row justify-between mb-1">
                   <Text className="text-xs text-moss">Commission</Text>
-                  <Text className="text-xs text-forest font-semibold">${commissionFee.toFixed(2)}</Text>
+                  <Text className="text-xs text-forest font-semibold">{currency} {commissionFee.toFixed(2)}</Text>
                 </View>
                 {cleaningFee > 0 && (
                   <View className="flex-row justify-between mb-1">
                     <Text className="text-xs text-moss">Cleaning Fee</Text>
-                    <Text className="text-xs text-forest font-semibold">${cleaningFee.toFixed(2)}</Text>
+                    <Text className="text-xs text-forest font-semibold">{currency} {cleaningFee.toFixed(2)}</Text>
                   </View>
                 )}
                 {taxes > 0 && (
                   <View className="flex-row justify-between mb-1">
                     <Text className="text-xs text-moss">Taxes</Text>
-                    <Text className="text-xs text-forest font-semibold">${taxes.toFixed(2)}</Text>
+                    <Text className="text-xs text-forest font-semibold">{currency} {taxes.toFixed(2)}</Text>
                   </View>
                 )}
                 <View className="border-t border-gold/30 mt-2 pt-2 flex-row justify-between">
                   <Text className="text-sm font-bold text-amber-700">Pay on Arrival</Text>
-                  <Text className="text-sm font-bold text-amber-700">${nightlyTotal.toFixed(2)}</Text>
+                  <Text className="text-sm font-bold text-amber-700">{currency} {nightlyTotal.toFixed(2)}</Text>
                 </View>
                 <Text className="text-xs text-amber-600 mt-1">
                   Accommodation is paid in cash on arrival. Only charges are due now.
@@ -466,8 +467,8 @@ export default function PaymentScreen() {
                 <Ionicons name="shield-checkmark" size={20} color="#122F26" />
                 <Text className="text-forest font-bold text-base ml-2">
                   {isCashOnArrival
-                    ? `Pay Charges $${chargesOnly.toFixed(2)}`
-                    : `Pay $${total.toFixed(2)}`}
+                    ? `Pay Charges ${currency} ${chargesOnly.toFixed(2)}`
+                    : `Pay ${currency} ${total.toFixed(2)}`}
                 </Text>
               </View>
             )}
