@@ -4,22 +4,19 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Calendar } from 'react-native-calendars';
-import { format, parseISO, addDays, isAfter } from 'date-fns';
+import { format, parseISO, addDays } from 'date-fns';
 import { useAuth } from '@/context/auth-context';
-import { apiClient } from '@/services/api-client';
 import { useUnavailableDates } from '@/hooks/api-hooks';
 
 export default function CreateBookingScreen() {
   const router = useRouter();
   const { propertyId } = useLocalSearchParams<{ propertyId: string }>();
   const { isAuthenticated } = useAuth();
-  const [loading, setLoading] = useState(false);
   const [checkIn, setCheckIn] = useState('');
   const [checkOut, setCheckOut] = useState('');
   const [guests, setGuests] = useState('1');
   const [showCheckInCalendar, setShowCheckInCalendar] = useState(false);
   const [showCheckOutCalendar, setShowCheckOutCalendar] = useState(false);
-  const [specialRequests, setSpecialRequests] = useState('');
 
   // Fetch unavailable dates for this property
   const { data: unavailableData } = useUnavailableDates(propertyId || '');
@@ -58,37 +55,16 @@ export default function CreateBookingScreen() {
       return;
     }
 
-    setLoading(true);
-    try {
-      // Create booking with correct API format expected by backend
-      const bookingData: any = {
-        rental_property: propertyId,
-        check_in: checkIn,
-        check_out: checkOut,
-        guests: guestCount,
-        cleaning_fee: 0, // Optional, will be calculated by backend
-      };
-
-      // Only include special_requests if it has content
-      if (specialRequests?.trim()) {
-        bookingData.special_requests = specialRequests.trim();
-      }
-
-      await apiClient.createBooking(bookingData);
-      
-      Alert.alert('Success', 'Booking request submitted!', [
-        { text: 'OK', onPress: () => router.replace('/(tabs)/bookings') }
-      ]);
-    } catch (error: any) {
-      console.error('Error creating booking:', error);
-      const errorMessage = error?.response?.data?.detail || 
-                          error?.response?.data?.message || 
-                          error?.message || 
-                          'Failed to create booking';
-      Alert.alert('Error', errorMessage);
-    } finally {
-      setLoading(false);
-    }
+    // Navigate to confirm page with price breakdown and payment (matches web flow)
+    router.push({
+      pathname: '/booking/confirm',
+      params: {
+        propertyId,
+        checkIn,
+        checkOut,
+        guests: guestCount.toString(),
+      },
+    });
   };
 
   const handleCheckInDateSelect = (date: string) => {
@@ -266,38 +242,17 @@ export default function CreateBookingScreen() {
           />
         </View>
 
-        {/* Special Requests */}
-        <Text className="text-base font-semibold text-forest mb-2">Special Requests (Optional)</Text>
-        <View className="bg-white rounded-2xl p-4 mb-6" style={{
-          shadowColor: '#122F26',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.05,
-          shadowRadius: 4,
-          elevation: 2,
-        }}>
-          <TextInput
-            className="text-base text-forest min-h-[80px]"
-            placeholder="Any special requests or requirements..."
-            placeholderTextColor="#94a3b8"
-            multiline
-            numberOfLines={4}
-            textAlignVertical="top"
-            value={specialRequests}
-            onChangeText={setSpecialRequests}
-          />
-        </View>
-
-        {/* Book Button */}
+        {/* Continue Button */}
         <TouchableOpacity
           onPress={handleCreateBooking}
-          disabled={loading}
+          disabled={!checkIn || !checkOut}
         >
           <LinearGradient
-            colors={loading ? ['#94a3b8', '#94a3b8'] : ['#D9B168', '#bea04f']}
+            colors={(!checkIn || !checkOut) ? ['#94a3b8', '#94a3b8'] : ['#D9B168', '#bea04f']}
             className="py-4 rounded-2xl items-center"
           >
             <Text className="text-forest font-bold text-base">
-              {loading ? 'Processing...' : 'Request to Book'}
+              Continue
             </Text>
           </LinearGradient>
         </TouchableOpacity>
@@ -309,7 +264,7 @@ export default function CreateBookingScreen() {
             <Text className="text-blue-800 font-semibold ml-2">Booking Info</Text>
           </View>
           <Text className="text-blue-700 text-sm">
-            You won't be charged until the host confirms your booking request.
+            You won't be charged yet. You'll review the price breakdown on the next page before confirming.
           </Text>
         </View>
       </View>
