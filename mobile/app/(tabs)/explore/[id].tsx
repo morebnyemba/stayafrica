@@ -163,7 +163,7 @@ export default function PropertyDetailsScreen() {
         </TouchableOpacity>
       </View>
 
-      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+      <ScrollView className="flex-1" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 24 }}>
         {/* Image Carousel */}
         <View className="h-80 bg-sand-200">
           {imageUrls.length > 0 ? (

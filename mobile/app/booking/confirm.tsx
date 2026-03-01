@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '@/context/auth-context';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
@@ -11,6 +12,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function BookingConfirmScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { isAuthenticated, user } = useAuth();
   const params = useLocalSearchParams();
   
@@ -167,7 +169,7 @@ export default function BookingConfirmScreen() {
       className="flex-1 bg-sand-100" 
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
-      contentContainerStyle={{ paddingBottom: 40 }}
+      contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
     >
       {/* Header */}
       <LinearGradient

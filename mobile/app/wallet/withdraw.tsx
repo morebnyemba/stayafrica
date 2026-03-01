@@ -3,12 +3,14 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '@/context/auth-context';
 import { apiClient } from '@/services/api-client';
 import { logApiError } from '@/utils/logger';
 
 export default function WithdrawScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const [amount, setAmount] = useState('');
   const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
@@ -83,7 +85,7 @@ export default function WithdrawScreen() {
       <ScrollView 
         className="flex-1 bg-sand-100" 
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 40 }}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
         keyboardShouldPersistTaps="handled"
       >
       {/* Header */}

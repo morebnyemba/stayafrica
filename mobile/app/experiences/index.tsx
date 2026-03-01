@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { AnimatedCompassIcon } from '@/components/common/AnimatedCompassIcon';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useState } from 'react';
 import { useExperiences, useExperienceCategories } from '@/hooks/api-hooks';
 import type { Experience } from '@/types';
@@ -16,6 +17,7 @@ const durationLabels: Record<string, string> = {
 
 export default function ExperiencesScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [searchParams, setSearchParams] = useState<any>({});
 
@@ -108,7 +110,7 @@ export default function ExperiencesScreen() {
     <ScrollView 
       className="flex-1 bg-sand-100" 
       showsVerticalScrollIndicator={false}
-      contentContainerStyle={{ paddingBottom: 40 }}
+      contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
     >
       <LinearGradient
         colors={['#122F26', '#1d392f', '#2d4a40']}

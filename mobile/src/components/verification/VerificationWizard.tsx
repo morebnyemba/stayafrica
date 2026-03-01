@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { DocumentUpload } from './DocumentUpload';
 import { SelfieCapture } from './SelfieCapture';
 import { useRouter } from 'expo-router';
@@ -51,6 +52,7 @@ const COUNTRIES = [
 
 export function VerificationWizard() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [currentStep, setCurrentStep] = useState<WizardStep>('document-info');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showCountryPicker, setShowCountryPicker] = useState(false);
@@ -426,7 +428,7 @@ export function VerificationWizard() {
   );
 
   const renderNavigationButtons = () => (
-    <View className="flex-row justify-between px-4 pb-6 pt-4">
+    <View className="flex-row justify-between px-4 pt-4" style={{ paddingBottom: insets.bottom + 12 }}>
       <TouchableOpacity
         onPress={handleBack}
         disabled={currentStep === 'document-info'}

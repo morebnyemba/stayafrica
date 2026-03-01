@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '@/context/auth-context';
 import { Skeleton } from '@/components/common/Skeletons';
 import { format } from 'date-fns';
@@ -10,6 +11,7 @@ import type { Review } from '@/types';
 
 export default function ReviewsScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { isAuthenticated } = useAuth();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -236,7 +238,7 @@ export default function ReviewsScreen() {
           data={reviews}
           renderItem={({ item }) => <ReviewItem review={item} />}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={{ paddingVertical: 12, paddingBottom: 40 }}
+          contentContainerStyle={{ paddingVertical: 12, paddingBottom: insets.bottom + 24 }}
         />
       )}
     </View>

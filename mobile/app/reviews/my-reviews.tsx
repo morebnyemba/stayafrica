@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '@/context/auth-context';
 
 interface Review {
@@ -16,6 +17,7 @@ interface Review {
 
 export default function MyReviewsScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { user, isAuthenticated } = useAuth();
   const [activeTab, setActiveTab] = useState<'written' | 'received'>('written');
 
@@ -79,7 +81,7 @@ export default function MyReviewsScreen() {
   }
 
   return (
-    <ScrollView className="flex-1 bg-sand-100" showsVerticalScrollIndicator={false}>
+    <ScrollView className="flex-1 bg-sand-100" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}>
       {/* Header */}
       <LinearGradient
         colors={['#122F26', '#1d392f']}

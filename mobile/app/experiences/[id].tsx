@@ -2,6 +2,7 @@ import { View, Text, ScrollView, TouchableOpacity, Platform, ActivityIndicator, 
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useExperienceById } from '@/hooks/api-hooks';
 import { useState } from 'react';
 
@@ -20,6 +21,7 @@ const difficultyColors: Record<string, string> = {
 
 export default function ExperienceDetailScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const params = useLocalSearchParams();
   const experienceId = params.id as string;
   const [selectedDate, setSelectedDate] = useState('');
@@ -61,7 +63,7 @@ export default function ExperienceDetailScreen() {
     <ScrollView 
       className="flex-1 bg-sand-100" 
       showsVerticalScrollIndicator={false}
-      contentContainerStyle={{ paddingBottom: 40 }}
+      contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
     >
       {/* Header Image */}
       {experience.cover_image && (

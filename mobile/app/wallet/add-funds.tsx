@@ -3,10 +3,12 @@ import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { apiClient } from '@/services/api-client';
 
 export default function AddFundsScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [amount, setAmount] = useState('');
   const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -58,7 +60,7 @@ export default function AddFundsScreen() {
       <ScrollView 
         className="flex-1 bg-sand-100" 
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 40 }}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
         keyboardShouldPersistTaps="handled"
       >
       {/* Header */}

@@ -2,9 +2,11 @@ import { View, Text, ScrollView, TouchableOpacity, Platform } from 'react-native
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function BookingFailureScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const params = useLocalSearchParams();
   const bookingId = params.bookingId as string;
 
@@ -29,7 +31,7 @@ export default function BookingFailureScreen() {
     <ScrollView 
       className="flex-1 bg-sand-100" 
       showsVerticalScrollIndicator={false}
-      contentContainerStyle={{ paddingBottom: 40 }}
+      contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
     >
       <LinearGradient
         colors={['#EF4444', '#DC2626']}

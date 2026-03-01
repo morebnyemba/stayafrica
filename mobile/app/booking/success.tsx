@@ -2,11 +2,13 @@ import { View, Text, ScrollView, TouchableOpacity, Platform, ActivityIndicator }
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
 
 export default function BookingSuccessScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const params = useLocalSearchParams();
   const bookingId = params.bookingId as string;
   const pending = params.pending as string;
@@ -33,7 +35,7 @@ export default function BookingSuccessScreen() {
     <ScrollView 
       className="flex-1 bg-sand-100" 
       showsVerticalScrollIndicator={false}
-      contentContainerStyle={{ paddingBottom: 40 }}
+      contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
     >
       <LinearGradient
         colors={['#10B981', '#059669']}

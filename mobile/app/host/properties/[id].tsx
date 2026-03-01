@@ -61,7 +61,7 @@ export default function PropertyDetailScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-[#122F26]" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-[#122F26]" edges={['top', 'bottom']}>
       <ScrollView className="flex-1 bg-sand-100" showsVerticalScrollIndicator={false}>
         {/* Header */}
         <LinearGradient
