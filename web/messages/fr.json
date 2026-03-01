@@ -1,0 +1,169 @@
+{
+  "common": {
+    "loading": "Chargement...",
+    "error": "Une erreur est survenue",
+    "retry": "Réessayer",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "back": "Retour",
+    "next": "Suivant",
+    "submit": "Soumettre",
+    "search": "Rechercher",
+    "filter": "Filtrer",
+    "sort": "Trier",
+    "viewAll": "Voir tout",
+    "seeMore": "Voir plus",
+    "noResults": "Aucun résultat trouvé",
+    "confirm": "Confirmer",
+    "close": "Fermer",
+    "yes": "Oui",
+    "no": "Non",
+    "or": "ou",
+    "and": "et"
+  },
+  "nav": {
+    "home": "Accueil",
+    "explore": "Explorer",
+    "bookings": "Mes réservations",
+    "messages": "Messages",
+    "profile": "Profil",
+    "wishlist": "Favoris",
+    "wallet": "Portefeuille",
+    "help": "Aide",
+    "login": "Se connecter",
+    "register": "S'inscrire",
+    "logout": "Se déconnecter",
+    "hostDashboard": "Tableau de bord hôte",
+    "adminPanel": "Panneau d'administration"
+  },
+  "home": {
+    "hero": {
+      "title": "Séjournez partout. L'Afrique vous attend.",
+      "subtitle": "Découvrez des hébergements uniques au Zimbabwe, en Afrique du Sud, au Botswana, en Namibie et en Zambie.",
+      "searchPlaceholder": "Où allez-vous ?",
+      "searchButton": "Rechercher"
+    },
+    "featured": "Propriétés en vedette",
+    "popular": "Destinations populaires",
+    "experiences": "Expériences uniques"
+  },
+  "property": {
+    "perNight": "par nuit",
+    "guests": "{count, plural, =1 {1 voyageur} other {# voyageurs}}",
+    "bedrooms": "{count, plural, =1 {1 chambre} other {# chambres}}",
+    "bathrooms": "{count, plural, =1 {1 salle de bain} other {# salles de bain}}",
+    "amenities": "Équipements",
+    "location": "Emplacement",
+    "reviews": "Avis",
+    "description": "Description",
+    "houseRules": "Règlement intérieur",
+    "availability": "Disponibilité",
+    "bookNow": "Réserver",
+    "instantBook": "Réservation instantanée",
+    "contactHost": "Contacter l'hôte",
+    "savedToWishlist": "Ajouté aux favoris",
+    "removedFromWishlist": "Retiré des favoris"
+  },
+  "booking": {
+    "title": "Résumé de la réservation",
+    "checkIn": "Arrivée",
+    "checkOut": "Départ",
+    "nights": "{count, plural, =1 {1 nuit} other {# nuits}}",
+    "guests": "Voyageurs",
+    "priceBreakdown": "Détail du prix",
+    "nightlyRate": "Tarif par nuit",
+    "serviceFee": "Frais de service",
+    "cleaningFee": "Frais de ménage",
+    "taxes": "Taxes",
+    "total": "Total",
+    "confirmBooking": "Confirmer la réservation",
+    "payNow": "Payer maintenant",
+    "status": {
+      "pending": "En attente",
+      "confirmed": "Confirmée",
+      "cancelled": "Annulée",
+      "completed": "Terminée"
+    },
+    "cancelBooking": "Annuler la réservation",
+    "bookingConfirmed": "Réservation confirmée !",
+    "bookingCancelled": "Réservation annulée"
+  },
+  "payment": {
+    "title": "Paiement",
+    "selectMethod": "Choisir un mode de paiement",
+    "processing": "Traitement du paiement...",
+    "success": "Paiement réussi !",
+    "failed": "Échec du paiement. Veuillez réessayer.",
+    "providers": {
+      "paynow": "Paynow (EcoCash/Visa)",
+      "payfast": "PayFast",
+      "stripe": "Carte bancaire",
+      "paypal": "PayPal",
+      "paystack": "Paystack",
+      "flutterwave": "Flutterwave",
+      "ozow": "Ozow",
+      "cash": "Paiement à l'arrivée"
+    }
+  },
+  "auth": {
+    "login": "Se connecter",
+    "register": "Créer un compte",
+    "email": "E-mail",
+    "password": "Mot de passe",
+    "confirmPassword": "Confirmer le mot de passe",
+    "forgotPassword": "Mot de passe oublié ?",
+    "resetPassword": "Réinitialiser le mot de passe",
+    "firstName": "Prénom",
+    "lastName": "Nom",
+    "alreadyHaveAccount": "Vous avez déjà un compte ?",
+    "dontHaveAccount": "Vous n'avez pas de compte ?",
+    "continueWith": "Continuer avec {provider}"
+  },
+  "host": {
+    "dashboard": "Tableau de bord hôte",
+    "listings": "Mes annonces",
+    "bookings": "Réservations",
+    "earnings": "Revenus",
+    "analytics": "Statistiques",
+    "calendar": "Calendrier",
+    "reviews": "Avis",
+    "addProperty": "Ajouter une propriété",
+    "editProperty": "Modifier la propriété",
+    "propertyStatus": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "pending": "En attente d'approbation"
+    }
+  },
+  "review": {
+    "writeReview": "Écrire un avis",
+    "rating": "Note",
+    "yourReview": "Votre avis",
+    "submitReview": "Soumettre l'avis",
+    "helpful": "Utile",
+    "report": "Signaler"
+  },
+  "messages": {
+    "title": "Messages",
+    "newMessage": "Nouveau message",
+    "typeMessage": "Écrire un message...",
+    "send": "Envoyer",
+    "noMessages": "Aucun message"
+  },
+  "errors": {
+    "networkError": "Erreur réseau. Vérifiez votre connexion.",
+    "unauthorized": "Veuillez vous connecter pour continuer.",
+    "forbidden": "Vous n'avez pas la permission d'accéder à cette page.",
+    "notFound": "Page non trouvée.",
+    "serverError": "Erreur serveur. Veuillez réessayer plus tard."
+  },
+  "footer": {
+    "about": "À propos",
+    "terms": "Conditions d'utilisation",
+    "privacy": "Politique de confidentialité",
+    "help": "Centre d'aide",
+    "copyright": "© {year} StayAfrica. Tous droits réservés."
+  }
+}

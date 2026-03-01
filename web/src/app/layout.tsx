@@ -6,6 +6,7 @@ import { Providers } from '@/context/providers';
 import { AppShell } from '@/components/common/AppShell';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import { ServiceWorkerRegistrar } from '@/components/common/ServiceWorkerRegistrar';
+import { getLocale, getMessages } from 'next-intl/server';
 
 export const metadata: Metadata = {
   title: {
@@ -57,13 +58,16 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: ReactNode;
 }) {
+  const locale = await getLocale();
+  const messages = await getMessages();
+
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="manifest" href="/manifest.json" />
@@ -76,7 +80,7 @@ export default function RootLayout({
       </head>
       <body className="antialiased bg-sand-100 text-primary-900">
         <ErrorBoundary>
-          <Providers>
+          <Providers locale={locale} messages={messages as Record<string, unknown>}>
             <ServiceWorkerRegistrar />
             <AppShell>{children}</AppShell>
           </Providers>

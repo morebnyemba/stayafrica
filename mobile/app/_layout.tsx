@@ -9,6 +9,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
 import { Providers } from '@/context/providers';
 import { useAuth } from '@/context/auth-context';
+import { OfflineBanner } from '@/components/OfflineBanner';
 import { Ionicons } from '@expo/vector-icons';
 import * as Font from 'expo-font';
 import { BrandedSplash } from '@/components/common/BrandedSplash';
@@ -169,6 +170,7 @@ function RootLayoutContent() {
 
   return (
     <>
+      <OfflineBanner />
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(onboarding)" options={{ animation: 'none' }} />
         <Stack.Screen name="(auth)" options={{ animation: 'none' }} />

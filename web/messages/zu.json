@@ -1,0 +1,169 @@
+{
+  "common": {
+    "loading": "Iyalayisha...",
+    "error": "Kukhona okungahambanga kahle",
+    "retry": "Zama Futhi",
+    "save": "Gcina",
+    "cancel": "Khansela",
+    "delete": "Susa",
+    "edit": "Hlela",
+    "back": "Emuva",
+    "next": "Okulandelayo",
+    "submit": "Thumela",
+    "search": "Sesha",
+    "filter": "Hlunga",
+    "sort": "Hlela",
+    "viewAll": "Buka Konke",
+    "seeMore": "Buka Okunye",
+    "noResults": "Ayikho imiphumela etholakele",
+    "confirm": "Qinisekisa",
+    "close": "Vala",
+    "yes": "Yebo",
+    "no": "Cha",
+    "or": "noma",
+    "and": "futhi"
+  },
+  "nav": {
+    "home": "Ikhaya",
+    "explore": "Hlola",
+    "bookings": "Ukubhukha Kwami",
+    "messages": "Imilayezo",
+    "profile": "Iphrofayili",
+    "wishlist": "Uhlu Lwezifiso",
+    "wallet": "Isikhwama",
+    "help": "Usizo",
+    "login": "Ngena",
+    "register": "Bhalisa",
+    "logout": "Phuma",
+    "hostDashboard": "Ideshibhodi Yomnini",
+    "adminPanel": "Iphaneli Yomphathi"
+  },
+  "home": {
+    "hero": {
+      "title": "Hlala Noma Kuphi. I-Afrika Iyakulinda.",
+      "subtitle": "Thola izindawo zokuhlala eziyingqayizivele eZimbabwe, eNingizimu Afrika, eBotswana, eNamibia, neZambia.",
+      "searchPlaceholder": "Uyaphi?",
+      "searchButton": "Sesha"
+    },
+    "featured": "Izindawo Ezikhethekileko",
+    "popular": "Izindawo Ezidumile",
+    "experiences": "Izinto Ezikhethekile"
+  },
+  "property": {
+    "perNight": "ngobusuku",
+    "guests": "{count, plural, =1 {isivakashi esingu-1} other {izivakashi ezingu-#}}",
+    "bedrooms": "{count, plural, =1 {ikamelo lokulala elingu-1} other {amakamelo okulala angu-#}}",
+    "bathrooms": "{count, plural, =1 {igumbi lokugeza elingu-1} other {amagumbi okugeza angu-#}}",
+    "amenities": "Izinsiza",
+    "location": "Indawo",
+    "reviews": "Izibuyekezo",
+    "description": "Incazelo",
+    "houseRules": "Imithetho Yendlu",
+    "availability": "Ukutholakala",
+    "bookNow": "Bhukha Manje",
+    "instantBook": "Ukubhukha Okusheshayo",
+    "contactHost": "Xhumana Nomnini",
+    "savedToWishlist": "Kugcinwe kuhlu lwezifiso",
+    "removedFromWishlist": "Kususiwe kuhlu lwezifiso"
+  },
+  "booking": {
+    "title": "Isifinyezo Sokubhukha",
+    "checkIn": "Ukungena",
+    "checkOut": "Ukuphuma",
+    "nights": "{count, plural, =1 {ubusuku obu-1} other {ubusuku obu-#}}",
+    "guests": "Izivakashi",
+    "priceBreakdown": "Ukuchazwa Kwentengo",
+    "nightlyRate": "Intengo yobusuku",
+    "serviceFee": "Imali yesevisi",
+    "cleaningFee": "Imali yokuhlanza",
+    "taxes": "Izintela",
+    "total": "Isamba",
+    "confirmBooking": "Qinisekisa Ukubhukha",
+    "payNow": "Khokha Manje",
+    "status": {
+      "pending": "Iyalinda",
+      "confirmed": "Iqinisekisiwe",
+      "cancelled": "Ikhanseliwe",
+      "completed": "Iphelile"
+    },
+    "cancelBooking": "Khansela Ukubhukha",
+    "bookingConfirmed": "Ukubhukha Kuqinisekisiwe!",
+    "bookingCancelled": "Ukubhukha Kukhanseliwe"
+  },
+  "payment": {
+    "title": "Ukukhokha",
+    "selectMethod": "Khetha Indlela Yokukhokha",
+    "processing": "Ikusebenza ukukhokha...",
+    "success": "Ukukhokha kuphumelele!",
+    "failed": "Ukukhokha kuhlulekile. Sicela uzame futhi.",
+    "providers": {
+      "paynow": "Paynow (EcoCash/Visa)",
+      "payfast": "PayFast",
+      "stripe": "Ikhadi Lesikweletu",
+      "paypal": "PayPal",
+      "paystack": "Paystack",
+      "flutterwave": "Flutterwave",
+      "ozow": "Ozow",
+      "cash": "Ukukhokha Lapho Ufika"
+    }
+  },
+  "auth": {
+    "login": "Ngena",
+    "register": "Dala I-akhawunti",
+    "email": "I-imeyili",
+    "password": "Iphasiwedi",
+    "confirmPassword": "Qinisekisa Iphasiwedi",
+    "forgotPassword": "Ukhohlwe Iphasiwedi?",
+    "resetPassword": "Setha Kabusha Iphasiwedi",
+    "firstName": "Igama",
+    "lastName": "Isibongo",
+    "alreadyHaveAccount": "Usunayo i-akhawunti?",
+    "dontHaveAccount": "Awunayo i-akhawunti?",
+    "continueWith": "Qhubeka nge-{provider}"
+  },
+  "host": {
+    "dashboard": "Ideshibhodi Yomnini",
+    "listings": "Izindawo Zami",
+    "bookings": "Ukubhukha",
+    "earnings": "Inzuzo",
+    "analytics": "Ukuhlaziya",
+    "calendar": "Ikhalenda",
+    "reviews": "Izibuyekezo",
+    "addProperty": "Engeza Indawo",
+    "editProperty": "Hlela Indawo",
+    "propertyStatus": {
+      "active": "Iyasebenza",
+      "inactive": "Ayisebenzi",
+      "pending": "Ilinde Ukugunyazwa"
+    }
+  },
+  "review": {
+    "writeReview": "Bhala Isibuyekezo",
+    "rating": "Isilinganiso",
+    "yourReview": "Isibuyekezo Sakho",
+    "submitReview": "Thumela Isibuyekezo",
+    "helpful": "Kuyasiza",
+    "report": "Bika"
+  },
+  "messages": {
+    "title": "Imilayezo",
+    "newMessage": "Umlayezo Omusha",
+    "typeMessage": "Bhala umlayezo...",
+    "send": "Thumela",
+    "noMessages": "Ayikho imilayezo"
+  },
+  "errors": {
+    "networkError": "Iphutha lenethiwekhi. Hlola uxhumano lwakho.",
+    "unauthorized": "Sicela ungene ukuze uqhubeke.",
+    "forbidden": "Awuvunyelwe ukufinyelela lapha.",
+    "notFound": "Ikhasi alitholakali.",
+    "serverError": "Iphutha leseva. Sicela uzame futhi."
+  },
+  "footer": {
+    "about": "Mayelana",
+    "terms": "Imigomo Yokusebenzisa",
+    "privacy": "Inqubomgomo Yobumfihlo",
+    "help": "Isikhungo Sosizo",
+    "copyright": "© {year} StayAfrica. Onke amalungelo agodliwe."
+  }
+}
