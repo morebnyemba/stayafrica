@@ -171,6 +171,10 @@ class ApiClient {
     return this.client.get('/payments/', { params: { gateway_ref: gatewayRef } });
   }
 
+  async lookupPaymentByRef(gatewayRef: string) {
+    return this.client.get('/payments/lookup/', { params: { gateway_ref: gatewayRef } });
+  }
+
   // Reviews
   async getReviews(params?: any) {
     return this.client.get('/reviews/', { params });

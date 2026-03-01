@@ -53,6 +53,7 @@ class PaymentViewSet(viewsets.ModelViewSet):
         """Initiate a payment with comprehensive validation"""
         booking_id = request.data.get('booking_id')
         provider = request.data.get('provider')
+        source = request.data.get('source', 'web')  # 'web' or 'mobile'
         
         if not booking_id or not provider:
             return Response(
@@ -147,7 +148,8 @@ class PaymentViewSet(viewsets.ModelViewSet):
                     booking,
                     provider,
                     request.user.email,
-                    request.user.get_full_name()
+                    request.user.get_full_name(),
+                    source=source,
                 )
                 
                 if not result['success']:
@@ -375,6 +377,34 @@ class PaymentViewSet(viewsets.ModelViewSet):
             'provider': payment.provider,
             'amount': payment.amount,
             'currency': payment.currency,
+            'created_at': payment.created_at,
+        })
+
+    @action(detail=False, methods=['get'], permission_classes=[AllowAny])
+    def lookup(self, request):
+        """Public payment status lookup by gateway_ref.
+
+        Allows users returning from a payment gateway to check status
+        without authentication (session may have expired during redirect).
+        """
+        gateway_ref = request.query_params.get('gateway_ref')
+        if not gateway_ref:
+            return Response(
+                {'error': 'gateway_ref query parameter is required'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        try:
+            payment = Payment.objects.select_related('booking').get(gateway_ref=gateway_ref)
+        except Payment.DoesNotExist:
+            return Response({'error': 'Payment not found'}, status=status.HTTP_404_NOT_FOUND)
+        return Response({
+            'id': str(payment.id),
+            'gateway_ref': payment.gateway_ref,
+            'status': payment.status,
+            'provider': payment.provider,
+            'amount': str(payment.amount),
+            'currency': payment.currency,
+            'booking_id': str(payment.booking_id),
             'created_at': payment.created_at,
         })
     

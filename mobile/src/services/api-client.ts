@@ -474,6 +474,7 @@ class APIClient {
     return (await this.client.post('/payments/initiate/', {
       booking_id: bookingId,
       provider,
+      source: 'mobile',
     })).data;
   }
 

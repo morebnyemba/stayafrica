@@ -1,10 +1,9 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
-import { CheckCircle, XCircle, Loader2, Home } from 'lucide-react';
+import { CheckCircle, XCircle, Loader2, Home, Smartphone } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui';
 
@@ -22,31 +21,54 @@ export default function PaymentReturnPage() {
   const [pendingPayment, setPendingPayment] = useState<PendingPayment | null>(null);
   const [captureStatus, setCaptureStatus] = useState<'idle' | 'capturing' | 'captured' | 'error'>('idle');
   const [captureError, setCaptureError] = useState<string | null>(null);
+  const [paymentData, setPaymentData] = useState<any>(null);
+  const [pollError, setPollError] = useState(false);
   const captureAttempted = useRef(false);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Read stored payment info on mount, with URL param fallback
+  const source = searchParams.get('source') || 'web';
+  const isMobileSource = source === 'mobile';
+
+  // Read stored payment info on mount, with URL param + public lookup fallback
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('pending_payment');
-      if (stored) {
-        try {
-          const parsed = JSON.parse(stored) as PendingPayment;
-          // Merge provider from URL if available (PayPal redirect includes ?provider=paypal)
-          const urlProvider = searchParams.get('provider');
-          if (urlProvider && !parsed.provider) {
-            parsed.provider = urlProvider;
-          }
-          setPendingPayment(parsed);
-        } catch (e) {
-          console.error('Failed to parse pending payment data:', e);
-        }
-      }
+    if (typeof window === 'undefined') return;
 
-      // Fallback: if no localStorage data but we have URL params (e.g., cleared storage)
-      if (!stored) {
-        const urlGatewayRef = searchParams.get('gateway_ref');
+    const stored = localStorage.getItem('pending_payment');
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored) as PendingPayment;
         const urlProvider = searchParams.get('provider');
-        if (urlGatewayRef) {
+        if (urlProvider && !parsed.provider) parsed.provider = urlProvider;
+        setPendingPayment(parsed);
+        return;
+      } catch (e) {
+        console.error('Failed to parse pending payment data:', e);
+      }
+    }
+
+    // Fallback: use URL params + public lookup
+    const urlGatewayRef = searchParams.get('gateway_ref');
+    const urlProvider = searchParams.get('provider');
+
+    if (urlGatewayRef) {
+      // Try public lookup to get payment details
+      apiClient.lookupPaymentByRef(urlGatewayRef)
+        .then((res) => {
+          const data = res.data;
+          setPendingPayment({
+            bookingId: data.booking_id || '',
+            provider: data.provider || urlProvider || '',
+            paymentId: data.id || '',
+            gateway_ref: urlGatewayRef,
+            paypal_order_id: urlProvider === 'paypal' ? urlGatewayRef : undefined,
+          });
+          // If already resolved, set payment data directly
+          if (data.status === 'success' || data.status === 'failed') {
+            setPaymentData(data);
+          }
+        })
+        .catch(() => {
+          // Minimal fallback
           setPendingPayment({
             bookingId: '',
             provider: urlProvider || '',
@@ -54,8 +76,7 @@ export default function PaymentReturnPage() {
             gateway_ref: urlGatewayRef,
             paypal_order_id: urlProvider === 'paypal' ? urlGatewayRef : undefined,
           });
-        }
-      }
+        });
     }
   }, [searchParams]);
 
@@ -66,7 +87,7 @@ export default function PaymentReturnPage() {
 
     const isPayPal = pendingPayment.provider === 'paypal';
     if (!isPayPal) {
-      setCaptureStatus('captured'); // Non-PayPal: skip capture, go straight to polling
+      setCaptureStatus('captured');
       return;
     }
 
@@ -97,52 +118,77 @@ export default function PaymentReturnPage() {
       });
   }, [pendingPayment]);
 
-  // Poll for payment status (only after capture completes or for non-PayPal)
-  const { data: payment, error } = useQuery({
-    queryKey: ['payment-return-status', pendingPayment?.paymentId],
-    queryFn: async () => {
-      if (pendingPayment?.paymentId) {
-        const response = await apiClient.getPaymentStatus(pendingPayment.paymentId);
-        return response.data;
+  // Poll for payment status using public lookup (no auth needed)
+  const pollPaymentStatus = useCallback(async () => {
+    if (!pendingPayment?.gateway_ref) return;
+    try {
+      const res = await apiClient.lookupPaymentByRef(pendingPayment.gateway_ref);
+      const data = res.data;
+      setPaymentData(data);
+      if (data.status === 'success' || data.status === 'failed') {
+        // Stop polling
+        if (pollRef.current) clearInterval(pollRef.current);
       }
-      return null;
-    },
-    enabled: !!pendingPayment?.paymentId && captureStatus === 'captured',
-    refetchInterval: (query) => {
-      const data = query.state.data;
-      if (data?.status === 'success' || data?.status === 'failed') {
-        return false;
-      }
-      return 3000;
-    },
-  });
-
-  // Redirect to success page on successful payment
-  useEffect(() => {
-    if ((payment?.status === 'success' || captureStatus === 'captured') && pendingPayment) {
-      // For PayPal, capture success is enough even without polling
-      const isSuccess = payment?.status === 'success' || (pendingPayment.provider === 'paypal' && captureStatus === 'captured');
-      if (isSuccess) {
-        localStorage.removeItem('pending_payment');
-        const timer = setTimeout(() => {
-          router.push(
-            `/booking/success?bookingId=${pendingPayment.bookingId}&provider=${pendingPayment.provider}`
-          );
-        }, 2000);
-        return () => clearTimeout(timer);
+    } catch {
+      // Fallback: try authenticated endpoint if available
+      if (pendingPayment.paymentId) {
+        try {
+          const res = await apiClient.getPaymentStatus(pendingPayment.paymentId);
+          setPaymentData(res.data);
+          if (res.data?.status === 'success' || res.data?.status === 'failed') {
+            if (pollRef.current) clearInterval(pollRef.current);
+          }
+        } catch {
+          setPollError(true);
+        }
       }
     }
-  }, [payment?.status, captureStatus, pendingPayment, router]);
+  }, [pendingPayment]);
+
+  useEffect(() => {
+    if (captureStatus !== 'captured' || !pendingPayment) return;
+    // Already have final status from initial lookup
+    if (paymentData?.status === 'success' || paymentData?.status === 'failed') return;
+
+    pollPaymentStatus();
+    pollRef.current = setInterval(pollPaymentStatus, 3000);
+    return () => { if (pollRef.current) clearInterval(pollRef.current); };
+  }, [captureStatus, pendingPayment, pollPaymentStatus, paymentData?.status]);
+
+  // Handle redirect on success
+  const handleRedirect = useCallback((bookingId: string, provider: string) => {
+    if (isMobileSource) {
+      // Redirect back to mobile app via deep link
+      window.location.href = `stayafrica://booking/success?bookingId=${bookingId}`;
+    } else {
+      router.push(`/booking/success?bookingId=${bookingId}&provider=${provider}`);
+    }
+  }, [isMobileSource, router]);
+
+  // Redirect on success
+  useEffect(() => {
+    if (!pendingPayment) return;
+    const isPayPalCaptured = pendingPayment.provider === 'paypal' && captureStatus === 'captured';
+    const isSuccess = paymentData?.status === 'success' || isPayPalCaptured;
+
+    if (isSuccess) {
+      localStorage.removeItem('pending_payment');
+      const bookingId = pendingPayment.bookingId || paymentData?.booking_id || '';
+      const timer = setTimeout(() => handleRedirect(bookingId, pendingPayment.provider), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [paymentData?.status, captureStatus, pendingPayment, handleRedirect]);
 
   // Clean up localStorage on failed payment
   useEffect(() => {
-    if (payment?.status === 'failed') {
+    if (paymentData?.status === 'failed') {
       localStorage.removeItem('pending_payment');
     }
-  }, [payment?.status]);
+  }, [paymentData?.status]);
 
-  const isSuccess = payment?.status === 'success' || (pendingPayment?.provider === 'paypal' && captureStatus === 'captured');
-  const isFailed = payment?.status === 'failed' || captureStatus === 'error';
+  const isPayPalCaptured = pendingPayment?.provider === 'paypal' && captureStatus === 'captured';
+  const isSuccess = paymentData?.status === 'success' || isPayPalCaptured;
+  const isFailed = paymentData?.status === 'failed' || captureStatus === 'error';
   const isProcessing = captureStatus === 'capturing' || (captureStatus === 'captured' && !isSuccess && !isFailed);
 
   if (!pendingPayment) {
@@ -156,9 +202,11 @@ export default function PaymentReturnPage() {
           <p className="text-primary-600 dark:text-sand-300 mb-6">
             Please wait while we confirm your payment...
           </p>
-          <Link href="/dashboard" className="inline-block">
-            <Button variant="secondary">Go to Dashboard</Button>
-          </Link>
+          {!isMobileSource && (
+            <Link href="/dashboard" className="inline-block">
+              <Button variant="secondary">Go to Dashboard</Button>
+            </Link>
+          )}
         </div>
       </div>
     );
@@ -188,8 +236,24 @@ export default function PaymentReturnPage() {
               Payment Successful!
             </h1>
             <p className="text-primary-600 dark:text-sand-300 mb-6">
-              Redirecting to your booking confirmation...
+              {isMobileSource
+                ? 'Redirecting you back to the app...'
+                : 'Redirecting to your booking confirmation...'}
             </p>
+            {isMobileSource && (
+              <button
+                onClick={() => {
+                  const bookingId = pendingPayment.bookingId || paymentData?.booking_id || '';
+                  window.location.href = `stayafrica://booking/success?bookingId=${bookingId}`;
+                }}
+                className="w-full"
+              >
+                <Button variant="primary" className="w-full flex items-center justify-center gap-2">
+                  <Smartphone className="w-5 h-5" />
+                  Open in App
+                </Button>
+              </button>
+            )}
           </>
         ) : isFailed ? (
           <>
@@ -203,38 +267,61 @@ export default function PaymentReturnPage() {
               {captureError || 'Your payment could not be processed. Please try again.'}
             </p>
             <div className="space-y-3">
-              <button
-                onClick={() => {
-                  if (pendingPayment?.bookingId) {
-                    router.push(`/booking/payment?bookingId=${pendingPayment.bookingId}`);
-                  } else {
-                    router.back();
-                  }
-                }}
-                className="w-full"
-              >
-                <Button variant="primary" className="w-full">
-                  Try Again
-                </Button>
-              </button>
-              <Link href="/" className="inline-block w-full">
-                <Button variant="secondary" className="w-full flex items-center justify-center gap-2">
-                  <Home className="w-5 h-5" />
-                  Back to Home
-                </Button>
-              </Link>
+              {isMobileSource ? (
+                <button
+                  onClick={() => {
+                    const bookingId = pendingPayment.bookingId || paymentData?.booking_id || '';
+                    window.location.href = `stayafrica://booking/payment?bookingId=${bookingId}`;
+                  }}
+                  className="w-full"
+                >
+                  <Button variant="primary" className="w-full flex items-center justify-center gap-2">
+                    <Smartphone className="w-5 h-5" />
+                    Retry in App
+                  </Button>
+                </button>
+              ) : (
+                <>
+                  <button
+                    onClick={() => {
+                      if (pendingPayment?.bookingId) {
+                        router.push(`/booking/payment?bookingId=${pendingPayment.bookingId}`);
+                      } else {
+                        router.back();
+                      }
+                    }}
+                    className="w-full"
+                  >
+                    <Button variant="primary" className="w-full">
+                      Try Again
+                    </Button>
+                  </button>
+                  <Link href="/" className="inline-block w-full">
+                    <Button variant="secondary" className="w-full flex items-center justify-center gap-2">
+                      <Home className="w-5 h-5" />
+                      Back to Home
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
           </>
         ) : null}
 
-        {error && (
+        {pollError && (
           <div className="mt-6">
             <p className="text-red-600 dark:text-red-400 mb-4">
               Unable to check payment status. Please check your bookings.
             </p>
-            <Link href="/dashboard" className="inline-block">
-              <Button>Go to Dashboard</Button>
-            </Link>
+            {isMobileSource ? (
+              <button onClick={() => { window.location.href = 'stayafrica://bookings'; }} className="inline-block">
+                <Button>Open App</Button>
+              </button>
+            ) : (
+              <Link href="/dashboard" className="inline-block">
+                <Button>Go to Dashboard</Button>
+              </Link>
+            )}
           </div>
         )}
       </div>

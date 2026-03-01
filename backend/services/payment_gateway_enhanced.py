@@ -341,18 +341,18 @@ class PaymentGatewayService:
         self, 
         payment_obj, 
         booking,
-        customer_email: str
+        customer_email: str,
+        return_url: str = '',
     ) -> Dict:
         """Initiate Stripe payment using official SDK"""
         try:
-            # Create Stripe checkout session
-            # Omit payment_method_types to let Stripe dynamically show all
-            # eligible methods (cards, Apple Pay, Google Pay, bank transfers, etc.)
+            success_url = return_url or f'{settings.SITE_URL}/payment/return'
+            cancel_url = f'{settings.SITE_URL}/booking/failure'
             session = stripe.checkout.Session.create(
                 line_items=[{
                     'price_data': {
                         'currency': payment_obj.currency.lower(),
-                        'unit_amount': int(payment_obj.amount * 100),  # Convert to cents
+                        'unit_amount': int(payment_obj.amount * 100),
                         'product_data': {
                             'name': f'Booking: {booking.rental_property.title}',
                             'description': f'{booking.check_in} to {booking.check_out}',
@@ -361,8 +361,8 @@ class PaymentGatewayService:
                     'quantity': 1,
                 }],
                 mode='payment',
-                success_url=f'{settings.SITE_URL}/payment/return',
-                cancel_url=f'{settings.SITE_URL}/booking/failure',
+                success_url=success_url,
+                cancel_url=cancel_url,
                 customer_email=customer_email,
                 metadata={
                     'payment_id': str(payment_obj.id),
@@ -394,17 +394,21 @@ class PaymentGatewayService:
         self, 
         payment_obj, 
         booking,
-        customer_email: str
+        customer_email: str,
+        return_url: str = '',
     ) -> Dict:
         """Initiate Paynow payment using official SDK"""
         try:
-            # Check if Paynow is initialized
             if not hasattr(self, 'paynow'):
                 logger.error('Paynow SDK not initialized - credentials missing')
                 return {
                     'success': False,
                     'error': 'Paynow payment gateway is not configured'
                 }
+
+            # Override return URL if provided
+            if return_url:
+                self.paynow.return_url = return_url
             
             # Create Paynow payment
             payment = self.paynow.create_payment(
@@ -448,7 +452,8 @@ class PaymentGatewayService:
         payment_obj, 
         booking,
         customer_email: str,
-        customer_name: str = ''
+        customer_name: str = '',
+        return_url: str = '',
     ) -> Dict:
         """Initiate Flutterwave payment using REST API"""
         try:
@@ -461,7 +466,7 @@ class PaymentGatewayService:
                 'tx_ref': payment_obj.gateway_ref,
                 'amount': str(payment_obj.amount),
                 'currency': payment_obj.currency,
-                'redirect_url': f'{settings.SITE_URL}/payment/return',
+                'redirect_url': return_url or f'{settings.SITE_URL}/payment/return',
                 'payment_options': 'card,mobilemoney,ussd',
                 'customer': {
                     'email': customer_email,
@@ -520,7 +525,8 @@ class PaymentGatewayService:
         payment_obj, 
         booking,
         customer_email: str,
-        customer_name: str = ''
+        customer_name: str = '',
+        return_url: str = '',
     ) -> Dict:
         """Initiate Paystack payment using REST API"""
         try:
@@ -534,7 +540,7 @@ class PaymentGatewayService:
                 'amount': int(payment_obj.amount * 100),  # Convert to kobo/cents (amount is already Decimal)
                 'currency': payment_obj.currency,
                 'email': customer_email,
-                'callback_url': f'{settings.SITE_URL}/payment/return',
+                'callback_url': return_url or f'{settings.SITE_URL}/payment/return',
                 'metadata': {
                     'payment_id': str(payment_obj.id),
                     'booking_id': str(booking.id),
@@ -624,7 +630,8 @@ class PaymentGatewayService:
         payment_obj, 
         booking,
         customer_email: str,
-        customer_name: str = ''
+        customer_name: str = '',
+        return_url: str = '',
     ) -> Dict:
         """Initiate PayPal payment using official Server SDK"""
         try:
@@ -633,6 +640,11 @@ class PaymentGatewayService:
                     'success': False,
                     'error': 'PayPal payment gateway is not configured'
                 }
+
+            # Build PayPal return URL — append provider param
+            paypal_return = return_url or f'{settings.SITE_URL}/payment/return?gateway_ref={payment_obj.gateway_ref}'
+            separator = '&' if '?' in paypal_return else '?'
+            paypal_return += f'{separator}provider=paypal'
 
             order_request = OrderRequest(
                 intent=CheckoutPaymentIntent.CAPTURE,
@@ -655,10 +667,7 @@ class PaymentGatewayService:
                             brand_name='StayAfrica',
                             shipping_preference=PaypalWalletContextShippingPreference.NO_SHIPPING,
                             user_action=PaypalExperienceUserAction.PAY_NOW,
-                            return_url=(
-                                f'{settings.SITE_URL}/payment/return'
-                                f'?provider=paypal&gateway_ref={payment_obj.gateway_ref}'
-                            ),
+                            return_url=paypal_return,
                             cancel_url=f'{settings.SITE_URL}/booking/failure',
                         )
                     )
@@ -966,27 +975,35 @@ class PaymentGatewayService:
 
     # ── Payment initiation ────────────────────────────────────────────
 
+    def _build_return_url(self, source: str = 'web', gateway_ref: str = '') -> str:
+        """Build payment return URL with source and gateway_ref params."""
+        base = f'{settings.SITE_URL}/payment/return'
+        params = f'?source={source}&gateway_ref={gateway_ref}' if gateway_ref else f'?source={source}'
+        return base + params
+
     def initiate_payment(
         self, 
         payment_obj, 
         booking, 
         provider: str,
         customer_email: str,
-        customer_name: str = ''
+        customer_name: str = '',
+        source: str = 'web',
     ) -> Dict:
         """
         Main payment initiation method - routes to appropriate provider SDK
         """
+        return_url = self._build_return_url(source, payment_obj.gateway_ref)
         if provider == 'stripe':
-            return self.initiate_stripe_payment(payment_obj, booking, customer_email)
+            return self.initiate_stripe_payment(payment_obj, booking, customer_email, return_url=return_url)
         elif provider == 'paynow':
-            return self.initiate_paynow_payment(payment_obj, booking, customer_email)
+            return self.initiate_paynow_payment(payment_obj, booking, customer_email, return_url=return_url)
         elif provider == 'paystack':
-            return self.initiate_paystack_payment(payment_obj, booking, customer_email, customer_name)
+            return self.initiate_paystack_payment(payment_obj, booking, customer_email, customer_name, return_url=return_url)
         elif provider == 'flutterwave':
-            return self.initiate_flutterwave_payment(payment_obj, booking, customer_email, customer_name)
+            return self.initiate_flutterwave_payment(payment_obj, booking, customer_email, customer_name, return_url=return_url)
         elif provider == 'paypal':
-            return self.initiate_paypal_payment(payment_obj, booking, customer_email, customer_name)
+            return self.initiate_paypal_payment(payment_obj, booking, customer_email, customer_name, return_url=return_url)
         elif provider == 'cash_on_arrival':
             # No external gateway needed
             return {
