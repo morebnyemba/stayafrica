@@ -123,7 +123,7 @@ export default function AdminLayout({
           <p className="text-sm text-[#D9B168] mt-2 font-medium">Admin Portal</p>
         </div>
 
-        <nav className="flex-1 p-4 space-y-1">
+        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
           {adminNavItems.map((item) => (
             <Link
               key={item.href}
