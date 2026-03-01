@@ -153,7 +153,7 @@ export default function AdminLayout({
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1 min-h-0 overflow-auto">
         {/* Desktop Sidebar Toggle */}
         <div className="hidden lg:block sticky top-0 z-30 bg-[#F4F1EA] border-b border-[#122F26]/10">
           <div className="px-4 py-3">
