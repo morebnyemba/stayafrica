@@ -23,7 +23,7 @@ type PointOfInterest = {
   address?: string;
   latitude?: number;
   longitude?: number;
-  is_verified: boolean;
+  is_active: boolean;
   created_at: string;
 };
 
@@ -345,9 +345,9 @@ export default function POIManagement() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            poi.is_verified ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                            poi.is_active ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
                           }`}>
-                            {poi.is_verified ? (
+                            {poi.is_active ? (
                               <>
                                 <CheckCircle className="w-3 h-3 mr-1" />
                                 Verified

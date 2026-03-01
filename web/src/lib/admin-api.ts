@@ -260,26 +260,26 @@ export const adminApi = {
     page?: number;
     per_page?: number;
   }): Promise<{ results: any[]; count: number }> {
-    const response = await apiClient.get('/payments/wallets/', { params });
+    const response = await apiClient.get('/wallets/', { params });
     return response.data;
   },
 
   async activateWallet(id: string): Promise<any> {
-    const response = await apiClient.patch(`/payments/wallets/${id}/`, {
+    const response = await apiClient.patch(`/wallets/${id}/`, {
       status: 'active'
     });
     return response.data;
   },
 
   async suspendWallet(id: string): Promise<any> {
-    const response = await apiClient.patch(`/payments/wallets/${id}/`, {
+    const response = await apiClient.patch(`/wallets/${id}/`, {
       status: 'suspended'
     });
     return response.data;
   },
 
   async closeWallet(id: string): Promise<any> {
-    const response = await apiClient.patch(`/payments/wallets/${id}/`, {
+    const response = await apiClient.patch(`/wallets/${id}/`, {
       status: 'closed'
     });
     return response.data;
@@ -292,19 +292,19 @@ export const adminApi = {
     page?: number;
     per_page?: number;
   }): Promise<{ results: any[]; count: number }> {
-    const response = await apiClient.get('/payments/withdrawals/', { params });
+    const response = await apiClient.get('/withdrawals/', { params });
     return response.data;
   },
 
   async markWithdrawalProcessing(id: string): Promise<any> {
-    const response = await apiClient.patch(`/payments/withdrawals/${id}/`, {
+    const response = await apiClient.patch(`/withdrawals/${id}/`, {
       status: 'processing'
     });
     return response.data;
   },
 
   async markWithdrawalCompleted(id: string, notes?: string): Promise<any> {
-    const response = await apiClient.patch(`/payments/withdrawals/${id}/`, {
+    const response = await apiClient.patch(`/withdrawals/${id}/`, {
       status: 'completed',
       admin_notes: notes
     });
@@ -312,7 +312,7 @@ export const adminApi = {
   },
 
   async markWithdrawalFailed(id: string, notes?: string): Promise<any> {
-    const response = await apiClient.patch(`/payments/withdrawals/${id}/`, {
+    const response = await apiClient.patch(`/withdrawals/${id}/`, {
       status: 'failed',
       admin_notes: notes
     });
@@ -325,22 +325,22 @@ export const adminApi = {
     page?: number;
     per_page?: number;
   }): Promise<{ results: any[]; count: number }> {
-    const response = await apiClient.get('/payments/tax-jurisdictions/', { params });
+    const response = await apiClient.get('/tax/jurisdictions/', { params });
     return response.data;
   },
 
   async createTaxJurisdiction(data: any): Promise<any> {
-    const response = await apiClient.post('/payments/tax-jurisdictions/', data);
+    const response = await apiClient.post('/tax/jurisdictions/', data);
     return response.data;
   },
 
   async updateTaxJurisdiction(id: string, data: any): Promise<any> {
-    const response = await apiClient.patch(`/payments/tax-jurisdictions/${id}/`, data);
+    const response = await apiClient.patch(`/tax/jurisdictions/${id}/`, data);
     return response.data;
   },
 
   async deleteTaxJurisdiction(id: string): Promise<void> {
-    await apiClient.delete(`/payments/tax-jurisdictions/${id}/`);
+    await apiClient.delete(`/tax/jurisdictions/${id}/`);
   },
 
   async getTaxRates(params?: {
@@ -348,22 +348,22 @@ export const adminApi = {
     page?: number;
     per_page?: number;
   }): Promise<{ results: any[]; count: number }> {
-    const response = await apiClient.get('/payments/tax-rates/', { params });
+    const response = await apiClient.get('/tax/rates/', { params });
     return response.data;
   },
 
   async createTaxRate(data: any): Promise<any> {
-    const response = await apiClient.post('/payments/tax-rates/', data);
+    const response = await apiClient.post('/tax/rates/', data);
     return response.data;
   },
 
   async updateTaxRate(id: string, data: any): Promise<any> {
-    const response = await apiClient.patch(`/payments/tax-rates/${id}/`, data);
+    const response = await apiClient.patch(`/tax/rates/${id}/`, data);
     return response.data;
   },
 
   async deleteTaxRate(id: string): Promise<void> {
-    await apiClient.delete(`/payments/tax-rates/${id}/`);
+    await apiClient.delete(`/tax/rates/${id}/`);
   },
 
   async getTaxExemptions(params?: {
@@ -371,7 +371,7 @@ export const adminApi = {
     page?: number;
     per_page?: number;
   }): Promise<{ results: any[]; count: number }> {
-    const response = await apiClient.get('/payments/tax-exemptions/', { params });
+    const response = await apiClient.get('/tax/exemptions/', { params });
     return response.data;
   },
 
@@ -381,7 +381,7 @@ export const adminApi = {
     per_page?: number;
     status?: string;
   }): Promise<{ results: any[]; count: number }> {
-    const response = await apiClient.get('/payments/tax-remittances/', { params });
+    const response = await apiClient.get('/tax/remittances/', { params });
     return response.data;
   },
 
@@ -391,7 +391,7 @@ export const adminApi = {
     page?: number;
     per_page?: number;
   }): Promise<{ results: any[]; count: number }> {
-    const response = await apiClient.get('/properties/pois/', { params });
+    const response = await apiClient.get('/pois/', { params });
     return response.data;
   },
 
@@ -400,20 +400,20 @@ export const adminApi = {
     page?: number;
     per_page?: number;
   }): Promise<{ results: any[]; count: number }> {
-    const response = await apiClient.get('/properties/poi-categories/', { params });
+    const response = await apiClient.get('/poi-categories/', { params });
     return response.data;
   },
 
   async verifyPOI(id: string): Promise<any> {
-    const response = await apiClient.patch(`/properties/pois/${id}/`, {
-      is_verified: true
+    const response = await apiClient.patch(`/pois/${id}/`, {
+      is_active: true
     });
     return response.data;
   },
 
   async unverifyPOI(id: string): Promise<any> {
-    const response = await apiClient.patch(`/properties/pois/${id}/`, {
-      is_verified: false
+    const response = await apiClient.patch(`/pois/${id}/`, {
+      is_active: false
     });
     return response.data;
   },
@@ -465,30 +465,30 @@ export const adminApi = {
 
   // POI Management
   async createPOI(data: any): Promise<any> {
-    const response = await apiClient.post('/properties/points-of-interest/', data);
+    const response = await apiClient.post('/pois/', data);
     return response.data;
   },
 
   async updatePOI(id: string, data: any): Promise<any> {
-    const response = await apiClient.patch(`/properties/points-of-interest/${id}/`, data);
+    const response = await apiClient.patch(`/pois/${id}/`, data);
     return response.data;
   },
 
   async deletePOI(id: string): Promise<void> {
-    await apiClient.delete(`/properties/points-of-interest/${id}/`);
+    await apiClient.delete(`/pois/${id}/`);
   },
 
   async createPOICategory(data: any): Promise<any> {
-    const response = await apiClient.post('/properties/poi-categories/', data);
+    const response = await apiClient.post('/poi-categories/', data);
     return response.data;
   },
 
   async updatePOICategory(id: string, data: any): Promise<any> {
-    const response = await apiClient.patch(`/properties/poi-categories/${id}/`, data);
+    const response = await apiClient.patch(`/poi-categories/${id}/`, data);
     return response.data;
   },
 
   async deletePOICategory(id: string): Promise<void> {
-    await apiClient.delete(`/properties/poi-categories/${id}/`);
+    await apiClient.delete(`/poi-categories/${id}/`);
   },
 };

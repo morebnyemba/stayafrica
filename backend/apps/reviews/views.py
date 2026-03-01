@@ -22,8 +22,19 @@ class ReviewViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     
     def get_queryset(self):
-        """Return reviews for properties of current user or reviews by user"""
+        """Return reviews - admins see all, users see their own"""
         user = self.request.user
+        
+        # Admin users can see all reviews
+        if user.is_staff:
+            qs = Review.objects.all().select_related('guest', 'host', 'booking__rental_property')
+            search = self.request.query_params.get('search')
+            if search:
+                qs = qs.filter(Q(text__icontains=search) | Q(guest__email__icontains=search) | Q(host__email__icontains=search))
+            rating = self.request.query_params.get('rating')
+            if rating:
+                qs = qs.filter(rating=int(rating))
+            return qs
         
         # Allow filtering by property or user
         property_id = self.request.query_params.get('property_id')
