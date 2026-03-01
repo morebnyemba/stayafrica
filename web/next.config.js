@@ -32,6 +32,10 @@ const nextConfig = {
         hostname: 'api.stayafrica.app',
       },
       {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
+      {
         protocol: 'http',
         hostname: 'localhost',
       },
@@ -58,7 +62,7 @@ const nextConfig = {
             "default-src 'self'",
             "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://api.mapbox.com https://js.stripe.com",
             "style-src 'self' 'unsafe-inline' https://api.mapbox.com https://fonts.googleapis.com",
-            "img-src 'self' data: blob: https://*.mapbox.com https://*.amazonaws.com https://*.cloudfront.net https://api.zimlegend.online https://api.stayafrica.app http://localhost:8000",
+            "img-src 'self' data: blob: https://*.mapbox.com https://*.amazonaws.com https://*.cloudfront.net https://images.unsplash.com https://api.zimlegend.online https://api.stayafrica.app http://localhost:8000",
             "font-src 'self' https://fonts.gstatic.com",
             "connect-src 'self' https://api.mapbox.com https://*.mapbox.com https://api.stripe.com https://exp.host https://api.zimlegend.online https://api.stayafrica.app http://localhost:8000 wss://*.stayafrica.app wss://*.zimlegend.online",
             "frame-src 'self' https://js.stripe.com https://hooks.stripe.com",
