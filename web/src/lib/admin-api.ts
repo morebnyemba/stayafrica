@@ -26,6 +26,11 @@ export const adminApi = {
     return response.data;
   },
 
+  async createUser(data: Partial<User> & { password?: string }): Promise<User> {
+    const response = await apiClient.post('/users/', data);
+    return response.data;
+  },
+
   async updateUser(id: string, data: Partial<User>): Promise<User> {
     const response = await apiClient.put(`/users/${id}/`, data);
     return response.data;
@@ -67,6 +72,16 @@ export const adminApi = {
     return response.data;
   },
 
+  async activateProperty(id: string): Promise<Property> {
+    const response = await apiClient.patch(`/properties/${id}/`, { status: 'active' });
+    return response.data;
+  },
+
+  async deactivateProperty(id: string): Promise<Property> {
+    const response = await apiClient.patch(`/properties/${id}/`, { status: 'inactive' });
+    return response.data;
+  },
+
   async deleteProperty(id: string): Promise<void> {
     await apiClient.delete(`/properties/${id}/`);
   },
@@ -84,6 +99,16 @@ export const adminApi = {
 
   async getBookingById(id: string): Promise<Booking> {
     const response = await apiClient.get(`/bookings/${id}/`);
+    return response.data;
+  },
+
+  async confirmBooking(id: string): Promise<Booking> {
+    const response = await apiClient.post(`/bookings/${id}/confirm/`);
+    return response.data;
+  },
+
+  async completeBooking(id: string): Promise<Booking> {
+    const response = await apiClient.post(`/bookings/${id}/complete/`);
     return response.data;
   },
 
@@ -314,6 +339,10 @@ export const adminApi = {
     return response.data;
   },
 
+  async deleteTaxJurisdiction(id: string): Promise<void> {
+    await apiClient.delete(`/payments/tax-jurisdictions/${id}/`);
+  },
+
   async getTaxRates(params?: {
     search?: string;
     page?: number;
@@ -331,6 +360,10 @@ export const adminApi = {
   async updateTaxRate(id: string, data: any): Promise<any> {
     const response = await apiClient.patch(`/payments/tax-rates/${id}/`, data);
     return response.data;
+  },
+
+  async deleteTaxRate(id: string): Promise<void> {
+    await apiClient.delete(`/payments/tax-rates/${id}/`);
   },
 
   async getTaxExemptions(params?: {
@@ -395,6 +428,15 @@ export const adminApi = {
     return response.data;
   },
 
+  async toggleAutomatedMessage(id: string, is_active: boolean): Promise<any> {
+    const response = await apiClient.patch(`/messaging/automated-messages/${id}/`, { is_active });
+    return response.data;
+  },
+
+  async deleteAutomatedMessage(id: string): Promise<void> {
+    await apiClient.delete(`/messaging/automated-messages/${id}/`);
+  },
+
   async getScheduledMessages(params?: {
     search?: string;
     page?: number;
@@ -404,6 +446,10 @@ export const adminApi = {
     return response.data;
   },
 
+  async deleteScheduledMessage(id: string): Promise<void> {
+    await apiClient.delete(`/messaging/scheduled-messages/${id}/`);
+  },
+
   async getQuickReplies(params?: {
     search?: string;
     page?: number;
@@ -411,5 +457,38 @@ export const adminApi = {
   }): Promise<{ results: any[]; count: number }> {
     const response = await apiClient.get('/messaging/quick-replies/', { params });
     return response.data;
+  },
+
+  async deleteQuickReply(id: string): Promise<void> {
+    await apiClient.delete(`/messaging/quick-replies/${id}/`);
+  },
+
+  // POI Management
+  async createPOI(data: any): Promise<any> {
+    const response = await apiClient.post('/properties/points-of-interest/', data);
+    return response.data;
+  },
+
+  async updatePOI(id: string, data: any): Promise<any> {
+    const response = await apiClient.patch(`/properties/points-of-interest/${id}/`, data);
+    return response.data;
+  },
+
+  async deletePOI(id: string): Promise<void> {
+    await apiClient.delete(`/properties/points-of-interest/${id}/`);
+  },
+
+  async createPOICategory(data: any): Promise<any> {
+    const response = await apiClient.post('/properties/poi-categories/', data);
+    return response.data;
+  },
+
+  async updatePOICategory(id: string, data: any): Promise<any> {
+    const response = await apiClient.patch(`/properties/poi-categories/${id}/`, data);
+    return response.data;
+  },
+
+  async deletePOICategory(id: string): Promise<void> {
+    await apiClient.delete(`/properties/poi-categories/${id}/`);
   },
 };

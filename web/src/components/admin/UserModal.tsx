@@ -20,13 +20,16 @@ export default function UserModal({ isOpen, onClose, onSave, user }: UserModalPr
     phone_number: user?.phone_number || '',
     role: user?.role || 'guest',
     is_verified: user?.is_verified || false,
+    password: '',
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await onSave(formData);
+      const { password, ...rest } = formData;
+      const dataToSave = user ? rest : { ...rest, password };
+      await onSave(dataToSave);
       onClose();
     } catch (error) {
       console.error('Error saving user:', error);
@@ -80,9 +83,26 @@ export default function UserModal({ isOpen, onClose, onSave, user }: UserModalPr
             value={formData.email}
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#D9B168] focus:border-transparent"
-            disabled={!!user} // Can't change email for existing users
+            disabled={!!user}
           />
         </div>
+
+        {!user && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Password <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="password"
+              required={!user}
+              value={formData.password}
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#D9B168] focus:border-transparent"
+              minLength={8}
+              placeholder="Minimum 8 characters"
+            />
+          </div>
+        )}
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">

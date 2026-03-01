@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { adminApi } from '@/lib/admin-api';
-import { Search, MapPin, Tag, CheckCircle, XCircle } from 'lucide-react';
+import { Search, MapPin, Tag, CheckCircle, XCircle, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ConfirmDialog from '@/components/admin/ConfirmDialog';
 
@@ -38,6 +38,8 @@ export default function POIManagement() {
   const [selectedPOIs, setSelectedPOIs] = useState<string[]>([]);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [confirmAction, setConfirmAction] = useState<{ type: string; ids: string[] } | null>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<{ type: 'poi' | 'category'; id: string } | null>(null);
   const ITEMS_PER_PAGE = 20;
 
   useEffect(() => {
@@ -88,6 +90,24 @@ export default function POIManagement() {
 
   const handleSearch = () => {
     setPage(1);
+  };
+
+  const handleDeleteItem = async () => {
+    if (!deleteTarget) return;
+    try {
+      if (deleteTarget.type === 'poi') {
+        await adminApi.deletePOI(deleteTarget.id);
+        toast.success('POI deleted');
+        loadPOIs();
+      } else {
+        await adminApi.deletePOICategory(deleteTarget.id);
+        toast.success('Category deleted');
+        loadCategories();
+      }
+    } catch (err: any) {
+      toast.error(err?.response?.data?.detail || 'Failed to delete');
+      console.error(err);
+    }
   };
 
   const toggleSelectPOI = (poiId: string) => {
@@ -283,6 +303,9 @@ export default function POIManagement() {
                       <th className="px-6 py-3 text-left text-xs font-medium text-[#3A5C50] uppercase tracking-wider">
                         Created
                       </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-[#3A5C50] uppercase tracking-wider">
+                        Actions
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
@@ -340,6 +363,15 @@ export default function POIManagement() {
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-[#3A5C50]">
                           {new Date(poi.created_at).toLocaleDateString()}
                         </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <button
+                            onClick={() => { setDeleteTarget({ type: 'poi', id: poi.id }); setShowDeleteDialog(true); }}
+                            className="text-red-600 hover:text-red-900"
+                            title="Delete POI"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -361,6 +393,9 @@ export default function POIManagement() {
                       <th className="px-6 py-3 text-left text-xs font-medium text-[#3A5C50] uppercase tracking-wider">
                         Description
                       </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-[#3A5C50] uppercase tracking-wider">
+                        Actions
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
@@ -378,6 +413,15 @@ export default function POIManagement() {
                           <div className="text-sm text-[#3A5C50]">
                             {category.description || '-'}
                           </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <button
+                            onClick={() => { setDeleteTarget({ type: 'category', id: category.id }); setShowDeleteDialog(true); }}
+                            className="text-red-600 hover:text-red-900"
+                            title="Delete category"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
                         </td>
                       </tr>
                     ))}
@@ -412,7 +456,7 @@ export default function POIManagement() {
         )}
       </div>
 
-      {/* Confirm Dialog */}
+      {/* Verify Confirm Dialog */}
       <ConfirmDialog
         isOpen={showConfirmDialog}
         onClose={() => setShowConfirmDialog(false)}
@@ -421,6 +465,17 @@ export default function POIManagement() {
         message={`Are you sure you want to ${confirmAction?.type} ${confirmAction?.ids.length} POI(s)?`}
         variant={confirmAction?.type === 'verify' ? 'info' : 'warning'}
         confirmText={confirmAction?.type === 'verify' ? 'Verify' : 'Unverify'}
+      />
+
+      {/* Delete Confirm Dialog */}
+      <ConfirmDialog
+        isOpen={showDeleteDialog}
+        onClose={() => { setShowDeleteDialog(false); setDeleteTarget(null); }}
+        onConfirm={handleDeleteItem}
+        title={`Delete ${deleteTarget?.type === 'category' ? 'Category' : 'POI'}`}
+        message="Are you sure you want to delete this item? This action cannot be undone."
+        variant="danger"
+        confirmText="Delete"
       />
     </div>
   );

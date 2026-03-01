@@ -3,11 +3,14 @@
 import { useEffect, useState } from 'react';
 import { adminApi } from '@/lib/admin-api';
 import { SystemConfig } from '@/types/admin-types';
+import { Save } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function SettingsPage() {
   const [config, setConfig] = useState<SystemConfig | null>(null);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
 
   useEffect(() => {
     loadConfig();
@@ -24,6 +27,27 @@ export default function SettingsPage() {
       console.error('Config load error:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const updateField = (field: string, value: any) => {
+    if (!config) return;
+    setConfig({ ...config, [field]: value });
+    setHasChanges(true);
+  };
+
+  const handleSave = async () => {
+    if (!config) return;
+    setSaving(true);
+    try {
+      await adminApi.updateSystemConfig(config);
+      toast.success('Settings saved successfully');
+      setHasChanges(false);
+    } catch (err: any) {
+      toast.error(err?.response?.data?.detail || 'Failed to save settings');
+      console.error(err);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -47,9 +71,21 @@ export default function SettingsPage() {
 
   return (
     <div className="p-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-[#122F26]">System Settings</h1>
-        <p className="text-[#3A5C50] mt-2">Configure system-wide settings and parameters</p>
+      <div className="mb-8 flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold text-[#122F26]">System Settings</h1>
+          <p className="text-[#3A5C50] mt-2">Configure system-wide settings and parameters</p>
+        </div>
+        {hasChanges && (
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="flex items-center space-x-2 px-6 py-2 bg-[#D9B168] text-[#122F26] font-medium rounded-lg hover:bg-[#c9a158] transition-colors disabled:opacity-50"
+          >
+            <Save className="w-5 h-5" />
+            <span>{saving ? 'Saving...' : 'Save Changes'}</span>
+          </button>
+        )}
       </div>
 
       <div className="space-y-6">
@@ -65,8 +101,8 @@ export default function SettingsPage() {
                 type="number"
                 step="0.01"
                 value={parseFloat(config.commission_rate) * 100}
-                readOnly
-                className="w-full px-4 py-2 border border-[#3A5C50] rounded-lg bg-gray-50"
+                onChange={(e) => updateField('commission_rate', (parseFloat(e.target.value) / 100).toString())}
+                className="w-full px-4 py-2 border border-[#3A5C50] rounded-lg focus:ring-2 focus:ring-[#D9B168] focus:border-transparent"
               />
               <p className="text-xs text-gray-500 mt-1">
                 Current: {(parseFloat(config.commission_rate) * 100).toFixed(2)}%
@@ -80,8 +116,8 @@ export default function SettingsPage() {
                 type="number"
                 step="0.01"
                 value={config.service_fee}
-                readOnly
-                className="w-full px-4 py-2 border border-[#3A5C50] rounded-lg bg-gray-50"
+                onChange={(e) => updateField('service_fee', parseFloat(e.target.value))}
+                className="w-full px-4 py-2 border border-[#3A5C50] rounded-lg focus:ring-2 focus:ring-[#D9B168] focus:border-transparent"
               />
               <p className="text-xs text-gray-500 mt-1">Per booking</p>
             </div>
@@ -92,8 +128,8 @@ export default function SettingsPage() {
               <input
                 type="text"
                 value={config.default_currency}
-                readOnly
-                className="w-full px-4 py-2 border border-[#3A5C50] rounded-lg bg-gray-50"
+                onChange={(e) => updateField('default_currency', e.target.value)}
+                className="w-full px-4 py-2 border border-[#3A5C50] rounded-lg focus:ring-2 focus:ring-[#D9B168] focus:border-transparent"
               />
             </div>
           </div>
@@ -110,8 +146,8 @@ export default function SettingsPage() {
               <input
                 type="number"
                 value={config.max_advance_booking_days}
-                readOnly
-                className="w-full px-4 py-2 border border-[#3A5C50] rounded-lg bg-gray-50"
+                onChange={(e) => updateField('max_advance_booking_days', parseInt(e.target.value))}
+                className="w-full px-4 py-2 border border-[#3A5C50] rounded-lg focus:ring-2 focus:ring-[#D9B168] focus:border-transparent"
               />
             </div>
             <div>
@@ -121,8 +157,8 @@ export default function SettingsPage() {
               <input
                 type="number"
                 value={config.max_stay_duration_days}
-                readOnly
-                className="w-full px-4 py-2 border border-[#3A5C50] rounded-lg bg-gray-50"
+                onChange={(e) => updateField('max_stay_duration_days', parseInt(e.target.value))}
+                className="w-full px-4 py-2 border border-[#3A5C50] rounded-lg focus:ring-2 focus:ring-[#D9B168] focus:border-transparent"
               />
             </div>
             <div>
@@ -132,8 +168,8 @@ export default function SettingsPage() {
               <input
                 type="number"
                 value={config.review_window_days}
-                readOnly
-                className="w-full px-4 py-2 border border-[#3A5C50] rounded-lg bg-gray-50"
+                onChange={(e) => updateField('review_window_days', parseInt(e.target.value))}
+                className="w-full px-4 py-2 border border-[#3A5C50] rounded-lg focus:ring-2 focus:ring-[#D9B168] focus:border-transparent"
               />
               <p className="text-xs text-gray-500 mt-1">Days after checkout to submit review</p>
             </div>
@@ -144,8 +180,8 @@ export default function SettingsPage() {
               <input
                 type="number"
                 value={config.review_edit_window_days}
-                readOnly
-                className="w-full px-4 py-2 border border-[#3A5C50] rounded-lg bg-gray-50"
+                onChange={(e) => updateField('review_edit_window_days', parseInt(e.target.value))}
+                className="w-full px-4 py-2 border border-[#3A5C50] rounded-lg focus:ring-2 focus:ring-[#D9B168] focus:border-transparent"
               />
               <p className="text-xs text-gray-500 mt-1">Days to edit review after submission</p>
             </div>
@@ -163,8 +199,8 @@ export default function SettingsPage() {
               <input
                 type="email"
                 value={config.admin_email}
-                readOnly
-                className="w-full px-4 py-2 border border-[#3A5C50] rounded-lg bg-gray-50"
+                onChange={(e) => updateField('admin_email', e.target.value)}
+                className="w-full px-4 py-2 border border-[#3A5C50] rounded-lg focus:ring-2 focus:ring-[#D9B168] focus:border-transparent"
               />
             </div>
             <div>
@@ -174,8 +210,8 @@ export default function SettingsPage() {
               <input
                 type="email"
                 value={config.support_email}
-                readOnly
-                className="w-full px-4 py-2 border border-[#3A5C50] rounded-lg bg-gray-50"
+                onChange={(e) => updateField('support_email', e.target.value)}
+                className="w-full px-4 py-2 border border-[#3A5C50] rounded-lg focus:ring-2 focus:ring-[#D9B168] focus:border-transparent"
               />
             </div>
           </div>
@@ -258,13 +294,6 @@ export default function SettingsPage() {
               </div>
             )}
           </div>
-        </div>
-
-        <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
-          <p className="text-sm text-blue-800">
-            <strong>Note:</strong> System configuration can only be modified through Django admin panel for security reasons.
-            Access Django admin at /django-admin/
-          </p>
         </div>
       </div>
     </div>

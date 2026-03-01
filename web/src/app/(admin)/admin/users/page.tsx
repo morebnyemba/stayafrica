@@ -83,12 +83,12 @@ export default function UsersManagement() {
         await adminApi.updateUser(selectedUser.id, data);
         toast.success('User updated successfully');
       } else {
-        // Create new user would need a create endpoint
-        toast.error('User creation not implemented yet');
+        await adminApi.createUser(data);
+        toast.success('User created successfully');
       }
       loadUsers();
-    } catch (err) {
-      toast.error('Failed to save user');
+    } catch (err: any) {
+      toast.error(err?.response?.data?.detail || 'Failed to save user');
       console.error(err);
     }
   };

@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { adminApi } from '@/lib/admin-api';
-import { Search, Clock, Zap, MessageCircle } from 'lucide-react';
+import { Search, Clock, Zap, MessageCircle, ToggleLeft, ToggleRight, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import ConfirmDialog from '@/components/admin/ConfirmDialog';
 
 type AutomatedMessage = {
   id: string;
@@ -44,6 +45,8 @@ export default function MessagingAutomation() {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<{ type: string; id: string } | null>(null);
   const ITEMS_PER_PAGE = 20;
 
   useEffect(() => {
@@ -115,6 +118,37 @@ export default function MessagingAutomation() {
 
   const handleSearch = () => {
     setPage(1);
+  };
+
+  const handleToggleAutomated = async (id: string, currentActive: boolean) => {
+    try {
+      await adminApi.toggleAutomatedMessage(id, !currentActive);
+      toast.success(`Message ${!currentActive ? 'activated' : 'deactivated'}`);
+      loadAutomatedMessages();
+    } catch (err: any) {
+      toast.error(err?.response?.data?.detail || 'Failed to toggle message');
+      console.error(err);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    try {
+      if (deleteTarget.type === 'automated') {
+        await adminApi.deleteAutomatedMessage(deleteTarget.id);
+      } else if (deleteTarget.type === 'scheduled') {
+        await adminApi.deleteScheduledMessage(deleteTarget.id);
+      } else if (deleteTarget.type === 'quick-reply') {
+        await adminApi.deleteQuickReply(deleteTarget.id);
+      }
+      toast.success('Item deleted successfully');
+      if (activeTab === 'automated') loadAutomatedMessages();
+      else if (activeTab === 'scheduled') loadScheduledMessages();
+      else loadQuickReplies();
+    } catch (err: any) {
+      toast.error(err?.response?.data?.detail || 'Failed to delete');
+      console.error(err);
+    }
   };
 
   const getStatusBadge = (status: string) => {
@@ -242,6 +276,9 @@ export default function MessagingAutomation() {
                       <th className="px-6 py-3 text-left text-xs font-medium text-[#3A5C50] uppercase tracking-wider">
                         Created
                       </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-[#3A5C50] uppercase tracking-wider">
+                        Actions
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
@@ -273,6 +310,24 @@ export default function MessagingAutomation() {
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-[#3A5C50]">
                           {new Date(message.created_at).toLocaleDateString()}
                         </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <div className="flex items-center space-x-2">
+                            <button
+                              onClick={() => handleToggleAutomated(message.id, message.is_active)}
+                              className={message.is_active ? 'text-green-600 hover:text-green-900' : 'text-gray-400 hover:text-gray-600'}
+                              title={message.is_active ? 'Deactivate' : 'Activate'}
+                            >
+                              {message.is_active ? <ToggleRight className="w-5 h-5" /> : <ToggleLeft className="w-5 h-5" />}
+                            </button>
+                            <button
+                              onClick={() => { setDeleteTarget({ type: 'automated', id: message.id }); setShowDeleteDialog(true); }}
+                              className="text-red-600 hover:text-red-900"
+                              title="Delete"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -303,6 +358,9 @@ export default function MessagingAutomation() {
                       <th className="px-6 py-3 text-left text-xs font-medium text-[#3A5C50] uppercase tracking-wider">
                         Created
                       </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-[#3A5C50] uppercase tracking-wider">
+                        Actions
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
@@ -327,6 +385,17 @@ export default function MessagingAutomation() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-[#3A5C50]">
                           {new Date(message.created_at).toLocaleDateString()}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          {message.status === 'pending' && (
+                            <button
+                              onClick={() => { setDeleteTarget({ type: 'scheduled', id: message.id }); setShowDeleteDialog(true); }}
+                              className="text-red-600 hover:text-red-900"
+                              title="Delete"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          )}
                         </td>
                       </tr>
                     ))}
@@ -358,6 +427,9 @@ export default function MessagingAutomation() {
                       <th className="px-6 py-3 text-left text-xs font-medium text-[#3A5C50] uppercase tracking-wider">
                         Created
                       </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-[#3A5C50] uppercase tracking-wider">
+                        Actions
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
@@ -388,6 +460,15 @@ export default function MessagingAutomation() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-[#3A5C50]">
                           {new Date(reply.created_at).toLocaleDateString()}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <button
+                            onClick={() => { setDeleteTarget({ type: 'quick-reply', id: reply.id }); setShowDeleteDialog(true); }}
+                            className="text-red-600 hover:text-red-900"
+                            title="Delete"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
                         </td>
                       </tr>
                     ))}
@@ -421,6 +502,17 @@ export default function MessagingAutomation() {
           </>
         )}
       </div>
+
+      {/* Delete Dialog */}
+      <ConfirmDialog
+        isOpen={showDeleteDialog}
+        onClose={() => { setShowDeleteDialog(false); setDeleteTarget(null); }}
+        onConfirm={handleDelete}
+        title="Delete Item"
+        message="Are you sure you want to delete this item? This action cannot be undone."
+        variant="danger"
+        confirmText="Delete"
+      />
     </div>
   );
 }

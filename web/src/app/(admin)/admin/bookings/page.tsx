@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { adminApi } from '@/lib/admin-api';
 import { Booking } from '@/types';
-import { Search, Eye, Calendar, CheckCircle, XCircle, ChevronDown } from 'lucide-react';
+import { Search, Eye, Calendar, CheckCircle, XCircle, ChevronDown, CheckCheck } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ConfirmDialog from '@/components/admin/ConfirmDialog';
 
@@ -76,6 +76,11 @@ export default function BookingsManagement() {
     setShowConfirmDialog(true);
   };
 
+  const handleMarkCompleted = (bookingId: string) => {
+    setConfirmAction({ type: 'complete', bookingId });
+    setShowConfirmDialog(true);
+  };
+
   const handleBulkAction = async (action: string) => {
     if (selectedBookings.length === 0) {
       toast.error('No bookings selected');
@@ -85,16 +90,16 @@ export default function BookingsManagement() {
     try {
       switch (action) {
         case 'confirm':
-          // Would need API endpoint for bulk confirm
-          toast('Bulk confirm action needs API implementation');
+          await Promise.all(selectedBookings.map(id => adminApi.confirmBooking(id)));
+          toast.success(`${selectedBookings.length} bookings confirmed`);
           break;
         case 'cancel':
           await Promise.all(selectedBookings.map(id => adminApi.cancelBooking(id, 'Bulk cancelled by admin')));
           toast.success(`${selectedBookings.length} bookings cancelled`);
           break;
         case 'complete':
-          // Would need API endpoint for bulk complete
-          toast('Bulk complete action needs API implementation');
+          await Promise.all(selectedBookings.map(id => adminApi.completeBooking(id)));
+          toast.success(`${selectedBookings.length} bookings completed`);
           break;
         default:
           toast.error('Unknown action');
@@ -117,8 +122,11 @@ export default function BookingsManagement() {
         await adminApi.cancelBooking(confirmAction.bookingId, 'Cancelled by admin');
         toast.success('Booking cancelled successfully');
       } else if (confirmAction.type === 'confirm') {
-        // Would need API endpoint for this
-        toast('Confirm booking action needs API implementation');
+        await adminApi.confirmBooking(confirmAction.bookingId);
+        toast.success('Booking confirmed successfully');
+      } else if (confirmAction.type === 'complete') {
+        await adminApi.completeBooking(confirmAction.bookingId);
+        toast.success('Booking marked as completed');
       }
       loadBookings();
     } catch (err) {
@@ -354,6 +362,15 @@ export default function BookingsManagement() {
                               <CheckCircle className="w-5 h-5" />
                             </button>
                           )}
+                          {booking.status === 'confirmed' && (
+                            <button
+                              onClick={() => handleMarkCompleted(booking.id)}
+                              className="text-blue-600 hover:text-blue-900"
+                              title="Mark as completed"
+                            >
+                              <CheckCheck className="w-5 h-5" />
+                            </button>
+                          )}
                           {booking.status !== 'cancelled' && booking.status !== 'completed' && (
                             <button
                               onClick={() => handleCancelBooking(booking.id)}
@@ -405,14 +422,16 @@ export default function BookingsManagement() {
         isOpen={showConfirmDialog}
         onClose={() => setShowConfirmDialog(false)}
         onConfirm={handleConfirm}
-        title={confirmAction?.type === 'cancel' ? 'Cancel Booking' : 'Confirm Booking'}
+        title={confirmAction?.type === 'cancel' ? 'Cancel Booking' : confirmAction?.type === 'complete' ? 'Complete Booking' : 'Confirm Booking'}
         message={
           confirmAction?.type === 'cancel'
             ? 'Are you sure you want to cancel this booking? This action cannot be undone.'
+            : confirmAction?.type === 'complete'
+            ? 'Are you sure you want to mark this booking as completed?'
             : 'Are you sure you want to confirm this booking?'
         }
         variant={confirmAction?.type === 'cancel' ? 'danger' : 'info'}
-        confirmText={confirmAction?.type === 'cancel' ? 'Cancel Booking' : 'Confirm'}
+        confirmText={confirmAction?.type === 'cancel' ? 'Cancel Booking' : confirmAction?.type === 'complete' ? 'Complete' : 'Confirm'}
       />
     </div>
   );

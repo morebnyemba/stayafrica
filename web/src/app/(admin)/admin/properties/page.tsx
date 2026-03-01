@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { adminApi } from '@/lib/admin-api';
 import { Property } from '@/types';
-import { Search, CheckCircle, XCircle, Eye, ChevronDown, Ban } from 'lucide-react';
+import { Search, CheckCircle, XCircle, Eye, ChevronDown, Ban, Power } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ConfirmDialog from '@/components/admin/ConfirmDialog';
 
@@ -75,6 +75,11 @@ export default function PropertiesManagement() {
     setShowConfirmDialog(true);
   };
 
+  const handleActivate = (propertyId: string) => {
+    setConfirmAction({ type: 'activate', propertyId });
+    setShowConfirmDialog(true);
+  };
+
   const handleBulkAction = async (action: string) => {
     if (selectedProperties.length === 0) {
       toast.error('No properties selected');
@@ -92,12 +97,12 @@ export default function PropertiesManagement() {
           toast.success(`${selectedProperties.length} properties rejected`);
           break;
         case 'activate':
-          // Would need API endpoint for this
-          toast('Activate action needs API implementation');
+          await Promise.all(selectedProperties.map(id => adminApi.activateProperty(id)));
+          toast.success(`${selectedProperties.length} properties activated`);
           break;
         case 'deactivate':
-          // Would need API endpoint for this
-          toast('Deactivate action needs API implementation');
+          await Promise.all(selectedProperties.map(id => adminApi.deactivateProperty(id)));
+          toast.success(`${selectedProperties.length} properties deactivated`);
           break;
         default:
           toast.error('Unknown action');
@@ -117,13 +122,15 @@ export default function PropertiesManagement() {
 
     try {
       if (confirmAction.type === 'suspend' && confirmAction.propertyId) {
-        // Suspend by marking as inactive
-        await adminApi.rejectProperty(confirmAction.propertyId, 'Suspended by admin');
+        await adminApi.deactivateProperty(confirmAction.propertyId);
         toast.success('Property suspended successfully');
-        loadProperties();
+      } else if (confirmAction.type === 'activate' && confirmAction.propertyId) {
+        await adminApi.activateProperty(confirmAction.propertyId);
+        toast.success('Property activated successfully');
       }
+      loadProperties();
     } catch (err) {
-      toast.error('Failed to suspend property');
+      toast.error(`Failed to ${confirmAction.type} property`);
       console.error(err);
     }
   };
@@ -397,6 +404,15 @@ export default function PropertiesManagement() {
                             <Ban className="w-5 h-5" />
                           </button>
                         )}
+                        {property.status === 'inactive' && (
+                          <button
+                            onClick={() => handleActivate(property.id)}
+                            className="text-green-600 hover:text-green-900"
+                            title="Reactivate"
+                          >
+                            <Power className="w-5 h-5" />
+                          </button>
+                        )}
                         <button className="text-[#D9B168] hover:text-[#c9a158]" title="View details">
                           <Eye className="w-5 h-5" />
                         </button>
@@ -438,10 +454,12 @@ export default function PropertiesManagement() {
         isOpen={showConfirmDialog}
         onClose={() => setShowConfirmDialog(false)}
         onConfirm={handleConfirm}
-        title="Suspend Property"
-        message="Are you sure you want to suspend this property? It will be marked as inactive."
-        variant="warning"
-        confirmText="Suspend"
+        title={confirmAction?.type === 'activate' ? 'Activate Property' : 'Suspend Property'}
+        message={confirmAction?.type === 'activate' 
+          ? 'Are you sure you want to reactivate this property?' 
+          : 'Are you sure you want to suspend this property? It will be marked as inactive.'}
+        variant={confirmAction?.type === 'activate' ? 'info' : 'warning'}
+        confirmText={confirmAction?.type === 'activate' ? 'Activate' : 'Suspend'}
       />
     </div>
   );

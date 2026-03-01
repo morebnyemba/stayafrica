@@ -2,8 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { adminApi } from '@/lib/admin-api';
-import { Search, Globe, DollarSign } from 'lucide-react';
+import { Search, Globe, DollarSign, Plus, Edit, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import TaxJurisdictionModal from '@/components/admin/TaxJurisdictionModal';
+import TaxRateModal from '@/components/admin/TaxRateModal';
+import ConfirmDialog from '@/components/admin/ConfirmDialog';
 
 type TaxJurisdiction = {
   id: string;
@@ -35,6 +38,13 @@ export default function TaxConfigManagement() {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
+  const [showJurisdictionModal, setShowJurisdictionModal] = useState(false);
+  const [selectedJurisdiction, setSelectedJurisdiction] = useState<TaxJurisdiction | null>(null);
+  const [showRateModal, setShowRateModal] = useState(false);
+  const [selectedRate, setSelectedRate] = useState<TaxRate | null>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<{ type: 'jurisdiction' | 'rate'; id: string } | null>(null);
+  const [allJurisdictions, setAllJurisdictions] = useState<TaxJurisdiction[]>([]);
   const ITEMS_PER_PAGE = 20;
 
   useEffect(() => {
@@ -85,6 +95,65 @@ export default function TaxConfigManagement() {
 
   const handleSearch = () => {
     setPage(1);
+  };
+
+  const loadAllJurisdictions = async () => {
+    try {
+      const data = await adminApi.getTaxJurisdictions({ per_page: 100 });
+      setAllJurisdictions(data.results || []);
+    } catch (err) {
+      console.error('Failed to load jurisdictions for dropdown:', err);
+    }
+  };
+
+  const handleSaveJurisdiction = async (data: any) => {
+    try {
+      if (selectedJurisdiction) {
+        await adminApi.updateTaxJurisdiction(selectedJurisdiction.id, data);
+        toast.success('Jurisdiction updated successfully');
+      } else {
+        await adminApi.createTaxJurisdiction(data);
+        toast.success('Jurisdiction created successfully');
+      }
+      loadJurisdictions();
+    } catch (err: any) {
+      toast.error(err?.response?.data?.detail || 'Failed to save jurisdiction');
+      throw err;
+    }
+  };
+
+  const handleSaveRate = async (data: any) => {
+    try {
+      if (selectedRate) {
+        await adminApi.updateTaxRate(selectedRate.id, data);
+        toast.success('Tax rate updated successfully');
+      } else {
+        await adminApi.createTaxRate(data);
+        toast.success('Tax rate created successfully');
+      }
+      loadTaxRates();
+    } catch (err: any) {
+      toast.error(err?.response?.data?.detail || 'Failed to save tax rate');
+      throw err;
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    try {
+      if (deleteTarget.type === 'jurisdiction') {
+        await adminApi.deleteTaxJurisdiction(deleteTarget.id);
+        toast.success('Jurisdiction deleted');
+        loadJurisdictions();
+      } else {
+        await adminApi.deleteTaxRate(deleteTarget.id);
+        toast.success('Tax rate deleted');
+        loadTaxRates();
+      }
+    } catch (err: any) {
+      toast.error(err?.response?.data?.detail || 'Failed to delete');
+      console.error(err);
+    }
   };
 
   const getJurisdictionTypeBadge = (type: string) => {
@@ -173,6 +242,22 @@ export default function TaxConfigManagement() {
           >
             Search
           </button>
+          <button
+            onClick={() => {
+              if (activeTab === 'jurisdictions') {
+                setSelectedJurisdiction(null);
+                setShowJurisdictionModal(true);
+              } else {
+                setSelectedRate(null);
+                loadAllJurisdictions();
+                setShowRateModal(true);
+              }
+            }}
+            className="flex items-center space-x-1 px-4 py-2 bg-[#122F26] text-white rounded-lg hover:bg-[#1a4035] transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Add</span>
+          </button>
         </div>
       </div>
 
@@ -206,6 +291,9 @@ export default function TaxConfigManagement() {
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-[#3A5C50] uppercase tracking-wider">
                         Created
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-[#3A5C50] uppercase tracking-wider">
+                        Actions
                       </th>
                     </tr>
                   </thead>
@@ -242,6 +330,24 @@ export default function TaxConfigManagement() {
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-[#3A5C50]">
                           {new Date(jurisdiction.created_at).toLocaleDateString()}
                         </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <div className="flex items-center space-x-2">
+                            <button
+                              onClick={() => { setSelectedJurisdiction(jurisdiction); setShowJurisdictionModal(true); }}
+                              className="text-[#D9B168] hover:text-[#c9a158]"
+                              title="Edit"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => { setDeleteTarget({ type: 'jurisdiction', id: jurisdiction.id }); setShowDeleteDialog(true); }}
+                              className="text-red-600 hover:text-red-900"
+                              title="Delete"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -271,6 +377,9 @@ export default function TaxConfigManagement() {
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-[#3A5C50] uppercase tracking-wider">
                         Created
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-[#3A5C50] uppercase tracking-wider">
+                        Actions
                       </th>
                     </tr>
                   </thead>
@@ -305,6 +414,24 @@ export default function TaxConfigManagement() {
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-[#3A5C50]">
                           {new Date(rate.created_at).toLocaleDateString()}
                         </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <div className="flex items-center space-x-2">
+                            <button
+                              onClick={() => { setSelectedRate(rate); loadAllJurisdictions(); setShowRateModal(true); }}
+                              className="text-[#D9B168] hover:text-[#c9a158]"
+                              title="Edit"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => { setDeleteTarget({ type: 'rate', id: rate.id }); setShowDeleteDialog(true); }}
+                              className="text-red-600 hover:text-red-900"
+                              title="Delete"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -337,6 +464,32 @@ export default function TaxConfigManagement() {
           </>
         )}
       </div>
+
+      {/* Modals */}
+      <TaxJurisdictionModal
+        isOpen={showJurisdictionModal}
+        onClose={() => { setShowJurisdictionModal(false); setSelectedJurisdiction(null); }}
+        onSave={handleSaveJurisdiction}
+        jurisdiction={selectedJurisdiction}
+      />
+
+      <TaxRateModal
+        isOpen={showRateModal}
+        onClose={() => { setShowRateModal(false); setSelectedRate(null); }}
+        onSave={handleSaveRate}
+        rate={selectedRate}
+        jurisdictions={allJurisdictions}
+      />
+
+      <ConfirmDialog
+        isOpen={showDeleteDialog}
+        onClose={() => { setShowDeleteDialog(false); setDeleteTarget(null); }}
+        onConfirm={handleDelete}
+        title={`Delete ${deleteTarget?.type === 'jurisdiction' ? 'Jurisdiction' : 'Tax Rate'}`}
+        message="Are you sure you want to delete this item? This action cannot be undone."
+        variant="danger"
+        confirmText="Delete"
+      />
     </div>
   );
 }
