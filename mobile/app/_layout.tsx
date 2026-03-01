@@ -11,6 +11,7 @@ import { Providers } from '@/context/providers';
 import { useAuth } from '@/context/auth-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Font from 'expo-font';
+import { BrandedSplash } from '@/components/common/BrandedSplash';
 import {
   registerForPushNotificationsAsync,
   addNotificationReceivedListener,
@@ -55,17 +56,19 @@ function RootLayoutContent() {
   const [hasSeenOnboarding, setHasSeenOnboarding] = useState<boolean | null>(null);
   const [checkingOnboarding, setCheckingOnboarding] = useState(true);
   const [fontsLoaded, setFontsLoaded] = useState(false);
+  const [showBrandedSplash, setShowBrandedSplash] = useState(true);
+  const hasNavigated = useRef(false);
   const notificationListener = useRef<Notifications.EventSubscription>();
   const responseListener = useRef<Notifications.EventSubscription>();
 
-  // Set status bar style
+  // Set status bar style — light during splash, dark after
   useEffect(() => {
-    StatusBar.setBarStyle('dark-content');
+    StatusBar.setBarStyle(showBrandedSplash ? 'light-content' : 'dark-content');
     if (Platform.OS === 'android') {
       StatusBar.setBackgroundColor('transparent');
       StatusBar.setTranslucent(true);
     }
-  }, []);
+  }, [showBrandedSplash]);
 
   // Register for push notifications when user is authenticated
   useEffect(() => {
@@ -135,38 +138,50 @@ function RootLayoutContent() {
 
   useEffect(() => {
     if (!isLoading && !checkingOnboarding && fontsLoaded) {
+      // Hide the native splash screen; our branded splash is showing on top
       SplashScreen.hideAsync();
+    }
+  }, [isLoading, checkingOnboarding, fontsLoaded]);
 
-      // Show onboarding for first-time users
+  // Navigate after branded splash finishes
+  const handleSplashFinish = useCallback(() => {
+    setShowBrandedSplash(false);
+    if (!hasNavigated.current) {
+      hasNavigated.current = true;
       if (hasSeenOnboarding === false) {
         router.replace('/(onboarding)/welcome');
       } else {
-        // Show tabs for returning users (explore is public)
         router.replace('/(tabs)');
       }
     }
-  }, [isLoading, checkingOnboarding, hasSeenOnboarding, fontsLoaded, router]);
+  }, [hasSeenOnboarding, router]);
 
-  if (isLoading || checkingOnboarding || !fontsLoaded) {
+  const isReady = !isLoading && !checkingOnboarding && fontsLoaded;
+
+  if (!isReady) {
+    // Still loading — show green background matching splash
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="#3A5C50" />
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#122F26' }}>
+        <ActivityIndicator size="large" color="#D9B168" />
       </View>
     );
   }
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="(onboarding)" options={{ animation: 'none' }} />
-      <Stack.Screen name="(auth)" options={{ animation: 'none' }} />
-      <Stack.Screen name="(tabs)" options={{ animation: 'none' }} />
-      <Stack.Screen name="host" options={{ animation: 'fade' }} />
-      <Stack.Screen name="reviews" options={{ animation: 'fade' }} />
-      <Stack.Screen name="booking" options={{ animation: 'slide_from_right' }} />
-      <Stack.Screen name="experiences" options={{ animation: 'slide_from_right' }} />
-      <Stack.Screen name="notifications" options={{ animation: 'slide_from_right' }} />
-      <Stack.Screen name="help" options={{ animation: 'slide_from_right' }} />
-    </Stack>
+    <>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(onboarding)" options={{ animation: 'none' }} />
+        <Stack.Screen name="(auth)" options={{ animation: 'none' }} />
+        <Stack.Screen name="(tabs)" options={{ animation: 'none' }} />
+        <Stack.Screen name="host" options={{ animation: 'fade' }} />
+        <Stack.Screen name="reviews" options={{ animation: 'fade' }} />
+        <Stack.Screen name="booking" options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="experiences" options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="notifications" options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="help" options={{ animation: 'slide_from_right' }} />
+      </Stack>
+      {showBrandedSplash && <BrandedSplash onFinish={handleSplashFinish} />}
+    </>
   );
 }
 
