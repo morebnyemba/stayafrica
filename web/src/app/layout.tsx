@@ -5,6 +5,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import { Providers } from '@/context/providers';
 import { AppShell } from '@/components/common/AppShell';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
+import { ServiceWorkerRegistrar } from '@/components/common/ServiceWorkerRegistrar';
 
 export const metadata: Metadata = {
   title: {
@@ -76,6 +77,7 @@ export default function RootLayout({
       <body className="antialiased bg-sand-100 text-primary-900">
         <ErrorBoundary>
           <Providers>
+            <ServiceWorkerRegistrar />
             <AppShell>{children}</AppShell>
           </Providers>
         </ErrorBoundary>

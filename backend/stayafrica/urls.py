@@ -12,6 +12,9 @@ urlpatterns = [
     path('api/health/', include('apps.health.urls')),
     path('ht/', include('health_check.urls')),  # django-health-check standard endpoint
     
+    # Prometheus Metrics
+    path('metrics/', include(('utils.metrics_urls', 'metrics'))),
+    
     # API Documentation
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
