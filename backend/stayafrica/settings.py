@@ -129,6 +129,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware',
     'utils.exception_handlers.RequestLoggingMiddleware',
+    'utils.api_versioning.APIVersionMiddleware',
 ]
 
 ROOT_URLCONF = 'stayafrica.urls'

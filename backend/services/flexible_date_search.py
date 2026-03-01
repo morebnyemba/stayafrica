@@ -210,5 +210,19 @@ class FlexibleDateSearch:
             'min_price': min(all_prices),
             'max_price': max(all_prices),
             'avg_price': sum(all_prices) / len(all_prices),
-            'currency': 'USD',  # TODO: Make this dynamic based on property currency
+            'currency': FlexibleDateSearch._get_dominant_currency(search_results),
         }
+    
+    @staticmethod
+    def _get_dominant_currency(search_results):
+        """Determine the most common currency from search results."""
+        from collections import Counter
+        currencies = []
+        for date_range in search_results.get('results', []):
+            for prop in date_range.get('properties', []):
+                currencies.append(prop.get('currency', 'USD'))
+        if not currencies:
+            from apps.admin_dashboard.models import SystemConfiguration
+            config = SystemConfiguration.get_config()
+            return config.default_currency
+        return Counter(currencies).most_common(1)[0][0]

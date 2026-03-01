@@ -160,32 +160,32 @@ export const adminApi = {
     return response.data;
   },
 
-  // Analytics - these endpoints don't exist yet, will return mock data for now
-  async getRevenueAnalytics(_params?: {
+  // Analytics
+  async getRevenueAnalytics(params?: {
     period?: 'daily' | 'weekly' | 'monthly' | 'yearly';
     start_date?: string;
     end_date?: string;
   }): Promise<any> {
-    // TODO: Backend needs to implement these endpoints
-    return { data: [] };
+    const response = await apiClient.get('/admin/stats/revenue_analytics/', { params });
+    return response.data;
   },
 
-  async getBookingAnalytics(_params?: {
+  async getBookingAnalytics(params?: {
     period?: 'daily' | 'weekly' | 'monthly' | 'yearly';
     start_date?: string;
     end_date?: string;
   }): Promise<any> {
-    // TODO: Backend needs to implement these endpoints
-    return { data: [] };
+    const response = await apiClient.get('/admin/stats/booking_analytics/', { params });
+    return response.data;
   },
 
-  async getUserAnalytics(_params?: {
+  async getUserAnalytics(params?: {
     period?: 'daily' | 'weekly' | 'monthly' | 'yearly';
     start_date?: string;
     end_date?: string;
   }): Promise<any> {
-    // TODO: Backend needs to implement these endpoints
-    return { data: [] };
+    const response = await apiClient.get('/admin/stats/user_analytics/', { params });
+    return response.data;
   },
 
   // Identity Verification / KYC Management

@@ -1,0 +1,100 @@
+groups:
+  - name: stayafrica-sla
+    rules:
+      # API availability
+      - alert: APIHighErrorRate
+        expr: rate(stayafrica_http_errors_total[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High API error rate ({{ $value | humanizePercentage }})"
+          description: "More than 5% of requests are failing."
+
+      # Response time SLA
+      - alert: APIHighLatency
+        expr: histogram_quantile(0.95, rate(stayafrica_request_duration_seconds_bucket[5m])) > 2
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "API p95 latency above 2s ({{ $value }}s)"
+          description: "95th percentile response time exceeds SLA target."
+
+      # Payment failures
+      - alert: PaymentFailureSpike
+        expr: rate(stayafrica_payment_failures_total[15m]) > 0.1
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Payment failure rate spike"
+          description: "Payment failures exceeding threshold."
+
+      # Database connection issues
+      - alert: DatabaseConnectionPoolExhausted
+        expr: stayafrica_db_connections_active / stayafrica_db_connections_max > 0.9
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Database connection pool nearly exhausted"
+
+      # Celery queue depth
+      - alert: CeleryQueueBacklog
+        expr: stayafrica_celery_queue_length > 1000
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Celery task queue backlog ({{ $value }} tasks)"
+
+      # Memory usage
+      - alert: HighMemoryUsage
+        expr: process_resident_memory_bytes / 1024 / 1024 > 512
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Backend memory usage above 512MB"
+
+  - name: stayafrica-uptime
+    rules:
+      # Backend down
+      - alert: BackendDown
+        expr: up{job="stayafrica-backend"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Backend service is down"
+          description: "StayAfrica backend has been unreachable for 1 minute."
+
+      # Erlang messaging down
+      - alert: MessagingServiceDown
+        expr: up{job="erlang-messaging"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Erlang messaging service is down"
+
+  - name: stayafrica-business
+    rules:
+      # No bookings for extended period (business hours)
+      - alert: NoBookingsReceived
+        expr: increase(stayafrica_bookings_created_total[6h]) == 0
+        for: 1h
+        labels:
+          severity: info
+        annotations:
+          summary: "No new bookings in 6 hours"
+
+      # Fraud detection alerts
+      - alert: HighFraudRiskBookings
+        expr: rate(stayafrica_fraud_high_risk_total[1h]) > 5
+        for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High number of fraud-flagged bookings"

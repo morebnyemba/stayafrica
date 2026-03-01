@@ -1,0 +1,31 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  - "alerts.yml"
+
+scrape_configs:
+  - job_name: 'stayafrica-backend'
+    metrics_path: '/metrics/'
+    static_configs:
+      - targets: ['backend:8000']
+        labels:
+          service: 'backend'
+
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'nginx'
+    static_configs:
+      - targets: ['nginx:80']
+        labels:
+          service: 'nginx'
+
+  - job_name: 'erlang-messaging'
+    metrics_path: '/health'
+    static_configs:
+      - targets: ['erlang-messaging:8765']
+        labels:
+          service: 'erlang-messaging'

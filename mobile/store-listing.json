@@ -1,0 +1,115 @@
+{
+  "app_name": "StayAfrica",
+  "short_description": "Book unique stays across Africa - homes, lodges, and experiences",
+  "full_description": "StayAfrica is your gateway to discovering and booking unique accommodations across Africa. From cozy city apartments to safari lodges, beach houses to mountain retreats — find your perfect stay in Zimbabwe, South Africa, Botswana, Namibia, and Zambia.\n\n✨ KEY FEATURES:\n• Browse thousands of verified properties across 5 African countries\n• Book instantly with secure payments (Paynow, PayFast, Stripe, PayPal & more)\n• Message hosts directly for personalized trip planning\n• Save favorites and create wishlists\n• Offline access — browse saved properties without internet\n• Multi-currency support (USD, ZAR, BWP, NAD, ZMW)\n• Host your own property and earn income\n\n🏠 FOR HOSTS:\n• List your property in minutes\n• Manage bookings, calendars, and pricing\n• Receive payouts directly to your bank account\n• Access analytics and performance insights\n\n🔒 TRUST & SAFETY:\n• Verified host profiles and ID verification\n• Secure payment processing\n• 24/7 customer support\n• Review system for accountability\n\n🌍 SUPPORTED COUNTRIES:\n• Zimbabwe\n• South Africa\n• Botswana\n• Namibia\n• Zambia\n\nWhether you're a traveler exploring Africa or a property owner wanting to share your space, StayAfrica connects you to unforgettable experiences across the continent.",
+  "category": "Travel & Local",
+  "content_rating": "Everyone",
+  "keywords": [
+    "accommodation",
+    "booking",
+    "travel",
+    "Africa",
+    "vacation rental",
+    "holiday homes",
+    "safari lodge",
+    "Zimbabwe",
+    "South Africa",
+    "Botswana",
+    "Namibia",
+    "Zambia",
+    "Airbnb alternative",
+    "African travel",
+    "short-term rental"
+  ],
+  "privacy_policy_url": "https://stayafrica.app/privacy",
+  "terms_of_service_url": "https://stayafrica.app/terms",
+  "support_email": "support@stayafrica.app",
+  "support_url": "https://stayafrica.app/support",
+  "screenshots": {
+    "phone": [
+      "screenshots/phone-1-home.png",
+      "screenshots/phone-2-search.png",
+      "screenshots/phone-3-property.png",
+      "screenshots/phone-4-booking.png",
+      "screenshots/phone-5-payment.png",
+      "screenshots/phone-6-messages.png"
+    ],
+    "tablet": [
+      "screenshots/tablet-1-home.png",
+      "screenshots/tablet-2-property.png"
+    ]
+  },
+  "apple": {
+    "primary_category": "Travel",
+    "secondary_category": "Lifestyle",
+    "age_rating": "4+",
+    "privacy_labels": {
+      "data_collected": [
+        {
+          "type": "Contact Info",
+          "purpose": "App Functionality",
+          "linked_to_identity": true,
+          "fields": ["Name", "Email Address", "Phone Number"]
+        },
+        {
+          "type": "Location",
+          "purpose": "App Functionality",
+          "linked_to_identity": true,
+          "fields": ["Precise Location", "Coarse Location"]
+        },
+        {
+          "type": "Financial Info",
+          "purpose": "App Functionality",
+          "linked_to_identity": true,
+          "fields": ["Payment Info"]
+        },
+        {
+          "type": "User Content",
+          "purpose": "App Functionality",
+          "linked_to_identity": true,
+          "fields": ["Photos or Videos", "Customer Support"]
+        },
+        {
+          "type": "Identifiers",
+          "purpose": "App Functionality",
+          "linked_to_identity": true,
+          "fields": ["User ID"]
+        },
+        {
+          "type": "Usage Data",
+          "purpose": "Analytics",
+          "linked_to_identity": false,
+          "fields": ["Product Interaction"]
+        }
+      ],
+      "data_not_collected": ["Health", "Fitness", "Sensitive Info", "Browsing History"]
+    }
+  },
+  "google_play": {
+    "category": "TRAVEL_AND_LOCAL",
+    "content_rating_questionnaire": {
+      "violence": false,
+      "sexual_content": false,
+      "language": false,
+      "controlled_substance": false,
+      "personal_info_sharing": true,
+      "location_sharing": true,
+      "financial_transactions": true
+    },
+    "data_safety": {
+      "data_collected": [
+        { "type": "Personal info", "purpose": "Account management, App functionality" },
+        { "type": "Financial info", "purpose": "Payments" },
+        { "type": "Location", "purpose": "App functionality" },
+        { "type": "Photos and videos", "purpose": "App functionality" },
+        { "type": "App activity", "purpose": "Analytics" }
+      ],
+      "data_shared": [],
+      "security_practices": {
+        "data_encrypted_in_transit": true,
+        "data_deletion_request": true,
+        "independent_security_review": false
+      }
+    }
+  }
+}

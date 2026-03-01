@@ -1,31 +1,99 @@
 """
-Notification tasks for push notifications and alerts
+Notification tasks for push notifications and alerts.
+Supports Expo Push Notifications for mobile and stores in-app notifications.
 """
 from celery import shared_task
 import logging
+import json
 
 logger = logging.getLogger(__name__)
 
 
-@shared_task
-def send_push_notification(user_id, title, message, data=None):
+def _get_expo_push_tokens(user_id):
+    """Retrieve Expo push tokens for a user's registered devices."""
+    from apps.users.models import User
+    try:
+        user = User.objects.get(id=user_id)
+        tokens = getattr(user, 'device_tokens', None)
+        if tokens and isinstance(tokens, list):
+            return [t for t in tokens if t.startswith('ExponentPushToken')]
+        return []
+    except Exception:
+        return []
+
+
+def _send_expo_push(tokens, title, body, data=None):
+    """Send push notification via Expo Push API."""
+    import requests
+    
+    messages = [
+        {
+            'to': token,
+            'sound': 'default',
+            'title': title,
+            'body': body,
+            'data': data or {},
+        }
+        for token in tokens
+    ]
+    
+    try:
+        response = requests.post(
+            'https://exp.host/--/api/v2/push/send',
+            json=messages,
+            headers={
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            timeout=10,
+        )
+        result = response.json()
+        logger.info(f"Expo push response: {response.status_code}")
+        return result
+    except requests.RequestException as e:
+        logger.error(f"Expo push failed: {e}")
+        return None
+
+
+def _create_in_app_notification(user_id, title, message, data=None):
+    """Store notification in database for in-app display."""
+    from apps.notifications.models import Notification
+    try:
+        Notification.objects.create(
+            recipient_id=user_id,
+            title=title,
+            message=message,
+            notification_type=data.get('type', 'general') if data else 'general',
+            data=data or {},
+        )
+    except Exception as e:
+        logger.error(f"Failed to create in-app notification: {e}")
+
+
+@shared_task(bind=True, max_retries=3, default_retry_delay=60)
+def send_push_notification(self, user_id, title, message, data=None):
     """
-    Send push notification to user's mobile device
-    Placeholder for future implementation with Firebase/Expo
+    Send push notification to user's mobile device via Expo Push API.
+    Falls back to in-app notification if no device tokens found.
     """
     logger.info(f"Push notification queued for user {user_id}: {title}")
     
-    # TODO: Implement with Firebase Cloud Messaging or Expo Push Notifications
-    # from firebase_admin import messaging
-    # message = messaging.Message(
-    #     notification=messaging.Notification(
-    #         title=title,
-    #         body=message,
-    #     ),
-    #     data=data or {},
-    #     token=user_device_token,
-    # )
-    # response = messaging.send(message)
+    # Always create in-app notification
+    _create_in_app_notification(user_id, title, message, data)
+    
+    # Try Expo push
+    tokens = _get_expo_push_tokens(user_id)
+    if tokens:
+        try:
+            result = _send_expo_push(tokens, title, message, data)
+            if result is None:
+                raise Exception("Expo push returned None")
+            logger.info(f"Push sent to {len(tokens)} devices for user {user_id}")
+        except Exception as exc:
+            logger.warning(f"Push notification retry for user {user_id}: {exc}")
+            self.retry(exc=exc)
+    else:
+        logger.info(f"No device tokens for user {user_id}, in-app notification created")
     
     return True
 

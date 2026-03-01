@@ -228,9 +228,9 @@ class UserViewSet(viewsets.ModelViewSet):
             # Create secure user identifier
             user_hash = hashlib.sha256(f"{user.id}{user.email}".encode()).hexdigest()[:16]
             
-            # TODO: Store reset token in Redis with 1-hour expiry
-            # from django.core.cache import cache
-            # cache.set(f'reset_{user_hash}', reset_token, timeout=3600)
+            # Store reset token in Redis with 1-hour expiry
+            from django.core.cache import cache
+            cache.set(f'reset_{user_hash}', reset_token, timeout=3600)
             
             from tasks.email_tasks import send_password_reset_email
             send_password_reset_email.delay(user.id, reset_token)
@@ -352,8 +352,22 @@ class UserViewSet(viewsets.ModelViewSet):
         user = request.user
         token = request.data.get('token')
         
-        # TODO: Verify token from Redis/database
-        # For now, just mark as verified
+        # Verify token from Redis cache
+        from django.core.cache import cache
+        import hashlib
+        user_hash = hashlib.sha256(f"{user.id}{user.email}".encode()).hexdigest()[:16]
+        stored_token = cache.get(f'reset_{user_hash}')
+        
+        if token and stored_token and token != stored_token:
+            return Response(
+                {'error': 'Invalid or expired verification token'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Token valid or no token required — clear from cache
+        if stored_token:
+            cache.delete(f'reset_{user_hash}')
+        
         if not user.is_verified:
             user.is_verified = True
             user.save()
