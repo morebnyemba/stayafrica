@@ -415,58 +415,62 @@ export function Navigation() {
           </div>
         </div>
 
-        {/* ── Mobile menu overlay + drawer ────────────────────────────── */}
-        {/* Backdrop */}
-        <div
-          className={cn(
-            'fixed inset-0 bg-black/40 z-[55] md:hidden transition-opacity duration-300',
-            mobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
-          )}
-          onClick={closeMobile}
-          aria-hidden
-        />
+      </nav>
 
-        {/* Slide-in panel */}
-        <div
-          className={cn(
-            'fixed top-0 right-0 bottom-0 w-[85%] max-w-sm bg-primary-800 z-[60] md:hidden transition-transform duration-300 ease-out overflow-y-auto',
-            mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
-          )}
-        >
-          {/* Mobile header */}
-          <div className="flex items-center justify-between px-4 py-4 border-b border-primary-700">
-            {isAuthenticated && user ? (
-              <div className="flex items-center gap-3 min-w-0">
-                {user.profile_picture ? (
-                  <img
-                    src={user.profile_picture}
-                    alt=""
-                    className="w-10 h-10 rounded-full object-cover ring-2 ring-sand-300/30 flex-shrink-0"
-                  />
-                ) : (
-                  <span className="w-10 h-10 rounded-full bg-secondary-500 text-primary-900 flex items-center justify-center text-sm font-bold flex-shrink-0">
-                    {initials}
-                  </span>
-                )}
-                <div className="min-w-0">
-                  <p className="text-sand-50 font-semibold text-sm truncate">
-                    {user.first_name} {user.last_name}
-                  </p>
-                  {isHost && <ModeBadge mode={activeProfile as 'guest' | 'host'} />}
-                </div>
+      {/* ── Mobile menu overlay + drawer (OUTSIDE nav to avoid backdrop-blur containing block) ── */}
+      {/* Backdrop */}
+      <div
+        className={cn(
+          'fixed inset-0 bg-black/40 z-[55] md:hidden transition-opacity duration-300',
+          mobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        )}
+        onClick={closeMobile}
+        aria-hidden
+      />
+
+      {/* Slide-in panel */}
+      <div
+        className={cn(
+          'fixed top-0 right-0 bottom-0 w-[85%] max-w-sm bg-primary-800 z-[60] md:hidden transition-transform duration-300 ease-out flex flex-col',
+          mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
+        )}
+      >
+        {/* Mobile header */}
+        <div className="flex items-center justify-between px-4 py-4 border-b border-primary-700 flex-shrink-0">
+          {isAuthenticated && user ? (
+            <div className="flex items-center gap-3 min-w-0">
+              {user.profile_picture ? (
+                <img
+                  src={user.profile_picture}
+                  alt=""
+                  className="w-10 h-10 rounded-full object-cover ring-2 ring-sand-300/30 flex-shrink-0"
+                />
+              ) : (
+                <span className="w-10 h-10 rounded-full bg-secondary-500 text-primary-900 flex items-center justify-center text-sm font-bold flex-shrink-0">
+                  {initials}
+                </span>
+              )}
+              <div className="min-w-0">
+                <p className="text-sand-50 font-semibold text-sm truncate">
+                  {user.first_name} {user.last_name}
+                </p>
+                {isHost && <ModeBadge mode={activeProfile as 'guest' | 'host'} />}
               </div>
-            ) : (
-              <span className="text-sand-100 font-semibold">Menu</span>
-            )}
-            <button
-              onClick={closeMobile}
-              className="p-2 rounded-lg text-sand-300 hover:text-sand-50 hover:bg-primary-700/60 transition"
-              aria-label="Close menu"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
+            </div>
+          ) : (
+            <span className="text-sand-100 font-semibold">Menu</span>
+          )}
+          <button
+            onClick={closeMobile}
+            className="p-2 rounded-lg text-sand-300 hover:text-sand-50 hover:bg-primary-700/60 transition"
+            aria-label="Close menu"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
 
+        {/* Scrollable content area */}
+        <div className="flex-1 overflow-y-auto overscroll-contain">
           {/* Mobile nav links */}
           <div className="py-3 space-y-0.5">
             <NavLink href="/explore" pathname={pathname} icon={Compass} onClick={closeMobile} mobile>
@@ -531,36 +535,36 @@ export function Navigation() {
               )}
             </div>
           )}
-
-          {/* Mobile bottom – locale + auth actions */}
-          <div className="border-t border-primary-700 py-4 px-4 space-y-2 mt-auto">
-            <div className="flex items-center gap-2 px-4 py-2 text-sand-200 text-sm">
-              <span>Language:</span>
-              <LocaleSwitcher />
-            </div>
-            {isAuthenticated ? (
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-3 w-full text-left text-red-400 hover:bg-red-500/10 px-4 py-3 rounded-xl transition"
-              >
-                <LogOut className="w-5 h-5" />
-                Sign out
-              </button>
-            ) : (
-              <>
-                <Link href="/login" onClick={closeMobile} className="block">
-                  <Button variant="secondary" fullWidth>
-                    Login
-                  </Button>
-                </Link>
-                <Link href="/register" onClick={closeMobile} className="block">
-                  <Button fullWidth>Sign Up</Button>
-                </Link>
-              </>
-            )}
-          </div>
         </div>
-      </nav>
+
+        {/* Mobile bottom – locale + auth actions (pinned to bottom) */}
+        <div className="border-t border-primary-700 py-4 px-4 space-y-2 flex-shrink-0">
+          <div className="flex items-center gap-2 px-4 py-2 text-sand-200 text-sm">
+            <span>Language:</span>
+            <LocaleSwitcher />
+          </div>
+          {isAuthenticated ? (
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-3 w-full text-left text-red-400 hover:bg-red-500/10 px-4 py-3 rounded-xl transition"
+            >
+              <LogOut className="w-5 h-5" />
+              Sign out
+            </button>
+          ) : (
+            <>
+              <Link href="/login" onClick={closeMobile} className="block">
+                <Button variant="secondary" fullWidth>
+                  Login
+                </Button>
+              </Link>
+              <Link href="/register" onClick={closeMobile} className="block">
+                <Button fullWidth>Sign Up</Button>
+              </Link>
+            </>
+          )}
+        </div>
+      </div>
     </>
   );
 }
