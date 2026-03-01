@@ -80,11 +80,13 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Image requests: Cache First
+  // Image requests: Cache First (same-origin only; cross-origin images
+  // are handled by the browser via img-src CSP and don't need SW caching)
   if (
     request.destination === 'image' ||
     url.pathname.match(/\.(png|jpg|jpeg|webp|svg|gif|ico)$/)
   ) {
+    if (url.origin !== self.location.origin) return;
     event.respondWith(cacheFirst(request, IMAGE_CACHE, IMAGE_CACHE_LIMIT));
     return;
   }
@@ -103,6 +105,9 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(networkFirstWithFallback(request));
     return;
   }
+
+  // Skip remaining cross-origin requests
+  if (url.origin !== self.location.origin) return;
 
   // Everything else: Network First
   event.respondWith(networkFirst(request, DYNAMIC_CACHE));

@@ -238,6 +238,7 @@ export function HomeProperties() {
               </p>
               <div>
                 <Button
+                  variant="secondary"
                   onClick={handleHostUpgrade}
                   disabled={hostLoading}
                   className="inline-flex items-center gap-2 text-base sm:text-lg"
