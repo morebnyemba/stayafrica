@@ -6,6 +6,7 @@ import { MapPin, Star, Home, Users, Building2, Trees, Shield, UtensilsCrossed, T
 import { Button } from '@/components/ui';
 import { PropertyListSkeleton } from './property-card-skeleton';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useAuth } from '@/store/auth-store';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -71,10 +72,12 @@ export function HomeProperties() {
               className="group cursor-pointer"
             >
               <div className="relative h-40 sm:h-48 md:h-64 lg:h-72 rounded-lg sm:rounded-2xl overflow-hidden mb-2 sm:mb-3">
-                <img
+                <Image
                   src={location.image}
                   alt={location.name}
-                  className="w-full h-full object-cover transition duration-300 group-hover:scale-105"
+                  fill
+                  sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"
+                  className="object-cover transition duration-300 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-primary-900/70 via-primary-900/20 to-transparent" />
                 <div className="absolute bottom-2 sm:bottom-4 left-2 sm:left-4 text-white">
@@ -223,10 +226,12 @@ export function HomeProperties() {
         <div className="card overflow-hidden">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
             <div className="relative h-40 sm:h-64 md:h-auto min-h-48">
-              <img
+              <Image
                 src="https://images.unsplash.com/photo-1560185007-cde436f6a4d0?w=800"
                 alt="Become a host"
-                className="w-full h-full object-cover"
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
+                className="object-cover"
               />
             </div>
             <div className="p-6 sm:p-8 md:p-12 flex flex-col justify-center bg-gradient-to-br from-primary-800 to-primary-700 text-sand-50">

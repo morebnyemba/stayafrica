@@ -419,7 +419,7 @@ export function Navigation() {
         {/* Backdrop */}
         <div
           className={cn(
-            'fixed inset-0 bg-black/40 z-40 md:hidden transition-opacity duration-300',
+            'fixed inset-0 bg-black/40 z-[55] md:hidden transition-opacity duration-300',
             mobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
           )}
           onClick={closeMobile}
@@ -429,7 +429,7 @@ export function Navigation() {
         {/* Slide-in panel */}
         <div
           className={cn(
-            'fixed top-0 right-0 bottom-0 w-[85%] max-w-sm bg-primary-800 z-50 md:hidden transition-transform duration-300 ease-out overflow-y-auto',
+            'fixed top-0 right-0 bottom-0 w-[85%] max-w-sm bg-primary-800 z-[60] md:hidden transition-transform duration-300 ease-out overflow-y-auto',
             mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
           )}
         >

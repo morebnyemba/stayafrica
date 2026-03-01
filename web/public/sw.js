@@ -9,7 +9,7 @@
  * - Offline Fallback: Custom offline page
  */
 
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v2';
 const STATIC_CACHE = `stayafrica-static-${CACHE_VERSION}`;
 const DYNAMIC_CACHE = `stayafrica-dynamic-${CACHE_VERSION}`;
 const IMAGE_CACHE = `stayafrica-images-${CACHE_VERSION}`;
