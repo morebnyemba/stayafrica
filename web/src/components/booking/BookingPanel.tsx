@@ -172,7 +172,7 @@ export const BookingPanel: React.FC<BookingPanelProps> = ({
               placeholderText="Add date"
               disabled={!checkInDate}
               className={`w-full h-10 rounded-lg border-2 border-neutral-300 dark:border-neutral-600 bg-white dark:bg-primary-800 pl-10 pr-4 py-2 text-sm text-neutral-900 dark:text-neutral-100 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 ${!checkInDate ? 'opacity-50 cursor-not-allowed' : ''}`}
-              aria-invalid={showMinStayError ? true : undefined}
+              aria-invalid={showMinStayError ? "true" : undefined}
               aria-describedby={showMinStayError ? minStayErrorId : undefined}
             />
           </div>
