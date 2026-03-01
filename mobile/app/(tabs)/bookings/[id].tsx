@@ -233,7 +233,7 @@ export default function BookingDetailScreen() {
             {/* Actions */}
             <View className="space-y-3">
               {/* Payment button for confirmed bookings */}
-              {booking.status === 'confirmed' && (
+              {booking.status === 'confirmed' && booking.payment_status !== 'success' && (
                 <TouchableOpacity
                   onPress={() => router.push({
                     pathname: '/booking/payment',

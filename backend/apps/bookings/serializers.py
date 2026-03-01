@@ -9,6 +9,7 @@ class BookingSerializer(serializers.ModelSerializer):
     guest_first_name = serializers.CharField(source='guest.first_name', read_only=True)
     guest_last_name = serializers.CharField(source='guest.last_name', read_only=True)
     nights = serializers.IntegerField(read_only=True)
+    payment_status = serializers.SerializerMethodField()
     
     class Meta:
         model = Booking
@@ -17,6 +18,12 @@ class BookingSerializer(serializers.ModelSerializer):
             'rental_property', 'property', 'property_title',
             'check_in', 'check_out', 'number_of_guests', 'nights', 'nightly_total', 'service_fee',
             'commission_fee', 'cleaning_fee', 'taxes', 'grand_total', 'currency', 'status',
-            'special_requests', 'created_at', 'updated_at'
+            'payment_status', 'special_requests', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'booking_ref', 'guest', 'nightly_total', 'service_fee', 'commission_fee', 'grand_total', 'currency', 'created_at', 'updated_at']
+
+    def get_payment_status(self, obj):
+        try:
+            return obj.payment.status
+        except Exception:
+            return None

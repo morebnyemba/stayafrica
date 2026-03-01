@@ -298,7 +298,8 @@ export function BookingContent() {
                       <a href={`/bookings/${booking.id}`} className="inline-block">
                         <Button variant="secondary" size="sm">View Details</Button>
                       </a>
-                      {['pending', 'confirmed', 'PENDING', 'CONFIRMED'].includes(booking.status) && (
+                      {['pending', 'confirmed', 'PENDING', 'CONFIRMED'].includes(booking.status) &&
+                        booking.payment_status !== 'success' && (
                         <a href={`/booking/payment?bookingId=${booking.id}`} className="inline-block">
                           <Button size="sm">Pay Now</Button>
                         </a>

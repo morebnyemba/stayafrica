@@ -201,7 +201,7 @@ export default function BookingsScreen() {
             </View>
 
             {/* Quick Actions */}
-            {booking.status === 'confirmed' && (
+            {booking.status === 'confirmed' && (booking as any).payment_status !== 'success' && (
               <View className="flex-row gap-2 pt-2">
                 <TouchableOpacity
                   onPress={(e) => {

@@ -1,11 +1,16 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/store/auth-store';
 import { useFeeConfiguration, calculateBookingCost } from '@/hooks/use-fees';
-import { Star, AlertCircle } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { apiClient } from '@/services/api-client';
+import { Star, AlertCircle, Calendar } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { format, differenceInDays, addDays } from 'date-fns';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 
 interface BookingCardProps {
   property?: {
@@ -21,23 +26,63 @@ interface BookingCardProps {
 export function BookingCard({ property }: BookingCardProps) {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
-  const [checkIn, setCheckIn] = useState<string>('');
-  const [checkOut, setCheckOut] = useState<string>('');
+  const [checkInDate, setCheckInDate] = useState<Date | null>(null);
+  const [checkOutDate, setCheckOutDate] = useState<Date | null>(null);
   const [guests, setGuests] = useState(1);
 
   // Fetch fee configuration
   const { data: feeConfig } = useFeeConfiguration();
 
+  // Fetch unavailable dates from backend
+  const { data: unavailableDatesData } = useQuery({
+    queryKey: ['unavailable-dates', property?.id],
+    queryFn: async () => {
+      const response = await apiClient.getUnavailableDates(property!.id);
+      return response.data;
+    },
+    enabled: !!property?.id,
+  });
+  const unavailableDates: Set<string> = useMemo(
+    () => new Set(unavailableDatesData?.unavailable_dates || []),
+    [unavailableDatesData]
+  );
+
+  // Convert to Date objects for react-datepicker excludeDates
+  const excludedDates = useMemo(() => {
+    return [...unavailableDates].map(dateStr => {
+      const [year, month, day] = dateStr.split('-').map(Number);
+      return new Date(year, month - 1, day);
+    });
+  }, [unavailableDates]);
+
+  // Day class name for red highlighting of booked dates
+  const getDayClassName = (date: Date) => {
+    const dateStr = format(date, 'yyyy-MM-dd');
+    return unavailableDates.has(dateStr) ? 'booked-date' : '';
+  };
+
+  // Check if a date range overlaps with any unavailable dates
+  const hasUnavailableDatesInRange = (start: Date, end: Date) => {
+    let current = new Date(start);
+    while (current < end) {
+      if (unavailableDates.has(format(current, 'yyyy-MM-dd'))) return true;
+      current = addDays(current, 1);
+    }
+    return false;
+  };
+
   if (!property) {
     return null;
   }
 
-  const nights = checkIn && checkOut ? Math.ceil((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / (1000 * 60 * 60 * 24)) : 0;
+  const nights = checkInDate && checkOutDate ? differenceInDays(checkOutDate, checkInDate) : 0;
   
   // Calculate costs using the fee configuration
   const costs = feeConfig && nights > 0
     ? calculateBookingCost(property.price_per_night, nights, feeConfig, property.cleaning_fee)
     : { basePrice: 0, serviceFee: 0, commissionFee: 0, commissionRate: 0, cleaningFee: 0, total: 0 };
+
+  const hasDateConflict = checkInDate && checkOutDate && hasUnavailableDatesInRange(checkInDate, checkOutDate);
 
   const handleBooking = () => {
     if (!isAuthenticated) {
@@ -46,7 +91,7 @@ export function BookingCard({ property }: BookingCardProps) {
       return;
     }
 
-    if (!checkIn || !checkOut) {
+    if (!checkInDate || !checkOutDate) {
       toast.error('Please select check-in and check-out dates');
       return;
     }
@@ -55,6 +100,14 @@ export function BookingCard({ property }: BookingCardProps) {
       toast.error('Check-out date must be after check-in date');
       return;
     }
+
+    if (hasDateConflict) {
+      toast.error('Some dates in your selection are already booked');
+      return;
+    }
+
+    const checkIn = format(checkInDate, 'yyyy-MM-dd');
+    const checkOut = format(checkOutDate, 'yyyy-MM-dd');
 
     // Navigate to booking confirmation page
     router.push(
@@ -90,24 +143,55 @@ export function BookingCard({ property }: BookingCardProps) {
           <label className="block text-sm font-medium text-primary-900 dark:text-sand-50 mb-2">
             Check-in
           </label>
-          <input
-            type="date"
-            value={checkIn}
-            onChange={(e) => setCheckIn(e.target.value)}
-            className="w-full px-3 py-2 border border-primary-200 dark:border-primary-600 rounded-lg bg-sand-50 dark:bg-primary-700 text-primary-900 dark:text-sand-100 focus:ring-2 focus:ring-secondary-500 focus:border-transparent"
-          />
+          <div className="relative">
+            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary-400 dark:text-sand-500 z-10 pointer-events-none" />
+            <DatePicker
+              selected={checkInDate}
+              onChange={(date: Date | null) => {
+                setCheckInDate(date);
+                if (checkOutDate && date && date >= checkOutDate) {
+                  setCheckOutDate(null);
+                }
+              }}
+              minDate={new Date()}
+              excludeDates={excludedDates}
+              dayClassName={getDayClassName}
+              dateFormat="MMM dd, yyyy"
+              placeholderText="Add date"
+              className="w-full px-3 py-2 pl-10 border border-primary-200 dark:border-primary-600 rounded-lg bg-sand-50 dark:bg-primary-700 text-primary-900 dark:text-sand-100 focus:ring-2 focus:ring-secondary-500 focus:border-transparent text-sm"
+            />
+          </div>
         </div>
         <div>
           <label className="block text-sm font-medium text-primary-900 dark:text-sand-50 mb-2">
             Check-out
           </label>
-          <input
-            type="date"
-            value={checkOut}
-            onChange={(e) => setCheckOut(e.target.value)}
-            className="w-full px-3 py-2 border border-primary-200 dark:border-primary-600 rounded-lg bg-sand-50 dark:bg-primary-700 text-primary-900 dark:text-sand-100 focus:ring-2 focus:ring-secondary-500 focus:border-transparent"
-          />
+          <div className="relative">
+            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary-400 dark:text-sand-500 z-10 pointer-events-none" />
+            <DatePicker
+              selected={checkOutDate}
+              onChange={(date: Date | null) => setCheckOutDate(date)}
+              minDate={checkInDate ? addDays(checkInDate, 1) : new Date()}
+              excludeDates={excludedDates}
+              dayClassName={getDayClassName}
+              dateFormat="MMM dd, yyyy"
+              placeholderText="Add date"
+              disabled={!checkInDate}
+              className={`w-full px-3 py-2 pl-10 border border-primary-200 dark:border-primary-600 rounded-lg bg-sand-50 dark:bg-primary-700 text-primary-900 dark:text-sand-100 focus:ring-2 focus:ring-secondary-500 focus:border-transparent text-sm ${!checkInDate ? 'opacity-50 cursor-not-allowed' : ''}`}
+            />
+          </div>
         </div>
+        {hasDateConflict && (
+          <p className="text-sm text-red-600 dark:text-red-400">
+            Some dates in your selection are already booked. Please choose different dates.
+          </p>
+        )}
+        {unavailableDates.size > 0 && (
+          <div className="flex items-center gap-2 text-xs text-primary-500 dark:text-sand-400">
+            <span className="inline-block w-3 h-3 rounded-full bg-red-100 border border-red-300" />
+            <span>Already booked</span>
+          </div>
+        )}
         <div>
           <label className="block text-sm font-medium text-primary-900 dark:text-sand-50 mb-2">
             Guests
