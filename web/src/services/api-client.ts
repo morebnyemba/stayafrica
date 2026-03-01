@@ -87,6 +87,13 @@ class ApiClient {
     return this.getPropertyById(safeId);
   }
 
+  async getUnavailableDates(propertyId: string, start?: string, end?: string) {
+    const safeId = this.assertId(propertyId, 'Property ID');
+    return this.client.get(`/properties/${safeId}/unavailable-dates/`, {
+      params: { start, end },
+    });
+  }
+
   async getHostPropertyById(id: string) {
     const safeId = this.assertId(id, 'Property ID');
     return this.client.get(`/properties/${safeId}/host_detail/`);

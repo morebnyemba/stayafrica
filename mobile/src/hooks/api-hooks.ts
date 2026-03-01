@@ -521,6 +521,14 @@ export function useFeeConfiguration() {
   });
 }
 
+export function useUnavailableDates(propertyId: string) {
+  return useQuery<{ unavailable_dates: string[] }>({
+    queryKey: ['unavailable-dates', propertyId],
+    queryFn: () => apiClient.getUnavailableDates(propertyId),
+    enabled: !!propertyId,
+  });
+}
+
 export function calculateBookingCost(
   pricePerNight: number,
   nights: number,

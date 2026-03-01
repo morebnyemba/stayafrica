@@ -310,7 +310,7 @@ export default function BookingDetailScreen() {
                     </View>
                   </TouchableOpacity>
 
-                  {booking.property.location?.latitude && booking.property.location?.longitude && (
+                  {(booking.status === 'confirmed' || booking.status === 'CONFIRMED') && booking.property.location?.latitude && booking.property.location?.longitude && (
                     <TouchableOpacity
                       onPress={() => {
                         const { latitude, longitude } = booking.property.location;

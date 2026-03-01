@@ -5,13 +5,16 @@
  */
 'use client';
 
-import React, { useState, useId } from 'react';
+import React, { useState, useId, useCallback, useMemo } from 'react';
 import { Card, CardHeader, CardBody, CardFooter } from '@/components/ui/Card';
-import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { AlertCircle, Check, Users, Calendar } from 'lucide-react';
 import { format, differenceInDays, addDays } from 'date-fns';
+import { useQuery } from '@tanstack/react-query';
+import { apiClient } from '@/services/api-client';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 
 interface BookingPanelProps {
   propertyId: string;
@@ -47,9 +50,39 @@ export const BookingPanel: React.FC<BookingPanelProps> = ({
   const guestsId = useId();
   const minStayErrorId = useId();
 
-  // Get today's date for minimum date constraint
-  const today = format(new Date(), 'yyyy-MM-dd');
-  const minCheckoutDate = checkInDate ? format(addDays(checkInDate, 1), 'yyyy-MM-dd') : today;
+  // Fetch unavailable dates from backend
+  const { data: unavailableDatesData } = useQuery({
+    queryKey: ['unavailable-dates', propertyId],
+    queryFn: async () => {
+      const response = await apiClient.getUnavailableDates(propertyId);
+      return response.data;
+    },
+  });
+  const unavailableDates: Set<string> = new Set(unavailableDatesData?.unavailable_dates || []);
+
+  // Check if a date range overlaps with any unavailable dates
+  const hasUnavailableDatesInRange = useCallback((start: Date, end: Date) => {
+    let current = new Date(start);
+    while (current < end) {
+      if (unavailableDates.has(format(current, 'yyyy-MM-dd'))) return true;
+      current = addDays(current, 1);
+    }
+    return false;
+  }, [unavailableDates]);
+
+  // Convert unavailable date strings to Date objects for react-datepicker
+  const excludedDates = useMemo(() => {
+    return [...unavailableDates].map(dateStr => {
+      const [year, month, day] = dateStr.split('-').map(Number);
+      return new Date(year, month - 1, day);
+    });
+  }, [unavailableDates]);
+
+  // Day class name for red highlighting of booked dates
+  const getDayClassName = useCallback((date: Date) => {
+    const dateStr = format(date, 'yyyy-MM-dd');
+    return unavailableDates.has(dateStr) ? 'booked-date' : '';
+  }, [unavailableDates]);
 
   // Calculate pricing
   const nights =
@@ -63,17 +96,19 @@ export const BookingPanel: React.FC<BookingPanelProps> = ({
   const hasSelectedDates = checkInDate && checkOutDate;
   const meetsMinStay = nights >= minStay;
   const showMinStayError = hasSelectedDates && !meetsMinStay;
+  const hasDateConflict = hasSelectedDates && hasUnavailableDatesInRange(checkInDate!, checkOutDate!);
 
   const handleBook = () => {
-    if (checkInDate && checkOutDate && meetsMinStay) {
+    if (checkInDate && checkOutDate && meetsMinStay && !hasDateConflict) {
       onBook?.({ propertyId, checkIn: checkInDate, checkOut: checkOutDate }, guestCount);
     }
   };
 
-  const isValidBooking = hasSelectedDates && meetsMinStay && guestCount > 0;
+  const isValidBooking = hasSelectedDates && meetsMinStay && guestCount > 0 && !hasDateConflict;
 
   // Dynamic button text based on state
   const getButtonText = () => {
+    if (hasDateConflict) return 'Selected dates are unavailable';
     if (isValidBooking) return 'Book Now';
     if (!checkInDate) return 'Select check-in date';
     if (!checkOutDate) return 'Select check-out date';
@@ -96,44 +131,66 @@ export const BookingPanel: React.FC<BookingPanelProps> = ({
           <label htmlFor={checkInId} className="block text-sm font-medium text-neutral-700 dark:text-neutral-300">
             Check-in
           </label>
-          <Input
-            id={checkInId}
-            type="date"
-            min={today}
-            value={checkInDate ? format(checkInDate, 'yyyy-MM-dd') : ''}
-            onChange={(e) => {
-              setCheckInDate(e.target.value ? new Date(e.target.value) : null);
-              // Reset checkout if it's before new checkin
-              if (checkOutDate && e.target.value && new Date(e.target.value) >= checkOutDate) {
-                setCheckOutDate(null);
-              }
-            }}
-            icon={<Calendar className="h-4 w-4" aria-hidden="true" />}
-            placeholder="Add date"
-            aria-describedby={showMinStayError ? minStayErrorId : undefined}
-          />
+          <div className="relative">
+            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400 dark:text-neutral-500 z-10 pointer-events-none" aria-hidden="true" />
+            <DatePicker
+              id={checkInId}
+              selected={checkInDate}
+              onChange={(date: Date | null) => {
+                setCheckInDate(date);
+                if (checkOutDate && date && date >= checkOutDate) {
+                  setCheckOutDate(null);
+                }
+              }}
+              minDate={new Date()}
+              excludeDates={excludedDates}
+              dayClassName={getDayClassName}
+              dateFormat="MMM dd, yyyy"
+              placeholderText="Add date"
+              className="w-full h-10 rounded-lg border-2 border-neutral-300 dark:border-neutral-600 bg-white dark:bg-primary-800 pl-10 pr-4 py-2 text-sm text-neutral-900 dark:text-neutral-100 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+              aria-describedby={showMinStayError ? minStayErrorId : undefined}
+            />
+          </div>
         </div>
 
         <div className="space-y-2">
           <label htmlFor={checkOutId} className="block text-sm font-medium text-neutral-700 dark:text-neutral-300">
             Check-out
           </label>
-          <Input
-            id={checkOutId}
-            type="date"
-            min={minCheckoutDate}
-            value={checkOutDate ? format(checkOutDate, 'yyyy-MM-dd') : ''}
-            onChange={(e) => setCheckOutDate(e.target.value ? new Date(e.target.value) : null)}
-            icon={<Calendar className="h-4 w-4" aria-hidden="true" />}
-            placeholder="Add date"
-            disabled={!checkInDate}
-            aria-invalid={showMinStayError ? true : undefined}
-            aria-describedby={showMinStayError ? minStayErrorId : undefined}
-          />
+          <div className="relative">
+            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400 dark:text-neutral-500 z-10 pointer-events-none" aria-hidden="true" />
+            <DatePicker
+              id={checkOutId}
+              selected={checkOutDate}
+              onChange={(date: Date | null) => {
+                setCheckOutDate(date);
+              }}
+              minDate={checkInDate ? addDays(checkInDate, 1) : new Date()}
+              excludeDates={excludedDates}
+              dayClassName={getDayClassName}
+              dateFormat="MMM dd, yyyy"
+              placeholderText="Add date"
+              disabled={!checkInDate}
+              className={`w-full h-10 rounded-lg border-2 border-neutral-300 dark:border-neutral-600 bg-white dark:bg-primary-800 pl-10 pr-4 py-2 text-sm text-neutral-900 dark:text-neutral-100 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 ${!checkInDate ? 'opacity-50 cursor-not-allowed' : ''}`}
+              aria-invalid={showMinStayError ? true : undefined}
+              aria-describedby={showMinStayError ? minStayErrorId : undefined}
+            />
+          </div>
           {showMinStayError && (
             <p id={minStayErrorId} className="text-sm text-red-600 dark:text-red-400" role="alert">
               Minimum stay is {minStay} night{minStay > 1 ? 's' : ''}. Please select at least {minStay} night{minStay > 1 ? 's' : ''}.
             </p>
+          )}
+          {hasDateConflict && (
+            <p className="text-sm text-red-600 dark:text-red-400" role="alert">
+              Some dates in your selection are already booked. Please choose different dates.
+            </p>
+          )}
+          {unavailableDates.size > 0 && (
+            <div className="flex items-center gap-2 text-xs text-neutral-500 dark:text-neutral-400">
+              <span className="inline-block w-3 h-3 rounded-full bg-red-100 border border-red-300" />
+              <span>Already booked</span>
+            </div>
           )}
         </div>
 

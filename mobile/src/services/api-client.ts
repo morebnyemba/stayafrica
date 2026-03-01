@@ -516,6 +516,18 @@ class APIClient {
     return (await this.client.get('/admin/config/fees/')).data;
   }
 
+  // Unavailable dates for a property (for calendar blocking)
+  async getUnavailableDates(propertyId: string, start?: string, end?: string): Promise<{
+    property_id: number;
+    start: string;
+    end: string;
+    unavailable_dates: string[];
+  }> {
+    return (await this.client.get(`/properties/${propertyId}/unavailable-dates/`, {
+      params: { start, end },
+    })).data;
+  }
+
   // Bank accounts
   async getBankAccounts(): Promise<ApiListResponse<BankAccount>> {
     return (await this.client.get('/bank-accounts/')).data;

@@ -471,6 +471,49 @@ class PropertyViewSet(viewsets.ModelViewSet):
         
         return Response(response_data)
     
+    @action(detail=True, methods=['get'], url_path='unavailable-dates', permission_classes=[AllowAny])
+    def unavailable_dates(self, request, pk=None):
+        """
+        Return list of unavailable dates for a property (for calendar blocking).
+        GET /api/v1/properties/{id}/unavailable-dates/?start=YYYY-MM-DD&end=YYYY-MM-DD
+        Returns dates that cannot be selected as check-in dates.
+        """
+        from datetime import datetime, timedelta
+        from apps.bookings.models import Booking
+
+        property_obj = self.get_object()
+
+        start_str = request.query_params.get('start')
+        end_str = request.query_params.get('end')
+
+        try:
+            start_date = datetime.strptime(start_str, '%Y-%m-%d').date() if start_str else datetime.now().date()
+            end_date = datetime.strptime(end_str, '%Y-%m-%d').date() if end_str else start_date + timedelta(days=180)
+        except ValueError:
+            return Response({'error': 'Invalid date format. Use YYYY-MM-DD'}, status=status.HTTP_400_BAD_REQUEST)
+
+        bookings = Booking.objects.filter(
+            rental_property=property_obj,
+            status__in=['confirmed', 'pending'],
+            check_out__gt=start_date,
+            check_in__lt=end_date,
+        )
+
+        unavailable = set()
+        for booking in bookings:
+            current = max(booking.check_in, start_date)
+            end = min(booking.check_out, end_date)
+            while current < end:
+                unavailable.add(current.strftime('%Y-%m-%d'))
+                current += timedelta(days=1)
+
+        return Response({
+            'property_id': property_obj.id,
+            'start': start_date.strftime('%Y-%m-%d'),
+            'end': end_date.strftime('%Y-%m-%d'),
+            'unavailable_dates': sorted(unavailable),
+        })
+    
     @action(detail=False, methods=['get', 'post'], permission_classes=[IsAuthenticated])
     def saved(self, request):
         """Get or save user's wishlist properties"""

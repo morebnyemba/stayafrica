@@ -269,3 +269,22 @@
     }
   }
 }
+
+/* React DatePicker - Booked/unavailable dates in red */
+.react-datepicker__day.booked-date {
+  background-color: #FEE2E2 !important;
+  color: #DC2626 !important;
+  text-decoration: line-through;
+  border-radius: 50% !important;
+  cursor: not-allowed !important;
+}
+
+.react-datepicker__day.booked-date:hover {
+  background-color: #FECACA !important;
+  color: #DC2626 !important;
+}
+
+/* Ensure react-datepicker popup is above other elements */
+.react-datepicker-popper {
+  z-index: 50 !important;
+}

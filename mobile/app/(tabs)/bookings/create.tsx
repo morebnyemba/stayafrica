@@ -1,5 +1,5 @@
 import { View, Text, ScrollView, TouchableOpacity, Platform, TextInput, Alert, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, Modal } from 'react-native';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -7,6 +7,7 @@ import { Calendar } from 'react-native-calendars';
 import { format, parseISO, addDays, isAfter } from 'date-fns';
 import { useAuth } from '@/context/auth-context';
 import { apiClient } from '@/services/api-client';
+import { useUnavailableDates } from '@/hooks/api-hooks';
 
 export default function CreateBookingScreen() {
   const router = useRouter();
@@ -19,6 +20,26 @@ export default function CreateBookingScreen() {
   const [showCheckInCalendar, setShowCheckInCalendar] = useState(false);
   const [showCheckOutCalendar, setShowCheckOutCalendar] = useState(false);
   const [specialRequests, setSpecialRequests] = useState('');
+
+  // Fetch unavailable dates for this property
+  const { data: unavailableData } = useUnavailableDates(propertyId || '');
+  const unavailableDates = unavailableData?.unavailable_dates || [];
+
+  // Build disabled dates map for react-native-calendars
+  const disabledMarkedDates = useMemo(() => {
+    const marks: Record<string, any> = {};
+    for (const date of unavailableDates) {
+      marks[date] = {
+        disabled: true,
+        disableTouchEvent: true,
+        customStyles: {
+          container: { backgroundColor: '#FEE2E2', borderRadius: 16 },
+          text: { color: '#DC2626', textDecorationLine: 'line-through' },
+        },
+      };
+    }
+    return marks;
+  }, [unavailableDates]);
 
   const handleCreateBooking = async () => {
     if (!checkIn || !checkOut) {
@@ -71,15 +92,25 @@ export default function CreateBookingScreen() {
   };
 
   const handleCheckInDateSelect = (date: string) => {
+    if (unavailableDates.includes(date)) return; // Block unavailable dates
     setCheckIn(date);
     setShowCheckInCalendar(false);
-    // Clear check-out if it's before or equal to the new check-in (compare as strings)
+    // Clear check-out if it's before or equal to the new check-in
     if (checkOut && date >= checkOut) {
       setCheckOut('');
     }
   };
 
   const handleCheckOutDateSelect = (date: string) => {
+    if (unavailableDates.includes(date)) return; // Block unavailable dates
+    // Check if any unavailable date falls between check-in and check-out
+    if (checkIn) {
+      const hasConflict = unavailableDates.some(d => d > checkIn && d < date);
+      if (hasConflict) {
+        Alert.alert('Unavailable Dates', 'Some dates in your selected range are already booked. Please choose different dates.');
+        return;
+      }
+    }
     setCheckOut(date);
     setShowCheckOutCalendar(false);
   };
@@ -300,14 +331,21 @@ export default function CreateBookingScreen() {
                 <Ionicons name="close" size={24} color="#122F26" />
               </TouchableOpacity>
             </View>
+            {unavailableDates.length > 0 && (
+              <View className="flex-row items-center mb-2 px-1">
+                <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: '#FEE2E2', borderWidth: 1, borderColor: '#FCA5A5', marginRight: 6 }} />
+                <Text className="text-xs text-slate-500">Already booked</Text>
+              </View>
+            )}
             <Calendar
+              markingType="custom"
               minDate={new Date().toISOString().split('T')[0]}
               onDayPress={(day) => handleCheckInDateSelect(day.dateString)}
               markedDates={{
-                [checkIn]: { selected: true, selectedColor: '#D9B168' },
+                ...disabledMarkedDates,
+                ...(checkIn ? { [checkIn]: { customStyles: { container: { backgroundColor: '#D9B168', borderRadius: 16 }, text: { color: '#FFFFFF', fontWeight: 'bold' } } } } : {}),
               }}
               theme={{
-                selectedDayBackgroundColor: '#D9B168',
                 todayTextColor: '#D9B168',
                 arrowColor: '#D9B168',
               }}
@@ -331,15 +369,22 @@ export default function CreateBookingScreen() {
                 <Ionicons name="close" size={24} color="#122F26" />
               </TouchableOpacity>
             </View>
+            {unavailableDates.length > 0 && (
+              <View className="flex-row items-center mb-2 px-1">
+                <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: '#FEE2E2', borderWidth: 1, borderColor: '#FCA5A5', marginRight: 6 }} />
+                <Text className="text-xs text-slate-500">Already booked</Text>
+              </View>
+            )}
             <Calendar
+              markingType="custom"
               minDate={getMinCheckOutDate()}
               onDayPress={(day) => handleCheckOutDateSelect(day.dateString)}
               markedDates={{
-                [checkOut]: { selected: true, selectedColor: '#D9B168' },
-                [checkIn]: { marked: true, dotColor: '#10B981' },
+                ...disabledMarkedDates,
+                ...(checkOut ? { [checkOut]: { customStyles: { container: { backgroundColor: '#D9B168', borderRadius: 16 }, text: { color: '#FFFFFF', fontWeight: 'bold' } } } } : {}),
+                ...(checkIn ? { [checkIn]: { customStyles: { container: { backgroundColor: '#10B981', borderRadius: 16 }, text: { color: '#FFFFFF', fontWeight: 'bold' } } } } : {}),
               }}
               theme={{
-                selectedDayBackgroundColor: '#D9B168',
                 todayTextColor: '#D9B168',
                 arrowColor: '#D9B168',
               }}
