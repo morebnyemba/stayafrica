@@ -25,6 +25,7 @@ import { ThemeToggle } from './theme-toggle';
 import { MobileSearchBar } from './mobile-search-bar';
 import { Button } from '@/components/ui/Button';
 import { NotificationCenter } from '@/components/notifications/NotificationCenter';
+import { LocaleSwitcher } from '@/components/common/LocaleSwitcher';
 import { cn } from '@/lib/utils';
 
 // ─── Nav link with active state ─────────────────────────────────────────────
@@ -234,6 +235,7 @@ export function Navigation() {
 
             {/* ── Right side (desktop) ──────────────────────────────── */}
             <div className="hidden md:flex items-center gap-2">
+              <LocaleSwitcher />
               <ThemeToggle />
 
               {isAuthenticated ? (
@@ -397,6 +399,7 @@ export function Navigation() {
             {/* ── Mobile right side ─────────────────────────────────── */}
             <div className="flex md:hidden items-center gap-2">
               {isAuthenticated && <NotificationCenter />}
+              <LocaleSwitcher />
               <ThemeToggle />
               <button
                 onClick={() => setMobileMenuOpen((o) => !o)}

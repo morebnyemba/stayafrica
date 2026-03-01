@@ -22,7 +22,7 @@ export function LocaleSwitcher() {
       value={locale}
       onChange={(e) => onChange(e.target.value)}
       disabled={isPending}
-      className="rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 disabled:opacity-50"
+      className="rounded-md border border-primary-600 bg-primary-800 px-2 py-1 text-sm text-sand-100 hover:bg-primary-700 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 disabled:opacity-50 cursor-pointer"
       aria-label="Select language"
     >
       {locales.map((loc) => (

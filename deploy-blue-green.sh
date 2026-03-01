@@ -92,7 +92,16 @@ upstream stayafrica_backend {
     server 127.0.0.1:${target_port};
 }
 EOF
-    sudo nginx -s reload
+    # Reload nginx - try multiple methods
+    if docker exec stayafrica_nginx nginx -s reload 2>/dev/null; then
+        log "Nginx reloaded via Docker"
+    elif sudo systemctl reload nginx 2>/dev/null; then
+        log "Nginx reloaded via systemctl"
+    elif sudo nginx -t && sudo nginx -s reload 2>/dev/null; then
+        log "Nginx reloaded via direct command"
+    else
+        log "WARNING: Could not reload nginx. Restart it manually: sudo systemctl restart nginx"
+    fi
 
     # Verify traffic is flowing to new version
     sleep 3
@@ -139,7 +148,10 @@ upstream stayafrica_backend {
     server 127.0.0.1:${target_port};
 }
 EOF
-    sudo nginx -s reload
+    docker exec stayafrica_nginx nginx -s reload 2>/dev/null \
+        || sudo systemctl reload nginx 2>/dev/null \
+        || sudo nginx -s reload 2>/dev/null \
+        || log "WARNING: Manual nginx reload needed"
 
     log "Rolled back to ${target}. Current active: ${target}"
 }
