@@ -173,7 +173,7 @@ export function ExploreContent() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         {/* Header */}
         <div className="mb-8 animate-fade-in">
-          <div className="flex items-start justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
             <div>
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-primary-900 dark:text-sand-50 mb-2">
                 Explore Properties
@@ -182,7 +182,7 @@ export function ExploreContent() {
                 {userLocation ? 'Showing properties near you' : 'Discover unique accommodations across Africa'}
               </p>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 sm:flex-nowrap">
               <FlexibilityToggle
                 isFlexible={isFlexible}
                 onChange={setIsFlexible}
@@ -192,7 +192,7 @@ export function ExploreContent() {
                 disabled={gettingLocation}
                 variant="outline"
                 size="sm"
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 whitespace-nowrap"
               >
                 <Navigation className="w-4 h-4" />
                 {gettingLocation ? 'Getting location...' : userLocation ? 'Update location' : 'Use my location'}
