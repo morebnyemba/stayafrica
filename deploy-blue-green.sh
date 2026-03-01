@@ -87,12 +87,12 @@ deploy() {
 
     # Switch nginx upstream
     log "Switching traffic to ${target}..."
-    cat > "${NGINX_CONF}" <<EOF
+    sudo tee "${NGINX_CONF}" > /dev/null <<EOF
 upstream stayafrica_backend {
     server 127.0.0.1:${target_port};
 }
 EOF
-    nginx -s reload
+    sudo nginx -s reload
 
     # Verify traffic is flowing to new version
     sleep 3
@@ -134,12 +134,12 @@ rollback() {
     fi
 
     # Switch nginx
-    cat > "${NGINX_CONF}" <<EOF
+    sudo tee "${NGINX_CONF}" > /dev/null <<EOF
 upstream stayafrica_backend {
     server 127.0.0.1:${target_port};
 }
 EOF
-    nginx -s reload
+    sudo nginx -s reload
 
     log "Rolled back to ${target}. Current active: ${target}"
 }
