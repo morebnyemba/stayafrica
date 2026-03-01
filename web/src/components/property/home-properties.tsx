@@ -78,7 +78,7 @@ export function HomeProperties() {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-primary-900/70 via-primary-900/20 to-transparent" />
                 <div className="absolute bottom-2 sm:bottom-4 left-2 sm:left-4 text-white">
-                  <h3 className="text-sm sm:text-base md:text-lg font-semibold line-clamp-2">{location.name}</h3>
+                  <h3 className="text-sm sm:text-base md:text-lg font-semibold line-clamp-2 text-white">{location.name}</h3>
                 </div>
               </div>
             </Link>
@@ -230,7 +230,7 @@ export function HomeProperties() {
               />
             </div>
             <div className="p-6 sm:p-8 md:p-12 flex flex-col justify-center bg-gradient-to-br from-primary-800 to-primary-700 text-sand-50">
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4 text-sand-50">
                 Become a Host
               </h2>
               <p className="text-base sm:text-lg text-sand-100 mb-4 sm:mb-6">
