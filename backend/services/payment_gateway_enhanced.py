@@ -113,7 +113,7 @@ class PaymentGatewayService:
 
         # PayPal Server SDK initialization
         self.paypal_client_id = getattr(self.config, 'paypal_client_id', '')
-        self.paypal_client_secret = getattr(self.config, 'paypal_client_secret', '')
+        self.paypal_client_secret = getattr(self.config, 'paypal_secret', '')
         self.paypal_mode = getattr(self.config, 'paypal_mode', 'sandbox')
         self.paypal_base_url = (
             'https://api-m.sandbox.paypal.com'
