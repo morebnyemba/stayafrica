@@ -1,114 +1,112 @@
 {
-  "dashboard": {
-    "id": null,
-    "uid": "stayafrica-overview",
-    "title": "StayAfrica - Overview",
-    "tags": ["stayafrica"],
-    "timezone": "browser",
-    "refresh": "30s",
-    "time": { "from": "now-24h", "to": "now" },
-    "panels": [
-      {
-        "id": 1,
-        "title": "API Request Rate",
-        "type": "timeseries",
-        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
-        "targets": [
-          {
-            "expr": "rate(stayafrica_requests_total[5m])",
-            "legendFormat": "{{method}} {{endpoint}}"
-          }
-        ]
-      },
-      {
-        "id": 2,
-        "title": "Error Rate",
-        "type": "timeseries",
-        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
-        "targets": [
-          {
-            "expr": "rate(stayafrica_http_errors_total[5m])",
-            "legendFormat": "{{status_code}}"
-          }
-        ]
-      },
-      {
-        "id": 3,
-        "title": "Active Bookings",
-        "type": "stat",
-        "gridPos": { "h": 4, "w": 6, "x": 0, "y": 8 },
-        "targets": [
-          {
-            "expr": "stayafrica_active_bookings",
-            "legendFormat": "Active"
-          }
-        ]
-      },
-      {
-        "id": 4,
-        "title": "Total Revenue (24h)",
-        "type": "stat",
-        "gridPos": { "h": 4, "w": 6, "x": 6, "y": 8 },
-        "targets": [
-          {
-            "expr": "increase(stayafrica_revenue_total[24h])",
-            "legendFormat": "Revenue"
-          }
-        ]
-      },
-      {
-        "id": 5,
-        "title": "Payment Success Rate",
-        "type": "gauge",
-        "gridPos": { "h": 4, "w": 6, "x": 12, "y": 8 },
-        "targets": [
-          {
-            "expr": "rate(stayafrica_payments_success_total[1h]) / (rate(stayafrica_payments_success_total[1h]) + rate(stayafrica_payment_failures_total[1h]))",
-            "legendFormat": "Success Rate"
-          }
-        ]
-      },
-      {
-        "id": 6,
-        "title": "Fraud Risk Score Distribution",
-        "type": "histogram",
-        "gridPos": { "h": 4, "w": 6, "x": 18, "y": 8 },
-        "targets": [
-          {
-            "expr": "stayafrica_fraud_score_bucket",
-            "legendFormat": "{{le}}"
-          }
-        ]
-      },
-      {
-        "id": 7,
-        "title": "Response Time (p95)",
-        "type": "timeseries",
-        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
-        "targets": [
-          {
-            "expr": "histogram_quantile(0.95, rate(stayafrica_request_duration_seconds_bucket[5m]))",
-            "legendFormat": "p95"
-          },
-          {
-            "expr": "histogram_quantile(0.50, rate(stayafrica_request_duration_seconds_bucket[5m]))",
-            "legendFormat": "p50"
-          }
-        ]
-      },
-      {
-        "id": 8,
-        "title": "Logs (Errors)",
-        "type": "logs",
-        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
-        "datasource": "Loki",
-        "targets": [
-          {
-            "expr": "{job=\"stayafrica\"} |= \"ERROR\""
-          }
-        ]
-      }
-    ]
-  },
-  "overwrite": true
+  "id": null,
+  "uid": "stayafrica-overview",
+  "title": "StayAfrica - Overview",
+  "tags": ["stayafrica"],
+  "timezone": "browser",
+  "refresh": "30s",
+  "schemaVersion": 39,
+  "time": { "from": "now-24h", "to": "now" },
+  "panels": [
+    {
+      "id": 1,
+      "title": "API Request Rate",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "rate(stayafrica_requests_total[5m])",
+          "legendFormat": "{{method}} {{endpoint}}"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Error Rate",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "targets": [
+        {
+          "expr": "rate(stayafrica_http_errors_total[5m])",
+          "legendFormat": "{{status_code}}"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Active Bookings",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 8 },
+      "targets": [
+        {
+          "expr": "stayafrica_active_bookings",
+          "legendFormat": "Active"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Total Revenue (24h)",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 8 },
+      "targets": [
+        {
+          "expr": "increase(stayafrica_revenue_total[24h])",
+          "legendFormat": "Revenue"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Payment Success Rate",
+      "type": "gauge",
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 8 },
+      "targets": [
+        {
+          "expr": "rate(stayafrica_payments_success_total[1h]) / (rate(stayafrica_payments_success_total[1h]) + rate(stayafrica_payment_failures_total[1h]))",
+          "legendFormat": "Success Rate"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Fraud Risk Score Distribution",
+      "type": "histogram",
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 8 },
+      "targets": [
+        {
+          "expr": "stayafrica_fraud_score_bucket",
+          "legendFormat": "{{le}}"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "Response Time (p95)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, rate(stayafrica_request_duration_seconds_bucket[5m]))",
+          "legendFormat": "p95"
+        },
+        {
+          "expr": "histogram_quantile(0.50, rate(stayafrica_request_duration_seconds_bucket[5m]))",
+          "legendFormat": "p50"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "Logs (Errors)",
+      "type": "logs",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
+      "datasource": "Loki",
+      "targets": [
+        {
+          "expr": "{job=\"stayafrica\"} |= \"ERROR\""
+        }
+      ]
+    }
+  ]
 }
