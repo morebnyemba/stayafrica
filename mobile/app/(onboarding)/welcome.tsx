@@ -12,6 +12,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AnimatedCompassIcon } from '@/components/common/AnimatedCompassIcon';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -67,6 +68,7 @@ export default function WelcomeScreen() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatListRef = useRef<FlatList>(null);
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   const markOnboardingSeen = async () => {
     try {
@@ -182,7 +184,8 @@ export default function WelcomeScreen() {
     <View className="flex-1 bg-forest">
       {/* Skip Button */}
       <TouchableOpacity
-        className="absolute top-14 right-6 z-10 bg-white/10 px-4 py-2 rounded-full"
+        className="absolute right-6 z-10 bg-white/10 px-4 py-2 rounded-full"
+        style={{ top: insets.top + 8 }}
         onPress={handleSkip}
       >
         <Text className="text-white font-semibold">Skip</Text>
@@ -205,7 +208,7 @@ export default function WelcomeScreen() {
       />
 
       {/* Bottom Section */}
-      <View className="absolute bottom-0 left-0 right-0 pb-12 px-6">
+      <View className="absolute bottom-0 left-0 right-0 px-6" style={{ paddingBottom: insets.bottom + 16 }}>
         {/* Dots */}
         {renderDots()}
 
