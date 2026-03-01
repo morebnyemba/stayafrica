@@ -399,7 +399,6 @@ export function Navigation() {
             {/* ── Mobile right side ─────────────────────────────────── */}
             <div className="flex md:hidden items-center gap-2">
               {isAuthenticated && <NotificationCenter />}
-              <LocaleSwitcher />
               <ThemeToggle />
               <button
                 onClick={() => setMobileMenuOpen((o) => !o)}
@@ -533,8 +532,12 @@ export function Navigation() {
             </div>
           )}
 
-          {/* Mobile bottom – auth actions */}
+          {/* Mobile bottom – locale + auth actions */}
           <div className="border-t border-primary-700 py-4 px-4 space-y-2 mt-auto">
+            <div className="flex items-center gap-2 px-4 py-2 text-sand-200 text-sm">
+              <span>Language:</span>
+              <LocaleSwitcher />
+            </div>
             {isAuthenticated ? (
               <button
                 onClick={handleLogout}
