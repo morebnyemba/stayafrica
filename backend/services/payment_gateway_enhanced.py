@@ -123,7 +123,7 @@ class PaymentGatewayService:
         self._paypal_token_cache = None  # (token, expiry_timestamp)
 
         if self.paypal_client_id and self.paypal_client_secret:
-            from paypalserversdk.environment import Environment
+            from paypalserversdk.configuration import Environment
 
             paypal_environment = (
                 Environment.SANDBOX
