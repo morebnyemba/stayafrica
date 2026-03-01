@@ -665,7 +665,7 @@ class PaymentGatewayService:
                 ),
             )
 
-            response = self.orders_controller.orders_create(
+            response = self.orders_controller.create_order(
                 {'body': order_request}
             )
 
@@ -708,7 +708,7 @@ class PaymentGatewayService:
                     'error': 'PayPal payment gateway is not configured'
                 }
 
-            response = self.orders_controller.orders_capture(
+            response = self.orders_controller.capture_order(
                 {'id': order_id}
             )
 
@@ -780,7 +780,7 @@ class PaymentGatewayService:
                 RefundRequest(**refund_body) if refund_body else RefundRequest()
             )
 
-            response = self.payments_controller.captures_refund({
+            response = self.payments_controller.refund_captured_payment({
                 'capture_id': capture_id,
                 'body': refund_request,
             })
