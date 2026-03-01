@@ -29,8 +29,18 @@ class BookingViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     
     def get_queryset(self):
-        """Return bookings for current user based on their active_profile"""
+        """Return bookings for current user based on their active_profile, or all for admin"""
         user = self.request.user
+        if user.is_staff:
+            qs = Booking.objects.all().select_related('guest', 'rental_property__host')
+            search = self.request.query_params.get('search')
+            if search:
+                from django.db.models import Q
+                qs = qs.filter(Q(booking_ref__icontains=search) | Q(guest__email__icontains=search))
+            status_filter = self.request.query_params.get('status')
+            if status_filter:
+                qs = qs.filter(status=status_filter)
+            return qs
         active_profile = getattr(user, 'active_profile', user.role)
         if active_profile == 'host':
             return Booking.objects.filter(rental_property__host=user).select_related('guest', 'rental_property')

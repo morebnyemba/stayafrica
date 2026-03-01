@@ -56,7 +56,9 @@ class AutomatedMessageViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     
     def get_queryset(self):
-        """Return automated messages for current host"""
+        """Return automated messages for current host, or all for admin"""
+        if self.request.user.is_staff:
+            return AutomatedMessage.objects.all().select_related('host')
         return AutomatedMessage.objects.filter(host=self.request.user)
     
     def perform_create(self, serializer):
@@ -74,7 +76,9 @@ class ScheduledMessageViewSet(viewsets.ModelViewSet):
         return ScheduledMessageSerializer
     
     def get_queryset(self):
-        """Return scheduled messages for current host"""
+        """Return scheduled messages for current host, or all for admin"""
+        if self.request.user.is_staff:
+            return ScheduledMessage.objects.all().select_related('host')
         return ScheduledMessage.objects.filter(host=self.request.user)
     
     def perform_create(self, serializer):
@@ -104,7 +108,9 @@ class QuickReplyViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     
     def get_queryset(self):
-        """Return quick replies for current host"""
+        """Return quick replies for current host, or all for admin"""
+        if self.request.user.is_staff:
+            return QuickReply.objects.all().select_related('host')
         return QuickReply.objects.filter(host=self.request.user)
     
     def perform_create(self, serializer):

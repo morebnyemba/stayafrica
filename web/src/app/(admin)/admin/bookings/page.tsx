@@ -52,6 +52,8 @@ export default function BookingsManagement() {
     const colors: Record<string, string> = {
       pending: 'bg-yellow-100 text-yellow-800',
       confirmed: 'bg-blue-100 text-blue-800',
+      checked_in: 'bg-indigo-100 text-indigo-800',
+      checked_out: 'bg-purple-100 text-purple-800',
       completed: 'bg-green-100 text-green-800',
       cancelled: 'bg-red-100 text-red-800',
     };
@@ -184,6 +186,8 @@ export default function BookingsManagement() {
               <option value="">All Status</option>
               <option value="pending">Pending</option>
               <option value="confirmed">Confirmed</option>
+              <option value="checked_in">Checked In</option>
+              <option value="checked_out">Checked Out</option>
               <option value="completed">Completed</option>
               <option value="cancelled">Cancelled</option>
             </select>
@@ -394,7 +398,7 @@ export default function BookingsManagement() {
             {/* Pagination */}
             <div className="bg-gray-50 px-6 py-4 flex items-center justify-between border-t">
               <div className="text-sm text-[#122F26]">
-                Showing {(page - 1) * 30 + 1} to {Math.min(page * 30, totalCount)} of {totalCount} bookings
+                Showing {(page - 1) * ITEMS_PER_PAGE + 1} to {Math.min(page * ITEMS_PER_PAGE, totalCount)} of {totalCount} bookings
               </div>
               <div className="flex space-x-2">
                 <button
@@ -406,7 +410,7 @@ export default function BookingsManagement() {
                 </button>
                 <button
                   onClick={() => setPage(p => p + 1)}
-                  disabled={page * 30 >= totalCount}
+                  disabled={page * ITEMS_PER_PAGE >= totalCount}
                   className="px-4 py-2 border border-[#3A5C50] rounded-lg text-sm font-medium text-[#122F26] hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Next
