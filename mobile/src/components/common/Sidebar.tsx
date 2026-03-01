@@ -38,7 +38,7 @@ interface SidebarProps {
 
 export function Sidebar({ isVisible, onClose }: SidebarProps) {
   const router = useRouter();
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, logout, switchProfile } = useAuth();
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
   const slideAnim = React.useRef(new Animated.Value(-SIDEBAR_WIDTH)).current;
 
@@ -307,20 +307,50 @@ export function Sidebar({ isVisible, onClose }: SidebarProps) {
                   <Text className="text-sand-200 text-sm mt-1">
                     {user.email}
                   </Text>
-                  <View className="mt-3">
-                    <LinearGradient
-                      colors={user.role === 'host' ? ['#3A5C50', '#2d4a40'] : ['#D9B168', '#bea04f']}
-                      className="px-4 py-1.5 rounded-full"
+                  {/* Active profile badge with switcher for hosts */}
+                  {(user.role === 'host' || user.role === 'admin') ? (
+                    <TouchableOpacity
+                      className="mt-3"
+                      onPress={() => {
+                        const target = (user.active_profile ?? 'guest') === 'host' ? 'guest' : 'host';
+                        switchProfile(target).then(() => {
+                          if (target === 'host') {
+                            handleNavigation('/(tabs)/host');
+                          }
+                        }).catch(() => {});
+                      }}
                     >
-                      <Text
-                        className={`text-xs font-semibold ${
-                          user.role === 'host' ? 'text-gold' : 'text-forest'
-                        }`}
+                      <LinearGradient
+                        colors={(user.active_profile ?? 'guest') === 'host' ? ['#3A5C50', '#2d4a40'] : ['#D9B168', '#bea04f']}
+                        className="px-4 py-2 rounded-full flex-row items-center"
                       >
-                        {user.role === 'host' ? '🏠 Host' : '✨ Guest'}
-                      </Text>
-                    </LinearGradient>
-                  </View>
+                        <Text
+                          className={`text-xs font-semibold ${
+                            (user.active_profile ?? 'guest') === 'host' ? 'text-gold' : 'text-forest'
+                          }`}
+                        >
+                          {(user.active_profile ?? 'guest') === 'host' ? '🏠 Hosting' : '✈ Traveling'}
+                        </Text>
+                        <Ionicons
+                          name="swap-horizontal"
+                          size={14}
+                          color={(user.active_profile ?? 'guest') === 'host' ? '#D9B168' : '#122F26'}
+                          style={{ marginLeft: 6 }}
+                        />
+                      </LinearGradient>
+                    </TouchableOpacity>
+                  ) : (
+                    <View className="mt-3">
+                      <LinearGradient
+                        colors={['#D9B168', '#bea04f']}
+                        className="px-4 py-1.5 rounded-full"
+                      >
+                        <Text className="text-xs font-semibold text-forest">
+                          ✨ Guest
+                        </Text>
+                      </LinearGradient>
+                    </View>
+                  )}
                 </View>
               ) : (
                 <View className="items-center mt-4">

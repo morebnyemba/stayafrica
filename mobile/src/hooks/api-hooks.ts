@@ -114,6 +114,7 @@ export function useConversations() {
   return useQuery({
     queryKey: ['conversations'],
     queryFn: () => apiClient.getConversations(),
+    refetchInterval: 10000,
   });
 }
 
@@ -132,6 +133,7 @@ export function useConversationMessages(conversationId: string) {
     queryKey: ['conversations', conversationId, 'messages'],
     queryFn: () => apiClient.getConversationMessages(conversationId),
     enabled: !!conversationId,
+    refetchInterval: 5000,
   });
 }
 
@@ -199,6 +201,7 @@ export function useUnreadCount() {
   return useQuery({
     queryKey: ['unread-count'],
     queryFn: () => apiClient.getTotalUnreadCount(),
+    refetchInterval: 15000,
   });
 }
 
