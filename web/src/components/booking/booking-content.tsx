@@ -91,6 +91,10 @@ export function BookingContent() {
         return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
       case 'completed':
         return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+      case 'checked_in':
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+      case 'checked_out':
+        return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
       default:
         return 'bg-primary-100 text-primary-800 dark:bg-primary-700 dark:text-sand-200';
     }
@@ -184,15 +188,13 @@ export function BookingContent() {
             >
               Confirmed
             </Button>
-            {activeTab === 'experiences' && (
-              <Button
-                onClick={() => setStatusFilter('completed')}
-                variant={statusFilter === 'completed' ? 'primary' : 'outline'}
-                size="sm"
-              >
-                Completed
-              </Button>
-            )}
+            <Button
+              onClick={() => setStatusFilter('completed')}
+              variant={statusFilter === 'completed' ? 'primary' : 'outline'}
+              size="sm"
+            >
+              Completed
+            </Button>
             <Button
               onClick={() => setStatusFilter('cancelled')}
               variant={statusFilter === 'cancelled' ? 'primary' : 'outline'}
@@ -296,11 +298,17 @@ export function BookingContent() {
                       <a href={`/bookings/${booking.id}`} className="inline-block">
                         <Button variant="secondary" size="sm">View Details</Button>
                       </a>
+                      {['pending', 'confirmed', 'PENDING', 'CONFIRMED'].includes(booking.status) && (
+                        <a href={`/booking/payment?bookingId=${booking.id}`} className="inline-block">
+                          <Button size="sm">Pay Now</Button>
+                        </a>
+                      )}
                       {(booking.status === 'CONFIRMED' || booking.status === 'confirmed') && (
                         <>
                           <Button
                             onClick={() => handleContactHost(booking)}
                             disabled={contactingHost === booking.id}
+                            variant="outline"
                             size="sm"
                           >
                             {contactingHost === booking.id ? 'Starting...' : 'Contact Host'}
@@ -309,6 +317,16 @@ export function BookingContent() {
                             <Button variant="outline" size="sm">Get Directions</Button>
                           </a>
                         </>
+                      )}
+                      {(booking.status === 'pending' || booking.status === 'PENDING') && (
+                        <Button
+                          onClick={() => handleContactHost(booking)}
+                          disabled={contactingHost === booking.id}
+                          variant="outline"
+                          size="sm"
+                        >
+                          {contactingHost === booking.id ? 'Starting...' : 'Contact Host'}
+                        </Button>
                       )}
                     </div>
                   </div>

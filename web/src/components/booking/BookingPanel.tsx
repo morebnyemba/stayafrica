@@ -13,6 +13,7 @@ import { AlertCircle, Check, Users, Calendar } from 'lucide-react';
 import { format, differenceInDays, addDays } from 'date-fns';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
+import { useFeeConfiguration, calculateBookingCost } from '@/hooks/use-fees';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
@@ -84,13 +85,19 @@ export const BookingPanel: React.FC<BookingPanelProps> = ({
     return unavailableDates.has(dateStr) ? 'booked-date' : '';
   }, [unavailableDates]);
 
-  // Calculate pricing
+  // Fetch fee configuration from backend
+  const { data: feeConfig } = useFeeConfiguration();
+
+  // Calculate pricing using shared fee logic
   const nights =
     checkInDate && checkOutDate ? differenceInDays(checkOutDate, checkInDate) : 0;
-  const subtotal = nights > 0 ? nights * pricePerNight : 0;
-  const serviceFee = subtotal > 0 ? Math.round(subtotal * 0.1) : 0; // 10% service fee
-  const tax = subtotal > 0 ? Math.round((subtotal + serviceFee) * 0.08) : 0; // 8% tax
-  const total = subtotal + serviceFee + tax;
+  const costs = useMemo(() => {
+    if (!feeConfig || nights <= 0) return { basePrice: 0, serviceFee: 0, commissionFee: 0, commissionRate: 0, cleaningFee: 0, total: 0 };
+    return calculateBookingCost(pricePerNight, nights, feeConfig);
+  }, [pricePerNight, nights, feeConfig]);
+  const subtotal = costs.basePrice;
+  const serviceFee = costs.serviceFee;
+  const total = costs.total;
 
   // Validation state
   const hasSelectedDates = checkInDate && checkOutDate;
@@ -229,17 +236,19 @@ export const BookingPanel: React.FC<BookingPanelProps> = ({
 
             <div className="flex justify-between text-sm">
               <span className="text-neutral-600 dark:text-neutral-400">Service fee</span>
-              <span className="font-medium text-neutral-900 dark:text-neutral-100">${serviceFee}</span>
+              <span className="font-medium text-neutral-900 dark:text-neutral-100">${serviceFee.toFixed(2)}</span>
             </div>
 
-            <div className="flex justify-between text-sm">
-              <span className="text-neutral-600 dark:text-neutral-400">Tax</span>
-              <span className="font-medium text-neutral-900 dark:text-neutral-100">${tax}</span>
-            </div>
+            {costs.commissionFee > 0 && (
+              <div className="flex justify-between text-sm">
+                <span className="text-neutral-600 dark:text-neutral-400">Commission ({(costs.commissionRate * 100).toFixed(1)}%)</span>
+                <span className="font-medium text-neutral-900 dark:text-neutral-100">${costs.commissionFee.toFixed(2)}</span>
+              </div>
+            )}
 
             <div className="flex justify-between font-semibold border-t border-neutral-200 dark:border-neutral-700 pt-3">
               <span className="text-neutral-900 dark:text-neutral-100">Total</span>
-              <span className="text-xl text-primary-600 dark:text-primary-400">${total}</span>
+              <span className="text-xl text-primary-600 dark:text-primary-400">${total.toFixed(2)}</span>
             </div>
           </div>
         )}
@@ -252,7 +261,7 @@ export const BookingPanel: React.FC<BookingPanelProps> = ({
           onClick={handleBook}
           disabled={!isValidBooking}
           isLoading={isLoading}
-          aria-label={isValidBooking ? `Book now for $${total} total` : getButtonText()}
+          aria-label={isValidBooking ? `Book now for $${total.toFixed(2)} total` : getButtonText()}
         >
           {getButtonText()}
         </Button>

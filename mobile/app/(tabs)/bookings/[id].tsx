@@ -61,6 +61,16 @@ export default function BookingDetailScreen() {
     );
   }
 
+  const STATUS_COLORS: Record<string, { bg: string; text: string; textColor: string }> = {
+    confirmed: { bg: 'bg-green-100', text: 'text-green-800', textColor: '#10B981' },
+    pending: { bg: 'bg-yellow-100', text: 'text-yellow-800', textColor: '#F59E0B' },
+    cancelled: { bg: 'bg-red-100', text: 'text-red-800', textColor: '#EF4444' },
+    checked_in: { bg: 'bg-blue-100', text: 'text-blue-800', textColor: '#3B82F6' },
+    checked_out: { bg: 'bg-purple-100', text: 'text-purple-800', textColor: '#8B5CF6' },
+    completed: { bg: 'bg-blue-100', text: 'text-blue-800', textColor: '#3B82F6' },
+  };
+  const defaultStatusColor = { bg: 'bg-gray-100', text: 'text-gray-800', textColor: '#6B7280' };
+
   return (
     <ScrollView 
       className="flex-1 bg-sand-100" 
@@ -81,7 +91,9 @@ export default function BookingDetailScreen() {
           >
             <Ionicons name="arrow-back" size={24} color="#fff" />
           </TouchableOpacity>
-          <Text className="text-xl font-bold text-white">Booking #{id}</Text>
+          <Text className="text-xl font-bold text-white">
+            {booking?.booking_ref ? `Booking ${booking.booking_ref}` : `Booking #${id}`}
+          </Text>
         </View>
       </LinearGradient>
 
@@ -99,8 +111,8 @@ export default function BookingDetailScreen() {
               }}>
                 <View className="flex-row items-center justify-between">
                   <Text className="text-moss text-sm font-medium">Status</Text>
-                  <View className="bg-green-100 px-3 py-1.5 rounded-full">
-                    <Text className="text-green-800 text-xs font-semibold capitalize">{booking.status}</Text>
+                  <View className={`${(STATUS_COLORS[booking.status] || defaultStatusColor).bg} px-3 py-1.5 rounded-full`}>
+                    <Text className={`${(STATUS_COLORS[booking.status] || defaultStatusColor).text} text-xs font-semibold capitalize`}>{booking.status.replace('_', ' ')}</Text>
                   </View>
                 </View>
               </View>

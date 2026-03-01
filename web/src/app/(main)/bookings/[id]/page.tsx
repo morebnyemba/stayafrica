@@ -95,6 +95,18 @@ export default function BookingDetailPage() {
           icon: CheckCircle,
           label: 'Completed',
         };
+      case 'checked_in':
+        return {
+          color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+          icon: CheckCircle,
+          label: 'Checked In',
+        };
+      case 'checked_out':
+        return {
+          color: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
+          icon: CheckCircle,
+          label: 'Checked Out',
+        };
       default:
         return {
           color: 'bg-primary-100 text-primary-800 dark:bg-primary-700 dark:text-sand-200',
