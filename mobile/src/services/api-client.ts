@@ -711,14 +711,29 @@ class APIClient {
 
   // ── Identity Verification ─────────────────────────────────────────────
 
+  async uploadVerificationFile(fileUri: string, fileName?: string): Promise<{ url: string; path: string }> {
+    const formData = new FormData();
+    const ext = fileUri.split('.').pop()?.toLowerCase() || 'jpg';
+    const mimeType = ext === 'png' ? 'image/png' : 'image/jpeg';
+    formData.append('file', {
+      uri: fileUri,
+      name: fileName || `document.${ext}`,
+      type: mimeType,
+    } as any);
+    const response = await this.client.post('/users/verification/upload/', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
+  }
+
   async submitVerification(data: {
     document_type: string;
     document_number: string;
     issued_country: string;
     expiry_date?: string | null;
-    front_image_url: string;
-    back_image_url?: string | null;
-    selfie_url: string;
+    front_image: string;
+    back_image?: string | null;
+    selfie_image: string;
   }): Promise<any> {
     return (await this.client.post('/users/verification/', data)).data;
   }

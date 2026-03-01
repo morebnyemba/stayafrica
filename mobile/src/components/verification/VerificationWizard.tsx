@@ -111,19 +111,36 @@ export function VerificationWizard() {
     }
   };
 
+  const [uploadStatus, setUploadStatus] = useState('');
+
   const handleSubmit = async () => {
     try {
       setIsSubmitting(true);
 
-      // Submit verification data to API
+      // Step 1: Upload images to server (like web does)
+      setUploadStatus('Uploading front image...');
+      const frontResult = await apiClient.uploadVerificationFile(data.frontImageUrl!, 'front.jpg');
+
+      let backUrl: string | null = null;
+      if (data.backImageUrl) {
+        setUploadStatus('Uploading back image...');
+        const backResult = await apiClient.uploadVerificationFile(data.backImageUrl, 'back.jpg');
+        backUrl = backResult.url;
+      }
+
+      setUploadStatus('Uploading selfie...');
+      const selfieResult = await apiClient.uploadVerificationFile(data.selfieUrl!, 'selfie.jpg');
+
+      // Step 2: Submit verification with server URLs and correct field names
+      setUploadStatus('Submitting verification...');
       const verificationData = {
-        document_type: data.documentType!,
+        document_type: data.documentType!.toLowerCase(),
         document_number: data.documentNumber!,
         issued_country: data.issuedCountry!,
         expiry_date: data.expiryDate || null,
-        front_image_url: data.frontImageUrl!,
-        back_image_url: data.backImageUrl || null,
-        selfie_url: data.selfieUrl!,
+        front_image: frontResult.url,
+        back_image: backUrl,
+        selfie_image: selfieResult.url,
       };
 
       await apiClient.submitVerification(verificationData);
@@ -144,10 +161,12 @@ export function VerificationWizard() {
       logApiError('/users/verification/', error, { action: 'submit verification' });
       const errorMessage = error?.response?.data?.detail || 
                           error?.response?.data?.message || 
+                          error?.response?.data?.error ||
                           'Failed to submit verification. Please try again.';
       Alert.alert('Error', errorMessage);
     } finally {
       setIsSubmitting(false);
+      setUploadStatus('');
     }
   };
 
@@ -496,7 +515,7 @@ export function VerificationWizard() {
             {isSubmitting ? (
               <>
                 <ActivityIndicator color="#fff" size="small" />
-                <Text className="text-white font-bold ml-2">Submitting...</Text>
+                <Text className="text-white font-bold ml-2">{uploadStatus || 'Submitting...'}</Text>
               </>
             ) : (
               <>

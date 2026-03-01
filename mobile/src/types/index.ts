@@ -309,13 +309,13 @@ export interface WithdrawalResponse {
 
 // Verification Types
 export interface VerificationData {
-  document_type: 'PASSPORT' | 'NATIONAL_ID' | 'DRIVERS_LICENSE';
+  document_type: string;
   document_number: string;
   issued_country: string;
   expiry_date: string | null;
-  front_image_url: string;
-  back_image_url: string | null;
-  selfie_url: string;
+  front_image: string;
+  back_image: string | null;
+  selfie_image: string;
 }
 
 export interface VerificationResponse {
