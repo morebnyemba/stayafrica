@@ -60,9 +60,9 @@ export function MobileSearchBar() {
             // Collapsed search button
             <button
               onClick={() => setIsExpanded(true)}
-              className="w-full flex items-center gap-2 px-4 py-2 bg-primary-700/50 hover:bg-primary-600/70 rounded-full text-sand-300 text-sm transition"
+              className="w-full flex items-center gap-2 px-4 py-2 bg-white/90 dark:bg-primary-600/80 hover:bg-white dark:hover:bg-primary-500/80 rounded-full text-primary-700 dark:text-sand-100 text-sm shadow-sm transition"
             >
-              <Search className="w-4 h-4 flex-shrink-0" />
+              <Search className="w-4 h-4 flex-shrink-0 text-secondary-600 dark:text-secondary-400" />
               <span className="truncate">Where to?</span>
             </button>
           )}
