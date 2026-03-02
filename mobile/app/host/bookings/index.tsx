@@ -121,7 +121,7 @@ export default function HostBookingsScreen() {
           <View className="flex-row items-center mb-2">
             <Ionicons name="calendar" size={16} color="#3A5C50" />
             <Text className="text-sm text-moss ml-2">
-              {format(new Date(booking.check_in), 'MMM dd')} - {format(new Date(booking.check_out), 'MMM dd, yyyy')}
+              {booking.check_in ? format(new Date(booking.check_in), 'MMM dd') : 'TBD'} - {booking.check_out ? format(new Date(booking.check_out), 'MMM dd, yyyy') : 'TBD'}
             </Text>
           </View>
 

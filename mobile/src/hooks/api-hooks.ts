@@ -297,6 +297,8 @@ export function useHostBookings() {
   return useQuery<{ results: Booking[] }>({
     queryKey: ['host', 'bookings'],
     queryFn: () => apiClient.getHostBookings(),
+    staleTime: 0,
+    refetchOnMount: true,
   });
 }
 

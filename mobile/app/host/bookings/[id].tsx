@@ -199,12 +199,12 @@ export default function HostBookingDetailScreen() {
                     <View className="flex-row items-center">
                       <Ionicons name="calendar" size={16} color="#3A5C50" />
                       <Text className="text-forest font-bold ml-2">
-                        {new Date(booking.check_in).toLocaleDateString('en-US', { 
+                        {booking.check_in ? new Date(booking.check_in).toLocaleDateString('en-US', { 
                           weekday: 'short',
                           month: 'short', 
                           day: 'numeric',
                           year: 'numeric'
-                        })}
+                        }) : 'TBD'}
                       </Text>
                     </View>
                   </View>
@@ -214,12 +214,12 @@ export default function HostBookingDetailScreen() {
                     <View className="flex-row items-center">
                       <Ionicons name="calendar" size={16} color="#3A5C50" />
                       <Text className="text-forest font-bold ml-2">
-                        {new Date(booking.check_out).toLocaleDateString('en-US', { 
+                        {booking.check_out ? new Date(booking.check_out).toLocaleDateString('en-US', { 
                           weekday: 'short',
                           month: 'short', 
                           day: 'numeric',
                           year: 'numeric'
-                        })}
+                        }) : 'TBD'}
                       </Text>
                     </View>
                   </View>

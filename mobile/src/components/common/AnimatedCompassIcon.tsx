@@ -38,8 +38,23 @@ export function AnimatedCompassIcon({
     outputRange: ['0deg', '360deg'],
   });
 
+  // Expand the container to the diagonal so corners aren't clipped during rotation
+  const containerSize = Math.ceil(size * Math.SQRT2);
+
   return (
-    <Animated.View style={[{ transform: [{ rotate }], overflow: 'visible' }, style]}>
+    <Animated.View
+      style={[
+        {
+          width: containerSize,
+          height: containerSize,
+          alignItems: 'center',
+          justifyContent: 'center',
+          transform: [{ rotate }],
+          overflow: 'visible',
+        },
+        style,
+      ]}
+    >
       <Ionicons name={filled ? 'compass' : 'compass-outline'} size={size} color={color} />
     </Animated.View>
   );

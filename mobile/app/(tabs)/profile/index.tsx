@@ -24,6 +24,8 @@ export default function ProfileScreen() {
       await switchProfile(target);
       if (target === 'host') {
         router.push('/(tabs)/host');
+      } else {
+        router.push('/(tabs)/dashboard');
       }
     } catch (error: any) {
       Alert.alert('Error', error.message || 'Failed to switch profile');

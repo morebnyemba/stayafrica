@@ -227,13 +227,13 @@ export default function ConversationDetailScreen() {
           keyboardShouldPersistTaps="handled"
           renderItem={({ item, index }) => {
             const messageText = item.text || item.content || '';
-            const isOwnMessage = item.is_own_message;
+            const isOwnMessage = item.is_own_message ?? false;
             const isEditing = editingMessageId === item.id;
             
             // Check if we should show a date separator
-            const messageTime = new Date(item.created_at || '');
+            const messageTime = item.created_at ? new Date(item.created_at) : new Date();
             const prevMessage = index > 0 ? messages[index - 1] : null;
-            const prevTime = prevMessage ? new Date(prevMessage.created_at || '') : null;
+            const prevTime = prevMessage?.created_at ? new Date(prevMessage.created_at) : null;
             const isNewDay = !prevTime || messageTime.toDateString() !== prevTime.toDateString();
 
             return (
