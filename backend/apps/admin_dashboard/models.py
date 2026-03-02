@@ -122,11 +122,6 @@ class SystemConfiguration(models.Model):
         blank=True,
         help_text="Flutterwave Encryption Key"
     )
-    flutterwave_webhook_secret = models.CharField(
-        max_length=255,
-        blank=True,
-        help_text="Flutterwave Webhook Secret Hash (set in Flutterwave Dashboard → Settings → Webhooks)"
-    )
     
     paystack_public_key= models.CharField(
         max_length=255, 

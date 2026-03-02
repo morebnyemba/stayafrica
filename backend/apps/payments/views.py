@@ -15,6 +15,9 @@ from services.audit_logger import AuditLoggerService
 import logging
 import json
 import secrets
+import hashlib
+import hmac
+import requests
 
 logger = logging.getLogger(__name__)
 
@@ -258,11 +261,18 @@ class PaymentViewSet(viewsets.ModelViewSet):
             payment_status = request.data.get('status', '')
             paynow_hash = request.data.get('hash')
             
-            # Hash verification disabled – Paynow's hash computation is
-            # undocumented and the SDK does not expose a verify helper.
-            # We rely on the obscure webhook URL + reference matching instead.
-            if paynow_hash:
-                logger.info(f"Paynow webhook hash present but verification is disabled for reference: {gateway_ref}")
+            # Verify hash: sort all params (except 'hash') alphabetically,
+            # concatenate their values, append integration key, SHA512.
+            paynow_key = getattr(payment_service, 'paynow_integration_key', '')
+            if paynow_hash and paynow_key:
+                params = {k: v for k, v in request.data.items() if k.lower() != 'hash'}
+                sorted_values = ''.join(str(v) for _, v in sorted(params.items()))
+                expected_hash = hashlib.sha512(
+                    (sorted_values + paynow_key).encode('utf-8')
+                ).hexdigest().upper()
+                if not hmac.compare_digest(paynow_hash.upper(), expected_hash):
+                    logger.error(f"Invalid Paynow webhook hash for reference: {gateway_ref}")
+                    return Response({'error': 'Invalid hash'}, status=status.HTTP_403_FORBIDDEN)
             
             logger.info(f"Paynow webhook received: reference={gateway_ref}, status={payment_status}")
         
@@ -271,15 +281,41 @@ class PaymentViewSet(viewsets.ModelViewSet):
             if not payment_service.verify_paypal_webhook(dict(request.headers), raw_body.decode('utf-8')):
                 return Response({'error': 'Invalid signature'}, status=status.HTTP_403_FORBIDDEN)
             
-            # Extract payment info from PayPal webhook
+            # Extract payment info from PayPal webhook (Orders API v2 / CAPTURE intent)
             event_type = request.data.get('event_type')
             resource = request.data.get('resource', {})
-            gateway_ref = resource.get('id')
             
-            if event_type == 'PAYMENT.SALE.COMPLETED':
+            if event_type == 'PAYMENT.CAPTURE.COMPLETED':
+                # For capture events, gateway_ref is the order ID stored in
+                # supplementary_data or purchase_units, not the capture ID.
+                gateway_ref = (
+                    resource.get('supplementary_data', {}).get('related_ids', {}).get('order_id')
+                    or resource.get('custom_id')
+                )
+                if not gateway_ref:
+                    # Fallback: look up payment by capture ID in purchase_units
+                    # The capture ID is resource['id'], try to find payment via it
+                    capture_id = resource.get('id')
+                    logger.info(f"PayPal capture webhook: looking up by capture_id={capture_id}")
+                    try:
+                        payment = Payment.objects.select_related('booking__guest').get(
+                            provider='paypal',
+                            status='initiated',
+                        )
+                        gateway_ref = payment.gateway_ref
+                    except (Payment.DoesNotExist, Payment.MultipleObjectsReturned):
+                        gateway_ref = capture_id
                 payment_status = 'completed'
-            elif event_type in ['PAYMENT.SALE.DENIED', 'PAYMENT.SALE.REFUNDED']:
+            elif event_type in ['PAYMENT.CAPTURE.DENIED', 'PAYMENT.CAPTURE.REFUNDED']:
+                gateway_ref = (
+                    resource.get('supplementary_data', {}).get('related_ids', {}).get('order_id')
+                    or resource.get('custom_id')
+                    or resource.get('id')
+                )
                 payment_status = 'failed'
+            elif event_type == 'CHECKOUT.ORDER.APPROVED':
+                gateway_ref = resource.get('id')
+                payment_status = 'pending'
             else:
                 return Response({'status': 'ignored'})
         
@@ -314,6 +350,51 @@ class PaymentViewSet(viewsets.ModelViewSet):
             
             payment_status = flw_status
             logger.info(f"Flutterwave webhook received: tx_ref={gateway_ref}, status={payment_status}, event={event_type}")
+        
+        elif provider == 'paystack':
+            # Paystack uses HMAC-SHA512 of raw body with secret key in x-paystack-signature header
+            paystack_sig = request.headers.get('x-paystack-signature') or request.headers.get('X-Paystack-Signature')
+            paystack_secret = payment_service.paystack_secret_key
+            if paystack_secret:
+                expected_sig = hmac.new(
+                    paystack_secret.encode('utf-8'),
+                    raw_body,
+                    hashlib.sha512,
+                ).hexdigest()
+                if not paystack_sig or not hmac.compare_digest(paystack_sig, expected_sig):
+                    logger.error("Invalid Paystack webhook: HMAC-SHA512 mismatch")
+                    return Response({'error': 'Invalid signature'}, status=status.HTTP_403_FORBIDDEN)
+            
+            # Paystack nests payload under "data"
+            ps_event = request.data.get('event')
+            ps_data = request.data.get('data', {})
+            gateway_ref = ps_data.get('reference')
+            ps_status = (ps_data.get('status') or '').lower()
+            
+            if ps_event == 'charge.success':
+                payment_status = ps_status  # typically "success"
+            elif ps_event in ('charge.failed', 'transfer.failed'):
+                payment_status = 'failed'
+            else:
+                return Response({'status': 'ignored'})
+            
+            # Server-side verification: confirm with Paystack verify endpoint
+            if gateway_ref and paystack_secret:
+                verify_resp = requests.get(
+                    f'https://api.paystack.co/transaction/verify/{gateway_ref}',
+                    headers={
+                        'Authorization': f'Bearer {paystack_secret}',
+                    },
+                    timeout=30,
+                )
+                if verify_resp.status_code == 200:
+                    verify_data = verify_resp.json().get('data', {})
+                    payment_status = (verify_data.get('status') or ps_status).lower()
+                    gateway_ref = verify_data.get('reference') or gateway_ref
+                else:
+                    logger.error(f"Paystack transaction verification failed for ref {gateway_ref}")
+            
+            logger.info(f"Paystack webhook received: reference={gateway_ref}, status={payment_status}, event={ps_event}")
         
         else:
             # For other providers (PayFast, Ozow, etc.), use existing signature verification
@@ -1083,33 +1164,30 @@ class PaymentMethodViewSet(viewsets.ModelViewSet):
     
     def _tokenize_stripe(self, data):
         """
-        Tokenize with Stripe using official SDK
-        Creates and attaches payment method to customer
+        Store a Stripe PaymentMethod created client-side via Stripe.js Elements.
+        Card tokenization MUST happen client-side (PCI DSS requirement).
+        The client sends us the pm_xxx PaymentMethod ID after creation.
         """
         try:
             import stripe
             from apps.admin_dashboard.models import SystemConfiguration
-            
+
+            # Require a client-side token (pm_xxx)
+            token = data.get('token') or data.get('payment_method_id')
+            if not token or not str(token).startswith('pm_'):
+                raise ValueError(
+                    'Card tokenization must happen client-side via Stripe.js Elements. '
+                    'Pass the resulting PaymentMethod ID (pm_xxx) in the "token" field.'
+                )
+
+            # Optionally verify the PaymentMethod exists
             config = SystemConfiguration.get_config()
             stripe.api_key = config.stripe_secret_key
-            
-            # Create payment method from card details
-            payment_method = stripe.PaymentMethod.create(
-                type='card',
-                card={
-                    'number': data.get('card_number', ''),
-                    'exp_month': data.get('expiry_month'),
-                    'exp_year': data.get('expiry_year'),
-                    'cvc': data.get('cvv', ''),
-                },
-            )
-            
-            logger.info(f'Stripe payment method created: {payment_method.id}')
-            return payment_method.id
-            
-        except stripe.error.CardError as e:
-            logger.error(f'Stripe card error: {e.user_message}')
-            raise Exception(f'Card validation failed: {e.user_message}')
+            pm = stripe.PaymentMethod.retrieve(token)
+
+            logger.info(f'Stripe payment method verified: {pm.id}')
+            return pm.id
+
         except stripe.error.StripeError as e:
             logger.error(f'Stripe error: {str(e)}')
             raise Exception(f'Stripe tokenization failed: {str(e)}')
@@ -1117,15 +1195,14 @@ class PaymentMethodViewSet(viewsets.ModelViewSet):
     def _tokenize_paynow(self, data, method_type):
         """
         Tokenize with Paynow
-        For cards: Paynow will handle during transaction
+        For cards: Paynow handles during redirect-based transaction (no server-side card data)
         For mobile: Verify phone number format
         """
         try:
             if method_type == 'card':
-                # Paynow accepts card details in transaction
-                # Return token representing card type and last 4
-                card_number = data.get('card_number', '')
-                last_four = card_number[-4:] if len(card_number) >= 4 else ''
+                # Paynow is redirect-based; card details are entered on Paynow's hosted page.
+                # We can only store a placeholder reference.
+                last_four = data.get('last_four', '')
                 return f'paynow_card_{last_four}'
             
             elif method_type == 'mobile':
@@ -1189,8 +1266,10 @@ class PaymentMethodViewSet(viewsets.ModelViewSet):
     
     def _tokenize_paystack(self, data, method_type):
         """
-        Tokenize with Paystack REST API
-        Handles cards and bank transfers
+        Store a Paystack payment method.
+        Card tokenization MUST happen client-side via Paystack Inline JS.
+        After a successful charge, Paystack returns an authorization_code
+        that can be used for recurring charges.
         """
         try:
             from apps.admin_dashboard.models import SystemConfiguration
@@ -1201,20 +1280,17 @@ class PaymentMethodViewSet(viewsets.ModelViewSet):
             if not secret_key:
                 raise Exception('Paystack API key not configured')
             
-            headers = {
-                'Authorization': f'Bearer {secret_key}',
-                'Content-Type': 'application/json'
-            }
-            
             if method_type == 'card':
-                # Paystack charges with card happen in transaction
-                # We validate the card details and return identifier
-                card_number = data.get('card_number', '')
-                last_four = card_number[-4:] if len(card_number) >= 4 else ''
-                
-                # Could call Paystack BIN lookup for validation
-                logger.info(f'Paystack card method verified: {last_four}')
-                return f'paystack_card_{last_four}'
+                # Card tokens must come from client-side Paystack Inline JS.
+                # After a successful charge, use the authorization_code for reuse.
+                token = data.get('token') or data.get('authorization_code')
+                if not token:
+                    raise ValueError(
+                        'Card tokenization must happen client-side via Paystack Inline. '
+                        'Pass the resulting authorization_code in the "token" field.'
+                    )
+                logger.info('Paystack card token received from client')
+                return token
             
             elif method_type == 'bank':
                 # Bank transfer

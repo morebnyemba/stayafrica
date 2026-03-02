@@ -407,7 +407,7 @@ class PaymentGatewayService:
                     'error': 'Paynow payment gateway is not configured'
                 }
 
-            # Override return URL if provided
+            # Override return URL if provided (safe: service is per-request)
             if return_url:
                 self.paynow.return_url = return_url
             
@@ -590,7 +590,8 @@ class PaymentGatewayService:
             response = requests.post(
                 'https://api.paystack.co/transaction/initialize',
                 headers=headers,
-                json=payload
+                json=payload,
+                timeout=30
             )
             
             if response.status_code == 200:
@@ -644,6 +645,7 @@ class PaymentGatewayService:
                 f'{self.paypal_base_url}/v1/oauth2/token',
                 headers=headers,
                 data={'grant_type': 'client_credentials'},
+                timeout=30
             )
             if response.status_code == 200:
                 data = response.json()
@@ -959,6 +961,7 @@ class PaymentGatewayService:
                 'https://api.paystack.co/refund',
                 headers=headers,
                 json=payload,
+                timeout=30
             )
             data = resp.json()
             ok = resp.status_code == 200 and data.get('status') is True
@@ -1094,7 +1097,8 @@ class PaymentGatewayService:
                     'Content-Type': 'application/json',
                     'Authorization': f'Bearer {access_token}'
                 },
-                json=verify_data
+                json=verify_data,
+                timeout=30
             )
             
             if response.status_code == 200:
