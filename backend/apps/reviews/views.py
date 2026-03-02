@@ -120,6 +120,18 @@ class ReviewViewSet(viewsets.ModelViewSet):
             text=sanitized_text
         )
         
+        # Notify host about new review
+        try:
+            from tasks.notification_tasks import send_push_notification
+            send_push_notification.delay(
+                booking.rental_property.host.id,
+                'New Review Received',
+                f'{self.request.user.first_name or "A guest"} left a {rating}-star review for {booking.rental_property.title}.',
+                {'review_id': str(review.id), 'booking_id': str(booking.id), 'type': 'new_review'}
+            )
+        except Exception as e:
+            logger.warning(f"Could not send review notification: {e}")
+        
         # Log the action
         AuditLoggerService.log_action(
             user=self.request.user,

@@ -95,10 +95,25 @@ class PropertyViewSet(viewsets.ModelViewSet):
             raise
     
     def perform_create(self, serializer):
-        """Set host to current user"""
+        """Set host to current user and trigger async geocoding"""
         try:
-            serializer.save(host=self.request.user)
+            property_instance = serializer.save(host=self.request.user)
             logger.info(f"Property created successfully by user {self.request.user.id}")
+            
+            # Async geocode the property address if coordinates missing
+            if not property_instance.location:
+                try:
+                    from tasks.geocoding_tasks import geocode_address_async
+                    address = ', '.join(filter(None, [
+                        property_instance.address,
+                        property_instance.city,
+                        property_instance.state,
+                        property_instance.country,
+                    ]))
+                    if address:
+                        geocode_address_async.delay(address, property_instance.country)
+                except Exception as e:
+                    logger.warning(f"Could not queue geocoding for property {property_instance.id}: {e}")
         except Exception as e:
             logger.error(f"Error in perform_create: {str(e)}", exc_info=True)
             raise

@@ -238,3 +238,20 @@ def send_daily_notifications():
     except Exception as e:
         logger.error(f"Error in daily notification task: {str(e)}")
         return False
+
+
+@shared_task
+def process_scheduled_messages():
+    """
+    Process due automated/scheduled messages from hosts.
+    Should run frequently (e.g., every 5–10 minutes) via Celery Beat.
+    """
+    try:
+        from services.automated_messaging_service import AutomatedMessagingService
+        count = AutomatedMessagingService.process_scheduled_messages()
+        if count:
+            logger.info(f"Processed {count} scheduled messages")
+        return count
+    except Exception as e:
+        logger.error(f"Error processing scheduled messages: {e}")
+        return 0

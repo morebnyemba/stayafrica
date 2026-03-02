@@ -375,6 +375,10 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'tasks.notification_tasks.send_daily_notifications',
         'schedule': crontab(hour=7, minute=0),  # 07:00 UTC
     },
+    'process-scheduled-messages': {
+        'task': 'tasks.notification_tasks.process_scheduled_messages',
+        'schedule': timedelta(minutes=10),  # Every 10 minutes
+    },
 
     # ── Analytics (runs after midnight so yesterday's data is complete) ──
     'daily-property-analytics': {

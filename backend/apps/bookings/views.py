@@ -187,6 +187,20 @@ class BookingViewSet(viewsets.ModelViewSet):
             except Exception as e:
                 logger.warning(f"Could not send push notification: {e}")
         
+        # Send confirmation email
+        if CELERY_AVAILABLE and send_booking_confirmation_email:
+            try:
+                send_booking_confirmation_email.delay(str(booking.id))
+            except Exception as e:
+                logger.warning(f"Could not queue confirmation email: {e}")
+        
+        # Trigger automated welcome message from host
+        try:
+            from services.automated_messaging_service import AutomatedMessagingService
+            AutomatedMessagingService.trigger_automated_message('booking_confirmed', booking=booking)
+        except Exception as e:
+            logger.warning(f"Could not trigger automated message: {e}")
+        
         logger.info(f"Booking confirmed: {booking.booking_ref}")
         return Response({'status': 'confirmed', 'booking_ref': booking.booking_ref})
     
@@ -268,6 +282,28 @@ class BookingViewSet(viewsets.ModelViewSet):
                 logger.error(f"Auto-refund FAILED for {booking.booking_ref}")
         
         logger.info(f"Booking cancelled: {booking.booking_ref}")
+        
+        # Send cancellation notifications
+        try:
+            from tasks.notification_tasks import send_push_notification
+            cancelled_by = 'host' if request.user == booking.rental_property.host else 'guest'
+            # Notify guest
+            send_push_notification.delay(
+                booking.guest.id,
+                'Booking Cancelled',
+                f'Your booking {booking.booking_ref} at {booking.rental_property.title} has been cancelled.',
+                {'booking_id': str(booking.id), 'type': 'booking_cancelled'}
+            )
+            # Notify host
+            send_push_notification.delay(
+                booking.rental_property.host.id,
+                'Booking Cancelled',
+                f'Booking {booking.booking_ref} has been cancelled by {cancelled_by}.',
+                {'booking_id': str(booking.id), 'type': 'booking_cancelled'}
+            )
+        except Exception as e:
+            logger.warning(f"Could not send cancellation notifications: {e}")
+        
         response_data = {'status': 'cancelled', 'booking_ref': booking.booking_ref}
         if refund_info:
             response_data['refund'] = refund_info
@@ -314,6 +350,33 @@ class BookingViewSet(viewsets.ModelViewSet):
                 object_id=booking.id,
                 changes={'status': 'completed'}
             )
+        
+        # Send completion notifications
+        try:
+            from tasks.notification_tasks import send_push_notification
+            # Notify guest
+            send_push_notification.delay(
+                booking.guest.id,
+                'Stay Completed',
+                f'Your stay at {booking.rental_property.title} is complete. We hope you enjoyed it!',
+                {'booking_id': str(booking.id), 'type': 'booking_completed'}
+            )
+            # Notify host
+            send_push_notification.delay(
+                booking.rental_property.host.id,
+                'Booking Completed',
+                f'Booking {booking.booking_ref} has been marked as completed.',
+                {'booking_id': str(booking.id), 'type': 'booking_completed'}
+            )
+        except Exception as e:
+            logger.warning(f"Could not send completion notifications: {e}")
+        
+        # Trigger automated checkout / review-request message
+        try:
+            from services.automated_messaging_service import AutomatedMessagingService
+            AutomatedMessagingService.trigger_automated_message('booking_completed', booking=booking)
+        except Exception as e:
+            logger.warning(f"Could not trigger automated message: {e}")
         
         logger.info(f"Booking completed: {booking.booking_ref}")
         return Response({'status': 'completed', 'booking_ref': booking.booking_ref})
