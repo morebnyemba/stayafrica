@@ -337,6 +337,8 @@ if not DEBUG:
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
     SECURE_SSL_REDIRECT = bool(os.getenv('SECURE_SSL_REDIRECT', 'True') == 'True')
+    # Exempt internal-only paths from SSL redirect (Prometheus scrapes backend directly over HTTP)
+    SECURE_REDIRECT_EXEMPT = [r'^metrics/']
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
     X_FRAME_OPTIONS = 'DENY'
