@@ -6,6 +6,7 @@
  */
 import * as AuthSession from 'expo-auth-session';
 import * as WebBrowser from 'expo-web-browser';
+import * as AppleAuthentication from 'expo-apple-authentication';
 import { apiClient } from './api-client';
 import { Platform } from 'react-native';
 
@@ -34,8 +35,8 @@ const GOOGLE_DISCOVERY: AuthSession.DiscoveryDocument = {
 };
 
 const FACEBOOK_DISCOVERY: AuthSession.DiscoveryDocument = {
-  authorizationEndpoint: 'https://www.facebook.com/v13.0/dialog/oauth',
-  tokenEndpoint: 'https://graph.facebook.com/v13.0/oauth/access_token',
+  authorizationEndpoint: 'https://www.facebook.com/v21.0/dialog/oauth',
+  tokenEndpoint: 'https://graph.facebook.com/v21.0/oauth/access_token',
 };
 
 // ── Redirect URI ────────────────────────────────────────────────────
@@ -84,7 +85,7 @@ class SocialAuthService {
 
   // ── Google ──────────────────────────────────────────────────────
 
-  async loginWithGoogle(): Promise<SocialAuthResult> {
+  async loginWithGoogle(role?: 'guest' | 'host'): Promise<SocialAuthResult> {
     await this.loadConfig();
     const clientId = this.providers.google?.client_id;
     if (!clientId) throw new Error('Google login is not configured');
@@ -109,13 +110,12 @@ class SocialAuthService {
       throw new Error((result as any).params?.error_description || 'Google sign-in failed');
     }
 
-    // Exchange the code via our backend
-    return this.exchangeCode('google', result.params.code, redirectUri);
+    return this.exchangeCode('google', result.params.code, redirectUri, role);
   }
 
   // ── Facebook ────────────────────────────────────────────────────
 
-  async loginWithFacebook(): Promise<SocialAuthResult> {
+  async loginWithFacebook(role?: 'guest' | 'host'): Promise<SocialAuthResult> {
     await this.loadConfig();
     const clientId = this.providers.facebook?.client_id;
     if (!clientId) throw new Error('Facebook login is not configured');
@@ -139,24 +139,39 @@ class SocialAuthService {
       throw new Error((result as any).params?.error_description || 'Facebook sign-in failed');
     }
 
-    return this.exchangeCode('facebook', result.params.code, redirectUri);
+    return this.exchangeCode('facebook', result.params.code, redirectUri, role);
   }
 
   // ── Apple ───────────────────────────────────────────────────────
 
-  async loginWithApple(): Promise<SocialAuthResult> {
-    // Apple Sign In on iOS uses the native module (expo-apple-authentication)
-    // For now, fall back to web-based flow on non-iOS
+  async loginWithApple(role?: 'guest' | 'host'): Promise<SocialAuthResult> {
     await this.loadConfig();
     const clientId = this.providers.apple?.client_id;
     if (!clientId) throw new Error('Apple login is not configured');
 
     if (Platform.OS === 'ios') {
-      // On iOS, prefer native Apple Authentication
-      // This would require expo-apple-authentication — we do a web fallback for now
-      throw new Error('Apple Sign In via native iOS is not yet implemented. Please use email login.');
+      // Native Apple Sign-In (required by App Store guidelines on iOS)
+      const isAvailable = await AppleAuthentication.isAvailableAsync();
+      if (!isAvailable) {
+        throw new Error('Apple Sign In is not available on this device');
+      }
+
+      const credential = await AppleAuthentication.signInAsync({
+        requestedScopes: [
+          AppleAuthentication.AppleAuthenticationScope.EMAIL,
+          AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+        ],
+      });
+
+      if (!credential.authorizationCode) {
+        throw new Error('Apple Sign In did not return an authorization code');
+      }
+
+      // Exchange the native authorization code via our backend
+      return this.exchangeCode('apple', credential.authorizationCode, 'native-ios', role);
     }
 
+    // Non-iOS: web-based Apple OAuth flow
     const redirectUri = getRedirectUri();
 
     const discovery: AuthSession.DiscoveryDocument = {
@@ -181,7 +196,7 @@ class SocialAuthService {
       throw new Error((result as any).params?.error_description || 'Apple sign-in failed');
     }
 
-    return this.exchangeCode('apple', result.params.code, redirectUri);
+    return this.exchangeCode('apple', result.params.code, redirectUri, role);
   }
 
   // ── Code exchange via backend ───────────────────────────────────
@@ -190,10 +205,11 @@ class SocialAuthService {
     provider: string,
     code: string,
     redirectUri: string,
+    role?: 'guest' | 'host',
   ): Promise<SocialAuthResult> {
     const response = await apiClient.client.post(
       `/auth/social/${provider}/login/`,
-      { code, redirect_uri: redirectUri },
+      { code, redirect_uri: redirectUri, ...(role && { role }) },
     );
 
     const { access, refresh, user } = response.data;

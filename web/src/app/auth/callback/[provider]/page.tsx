@@ -42,7 +42,20 @@ export default function OAuthCallbackPage() {
         return;
       }
 
+      // Validate CSRF state parameter
+      const savedState = sessionStorage.getItem('oauth_state');
+      sessionStorage.removeItem('oauth_state');
+      if (savedState && state !== savedState) {
+        setStatus('error');
+        setErrorMessage('Security validation failed (state mismatch). Please try again.');
+        return;
+      }
+
       try {
+        // Read role selected before OAuth redirect (signup flow)
+        const oauthRole = sessionStorage.getItem('oauth_role');
+        sessionStorage.removeItem('oauth_role');
+
         // Exchange authorization code for tokens via backend
         const response = await fetch(`${API_BASE}/auth/social/${provider}/login/`, {
           method: 'POST',
@@ -50,6 +63,7 @@ export default function OAuthCallbackPage() {
           body: JSON.stringify({
             code,
             ...(state && { state }),
+            ...(oauthRole && { role: oauthRole }),
             redirect_uri: `${window.location.origin}/auth/callback/${provider}`,
           }),
         });

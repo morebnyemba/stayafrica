@@ -14,10 +14,15 @@ from django.contrib.auth import get_user_model
 from allauth.socialaccount.models import SocialApp
 from drf_spectacular.utils import extend_schema, OpenApiResponse, inline_serializer
 from rest_framework import serializers
+from utils.decorators import api_ratelimit
 
+import jwt
+import time
+import logging
 import requests
 
 User = get_user_model()
+logger = logging.getLogger(__name__)
 
 
 @extend_schema(
@@ -56,8 +61,11 @@ def social_auth_config(request):
 GOOGLE_TOKEN_URL = 'https://oauth2.googleapis.com/token'
 GOOGLE_USERINFO_URL = 'https://www.googleapis.com/oauth2/v2/userinfo'
 
-FACEBOOK_TOKEN_URL = 'https://graph.facebook.com/v13.0/oauth/access_token'
+FACEBOOK_TOKEN_URL = 'https://graph.facebook.com/v21.0/oauth/access_token'
 FACEBOOK_USERINFO_URL = 'https://graph.facebook.com/me?fields=id,email,first_name,last_name,picture'
+
+APPLE_TOKEN_URL = 'https://appleid.apple.com/auth/token'
+APPLE_KEYS_URL = 'https://appleid.apple.com/auth/keys'
 
 
 def _exchange_google_code(code: str, redirect_uri: str):
@@ -119,20 +127,106 @@ def _exchange_facebook_code(code: str, redirect_uri: str):
     return user_resp.json(), None
 
 
+def _generate_apple_client_secret(app):
+    """
+    Generate a short-lived JWT client secret for Apple Sign In.
+    Apple requires: team_id, key_id, and a .p8 private key.
+    These are stored in the SocialApp.settings JSON field:
+      {"team_id": "...", "key_id": "...", "private_key": "-----BEGIN PRIVATE KEY-----\\n..."}
+    """
+    settings = app.settings or {}
+    team_id = settings.get('team_id', '')
+    key_id = settings.get('key_id', '')
+    private_key = settings.get('private_key', '')
+
+    if not all([team_id, key_id, private_key]):
+        return None
+
+    now = int(time.time())
+    payload = {
+        'iss': team_id,
+        'iat': now,
+        'exp': now + 86400 * 180,  # 6 months max
+        'aud': 'https://appleid.apple.com',
+        'sub': app.client_id,
+    }
+    return jwt.encode(payload, private_key, algorithm='ES256', headers={'kid': key_id})
+
+
 def _exchange_apple_code(code: str, redirect_uri: str):
-    """Exchange Apple auth code for user info (simplified)."""
+    """Exchange Apple auth code for user info via id_token."""
     app = SocialApp.objects.filter(provider='apple').first()
     if not app:
         return None, 'Apple social login is not configured'
 
-    # Apple token exchange requires a client secret JWT — simplified here
-    # In production, you'd generate a JWT with the team_id / key_id / private_key
-    return None, 'Apple Sign In server exchange not fully implemented'
+    client_secret = _generate_apple_client_secret(app)
+    if not client_secret:
+        return None, (
+            'Apple Sign In is not fully configured. '
+            'Set team_id, key_id, and private_key in the Apple SocialApp settings (Django Admin).'
+        )
+
+    # Exchange auth code for tokens
+    token_resp = requests.post(APPLE_TOKEN_URL, data={
+        'client_id': app.client_id,
+        'client_secret': client_secret,
+        'code': code,
+        'grant_type': 'authorization_code',
+        'redirect_uri': redirect_uri,
+    }, timeout=15)
+
+    if token_resp.status_code != 200:
+        logger.error(f'Apple token exchange failed: {token_resp.text}')
+        return None, f'Failed to exchange Apple code: {token_resp.text}'
+
+    token_data = token_resp.json()
+    id_token = token_data.get('id_token')
+    if not id_token:
+        return None, 'Apple did not return an id_token'
+
+    # Decode id_token (Apple's JWT). We verify the signature using Apple's public keys.
+    try:
+        # Fetch Apple's public keys
+        keys_resp = requests.get(APPLE_KEYS_URL, timeout=10)
+        apple_keys = keys_resp.json().get('keys', [])
+
+        # Decode header to find matching key
+        header = jwt.get_unverified_header(id_token)
+        matching_key = next((k for k in apple_keys if k['kid'] == header['kid']), None)
+        if not matching_key:
+            return None, 'Apple id_token key not found in Apple JWKS'
+
+        public_key = jwt.algorithms.RSAAlgorithm.from_jwk(matching_key)
+        claims = jwt.decode(
+            id_token,
+            public_key,
+            algorithms=['RS256'],
+            audience=app.client_id,
+            issuer='https://appleid.apple.com',
+        )
+    except jwt.PyJWTError as e:
+        logger.error(f'Apple id_token verification failed: {e}')
+        return None, f'Apple id_token verification failed: {str(e)}'
+
+    # Apple returns: sub (unique user ID), email (optional, only on first login)
+    user_info = {
+        'sub': claims.get('sub', ''),
+        'email': claims.get('email', ''),
+        'email_verified': claims.get('email_verified', False),
+    }
+    return user_info, None
 
 
 def _get_or_create_social_user(provider: str, social_id: str, email: str,
-                                first_name: str = '', last_name: str = ''):
-    """Get or create a user from social provider data."""
+                                first_name: str = '', last_name: str = '',
+                                email_verified: bool = True, role: str = 'guest'):
+    """
+    Get or create a user from social provider data.
+
+    Account linking (step 2) only happens when email_verified=True to
+    prevent a malicious provider account with an unverified email from
+    hijacking an existing local account.
+    """
     field_map = {
         'google': 'google_id',
         'facebook': 'facebook_id',
@@ -149,12 +243,13 @@ def _get_or_create_social_user(provider: str, social_id: str, email: str,
     except User.DoesNotExist:
         pass
 
-    # 2. Try to find by email and link
-    if email:
+    # 2. Try to find by email and link — only if provider email is verified
+    if email and email_verified:
         try:
             user = User.objects.get(email=email)
             setattr(user, id_field, social_id)
             user.save(update_fields=[id_field])
+            logger.info(f'Linked {provider} account (id={social_id}) to existing user {user.email}')
             return user
         except User.DoesNotExist:
             pass
@@ -163,11 +258,16 @@ def _get_or_create_social_user(provider: str, social_id: str, email: str,
     if not email:
         return None
 
+    # Only allow 'guest' or 'host' roles on creation
+    if role not in ('guest', 'host'):
+        role = 'guest'
+
     user = User.objects.create_user(
         email=email,
         username=email,
         first_name=first_name or '',
         last_name=last_name or '',
+        role=role,
         is_verified=True,  # Social accounts are pre-verified
         **{id_field: social_id},
     )
@@ -187,6 +287,7 @@ def _get_or_create_social_user(provider: str, social_id: str, email: str,
             'code': serializers.CharField(required=False, help_text='OAuth authorization code'),
             'access_token': serializers.CharField(required=False, help_text='OAuth access token (alternative)'),
             'redirect_uri': serializers.CharField(required=True),
+            'role': serializers.ChoiceField(choices=['guest', 'host'], required=False, help_text='Desired role for new accounts (default: guest)'),
         },
     ),
     responses={
@@ -197,6 +298,7 @@ def _get_or_create_social_user(provider: str, social_id: str, email: str,
 )
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@api_ratelimit(rate='20/m')
 def social_login(request, provider):
     """
     Exchange OAuth code / access_token for StayAfrica JWT.
@@ -209,6 +311,7 @@ def social_login(request, provider):
     code = request.data.get('code')
     access_token = request.data.get('access_token')
     redirect_uri = request.data.get('redirect_uri', '')
+    requested_role = request.data.get('role', 'guest')
 
     if not code and not access_token:
         return Response(
@@ -266,21 +369,26 @@ def social_login(request, provider):
         )
 
     # ── Normalise user info across providers ─────────────────────
+    email_verified = True  # Default: Google always verifies; Facebook see below
     if provider == 'google':
         social_id = str(user_info.get('id', ''))
         email = user_info.get('email', '')
         first_name = user_info.get('given_name', '')
         last_name = user_info.get('family_name', '')
+        email_verified = user_info.get('verified_email', True)
     elif provider == 'facebook':
         social_id = str(user_info.get('id', ''))
         email = user_info.get('email', '')
         first_name = user_info.get('first_name', '')
         last_name = user_info.get('last_name', '')
+        # Facebook does NOT guarantee email is verified
+        email_verified = False
     elif provider == 'apple':
         social_id = str(user_info.get('sub', user_info.get('id', '')))
         email = user_info.get('email', '')
         first_name = user_info.get('name', {}).get('firstName', '') if isinstance(user_info.get('name'), dict) else ''
         last_name = user_info.get('name', {}).get('lastName', '') if isinstance(user_info.get('name'), dict) else ''
+        email_verified = user_info.get('email_verified', False)
     else:
         return Response({'detail': f'Unknown provider: {provider}'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -288,7 +396,7 @@ def social_login(request, provider):
         return Response({'detail': 'No social ID returned by provider'}, status=status.HTTP_401_UNAUTHORIZED)
 
     # ── Get or create user ───────────────────────────────────────
-    user = _get_or_create_social_user(provider, social_id, email, first_name, last_name)
+    user = _get_or_create_social_user(provider, social_id, email, first_name, last_name, email_verified=email_verified, role=requested_role)
     if not user:
         return Response(
             {'detail': 'Unable to create or find user account. An email address is required.'},

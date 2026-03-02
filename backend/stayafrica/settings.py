@@ -356,8 +356,11 @@ CELERY_TIMEZONE = 'UTC'
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60  # 30 minutes
 
+from celery.schedules import crontab
+
 # Celery Beat Configuration
 CELERY_BEAT_SCHEDULE = {
+    # ── Existing ──────────────────────────────────────────────────
     'send-pending-emails': {
         'task': 'tasks.email_tasks.send_pending_emails',
         'schedule': timedelta(minutes=5),
@@ -365,6 +368,44 @@ CELERY_BEAT_SCHEDULE = {
     'expire-stale-payments': {
         'task': 'tasks.payment_tasks.expire_stale_payments',
         'schedule': timedelta(minutes=5),
+    },
+
+    # ── Notifications ─────────────────────────────────────────────
+    'daily-notifications': {
+        'task': 'tasks.notification_tasks.send_daily_notifications',
+        'schedule': crontab(hour=7, minute=0),  # 07:00 UTC
+    },
+
+    # ── Analytics (runs after midnight so yesterday's data is complete) ──
+    'daily-property-analytics': {
+        'task': 'tasks.analytics_tasks.compute_daily_property_analytics',
+        'schedule': crontab(hour=2, minute=0),  # 02:00 UTC
+    },
+    'daily-message-analytics': {
+        'task': 'tasks.analytics_tasks.compute_message_analytics',
+        'schedule': crontab(hour=2, minute=30),  # 02:30 UTC
+    },
+    'daily-host-summaries': {
+        'task': 'tasks.analytics_tasks.generate_host_summaries',
+        'schedule': crontab(hour=3, minute=0),  # 03:00 UTC (after property analytics)
+    },
+    'weekly-revenue-projections': {
+        'task': 'tasks.analytics_tasks.generate_revenue_projections',
+        'schedule': crontab(hour=4, minute=0, day_of_week=0),  # Sunday 04:00 UTC
+    },
+    'weekly-performance-benchmarks': {
+        'task': 'tasks.analytics_tasks.compute_performance_benchmarks',
+        'schedule': crontab(hour=5, minute=0, day_of_week=0),  # Sunday 05:00 UTC
+    },
+
+    # ── Housekeeping ──────────────────────────────────────────────
+    'cleanup-old-images': {
+        'task': 'tasks.image_tasks.cleanup_old_images',
+        'schedule': crontab(hour=4, minute=0, day_of_week=1),  # Monday 04:00 UTC
+    },
+    'refresh-property-geocodes': {
+        'task': 'tasks.geocoding_tasks.refresh_property_geocodes',
+        'schedule': crontab(hour=5, minute=0, day_of_week=1),  # Monday 05:00 UTC
     },
 }
 
@@ -395,13 +436,31 @@ SERVICE_FEE = float(os.getenv('SERVICE_FEE', '3.00'))
 DEFAULT_CURRENCY = os.getenv('DEFAULT_CURRENCY', 'USD')
 
 # Email Configuration
+# Works with any external SMTP provider: Hostinger, Mailbaby, Gmail, AWS SES,
+# SendGrid, Mailgun, Zoho, etc. Just set the env vars below.
+#
+# Common provider settings:
+#   Hostinger:  EMAIL_HOST=smtp.hostinger.com  PORT=465  USE_SSL=True   USE_TLS=False
+#   Mailbaby:   EMAIL_HOST=smtp.mail.baby      PORT=587  USE_SSL=False  USE_TLS=True
+#   Gmail:      EMAIL_HOST=smtp.gmail.com      PORT=587  USE_SSL=False  USE_TLS=True
+#   AWS SES:    EMAIL_HOST=email-smtp.us-east-1.amazonaws.com  PORT=587  USE_TLS=True
+#   SendGrid:   EMAIL_HOST=smtp.sendgrid.net   PORT=587  USE_SSL=False  USE_TLS=True
+#   Mailgun:    EMAIL_HOST=smtp.mailgun.org    PORT=587  USE_SSL=False  USE_TLS=True
+#   Zoho:       EMAIL_HOST=smtp.zoho.com       PORT=465  USE_SSL=True   USE_TLS=False
 EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
-EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_HOST = os.getenv('EMAIL_HOST', 'localhost')
 EMAIL_PORT = int(os.getenv('EMAIL_PORT', '587'))
 EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
-EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 'noreply@stayafrica.com')
+EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL', 'False') == 'True'
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'StayAfrica <noreply@stayafrica.com>')
+EMAIL_TIMEOUT = int(os.getenv('EMAIL_TIMEOUT', '30'))
+
+# Firebase Cloud Messaging (Push Notifications)
+# Download the service account JSON from Firebase Console → Project Settings → Service Accounts
+# Store it at backend/firebase-credentials.json (gitignored) or set the env var to the path
+FIREBASE_CREDENTIALS_PATH = os.getenv('FIREBASE_CREDENTIALS_PATH', os.path.join(BASE_DIR, 'firebase-credentials.json'))
 
 # Frontend URL for emails
 FRONTEND_URL = os.getenv('FRONTEND_URL', 'https://stayafrica.app')
@@ -889,7 +948,7 @@ SOCIALACCOUNT_PROVIDERS = {
         ],
         'EXCHANGE_TOKEN': True,
         'VERIFIED_EMAIL': False,
-        'VERSION': 'v13.0',
+        'VERSION': 'v21.0',
     },
     'apple': {},
 }

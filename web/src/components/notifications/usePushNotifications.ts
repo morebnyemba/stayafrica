@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
+import { requestFCMToken, getFirebaseMessaging, onMessage } from '@/lib/firebase';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
@@ -25,6 +26,23 @@ export const usePushNotifications = () => {
     if (cached) setFcmToken(cached);
   }, []);
 
+  // Listen for foreground messages
+  useEffect(() => {
+    const msg = getFirebaseMessaging();
+    if (!msg) return;
+
+    const unsubscribe = onMessage(msg, (payload) => {
+      const title = payload.notification?.title || 'StayAfrica';
+      const body = payload.notification?.body || '';
+      if (Notification.permission === 'granted') {
+        new Notification(title, { body, icon: '/logo.png' });
+      }
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+    });
+
+    return () => unsubscribe();
+  }, [queryClient]);
+
   const registerTokenMutation = useMutation({
     mutationFn: async (data: PushTokenData) => {
       const token = localStorage.getItem('access_token');
@@ -45,31 +63,27 @@ export const usePushNotifications = () => {
     },
   });
 
-  const requestPermission = async () => {
+  const requestPermission = useCallback(async () => {
     if (!isSupported) {
       throw new Error('Push notifications are not supported');
     }
 
-    try {
-      const result = await Notification.requestPermission();
-      setPermission(result);
+    const result = await Notification.requestPermission();
+    setPermission(result);
 
-      // Register service worker for background notifications
-      if (result === 'granted' && 'serviceWorker' in navigator) {
-        try {
-          await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-          console.log('Firebase messaging service worker registered');
-        } catch (swError) {
-          console.warn('Service worker registration failed:', swError);
-        }
+    if (result === 'granted') {
+      // Get FCM token from Firebase SDK
+      const token = await requestFCMToken();
+      if (token) {
+        setFcmToken(token);
+        localStorage.setItem('fcm_token', token);
+        // Register with backend
+        await registerTokenMutation.mutateAsync({ token, platform: 'web' });
       }
-
-      return result;
-    } catch (error) {
-      console.error('Error requesting notification permission:', error);
-      throw error;
     }
-  };
+
+    return result;
+  }, [isSupported, registerTokenMutation]);
 
   const registerToken = async (token: string) => {
     try {

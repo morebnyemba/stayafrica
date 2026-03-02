@@ -392,7 +392,7 @@ export function RegisterContent() {
           {currentStep === 1 && (
             <>
               <AuthDivider text="or" bgClassName="bg-white dark:bg-primary-900" />
-              <SocialAuthButtons mode="signup" redirectUrl={redirectUrl} />
+              <SocialAuthButtons mode="signup" redirectUrl={redirectUrl} role={formData.role} />
             </>
           )}
 

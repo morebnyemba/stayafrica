@@ -18,9 +18,10 @@ interface SocialAuthButtonsProps {
   mode?: 'signin' | 'signup';
   onSuccess?: (data: any) => void;
   redirectUrl?: string;
+  role?: 'guest' | 'host';
 }
 
-export default function SocialAuthButtons({ mode: _mode = 'signin', onSuccess: _onSuccess, redirectUrl }: SocialAuthButtonsProps) {
+export default function SocialAuthButtons({ mode: _mode = 'signin', onSuccess: _onSuccess, redirectUrl, role }: SocialAuthButtonsProps) {
   const [providers, setProviders] = useState<Record<string, ProviderConfig>>({});
 
   useEffect(() => {
@@ -36,6 +37,17 @@ export default function SocialAuthButtons({ mode: _mode = 'signin', onSuccess: _
     if (redirectUrl && redirectUrl !== '/dashboard') {
       localStorage.setItem('auth_redirect', redirectUrl);
     }
+    // Store the selected role so the callback can send it to the backend
+    if (role) {
+      sessionStorage.setItem('oauth_role', role);
+    }
+  };
+
+  // Generate and store a random state param for CSRF protection
+  const generateState = (): string => {
+    const state = crypto.randomUUID();
+    sessionStorage.setItem('oauth_state', state);
+    return state;
   };
 
   const handleGoogleAuth = () => {
@@ -48,7 +60,8 @@ export default function SocialAuthButtons({ mode: _mode = 'signin', onSuccess: _
     }
 
     saveRedirect();
-    window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=email%20profile`;
+    const state = generateState();
+    window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=email%20profile&state=${state}`;
   };
 
   const handleFacebookAuth = () => {
@@ -61,7 +74,8 @@ export default function SocialAuthButtons({ mode: _mode = 'signin', onSuccess: _
     }
 
     saveRedirect();
-    window.location.href = `https://www.facebook.com/v13.0/dialog/oauth?client_id=${appId}&redirect_uri=${redirectUri}&response_type=code&scope=email,public_profile`;
+    const state = generateState();
+    window.location.href = `https://www.facebook.com/v21.0/dialog/oauth?client_id=${appId}&redirect_uri=${redirectUri}&response_type=code&scope=email,public_profile&state=${state}`;
   };
 
   const handleAppleAuth = () => {
@@ -74,7 +88,8 @@ export default function SocialAuthButtons({ mode: _mode = 'signin', onSuccess: _
     }
 
     saveRedirect();
-    window.location.href = `https://appleid.apple.com/auth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=email%20name`;
+    const state = generateState();
+    window.location.href = `https://appleid.apple.com/auth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=email%20name&response_mode=query&state=${state}`;
   };
 
   return (

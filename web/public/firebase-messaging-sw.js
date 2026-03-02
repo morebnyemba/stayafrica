@@ -1,27 +1,24 @@
 /**
  * Firebase Cloud Messaging Service Worker
- * This service worker handles background push notifications for the web app.
+ * Handles background push notifications for the web app.
  * 
- * SETUP REQUIRED:
- *   1. Create a Firebase project at https://console.firebase.google.com
- *   2. Enable Cloud Messaging in the project settings
- *   3. Replace the firebaseConfig below with your project's config
- *   4. Add NEXT_PUBLIC_FIREBASE_* env vars to web/.env.local
+ * SETUP: Replace the empty strings below with your Firebase project config
+ * from https://console.firebase.google.com → Project Settings → General → Your apps
+ * These MUST match the NEXT_PUBLIC_FIREBASE_* env vars in your .env.local
  */
 
 // Import Firebase scripts for the service worker
 importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js');
 
-// Firebase configuration — replace with your project's config
-// These values should match the env vars in your Next.js app
+// Firebase configuration — copy values from your Firebase Console
 const firebaseConfig = {
-  apiKey: '',
-  authDomain: '',
-  projectId: '',
-  storageBucket: '',
-  messagingSenderId: '',
-  appId: '',
+  apiKey: self.__FIREBASE_CONFIG__?.apiKey || '',
+  authDomain: self.__FIREBASE_CONFIG__?.authDomain || '',
+  projectId: self.__FIREBASE_CONFIG__?.projectId || '',
+  storageBucket: self.__FIREBASE_CONFIG__?.storageBucket || '',
+  messagingSenderId: self.__FIREBASE_CONFIG__?.messagingSenderId || '',
+  appId: self.__FIREBASE_CONFIG__?.appId || '',
 };
 
 // Only initialize if config is set
@@ -88,5 +85,16 @@ if (firebaseConfig.apiKey) {
     );
   });
 } else {
-  console.log('[SW] Firebase not configured — push notifications disabled');
+  console.log('[SW] Firebase not configured — waiting for config via postMessage');
 }
+
+// Accept config from the main app via postMessage
+self.addEventListener('message', (event) => {
+  if (event.data?.type === 'FIREBASE_CONFIG' && event.data.config?.apiKey) {
+    self.__FIREBASE_CONFIG__ = event.data.config;
+    if (!firebase.apps.length) {
+      firebase.initializeApp(event.data.config);
+      console.log('[SW] Firebase initialized via postMessage');
+    }
+  }
+});

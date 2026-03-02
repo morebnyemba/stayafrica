@@ -53,6 +53,15 @@ services:
       - DB_PORT=5432
       - REDIS_URL=redis://:${REDIS_PASSWORD:-devpassword123}@redis:6379/0
       - CELERY_BROKER_URL=redis://:${REDIS_PASSWORD:-devpassword123}@redis:6379/0
+      - EMAIL_BACKEND=${EMAIL_BACKEND:-django.core.mail.backends.console.EmailBackend}
+      - EMAIL_HOST=${EMAIL_HOST:-localhost}
+      - EMAIL_PORT=${EMAIL_PORT:-587}
+      - EMAIL_USE_TLS=${EMAIL_USE_TLS:-True}
+      - EMAIL_USE_SSL=${EMAIL_USE_SSL:-False}
+      - EMAIL_HOST_USER=${EMAIL_HOST_USER:-}
+      - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD:-}
+      - DEFAULT_FROM_EMAIL=${DEFAULT_FROM_EMAIL:-StayAfrica <noreply@stayafrica.com>}
+      - FIREBASE_CREDENTIALS_PATH=/app/firebase-credentials.json
     volumes:
       - ./backend:/app
     depends_on:
@@ -76,6 +85,15 @@ services:
       - DB_PORT=5432
       - REDIS_URL=redis://:${REDIS_PASSWORD:-devpassword123}@redis:6379/0
       - CELERY_BROKER_URL=redis://:${REDIS_PASSWORD:-devpassword123}@redis:6379/0
+      - EMAIL_BACKEND=${EMAIL_BACKEND:-django.core.mail.backends.console.EmailBackend}
+      - EMAIL_HOST=${EMAIL_HOST:-localhost}
+      - EMAIL_PORT=${EMAIL_PORT:-587}
+      - EMAIL_USE_TLS=${EMAIL_USE_TLS:-True}
+      - EMAIL_USE_SSL=${EMAIL_USE_SSL:-False}
+      - EMAIL_HOST_USER=${EMAIL_HOST_USER:-}
+      - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD:-}
+      - DEFAULT_FROM_EMAIL=${DEFAULT_FROM_EMAIL:-StayAfrica <noreply@stayafrica.com>}
+      - FIREBASE_CREDENTIALS_PATH=/app/firebase-credentials.json
     volumes:
       - ./backend:/app
     depends_on:

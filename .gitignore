@@ -41,6 +41,11 @@ db.sqlite3-journal
 .env.*.local
 *.env.prod
 
+# Firebase / Google service account credentials (secrets — never commit)
+firebase-credentials.json
+google-services.json
+GoogleService-Info.plist
+
 # Node
 node_modules/
 npm-debug.log*
