@@ -413,6 +413,10 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'tasks.geocoding_tasks.refresh_property_geocodes',
         'schedule': crontab(hour=5, minute=0, day_of_week=1),  # Monday 05:00 UTC
     },
+    'refresh-property-pois': {
+        'task': 'tasks.analytics_tasks.refresh_property_pois',
+        'schedule': crontab(hour=5, minute=30, day_of_week=1),  # Monday 05:30 UTC
+    },
 }
 
 # Sentry Configuration (Optional)

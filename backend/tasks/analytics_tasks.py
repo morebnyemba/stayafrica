@@ -304,3 +304,33 @@ def compute_message_analytics():
 
     logger.info("Message analytics: %d hosts processed", total)
     return {"processed": total}
+
+
+@shared_task(bind=True, max_retries=1, default_retry_delay=300)
+def refresh_property_pois(self):
+    """
+    Import POIs from OpenStreetMap for active properties that have no
+    associated POIs yet.  Scheduled: weekly (Monday 05:30 UTC).
+    """
+    from apps.properties.models import Property
+
+    properties = Property.objects.filter(
+        status='active',
+        location__isnull=False,
+    ).exclude(
+        nearby_pois__isnull=False,
+    ).distinct()[:50]  # batch of 50 to stay within Overpass rate limits
+
+    count = 0
+    for prop in properties:
+        try:
+            from services.poi_service import POIService
+            imported = POIService.import_from_openstreetmap(prop, radius_meters=5000)
+            if imported > 0:
+                POIService.associate_pois_with_property(prop, radius_km=5)
+                count += 1
+        except Exception as exc:
+            logger.error("POI refresh error for property %s: %s", prop.id, exc)
+
+    logger.info("POI refresh: %d properties updated", count)
+    return {"updated": count}

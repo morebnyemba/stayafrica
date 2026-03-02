@@ -6,6 +6,7 @@ from django.contrib.gis.geos import Point
 from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.measure import D
 import logging
+import requests
 
 logger = logging.getLogger(__name__)
 
@@ -46,17 +47,21 @@ class POIService:
     @staticmethod
     def associate_pois_with_property(property_obj, radius_km=5, auto_calculate_time=True):
         """
-        Find and associate POIs with a property
-        
-        Args:
-            property_obj: Property instance
-            radius_km: Search radius in kilometers
-            auto_calculate_time: Calculate walking/driving times
-            
-        Returns:
-            Number of POIs associated
+        Find and associate POIs with a property.
+        If no POIs exist in the DB nearby, auto-imports from OpenStreetMap first.
         """
         from apps.properties.poi_models import PointOfInterest, PropertyPOI
+        
+        # Check if any POIs exist near this location
+        nearby_count = PointOfInterest.objects.filter(
+            location__distance_lte=(property_obj.location, D(km=radius_km)),
+            is_active=True
+        ).count()
+        
+        # Auto-import from OSM if database is empty for this area
+        if nearby_count == 0:
+            logger.info(f"No POIs in DB near property {property_obj.id}, importing from OpenStreetMap...")
+            POIService.import_from_openstreetmap(property_obj, radius_meters=int(radius_km * 1000))
         
         # Find nearby POIs
         pois = POIService.find_nearby_pois(property_obj, radius_km=radius_km)
@@ -65,19 +70,15 @@ class POIService:
         for poi in pois:
             distance_meters = poi.distance.m
             
-            # Calculate estimated times (rough estimates)
             walking_time = None
             driving_time = None
             
             if auto_calculate_time:
-                # Walking: ~5 km/h = 83 m/min
                 walking_time = int(distance_meters / 83)
-                # Driving: ~30 km/h in city = 500 m/min
                 driving_time = int(distance_meters / 500)
             
-            # Create or update association
             PropertyPOI.objects.update_or_create(
-                property=property_obj,
+                linked_property=property_obj,
                 poi=poi,
                 defaults={
                     'distance_meters': distance_meters,
@@ -107,7 +108,7 @@ class POIService:
         from apps.properties.poi_models import PropertyPOI
         
         pois = PropertyPOI.objects.filter(
-            property=property_obj
+            linked_property=property_obj
         ).select_related('poi', 'poi__category')
         
         if poi_types:
@@ -221,7 +222,7 @@ class POIService:
                 # Associate with property
                 distance = property_obj.location.distance(poi.location) * 111000  # Convert to meters
                 PropertyPOI.objects.update_or_create(
-                    property=property_obj,
+                    linked_property=property_obj,
                     poi=poi,
                     defaults={
                         'distance_meters': distance,
@@ -272,4 +273,115 @@ class POIService:
             if gtype in type_mapping:
                 return type_mapping[gtype]
         
+        return 'other'
+
+    @staticmethod
+    def import_from_openstreetmap(property_obj, radius_meters=5000):
+        """
+        Import POIs from OpenStreetMap via the Overpass API (free, no key needed).
+        Queries for common amenities, tourism, leisure, and transport features.
+        """
+        from apps.properties.poi_models import PointOfInterest
+
+        lat = property_obj.location.y
+        lon = property_obj.location.x
+
+        # Overpass QL: grab amenities, tourism, leisure, shops, transport within radius
+        overpass_query = f"""
+        [out:json][timeout:25];
+        (
+          node["amenity"~"restaurant|cafe|bar|pharmacy|hospital|clinic|bank|fuel|marketplace"](around:{radius_meters},{lat},{lon});
+          node["tourism"~"attraction|museum|hotel|viewpoint|artwork|information"](around:{radius_meters},{lat},{lon});
+          node["leisure"~"park|garden|beach_resort|swimming_pool|sports_centre"](around:{radius_meters},{lat},{lon});
+          node["shop"~"supermarket|convenience|mall"](around:{radius_meters},{lat},{lon});
+          node["public_transport"~"station|stop_position"](around:{radius_meters},{lat},{lon});
+          node["railway"="station"](around:{radius_meters},{lat},{lon});
+          node["aeroway"="aerodrome"](around:{radius_meters},{lat},{lon});
+        );
+        out body;
+        """
+
+        try:
+            resp = requests.post(
+                'https://overpass-api.de/api/interpreter',
+                data={'data': overpass_query},
+                timeout=30,
+            )
+            resp.raise_for_status()
+            elements = resp.json().get('elements', [])
+        except Exception as e:
+            logger.error(f"Overpass API error: {e}")
+            return 0
+
+        count = 0
+        for el in elements:
+            tags = el.get('tags', {})
+            name = tags.get('name')
+            if not name:
+                continue
+
+            el_lat = el.get('lat')
+            el_lon = el.get('lon')
+            if el_lat is None or el_lon is None:
+                continue
+
+            osm_id = f"osm_node_{el['id']}"
+            poi_type = POIService._map_osm_tags_to_poi_type(tags)
+
+            poi, created = PointOfInterest.objects.update_or_create(
+                external_id=osm_id,
+                source='openstreetmap',
+                defaults={
+                    'name': name,
+                    'poi_type': poi_type,
+                    'location': Point(el_lon, el_lat, srid=4326),
+                    'address': tags.get('addr:street', ''),
+                    'city': tags.get('addr:city', property_obj.city),
+                    'country': tags.get('addr:country', property_obj.country),
+                    'phone': tags.get('phone', ''),
+                    'website': tags.get('website', ''),
+                    'opening_hours': {'raw': tags.get('opening_hours', '')},
+                    'is_active': True,
+                }
+            )
+
+            if created:
+                count += 1
+
+        logger.info(f"Imported {count} POIs from OpenStreetMap near property {property_obj.id}")
+        return count
+
+    @staticmethod
+    def _map_osm_tags_to_poi_type(tags):
+        """Map OpenStreetMap tags to our POI types"""
+        amenity = tags.get('amenity', '')
+        tourism = tags.get('tourism', '')
+        leisure = tags.get('leisure', '')
+        shop = tags.get('shop', '')
+        transport = tags.get('public_transport', '')
+        railway = tags.get('railway', '')
+        aeroway = tags.get('aeroway', '')
+
+        mapping = {
+            # amenity
+            'restaurant': 'restaurant', 'cafe': 'cafe', 'bar': 'bar',
+            'pharmacy': 'pharmacy', 'hospital': 'hospital', 'clinic': 'hospital',
+            'bank': 'services', 'fuel': 'services', 'marketplace': 'shopping',
+            # tourism
+            'attraction': 'attraction', 'museum': 'museum', 'viewpoint': 'attraction',
+            'artwork': 'attraction', 'information': 'services', 'hotel': 'services',
+            # leisure
+            'park': 'park', 'garden': 'park', 'beach_resort': 'beach',
+            'swimming_pool': 'entertainment', 'sports_centre': 'entertainment',
+            # shop
+            'supermarket': 'grocery', 'convenience': 'grocery', 'mall': 'shopping',
+        }
+
+        for tag_val in [amenity, tourism, leisure, shop]:
+            if tag_val in mapping:
+                return mapping[tag_val]
+
+        if transport or railway or aeroway:
+            return 'transport'
+
         return 'other'

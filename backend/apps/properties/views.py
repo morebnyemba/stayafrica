@@ -1007,9 +1007,22 @@ class PropertyViewSet(viewsets.ModelViewSet):
             )
         
         radius_km = float(request.data.get('radius_km', 5))
+        source = request.data.get('source', 'auto')
         
         try:
             from services.poi_service import POIService
+            
+            # If source is explicitly OSM or Google, import first
+            if source == 'osm':
+                POIService.import_from_openstreetmap(property_obj, radius_meters=int(radius_km * 1000))
+            elif source == 'google':
+                from apps.admin_dashboard.models import SystemConfiguration
+                config = SystemConfiguration.load()
+                api_key = getattr(config, 'google_places_api_key', None)
+                if api_key:
+                    POIService.import_from_google_places(property_obj, api_key, radius_meters=int(radius_km * 1000))
+            
+            # associate_pois_with_property auto-imports from OSM if DB is empty
             count = POIService.associate_pois_with_property(
                 property_obj,
                 radius_km=radius_km
