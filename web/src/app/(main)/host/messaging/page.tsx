@@ -9,7 +9,6 @@ import {
   Clock, 
   FileText,
   ArrowLeft,
-  ChevronRight,
 } from 'lucide-react';
 import { AutoMessageSettings } from '@/components/automated-messaging/AutoMessageSettings';
 import { QuickRepliesManager } from '@/components/automated-messaging/QuickRepliesManager';

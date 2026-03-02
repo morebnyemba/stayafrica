@@ -10,7 +10,7 @@ import { WORLD_COUNTRIES } from '@/lib/countries';
 import { Button } from '@/components/ui/Button';
 import TwoFactorSettings from '@/components/settings/TwoFactorSettings';
 import { apiClient } from '@/services/api-client';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 type Tab = 'profile' | 'security' | 'payments' | 'notifications' | 'preferences';
 
