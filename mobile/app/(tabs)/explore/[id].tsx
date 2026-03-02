@@ -2,7 +2,7 @@ import { View, Text, ScrollView, TouchableOpacity, Image, ActivityIndicator, Ale
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { usePropertyById, useCreateConversation, useAddToWishlist, useRemoveFromWishlist } from '@/hooks/api-hooks';
+import { usePropertyById, useCreateConversation, useAddToWishlist, useRemoveFromWishlist, useNearbyPOIs } from '@/hooks/api-hooks';
 import { Skeleton } from '@/components/common/Skeletons';
 import { useAuth } from '@/context/auth-context';
 import { useState, useCallback } from 'react';
@@ -12,6 +12,7 @@ export default function PropertyDetailsScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams();
   const { data: property, isLoading } = usePropertyById(id as string);
+  const { data: nearbyPOIs } = useNearbyPOIs(id as string);
   const { mutate: createConversation, isPending: isCreatingConversation } = useCreateConversation();
   const { isAuthenticated } = useAuth();
   const { width } = Dimensions.get('window');
@@ -346,6 +347,50 @@ export default function PropertyDetailsScreen() {
                   </View>
                 ))}
               </View>
+            </View>
+          )}
+
+          {/* Instant Booking Badge */}
+          {property.instant_booking_enabled && (
+            <View className="mb-4 bg-green-50 border border-green-200 rounded-2xl p-4 flex-row items-center">
+              <Ionicons name="flash" size={20} color="#10B981" />
+              <View className="ml-3 flex-1">
+                <Text className="font-bold text-green-800">Instant Booking</Text>
+                <Text className="text-green-600 text-xs">Book immediately without waiting for host approval</Text>
+              </View>
+            </View>
+          )}
+
+          {/* Nearby Attractions */}
+          {Array.isArray(nearbyPOIs) && nearbyPOIs.length > 0 && (
+            <View className="mb-6">
+              <Text className="text-xl font-bold text-forest mb-3">Nearby Attractions</Text>
+              {nearbyPOIs.slice(0, 5).map((poi: any) => (
+                <View
+                  key={poi.id}
+                  className="flex-row items-center bg-white px-4 py-3 rounded-xl mb-2"
+                  style={{
+                    shadowColor: '#122F26',
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.05,
+                    shadowRadius: 4,
+                    elevation: 2,
+                  }}
+                >
+                  <View className="bg-gold/20 rounded-full p-2">
+                    <Ionicons name="location" size={16} color="#D9B168" />
+                  </View>
+                  <View className="ml-3 flex-1">
+                    <Text className="font-semibold text-forest">{poi.name}</Text>
+                    {poi.category_name && (
+                      <Text className="text-xs text-moss">{poi.category_name}</Text>
+                    )}
+                  </View>
+                  {poi.distance_km != null && (
+                    <Text className="text-xs text-moss font-medium">{poi.distance_km.toFixed(1)} km</Text>
+                  )}
+                </View>
+              ))}
             </View>
           )}
 

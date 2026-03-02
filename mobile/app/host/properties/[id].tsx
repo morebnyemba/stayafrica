@@ -1,9 +1,9 @@
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Switch } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '@/context/auth-context';
-import { usePropertyById } from '@/hooks/api-hooks';
+import { usePropertyById, useInstantBookingInfo, useToggleInstantBooking } from '@/hooks/api-hooks';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function PropertyDetailScreen() {
@@ -13,6 +13,8 @@ export default function PropertyDetailScreen() {
   const insets = useSafeAreaInsets();
 
   const { data: property, isLoading: loading } = usePropertyById(id as string);
+  const { data: ibInfo } = useInstantBookingInfo(id as string);
+  const { mutate: toggleIB, isPending: togglingIB } = useToggleInstantBooking();
 
   if (!isAuthenticated) {
     return (
@@ -137,6 +139,37 @@ export default function PropertyDetailScreen() {
               >
                 <Text className="text-lg font-bold text-forest mb-2">Performance</Text>
                 {/* Add booking stats, revenue, etc */}
+              </View>
+
+              {/* Instant Booking Toggle */}
+              <View
+                className="bg-white rounded-2xl p-5 mb-4"
+                style={{
+                  shadowColor: '#122F26',
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.05,
+                  shadowRadius: 4,
+                  elevation: 2,
+                }}
+              >
+                <View className="flex-row items-center justify-between">
+                  <View className="flex-1 mr-3">
+                    <View className="flex-row items-center mb-1">
+                      <Ionicons name="flash" size={18} color="#D9B168" />
+                      <Text className="text-lg font-bold text-forest ml-2">Instant Booking</Text>
+                    </View>
+                    <Text className="text-moss text-xs">
+                      Allow guests to book without waiting for your approval
+                    </Text>
+                  </View>
+                  <Switch
+                    value={ibInfo?.instant_booking_enabled ?? property?.instant_booking_enabled ?? false}
+                    onValueChange={(enabled) => toggleIB({ propertyId: id as string, data: { enabled } })}
+                    disabled={togglingIB}
+                    trackColor={{ false: '#d1d5db', true: '#D9B168' }}
+                    thumbColor="#fff"
+                  />
+                </View>
               </View>
 
               {/* Actions */}

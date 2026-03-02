@@ -424,6 +424,34 @@ export function usePendingActions() {
   });
 }
 
+export function useInstantBookingInfo(propertyId: string) {
+  return useQuery({
+    queryKey: ['instant-booking', propertyId],
+    queryFn: () => apiClient.getInstantBookingInfo(propertyId),
+    enabled: !!propertyId,
+  });
+}
+
+export function useToggleInstantBooking() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ propertyId, data }: { propertyId: string; data: { enabled: boolean; requirements?: any } }) =>
+      apiClient.toggleInstantBooking(propertyId, data),
+    onSuccess: (_, { propertyId }) => {
+      queryClient.invalidateQueries({ queryKey: ['instant-booking', propertyId] });
+      queryClient.invalidateQueries({ queryKey: ['host', 'properties'] });
+    },
+  });
+}
+
+export function useNearbyPOIs(propertyId: string, params?: { radius?: number; poi_type?: string }) {
+  return useQuery({
+    queryKey: ['nearby-pois', propertyId, params],
+    queryFn: () => apiClient.getNearbyPOIs(propertyId, params),
+    enabled: !!propertyId,
+  });
+}
+
 export function useBookingCalendar(propertyId: string, start?: string, end?: string) {
   return useQuery({
     queryKey: ['host', 'calendar', propertyId, start, end],

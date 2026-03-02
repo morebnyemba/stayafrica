@@ -526,6 +526,22 @@ class APIClient {
     return (await this.client.get('/properties/pending_actions/')).data;
   }
 
+  async getInstantBookingInfo(propertyId: string): Promise<any> {
+    return (await this.client.get(`/properties/${propertyId}/instant_booking_info/`)).data;
+  }
+
+  async toggleInstantBooking(propertyId: string, data: { enabled: boolean; requirements?: any }): Promise<any> {
+    return (await this.client.post(`/properties/${propertyId}/toggle_instant_booking/`, data)).data;
+  }
+
+  async getNearbyPOIs(propertyId: string, params?: { radius?: number; poi_type?: string }): Promise<any> {
+    return (await this.client.get(`/properties/${propertyId}/nearby_pois/`, { params })).data;
+  }
+
+  async getLocationSuggestions(query: string): Promise<any> {
+    return (await this.client.get('/properties/location_suggestions/', { params: { q: query } })).data;
+  }
+
   // Host - Bookings
   async getHostBookings(): Promise<ApiListResponse<Booking>> {
     return (await this.client.get('/bookings/')).data;
