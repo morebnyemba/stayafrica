@@ -62,7 +62,7 @@ export default function GuestDashboardScreen() {
     }
   };
 
-  if (isAuthenticated && user?.role === 'host') {
+  if (isAuthenticated && user?.active_profile === 'host') {
     return <Redirect href="/(tabs)/host" />;
   }
 

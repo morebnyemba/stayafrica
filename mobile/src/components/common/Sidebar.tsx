@@ -316,6 +316,8 @@ export function Sidebar({ isVisible, onClose }: SidebarProps) {
                         switchProfile(target).then(() => {
                           if (target === 'host') {
                             handleNavigation('/(tabs)/host');
+                          } else {
+                            handleNavigation('/(tabs)/dashboard');
                           }
                         }).catch(() => {});
                       }}

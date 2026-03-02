@@ -240,8 +240,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (data.access && data.refresh) {
         await apiClient.saveTokens(data.access, data.refresh);
       }
-      // Update user state with returned user data
-      const updatedUser = data.user || user;
+      // Update user state — ensure active_profile is always set even if backend omits user
+      const updatedUser = data.user
+        ? { ...data.user, active_profile: data.user.active_profile ?? mode }
+        : { ...user!, active_profile: mode };
       setUser(updatedUser);
       logInfo('Profile switched to', { mode });
     } catch (error) {
