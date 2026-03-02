@@ -1,14 +1,24 @@
-import { View, Text, ScrollView, TouchableOpacity, FlatList } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, FlatList, TextInput, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '@/context/auth-context';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useHostReviews, useRespondToReview } from '@/hooks/api-hooks';
+import { Skeleton } from '@/components/common/Skeletons';
+import type { Review } from '@/types';
 
 export default function HostReviewsScreen() {
   const router = useRouter();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const insets = useSafeAreaInsets();
+  const { data, isLoading } = useHostReviews();
+  const { mutate: respondToReview, isPending: isResponding } = useRespondToReview();
+  const [respondingTo, setRespondingTo] = useState<string | null>(null);
+  const [responseText, setResponseText] = useState('');
+
+  const reviews = data?.results || [];
 
   if (!isAuthenticated) {
     return (
@@ -36,12 +46,28 @@ export default function HostReviewsScreen() {
     );
   }
 
-  // Sample reviews data (empty state)
-  const reviews: any[] = [];
+  const avgRating = reviews.length > 0
+    ? (reviews.reduce((sum: number, r: Review) => sum + r.rating, 0) / reviews.length).toFixed(1)
+    : '0.0';
+
+  const ratingCounts = [5, 4, 3, 2, 1].map(star => ({
+    star,
+    count: reviews.filter((r: Review) => Math.round(r.rating) === star).length,
+  }));
+
+  const handleSubmitResponse = (reviewId: string) => {
+    if (!responseText.trim()) return;
+    respondToReview({ reviewId, response: responseText.trim() }, {
+      onSuccess: () => {
+        setRespondingTo(null);
+        setResponseText('');
+      },
+    });
+  };
 
   const RatingStats = () => (
     <View
-      className="p-5 mx-4 -mt-4"
+      className="p-5 mx-4 -mt-4 bg-white rounded-2xl"
       style={{
         shadowColor: '#122F26',
         shadowOffset: { width: 0, height: 4 },
@@ -52,24 +78,24 @@ export default function HostReviewsScreen() {
     >
       <View className="flex-row items-center justify-between">
         <View className="items-center">
-          <Text className="text-4xl font-black text-forest">0.0</Text>
+          <Text className="text-4xl font-black text-forest">{avgRating}</Text>
           <View className="flex-row mt-1">
             {[1, 2, 3, 4, 5].map((star) => (
-              <Ionicons key={star} name="star-outline" size={16} color="#D9B168" />
+              <Ionicons key={star} name={Number(avgRating) >= star ? 'star' : 'star-outline'} size={16} color="#D9B168" />
             ))}
           </View>
-          <Text className="text-sm text-moss mt-1">0 reviews</Text>
+          <Text className="text-sm text-moss mt-1">{reviews.length} reviews</Text>
         </View>
 
         <View className="flex-1 ml-6">
-          {[5, 4, 3, 2, 1].map((rating) => (
-            <View key={rating} className="flex-row items-center mb-1">
-              <Text className="text-xs text-moss w-3">{rating}</Text>
+          {ratingCounts.map(({ star, count }) => (
+            <View key={star} className="flex-row items-center mb-1">
+              <Text className="text-xs text-moss w-3">{star}</Text>
               <Ionicons name="star" size={10} color="#D9B168" className="ml-1" />
               <View className="flex-1 h-2 bg-sand-200 rounded-full ml-2">
-                <View className="h-2 bg-gold rounded-full" style={{ width: '0%' }} />
+                <View className="h-2 bg-gold rounded-full" style={{ width: reviews.length > 0 ? `${(count / reviews.length) * 100}%` : '0%' }} />
               </View>
-              <Text className="text-xs text-moss w-6 text-right">0</Text>
+              <Text className="text-xs text-moss w-6 text-right">{count}</Text>
             </View>
           ))}
         </View>
@@ -77,7 +103,7 @@ export default function HostReviewsScreen() {
     </View>
   );
 
-  const ReviewItem = ({ review }: any) => (
+  const ReviewItem = ({ review }: { review: Review }) => (
     <View
       className="p-4 bg-white rounded-2xl mb-3 mx-4"
       style={{
@@ -91,28 +117,88 @@ export default function HostReviewsScreen() {
       <View className="flex-row items-center mb-3">
         <View className="w-12 h-12 rounded-full bg-gold items-center justify-center">
           <Text className="text-xl font-bold text-forest">
-            {review.guest?.first_name?.[0] || 'G'}
+            {review.guest_name?.[0] || review.reviewer?.first_name?.[0] || 'G'}
           </Text>
         </View>
         <View className="flex-1 ml-3">
           <Text className="font-semibold text-forest">
-            {review.guest?.first_name} {review.guest?.last_name}
+            {review.guest_name || `${review.reviewer?.first_name || ''} ${review.reviewer?.last_name || ''}`}
           </Text>
-          <Text className="text-xs text-moss">{review.property?.title}</Text>
+          <Text className="text-xs text-moss">{review.property_title}</Text>
         </View>
         <View className="flex-row items-center bg-gold/20 px-2 py-1 rounded-full">
           <Ionicons name="star" size={14} color="#D9B168" />
           <Text className="text-sm font-bold text-forest ml-1">{review.rating}</Text>
         </View>
       </View>
-      <Text className="text-moss">{review.text}</Text>
-      <Text className="text-xs text-moss/70 mt-2">{review.date}</Text>
+      <Text className="text-moss">{review.text || review.comment}</Text>
+      <Text className="text-xs text-moss/70 mt-2">
+        {new Date(review.created_at).toLocaleDateString()}
+      </Text>
+
+      {/* Host Response */}
+      {review.host_response ? (
+        <View className="mt-3 pt-3 border-t border-sand-200 bg-sand-100 rounded-xl p-3">
+          <Text className="text-xs font-semibold text-moss mb-1">Your Response:</Text>
+          <Text className="text-sm text-forest">{review.host_response}</Text>
+        </View>
+      ) : respondingTo === review.id ? (
+        <View className="mt-3 pt-3 border-t border-sand-200">
+          <TextInput
+            className="bg-sand-100 rounded-xl p-3 text-forest min-h-[80px]"
+            placeholder="Write your response..."
+            placeholderTextColor="#7A8F85"
+            value={responseText}
+            onChangeText={setResponseText}
+            multiline
+            textAlignVertical="top"
+          />
+          <View className="flex-row gap-2 mt-2">
+            <TouchableOpacity
+              onPress={() => { setRespondingTo(null); setResponseText(''); }}
+              className="flex-1 py-2 rounded-xl bg-sand-200"
+            >
+              <Text className="text-center text-moss font-semibold">Cancel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => handleSubmitResponse(review.id)}
+              disabled={isResponding || !responseText.trim()}
+              className="flex-1 py-2 rounded-xl bg-forest"
+            >
+              {isResponding ? (
+                <ActivityIndicator color="#D9B168" size="small" />
+              ) : (
+                <Text className="text-center text-gold font-semibold">Submit</Text>
+              )}
+            </TouchableOpacity>
+          </View>
+        </View>
+      ) : (
+        <TouchableOpacity
+          onPress={() => setRespondingTo(review.id)}
+          className="mt-3 pt-3 border-t border-sand-200"
+        >
+          <Text className="text-forest font-semibold text-sm">Respond to review →</Text>
+        </TouchableOpacity>
+      )}
+    </View>
+  );
+
+  const ReviewSkeleton = () => (
+    <View className="p-4 bg-white rounded-2xl mb-3 mx-4">
+      <View className="flex-row items-center mb-3">
+        <Skeleton height={48} width={48} borderRadius={24} />
+        <View className="flex-1 ml-3">
+          <Skeleton height={16} width="60%" className="mb-2" />
+          <Skeleton height={12} width="40%" />
+        </View>
+      </View>
+      <Skeleton height={40} width="100%" />
     </View>
   );
 
   return (
     <SafeAreaView className="flex-1 bg-sand-100">
-      {/* Header */}
       <LinearGradient
         colors={['#122F26', '#1d392f', '#2d4a40']}
         start={{ x: 0, y: 0 }}
@@ -137,14 +223,14 @@ export default function HostReviewsScreen() {
       </LinearGradient>
 
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Rating Stats */}
         <RatingStats />
 
-        {/* Reviews List */}
         <View className="mt-6 mb-8">
           <Text className="text-lg font-bold text-forest mb-3 mx-4">All Reviews</Text>
 
-          {reviews.length === 0 ? (
+          {isLoading ? (
+            [1, 2, 3].map((i) => <ReviewSkeleton key={i} />)
+          ) : reviews.length === 0 ? (
             <View className="bg-white rounded-2xl p-8 mx-4 items-center" style={{
               shadowColor: '#122F26',
               shadowOffset: { width: 0, height: 4 },
@@ -161,8 +247,8 @@ export default function HostReviewsScreen() {
               </Text>
             </View>
           ) : (
-            reviews.map((review, index) => (
-              <ReviewItem key={index} review={review} />
+            reviews.map((review: Review) => (
+              <ReviewItem key={review.id} review={review} />
             ))
           )}
         </View>

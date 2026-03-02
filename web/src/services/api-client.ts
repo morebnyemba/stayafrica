@@ -394,22 +394,22 @@ class ApiClient {
 
   // Wallet Management
   async getMyWallet() {
-    return this.client.get('/payments/wallets/my_wallet/');
+    return this.client.get('/wallets/my_wallet/');
   }
 
   async getWalletBalance(walletId: string) {
     const safeId = this.assertId(walletId, 'Wallet ID');
-    return this.client.get(`/payments/wallets/${safeId}/balance/`);
+    return this.client.get(`/wallets/${safeId}/balance/`);
   }
 
   async getWalletTransactions(walletId: string, params?: any) {
     const safeId = this.assertId(walletId, 'Wallet ID');
-    return this.client.get(`/payments/wallets/${safeId}/transactions/`, { params });
+    return this.client.get(`/wallets/${safeId}/transactions/`, { params });
   }
 
   // Bank Account Management
   async getBankAccounts() {
-    return this.client.get('/payments/bank-accounts/');
+    return this.client.get('/bank-accounts/');
   }
 
   async createBankAccount(data: {
@@ -420,27 +420,27 @@ class ApiClient {
     country?: string;
     is_primary?: boolean;
   }) {
-    return this.client.post('/payments/bank-accounts/', data);
+    return this.client.post('/bank-accounts/', data);
   }
 
   async updateBankAccount(accountId: string, data: any) {
     const safeId = this.assertId(accountId, 'Bank Account ID');
-    return this.client.patch(`/payments/bank-accounts/${safeId}/`, data);
+    return this.client.patch(`/bank-accounts/${safeId}/`, data);
   }
 
   async deleteBankAccount(accountId: string) {
     const safeId = this.assertId(accountId, 'Bank Account ID');
-    return this.client.delete(`/payments/bank-accounts/${safeId}/`);
+    return this.client.delete(`/bank-accounts/${safeId}/`);
   }
 
   async setPrimaryBankAccount(accountId: string) {
     const safeId = this.assertId(accountId, 'Bank Account ID');
-    return this.client.post(`/payments/bank-accounts/${safeId}/set_primary/`);
+    return this.client.post(`/bank-accounts/${safeId}/set_primary/`);
   }
 
   // Withdrawal Management
   async getWithdrawals(params?: any) {
-    return this.client.get('/payments/withdrawals/', { params });
+    return this.client.get('/withdrawals/', { params });
   }
 
   async initiateWithdrawal(data: {
@@ -450,12 +450,12 @@ class ApiClient {
     currency: string;
     notes?: string;
   }) {
-    return this.client.post('/payments/withdrawals/', data);
+    return this.client.post('/withdrawals/', data);
   }
 
   // Transaction History
   async getTransactions(params?: any) {
-    return this.client.get('/payments/transactions/', { params });
+    return this.client.get('/transactions/', { params });
   }
 
   // Experiences

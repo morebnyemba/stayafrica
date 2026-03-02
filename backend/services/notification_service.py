@@ -220,12 +220,11 @@ class NotificationService:
     @classmethod
     def send_new_message(cls, message):
         """Send new message notification"""
-        # Notify the recipient (not the sender)
-        recipient = message.recipient
+        # Notify the receiver (not the sender)
         return cls.send_notification(
-            user=recipient,
+            user=message.receiver,
             title=f"New message from {message.sender.get_full_name() or 'Guest'}",
-            body=message.content[:100] + ('...' if len(message.content) > 100 else ''),
+            body=message.text[:100] + ('...' if len(message.text) > 100 else ''),
             notification_type='new_message',
             data={
                 'message_id': message.id,

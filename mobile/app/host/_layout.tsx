@@ -39,6 +39,7 @@ export default function HostLayout() {
       <Stack.Screen name="experiences/bookings" />
       <Stack.Screen name="analytics/index" />
       <Stack.Screen name="calendar/index" />
+      <Stack.Screen name="messaging/index" />
       <Stack.Screen name="properties/[id]/calendar" />
     </Stack>
   );

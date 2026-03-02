@@ -5,6 +5,7 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from django.db import models as db_models
 from django.utils import timezone
 from datetime import timedelta
 from apps.payments.tax_models import (
@@ -84,8 +85,8 @@ class BookingTaxViewSet(viewsets.ReadOnlyModelViewSet):
         # Hosts can see taxes for their properties
         # Guests can see taxes for their bookings
         queryset = BookingTax.objects.filter(
-            models.Q(booking__guest=user) |
-            models.Q(booking__rental_property__host=user)
+            db_models.Q(booking__guest=user) |
+            db_models.Q(booking__rental_property__host=user)
         )
         
         # Filter by booking

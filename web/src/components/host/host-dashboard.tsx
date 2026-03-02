@@ -19,6 +19,7 @@ import {
   TrendingUp,
   Compass,
   Home,
+  Zap,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { AnalyticsDashboard } from '@/components/analytics';
@@ -193,6 +194,13 @@ export function HostDashboard() {
       icon: MessageSquare,
       link: '/messages',
       color: 'bg-orange-500',
+    },
+    {
+      title: 'Auto-Messaging',
+      description: 'Templates & quick replies',
+      icon: Zap,
+      link: '/host/messaging',
+      color: 'bg-violet-500',
     },
     {
       title: 'Tax Reports',

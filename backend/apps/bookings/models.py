@@ -44,9 +44,29 @@ class Booking(models.Model):
             models.Index(fields=['booking_ref']),
         ]
     
+    # Valid status transitions: current_status → allowed next statuses
+    VALID_TRANSITIONS = {
+        'pending': {'confirmed', 'cancelled'},
+        'confirmed': {'cancelled', 'completed'},
+        'cancelled': set(),   # terminal state
+        'completed': set(),   # terminal state
+    }
+
     def save(self, *args, **kwargs):
         if not self.booking_ref:
             self.booking_ref = f'BK{uuid.uuid4().hex[:10].upper()}'
+        # Validate status transitions on existing bookings
+        if self.pk:
+            try:
+                old = Booking.objects.only('status').get(pk=self.pk)
+                if old.status != self.status:
+                    allowed = self.VALID_TRANSITIONS.get(old.status, set())
+                    if self.status not in allowed:
+                        raise ValueError(
+                            f"Invalid status transition: {old.status} → {self.status}"
+                        )
+            except Booking.DoesNotExist:
+                pass
         super().save(*args, **kwargs)
     
     def __str__(self):

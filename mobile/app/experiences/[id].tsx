@@ -3,8 +3,8 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useExperienceById } from '@/hooks/api-hooks';
-import { useState } from 'react';
+import { useExperienceById, useExperienceAvailability } from '@/hooks/api-hooks';
+import { useState, useMemo } from 'react';
 
 const durationLabels: Record<string, string> = {
   half_day: 'Half Day',
@@ -27,6 +27,23 @@ export default function ExperienceDetailScreen() {
   const [selectedDate, setSelectedDate] = useState('');
 
   const { data: experience, isLoading } = useExperienceById(experienceId);
+  const { data: availability } = useExperienceAvailability(experienceId);
+
+  const WEEKDAY_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+  const weekdaySlots = useMemo(() => {
+    if (!availability) return [];
+    return (Array.isArray(availability) ? availability : [])
+      .filter((s: any) => s.weekday !== null && s.weekday !== undefined)
+      .sort((a: any, b: any) => a.weekday - b.weekday);
+  }, [availability]);
+
+  const dateSlots = useMemo(() => {
+    if (!availability) return [];
+    return (Array.isArray(availability) ? availability : [])
+      .filter((s: any) => s.specific_date)
+      .sort((a: any, b: any) => a.specific_date.localeCompare(b.specific_date));
+  }, [availability]);
 
   const handleBookNow = () => {
     // Navigate to booking page for experiences
@@ -215,6 +232,57 @@ export default function ExperienceDetailScreen() {
           }}>
             <Text className="text-lg font-bold text-forest mb-3">Cancellation Policy</Text>
             <Text className="text-moss leading-6">{experience.cancellation_policy}</Text>
+          </View>
+        )}
+
+        {/* Availability Schedule */}
+        {(weekdaySlots.length > 0 || dateSlots.length > 0) && (
+          <View className="bg-white rounded-2xl p-5 mb-4" style={{
+            shadowColor: '#122F26',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.08,
+            shadowRadius: 8,
+            elevation: 4,
+          }}>
+            <Text className="text-lg font-bold text-forest mb-3">Availability</Text>
+
+            {weekdaySlots.length > 0 && (
+              <View className="mb-3">
+                <Text className="text-sm font-semibold text-moss mb-2">Weekly Schedule</Text>
+                <View className="flex-row flex-wrap gap-2">
+                  {weekdaySlots.map((slot: any) => (
+                    <View key={slot.id} className="bg-gold/15 rounded-xl px-3 py-2">
+                      <Text className="text-xs font-bold text-forest">{WEEKDAY_NAMES[slot.weekday]}</Text>
+                      <Text className="text-xs text-moss">
+                        {slot.start_time?.slice(0, 5)} – {slot.end_time?.slice(0, 5)}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            )}
+
+            {dateSlots.length > 0 && (
+              <View>
+                <Text className="text-sm font-semibold text-moss mb-2">Upcoming Dates</Text>
+                {dateSlots.slice(0, 5).map((slot: any) => (
+                  <TouchableOpacity
+                    key={slot.id}
+                    onPress={() => setSelectedDate(slot.specific_date)}
+                    className={`flex-row justify-between items-center py-2 px-3 rounded-lg mb-1 ${
+                      selectedDate === slot.specific_date ? 'bg-gold/20' : ''
+                    }`}
+                  >
+                    <Text className="text-forest font-medium">
+                      {new Date(slot.specific_date + 'T00:00:00').toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
+                    </Text>
+                    <Text className="text-moss text-sm">
+                      {slot.start_time?.slice(0, 5)} – {slot.end_time?.slice(0, 5)}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
           </View>
         )}
 

@@ -92,16 +92,34 @@ export interface Booking {
 // Review Types
 export interface Review {
   id: string;
-  booking_id: string;
-  reviewer_id: string;
+  booking: string;
+  booking_ref?: string;
+  guest: string;
+  guest_name?: string;
+  host: string;
+  review_type?: string;
+  property_id?: string;
+  property_title?: string;
+  property?: { id: string; title: string };
+  reviewer?: { id: string; first_name: string; last_name: string };
   rating: number;
-  title: string;
-  comment: string;
-  cleanliness_rating: number;
-  communication_rating: number;
-  accuracy_rating: number;
-  location_rating: number;
+  text: string;
+  comment?: string; // alias
+  cleanliness_rating?: number;
+  communication_rating?: number;
+  accuracy_rating?: number;
+  location_rating?: number;
+  helpful_count?: number;
+  host_response?: string;
+  host_response_date?: string;
   created_at: string;
+  updated_at?: string;
+}
+
+export interface ReviewStats {
+  average_rating: number;
+  total_reviews: number;
+  rating_distribution: Record<string, number>;
 }
 
 // Experience Types

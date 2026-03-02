@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
 import { Button } from '@/components/ui';
@@ -29,6 +29,30 @@ export default function ExperienceDetailPage({ params }: { params: Promise<{ id:
     },
     enabled: !!experienceId,
   });
+
+  const { data: availabilityRes } = useQuery({
+    queryKey: ['experience-availability', experienceId],
+    queryFn: async () => {
+      if (!experienceId) throw new Error('No ID');
+      const response = await apiClient.getExperienceAvailability(experienceId);
+      return response.data;
+    },
+    enabled: !!experienceId,
+  });
+
+  const WEEKDAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+  const weekdaySlots = useMemo(() => {
+    const data = Array.isArray(availabilityRes) ? availabilityRes : [];
+    return data.filter((s: any) => s.weekday !== null && s.weekday !== undefined)
+      .sort((a: any, b: any) => a.weekday - b.weekday);
+  }, [availabilityRes]);
+
+  const dateSlots = useMemo(() => {
+    const data = Array.isArray(availabilityRes) ? availabilityRes : [];
+    return data.filter((s: any) => s.specific_date)
+      .sort((a: any, b: any) => a.specific_date.localeCompare(b.specific_date));
+  }, [availabilityRes]);
 
   if (!experienceId) {
     return (
@@ -202,6 +226,50 @@ export default function ExperienceDetailPage({ params }: { params: Promise<{ id:
                 <p className="text-primary-700 dark:text-sand-300 whitespace-pre-line">
                   {experience.cancellation_policy}
                 </p>
+              </div>
+            )}
+
+            {/* Availability */}
+            {(weekdaySlots.length > 0 || dateSlots.length > 0) && (
+              <div className="card p-6">
+                <h2 className="text-2xl font-semibold text-primary-900 dark:text-sand-50 mb-4">
+                  <Calendar className="w-6 h-6 inline mr-2" />
+                  Availability
+                </h2>
+
+                {weekdaySlots.length > 0 && (
+                  <div className="mb-4">
+                    <h3 className="text-sm font-semibold text-primary-600 dark:text-sand-400 mb-3">Weekly Schedule</h3>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                      {weekdaySlots.map((slot: any) => (
+                        <div key={slot.id} className="bg-secondary-50 dark:bg-primary-700 rounded-lg px-3 py-2 text-center">
+                          <p className="font-semibold text-primary-900 dark:text-sand-50 text-sm">{WEEKDAY_NAMES[slot.weekday]}</p>
+                          <p className="text-xs text-primary-600 dark:text-sand-400">
+                            {slot.start_time?.slice(0, 5)} – {slot.end_time?.slice(0, 5)}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {dateSlots.length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-semibold text-primary-600 dark:text-sand-400 mb-3">Upcoming Dates</h3>
+                    <div className="space-y-2">
+                      {dateSlots.slice(0, 6).map((slot: any) => (
+                        <div key={slot.id} className="flex items-center justify-between border border-primary-200 dark:border-primary-700 rounded-lg px-4 py-2">
+                          <span className="font-medium text-primary-900 dark:text-sand-50">
+                            {new Date(slot.specific_date + 'T00:00:00').toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
+                          </span>
+                          <span className="text-sm text-primary-600 dark:text-sand-400">
+                            {slot.start_time?.slice(0, 5)} – {slot.end_time?.slice(0, 5)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>

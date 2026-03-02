@@ -4,13 +4,15 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/store/auth-store';
 import dynamic from 'next/dynamic';
 const ProtectedRoute = dynamic(() => import('@/components/auth/protected-route').then(m => m.ProtectedRoute), { ssr: false });
-import { User, Mail, Phone, MapPin, CreditCard, Shield, Bell, Camera, Save, Loader2 } from 'lucide-react';
+import { User, Mail, Phone, MapPin, CreditCard, Shield, Bell, Camera, Save, Loader2, Heart } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { WORLD_COUNTRIES } from '@/lib/countries';
 import { Button } from '@/components/ui/Button';
 import TwoFactorSettings from '@/components/settings/TwoFactorSettings';
+import { apiClient } from '@/services/api-client';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
-type Tab = 'profile' | 'security' | 'payments' | 'notifications';
+type Tab = 'profile' | 'security' | 'payments' | 'notifications' | 'preferences';
 
 export function ProfileContent() {
   const { user, updateProfile } = useAuth();
@@ -57,6 +59,7 @@ export function ProfileContent() {
     { id: 'security' as Tab, label: 'Security', icon: Shield },
     { id: 'payments' as Tab, label: 'Payments', icon: CreditCard },
     { id: 'notifications' as Tab, label: 'Notifications', icon: Bell },
+    { id: 'preferences' as Tab, label: 'Preferences', icon: Heart },
   ];
 
   return (
@@ -365,10 +368,229 @@ export function ProfileContent() {
                   </div>
                 </div>
               )}
+
+              {/* Preferences Tab */}
+              {activeTab === 'preferences' && <PreferencesTab />}
             </div>
           </div>
         </div>
       </div>
     </ProtectedRoute>
+  );
+}
+
+const PROPERTY_TYPES = ['lodge', 'cottage', 'room', 'apartment', 'house', 'villa'];
+
+function PreferencesTab() {
+  const queryClient = useQueryClient();
+  const [saving, setSaving] = useState(false);
+
+  const { data: prefsRes, isLoading } = useQuery({
+    queryKey: ['user-preferences'],
+    queryFn: () => apiClient.getUserPreferences(),
+  });
+  const prefs = prefsRes?.data;
+
+  const [form, setForm] = useState({
+    preferred_property_types: [] as string[],
+    preferred_min_price: '',
+    preferred_max_price: '',
+    preferred_cities: [] as string[],
+    usual_guest_count: '',
+    preferred_amenities: [] as string[],
+  });
+  const [cityInput, setCityInput] = useState('');
+  const [amenityInput, setAmenityInput] = useState('');
+
+  useEffect(() => {
+    if (prefs) {
+      setForm({
+        preferred_property_types: prefs.preferred_property_types || [],
+        preferred_min_price: prefs.preferred_min_price || '',
+        preferred_max_price: prefs.preferred_max_price || '',
+        preferred_cities: prefs.preferred_cities || [],
+        usual_guest_count: prefs.usual_guest_count?.toString() || '',
+        preferred_amenities: prefs.preferred_amenities || [],
+      });
+    }
+  }, [prefs]);
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await apiClient.updateUserPreferences({
+        preferred_property_types: form.preferred_property_types,
+        preferred_min_price: form.preferred_min_price ? parseFloat(form.preferred_min_price as string) : null,
+        preferred_max_price: form.preferred_max_price ? parseFloat(form.preferred_max_price as string) : null,
+        preferred_cities: form.preferred_cities,
+        usual_guest_count: form.usual_guest_count ? parseInt(form.usual_guest_count as string) : null,
+        preferred_amenities: form.preferred_amenities,
+      });
+      queryClient.invalidateQueries({ queryKey: ['user-preferences'] });
+      toast.success('Preferences saved');
+    } catch {
+      toast.error('Failed to save preferences');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const togglePropertyType = (type: string) => {
+    setForm(f => ({
+      ...f,
+      preferred_property_types: f.preferred_property_types.includes(type)
+        ? f.preferred_property_types.filter(t => t !== type)
+        : [...f.preferred_property_types, type],
+    }));
+  };
+
+  const addCity = () => {
+    const city = cityInput.trim();
+    if (city && !form.preferred_cities.includes(city)) {
+      setForm(f => ({ ...f, preferred_cities: [...f.preferred_cities, city] }));
+      setCityInput('');
+    }
+  };
+
+  const addAmenity = () => {
+    const amenity = amenityInput.trim();
+    if (amenity && !form.preferred_amenities.includes(amenity)) {
+      setForm(f => ({ ...f, preferred_amenities: [...f.preferred_amenities, amenity] }));
+      setAmenityInput('');
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="card p-8 text-center">
+        <Loader2 className="w-6 h-6 animate-spin mx-auto text-secondary-500" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="card p-8">
+      <h2 className="text-2xl font-bold text-primary-900 dark:text-sand-50 mb-6">
+        Travel Preferences
+      </h2>
+      <div className="space-y-6">
+        {/* Property Types */}
+        <div>
+          <label className="block text-sm font-medium text-primary-700 dark:text-sand-300 mb-2">
+            Preferred Property Types
+          </label>
+          <div className="flex flex-wrap gap-2">
+            {PROPERTY_TYPES.map(type => (
+              <button
+                key={type}
+                onClick={() => togglePropertyType(type)}
+                className={`px-4 py-2 rounded-full text-sm font-medium border transition-colors ${
+                  form.preferred_property_types.includes(type)
+                    ? 'bg-secondary-500 text-white border-secondary-500'
+                    : 'border-primary-300 dark:border-primary-600 text-primary-700 dark:text-sand-300 hover:border-secondary-400'
+                }`}
+              >
+                {type.charAt(0).toUpperCase() + type.slice(1)}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Price Range */}
+        <div>
+          <label className="block text-sm font-medium text-primary-700 dark:text-sand-300 mb-2">
+            Price Range (per night)
+          </label>
+          <div className="flex items-center gap-3">
+            <input
+              type="number"
+              placeholder="Min"
+              value={form.preferred_min_price}
+              onChange={e => setForm(f => ({ ...f, preferred_min_price: e.target.value }))}
+              className="w-32 px-3 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-50"
+            />
+            <span className="text-primary-600 dark:text-sand-400">—</span>
+            <input
+              type="number"
+              placeholder="Max"
+              value={form.preferred_max_price}
+              onChange={e => setForm(f => ({ ...f, preferred_max_price: e.target.value }))}
+              className="w-32 px-3 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-50"
+            />
+          </div>
+        </div>
+
+        {/* Guest Count */}
+        <div>
+          <label className="block text-sm font-medium text-primary-700 dark:text-sand-300 mb-2">
+            Usual Number of Guests
+          </label>
+          <input
+            type="number"
+            min="1"
+            max="20"
+            value={form.usual_guest_count}
+            onChange={e => setForm(f => ({ ...f, usual_guest_count: e.target.value }))}
+            className="w-32 px-3 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-50"
+          />
+        </div>
+
+        {/* Preferred Cities */}
+        <div>
+          <label className="block text-sm font-medium text-primary-700 dark:text-sand-300 mb-2">
+            Preferred Cities
+          </label>
+          <div className="flex gap-2 mb-2">
+            <input
+              type="text"
+              placeholder="Add a city…"
+              value={cityInput}
+              onChange={e => setCityInput(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addCity(); } }}
+              className="flex-1 px-3 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-50"
+            />
+            <Button onClick={addCity} size="sm" variant="outline">Add</Button>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {form.preferred_cities.map(city => (
+              <span key={city} className="inline-flex items-center gap-1 bg-primary-100 dark:bg-primary-700 text-primary-800 dark:text-sand-200 px-3 py-1 rounded-full text-sm">
+                {city}
+                <button onClick={() => setForm(f => ({ ...f, preferred_cities: f.preferred_cities.filter(c => c !== city) }))} className="hover:text-red-500">×</button>
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* Preferred Amenities */}
+        <div>
+          <label className="block text-sm font-medium text-primary-700 dark:text-sand-300 mb-2">
+            Preferred Amenities
+          </label>
+          <div className="flex gap-2 mb-2">
+            <input
+              type="text"
+              placeholder="Add an amenity…"
+              value={amenityInput}
+              onChange={e => setAmenityInput(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addAmenity(); } }}
+              className="flex-1 px-3 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-50"
+            />
+            <Button onClick={addAmenity} size="sm" variant="outline">Add</Button>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {form.preferred_amenities.map(amenity => (
+              <span key={amenity} className="inline-flex items-center gap-1 bg-primary-100 dark:bg-primary-700 text-primary-800 dark:text-sand-200 px-3 py-1 rounded-full text-sm">
+                {amenity}
+                <button onClick={() => setForm(f => ({ ...f, preferred_amenities: f.preferred_amenities.filter(a => a !== amenity) }))} className="hover:text-red-500">×</button>
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <Button onClick={handleSave} disabled={saving} className="mt-4">
+          {saving ? <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Saving…</> : <><Save className="w-4 h-4 mr-2" /> Save Preferences</>}
+        </Button>
+      </div>
+    </div>
   );
 }

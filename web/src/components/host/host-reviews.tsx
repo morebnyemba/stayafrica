@@ -31,7 +31,7 @@ export function HostReviews() {
   const { data: reviewsData, isLoading } = useQuery({
     queryKey: ['host', 'reviews', selectedProperty, sortBy],
     queryFn: async () => {
-      const response = await apiClient.get('/api/v1/host/reviews/', {
+      const response = await apiClient.get('/reviews/', {
         params: {
           property_id: selectedProperty !== 'all' ? selectedProperty : undefined,
           sort_by: sortBy,

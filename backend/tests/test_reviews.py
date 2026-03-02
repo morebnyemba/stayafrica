@@ -19,7 +19,7 @@ class TestReviewModel:
         review = Review.objects.create(
             booking=booking,
             guest=guest_user,
-            property=booking.rental_property,
+            host=booking.rental_property.host,
             rating=5,
             text='Excellent stay!',
         )
@@ -31,7 +31,7 @@ class TestReviewModel:
         review = Review.objects.create(
             booking=booking,
             guest=guest_user,
-            property=booking.rental_property,
+            host=booking.rental_property.host,
             rating=1,
             text='Poor experience',
         )
@@ -42,7 +42,7 @@ class TestReviewModel:
         review = Review.objects.create(
             booking=booking,
             guest=guest_user,
-            property=booking.rental_property,
+            host=booking.rental_property.host,
             rating=4,
             text='Good stay',
         )
@@ -58,7 +58,7 @@ class TestReviewVoteModel:
         review = Review.objects.create(
             booking=booking,
             guest=guest_user,
-            property=booking.rental_property,
+            host=booking.rental_property.host,
             rating=4,
             text='Nice place',
         )
@@ -66,9 +66,9 @@ class TestReviewVoteModel:
         vote = ReviewVote.objects.create(
             review=review,
             user=voter,
-            is_helpful=True,
+            vote_type='helpful',
         )
-        assert vote.is_helpful is True
+        assert vote.vote_type == 'helpful'
 
 
 @pytest.mark.django_db

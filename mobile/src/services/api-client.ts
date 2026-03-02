@@ -402,6 +402,73 @@ class APIClient {
     return (await this.client.get(`/reviews/`, { params: { property_id: propertyId } })).data;
   }
 
+  async getHostReviews(): Promise<ApiListResponse<Review>> {
+    return (await this.client.get(`/reviews/`)).data;
+  }
+
+  async getHostReviewStats(hostId: string): Promise<any> {
+    return (await this.client.get(`/reviews/host_stats/`, { params: { host_id: hostId } })).data;
+  }
+
+  async respondToReview(reviewId: string, response: string): Promise<Review> {
+    return (await this.client.post(`/reviews/${reviewId}/respond/`, { response })).data;
+  }
+
+  async voteReview(reviewId: string, voteType: 'helpful' | 'unhelpful'): Promise<any> {
+    return (await this.client.post(`/reviews/${reviewId}/vote/`, { vote_type: voteType })).data;
+  }
+
+  // Tax Reports
+  async getHostTaxSummary(year?: number): Promise<any> {
+    const params = year ? { year } : {};
+    return (await this.client.get(`/tax/reports/host_summary/`, { params })).data;
+  }
+
+  // Messaging Automation
+  async getMessageTemplates(): Promise<ApiListResponse<any>> {
+    return (await this.client.get('/messaging/templates/')).data;
+  }
+
+  async createMessageTemplate(data: any): Promise<any> {
+    return (await this.client.post('/messaging/templates/', data)).data;
+  }
+
+  async updateMessageTemplate(id: string, data: any): Promise<any> {
+    return (await this.client.patch(`/messaging/templates/${id}/`, data)).data;
+  }
+
+  async deleteMessageTemplate(id: string): Promise<void> {
+    return (await this.client.delete(`/messaging/templates/${id}/`)).data;
+  }
+
+  async getAutomatedMessages(): Promise<ApiListResponse<any>> {
+    return (await this.client.get('/messaging/automated-messages/')).data;
+  }
+
+  async updateAutomatedMessage(id: string, data: any): Promise<any> {
+    return (await this.client.patch(`/messaging/automated-messages/${id}/`, data)).data;
+  }
+
+  async getQuickReplies(): Promise<ApiListResponse<any>> {
+    return (await this.client.get('/messaging/quick-replies/')).data;
+  }
+
+  async createQuickReply(data: any): Promise<any> {
+    return (await this.client.post('/messaging/quick-replies/', data)).data;
+  }
+
+  async deleteQuickReply(id: string): Promise<void> {
+    return (await this.client.delete(`/messaging/quick-replies/${id}/`)).data;
+  }
+
+  async getHostMessageSettings(): Promise<any> {
+    return (await this.client.get('/messaging/settings/')).data;
+  }
+
+  async updateHostMessageSettings(data: any): Promise<any> {
+    return (await this.client.patch('/messaging/settings/', data)).data;
+  }
+
   // Wishlist (saved properties)
   async getWishlist(): Promise<ApiListResponse<Property>> {
     return (await this.client.get('/properties/saved/')).data;

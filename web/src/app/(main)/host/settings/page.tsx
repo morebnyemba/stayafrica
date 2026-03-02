@@ -12,6 +12,7 @@ import {
   Receipt,
   ShieldCheck,
   TrendingUp,
+  MessageSquare,
 } from 'lucide-react';
 
 const settingsSections = [
@@ -46,6 +47,17 @@ const settingsSections = [
         description: 'Manage pricing rules and seasonal adjustments',
         icon: TrendingUp,
         link: '/host/pricing',
+      },
+    ],
+  },
+  {
+    title: 'Communication',
+    items: [
+      {
+        title: 'Messaging Automation',
+        description: 'Auto-replies, templates, quick replies, and scheduled messages',
+        icon: MessageSquare,
+        link: '/host/messaging',
       },
     ],
   },

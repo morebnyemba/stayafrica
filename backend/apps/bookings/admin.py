@@ -63,23 +63,67 @@ class BookingAdmin(UnfoldModelAdmin):
     # Custom action methods
     @admin.action(description=_('Mark selected bookings as confirmed'))
     def mark_confirmed(self, request, queryset):
-        updated = queryset.update(status='confirmed')
-        self.message_user(request, f'{updated} booking(s) confirmed successfully.')
+        updated = 0
+        errors = []
+        for booking in queryset.filter(status='pending'):
+            try:
+                booking.status = 'confirmed'
+                booking.save(update_fields=['status', 'updated_at'])
+                updated += 1
+            except ValueError as e:
+                errors.append(f"{booking.booking_ref}: {e}")
+        msg = f'{updated} booking(s) confirmed.'
+        if errors:
+            msg += f' {len(errors)} failed: {"; ".join(errors)}'
+        self.message_user(request, msg)
 
     @admin.action(description=_('Mark selected bookings as cancelled'))
     def mark_cancelled(self, request, queryset):
-        updated = queryset.update(status='cancelled')
-        self.message_user(request, f'{updated} booking(s) cancelled successfully.')
+        updated = 0
+        errors = []
+        for booking in queryset.exclude(status__in=['cancelled', 'completed']):
+            try:
+                booking.status = 'cancelled'
+                booking.save(update_fields=['status', 'updated_at'])
+                updated += 1
+            except ValueError as e:
+                errors.append(f"{booking.booking_ref}: {e}")
+        msg = f'{updated} booking(s) cancelled.'
+        if errors:
+            msg += f' {len(errors)} failed: {"; ".join(errors)}'
+        self.message_user(request, msg)
 
     @admin.action(description=_('Mark selected bookings as completed'))
     def mark_completed(self, request, queryset):
-        updated = queryset.update(status='completed')
-        self.message_user(request, f'{updated} booking(s) marked as completed.')
+        updated = 0
+        errors = []
+        for booking in queryset.filter(status='confirmed'):
+            try:
+                booking.status = 'completed'
+                booking.save(update_fields=['status', 'updated_at'])
+                updated += 1
+            except ValueError as e:
+                errors.append(f"{booking.booking_ref}: {e}")
+        msg = f'{updated} booking(s) marked as completed.'
+        if errors:
+            msg += f' {len(errors)} failed: {"; ".join(errors)}'
+        self.message_user(request, msg)
 
     @admin.action(description=_('Mark selected bookings as paid/confirmed'))
     def mark_paid(self, request, queryset):
-        updated = queryset.update(status='confirmed')
-        self.message_user(request, f'{updated} booking(s) marked as paid.')
+        updated = 0
+        errors = []
+        for booking in queryset.filter(status='pending'):
+            try:
+                booking.status = 'confirmed'
+                booking.save(update_fields=['status', 'updated_at'])
+                updated += 1
+            except ValueError as e:
+                errors.append(f"{booking.booking_ref}: {e}")
+        msg = f'{updated} booking(s) marked as paid.'
+        if errors:
+            msg += f' {len(errors)} failed: {"; ".join(errors)}'
+        self.message_user(request, msg)
 
     # Custom display methods
     @display(description=_('Status'), ordering='status', label=True)

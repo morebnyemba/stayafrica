@@ -460,7 +460,7 @@ function PaymentMethodsList() {
   const { data: paymentMethodsData, isLoading } = useQuery({
     queryKey: ['payment-methods'],
     queryFn: async () => {
-      const response = await apiClient.get('/payments/payment-methods/');
+      const response = await apiClient.get('/payment-methods/');
       return response.data;
     },
   });
@@ -468,7 +468,7 @@ function PaymentMethodsList() {
   const paymentMethods = paymentMethodsData?.results || paymentMethodsData || [];
 
   const setDefaultMutation = useMutation({
-    mutationFn: (methodId: string) => apiClient.patch(`/payments/payment-methods/${methodId}/set_default/`),
+    mutationFn: (methodId: string) => apiClient.patch(`/payment-methods/${methodId}/set_default/`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['payment-methods'] });
       toast.success('Default payment method updated!');
@@ -479,7 +479,7 @@ function PaymentMethodsList() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (methodId: string) => apiClient.delete(`/payments/payment-methods/${methodId}/`),
+    mutationFn: (methodId: string) => apiClient.delete(`/payment-methods/${methodId}/`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['payment-methods'] });
       toast.success('Payment method deleted successfully.');

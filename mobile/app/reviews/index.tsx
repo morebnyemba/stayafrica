@@ -1,25 +1,24 @@
 import { View, Text, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '@/context/auth-context';
 import { Skeleton } from '@/components/common/Skeletons';
-import { format } from 'date-fns';
+import { useHostReviews } from '@/hooks/api-hooks';
 import type { Review } from '@/types';
 
 export default function ReviewsScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { isAuthenticated } = useAuth();
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const { data, isLoading } = useHostReviews();
+
+  const reviews = data?.results || [];
 
   if (!isAuthenticated) {
     return (
       <View className="flex-1 bg-sand-100">
-        {/* Header */}
         <LinearGradient
           colors={['#122F26', '#1d392f']}
           className="px-4 pt-12 pb-6"
@@ -64,6 +63,10 @@ export default function ReviewsScreen() {
     );
   }
 
+  const avgRating = reviews.length > 0
+    ? (reviews.reduce((sum: number, r: Review) => sum + r.rating, 0) / reviews.length).toFixed(1)
+    : 'N/A';
+
   const StarRating = ({ rating }: { rating: number }) => (
     <View className="flex-row">
       {[1, 2, 3, 4, 5].map((star) => (
@@ -85,12 +88,10 @@ export default function ReviewsScreen() {
       shadowRadius: 8,
       elevation: 4,
     }}>
-      {/* Property Info */}
       <Text className="text-base font-bold text-forest mb-2">
-        {review.property?.title || 'Property'}
+        {review.property_title || review.property?.title || 'Property'}
       </Text>
 
-      {/* Reviewer Info */}
       <View className="flex-row items-center mb-3">
         <LinearGradient
           colors={['#D9B168', '#bea04f']}
@@ -100,46 +101,44 @@ export default function ReviewsScreen() {
         </LinearGradient>
         <View className="flex-1">
           <Text className="text-sm font-semibold text-forest">
-            {review.reviewer?.first_name} {review.reviewer?.last_name}
+            {review.guest_name || `${review.reviewer?.first_name || ''} ${review.reviewer?.last_name || ''}`}
           </Text>
           <Text className="text-xs text-moss">
-            {format(new Date(review.created_at), 'MMM dd, yyyy')}
+            {new Date(review.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
           </Text>
         </View>
         <StarRating rating={review.rating} />
       </View>
 
-      {/* Review Text */}
       <Text className="text-sm text-moss leading-5 mb-3">
-        {review.comment}
+        {review.text || review.comment}
       </Text>
 
       {/* Review Categories */}
       <View className="flex-row flex-wrap gap-2">
-        {review.cleanliness_rating && (
+        {review.cleanliness_rating ? (
           <View className="bg-sand-100 px-3 py-1 rounded-full">
             <Text className="text-xs text-forest">
               🧹 Cleanliness: {review.cleanliness_rating}/5
             </Text>
           </View>
-        )}
-        {review.accuracy_rating && (
+        ) : null}
+        {review.accuracy_rating ? (
           <View className="bg-sand-100 px-3 py-1 rounded-full">
             <Text className="text-xs text-forest">
               ✓ Accuracy: {review.accuracy_rating}/5
             </Text>
           </View>
-        )}
-        {review.communication_rating && (
+        ) : null}
+        {review.communication_rating ? (
           <View className="bg-sand-100 px-3 py-1 rounded-full">
             <Text className="text-xs text-forest">
               💬 Communication: {review.communication_rating}/5
             </Text>
           </View>
-        )}
+        ) : null}
       </View>
 
-      {/* Response */}
       {review.host_response && (
         <View className="mt-3 pt-3 border-t border-sand-200">
           <Text className="text-xs font-semibold text-moss mb-1">Host Response:</Text>
@@ -169,7 +168,6 @@ export default function ReviewsScreen() {
 
   return (
     <View className="flex-1 bg-sand-100">
-      {/* Modern Header */}
       <LinearGradient
         colors={['#122F26', '#1d392f', '#2d4a40']}
         start={{ x: 0, y: 0 }}
@@ -203,7 +201,7 @@ export default function ReviewsScreen() {
             <Text className="text-sm text-moss mb-2 font-semibold">Overall Rating</Text>
             <View className="flex-row items-center">
               <Ionicons name="star" size={32} color="#F59E0B" />
-              <Text className="text-4xl font-black text-forest ml-2">N/A</Text>
+              <Text className="text-4xl font-black text-forest ml-2">{avgRating}</Text>
             </View>
           </View>
           <View className="w-px h-16 bg-sand-200 mx-4" />

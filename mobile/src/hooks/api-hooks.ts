@@ -239,6 +239,77 @@ export function usePropertyReviews(propertyId: string) {
   });
 }
 
+export function useHostReviews() {
+  return useQuery<{ results: Review[] }>({
+    queryKey: ['reviews', 'host'],
+    queryFn: () => apiClient.getHostReviews(),
+  });
+}
+
+export function useHostReviewStats(hostId: string) {
+  return useQuery({
+    queryKey: ['reviews', 'host-stats', hostId],
+    queryFn: () => apiClient.getHostReviewStats(hostId),
+    enabled: !!hostId,
+  });
+}
+
+export function useRespondToReview() {
+  const queryClient = useQueryClient();
+  return useMutation<Review, Error, { reviewId: string; response: string }>({
+    mutationFn: ({ reviewId, response }) => apiClient.respondToReview(reviewId, response),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['reviews'] });
+    },
+  });
+}
+
+export function useHostTaxSummary(year?: number) {
+  return useQuery({
+    queryKey: ['tax', 'host-summary', year],
+    queryFn: () => apiClient.getHostTaxSummary(year),
+  });
+}
+
+// Messaging Automation
+export function useMessageTemplates() {
+  return useQuery<{ results: any[] }>({
+    queryKey: ['messaging', 'templates'],
+    queryFn: () => apiClient.getMessageTemplates(),
+  });
+}
+
+export function useAutomatedMessages() {
+  return useQuery<{ results: any[] }>({
+    queryKey: ['messaging', 'automated-messages'],
+    queryFn: () => apiClient.getAutomatedMessages(),
+  });
+}
+
+export function useQuickReplies() {
+  return useQuery<{ results: any[] }>({
+    queryKey: ['messaging', 'quick-replies'],
+    queryFn: () => apiClient.getQuickReplies(),
+  });
+}
+
+export function useHostMessageSettings() {
+  return useQuery({
+    queryKey: ['messaging', 'settings'],
+    queryFn: () => apiClient.getHostMessageSettings(),
+  });
+}
+
+export function useUpdateHostMessageSettings() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: any) => apiClient.updateHostMessageSettings(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['messaging', 'settings'] });
+    },
+  });
+}
+
 // Wishlist
 export function useWishlist() {
   return useQuery<{ results: Property[] }>({
@@ -398,6 +469,14 @@ export function useExperienceById(id: string) {
   return useQuery({
     queryKey: ['experiences', id],
     queryFn: () => apiClient.getExperienceById(id),
+    enabled: !!id,
+  });
+}
+
+export function useExperienceAvailability(id: string) {
+  return useQuery({
+    queryKey: ['experience-availability', id],
+    queryFn: () => apiClient.getExperienceAvailability(id),
     enabled: !!id,
   });
 }

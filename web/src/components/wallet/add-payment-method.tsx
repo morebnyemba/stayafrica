@@ -109,7 +109,7 @@ export function AddPaymentMethodWizard() {
 
     setLoading(true);
     try {
-      await apiClient.post('/payments/payment-methods/', {
+      await apiClient.post('/payment-methods/', {
         provider: paymentData.provider,
         method_type: paymentData.method,
         name: paymentData.provider === 'stripe' ? 'Credit Card' :

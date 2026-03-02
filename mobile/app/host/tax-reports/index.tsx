@@ -4,11 +4,15 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '@/context/auth-context';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useHostTaxSummary } from '@/hooks/api-hooks';
+import { Skeleton } from '@/components/common/Skeletons';
 
 export default function HostTaxReportsScreen() {
   const router = useRouter();
   const { isAuthenticated, user } = useAuth();
   const insets = useSafeAreaInsets();
+  const currentYear = new Date().getFullYear();
+  const { data: taxData, isLoading } = useHostTaxSummary(currentYear);
 
   if (!isAuthenticated) {
     return (
@@ -34,11 +38,13 @@ export default function HostTaxReportsScreen() {
     );
   }
 
-  // Sample tax reports (empty state)
-  const taxReports: any[] = [];
-  const currentYear = new Date().getFullYear();
+  const totalEarnings = taxData?.total_earnings || taxData?.total_revenue || 0;
+  const totalTransactions = taxData?.total_transactions || taxData?.total_bookings || 0;
+  const taxReports = taxData?.reports || [];
+  const currency = taxData?.currency || 'USD';
+  const currencySymbol = currency === 'USD' ? '$' : currency === 'ZAR' ? 'R' : currency === 'EUR' ? '€' : `${currency} `;
 
-  const TaxReportCard = ({ year, status, totalEarnings, downloadUrl }: any) => (
+  const TaxReportCard = ({ year, status, totalEarnings: earnings, downloadUrl }: any) => (
     <TouchableOpacity
       className="bg-white rounded-2xl p-4 mb-3 flex-row items-center"
       onPress={() => downloadUrl && {}}
@@ -58,7 +64,7 @@ export default function HostTaxReportsScreen() {
       </LinearGradient>
       <View className="flex-1 ml-4">
         <Text className="text-lg font-bold text-forest">{year} Tax Summary</Text>
-        <Text className="text-sm text-moss mt-1">Total Earnings: ${totalEarnings || '0.00'}</Text>
+        <Text className="text-sm text-moss mt-1">Total Earnings: {currencySymbol}{earnings || '0.00'}</Text>
         <View className={`px-2 py-1 rounded-full mt-2 self-start ${
           status === 'ready' ? 'bg-green-100' : 'bg-yellow-100'
         }`}>
@@ -102,41 +108,63 @@ export default function HostTaxReportsScreen() {
 
       <View className="px-4 -mt-4">
         {/* Current Year Summary */}
-        <LinearGradient
-          colors={['#14B8A6', '#0D9488']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          className="rounded-2xl p-5 mb-4"
-          style={{
-            shadowColor: '#14B8A6',
-            shadowOffset: { width: 0, height: 8 },
-            shadowOpacity: 0.25,
-            shadowRadius: 12,
-            elevation: 8,
-          }}
-        >
-          <View className="flex-row items-center mb-4">
-            <View className="bg-white/20 rounded-full p-2">
-              <Ionicons name="calendar" size={24} color="#fff" />
-            </View>
-            <Text className="text-white text-xl font-bold ml-3">{currentYear} Summary</Text>
-          </View>
-          <View className="flex-row justify-between">
-            <View>
-              <Text className="text-white/70 text-sm">Total Earnings</Text>
-              <Text className="text-white text-2xl font-black">$0.00</Text>
-            </View>
-            <View className="items-end">
-              <Text className="text-white/70 text-sm">Transactions</Text>
-              <Text className="text-white text-2xl font-black">0</Text>
+        {isLoading ? (
+          <View className="rounded-2xl p-5 mb-4 bg-white">
+            <Skeleton height={24} width="60%" className="mb-4" />
+            <View className="flex-row justify-between">
+              <Skeleton height={32} width="40%" />
+              <Skeleton height={32} width="20%" />
             </View>
           </View>
-        </LinearGradient>
+        ) : (
+          <LinearGradient
+            colors={['#14B8A6', '#0D9488']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            className="rounded-2xl p-5 mb-4"
+            style={{
+              shadowColor: '#14B8A6',
+              shadowOffset: { width: 0, height: 8 },
+              shadowOpacity: 0.25,
+              shadowRadius: 12,
+              elevation: 8,
+            }}
+          >
+            <View className="flex-row items-center mb-4">
+              <View className="bg-white/20 rounded-full p-2">
+                <Ionicons name="calendar" size={24} color="#fff" />
+              </View>
+              <Text className="text-white text-xl font-bold ml-3">{currentYear} Summary</Text>
+            </View>
+            <View className="flex-row justify-between">
+              <View>
+                <Text className="text-white/70 text-sm">Total Earnings</Text>
+                <Text className="text-white text-2xl font-black">{currencySymbol}{Number(totalEarnings).toFixed(2)}</Text>
+              </View>
+              <View className="items-end">
+                <Text className="text-white/70 text-sm">Transactions</Text>
+                <Text className="text-white text-2xl font-black">{totalTransactions}</Text>
+              </View>
+            </View>
+          </LinearGradient>
+        )}
 
         {/* Tax Documents */}
         <Text className="text-lg font-bold text-forest mb-3 mt-4">Available Reports</Text>
 
-        {taxReports.length === 0 ? (
+        {isLoading ? (
+          [1, 2].map((i) => (
+            <View key={i} className="bg-white rounded-2xl p-4 mb-3">
+              <View className="flex-row items-center">
+                <Skeleton height={56} width={56} borderRadius={16} />
+                <View className="flex-1 ml-4">
+                  <Skeleton height={18} width="60%" className="mb-2" />
+                  <Skeleton height={14} width="40%" />
+                </View>
+              </View>
+            </View>
+          ))
+        ) : taxReports.length === 0 ? (
           <View className="bg-white rounded-2xl p-8 items-center" style={{
             shadowColor: '#122F26',
             shadowOffset: { width: 0, height: 4 },
@@ -153,7 +181,7 @@ export default function HostTaxReportsScreen() {
             </Text>
           </View>
         ) : (
-          taxReports.map((report, index) => (
+          taxReports.map((report: any, index: number) => (
             <TaxReportCard key={index} {...report} />
           ))
         )}

@@ -569,6 +569,14 @@ export default function HostScreen() {
             />
 
             <MenuItem
+              icon="chatbubbles"
+              title="Messaging Automation"
+              description="Templates, auto-replies & quick responses"
+              onPress={() => router.push('/host/messaging')}
+              color="#8B5CF6"
+            />
+
+            <MenuItem
               icon="receipt"
               title="Tax Reports"
               description="View tax documents"

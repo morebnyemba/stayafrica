@@ -60,9 +60,9 @@ def _create_in_app_notification(user_id, title, message, data=None):
     from apps.notifications.models import Notification
     try:
         Notification.objects.create(
-            recipient_id=user_id,
+            user_id=user_id,
             title=title,
-            message=message,
+            body=message,
             notification_type=data.get('type', 'general') if data else 'general',
             data=data or {},
         )

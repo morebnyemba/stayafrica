@@ -1,7 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from apps.messaging.views import (
-    MessageViewSet, ConversationViewSet, MessageTemplateViewSet,
+    MessageViewSet, ConversationViewSet,
     erlang_persist_messages, erlang_health
 )
 from apps.messaging.automated_views import (
@@ -9,7 +9,8 @@ from apps.messaging.automated_views import (
     AutomatedMessageViewSet,
     ScheduledMessageViewSet,
     QuickReplyViewSet,
-    MessageAnalyticsViewSet
+    MessageAnalyticsViewSet,
+    MessageTemplateViewSet
 )
 
 app_name = 'messaging'

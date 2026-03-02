@@ -95,15 +95,19 @@ function RootLayoutContent() {
           const bookingId = link.split('bookings/').pop();
           if (bookingId) router.push(`/booking/${bookingId}` as any);
         } else if (link.includes('messages/')) {
-          router.push(`/(tabs)/inbox` as any);
+          const msgId = link.split('messages/').pop();
+          if (msgId) {
+            router.push(`/(tabs)/messages/${msgId}` as any);
+          } else {
+            router.push(`/(tabs)/messages` as any);
+          }
         } else if (link.includes('properties/')) {
           const propId = link.split('properties/').pop();
-          if (propId) router.push(`/property/${propId}` as any);
+          if (propId) router.push(`/(tabs)/explore/${propId}` as any);
         } else if (link.includes('reviews/')) {
           router.push(`/reviews` as any);
         }
       } else {
-        // Default: open notifications screen
         router.push('/notifications' as any);
       }
       // Clear badge

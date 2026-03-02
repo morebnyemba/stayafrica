@@ -163,7 +163,7 @@ class MessageAnalyticsViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class MessageTemplateViewSet(viewsets.ModelViewSet):
-    """ViewSet for message templates"""
+    """ViewSet for message templates (full CRUD + render)"""
     serializer_class = MessageTemplateSerializer
     permission_classes = [IsAuthenticated]
     queryset = MessageTemplate.objects.all()
@@ -171,3 +171,17 @@ class MessageTemplateViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """Return all active templates"""
         return MessageTemplate.objects.filter(is_active=True)
+
+    @action(detail=True, methods=['post'])
+    def render(self, request, pk=None):
+        """Render template with provided variables"""
+        template = self.get_object()
+        variables = request.data.get('variables', {})
+        try:
+            rendered = template.render(variables)
+            return Response(rendered)
+        except KeyError as e:
+            return Response(
+                {'error': f'Missing variable: {str(e)}'},
+                status=status.HTTP_400_BAD_REQUEST
+            )

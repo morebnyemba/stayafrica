@@ -6,10 +6,10 @@ from rest_framework.exceptions import PermissionDenied
 from django.db.models import Q, Prefetch
 from django.utils import timezone
 from django.contrib.auth import get_user_model
-from apps.messaging.models import Message, Conversation, MessageTemplate
+from apps.messaging.models import Message, Conversation
 from apps.messaging.serializers import (
     MessageSerializer, ConversationSerializer, ConversationDetailSerializer,
-    MessageCreateSerializer, MessageTemplateSerializer
+    MessageCreateSerializer
 )
 import logging
 
@@ -246,28 +246,6 @@ class MessageViewSet(viewsets.ModelViewSet):
             deleted_by_receiver__isnull=True
         ).count()
         return Response({'unread_count': count})
-
-
-class MessageTemplateViewSet(viewsets.ReadOnlyModelViewSet):
-    """ViewSet for viewing message templates"""
-    queryset = MessageTemplate.objects.filter(is_active=True)
-    serializer_class = MessageTemplateSerializer
-    permission_classes = [IsAuthenticated]
-    
-    @action(detail=True, methods=['post'])
-    def render(self, request, pk=None):
-        """Render template with provided variables"""
-        template = self.get_object()
-        variables = request.data.get('variables', {})
-        
-        try:
-            rendered = template.render(variables)
-            return Response(rendered)
-        except KeyError as e:
-            return Response(
-                {'error': f'Missing variable: {str(e)}'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
 
 
 from rest_framework.decorators import api_view, permission_classes
