@@ -20,10 +20,24 @@ import type {
 } from '@/types';
 
 // Properties
-export function useProperties() {
+export interface PropertyFilters {
+  search?: string;
+  property_type?: string;
+  city?: string;
+  country?: string;
+  ordering?: string;
+  page?: number;
+  page_size?: number;
+}
+
+export function useProperties(filters?: PropertyFilters) {
+  // Strip undefined values so the query key is stable
+  const cleanFilters = filters
+    ? Object.fromEntries(Object.entries(filters).filter(([, v]) => v !== undefined && v !== ''))
+    : {};
   return useQuery({
-    queryKey: ['properties'],
-    queryFn: () => apiClient.getProperties(),
+    queryKey: ['properties', cleanFilters],
+    queryFn: () => apiClient.getProperties(filters),
   });
 }
 

@@ -145,12 +145,21 @@ export default function PropertyDetailsScreen() {
     );
   }
 
-  const amenitiesMap = [
-    { icon: 'wifi', label: 'WiFi' },
-    { icon: 'flash', label: 'Electricity' },
-    { icon: 'restaurant', label: 'Kitchen' },
-    { icon: 'people', label: 'Common Area' },
-  ];
+  const amenityIcons: Record<string, string> = {
+    wifi: 'wifi', pool: 'water', parking: 'car', kitchen: 'restaurant',
+    tv: 'tv', ac: 'snow', heating: 'flame', washer: 'water-outline',
+    dryer: 'sunny', gym: 'barbell', elevator: 'arrow-up', security: 'shield-checkmark',
+    garden: 'leaf', balcony: 'resize', bbq: 'flame-outline', fireplace: 'bonfire',
+    electricity: 'flash', common_area: 'people', hot_water: 'thermometer',
+  };
+
+  const propertyAmenities = (property.amenities || []).map((a: string) => ({
+    icon: amenityIcons[a.toLowerCase().replace(/[\s-]/g, '_')] || 'checkmark-circle',
+    label: a.charAt(0).toUpperCase() + a.slice(1).replace(/_/g, ' '),
+  }));
+
+  const currency = property.currency || 'USD';
+  const currencySymbol = currency === 'USD' ? '$' : currency === 'ZAR' ? 'R' : currency === 'EUR' ? '€' : currency === 'GBP' ? '£' : `${currency} `;
 
   const pricePerNight =
     property?.price_per_night ??
@@ -271,11 +280,11 @@ export default function PropertyDetailsScreen() {
             }}
           >
             <View className="flex-row items-baseline">
-              <Text className="text-4xl font-black text-forest">${pricePerNight}</Text>
+              <Text className="text-4xl font-black text-forest">{currencySymbol}{pricePerNight}</Text>
               <Text className="text-forest/80 ml-2 text-lg font-semibold">per night</Text>
             </View>
             {property.cleaning_fee && (
-              <Text className="text-sm text-forest/70 mt-2">+ ${property.cleaning_fee} cleaning fee</Text>
+              <Text className="text-sm text-forest/70 mt-2">+ {currencySymbol}{property.cleaning_fee} cleaning fee</Text>
             )}
           </LinearGradient>
 
@@ -316,11 +325,11 @@ export default function PropertyDetailsScreen() {
           </View>
 
           {/* Amenities */}
-          {amenitiesMap.length > 0 && (
+          {propertyAmenities.length > 0 && (
             <View className="mb-6">
               <Text className="text-xl font-bold text-forest mb-3">Amenities</Text>
               <View className="flex-row flex-wrap">
-                {amenitiesMap.map((amenity, index) => (
+                {propertyAmenities.map((amenity: { icon: string; label: string }, index: number) => (
                   <View
                     key={index}
                     className="flex-row items-center bg-white px-4 py-3 rounded-xl mr-2 mb-2"

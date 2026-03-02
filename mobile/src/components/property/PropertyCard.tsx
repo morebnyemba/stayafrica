@@ -188,7 +188,7 @@ export function PropertyCard({
           <View className="flex-row justify-between items-center">
             <View>
               <Text className={isCompact ? 'text-lg font-black text-gold' : 'text-2xl font-black text-gold'}>
-                ${property.price_per_night ?? 0}
+                {property.currency === 'ZAR' ? 'R' : property.currency === 'EUR' ? '€' : property.currency === 'GBP' ? '£' : '$'}{property.price_per_night ?? 0}
               </Text>
               <Text className={isCompact ? 'text-moss text-[10px] font-medium' : 'text-moss text-xs font-medium'}>
                 per night

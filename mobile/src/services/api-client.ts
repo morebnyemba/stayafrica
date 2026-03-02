@@ -249,8 +249,16 @@ class APIClient {
   }
 
   // Properties
-  async getProperties(): Promise<ApiListResponse<Property>> {
-    return (await this.client.get('/properties/')).data;
+  async getProperties(params?: {
+    search?: string;
+    property_type?: string;
+    city?: string;
+    country?: string;
+    ordering?: string;
+    page?: number;
+    page_size?: number;
+  }): Promise<ApiListResponse<Property>> {
+    return (await this.client.get('/properties/', { params })).data;
   }
 
   async getNearbyProperties(
