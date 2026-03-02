@@ -109,6 +109,7 @@ class PaymentGatewayService:
         
         # REST API configurations (Flutterwave, Paystack)
         self.flutterwave_secret_key = getattr(self.config, 'flutterwave_secret_key', '')
+        self.flutterwave_webhook_secret = getattr(self.config, 'flutterwave_webhook_secret', '')
         self.paystack_secret_key = getattr(self.config, 'paystack_secret_key', '')
 
         # PayPal Server SDK initialization
@@ -453,6 +454,7 @@ class PaymentGatewayService:
         booking,
         customer_email: str,
         customer_name: str = '',
+        customer_phone: str = '',
         return_url: str = '',
     ) -> Dict:
         """Initiate Flutterwave payment using REST API"""
@@ -462,16 +464,20 @@ class PaymentGatewayService:
                 'Content-Type': 'application/json'
             }
             
+            customer_data: Dict = {
+                'email': customer_email,
+                'name': customer_name or customer_email,
+            }
+            if customer_phone:
+                customer_data['phonenumber'] = customer_phone
+            
             payload = {
                 'tx_ref': payment_obj.gateway_ref,
                 'amount': str(payment_obj.amount),
                 'currency': payment_obj.currency,
                 'redirect_url': return_url or f'{settings.SITE_URL}/payment/return',
                 'payment_options': 'card,mobilemoney,ussd',
-                'customer': {
-                    'email': customer_email,
-                    'name': customer_name or customer_email,
-                },
+                'customer': customer_data,
                 'customizations': {
                     'title': 'StayAfrica Booking',
                     'description': f'Booking: {booking.rental_property.title}',
@@ -486,7 +492,8 @@ class PaymentGatewayService:
             response = requests.post(
                 'https://api.flutterwave.com/v3/payments',
                 headers=headers,
-                json=payload
+                json=payload,
+                timeout=30,
             )
             
             if response.status_code == 200:
@@ -519,6 +526,31 @@ class PaymentGatewayService:
                 'success': False,
                 'error': str(e)
             }
+
+    def verify_flutterwave_transaction(self, transaction_id: int) -> Optional[Dict]:
+        """Verify a Flutterwave transaction by its numeric ID.
+
+        Returns the transaction data dict on success, or None on failure.
+        """
+        try:
+            headers = {
+                'Authorization': f'Bearer {self.flutterwave_secret_key}',
+                'Content-Type': 'application/json',
+            }
+            resp = requests.get(
+                f'https://api.flutterwave.com/v3/transactions/{transaction_id}/verify',
+                headers=headers,
+                timeout=30,
+            )
+            if resp.status_code == 200:
+                body = resp.json()
+                if body.get('status') == 'success':
+                    return body['data']
+            logger.error(f'Flutterwave verify failed for txn {transaction_id}: {resp.text[:200]}')
+            return None
+        except Exception as e:
+            logger.error(f'Flutterwave verify exception: {str(e)}')
+            return None
     
     def initiate_paystack_payment(
         self, 
@@ -873,6 +905,7 @@ class PaymentGatewayService:
             verify_resp = requests.get(
                 f'https://api.flutterwave.com/v3/transactions/verify_by_reference?tx_ref={gateway_ref}',
                 headers=headers,
+                timeout=30,
             )
             if verify_resp.status_code != 200 or verify_resp.json().get('status') != 'success':
                 return {'success': False, 'error': 'Could not verify Flutterwave transaction'}
@@ -887,6 +920,7 @@ class PaymentGatewayService:
                 f'https://api.flutterwave.com/v3/transactions/{txn_id}/refund',
                 headers=headers,
                 json=payload,
+                timeout=30,
             )
             data = resp.json()
             ok = resp.status_code == 200 and data.get('status') == 'success'
@@ -988,6 +1022,7 @@ class PaymentGatewayService:
         provider: str,
         customer_email: str,
         customer_name: str = '',
+        customer_phone: str = '',
         source: str = 'web',
     ) -> Dict:
         """
@@ -1001,7 +1036,7 @@ class PaymentGatewayService:
         elif provider == 'paystack':
             return self.initiate_paystack_payment(payment_obj, booking, customer_email, customer_name, return_url=return_url)
         elif provider == 'flutterwave':
-            return self.initiate_flutterwave_payment(payment_obj, booking, customer_email, customer_name, return_url=return_url)
+            return self.initiate_flutterwave_payment(payment_obj, booking, customer_email, customer_name, customer_phone, return_url=return_url)
         elif provider == 'paypal':
             return self.initiate_paypal_payment(payment_obj, booking, customer_email, customer_name, return_url=return_url)
         elif provider == 'cash_on_arrival':

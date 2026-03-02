@@ -14,6 +14,7 @@ from tasks.email_tasks import send_payment_receipt_email
 from services.audit_logger import AuditLoggerService
 import logging
 import json
+import secrets
 
 logger = logging.getLogger(__name__)
 
@@ -149,6 +150,7 @@ class PaymentViewSet(viewsets.ModelViewSet):
                     provider,
                     request.user.email,
                     request.user.get_full_name(),
+                    customer_phone=getattr(request.user, 'phone_number', '') or '',
                     source=source,
                 )
                 
@@ -281,13 +283,44 @@ class PaymentViewSet(viewsets.ModelViewSet):
             else:
                 return Response({'status': 'ignored'})
         
+        elif provider == 'flutterwave':
+            # Flutterwave sends a secret hash in the verif-hash header
+            verif_hash = request.headers.get('verif-hash')
+            flw_secret = payment_service.flutterwave_webhook_secret
+            if flw_secret:
+                if not verif_hash or not secrets.compare_digest(verif_hash, flw_secret):
+                    logger.error("Invalid Flutterwave webhook: verif-hash mismatch")
+                    return Response({'error': 'Invalid signature'}, status=status.HTTP_403_FORBIDDEN)
+            
+            # Flutterwave nests payload under "data"
+            event_type = request.data.get('event')
+            flw_data = request.data.get('data', {})
+            gateway_ref = flw_data.get('tx_ref')
+            flw_status = (flw_data.get('status') or '').lower()
+            flw_txn_id = flw_data.get('id')
+            
+            if event_type not in ('charge.completed', 'charge.failed'):
+                return Response({'status': 'ignored'})
+            
+            # Server-side verification: confirm amount/currency/status with Flutterwave
+            if flw_txn_id:
+                verified = payment_service.verify_flutterwave_transaction(flw_txn_id)
+                if verified:
+                    flw_status = (verified.get('status') or '').lower()
+                    gateway_ref = verified.get('tx_ref') or gateway_ref
+                else:
+                    logger.error(f"Flutterwave transaction verification failed for txn {flw_txn_id}")
+                    return Response({'error': 'Transaction verification failed'}, status=status.HTTP_400_BAD_REQUEST)
+            
+            payment_status = flw_status
+            logger.info(f"Flutterwave webhook received: tx_ref={gateway_ref}, status={payment_status}, event={event_type}")
+        
         else:
-            # For other providers, use existing signature verification
+            # For other providers (PayFast, Ozow, etc.), use existing signature verification
             signature = (
                 request.headers.get('X-Webhook-Signature') or
                 request.headers.get('X-Paynow-Signature') or
-                request.headers.get('X-PayFast-Signature') or
-                request.headers.get('X-Flutterwave-Signature')
+                request.headers.get('X-PayFast-Signature')
             )
             
             from apps.admin_dashboard.models import SystemConfiguration
@@ -295,7 +328,6 @@ class PaymentViewSet(viewsets.ModelViewSet):
             
             webhook_secrets = {
                 'payfast': config.payfast_webhook_secret,
-                'flutterwave': getattr(config, 'flutterwave_webhook_secret', ''),
                 'ozow': '',
             }
             webhook_secret = webhook_secrets.get(provider.lower())
@@ -1116,45 +1148,22 @@ class PaymentMethodViewSet(viewsets.ModelViewSet):
     
     def _tokenize_flutterwave(self, data, method_type):
         """
-        Tokenize with Flutterwave REST API
-        Handles cards, mobile money, bank transfers
+        Handle Flutterwave payment method storage.
+        Card tokenization MUST happen client-side via Flutterwave Inline/SDK.
+        The server only accepts pre-existing tokens.
         """
         try:
-            from apps.admin_dashboard.models import SystemConfiguration
-            
-            config = SystemConfiguration.get_config()
-            secret_key = config.flutterwave_secret_key
-            
-            if not secret_key:
-                raise Exception('Flutterwave API key not configured')
-            
-            headers = {
-                'Authorization': f'Bearer {secret_key}',
-                'Content-Type': 'application/json'
-            }
-            
             if method_type == 'card':
-                # Tokenize card
-                response = requests.post(
-                    'https://api.flutterwave.com/v3/tokenized-charges',
-                    headers=headers,
-                    json={
-                        'card_number': data.get('card_number', ''),
-                        'cvv': data.get('cvv', ''),
-                        'expiry_month': data.get('expiry_month'),
-                        'expiry_year': data.get('expiry_year'),
-                    }
-                )
-                
-                if response.status_code == 200:
-                    result = response.json()
-                    token = result.get('data', {}).get('token')
-                    if token:
-                        logger.info(f'Flutterwave card tokenized: {token}')
-                        return token
-                    raise Exception('No token in Flutterwave response')
-                else:
-                    raise Exception(f'Flutterwave API error: {response.status_code}')
+                # Card tokens must be obtained client-side via Flutterwave Inline JS or mobile SDK.
+                # The client sends us the token after a successful charge.
+                token = data.get('token') or data.get('flw_token')
+                if not token:
+                    raise ValueError(
+                        'Card tokenization must happen client-side via Flutterwave Inline. '
+                        'Pass the resulting token in the "token" field.'
+                    )
+                logger.info('Flutterwave card token received from client')
+                return token
             
             elif method_type == 'mobile':
                 # Mobile money - return account identifier
@@ -1162,7 +1171,7 @@ class PaymentMethodViewSet(viewsets.ModelViewSet):
                 if not phone.isdigit() or not (10 <= len(phone) <= 13):
                     raise ValueError('Invalid phone number format')
                 
-                logger.info(f'Flutterwave mobile method verified')
+                logger.info('Flutterwave mobile method verified')
                 return f'flutterwave_mobile_{phone[-4:]}'
             
             elif method_type in ['bank', 'ussd']:
