@@ -2,10 +2,10 @@ import { View, Text, ScrollView, TouchableOpacity, Image, ActivityIndicator, Ale
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { usePropertyById, useCreateConversation } from '@/hooks/api-hooks';
+import { usePropertyById, useCreateConversation, useAddToWishlist, useRemoveFromWishlist } from '@/hooks/api-hooks';
 import { Skeleton } from '@/components/common/Skeletons';
 import { useAuth } from '@/context/auth-context';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function PropertyDetailsScreen() {
@@ -16,7 +16,30 @@ export default function PropertyDetailsScreen() {
   const { isAuthenticated } = useAuth();
   const { width } = Dimensions.get('window');
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [isSaved, setIsSaved] = useState(false);
+  const { mutate: addToWishlist, isPending: isAdding } = useAddToWishlist();
+  const { mutate: removeFromWishlist, isPending: isRemoving } = useRemoveFromWishlist();
   const insets = useSafeAreaInsets();
+
+  const handleToggleSave = useCallback(() => {
+    if (!isAuthenticated) {
+      router.push('/(auth)/login');
+      return;
+    }
+    if (!property?.id || isAdding || isRemoving) return;
+
+    if (isSaved) {
+      removeFromWishlist(String(property.id), {
+        onSuccess: () => setIsSaved(false),
+        onError: () => Alert.alert('Error', 'Failed to remove from wishlist'),
+      });
+    } else {
+      addToWishlist(String(property.id), {
+        onSuccess: () => setIsSaved(true),
+        onError: () => Alert.alert('Error', 'Failed to add to wishlist'),
+      });
+    }
+  }, [isAuthenticated, property?.id, isSaved, isAdding, isRemoving, addToWishlist, removeFromWishlist, router]);
 
   const handleMessageHost = () => {
     if (!isAuthenticated) {
@@ -158,8 +181,12 @@ export default function PropertyDetailsScreen() {
           <Ionicons name="arrow-back" size={24} color="#122F26" />
         </TouchableOpacity>
         <Text className="text-lg font-semibold text-forest">Property Details</Text>
-        <TouchableOpacity>
-          <Ionicons name="heart-outline" size={24} color="#D9B168" />
+        <TouchableOpacity onPress={handleToggleSave} disabled={isAdding || isRemoving}>
+          {isAdding || isRemoving ? (
+            <ActivityIndicator size="small" color="#D9B168" />
+          ) : (
+            <Ionicons name={isSaved ? 'heart' : 'heart-outline'} size={24} color="#D9B168" />
+          )}
         </TouchableOpacity>
       </View>
 

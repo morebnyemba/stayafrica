@@ -394,17 +394,17 @@ class APIClient {
     return (await this.client.get(`/reviews/`, { params: { property_id: propertyId } })).data;
   }
 
-  // Wishlist
+  // Wishlist (saved properties)
   async getWishlist(): Promise<ApiListResponse<Property>> {
-    return (await this.client.get('/users/wishlist/')).data;
+    return (await this.client.get('/properties/saved/')).data;
   }
 
   async addToWishlist(propertyId: string): Promise<{ message: string }> {
-    return (await this.client.post('/users/wishlist/', { property_id: propertyId })).data;
+    return (await this.client.post('/properties/saved/', { property_id: propertyId })).data;
   }
 
   async removeFromWishlist(propertyId: string): Promise<void> {
-    return (await this.client.delete(`/users/wishlist/${propertyId}/`)).data;
+    return (await this.client.delete(`/properties/${propertyId}/saved/`)).data;
   }
 
   // Host - Properties

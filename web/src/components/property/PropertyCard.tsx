@@ -4,18 +4,21 @@
  */
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Card, CardBody } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { 
   Heart, ChevronLeft, ChevronRight, Star, Wifi, UtensilsCrossed, Wind, MapPin,
-  Tv, ParkingCircle, Dumbbell, Waves, Dog, Flame, Snowflake, Baby, Accessibility
+  Tv, ParkingCircle, Dumbbell, Waves, Dog, Flame, Snowflake, Baby, Accessibility, Loader2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/store/auth-store';
+import { apiClient } from '@/services/api-client';
 
 export interface Property {
   id: string;
@@ -45,7 +48,10 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
 }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isFavorite, setIsFavorite] = useState(property.isFavorite || false);
+  const [favoriteLoading, setFavoriteLoading] = useState(false);
   const [showQuickView, setShowQuickView] = useState(false);
+  const { isAuthenticated } = useAuth();
+  const router = useRouter();
 
   const handlePrevImage = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -63,12 +69,29 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
     );
   };
 
-  const handleFavorite = (e: React.MouseEvent) => {
+  const handleFavorite = useCallback(async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsFavorite(!isFavorite);
-    onFavorite?.(property.id);
-  };
+    if (!isAuthenticated) {
+      router.push('/login');
+      return;
+    }
+    if (favoriteLoading) return;
+    setFavoriteLoading(true);
+    try {
+      if (isFavorite) {
+        await apiClient.unsaveProperty(property.id);
+      } else {
+        await apiClient.saveProperty(property.id);
+      }
+      setIsFavorite(!isFavorite);
+      onFavorite?.(property.id);
+    } catch {
+      // Silently fail — user can retry
+    } finally {
+      setFavoriteLoading(false);
+    }
+  }, [isAuthenticated, isFavorite, favoriteLoading, property.id, onFavorite, router]);
 
   // Amenity icon map
   const amenityIcons: Record<string, React.ReactNode> = {
@@ -113,12 +136,17 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
             {/* Favorite Button */}
             <button
               onClick={handleFavorite}
+              disabled={favoriteLoading}
               className="absolute top-3 right-3 z-10 rounded-full bg-white/90 p-2 hover:bg-white transition-colors"
               aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
             >
-              <Heart
-                className={cn('h-5 w-5 transition-colors', isFavorite && 'fill-error-500 text-error-500')}
-              />
+              {favoriteLoading ? (
+                <Loader2 className="h-5 w-5 animate-spin text-neutral-400" />
+              ) : (
+                <Heart
+                  className={cn('h-5 w-5 transition-colors', isFavorite ? 'fill-error-500 text-error-500' : 'text-neutral-600')}
+                />
+              )}
             </button>
 
             {/* Image Navigation */}
