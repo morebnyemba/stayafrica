@@ -330,12 +330,12 @@ class APIClient {
     }
   }
 
-  async createConversation(propertyId: string): Promise<any> {
+  async createConversation(propertyId: string, hostId?: string): Promise<any> {
     try {
+      const body: Record<string, any> = { property: propertyId };
+      if (hostId) body.participants = [Number(hostId)];
       return (
-        await this.client.post('/messaging/conversations/', {
-          property_id: propertyId,
-        })
+        await this.client.post('/messaging/conversations/', body)
       ).data;
     } catch (error: any) {
       if (error?.response?.status === 404) {
@@ -348,8 +348,8 @@ class APIClient {
   async sendMessage(conversationId: string, receiverId: string, message: string): Promise<any> {
     return (
       await this.client.post('/messaging/messages/', {
-        conversation: Number(conversationId),
-        receiver: Number(receiverId),
+        conversation: conversationId,
+        receiver: receiverId,
         text: message,
       })
     ).data;
@@ -466,7 +466,7 @@ class APIClient {
   }
 
   async withdrawFunds(amount: number): Promise<{ message: string; balance: number }> {
-    return (await this.client.post('/payments/withdraw/', { amount })).data;
+    return (await this.client.post('/withdrawals/', { amount })).data;
   }
 
   // Payment initiation for bookings

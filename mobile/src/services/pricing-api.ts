@@ -38,7 +38,7 @@ export const pricingApi = {
   },
 
   /**
-   * Calculate booking total with dynamic pricing
+   * Calculate booking total using the availability endpoint (includes pricing)
    */
   async calculateBookingTotal(
     propertyId: string,
@@ -46,13 +46,13 @@ export const pricingApi = {
     checkOut: string,
     guests: number
   ) {
-    const response = await apiClient.post(
-      `/bookings/calculate_total/`,
+    const response = await apiClient.get(
+      `/properties/${propertyId}/availability/`,
       {
-        rental_property: propertyId,
-        check_in: checkIn,
-        check_out: checkOut,
-        number_of_guests: guests,
+        params: {
+          check_in: checkIn,
+          check_out: checkOut,
+        },
       }
     );
     return response.data;

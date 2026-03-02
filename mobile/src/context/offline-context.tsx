@@ -102,7 +102,7 @@ export function OfflineProvider({ children }: { children: React.ReactNode }) {
       try {
         // Import api client dynamically to avoid circular deps
         const { apiClient } = require('../services/api-client');
-        await apiClient.post(`/api/v1/${action.type}s/${action.action}/`, action.payload);
+        await apiClient.post(`/${action.type}s/${action.action}/`, action.payload);
       } catch {
         // Keep failed actions for retry
         remaining.push(action);
