@@ -9,6 +9,7 @@ import { BookingCard } from '@/components/booking/booking-card';
 import { ReviewList } from '@/components/review/review-list';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui';
+import POIList from '@/components/poi/POIList';
 import { Heart, MapPin, Share2, Star } from 'lucide-react';
 import Link from 'next/link';
 
@@ -206,6 +207,9 @@ export function PropertyDetailContent({ propertyId, useHostEndpoint = false }: P
               totalReviews={totalReviews}
             />
           </div>
+
+          {/* Nearby Points of Interest */}
+          <POIList propertyId={propertyId} radiusKm={2} />
         </div>
 
         {/* Booking card */}
