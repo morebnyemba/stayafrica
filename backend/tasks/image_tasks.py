@@ -3,10 +3,6 @@ Celery tasks for async image processing operations
 Use these for non-blocking image optimization and thumbnail generation
 """
 from celery import shared_task, group
-from services.image_processor import ImageProcessorService
-from PIL import Image
-from io import BytesIO
-from django.core.files.uploadedfile import InMemoryUploadedFile
 from typing import List, Dict, Optional
 import logging
 import os
@@ -20,6 +16,7 @@ def optimize_image(self, image_path, quality=85, max_width=1920, max_height=1080
     Optimize image using enhanced ImageProcessorService
     """
     try:
+        from services.image_processor import ImageProcessorService
         if not os.path.exists(image_path):
             logger.error(f"Image not found: {image_path}")
             return False
@@ -46,6 +43,7 @@ def generate_thumbnails(self, image_path, sizes=None):
     Generate multiple thumbnail sizes using enhanced ImageProcessorService
     """
     try:
+        from services.image_processor import ImageProcessorService
         if not os.path.exists(image_path):
             logger.error(f"Image not found: {image_path}")
             return False
@@ -173,6 +171,7 @@ def add_watermark_to_property_images(property_id: str, watermark_text: str = "St
         
         # Watermark main image
         if property_obj.main_image and hasattr(property_obj.main_image, 'path'):
+            from services.image_processor import ImageProcessorService
             result = ImageProcessorService.add_watermark(
                 property_obj.main_image.path,
                 watermark_text=watermark_text
@@ -183,6 +182,7 @@ def add_watermark_to_property_images(property_id: str, watermark_text: str = "St
         # Watermark additional images
         for prop_image in property_obj.images.all():
             if prop_image.image and hasattr(prop_image.image, 'path'):
+                from services.image_processor import ImageProcessorService
                 result = ImageProcessorService.add_watermark(
                     prop_image.image.path,
                     watermark_text=watermark_text

@@ -359,6 +359,17 @@ CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60  # 30 minutes
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 
+# Explicit task module imports — autodiscover_tasks doesn't reliably find
+# modules in the top-level tasks/ package (it's designed for Django apps).
+CELERY_IMPORTS = [
+    'tasks.email_tasks',
+    'tasks.payment_tasks',
+    'tasks.notification_tasks',
+    'tasks.image_tasks',
+    'tasks.geocoding_tasks',
+    'tasks.analytics_tasks',
+]
+
 from kombu import Queue
 from celery.schedules import crontab
 

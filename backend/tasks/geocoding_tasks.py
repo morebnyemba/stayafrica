@@ -3,7 +3,6 @@ Celery tasks for async geocoding operations
 Use these for bulk operations or non-blocking geocoding
 """
 from celery import shared_task
-from services.geocoding_service import GeocodingService
 from typing import List, Dict, Optional
 import logging
 
@@ -28,6 +27,7 @@ def geocode_address_async(self, address: str, country: Optional[str] = None) -> 
         geocoding_data = result.get()  # Wait for result
     """
     try:
+        from services.geocoding_service import GeocodingService
         result = GeocodingService.geocode_address(address, country)
         logger.info(f"Async geocoding completed for: {address}")
         return result
@@ -59,6 +59,7 @@ def bulk_geocode_async(self, addresses: List[Dict[str, str]]) -> List[Optional[D
         results = task.get()  # Wait for completion
     """
     try:
+        from services.geocoding_service import GeocodingService
         logger.info(f"Starting bulk geocoding for {len(addresses)} addresses")
         results = GeocodingService.bulk_geocode(addresses)
         successful = sum(1 for r in results if r)
@@ -82,6 +83,7 @@ def reverse_geocode_async(self, latitude: float, longitude: float) -> Optional[D
         Reverse geocoding result or None
     """
     try:
+        from services.geocoding_service import GeocodingService
         result = GeocodingService.reverse_geocode(latitude, longitude)
         logger.info(f"Async reverse geocoding completed for: {latitude}, {longitude}")
         return result
@@ -119,6 +121,7 @@ def refresh_property_geocodes():
         for prop in properties_to_update[:100]:  # Limit to 100 per run
             try:
                 if prop.location:
+                    from services.geocoding_service import GeocodingService
                     lat = prop.location.y
                     lon = prop.location.x
                     result = GeocodingService.reverse_geocode(lat, lon)
