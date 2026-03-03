@@ -255,7 +255,7 @@ export const BookingPanel: React.FC<BookingPanelProps> = ({
       </CardBody>
 
       {/* CTA Button */}
-      <CardFooter>
+      <CardFooter className="flex flex-col items-center gap-2">
         <Button
           fullWidth
           onClick={handleBook}
@@ -265,6 +265,9 @@ export const BookingPanel: React.FC<BookingPanelProps> = ({
         >
           {getButtonText()}
         </Button>
+        {isValidBooking && (
+          <p className="text-sm text-neutral-500 dark:text-neutral-400">You won&apos;t be charged yet</p>
+        )}
       </CardFooter>
 
       {/* Trust Indicators */}

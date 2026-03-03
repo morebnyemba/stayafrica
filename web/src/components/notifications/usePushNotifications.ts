@@ -31,7 +31,7 @@ export const usePushNotifications = () => {
     const msg = getFirebaseMessaging();
     if (!msg) return;
 
-    const unsubscribe = onMessage(msg, (payload) => {
+    const unsubscribe = onMessage(msg, (payload: any) => {
       const title = payload.notification?.title || 'StayAfrica';
       const body = payload.notification?.body || '';
       if (Notification.permission === 'granted') {

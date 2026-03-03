@@ -1,10 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
-import { useAuth } from '@/store/auth-store';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui';
 import { PropertyImageCarousel } from '@/components/property/property-image-carousel';
@@ -12,7 +11,10 @@ import { PropertyAmenities } from '@/components/property/property-amenities';
 import { PropertyHostCard } from '@/components/property/property-host-card';
 import { BookingPanel } from '@/components/booking';
 import POIList from '@/components/poi/POIList';
-import { Heart, MapPin, Share2, Star, Users, Loader2 } from 'lucide-react';
+import {
+  Heart, MapPin, Share2, Star,
+  Home, Bed, UserCheck,
+} from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
 
@@ -25,13 +27,12 @@ type Review = {
 };
 
 export function PropertyDetailsContent() {
-  const router = useRouter();
   const searchParams = useSearchParams();
-  const { user } = useAuth();
   const propertyId = searchParams.get('id') ?? '';
   const [isSaved, setIsSaved] = useState(false);
   const [checkingSaved, setCheckingSaved] = useState(true);
-  const [contactingHost, setContactingHost] = useState(false);
+  const [showFullDescription, setShowFullDescription] = useState(false);
+  const [showAllReviews, setShowAllReviews] = useState(false);
 
   // Check if property is saved on mount
   useEffect(() => {
@@ -75,34 +76,23 @@ export function PropertyDetailsContent() {
     enabled: !!propertyId,
   });
 
-  // Contact Host logic
-  const contactHost = async () => {
-    if (!property || !property.host_id || !user?.id) {
-      toast.error('Host or user information missing');
-      return;
-    }
-    setContactingHost(true);
-    try {
-      await apiClient.createConversation({
-        participants: [property.host_id, user.id],
-        property: property.id,
-        subject: `Inquiry about ${property.title}`,
-      });
-      toast.success('Conversation started!');
-      router.push(`/messages`);
-    } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Failed to start conversation');
-    } finally {
-      setContactingHost(false);
-    }
-  };
+  // Review rating breakdown
+  const ratingBreakdown = reviews?.reduce((acc, r) => {
+    const star = Math.min(5, Math.max(1, Math.round(r.rating)));
+    acc[star] = (acc[star] || 0) + 1;
+    return acc;
+  }, {} as Record<number, number>) || {};
+
+  const avgRating = reviews && reviews.length > 0
+    ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
+    : null;
 
   if (!propertyId) {
     return (
-      <div className="min-h-screen bg-sand-100 dark:bg-primary-900 flex items-center justify-center">
+      <div className="min-h-screen bg-white dark:bg-primary-900 flex items-center justify-center">
         <div className="text-center">
           <p className="text-primary-900 dark:text-sand-100 mb-4">Property not found</p>
-          <Link href="/explore" className="text-secondary-600 hover:text-secondary-700">
+          <Link href="/explore" className="text-secondary-600 hover:text-secondary-700 underline">
             Back to explore
           </Link>
         </div>
@@ -112,16 +102,11 @@ export function PropertyDetailsContent() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-sand-100 dark:bg-primary-900 flex items-center justify-center">
+      <div className="min-h-screen bg-white dark:bg-primary-900 flex items-center justify-center">
         <div className="text-center">
           <p className="text-red-600 dark:text-red-400 mb-4">Error loading property</p>
-          <Button
-            onClick={() => window.location.reload()}
-            className="mb-4"
-          >
-            Retry
-          </Button>
-          <Link href="/explore" className="text-secondary-600 hover:text-secondary-700">
+          <Button onClick={() => window.location.reload()} className="mb-4">Retry</Button>
+          <Link href="/explore" className="text-secondary-600 hover:text-secondary-700 underline">
             Back to explore
           </Link>
         </div>
@@ -131,222 +116,301 @@ export function PropertyDetailsContent() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-sand-100 dark:bg-primary-900 py-12">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Hero skeleton */}
-          <Skeleton className="w-full h-96 mb-8 rounded-2xl" />
-          {/* Title skeleton */}
-          <Skeleton className="h-8 w-64 mb-4" />
-          <Skeleton className="h-6 w-48 mb-8" />
-          {/* Content skeletons */}
-          <div className="grid grid-cols-3 gap-8">
-            <div className="col-span-2 space-y-6">
-              <Skeleton className="h-64 w-full" />
-              <Skeleton className="h-64 w-full" />
+      <div className="min-h-screen bg-white dark:bg-primary-900 py-8">
+        <div className="max-w-[1120px] mx-auto px-6">
+          <Skeleton className="h-8 w-80 mb-2" />
+          <Skeleton className="h-5 w-48 mb-6" />
+          <Skeleton className="w-full h-[400px] mb-8 rounded-xl" />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+            <div className="lg:col-span-2 space-y-6">
+              <Skeleton className="h-48 w-full" />
+              <Skeleton className="h-48 w-full" />
             </div>
-            <Skeleton className="h-96 w-full" />
+            <Skeleton className="h-96 w-full rounded-xl" />
           </div>
         </div>
       </div>
     );
   }
 
+  const isLongDescription = (property?.description?.length || 0) > 300;
+
+  const displayedReviews = showAllReviews ? reviews : reviews?.slice(0, 6);
+
   return (
-    <div className="min-h-screen bg-sand-100 dark:bg-primary-900">
-      {/* Header with back button */}
-      <div className="bg-white dark:bg-primary-800 border-b border-primary-200 dark:border-primary-700 sticky top-16 z-40">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4 flex items-center justify-between">
-          <button
-            onClick={() => router.back()}
-            className="text-primary-600 dark:text-sand-300 hover:text-primary-900 dark:hover:text-sand-50 text-sm sm:text-base"
-          >
-            ← Back
-          </button>
-          <div className="flex items-center space-x-2 sm:space-x-4">
-            <button
-              disabled={checkingSaved || saveMutation.isPending || unsaveMutation.isPending}
-              onClick={() => {
-                if (isSaved) {
-                  unsaveMutation.mutate();
-                } else {
-                  saveMutation.mutate();
-                }
-              }}
-              className={`flex items-center space-x-1 sm:space-x-2 px-2 sm:px-4 py-2 rounded-lg transition text-xs sm:text-base ${
-                isSaved
-                  ? 'bg-secondary-100 dark:bg-secondary-900/30 text-secondary-600'
-                  : 'bg-sand-100 dark:bg-primary-700 text-primary-600 dark:text-sand-300'
-              } ${checkingSaved ? 'opacity-50 cursor-not-allowed' : ''}`}
-            >
-              <Heart className={`w-4 h-4 sm:w-5 sm:h-5 ${isSaved ? 'fill-current' : ''}`} />
-              <span className="hidden sm:inline">{isSaved ? 'Saved' : 'Save'}</span>
-            </button>
-            <button className="flex items-center space-x-1 sm:space-x-2 px-2 sm:px-4 py-2 bg-sand-100 dark:bg-primary-700 text-primary-600 dark:text-sand-300 rounded-lg hover:bg-sand-200 dark:hover:bg-primary-600 transition text-xs sm:text-base">
-              <Share2 className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span className="hidden sm:inline">Share</span>
-            </button>
-            {user && (
+    <div className="min-h-screen bg-white dark:bg-primary-900">
+      <div className="max-w-[1120px] mx-auto px-6 pt-6 pb-12">
+        {/* Title & Actions Row */}
+        <div className="mb-6">
+          <h1 className="text-2xl font-semibold text-primary-900 dark:text-sand-50 mb-1">
+            {property?.title}
+          </h1>
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="flex items-center gap-2 text-sm">
+              {property?.average_rating > 0 && (
+                <>
+                  <Star className="w-4 h-4 fill-primary-900 dark:fill-sand-50 text-primary-900 dark:text-sand-50" />
+                  <span className="font-semibold text-primary-900 dark:text-sand-50">
+                    {property.average_rating.toFixed(1)}
+                  </span>
+                  <span className="text-primary-600 dark:text-sand-400">·</span>
+                  <button
+                    onClick={() => document.getElementById('reviews')?.scrollIntoView({ behavior: 'smooth' })}
+                    className="underline text-primary-900 dark:text-sand-50 font-medium hover:text-primary-700"
+                  >
+                    {property?.review_count || 0} review{(property?.review_count || 0) !== 1 ? 's' : ''}
+                  </button>
+                  <span className="text-primary-600 dark:text-sand-400">·</span>
+                </>
+              )}
+              <span className="flex items-center gap-1 text-primary-900 dark:text-sand-50 font-medium">
+                <MapPin className="w-4 h-4" />
+                {property?.city}, {property?.country}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
               <button
-                onClick={contactHost}
-                disabled={contactingHost}
-                className="flex items-center space-x-1 sm:space-x-2 px-2 sm:px-4 py-2 bg-secondary-600 hover:bg-secondary-700 dark:bg-secondary-700 dark:hover:bg-secondary-600 text-white rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-base"
+                onClick={() => {
+                  if (navigator.share) {
+                    navigator.share({ title: property?.title, url: window.location.href });
+                  } else {
+                    navigator.clipboard.writeText(window.location.href);
+                    toast.success('Link copied!');
+                  }
+                }}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-primary-800 transition text-sm font-medium text-primary-900 dark:text-sand-50 underline"
               >
-                {contactingHost ? (
-                  <>
-                    <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
-                    <span className="hidden sm:inline">Contacting...</span>
-                  </>
-                ) : (
-                  <>
-                    <Users className="w-4 h-4 sm:w-5 sm:h-5" />
-                    <span>Contact Host</span>
-                  </>
-                )}
+                <Share2 className="w-4 h-4" />
+                Share
               </button>
-            )}
+              <button
+                disabled={checkingSaved || saveMutation.isPending || unsaveMutation.isPending}
+                onClick={() => isSaved ? unsaveMutation.mutate() : saveMutation.mutate()}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-primary-800 transition text-sm font-medium text-primary-900 dark:text-sand-50 underline disabled:opacity-50"
+              >
+                <Heart className={`w-4 h-4 ${isSaved ? 'fill-red-500 text-red-500' : ''}`} />
+                {isSaved ? 'Saved' : 'Save'}
+              </button>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main content */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Image carousel */}
-            <PropertyImageCarousel
-              images={property?.images || []}
-              title={property?.title}
-            />
+        {/* Photo Grid / Carousel */}
+        <PropertyImageCarousel
+          images={property?.images || []}
+          title={property?.title}
+        />
 
-            {/* Basic info */}
-            <div>
-              <h1 className="text-4xl font-bold text-primary-900 dark:text-sand-50 mb-2">
-                {property?.title}
-              </h1>
-              <div className="flex items-center space-x-4 text-sm text-primary-600 dark:text-sand-300">
-                <div className="flex items-center space-x-1">
-                  <MapPin className="w-4 h-4" />
-                  <span>{property?.city}, {property?.country}</span>
-                </div>
-                {property?.average_rating > 0 && (
-                  <div className="flex items-center space-x-1">
-                    <Star className="w-4 h-4 fill-secondary-500 text-secondary-500" />
-                    <span>{property?.average_rating.toFixed(1)} ({property?.review_count} reviews)</span>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Description */}
-            <div>
-              <h2 className="text-2xl font-semibold text-primary-900 dark:text-sand-50 mb-4">
-                About this property
-              </h2>
-              <p className="text-primary-700 dark:text-sand-200 leading-relaxed whitespace-pre-line">
-                {property?.description}
-              </p>
-            </div>
-
-            {/* Property type & capacity */}
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-              <div className="bg-white dark:bg-primary-800 p-4 rounded-lg border border-primary-200 dark:border-primary-700">
-                <p className="text-sm text-primary-600 dark:text-sand-400">Property Type</p>
-                <p className="text-lg font-semibold text-primary-900 dark:text-sand-50">
-                  {property?.property_type}
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-x-12 mt-8">
+          {/* Left Column */}
+          <div className="lg:col-span-2">
+            {/* Property Type + Host Intro */}
+            <div className="flex items-center justify-between py-6 border-b border-neutral-200 dark:border-primary-700">
+              <div>
+                <h2 className="text-xl font-semibold text-primary-900 dark:text-sand-50">
+                  {property?.property_type} hosted by {property?.host?.first_name || 'Host'}
+                </h2>
+                <p className="text-sm text-primary-600 dark:text-sand-400 mt-1">
+                  {[
+                    property?.max_guests && `${property.max_guests} guest${property.max_guests !== 1 ? 's' : ''}`,
+                    property?.bedrooms && `${property.bedrooms} bedroom${property.bedrooms !== 1 ? 's' : ''}`,
+                    property?.bathrooms && `${property.bathrooms} bathroom${property.bathrooms !== 1 ? 's' : ''}`,
+                  ].filter(Boolean).join(' · ')}
                 </p>
               </div>
-              {property?.max_guests && (
-                <div className="bg-white dark:bg-primary-800 p-4 rounded-lg border border-primary-200 dark:border-primary-700">
-                  <p className="text-sm text-primary-600 dark:text-sand-400">Max Guests</p>
-                  <p className="text-lg font-semibold text-primary-900 dark:text-sand-50">
-                    {property?.max_guests}
-                  </p>
+              {property?.host?.profile_picture ? (
+                <img
+                  src={property.host.profile_picture}
+                  alt={property.host.first_name}
+                  className="w-14 h-14 rounded-full object-cover flex-shrink-0"
+                />
+              ) : (
+                <div className="w-14 h-14 rounded-full bg-primary-800 dark:bg-primary-600 flex items-center justify-center flex-shrink-0">
+                  <span className="text-white text-lg font-semibold">
+                    {property?.host?.first_name?.[0] || 'H'}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Property Highlights */}
+            <div className="py-6 border-b border-neutral-200 dark:border-primary-700 space-y-5">
+              {property?.host?.is_verified && (
+                <div className="flex items-start gap-4">
+                  <UserCheck className="w-6 h-6 text-primary-900 dark:text-sand-50 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-primary-900 dark:text-sand-50">Verified Host</p>
+                    <p className="text-sm text-primary-600 dark:text-sand-400">
+                      This host has completed identity verification
+                    </p>
+                  </div>
+                </div>
+              )}
+              {property?.property_type && (
+                <div className="flex items-start gap-4">
+                  <Home className="w-6 h-6 text-primary-900 dark:text-sand-50 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-primary-900 dark:text-sand-50">Entire {property.property_type.toLowerCase()}</p>
+                    <p className="text-sm text-primary-600 dark:text-sand-400">
+                      You&apos;ll have the {property.property_type.toLowerCase()} to yourself
+                    </p>
+                  </div>
                 </div>
               )}
               {property?.bedrooms && (
-                <div className="bg-white dark:bg-primary-800 p-4 rounded-lg border border-primary-200 dark:border-primary-700">
-                  <p className="text-sm text-primary-600 dark:text-sand-400">Bedrooms</p>
-                  <p className="text-lg font-semibold text-primary-900 dark:text-sand-50">
-                    {property?.bedrooms}
-                  </p>
+                <div className="flex items-start gap-4">
+                  <Bed className="w-6 h-6 text-primary-900 dark:text-sand-50 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-primary-900 dark:text-sand-50">
+                      {property.bedrooms} dedicated bedroom{property.bedrooms !== 1 ? 's' : ''}
+                    </p>
+                    <p className="text-sm text-primary-600 dark:text-sand-400">
+                      Comfortable sleeping arrangements for {property.max_guests || 2} guest{(property.max_guests || 2) !== 1 ? 's' : ''}
+                    </p>
+                  </div>
                 </div>
               )}
-              {property?.bathrooms && (
-                <div className="bg-white dark:bg-primary-800 p-4 rounded-lg border border-primary-200 dark:border-primary-700">
-                  <p className="text-sm text-primary-600 dark:text-sand-400">Bathrooms</p>
-                  <p className="text-lg font-semibold text-primary-900 dark:text-sand-50">
-                    {property?.bathrooms}
-                  </p>
-                </div>
+            </div>
+
+            {/* Description with Show More */}
+            <div className="py-6 border-b border-neutral-200 dark:border-primary-700">
+              <div className={`relative ${!showFullDescription && isLongDescription ? 'max-h-[120px] overflow-hidden' : ''}`}>
+                <p className="text-primary-700 dark:text-sand-200 leading-relaxed whitespace-pre-line text-[15px]">
+                  {property?.description}
+                </p>
+                {!showFullDescription && isLongDescription && (
+                  <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-white dark:from-primary-900 to-transparent" />
+                )}
+              </div>
+              {isLongDescription && (
+                <button
+                  onClick={() => setShowFullDescription(!showFullDescription)}
+                  className="mt-3 text-primary-900 dark:text-sand-50 font-semibold text-sm underline hover:text-primary-700 dark:hover:text-sand-200"
+                >
+                  {showFullDescription ? 'Show less' : 'Show more'}
+                </button>
               )}
             </div>
 
             {/* Amenities */}
             {property?.amenities && property.amenities.length > 0 && (
-              <PropertyAmenities amenities={property.amenities} />
+              <div className="py-6 border-b border-neutral-200 dark:border-primary-700">
+                <PropertyAmenities amenities={property.amenities} />
+              </div>
             )}
 
-            {/* Host info */}
-            <PropertyHostCard host={property?.host} propertyId={propertyId} />
+            {/* Host Card */}
+            <div className="py-6 border-b border-neutral-200 dark:border-primary-700">
+              <PropertyHostCard host={property?.host} propertyId={propertyId} />
+            </div>
 
-            {/* Reviews section */}
+            {/* Reviews Section */}
             {reviews && reviews.length > 0 && (
-              <div>
-                <h2 className="text-2xl font-semibold text-primary-900 dark:text-sand-50 mb-6">
-                  Reviews
-                </h2>
-                <div className="space-y-4">
-                  {reviews.map((review: Review) => (
-                    <div key={review.id} className="bg-white dark:bg-primary-800 p-6 rounded-lg border border-primary-200 dark:border-primary-700">
-                      <div className="flex items-start justify-between mb-2">
-                        <div>
-                          <p className="font-semibold text-primary-900 dark:text-sand-50">
-                            {review.guest?.first_name} {review.guest?.last_name}
-                          </p>
-                          <p className="text-sm text-primary-600 dark:text-sand-400">
-                            {new Date(review.created_at).toLocaleDateString()}
-                          </p>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          {[...Array(5)].map((_, i) => (
-                            <Star
-                              key={i}
-                              className={`w-4 h-4 ${
-                                i < review.rating
-                                  ? 'fill-secondary-500 text-secondary-500'
-                                  : 'text-primary-300 dark:text-primary-600'
-                              }`}
-                            />
-                          ))}
+              <div id="reviews" className="py-6 border-b border-neutral-200 dark:border-primary-700">
+                {/* Rating Summary */}
+                <div className="flex items-center gap-3 mb-6">
+                  <Star className="w-6 h-6 fill-primary-900 dark:fill-sand-50 text-primary-900 dark:text-sand-50" />
+                  <span className="text-2xl font-semibold text-primary-900 dark:text-sand-50">
+                    {avgRating}
+                  </span>
+                  <span className="text-primary-600 dark:text-sand-400 text-lg">·</span>
+                  <span className="text-2xl font-semibold text-primary-900 dark:text-sand-50">
+                    {reviews.length} review{reviews.length !== 1 ? 's' : ''}
+                  </span>
+                </div>
+
+                {/* Rating Breakdown Bars */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-16 gap-y-2 mb-8 max-w-lg">
+                  {[5, 4, 3, 2, 1].map((star) => {
+                    const count = ratingBreakdown[star] || 0;
+                    const pct = reviews.length > 0 ? (count / reviews.length) * 100 : 0;
+                    return (
+                      <div key={star} className="flex items-center gap-2">
+                        <span className="text-xs text-primary-900 dark:text-sand-50 w-3">{star}</span>
+                        <div className="flex-1 h-1 bg-neutral-200 dark:bg-primary-700 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-primary-900 dark:bg-sand-100 rounded-full transition-all"
+                            style={{ width: `${pct}%` }}
+                          />
                         </div>
                       </div>
-                      <p className="text-primary-700 dark:text-sand-200">{review.text}</p>
+                    );
+                  })}
+                </div>
+
+                {/* Review Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  {displayedReviews?.map((review: Review) => (
+                    <div key={review.id}>
+                      <div className="flex items-center gap-3 mb-3">
+                        {/* Avatar */}
+                        <div className="w-10 h-10 rounded-full bg-primary-800 dark:bg-primary-600 flex items-center justify-center flex-shrink-0">
+                          <span className="text-white text-sm font-semibold">
+                            {review.guest?.first_name?.[0] || '?'}{review.guest?.last_name?.[0] || ''}
+                          </span>
+                        </div>
+                        <div>
+                          <p className="font-semibold text-sm text-primary-900 dark:text-sand-50">
+                            {review.guest?.first_name} {review.guest?.last_name}
+                          </p>
+                          <p className="text-xs text-primary-500 dark:text-sand-500">
+                            {new Date(review.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-0.5 mb-2">
+                        {[...Array(5)].map((_, i) => (
+                          <Star
+                            key={i}
+                            className={`w-3 h-3 ${
+                              i < review.rating
+                                ? 'fill-primary-900 dark:fill-sand-50 text-primary-900 dark:text-sand-50'
+                                : 'text-neutral-300 dark:text-primary-600'
+                            }`}
+                          />
+                        ))}
+                      </div>
+                      <p className="text-[15px] text-primary-700 dark:text-sand-200 line-clamp-4 leading-relaxed">
+                        {review.text}
+                      </p>
                     </div>
                   ))}
                 </div>
+
+                {reviews.length > 6 && (
+                  <button
+                    onClick={() => setShowAllReviews(!showAllReviews)}
+                    className="mt-6 px-6 py-3 border border-primary-900 dark:border-sand-50 rounded-lg text-primary-900 dark:text-sand-50 font-semibold text-sm hover:bg-neutral-50 dark:hover:bg-primary-800 transition"
+                  >
+                    {showAllReviews ? 'Show less' : `Show all ${reviews.length} reviews`}
+                  </button>
+                )}
               </div>
             )}
 
             {/* Nearby Points of Interest */}
             {property && (
-              <div>
+              <div className="py-6">
                 <POIList propertyId={property.id} radiusKm={2} />
               </div>
             )}
           </div>
 
-          {/* Sidebar - Booking panel */}
+          {/* Right Column — Booking Panel */}
           <div className="lg:col-span-1">
-            {property && (
-              <BookingPanel
-                propertyId={property.id}
-                pricePerNight={property.price_per_night}
-                maxGuests={property.max_guests}
-                minStay={property.min_stay_nights || 1}
-                hostVerified={property.host?.is_verified || false}
-                hostRating={property.average_rating || 0}
-              />
-            )}
+            <div className="sticky top-24">
+              {property && (
+                <BookingPanel
+                  propertyId={property.id}
+                  pricePerNight={property.price_per_night}
+                  maxGuests={property.max_guests}
+                  minStay={property.min_stay_nights || 1}
+                  hostVerified={property.host?.is_verified || false}
+                  hostRating={property.average_rating || 0}
+                />
+              )}
+            </div>
           </div>
         </div>
       </div>

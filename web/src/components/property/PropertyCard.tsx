@@ -1,6 +1,6 @@
 /**
- * Enhanced Property Card Component
- * Features: Image carousel, amenity icons, ratings, price display, quick-view modal
+ * Airbnb-style Property Card Component
+ * Clean minimal design: rounded image with dot carousel, no borders/shadows
  */
 'use client';
 
@@ -8,14 +8,7 @@ import React, { useState, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Card, CardBody } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
-import { Modal } from '@/components/ui/Modal';
-import { Button } from '@/components/ui/Button';
-import { 
-  Heart, ChevronLeft, ChevronRight, Star, Wifi, UtensilsCrossed, Wind, MapPin,
-  Tv, ParkingCircle, Dumbbell, Waves, Dog, Flame, Snowflake, Baby, Accessibility, Loader2
-} from 'lucide-react';
+import { Heart, ChevronLeft, ChevronRight, Star, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/store/auth-store';
 import { apiClient } from '@/services/api-client';
@@ -44,12 +37,10 @@ interface PropertyCardProps {
 export const PropertyCard: React.FC<PropertyCardProps> = ({
   property,
   onFavorite,
-  onBook,
 }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isFavorite, setIsFavorite] = useState(property.isFavorite || false);
   const [favoriteLoading, setFavoriteLoading] = useState(false);
-  const [showQuickView, setShowQuickView] = useState(false);
   const { isAuthenticated } = useAuth();
   const router = useRouter();
 
@@ -93,232 +84,134 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
     }
   }, [isAuthenticated, isFavorite, favoriteLoading, property.id, onFavorite, router]);
 
-  // Amenity icon map
-  const amenityIcons: Record<string, React.ReactNode> = {
-    wifi: <Wifi className="h-4 w-4" />,
-    kitchen: <UtensilsCrossed className="h-4 w-4" />,
-    ac: <Wind className="h-4 w-4" />,
-    'air conditioning': <Wind className="h-4 w-4" />,
-    tv: <Tv className="h-4 w-4" />,
-    television: <Tv className="h-4 w-4" />,
-    parking: <ParkingCircle className="h-4 w-4" />,
-    gym: <Dumbbell className="h-4 w-4" />,
-    fitness: <Dumbbell className="h-4 w-4" />,
-    pool: <Waves className="h-4 w-4" />,
-    swimming: <Waves className="h-4 w-4" />,
-    'pet friendly': <Dog className="h-4 w-4" />,
-    pets: <Dog className="h-4 w-4" />,
-    heating: <Flame className="h-4 w-4" />,
-    cooling: <Snowflake className="h-4 w-4" />,
-    'baby friendly': <Baby className="h-4 w-4" />,
-    accessible: <Accessibility className="h-4 w-4" />,
-    wheelchair: <Accessibility className="h-4 w-4" />,
+  const handleDotClick = (e: React.MouseEvent, index: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCurrentImageIndex(index);
   };
 
+  // Show max 5 dots, centered around current
+  const maxDots = 5;
+  const totalImages = property.images.length;
+  const dots = [];
+  if (totalImages <= maxDots) {
+    for (let i = 0; i < totalImages; i++) dots.push(i);
+  } else {
+    let start = Math.max(0, currentImageIndex - Math.floor(maxDots / 2));
+    const end = Math.min(totalImages, start + maxDots);
+    if (end - start < maxDots) start = end - maxDots;
+    for (let i = start; i < end; i++) dots.push(i);
+  }
+
   return (
-    <>
-      <Link href={`/property/${property.id}`}>
-        <Card
-          variant="default"
-          hoverable
-          className="overflow-hidden animate-fade-in transition-all duration-300"
+    <Link href={`/property/${property.id}`} className="group block">
+      {/* Image Container */}
+      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl bg-neutral-100 dark:bg-primary-800">
+        <Image
+          src={property.images[currentImageIndex]}
+          alt={property.title}
+          fill
+          className="object-cover transition-opacity duration-300"
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+        />
+
+        {/* Favorite Button */}
+        <button
+          onClick={handleFavorite}
+          disabled={favoriteLoading}
+          className="absolute top-3 right-3 z-10 drop-shadow-md"
+          aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
         >
-          {/* Image Carousel */}
-          <div className="relative h-48 sm:h-56 md:h-48 w-full bg-neutral-200 overflow-hidden">
-            <Image
-              src={property.images[currentImageIndex]}
-              alt={property.title}
-              fill
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          {favoriteLoading ? (
+            <Loader2 className="h-6 w-6 animate-spin text-white drop-shadow-md" />
+          ) : (
+            <Heart
+              className={cn(
+                'h-6 w-6 transition-colors drop-shadow-md',
+                isFavorite
+                  ? 'fill-red-500 text-red-500'
+                  : 'fill-black/30 text-white hover:fill-black/50'
+              )}
+              strokeWidth={2}
             />
+          )}
+        </button>
 
-            {/* Favorite Button */}
+        {/* Hover Navigation Arrows */}
+        {totalImages > 1 && (
+          <>
             <button
-              onClick={handleFavorite}
-              disabled={favoriteLoading}
-              className="absolute top-3 right-3 z-10 rounded-full bg-white/90 p-2 hover:bg-white transition-colors"
-              aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+              onClick={handlePrevImage}
+              className="absolute left-2 top-1/2 -translate-y-1/2 z-10 rounded-full bg-white/90 p-1.5 shadow-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white hover:scale-105"
+              aria-label="Previous image"
             >
-              {favoriteLoading ? (
-                <Loader2 className="h-5 w-5 animate-spin text-neutral-400" />
-              ) : (
-                <Heart
-                  className={cn('h-5 w-5 transition-colors', isFavorite ? 'fill-error-500 text-error-500' : 'text-neutral-600')}
-                />
-              )}
+              <ChevronLeft className="h-4 w-4 text-neutral-800" />
             </button>
+            <button
+              onClick={handleNextImage}
+              className="absolute right-2 top-1/2 -translate-y-1/2 z-10 rounded-full bg-white/90 p-1.5 shadow-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white hover:scale-105"
+              aria-label="Next image"
+            >
+              <ChevronRight className="h-4 w-4 text-neutral-800" />
+            </button>
+          </>
+        )}
 
-            {/* Image Navigation */}
-            {property.images.length > 1 && (
-              <>
-                <button
-                  onClick={handlePrevImage}
-                  className="absolute left-2 top-1/2 -translate-y-1/2 z-10 rounded-full bg-white/80 p-1 hover:bg-white transition-colors"
-                  aria-label="Previous image"
-                >
-                  <ChevronLeft className="h-5 w-5" />
-                </button>
-                <button
-                  onClick={handleNextImage}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 z-10 rounded-full bg-white/80 p-1 hover:bg-white transition-colors"
-                  aria-label="Next image"
-                >
-                  <ChevronRight className="h-5 w-5" />
-                </button>
-
-                {/* Image Counter */}
-                <div className="absolute bottom-3 right-3 bg-black/60 text-white text-xs px-2 py-1 rounded-full">
-                  {currentImageIndex + 1} / {property.images.length}
-                </div>
-              </>
-            )}
+        {/* Dot Indicators */}
+        {totalImages > 1 && (
+          <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-10">
+            {dots.map((idx) => (
+              <button
+                key={idx}
+                onClick={(e) => handleDotClick(e, idx)}
+                aria-label={`Go to image ${idx + 1}`}
+                className={cn(
+                  'rounded-full transition-all duration-200',
+                  idx === currentImageIndex
+                    ? 'h-1.5 w-1.5 bg-white shadow-sm'
+                    : 'h-1.5 w-1.5 bg-white/60 hover:bg-white/80'
+                )}
+              />
+            ))}
           </div>
+        )}
+      </div>
 
-          {/* Card Content */}
-          <CardBody className="space-y-3">
-            {/* Title & Location */}
-            <div>
-              <h3 className="font-semibold text-neutral-900 line-clamp-1 text-base sm:text-lg">
-                {property.title}
-              </h3>
-              <p className="text-sm text-neutral-600 flex items-center gap-1">
-                <MapPin className="h-3 w-3 sm:h-4 sm:w-4" />
-                <span className="line-clamp-1">{property.location}</span>
-              </p>
-            </div>
-
-            {/* Amenities */}
-            <div className="flex gap-2 flex-wrap">
-              {property.amenities.slice(0, 3).map((amenity) => {
-                const maxLength = 10;
-                const truncatedName = amenity.length > maxLength 
-                  ? `${amenity.substring(0, maxLength)}...` 
-                  : amenity;
-                return (
-                  <Badge key={amenity} size="sm" variant="neutral" icon={amenityIcons[amenity.toLowerCase()]} className="text-xs">
-                    <span className="hidden sm:inline">{amenity}</span>
-                    <span className="sm:hidden">{truncatedName}</span>
-                  </Badge>
-                );
-              })}
-              {property.amenities.length > 3 && (
-                <Badge size="sm" variant="neutral" className="text-xs">
-                  +{property.amenities.length - 3}
-                </Badge>
-              )}
-            </div>
-
-            {/* Beds, Baths, Guests */}
-            <div className="flex gap-3 sm:gap-4 text-xs sm:text-sm text-neutral-600">
-              <span>{property.beds} beds</span>
-              <span>{property.baths} baths</span>
-              <span>{property.guests} guests</span>
-            </div>
-
-            {/* Rating */}
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1">
-                <Star className="h-4 w-4 fill-secondary-500 text-secondary-500" />
-                <span className="font-medium text-neutral-900">{property.rating}</span>
-              </div>
-              <span className="text-sm text-neutral-600">
-                ({property.reviewCount} reviews)
+      {/* Card Text Content */}
+      <div className="mt-3 space-y-0.5">
+        {/* Location + Rating */}
+        <div className="flex items-center justify-between">
+          <p className="font-semibold text-[15px] text-neutral-900 dark:text-sand-50 line-clamp-1">
+            {property.location}
+          </p>
+          {property.rating > 0 && (
+            <div className="flex items-center gap-1 flex-shrink-0 ml-2">
+              <Star className="h-3.5 w-3.5 fill-neutral-900 dark:fill-sand-50 text-neutral-900 dark:text-sand-50" />
+              <span className="text-sm text-neutral-900 dark:text-sand-50">
+                {property.rating.toFixed(1)}
               </span>
             </div>
-
-            {/* Price & CTA */}
-            <div className="flex items-center justify-between pt-2 border-t border-neutral-200">
-              <div>
-                <p className="text-xl sm:text-2xl font-bold text-neutral-900">
-                  ${property.price}
-                </p>
-                <p className="text-xs sm:text-sm text-neutral-600">per night</p>
-              </div>
-              <Button
-                size="sm"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setShowQuickView(true);
-                }}
-                className="text-xs sm:text-sm"
-              >
-                Reserve
-              </Button>
-            </div>
-          </CardBody>
-        </Card>
-      </Link>
-
-      {/* Quick View Modal */}
-      <Modal
-        isOpen={showQuickView}
-        onClose={() => setShowQuickView(false)}
-        title={property.title}
-        size="lg"
-      >
-        <div className="space-y-4">
-          <div className="h-64 w-full bg-neutral-200 rounded-lg overflow-hidden">
-            <Image
-              src={property.images[currentImageIndex]}
-              alt={property.title}
-              width={600}
-              height={400}
-              className="w-full h-full object-cover"
-            />
-          </div>
-
-          <div className="grid grid-cols-3 gap-4 text-center">
-            <div>
-              <p className="text-2xl font-bold text-neutral-900">{property.beds}</p>
-              <p className="text-sm text-neutral-600">Bedrooms</p>
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-neutral-900">{property.baths}</p>
-              <p className="text-sm text-neutral-600">Bathrooms</p>
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-neutral-900">{property.guests}</p>
-              <p className="text-sm text-neutral-600">Guests</p>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <h4 className="font-semibold text-neutral-900">Amenities</h4>
-            <div className="grid grid-cols-2 gap-2">
-              {property.amenities.map((amenity) => (
-                <Badge key={amenity} icon={amenityIcons[amenity.toLowerCase()]}>
-                  {amenity}
-                </Badge>
-              ))}
-            </div>
-          </div>
-
-          <div className="bg-neutral-50 p-4 rounded-lg">
-            <p className="text-sm text-neutral-600 mb-2">Price per night</p>
-            <p className="text-3xl font-bold text-neutral-900">${property.price}</p>
-          </div>
+          )}
         </div>
 
-        <div className="flex gap-3 mt-6">
-          <Button
-            variant="outline"
-            fullWidth
-            onClick={() => setShowQuickView(false)}
-          >
-            Close
-          </Button>
-          <Button
-            fullWidth
-            onClick={() => {
-              onBook?.(property.id);
-              setShowQuickView(false);
-            }}
-          >
-            Book Now
-          </Button>
-        </div>
-      </Modal>
-    </>
+        {/* Title */}
+        <p className="text-sm text-neutral-500 dark:text-sand-400 line-clamp-1">
+          {property.title}
+        </p>
+
+        {/* Beds · Baths · Guests */}
+        <p className="text-sm text-neutral-500 dark:text-sand-400">
+          {property.beds} bed{property.beds !== 1 ? 's' : ''} · {property.baths} bath{property.baths !== 1 ? 's' : ''} · {property.guests} guest{property.guests !== 1 ? 's' : ''}
+        </p>
+
+        {/* Price */}
+        <p className="pt-1">
+          <span className="font-semibold text-[15px] text-neutral-900 dark:text-sand-50">
+            ${property.price}
+          </span>
+          <span className="text-sm text-neutral-500 dark:text-sand-400"> night</span>
+        </p>
+      </div>
+    </Link>
   );
 };
