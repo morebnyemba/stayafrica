@@ -6,8 +6,19 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'stayafrica.settings')
 
 app = Celery('stayafrica')
 app.config_from_object('django.conf:settings', namespace='CELERY')
+
+# Ensure ALL task modules are imported and registered.
+# Belt-and-suspenders: include= here + imports in tasks/__init__.py
+# + CELERY_IMPORTS in settings.py. All three mechanisms ensure tasks register.
+app.conf.include = [
+    'tasks.email_tasks',
+    'tasks.payment_tasks',
+    'tasks.notification_tasks',
+    'tasks.image_tasks',
+    'tasks.geocoding_tasks',
+    'tasks.analytics_tasks',
+]
 app.autodiscover_tasks()
-# Task modules in tasks/ are loaded via CELERY_IMPORTS in settings.py
 
 
 @beat_init.connect
