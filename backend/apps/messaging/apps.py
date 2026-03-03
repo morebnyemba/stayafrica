@@ -4,7 +4,3 @@ class MessagingConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'apps.messaging'
     verbose_name = 'Messaging'
-
-    def ready(self):
-        # Import additional admin modules
-        import apps.messaging.automated_admin  # noqa: F401
