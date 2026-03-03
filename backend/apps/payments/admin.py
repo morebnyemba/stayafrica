@@ -54,19 +54,9 @@ class PaymentAdmin(UnfoldModelAdmin):
         updated = queryset.update(status='refunded')
         self.message_user(request, f'{updated} payment(s) refunded.')
 
-    @display(description=_('Status'), ordering='status', label=True)
+    @display(description=_('Status'), ordering='status', label={"Initiated": "warning", "Pending": "info", "Success": "success", "Failed": "danger", "Refunded": "secondary"})
     def status_badge(self, obj):
-        colors = {
-            'initiated': 'warning',
-            'pending': 'info',
-            'success': 'success',
-            'failed': 'danger',
-            'refunded': 'secondary',
-        }
-        return {
-            'value': obj.get_status_display(),
-            'color': colors.get(obj.status, 'secondary'),
-        }
+        return obj.get_status_display()
 
     @display(description=_('Reference'))
     def gateway_ref_display(self, obj):
@@ -126,17 +116,9 @@ class WalletAdmin(UnfoldModelAdmin):
         }),
     )
 
-    @display(description=_('Status'), ordering='status', label=True)
+    @display(description=_('Status'), ordering='status', label={"Active": "success", "Suspended": "warning", "Closed": "danger"})
     def status_badge(self, obj):
-        colors = {
-            'active': 'success',
-            'suspended': 'warning',
-            'closed': 'danger',
-        }
-        return {
-            'value': obj.get_status_display(),
-            'color': colors.get(obj.status, 'secondary'),
-        }
+        return obj.get_status_display()
 
     @display(description=_('User'))
     def user_display(self, obj):
@@ -226,11 +208,9 @@ class BankAccountAdmin(UnfoldModelAdmin):
             # Show last 4 digits only
             return f"****{obj.account_number[-4:]}"
 
-    @display(description=_('Primary'), label=True)
+    @display(description=_('Primary'), label={"Primary": "success", "Secondary": "secondary"})
     def primary_badge(self, obj):
-        if obj.is_primary:
-            return {'value': 'Primary', 'color': 'success'}
-        return {'value': 'Secondary', 'color': 'secondary'}
+        return "Primary" if obj.is_primary else "Secondary"
 
     @admin.action(description=_('Mark selected accounts as primary'))
     def make_primary(self, request, queryset):
@@ -275,18 +255,9 @@ class WalletTransactionAdmin(UnfoldModelAdmin):
         }),
     )
 
-    @display(description=_('Status'), ordering='status', label=True)
+    @display(description=_('Status'), ordering='status', label={"Pending": "warning", "Completed": "success", "Failed": "danger", "Reversed": "info"})
     def status_badge(self, obj):
-        colors = {
-            'pending': 'warning',
-            'completed': 'success',
-            'failed': 'danger',
-            'reversed': 'info',
-        }
-        return {
-            'value': obj.get_status_display(),
-            'color': colors.get(obj.status, 'secondary'),
-        }
+        return obj.get_status_display()
 
     @display(description=_('Wallet'))
     def wallet_display(self, obj):
@@ -296,6 +267,7 @@ class WalletTransactionAdmin(UnfoldModelAdmin):
     def amount_display(self, obj):
         prefix = '+' if obj.txn_type == 'credit' else '-'
         return f"{prefix} {obj.currency} {obj.amount:.2f}"
+
 
 
 @admin.register(Withdrawal)
@@ -328,18 +300,9 @@ class WithdrawalAdmin(UnfoldModelAdmin):
         }),
     )
 
-    @display(description=_('Status'), ordering='status', label=True)
+    @display(description=_('Status'), ordering='status', label={"Pending": "warning", "Processing": "info", "Completed": "success", "Failed": "danger"})
     def status_badge(self, obj):
-        colors = {
-            'pending': 'warning',
-            'processing': 'info',
-            'completed': 'success',
-            'failed': 'danger',
-        }
-        return {
-            'value': obj.get_status_display(),
-            'color': colors.get(obj.status, 'secondary'),
-        }
+        return obj.get_status_display()
 
     @display(description=_('Wallet'))
     def wallet_display(self, obj):
@@ -420,12 +383,9 @@ class PricingRuleAdmin(UnfoldModelAdmin):
     def property_title(self, obj):
         return f"{obj.property.title} ({obj.property.host.email})"
     
-    @display(description=_('Active'), label=True)
+    @display(description=_('Active'), label={"Active": "success", "Inactive": "secondary"})
     def active_badge(self, obj):
-        return {
-            'value': 'Active' if obj.is_active else 'Inactive',
-            'color': 'success' if obj.is_active else 'secondary',
-        }
+        return "Active" if obj.is_active else "Inactive"
     
     @display(description=_('Adjustment'))
     def adjustment_display(self, obj):
@@ -472,19 +432,13 @@ class PropertyFeeAdmin(UnfoldModelAdmin):
     def amount_display(self, obj):
         return f"${obj.amount:.2f}"
     
-    @display(description=_('Active'), label=True)
+    @display(description=_('Active'), label={"Active": "success", "Inactive": "secondary"})
     def active_badge(self, obj):
-        return {
-            'value': 'Active' if obj.is_active else 'Inactive',
-            'color': 'success' if obj.is_active else 'secondary',
-        }
+        return "Active" if obj.is_active else "Inactive"
     
-    @display(description=_('Mandatory'), label=True)
+    @display(description=_('Mandatory'), label={"Required": "info", "Optional": "secondary"})
     def mandatory_badge(self, obj):
-        return {
-            'value': 'Required' if obj.is_mandatory else 'Optional',
-            'color': 'info' if obj.is_mandatory else 'secondary',
-        }
+        return "Required" if obj.is_mandatory else "Optional"
 
 
 @admin.register(PropertyTax)
@@ -518,12 +472,9 @@ class PropertyTaxAdmin(UnfoldModelAdmin):
     def rate_display(self, obj):
         return f"{obj.rate}%"
     
-    @display(description=_('Active'), label=True)
+    @display(description=_('Active'), label={"Active": "success", "Inactive": "secondary"})
     def active_badge(self, obj):
-        return {
-            'value': 'Active' if obj.is_active else 'Inactive',
-            'color': 'success' if obj.is_active else 'secondary',
-        }
+        return "Active" if obj.is_active else "Inactive"
     
     @display(description=_('Applies To'))
     def applies_to_display(self, obj):
@@ -562,12 +513,9 @@ class CurrencyExchangeRateAdmin(UnfoldModelAdmin):
     def currency_pair(self, obj):
         return f"{obj.from_currency} → {obj.to_currency}"
     
-    @display(description=_('Active'), label=True)
+    @display(description=_('Active'), label={"Active": "success", "Inactive": "secondary"})
     def active_badge(self, obj):
-        return {
-            'value': 'Active' if obj.is_active else 'Inactive',
-            'color': 'success' if obj.is_active else 'secondary',
-        }
+        return "Active" if obj.is_active else "Inactive"
 
 
 @admin.register(PaymentMethod)
@@ -618,19 +566,13 @@ class PaymentMethodAdmin(UnfoldModelAdmin):
             return obj.phone_number
         return '-'
     
-    @display(description=_('Default'), label=True)
+    @display(description=_('Default'), label={"Default": "success", "Secondary": "secondary"})
     def default_badge(self, obj):
-        return {
-            'value': 'Default' if obj.is_default else 'Secondary',
-            'color': 'success' if obj.is_default else 'secondary',
-        }
+        return "Default" if obj.is_default else "Secondary"
     
-    @display(description=_('Verified'), label=True)
+    @display(description=_('Verified'), label={"Verified": "success", "Unverified": "warning"})
     def verified_badge(self, obj):
-        return {
-            'value': 'Verified' if obj.is_verified else 'Unverified',
-            'color': 'success' if obj.is_verified else 'warning',
-        }
+        return "Verified" if obj.is_verified else "Unverified"
     
     @admin.action(description=_('Verify selected payment methods'))
     def verify_methods(self, request, queryset):
@@ -673,12 +615,9 @@ class TaxJurisdictionAdmin(UnfoldModelAdmin):
         }),
     )
     
-    @display(description=_('Active'), label=True)
+    @display(description=_('Active'), label={"Active": "success", "Inactive": "secondary"})
     def active_badge(self, obj):
-        return {
-            'value': 'Active' if obj.is_active else 'Inactive',
-            'color': 'success' if obj.is_active else 'secondary',
-        }
+        return "Active" if obj.is_active else "Inactive"
 
 
 @admin.register(TaxRate)
@@ -712,12 +651,9 @@ class TaxRateAdmin(UnfoldModelAdmin):
     def rate_display(self, obj):
         return f"{obj.rate}%"
     
-    @display(description=_('Active'), label=True)
+    @display(description=_('Active'), label={"Active": "success", "Inactive": "secondary"})
     def active_badge(self, obj):
-        return {
-            'value': 'Active' if obj.is_active else 'Inactive',
-            'color': 'success' if obj.is_active else 'secondary',
-        }
+        return "Active" if obj.is_active else "Inactive"
 
 
 @admin.register(BookingTax)
@@ -810,17 +746,9 @@ class TaxRemittanceAdmin(UnfoldModelAdmin):
     def total_amount_display(self, obj):
         return f"${obj.total_tax_collected:.2f}"
     
-    @display(description=_('Status'), label=True)
+    @display(description=_('Status'), label={"Pending": "warning", "Remitted": "success", "Overdue": "danger"})
     def status_badge(self, obj):
-        colors = {
-            'pending': 'warning',
-            'remitted': 'success',
-            'overdue': 'danger',
-        }
-        return {
-            'value': obj.get_status_display() if hasattr(obj, 'get_status_display') else obj.status,
-            'color': colors.get(obj.status, 'secondary'),
-        }
+        return obj.get_status_display() if hasattr(obj, 'get_status_display') else obj.status
     
     @admin.action(description=_('Mark as remitted'))
     def mark_remitted(self, request, queryset):
@@ -876,9 +804,6 @@ class TaxExemptionAdmin(UnfoldModelAdmin):
     def certificate_number(self, obj):
         return obj.exemption_certificate_number or '-'
     
-    @display(description=_('Active'), label=True)
+    @display(description=_('Active'), label={"Active": "success", "Inactive": "secondary"})
     def active_badge(self, obj):
-        return {
-            'value': 'Active' if obj.is_active else 'Inactive',
-            'color': 'success' if obj.is_active else 'secondary',
-        }
+        return "Active" if obj.is_active else "Inactive"

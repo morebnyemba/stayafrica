@@ -126,19 +126,10 @@ class BookingAdmin(UnfoldModelAdmin):
         self.message_user(request, msg)
 
     # Custom display methods
-    @display(description=_('Status'), ordering='status', label=True)
+    @display(description=_('Status'), ordering='status', label={"Pending": "warning", "Confirmed": "info", "Completed": "success", "Cancelled": "danger"})
     def status_badge(self, obj):
         """Display status with StayAfrica themed badges"""
-        colors = {
-            'pending': 'warning',      # Safari Gold theme
-            'confirmed': 'info',       # Blue/Moss theme
-            'completed': 'success',    # Green theme
-            'cancelled': 'danger',     # Red theme
-        }
-        return {
-            'value': obj.get_status_display(),
-            'color': colors.get(obj.status, 'secondary'),
-        }
+        return obj.get_status_display()
 
     @display(description=_('Guest'), ordering='guest__email')
     def guest_display(self, obj):

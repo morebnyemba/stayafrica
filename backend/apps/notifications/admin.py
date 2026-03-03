@@ -46,21 +46,15 @@ class EmailConfigurationAdmin(UnfoldModelAdmin):
     
     actions = ['test_smtp_connection']
     
-    @display(description=_('Active'), label=True)
+    @display(description=_('Active'), label={"Active": "success", "Inactive": "secondary"})
     def active_badge(self, obj):
-        return {
-            'value': 'Active' if obj.is_active else 'Inactive',
-            'color': 'success' if obj.is_active else 'secondary',
-        }
+        return "Active" if obj.is_active else "Inactive"
     
-    @display(description=_('Test Status'), label=True)
+    @display(description=_('Test Status'), label={"Passed": "success", "Failed": "danger", "Not Tested": "secondary"})
     def test_status(self, obj):
         if obj.last_tested_at is None:
-            return {'value': 'Not Tested', 'color': 'secondary'}
-        return {
-            'value': 'Passed' if obj.last_test_success else 'Failed',
-            'color': 'success' if obj.last_test_success else 'danger',
-        }
+            return "Not Tested"
+        return "Passed" if obj.last_test_success else "Failed"
     
     @action(description=_('Test SMTP Connection'))
     def test_smtp_connection(self, request, queryset):
@@ -113,12 +107,9 @@ class PushTokenAdmin(UnfoldModelAdmin):
     def masked_token(self, obj):
         return f"{obj.token[:20]}..." if len(obj.token) > 20 else obj.token
     
-    @display(description=_('Active'), label=True)
+    @display(description=_('Active'), label={"Active": "success", "Inactive": "secondary"})
     def active_badge(self, obj):
-        return {
-            'value': 'Active' if obj.is_active else 'Inactive',
-            'color': 'success' if obj.is_active else 'secondary',
-        }
+        return "Active" if obj.is_active else "Inactive"
 
 
 @admin.register(NotificationPreference)
@@ -154,28 +145,19 @@ class NotificationPreferenceAdmin(UnfoldModelAdmin):
     def user_email(self, obj):
         return obj.user.email
     
-    @display(description=_('Bookings'), label=True)
+    @display(description=_('Bookings'), label={"Enabled": "success", "Disabled": "secondary"})
     def booking_status(self, obj):
         enabled = any([obj.booking_confirmed, obj.booking_cancelled, obj.booking_reminder])
-        return {
-            'value': 'Enabled' if enabled else 'Disabled',
-            'color': 'success' if enabled else 'secondary',
-        }
+        return "Enabled" if enabled else "Disabled"
     
-    @display(description=_('Messages'), label=True)
+    @display(description=_('Messages'), label={"Enabled": "success", "Disabled": "secondary"})
     def message_status(self, obj):
-        return {
-            'value': 'Enabled' if obj.new_message else 'Disabled',
-            'color': 'success' if obj.new_message else 'secondary',
-        }
+        return "Enabled" if obj.new_message else "Disabled"
     
-    @display(description=_('Payments'), label=True)
+    @display(description=_('Payments'), label={"Enabled": "success", "Disabled": "secondary"})
     def payment_status(self, obj):
         enabled = any([obj.payment_received, obj.payment_required])
-        return {
-            'value': 'Enabled' if enabled else 'Disabled',
-            'color': 'success' if enabled else 'secondary',
-        }
+        return "Enabled" if enabled else "Disabled"
 
 
 @admin.register(Notification)
@@ -219,16 +201,6 @@ class NotificationAdmin(UnfoldModelAdmin):
     def title_truncated(self, obj):
         return obj.title[:50] + '...' if len(obj.title) > 50 else obj.title
     
-    @display(description=_('Status'), label=True)
+    @display(description=_('Status'), label={"Pending": "warning", "Sent": "info", "Delivered": "success", "Failed": "danger", "Read": "secondary"})
     def status_badge(self, obj):
-        colors = {
-            'pending': 'warning',
-            'sent': 'info',
-            'delivered': 'success',
-            'failed': 'danger',
-            'read': 'secondary',
-        }
-        return {
-            'value': obj.get_status_display(),
-            'color': colors.get(obj.status, 'secondary'),
-        }
+        return obj.get_status_display()

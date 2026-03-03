@@ -131,17 +131,9 @@ class PropertyAdmin(UnfoldModelAdmin):
         self.message_user(request, f'{updated} property(ies) unpublished.')
 
     # Custom display methods
-    @display(description=_('Status'), ordering='status', label=True)
+    @display(description=_('Status'), ordering='status', label={"Active": "success", "Inactive": "danger", "Pending Approval": "warning"})
     def status_badge(self, obj):
-        colors = {
-            'active': 'success',
-            'inactive': 'danger',
-            'pending_approval': 'warning',
-        }
-        return {
-            'value': obj.get_status_display(),
-            'color': colors.get(obj.status, 'secondary'),
-        }
+        return obj.get_status_display()
 
     @display(description=_('Host'))
     def host_display(self, obj):
@@ -312,15 +304,14 @@ class PointOfInterestAdmin(UnfoldModelAdmin):
         }),
     )
 
-    @display(description=_('Type'), label=True)
+    @display(description=_('Type'), label={
+        "Restaurant": "info", "Cafe": "info", "Bar": "info",
+        "Hospital": "danger", "Pharmacy": "danger",
+        "Attraction": "success", "Museum": "success", "Park": "success", "Beach": "success",
+        "Transport": "warning", "Shopping": "secondary",
+    })
     def poi_type_badge(self, obj):
-        colors = {
-            'restaurant': 'info', 'cafe': 'info', 'bar': 'info',
-            'hospital': 'danger', 'pharmacy': 'danger',
-            'attraction': 'success', 'museum': 'success', 'park': 'success', 'beach': 'success',
-            'transport': 'warning', 'shopping': 'secondary',
-        }
-        return {'value': obj.get_poi_type_display(), 'color': colors.get(obj.poi_type, 'secondary')}
+        return obj.get_poi_type_display()
 
     @display(description=_('Rating'))
     def rating_display(self, obj):
@@ -328,15 +319,13 @@ class PointOfInterestAdmin(UnfoldModelAdmin):
             return f"⭐ {obj.rating}"
         return '-'
 
-    @display(description=_('Source'), label=True)
+    @display(description=_('Source'), label={"manual": "secondary", "google_places": "info", "openstreetmap": "success"})
     def source_badge(self, obj):
-        colors = {'manual': 'secondary', 'google_places': 'info', 'openstreetmap': 'success'}
-        return {'value': obj.source, 'color': colors.get(obj.source, 'secondary')}
+        return obj.source
 
-    @display(description=_('Active'), label=True)
+    @display(description=_('Active'), label={"Active": "success", "Inactive": "danger"})
     def active_badge(self, obj):
-        return {'value': 'Active' if obj.is_active else 'Inactive',
-                'color': 'success' if obj.is_active else 'danger'}
+        return "Active" if obj.is_active else "Inactive"
 
 
 @admin.register(PropertyPOI)
@@ -368,10 +357,9 @@ class PropertyPOIAdmin(UnfoldModelAdmin):
     def walking_time(self, obj):
         return f"{obj.walking_time_minutes} min" if obj.walking_time_minutes else '-'
 
-    @display(description=_('Recommended'), label=True)
+    @display(description=_('Recommended'), label={"⭐ Recommended": "success", "No": "secondary"})
     def recommended_badge(self, obj):
-        return {'value': '⭐ Recommended' if obj.is_recommended else 'No',
-                'color': 'success' if obj.is_recommended else 'secondary'}
+        return "⭐ Recommended" if obj.is_recommended else "No"
 
 
 # ── Analytics Admin ───────────────────────────────────────────────────────
@@ -431,10 +419,9 @@ class HostAnalyticsSummaryAdmin(UnfoldModelAdmin):
     def host_display(self, obj):
         return obj.host.get_full_name() or obj.host.email
 
-    @display(description=_('Period'), label=True)
+    @display(description=_('Period'), label={"Daily": "secondary", "Weekly": "info", "Monthly": "success", "Yearly": "warning"})
     def period_badge(self, obj):
-        colors = {'daily': 'secondary', 'weekly': 'info', 'monthly': 'success', 'yearly': 'warning'}
-        return {'value': obj.get_period_display(), 'color': colors.get(obj.period, 'secondary')}
+        return obj.get_period_display()
 
     @display(description=_('Date Range'))
     def date_range(self, obj):
@@ -481,13 +468,7 @@ class RevenueProjectionAdmin(UnfoldModelAdmin):
 
     @display(description=_('Confidence'), label=True)
     def confidence_display(self, obj):
-        if obj.confidence_level >= 80:
-            color = 'success'
-        elif obj.confidence_level >= 50:
-            color = 'warning'
-        else:
-            color = 'danger'
-        return {'value': f"{obj.confidence_level}%", 'color': color}
+        return f"{obj.confidence_level}%"
 
     def has_add_permission(self, request):
         return False
@@ -538,10 +519,9 @@ class WishlistAdmin(UnfoldModelAdmin):
     def owner_display(self, obj):
         return obj.owner.get_full_name() or obj.owner.email
 
-    @display(description=_('Privacy'), label=True)
+    @display(description=_('Privacy'), label={"Private": "secondary", "Shared with Collaborators": "info", "Public": "success"})
     def privacy_badge(self, obj):
-        colors = {'private': 'secondary', 'shared': 'info', 'public': 'success'}
-        return {'value': obj.get_privacy_display(), 'color': colors.get(obj.privacy, 'secondary')}
+        return obj.get_privacy_display()
 
     @display(description=_('Items'))
     def item_count(self, obj):
@@ -598,11 +578,9 @@ class WishlistVoteAdmin(UnfoldModelAdmin):
     def item_display(self, obj):
         return obj.wishlist_item.property.title
 
-    @display(description=_('Vote'), label=True)
+    @display(description=_('Vote'), label={"👍 Upvote": "success", "👎 Downvote": "danger"})
     def vote_badge(self, obj):
-        if obj.vote == 1:
-            return {'value': '👍 Upvote', 'color': 'success'}
-        return {'value': '👎 Downvote', 'color': 'danger'}
+        return "👍 Upvote" if obj.vote == 1 else "👎 Downvote"
 
     def has_add_permission(self, request):
         return False

@@ -163,12 +163,9 @@ class ReviewVoteAdmin(UnfoldModelAdmin):
     def user_display(self, obj):
         return obj.user.get_full_name() or obj.user.email
     
-    @display(description=_('Vote'), label=True)
+    @display(description=_('Vote'), label={"Helpful": "success", "Unhelpful": "warning"})
     def vote_type_badge(self, obj):
-        return {
-            'value': obj.get_vote_type_display(),
-            'color': 'success' if obj.vote_type == 'helpful' else 'warning',
-        }
+        return obj.get_vote_type_display()
     
     def has_add_permission(self, request):
         return False
