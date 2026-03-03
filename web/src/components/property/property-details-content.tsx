@@ -40,9 +40,14 @@ export function PropertyDetailsContent({ propertyId: propId }: PropertyDetailsCo
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [showAllReviews, setShowAllReviews] = useState(false);
 
-  // Check if property is saved on mount
+  // Check if property is saved on mount (only if logged in)
   useEffect(() => {
     if (!propertyId) return;
+    const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
+    if (!token) {
+      setCheckingSaved(false);
+      return;
+    }
     setCheckingSaved(true);
     apiClient.isPropertySaved(propertyId)
       .then((isSaved: boolean) => setIsSaved(isSaved))
