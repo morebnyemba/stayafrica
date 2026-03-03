@@ -396,15 +396,15 @@ CELERY_TASK_ROUTES = {
 
 # Celery Beat Configuration
 CELERY_BEAT_SCHEDULE = {
-    # ── Real-time tasks (every 1–2 minutes) ──────────────────────
+    # ── Real-time tasks (every 1–5 minutes) ──────────────────────
     'send-pending-emails': {
         'task': 'tasks.email_tasks.send_pending_emails',
-        'schedule': timedelta(seconds=60),   # every 1 min
+        'schedule': timedelta(minutes=1),    # every 1 min
         'options': {'queue': 'high_priority'},
     },
     'expire-stale-payments': {
         'task': 'tasks.payment_tasks.expire_stale_payments',
-        'schedule': timedelta(seconds=90),   # every 1.5 min
+        'schedule': timedelta(minutes=5),    # every 5 min
         'options': {'queue': 'high_priority'},
     },
     'process-scheduled-messages': {
@@ -426,7 +426,7 @@ CELERY_BEAT_SCHEDULE = {
     },
     'daily-notifications': {
         'task': 'tasks.notification_tasks.send_daily_notifications',
-        'schedule': timedelta(hours=4),      # every 4 hrs (catches reminders faster)
+        'schedule': timedelta(hours=4),      # every 4 hrs
         'options': {'queue': 'high_priority'},
     },
 
@@ -457,20 +457,20 @@ CELERY_BEAT_SCHEDULE = {
         'options': {'queue': 'analytics'},
     },
 
-    # ── Housekeeping (daily / weekly) ────────────────────────────
+    # ── Housekeeping (every 6–12 hours) ──────────────────────────
     'cleanup-old-images': {
         'task': 'tasks.image_tasks.cleanup_old_images',
-        'schedule': crontab(hour=3, minute=0, day_of_week=1),
+        'schedule': timedelta(hours=12),     # every 12 hrs
         'options': {'queue': 'analytics'},
     },
     'refresh-property-geocodes': {
         'task': 'tasks.geocoding_tasks.refresh_property_geocodes',
-        'schedule': crontab(hour=3, minute=15, day_of_week=1),
+        'schedule': timedelta(hours=12),     # every 12 hrs
         'options': {'queue': 'analytics'},
     },
     'refresh-property-pois': {
         'task': 'tasks.analytics_tasks.refresh_property_pois',
-        'schedule': crontab(hour=3, minute=30, day_of_week=1),
+        'schedule': timedelta(hours=6),      # every 6 hrs
         'options': {'queue': 'analytics'},
     },
 }
