@@ -44,6 +44,13 @@ class PushTokenViewSet(viewsets.ModelViewSet):
         logger.info(f"Push token deactivated for user {request.user.email}")
         return Response({'status': 'deactivated'})
 
+    @action(detail=False, methods=['post'], url_path='deactivate-all')
+    def deactivate_all(self, request):
+        """Deactivate all push tokens for the current user (used on logout)"""
+        count = self.get_queryset().filter(is_active=True).update(is_active=False)
+        logger.info(f"Deactivated {count} push tokens for user {request.user.email}")
+        return Response({'status': 'deactivated', 'count': count})
+
 
 class NotificationPreferenceViewSet(viewsets.ViewSet):
     """Manage notification preferences"""

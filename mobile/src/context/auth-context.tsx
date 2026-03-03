@@ -202,6 +202,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = async () => {
     try {
+      // Deactivate push tokens before clearing auth
+      try {
+        await apiClient.deactivateAllPushTokens();
+      } catch {
+        // Non-blocking: token deactivation failure shouldn't prevent logout
+      }
       await apiClient.clearTokens();
       setUser(null);
       setIsAuthenticated(false);

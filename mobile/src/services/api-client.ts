@@ -811,6 +811,10 @@ class APIClient {
     return (await this.client.post(`/tokens/${tokenId}/deactivate/`)).data;
   }
 
+  async deactivateAllPushTokens(): Promise<any> {
+    return (await this.client.post('/tokens/deactivate-all/')).data;
+  }
+
   // ── Identity Verification ─────────────────────────────────────────────
 
   async uploadVerificationFile(fileUri: string, fileName?: string): Promise<{ url: string; path: string }> {

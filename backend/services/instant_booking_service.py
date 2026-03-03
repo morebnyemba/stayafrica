@@ -76,10 +76,12 @@ class InstantBookingService:
         # Check if guest has payment method on file
         require_payment_method = requirements.get('require_payment_method', True)
         if require_payment_method:
-            # Check if guest has valid payment method
-            # This is a placeholder - implement based on payment system
-            # For now, we assume payment method is checked during booking creation
-            pass
+            from apps.payments.models import Payment
+            has_successful_payment = Payment.objects.filter(
+                booking__guest=guest, status='success'
+            ).exists()
+            if not has_successful_payment:
+                return False, "Guest must have a successful payment on record for instant booking"
         
         # Check if guest is blocked by host
         if hasattr(property_obj.host, 'blocked_guests'):

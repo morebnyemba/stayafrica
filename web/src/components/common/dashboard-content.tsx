@@ -139,9 +139,7 @@ export function DashboardContent() {
       try {
         const response = await apiClient.getSavedProperties();
         return response.data?.results || [];
-      } catch (error) {
-        // If endpoint not implemented yet, return empty array
-        console.warn('Saved properties endpoint not available yet');
+      } catch {
         return [];
       }
     },

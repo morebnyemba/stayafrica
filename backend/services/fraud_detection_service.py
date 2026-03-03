@@ -312,10 +312,40 @@ class FraudDetectionService:
         if score >= RISK_CRITICAL:
             return 'block'  # Block the transaction
         elif score >= RISK_HIGH:
-            return 'manual_review'  # Flag for admin review
+            return 'review'  # Flag for admin review
         elif score >= RISK_MEDIUM:
             return 'monitor'  # Allow but monitor closely
         return 'allow'  # Normal processing
+
+    def assess_payment_risk_precheck(self, booking, request=None):
+        """
+        Lightweight pre-payment fraud check (before Payment object exists).
+        Uses booking-level signals + payment history to decide allow/review/block.
+        """
+        booking_risk = self.assess_booking_risk(booking, request)
+        signals = [FraudSignal(s['score'], s['reason'], s['category']) for s in booking_risk['signals']]
+
+        # Also check payment failure history
+        signals.extend(self._check_payment_history(booking.guest))
+        signals.extend(self._check_failed_payments_for_booking(booking))
+        signals.extend(self._check_provider_switching(booking))
+
+        total_score = min(sum(s.score for s in signals), 100)
+        risk_level = self._score_to_level(total_score)
+
+        result = {
+            'risk_score': total_score,
+            'risk_level': risk_level,
+            'action': self._determine_action(total_score),
+            'signals': [s.to_dict() for s in signals],
+        }
+
+        if total_score >= RISK_HIGH:
+            logger.warning(
+                f"Pre-payment fraud risk for booking {booking.booking_ref}: "
+                f"score={total_score}, action={result['action']}"
+            )
+        return result
 
 
 # Singleton instance

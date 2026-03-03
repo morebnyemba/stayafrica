@@ -20,6 +20,7 @@ export interface PendingAction {
   id: string;
   type: 'booking' | 'review' | 'message' | 'profile';
   action: string;
+  endpoint?: string; // Full API path, preferred over type/action pattern
   payload: Record<string, unknown>;
   createdAt: string;
 }
@@ -100,9 +101,9 @@ export function OfflineProvider({ children }: { children: React.ReactNode }) {
 
     for (const action of pendingActions) {
       try {
-        // Import api client dynamically to avoid circular deps
         const { apiClient } = require('../services/api-client');
-        await apiClient.post(`/${action.type}s/${action.action}/`, action.payload);
+        const url = action.endpoint || `/${action.type}s/${action.action}/`;
+        await apiClient.post(url, action.payload);
       } catch {
         // Keep failed actions for retry
         remaining.push(action);

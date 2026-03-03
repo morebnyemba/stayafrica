@@ -137,6 +137,22 @@ class FlexibleDateSearch:
                 properties = properties.filter(city__icontains=filters['city'])
             if 'country' in filters:
                 properties = properties.filter(country=filters['country'])
+            if 'amenities' in filters:
+                # Accept comma-separated IDs or names
+                amenity_values = [a.strip() for a in filters['amenities'].split(',') if a.strip()]
+                for val in amenity_values:
+                    if val.isdigit():
+                        properties = properties.filter(amenities__id=int(val))
+                    else:
+                        properties = properties.filter(amenities__name__icontains=val)
+            if 'lat' in filters and 'lon' in filters:
+                from django.contrib.gis.geos import Point
+                from django.contrib.gis.db.models.functions import Distance
+                radius_km = filters.get('radius_km', 10)
+                point = Point(filters['lon'], filters['lat'])
+                properties = properties.filter(
+                    location__distance_lte=(point, radius_km * 1000)
+                ).annotate(distance=Distance('location', point))
         
         # Check availability for each date range
         results = []

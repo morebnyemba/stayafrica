@@ -65,12 +65,20 @@ class SocialAuthService {
   async loadConfig(): Promise<Record<string, ProviderConfig>> {
     if (this.configLoaded) return this.providers;
 
-    try {
-      const response = await apiClient.client.get('/auth/social/config/');
-      this.providers = response.data?.providers || {};
-      this.configLoaded = true;
-    } catch (e) {
-      console.warn('Failed to load social auth config:', e);
+    const maxRetries = 3;
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        const response = await apiClient.client.get('/auth/social/config/');
+        this.providers = response.data?.providers || {};
+        this.configLoaded = true;
+        return this.providers;
+      } catch (e) {
+        if (attempt < maxRetries - 1) {
+          await new Promise(r => setTimeout(r, 1000 * Math.pow(2, attempt)));
+        } else {
+          console.warn('Failed to load social auth config after retries:', e);
+        }
+      }
     }
     return this.providers;
   }

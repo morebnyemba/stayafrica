@@ -135,6 +135,21 @@ class PaymentViewSet(viewsets.ModelViewSet):
 
         # Initiate payment with provider SDK
         try:
+            # Fraud risk assessment
+            try:
+                from services.fraud_detection_service import FraudDetectionService
+                fraud_service = FraudDetectionService()
+                risk = fraud_service.assess_payment_risk_precheck(booking, request)
+                if risk.get('action') == 'block':
+                    return Response(
+                        {'error': 'Payment blocked due to security concerns. Please contact support.'},
+                        status=status.HTTP_403_FORBIDDEN,
+                    )
+                if risk.get('action') == 'review':
+                    logger.warning(f"Payment flagged for review: booking={booking.booking_ref}, risk={risk['risk_score']}")
+            except Exception as fraud_exc:
+                logger.warning(f"Fraud check skipped: {fraud_exc}")
+
             with transaction.atomic():
                 import uuid
                 payment = Payment.objects.create(

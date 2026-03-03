@@ -266,6 +266,10 @@ class PropertyViewSet(viewsets.ModelViewSet):
         - bedrooms: Optional minimum bedrooms filter
         - city: Optional city filter
         - country: Optional country filter
+        - amenities: Optional comma-separated amenity IDs or names
+        - lat: Optional latitude for geo-radius search
+        - lon: Optional longitude for geo-radius search
+        - radius_km: Optional radius in km (default: 10, requires lat/lon)
         """
         check_in = request.query_params.get('check_in')
         check_out = request.query_params.get('check_out')
@@ -327,6 +331,15 @@ class PropertyViewSet(viewsets.ModelViewSet):
             filters['city'] = request.query_params.get('city')
         if request.query_params.get('country'):
             filters['country'] = request.query_params.get('country')
+        if request.query_params.get('amenities'):
+            filters['amenities'] = request.query_params.get('amenities')
+        if request.query_params.get('lat') and request.query_params.get('lon'):
+            try:
+                filters['lat'] = float(request.query_params.get('lat'))
+                filters['lon'] = float(request.query_params.get('lon'))
+                filters['radius_km'] = float(request.query_params.get('radius_km', 10))
+            except ValueError:
+                pass
         
         # Perform flexible date search
         try:
