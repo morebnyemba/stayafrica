@@ -325,10 +325,13 @@ def refresh_property_pois(self):
     for prop in properties:
         try:
             from services.poi_service import POIService
-            imported = POIService.import_from_openstreetmap(prop, radius_meters=5000)
-            if imported > 0:
-                POIService.associate_pois_with_property(prop, radius_km=5)
+            import time
+            # associate_pois_with_property auto-imports from OSM if no POIs
+            # exist nearby, then creates PropertyPOI junction records.
+            associated = POIService.associate_pois_with_property(prop, radius_km=5)
+            if associated > 0:
                 count += 1
+            time.sleep(2)  # respect Overpass rate limits
         except Exception as exc:
             logger.error("POI refresh error for property %s: %s", prop.id, exc)
 
