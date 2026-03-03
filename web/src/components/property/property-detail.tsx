@@ -1,7 +1,10 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
+import { useAuth } from '@/store/auth-store';
 import { PropertyImageCarousel } from '@/components/property/property-image-carousel';
 import { PropertyAmenities } from '@/components/property/property-amenities';
 import { PropertyHostCard } from '@/components/property/property-host-card';
@@ -10,8 +13,9 @@ import { ReviewList } from '@/components/review/review-list';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui';
 import POIList from '@/components/poi/POIList';
-import { Heart, MapPin, Share2, Star } from 'lucide-react';
+import { ArrowLeft, Heart, MapPin, Share2, Star } from 'lucide-react';
 import Link from 'next/link';
+import { toast } from 'react-hot-toast';
 
 type PropertyDetailContentProps = {
   propertyId: string;
@@ -19,6 +23,11 @@ type PropertyDetailContentProps = {
 };
 
 export function PropertyDetailContent({ propertyId, useHostEndpoint = false }: PropertyDetailContentProps) {
+  const router = useRouter();
+  const { user } = useAuth();
+  const [isSaved, setIsSaved] = useState(false);
+  const [checkingSaved, setCheckingSaved] = useState(true);
+
   const { data: property, isLoading, error } = useQuery({
     queryKey: ['property', propertyId, useHostEndpoint],
     queryFn: async () => {
@@ -45,6 +54,37 @@ export function PropertyDetailContent({ propertyId, useHostEndpoint = false }: P
   const reviews = reviewsData?.reviews || [];
   const averageRating = reviewsData?.average_rating;
   const totalReviews = reviewsData?.count || 0;
+
+  // Check if property is saved
+  useEffect(() => {
+    if (!propertyId || !user) {
+      setCheckingSaved(false);
+      return;
+    }
+    setCheckingSaved(true);
+    apiClient.isPropertySaved(propertyId)
+      .then((saved: boolean) => setIsSaved(saved))
+      .catch(() => setIsSaved(false))
+      .finally(() => setCheckingSaved(false));
+  }, [propertyId, user]);
+
+  const saveMutation = useMutation({
+    mutationFn: async () => apiClient.saveProperty(propertyId),
+    onSuccess: () => { setIsSaved(true); toast.success('Property saved!'); },
+  });
+  const unsaveMutation = useMutation({
+    mutationFn: async () => apiClient.unsaveProperty(propertyId),
+    onSuccess: () => { setIsSaved(false); toast.success('Property removed from saved'); },
+  });
+
+  const handleShare = async () => {
+    try {
+      await navigator.share({ title: property?.title, url: window.location.href });
+    } catch {
+      await navigator.clipboard.writeText(window.location.href);
+      toast.success('Link copied to clipboard');
+    }
+  };
 
   if (!propertyId) {
     return (
@@ -102,6 +142,15 @@ export function PropertyDetailContent({ propertyId, useHostEndpoint = false }: P
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-12">
+      {/* Back button */}
+      <button
+        onClick={() => router.back()}
+        className="flex items-center gap-1 text-primary-600 dark:text-sand-300 hover:text-primary-900 dark:hover:text-sand-50 mb-6 text-sm"
+      >
+        <ArrowLeft className="w-4 h-4" />
+        Back
+      </button>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Main content */}
         <div className="lg:col-span-2 space-y-8">
@@ -133,10 +182,24 @@ export function PropertyDetailContent({ propertyId, useHostEndpoint = false }: P
                 </div>
               </div>
               <div className="flex gap-2">
-                <button className="p-3 rounded-lg border border-primary-200 dark:border-primary-700 hover:bg-primary-50 dark:hover:bg-primary-800 transition">
-                  <Heart className="w-5 h-5 text-primary-600" />
+                <button
+                  disabled={checkingSaved || saveMutation.isPending || unsaveMutation.isPending}
+                  onClick={() => {
+                    if (!user) { toast.error('Please sign in to save properties'); return; }
+                    if (isSaved) { unsaveMutation.mutate(); } else { saveMutation.mutate(); }
+                  }}
+                  className={`p-3 rounded-lg border transition ${
+                    isSaved
+                      ? 'border-secondary-300 bg-secondary-50 dark:bg-secondary-900/30'
+                      : 'border-primary-200 dark:border-primary-700 hover:bg-primary-50 dark:hover:bg-primary-800'
+                  } ${checkingSaved ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  <Heart className={`w-5 h-5 ${isSaved ? 'fill-secondary-500 text-secondary-500' : 'text-primary-600'}`} />
                 </button>
-                <button className="p-3 rounded-lg border border-primary-200 dark:border-primary-700 hover:bg-primary-50 dark:hover:bg-primary-800 transition">
+                <button
+                  onClick={handleShare}
+                  className="p-3 rounded-lg border border-primary-200 dark:border-primary-700 hover:bg-primary-50 dark:hover:bg-primary-800 transition"
+                >
                   <Share2 className="w-5 h-5 text-primary-600" />
                 </button>
               </div>
@@ -193,7 +256,7 @@ export function PropertyDetailContent({ propertyId, useHostEndpoint = false }: P
           )}
 
           {/* Host info */}
-          <PropertyHostCard host={property?.host} />
+          <PropertyHostCard host={property?.host} propertyId={propertyId} />
 
           {/* Reviews section */}
           <div>
