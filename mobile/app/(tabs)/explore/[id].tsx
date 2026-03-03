@@ -1,8 +1,8 @@
-import { View, Text, ScrollView, TouchableOpacity, Image, ActivityIndicator, Alert, Dimensions } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Image, ActivityIndicator, Alert, Dimensions, Share } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { usePropertyById, useCreateConversation, useAddToWishlist, useRemoveFromWishlist, useNearbyPOIs } from '@/hooks/api-hooks';
+import { usePropertyById, useCreateConversation, useAddToWishlist, useRemoveFromWishlist, useNearbyPOIs, usePropertyReviews } from '@/hooks/api-hooks';
 import { Skeleton } from '@/components/common/Skeletons';
 import { useAuth } from '@/context/auth-context';
 import { useState, useCallback } from 'react';
@@ -13,6 +13,7 @@ export default function PropertyDetailsScreen() {
   const { id } = useLocalSearchParams();
   const { data: property, isLoading } = usePropertyById(id as string);
   const { data: nearbyPOIs } = useNearbyPOIs(id as string);
+  const { data: reviewsData } = usePropertyReviews(id as string);
   const { mutate: createConversation, isPending: isCreatingConversation } = useCreateConversation();
   const { isAuthenticated } = useAuth();
   const { width } = Dimensions.get('window');
@@ -21,6 +22,19 @@ export default function PropertyDetailsScreen() {
   const { mutate: addToWishlist, isPending: isAdding } = useAddToWishlist();
   const { mutate: removeFromWishlist, isPending: isRemoving } = useRemoveFromWishlist();
   const insets = useSafeAreaInsets();
+
+  const reviews = reviewsData?.results || [];
+
+  const handleShare = async () => {
+    try {
+      await Share.share({
+        message: `Check out ${property?.title || 'this property'} on StayAfrica!`,
+        url: `https://zimlegend.online/property/${id}`,
+      });
+    } catch {
+      // user cancelled
+    }
+  };
 
   const handleToggleSave = useCallback(() => {
     if (!isAuthenticated) {
@@ -154,10 +168,14 @@ export default function PropertyDetailsScreen() {
     electricity: 'flash', common_area: 'people', hot_water: 'thermometer',
   };
 
-  const propertyAmenities = (property.amenities || []).map((a: string) => ({
-    icon: amenityIcons[a.toLowerCase().replace(/[\s-]/g, '_')] || 'checkmark-circle',
-    label: a.charAt(0).toUpperCase() + a.slice(1).replace(/_/g, ' '),
-  }));
+  const propertyAmenities = (property.amenities || []).map((a: any) => {
+    const name = typeof a === 'string' ? a : (a.name || '');
+    const key = name.toLowerCase().replace(/[\s-]/g, '_');
+    return {
+      icon: amenityIcons[key] || 'checkmark-circle',
+      label: name.charAt(0).toUpperCase() + name.slice(1).replace(/_/g, ' '),
+    };
+  });
 
   const currency = property.currency || 'USD';
   const currencySymbol = currency === 'USD' ? '$' : currency === 'ZAR' ? 'R' : currency === 'EUR' ? '€' : currency === 'GBP' ? '£' : `${currency} `;
@@ -191,13 +209,18 @@ export default function PropertyDetailsScreen() {
           <Ionicons name="arrow-back" size={24} color="#122F26" />
         </TouchableOpacity>
         <Text className="text-lg font-semibold text-forest">Property Details</Text>
-        <TouchableOpacity onPress={handleToggleSave} disabled={isAdding || isRemoving}>
-          {isAdding || isRemoving ? (
-            <ActivityIndicator size="small" color="#D9B168" />
-          ) : (
-            <Ionicons name={isSaved ? 'heart' : 'heart-outline'} size={24} color="#D9B168" />
-          )}
-        </TouchableOpacity>
+        <View className="flex-row items-center gap-3">
+          <TouchableOpacity onPress={handleShare}>
+            <Ionicons name="share-outline" size={22} color="#122F26" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handleToggleSave} disabled={isAdding || isRemoving}>
+            {isAdding || isRemoving ? (
+              <ActivityIndicator size="small" color="#D9B168" />
+            ) : (
+              <Ionicons name={isSaved ? 'heart' : 'heart-outline'} size={24} color="#D9B168" />
+            )}
+          </TouchableOpacity>
+        </View>
       </View>
 
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 24 }}>
@@ -296,30 +319,56 @@ export default function PropertyDetailsScreen() {
           </View>
 
           {/* Property Type and Guests */}
-          <View className="flex-row gap-3 mb-6">
+          <View className="flex-row flex-wrap gap-3 mb-6">
             {property.property_type && (
-              <View className="flex-1 bg-white p-4 rounded-2xl" style={{
+              <View className="flex-1 min-w-[45%] bg-white p-4 rounded-2xl" style={{
                 shadowColor: '#122F26',
                 shadowOffset: { width: 0, height: 2 },
                 shadowOpacity: 0.05,
                 shadowRadius: 4,
                 elevation: 2,
               }}>
-                <Ionicons name="home" size={24} color="#D9B168" className="mb-2" />
-                <Text className="text-xs text-moss mb-1 font-semibold">Type</Text>
-                <Text className="font-bold text-forest">{property.property_type}</Text>
+                <Ionicons name="home" size={24} color="#D9B168" />
+                <Text className="text-xs text-moss mb-1 mt-2 font-semibold">Type</Text>
+                <Text className="font-bold text-forest capitalize">{property.property_type}</Text>
               </View>
             )}
-            {property.max_guests && (
-              <View className="flex-1 bg-white p-4 rounded-2xl" style={{
+            {property.bedrooms != null && (
+              <View className="flex-1 min-w-[45%] bg-white p-4 rounded-2xl" style={{
                 shadowColor: '#122F26',
                 shadowOffset: { width: 0, height: 2 },
                 shadowOpacity: 0.05,
                 shadowRadius: 4,
                 elevation: 2,
               }}>
-                <Ionicons name="people" size={24} color="#D9B168" className="mb-2" />
-                <Text className="text-xs text-moss mb-1 font-semibold">Guests</Text>
+                <Ionicons name="bed" size={24} color="#D9B168" />
+                <Text className="text-xs text-moss mb-1 mt-2 font-semibold">Bedrooms</Text>
+                <Text className="font-bold text-forest">{property.bedrooms}</Text>
+              </View>
+            )}
+            {property.bathrooms != null && (
+              <View className="flex-1 min-w-[45%] bg-white p-4 rounded-2xl" style={{
+                shadowColor: '#122F26',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.05,
+                shadowRadius: 4,
+                elevation: 2,
+              }}>
+                <Ionicons name="water" size={24} color="#D9B168" />
+                <Text className="text-xs text-moss mb-1 mt-2 font-semibold">Bathrooms</Text>
+                <Text className="font-bold text-forest">{property.bathrooms}</Text>
+              </View>
+            )}
+            {property.max_guests != null && (
+              <View className="flex-1 min-w-[45%] bg-white p-4 rounded-2xl" style={{
+                shadowColor: '#122F26',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.05,
+                shadowRadius: 4,
+                elevation: 2,
+              }}>
+                <Ionicons name="people" size={24} color="#D9B168" />
+                <Text className="text-xs text-moss mb-1 mt-2 font-semibold">Guests</Text>
                 <Text className="font-bold text-forest">{property.max_guests}</Text>
               </View>
             )}
@@ -361,14 +410,58 @@ export default function PropertyDetailsScreen() {
             </View>
           )}
 
-          {/* Nearby Attractions */}
-          {Array.isArray(nearbyPOIs) && nearbyPOIs.length > 0 && (
+          {/* Host Info */}
+          {property.host && (
+            <View className="mb-6 bg-white rounded-2xl p-4" style={{
+              shadowColor: '#122F26',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.05,
+              shadowRadius: 4,
+              elevation: 2,
+            }}>
+              <Text className="text-xl font-bold text-forest mb-3">Your Host</Text>
+              <View className="flex-row items-center">
+                {property.host.profile_picture ? (
+                  <Image
+                    source={{ uri: property.host.profile_picture }}
+                    className="w-14 h-14 rounded-full"
+                    resizeMode="cover"
+                  />
+                ) : (
+                  <View className="w-14 h-14 rounded-full bg-gold/20 items-center justify-center">
+                    <Ionicons name="person" size={28} color="#D9B168" />
+                  </View>
+                )}
+                <View className="ml-3 flex-1">
+                  <Text className="font-bold text-forest text-base">
+                    {property.host.first_name} {property.host.last_name}
+                  </Text>
+                  {property.host.response_time && (
+                    <Text className="text-xs text-moss mt-1">
+                      Responds within {property.host.response_time}
+                    </Text>
+                  )}
+                  {property.host.is_verified && (
+                    <View className="flex-row items-center mt-1">
+                      <Ionicons name="checkmark-circle" size={14} color="#10B981" />
+                      <Text className="text-xs text-green-600 ml-1">Verified Host</Text>
+                    </View>
+                  )}
+                </View>
+              </View>
+            </View>
+          )}
+
+          {/* Reviews */}
+          {reviews.length > 0 && (
             <View className="mb-6">
-              <Text className="text-xl font-bold text-forest mb-3">Nearby Attractions</Text>
-              {nearbyPOIs.slice(0, 5).map((poi: any) => (
+              <Text className="text-xl font-bold text-forest mb-3">
+                Guest Reviews ({reviews.length})
+              </Text>
+              {reviews.slice(0, 3).map((review: any, index: number) => (
                 <View
-                  key={poi.id}
-                  className="flex-row items-center bg-white px-4 py-3 rounded-xl mb-2"
+                  key={review.id || index}
+                  className="bg-white rounded-2xl p-4 mb-3"
                   style={{
                     shadowColor: '#122F26',
                     shadowOffset: { width: 0, height: 2 },
@@ -377,19 +470,73 @@ export default function PropertyDetailsScreen() {
                     elevation: 2,
                   }}
                 >
-                  <View className="bg-gold/20 rounded-full p-2">
-                    <Ionicons name="location" size={16} color="#D9B168" />
+                  <View className="flex-row items-center mb-2">
+                    <View className="w-10 h-10 rounded-full bg-gold/20 items-center justify-center">
+                      <Ionicons name="person" size={20} color="#D9B168" />
+                    </View>
+                    <View className="ml-3 flex-1">
+                      <Text className="font-bold text-forest">
+                        {review.guest?.first_name || review.reviewer_name || 'Guest'}
+                      </Text>
+                      {review.created_at && (
+                        <Text className="text-xs text-moss">
+                          {new Date(review.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                        </Text>
+                      )}
+                    </View>
+                    <View className="flex-row items-center bg-gold/20 px-2 py-1 rounded-lg">
+                      <Ionicons name="star" size={14} color="#F59E0B" />
+                      <Text className="font-bold text-forest ml-1 text-sm">{review.overall_rating || review.rating}</Text>
+                    </View>
                   </View>
-                  <View className="ml-3 flex-1">
-                    <Text className="font-semibold text-forest">{poi.name}</Text>
-                    {poi.category_name && (
-                      <Text className="text-xs text-moss">{poi.category_name}</Text>
-                    )}
-                  </View>
-                  {poi.distance_km != null && (
-                    <Text className="text-xs text-moss font-medium">{poi.distance_km.toFixed(1)} km</Text>
+                  {review.comment && (
+                    <Text className="text-moss text-sm leading-5" numberOfLines={4}>
+                      {review.comment}
+                    </Text>
                   )}
                 </View>
+              ))}
+            </View>
+          )}
+
+          {/* Nearby Attractions */}
+          {nearbyPOIs?.pois_by_category && nearbyPOIs.total_pois > 0 && (
+            <View className="mb-6">
+              <Text className="text-xl font-bold text-forest mb-3">What's Nearby</Text>
+              <Text className="text-moss text-sm mb-3">{nearbyPOIs.total_pois} places within {nearbyPOIs.radius_km}km</Text>
+              {Object.entries(nearbyPOIs.pois_by_category).map(([category, pois]: [string, any[]]) => (
+                pois.length > 0 && (
+                  <View key={category} className="mb-4">
+                    <Text className="text-base font-bold text-forest mb-2 capitalize">{category.replace(/_/g, ' ')}</Text>
+                    {pois.slice(0, 3).map((item: any) => (
+                      <View
+                        key={item.id}
+                        className="flex-row items-center bg-white px-4 py-3 rounded-xl mb-2"
+                        style={{
+                          shadowColor: '#122F26',
+                          shadowOffset: { width: 0, height: 2 },
+                          shadowOpacity: 0.05,
+                          shadowRadius: 4,
+                          elevation: 2,
+                        }}
+                      >
+                        <View className="bg-gold/20 rounded-full p-2">
+                          <Ionicons name="location" size={16} color="#D9B168" />
+                        </View>
+                        <View className="ml-3 flex-1">
+                          <Text className="font-semibold text-forest">{item.poi?.name || item.name}</Text>
+                          <Text className="text-xs text-moss capitalize">{(item.poi?.poi_type || category).replace(/_/g, ' ')}</Text>
+                        </View>
+                        <View className="items-end">
+                          <Text className="text-xs text-moss font-medium">{item.distance_display}</Text>
+                          {item.walking_time_minutes && (
+                            <Text className="text-xs text-moss">{item.walking_time_minutes} min walk</Text>
+                          )}
+                        </View>
+                      </View>
+                    ))}
+                  </View>
+                )
               ))}
             </View>
           )}
