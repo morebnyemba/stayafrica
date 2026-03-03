@@ -791,6 +791,16 @@ class APIClient {
     return (await this.client.put('/preferences/', data)).data;
   }
 
+  // ── Travel Preferences ────────────────────────────────────────────────
+
+  async getUserPreferences(): Promise<any> {
+    return (await this.client.get('/preferences/my_preferences/')).data;
+  }
+
+  async updateUserPreferences(data: any): Promise<any> {
+    return (await this.client.post('/preferences/update_preferences/', data)).data;
+  }
+
   // ── Push Tokens ────────────────────────────────────────────────────────
 
   async registerPushToken(data: PushTokenData): Promise<any> {

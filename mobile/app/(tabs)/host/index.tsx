@@ -10,7 +10,8 @@ import {
   useHostProperties, 
   useHostAnalytics, 
   usePendingActions,
-  usePropertyPerformance 
+  usePropertyPerformance,
+  useUpcomingCheckins 
 } from '@/hooks/api-hooks';
 
 interface StatCardProps {
@@ -42,6 +43,7 @@ export default function HostScreen() {
   const { data: analyticsData, refetch: refetchAnalytics } = useHostAnalytics();
   const { data: pendingData, refetch: refetchPending } = usePendingActions();
   const { data: performanceData, refetch: refetchPerformance } = usePropertyPerformance();
+  const { data: checkinsData, refetch: refetchCheckins } = useUpcomingCheckins(7);
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -53,6 +55,7 @@ export default function HostScreen() {
         refetchAnalytics(),
         refetchPending(),
         refetchPerformance(),
+        refetchCheckins(),
       ]);
     } catch (error) {
       console.error('Error refreshing dashboard:', error);
@@ -494,6 +497,51 @@ export default function HostScreen() {
 
           {/* Quick Actions */}
           <View className="px-4 mt-6">
+
+            {/* Upcoming Check-ins */}
+            {checkinsData?.upcoming_checkins && checkinsData.upcoming_checkins.length > 0 && (
+              <View
+                className="p-4 bg-white rounded-2xl mb-4"
+                style={{
+                  shadowColor: '#122F26',
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.08,
+                  shadowRadius: 8,
+                  elevation: 4,
+                }}
+              >
+                <Text className="text-lg font-bold text-forest mb-3">
+                  Upcoming Check-ins (Next 7 Days)
+                </Text>
+                {checkinsData.upcoming_checkins.slice(0, 5).map((checkin: any) => (
+                  <View
+                    key={checkin.booking_id}
+                    className="bg-sand-50 rounded-xl p-3 mb-2"
+                  >
+                    <Text className="text-forest font-semibold" numberOfLines={1}>
+                      {checkin.property_title}
+                    </Text>
+                    <Text className="text-xs text-moss mt-1">
+                      Guest: {checkin.guest_name}
+                    </Text>
+                    <View className="flex-row justify-between mt-1">
+                      <View className="flex-row items-center">
+                        <Ionicons name="enter-outline" size={12} color="#3A5C50" />
+                        <Text className="text-xs text-moss ml-1">
+                          {new Date(checkin.check_in).toLocaleDateString()}
+                        </Text>
+                      </View>
+                      <View className="flex-row items-center">
+                        <Ionicons name="exit-outline" size={12} color="#3A5C50" />
+                        <Text className="text-xs text-moss ml-1">
+                          {new Date(checkin.check_out).toLocaleDateString()}
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+                ))}
+              </View>
+            )}
             <Text className="text-lg font-bold text-forest mb-3">Quick Actions</Text>
             
             <MenuItem

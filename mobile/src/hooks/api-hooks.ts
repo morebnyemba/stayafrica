@@ -736,3 +736,22 @@ export function useUpdateNotificationPreferences() {
     },
   });
 }
+
+// ── Travel Preferences ────────────────────────────────────────────────
+
+export function useUserPreferences() {
+  return useQuery({
+    queryKey: ['user-preferences'],
+    queryFn: () => apiClient.getUserPreferences(),
+  });
+}
+
+export function useUpdateUserPreferences() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: any) => apiClient.updateUserPreferences(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user-preferences'] });
+    },
+  });
+}

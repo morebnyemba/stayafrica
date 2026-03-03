@@ -610,7 +610,15 @@ export default function ProfileScreen() {
             iconName="notifications-outline"
             label="Notifications"
             value="Manage notification preferences"
-            onPress={() => { }}
+            onPress={() => router.push('/(tabs)/profile/notifications')}
+            highlighted={true}
+          />
+
+          <MenuItem
+            iconName="heart-outline"
+            label="Travel Preferences"
+            value="Property types, price range, amenities"
+            onPress={() => router.push('/(tabs)/profile/preferences')}
             highlighted={true}
           />
 
