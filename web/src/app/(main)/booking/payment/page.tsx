@@ -16,75 +16,95 @@ import { toast } from 'react-hot-toast';
 import Link from 'next/link';
 
 /* ── Payment method tags per provider ── */
+type MethodIcon = 'card' | 'mobile' | 'eft' | 'wallet' | 'cash' | 'ussd' | 'qr';
+
 const PROVIDER_META: Record<string, {
   description: string;
-  methods: { label: string; icon: 'card' | 'mobile' | 'eft' | 'wallet' | 'cash' | 'ussd' }[];
+  methods: { label: string; icon: MethodIcon }[];
   poweredBy: string;
   cardOnly?: boolean;
 }> = {
   stripe: {
-    description: 'Credit & debit cards processed securely by Stripe',
+    description: 'All major credit & debit cards, processed securely by Stripe',
     methods: [
       { label: 'Visa', icon: 'card' },
       { label: 'Mastercard', icon: 'card' },
       { label: 'Amex', icon: 'card' },
+      { label: 'Discover', icon: 'card' },
+      { label: 'Diners Club', icon: 'card' },
+      { label: 'JCB', icon: 'card' },
+      { label: 'Apple Pay', icon: 'wallet' },
+      { label: 'Google Pay', icon: 'wallet' },
     ],
     poweredBy: 'Stripe',
     cardOnly: true,
   },
   paypal: {
-    description: 'Pay with PayPal balance or linked cards',
+    description: 'Pay with your PayPal account, linked cards or bank',
     methods: [
       { label: 'PayPal Balance', icon: 'wallet' },
       { label: 'Visa', icon: 'card' },
       { label: 'Mastercard', icon: 'card' },
+      { label: 'Amex', icon: 'card' },
+      { label: 'Linked Bank', icon: 'eft' },
+      { label: 'Pay Later', icon: 'wallet' },
     ],
     poweredBy: 'PayPal',
     cardOnly: true,
   },
   paynow: {
-    description: 'Zimbabwe\'s leading payment gateway',
+    description: 'Zimbabwe\'s leading gateway — mobile money & wallets',
     methods: [
       { label: 'EcoCash', icon: 'mobile' },
       { label: 'OneMoney', icon: 'mobile' },
-      { label: 'Visa', icon: 'card' },
+      { label: 'Telecash', icon: 'mobile' },
+      { label: 'InnBucks', icon: 'mobile' },
+      { label: 'Omari', icon: 'mobile' },
+      { label: 'ZimSwitch', icon: 'eft' },
     ],
     poweredBy: 'Paynow',
   },
   flutterwave: {
-    description: 'Africa-wide payments — cards & mobile money',
+    description: 'Africa-wide payments — mobile money, bank transfer & USSD',
     methods: [
-      { label: 'Mobile Money', icon: 'mobile' },
-      { label: 'Visa', icon: 'card' },
-      { label: 'Mastercard', icon: 'card' },
+      { label: 'M-Pesa', icon: 'mobile' },
+      { label: 'MTN MoMo', icon: 'mobile' },
+      { label: 'Airtel Money', icon: 'mobile' },
+      { label: 'Vodafone Cash', icon: 'mobile' },
+      { label: 'Tigo', icon: 'mobile' },
+      { label: 'Bank Transfer', icon: 'eft' },
       { label: 'USSD', icon: 'ussd' },
     ],
     poweredBy: 'Flutterwave',
   },
   paystack: {
-    description: 'Secure payments for Africa',
+    description: 'Secure payments for Nigeria, Ghana & South Africa',
     methods: [
-      { label: 'Visa', icon: 'card' },
-      { label: 'Mastercard', icon: 'card' },
       { label: 'Bank Transfer', icon: 'eft' },
       { label: 'Mobile Money', icon: 'mobile' },
       { label: 'USSD', icon: 'ussd' },
+      { label: 'QR Code', icon: 'qr' },
     ],
     poweredBy: 'Paystack',
   },
   ozow: {
-    description: 'Instant EFT for South Africa',
+    description: 'Instant EFT — pay directly from your South African bank',
     methods: [
-      { label: 'Bank EFT', icon: 'eft' },
+      { label: 'ABSA', icon: 'eft' },
+      { label: 'FNB', icon: 'eft' },
+      { label: 'Nedbank', icon: 'eft' },
+      { label: 'Standard Bank', icon: 'eft' },
+      { label: 'Capitec', icon: 'eft' },
+      { label: 'Investec', icon: 'eft' },
     ],
     poweredBy: 'Ozow',
   },
   mpesa: {
-    description: 'Pay with M-Pesa mobile money',
+    description: 'Kenya\'s most popular mobile money service',
     methods: [
       { label: 'M-Pesa', icon: 'mobile' },
     ],
-    poweredBy: 'M-Pesa',
+    poweredBy: 'Safaricom M-Pesa',
   },
   cash_on_arrival: {
     description: 'Pay cash directly at the property on check-in',
@@ -103,6 +123,7 @@ function MethodIcon({ type }: { type: string }) {
     case 'wallet': return <Wallet className="w-3.5 h-3.5" />;
     case 'cash': return <Banknote className="w-3.5 h-3.5" />;
     case 'ussd': return <Smartphone className="w-3.5 h-3.5" />;
+    case 'qr': return <Globe className="w-3.5 h-3.5" />;
     default: return <CreditCard className="w-3.5 h-3.5" />;
   }
 }

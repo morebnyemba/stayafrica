@@ -24,32 +24,35 @@ app.autodiscover_tasks()
 @beat_init.connect
 def force_sync_beat_schedule(sender, **kwargs):
     """
-    On every beat startup, force-sync the ENTIRE CELERY_BEAT_SCHEDULE from
-    settings into django_celery_beat DB tables — task names, schedules,
-    queues, and args. Prevents stale/corrupted DB entries from overriding
-    the canonical schedule in settings.py.
+    On beat startup, sync CELERY_BEAT_SCHEDULE into django_celery_beat DB tables.
+    Resets last_run_at so tasks fire immediately after deploy/restart.
     """
     import django
     django.setup()
 
-    from django.conf import settings
-    from django_celery_beat.models import (
-        PeriodicTask, IntervalSchedule, CrontabSchedule,
-    )
-    from celery.schedules import crontab as celery_crontab, schedule as celery_schedule
-    import json
-
-    beat_schedule = getattr(settings, 'CELERY_BEAT_SCHEDULE', {})
+    from django.conf import settings as django_settings
+    beat_schedule = getattr(django_settings, 'CELERY_BEAT_SCHEDULE', {})
     if not beat_schedule:
         return
 
+    try:
+        from django_celery_beat.models import (
+            PeriodicTask, PeriodicTasks, IntervalSchedule, CrontabSchedule,
+        )
+    except Exception:
+        return
+
+    from celery.schedules import crontab as celery_crontab
+    import json, logging
+    logger = logging.getLogger('celery.beat.sync')
+
+    synced = 0
     for name, entry in beat_schedule.items():
         task_name = entry.get('task', '')
         sched = entry.get('schedule')
         if not task_name or not sched:
             continue
         try:
-            # Build the correct schedule object
             crontab_obj = None
             interval_obj = None
 
@@ -62,7 +65,6 @@ def force_sync_beat_schedule(sender, **kwargs):
                     month_of_year=sched._orig_month_of_year,
                 )
             else:
-                # timedelta / schedule interval
                 total_seconds = sched.total_seconds() if hasattr(sched, 'total_seconds') else float(sched)
                 if total_seconds >= 60:
                     every = int(total_seconds // 60)
@@ -78,31 +80,32 @@ def force_sync_beat_schedule(sender, **kwargs):
             task_kwargs = json.dumps(entry.get('kwargs', {}))
             task_args = json.dumps(entry.get('args', []))
 
-            pt = PeriodicTask.objects.filter(name=name).first()
-            if pt:
-                # Force-update all fields to match settings.py
-                pt.task = task_name
-                pt.crontab = crontab_obj
-                pt.interval = interval_obj if not crontab_obj else None
-                pt.kwargs = task_kwargs
-                pt.args = task_args
-                pt.queue = queue
-                pt.enabled = True
-                pt.save()
-            else:
-                # Create missing entry
-                PeriodicTask.objects.create(
-                    name=name,
-                    task=task_name,
-                    crontab=crontab_obj,
-                    interval=interval_obj if not crontab_obj else None,
-                    kwargs=task_kwargs,
-                    args=task_args,
-                    queue=queue,
-                    enabled=True,
-                )
-        except Exception:
-            pass  # DB not ready yet or table missing — skip silently
+            defaults = {
+                'task': task_name,
+                'crontab': crontab_obj,
+                'interval': interval_obj if not crontab_obj else None,
+                'kwargs': task_kwargs,
+                'args': task_args,
+                'queue': queue,
+                'enabled': True,
+                'last_run_at': None,  # reset so task fires immediately
+            }
+
+            _, created = PeriodicTask.objects.update_or_create(
+                name=name, defaults=defaults,
+            )
+            synced += 1
+        except Exception as exc:
+            logger.warning(f'Failed to sync beat entry "{name}": {exc}')
+
+    # Signal the scheduler to reload from DB
+    try:
+        PeriodicTasks.changed()
+    except Exception:
+        pass
+
+    if synced:
+        logger.info(f'Synced {synced}/{len(beat_schedule)} beat schedule entries to DB')
 
 
 @app.task(bind=True)
