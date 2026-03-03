@@ -426,7 +426,7 @@ CELERY_BEAT_SCHEDULE = {
     },
     'daily-notifications': {
         'task': 'tasks.notification_tasks.send_daily_notifications',
-        'schedule': timedelta(minutes=30),   # every 30 min
+        'schedule': timedelta(minutes=2),    # every 2 min — near-instant
         'options': {'queue': 'high_priority'},
     },
 
