@@ -458,7 +458,7 @@ CELERY_BEAT_SCHEDULE = {
     },
     'refresh-property-pois': {
         'task': 'tasks.analytics_tasks.refresh_property_pois',
-        'schedule': crontab(hour=5, minute=30, day_of_week=1),
+        'schedule': crontab(hour=5, minute=30),
         'options': {'queue': 'analytics'},
     },
 }
