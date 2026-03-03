@@ -396,70 +396,68 @@ CELERY_TASK_ROUTES = {
 
 # Celery Beat Configuration
 CELERY_BEAT_SCHEDULE = {
-    # ── High-priority interval tasks ─────────────────────────────
+    # ── Real-time tasks (every 1–2 minutes) ──────────────────────
     'send-pending-emails': {
         'task': 'tasks.email_tasks.send_pending_emails',
-        'schedule': timedelta(minutes=5),
+        'schedule': timedelta(seconds=60),   # every 1 min
         'options': {'queue': 'high_priority'},
     },
     'expire-stale-payments': {
         'task': 'tasks.payment_tasks.expire_stale_payments',
-        'schedule': timedelta(minutes=5),
+        'schedule': timedelta(seconds=90),   # every 1.5 min
         'options': {'queue': 'high_priority'},
     },
     'process-scheduled-messages': {
         'task': 'tasks.notification_tasks.process_scheduled_messages',
-        'schedule': timedelta(minutes=10),
-        'options': {'queue': 'high_priority'},
-    },
-    'daily-notifications': {
-        'task': 'tasks.notification_tasks.send_daily_notifications',
-        'schedule': crontab(hour=7, minute=0),
+        'schedule': timedelta(minutes=2),    # every 2 min
         'options': {'queue': 'high_priority'},
     },
 
-    # ── Hourly operational tasks ─────────────────────────────────
+    # ── Frequent operational tasks (every 10–15 minutes) ─────────
     'auto-host-payouts': {
         'task': 'tasks.payment_tasks.process_host_payouts',
-        'schedule': crontab(minute=15),  # every hour at :15
+        'schedule': timedelta(minutes=10),   # every 10 min
         'options': {'queue': 'high_priority'},
     },
     'refresh-admin-stats': {
         'task': 'tasks.payment_tasks.refresh_admin_stats',
-        'schedule': crontab(minute=45),  # every hour at :45
+        'schedule': timedelta(minutes=15),   # every 15 min
         'options': {'queue': 'analytics'},
     },
+    'daily-notifications': {
+        'task': 'tasks.notification_tasks.send_daily_notifications',
+        'schedule': timedelta(hours=4),      # every 4 hrs (catches reminders faster)
+        'options': {'queue': 'high_priority'},
+    },
 
-    # ── Daily analytics (grouped 02:00–02:30 UTC) ───────────────
-    'daily-property-analytics': {
+    # ── Analytics (every 2–4 hours — idempotent, safe to repeat) ─
+    'property-analytics': {
         'task': 'tasks.analytics_tasks.compute_daily_property_analytics',
-        'schedule': crontab(hour=2, minute=0),
+        'schedule': timedelta(hours=4),      # every 4 hrs
         'options': {'queue': 'analytics'},
     },
-    'daily-message-analytics': {
+    'message-analytics': {
         'task': 'tasks.analytics_tasks.compute_message_analytics',
-        'schedule': crontab(hour=2, minute=10),
+        'schedule': timedelta(hours=4),      # every 4 hrs
         'options': {'queue': 'analytics'},
     },
-    'daily-host-summaries': {
+    'host-summaries': {
         'task': 'tasks.analytics_tasks.generate_host_summaries',
-        'schedule': crontab(hour=2, minute=20),
+        'schedule': timedelta(hours=6),      # every 6 hrs
         'options': {'queue': 'analytics'},
     },
-
-    # ── Weekly analytics (Sunday 03:00–03:15 UTC) ────────────────
-    'weekly-revenue-projections': {
+    'revenue-projections': {
         'task': 'tasks.analytics_tasks.generate_revenue_projections',
-        'schedule': crontab(hour=3, minute=0, day_of_week=0),
+        'schedule': timedelta(hours=12),     # every 12 hrs
         'options': {'queue': 'analytics'},
     },
-    'weekly-performance-benchmarks': {
+    'performance-benchmarks': {
         'task': 'tasks.analytics_tasks.compute_performance_benchmarks',
-        'schedule': crontab(hour=3, minute=15, day_of_week=0),
+        'schedule': timedelta(hours=12),     # every 12 hrs
         'options': {'queue': 'analytics'},
     },
 
-    # ── Weekly housekeeping (Monday 03:00–03:30 UTC) ─────────────
+    # ── Housekeeping (daily / weekly) ────────────────────────────
     'cleanup-old-images': {
         'task': 'tasks.image_tasks.cleanup_old_images',
         'schedule': crontab(hour=3, minute=0, day_of_week=1),
