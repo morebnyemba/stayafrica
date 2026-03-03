@@ -149,16 +149,26 @@ class POIService:
                 grouped[poi_type] = []
             
             grouped[poi_type].append({
-                'id': str(property_poi.poi.id),
-                'name': property_poi.poi.name,
-                'poi_type': property_poi.poi.poi_type,
+                'id': str(property_poi.id),
+                'poi': {
+                    'id': str(property_poi.poi.id),
+                    'name': property_poi.poi.name,
+                    'poi_type': property_poi.poi.poi_type,
+                    'description': property_poi.poi.description,
+                    'address': property_poi.poi.address,
+                    'latitude': property_poi.poi.location.y,
+                    'longitude': property_poi.poi.location.x,
+                    'rating': float(property_poi.poi.rating) if property_poi.poi.rating else None,
+                    'price_level': property_poi.poi.price_level,
+                    'phone': property_poi.poi.phone,
+                    'website': property_poi.poi.website,
+                    'opening_hours': property_poi.poi.opening_hours,
+                    'image_url': property_poi.poi.image_url,
+                },
                 'distance_meters': property_poi.distance_meters,
                 'distance_display': property_poi.distance_display,
                 'walking_time_minutes': property_poi.walking_time_minutes,
                 'driving_time_minutes': property_poi.driving_time_minutes,
-                'rating': float(property_poi.poi.rating) if property_poi.poi.rating else None,
-                'price_level': property_poi.poi.price_level,
-                'address': property_poi.poi.address,
                 'is_recommended': property_poi.is_recommended,
                 'host_notes': property_poi.host_notes,
             })
