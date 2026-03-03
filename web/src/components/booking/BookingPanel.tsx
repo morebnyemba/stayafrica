@@ -6,6 +6,7 @@
 'use client';
 
 import React, { useState, useId, useCallback, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, CardHeader, CardBody, CardFooter } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -14,6 +15,8 @@ import { format, differenceInDays, addDays } from 'date-fns';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
 import { useFeeConfiguration, calculateBookingCost } from '@/hooks/use-fees';
+import { useAuth } from '@/context/auth-context';
+import { toast } from 'react-hot-toast';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
@@ -40,6 +43,8 @@ export const BookingPanel: React.FC<BookingPanelProps> = ({
   onBook,
   isLoading = false,
 }) => {
+  const router = useRouter();
+  const { isAuthenticated } = useAuth();
   const [checkInDate, setCheckInDate] = useState<Date | null>(null);
   const [checkOutDate, setCheckOutDate] = useState<Date | null>(null);
   const [guestCount, setGuestCount] = useState(1);
@@ -106,8 +111,21 @@ export const BookingPanel: React.FC<BookingPanelProps> = ({
   const hasDateConflict = hasSelectedDates && hasUnavailableDatesInRange(checkInDate!, checkOutDate!);
 
   const handleBook = () => {
+    if (!isAuthenticated) {
+      toast.error('Please log in to book');
+      router.push('/login');
+      return;
+    }
     if (checkInDate && checkOutDate && meetsMinStay && !hasDateConflict) {
-      onBook?.({ propertyId, checkIn: checkInDate, checkOut: checkOutDate }, guestCount);
+      if (onBook) {
+        onBook({ propertyId, checkIn: checkInDate, checkOut: checkOutDate }, guestCount);
+      } else {
+        const checkIn = format(checkInDate, 'yyyy-MM-dd');
+        const checkOut = format(checkOutDate, 'yyyy-MM-dd');
+        router.push(
+          `/booking/confirm?propertyId=${propertyId}&checkIn=${checkIn}&checkOut=${checkOut}&guests=${guestCount}`
+        );
+      }
     }
   };
 
@@ -125,21 +143,21 @@ export const BookingPanel: React.FC<BookingPanelProps> = ({
 
   return (
     <Card variant="elevated" className="sticky top-24" role="region" aria-label="Booking details">
-      <CardHeader className="border-b border-neutral-200 dark:border-neutral-700">
+      <CardHeader className="border-b border-primary-200 dark:border-primary-700">
         <div className="flex items-baseline gap-2">
-          <span className="text-3xl font-bold text-neutral-900 dark:text-neutral-100">${pricePerNight}</span>
-          <span className="text-sm text-neutral-600 dark:text-neutral-400">per night</span>
+          <span className="text-3xl font-bold text-primary-900 dark:text-sand-50">${pricePerNight}</span>
+          <span className="text-sm text-primary-600 dark:text-sand-400">per night</span>
         </div>
       </CardHeader>
 
       <CardBody className="space-y-4">
         {/* Check-in & Check-out */}
         <div className="space-y-2">
-          <label htmlFor={checkInId} className="block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+          <label htmlFor={checkInId} className="block text-sm font-medium text-primary-700 dark:text-sand-300">
             Check-in
           </label>
           <div className="relative">
-            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400 dark:text-neutral-500 z-10 pointer-events-none" aria-hidden="true" />
+            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary-400 dark:text-sand-500 z-10 pointer-events-none" aria-hidden="true" />
             <DatePicker
               id={checkInId}
               selected={checkInDate}
@@ -154,18 +172,18 @@ export const BookingPanel: React.FC<BookingPanelProps> = ({
               dayClassName={getDayClassName}
               dateFormat="MMM dd, yyyy"
               placeholderText="Add date"
-              className="w-full h-10 rounded-lg border-2 border-neutral-300 dark:border-neutral-600 bg-white dark:bg-primary-800 pl-10 pr-4 py-2 text-sm text-neutral-900 dark:text-neutral-100 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+              className="w-full h-10 rounded-lg border-2 border-primary-300 dark:border-primary-600 bg-sand-50 dark:bg-primary-800 pl-10 pr-4 py-2 text-sm text-primary-900 dark:text-sand-100 placeholder:text-primary-400 focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:border-transparent"
               aria-describedby={showMinStayError ? minStayErrorId : undefined}
             />
           </div>
         </div>
 
         <div className="space-y-2">
-          <label htmlFor={checkOutId} className="block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+          <label htmlFor={checkOutId} className="block text-sm font-medium text-primary-700 dark:text-sand-300">
             Check-out
           </label>
           <div className="relative">
-            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400 dark:text-neutral-500 z-10 pointer-events-none" aria-hidden="true" />
+            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary-400 dark:text-sand-500 z-10 pointer-events-none" aria-hidden="true" />
             <DatePicker
               id={checkOutId}
               selected={checkOutDate}
@@ -178,7 +196,7 @@ export const BookingPanel: React.FC<BookingPanelProps> = ({
               dateFormat="MMM dd, yyyy"
               placeholderText="Add date"
               disabled={!checkInDate}
-              className={`w-full h-10 rounded-lg border-2 border-neutral-300 dark:border-neutral-600 bg-white dark:bg-primary-800 pl-10 pr-4 py-2 text-sm text-neutral-900 dark:text-neutral-100 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 ${!checkInDate ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`w-full h-10 rounded-lg border-2 border-primary-300 dark:border-primary-600 bg-sand-50 dark:bg-primary-800 pl-10 pr-4 py-2 text-sm text-primary-900 dark:text-sand-100 placeholder:text-primary-400 focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:border-transparent ${!checkInDate ? 'opacity-50 cursor-not-allowed' : ''}`}
               aria-invalid={showMinStayError ? "true" : undefined}
               aria-describedby={showMinStayError ? minStayErrorId : undefined}
             />
@@ -194,7 +212,7 @@ export const BookingPanel: React.FC<BookingPanelProps> = ({
             </p>
           )}
           {unavailableDates.size > 0 && (
-            <div className="flex items-center gap-2 text-xs text-neutral-500 dark:text-neutral-400">
+            <div className="flex items-center gap-2 text-xs text-primary-500 dark:text-sand-400">
               <span className="inline-block w-3 h-3 rounded-full bg-red-100 border border-red-300" />
               <span>Already booked</span>
             </div>
@@ -203,16 +221,16 @@ export const BookingPanel: React.FC<BookingPanelProps> = ({
 
         {/* Guest Count */}
         <div className="space-y-2">
-          <label htmlFor={guestsId} className="block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+          <label htmlFor={guestsId} className="block text-sm font-medium text-primary-700 dark:text-sand-300">
             Guests
           </label>
-          <div className="flex items-center gap-2 border-2 border-neutral-300 dark:border-neutral-600 rounded-lg p-2 bg-white dark:bg-neutral-800">
-            <Users className="h-5 w-5 text-neutral-400 dark:text-neutral-500" aria-hidden="true" />
+          <div className="flex items-center gap-2 border-2 border-primary-300 dark:border-primary-600 rounded-lg p-2 bg-sand-50 dark:bg-primary-800">
+            <Users className="h-5 w-5 text-primary-400 dark:text-sand-500" aria-hidden="true" />
             <select
               id={guestsId}
               value={guestCount}
               onChange={(e) => setGuestCount(parseInt(e.target.value))}
-              className="flex-1 bg-transparent outline-none text-sm text-neutral-900 dark:text-neutral-100"
+              className="flex-1 bg-transparent outline-none text-sm text-primary-900 dark:text-sand-100"
               aria-label={`Number of guests, currently ${guestCount}`}
             >
               {Array.from({ length: maxGuests }, (_, i) => i + 1).map((num) => (
@@ -226,29 +244,29 @@ export const BookingPanel: React.FC<BookingPanelProps> = ({
 
         {/* Price Breakdown */}
         {nights > 0 && (
-          <div className="space-y-3 border-t border-neutral-200 dark:border-neutral-700 pt-4" role="region" aria-label="Price breakdown">
+          <div className="space-y-3 border-t border-primary-200 dark:border-primary-700 pt-4" role="region" aria-label="Price breakdown">
             <div className="flex justify-between text-sm">
-              <span className="text-neutral-600 dark:text-neutral-400">
+              <span className="text-primary-600 dark:text-sand-400">
                 ${pricePerNight} × {nights} night{nights !== 1 ? 's' : ''}
               </span>
-              <span className="font-medium text-neutral-900 dark:text-neutral-100">${subtotal}</span>
+              <span className="font-medium text-primary-900 dark:text-sand-100">${subtotal}</span>
             </div>
 
             <div className="flex justify-between text-sm">
-              <span className="text-neutral-600 dark:text-neutral-400">Service fee</span>
-              <span className="font-medium text-neutral-900 dark:text-neutral-100">${serviceFee.toFixed(2)}</span>
+              <span className="text-primary-600 dark:text-sand-400">Service fee</span>
+              <span className="font-medium text-primary-900 dark:text-sand-100">${serviceFee.toFixed(2)}</span>
             </div>
 
             {costs.commissionFee > 0 && (
               <div className="flex justify-between text-sm">
-                <span className="text-neutral-600 dark:text-neutral-400">Commission ({(costs.commissionRate * 100).toFixed(1)}%)</span>
-                <span className="font-medium text-neutral-900 dark:text-neutral-100">${costs.commissionFee.toFixed(2)}</span>
+                <span className="text-primary-600 dark:text-sand-400">Commission ({(costs.commissionRate * 100).toFixed(1)}%)</span>
+                <span className="font-medium text-primary-900 dark:text-sand-100">${costs.commissionFee.toFixed(2)}</span>
               </div>
             )}
 
-            <div className="flex justify-between font-semibold border-t border-neutral-200 dark:border-neutral-700 pt-3">
-              <span className="text-neutral-900 dark:text-neutral-100">Total</span>
-              <span className="text-xl text-primary-600 dark:text-primary-400">${total.toFixed(2)}</span>
+            <div className="flex justify-between font-semibold border-t border-primary-200 dark:border-primary-700 pt-3">
+              <span className="text-primary-900 dark:text-sand-50">Total</span>
+              <span className="text-xl text-secondary-600 dark:text-secondary-400">${total.toFixed(2)}</span>
             </div>
           </div>
         )}
@@ -257,40 +275,42 @@ export const BookingPanel: React.FC<BookingPanelProps> = ({
       {/* CTA Button */}
       <CardFooter className="flex flex-col items-center gap-2">
         <Button
+          variant="secondary"
           fullWidth
           onClick={handleBook}
           disabled={!isValidBooking}
           isLoading={isLoading}
+          className="py-3"
           aria-label={isValidBooking ? `Book now for $${total.toFixed(2)} total` : getButtonText()}
         >
           {getButtonText()}
         </Button>
-        {isValidBooking && (
-          <p className="text-sm text-neutral-500 dark:text-neutral-400">You won&apos;t be charged yet</p>
-        )}
+        {isValidBooking ? (
+          <p className="text-sm text-primary-500 dark:text-sand-400">You won&apos;t be charged yet</p>
+        ) : null}
       </CardFooter>
 
       {/* Trust Indicators */}
-      <CardBody className="border-t border-neutral-200 dark:border-neutral-700 space-y-2">
+      <CardBody className="border-t border-primary-200 dark:border-primary-700 space-y-2">
         {hostVerified && (
           <div className="flex items-center gap-2 text-sm">
             <Check className="h-4 w-4 text-success-500" aria-hidden="true" />
-            <span className="text-neutral-700 dark:text-neutral-300">Verified host</span>
+            <span className="text-primary-700 dark:text-sand-300">Verified host</span>
           </div>
         )}
 
-        {hostRating && (
+        {hostRating > 0 && (
           <div className="flex items-center gap-2 text-sm">
-            <span className="text-neutral-700 dark:text-neutral-300" aria-label={`Host rating ${hostRating} out of 5 stars`}>
+            <span className="text-primary-700 dark:text-sand-300" aria-label={`Host rating ${hostRating} out of 5 stars`}>
               ★ {hostRating}
             </span>
-            <span className="text-neutral-600 dark:text-neutral-400">(Host rating)</span>
+            <span className="text-primary-600 dark:text-sand-400">(Host rating)</span>
           </div>
         )}
 
         <button
           onClick={() => setShowCancellationInfo(!showCancellationInfo)}
-          className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200 transition-colors"
+          className="flex items-center gap-2 text-sm text-primary-600 dark:text-sand-400 hover:text-primary-900 dark:hover:text-sand-200 transition-colors"
           aria-expanded={showCancellationInfo}
           aria-controls="cancellation-info"
         >
@@ -299,7 +319,7 @@ export const BookingPanel: React.FC<BookingPanelProps> = ({
         </button>
 
         {showCancellationInfo && (
-          <div id="cancellation-info" className="mt-2 p-3 bg-neutral-50 dark:bg-neutral-800 rounded-lg text-xs text-neutral-700 dark:text-neutral-300">
+          <div id="cancellation-info" className="mt-2 p-3 bg-sand-50 dark:bg-primary-800 rounded-lg text-xs text-primary-700 dark:text-sand-300">
             <p className="font-medium mb-1">Cancellation Policy</p>
             <p>
               {cancellationPolicy === 'Flexible'
@@ -314,7 +334,7 @@ export const BookingPanel: React.FC<BookingPanelProps> = ({
 
       {/* Minimum Stay Notice */}
       {minStay > 1 && (
-        <CardBody className="border-t border-neutral-200 dark:border-neutral-700">
+        <CardBody className="border-t border-primary-200 dark:border-primary-700">
           <Badge variant="warning" size="sm">
             Minimum {minStay} night{minStay !== 1 ? 's' : ''} stay required
           </Badge>
