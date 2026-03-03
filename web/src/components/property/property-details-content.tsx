@@ -11,6 +11,8 @@ import { PropertyAmenities } from '@/components/property/property-amenities';
 import { PropertyHostCard } from '@/components/property/property-host-card';
 import { BookingPanel } from '@/components/booking';
 import POIList from '@/components/poi/POIList';
+import { PropertyLocationMap } from '@/components/property/property-location-map';
+import { SimilarProperties } from '@/components/property/similar-properties';
 import {
   Heart, MapPin, Share2, Star,
   Home, Bed, UserCheck,
@@ -140,6 +142,38 @@ export function PropertyDetailsContent() {
   return (
     <div className="min-h-screen bg-white dark:bg-primary-900">
       <div className="max-w-[1120px] mx-auto px-6 pt-6 pb-12">
+        {/* Breadcrumb */}
+        {property && (
+          <nav className="text-sm text-primary-600 dark:text-sand-400 mb-3 flex items-center gap-1.5">
+            <Link href="/explore" className="hover:text-primary-900 dark:hover:text-sand-50 hover:underline">
+              Explore
+            </Link>
+            <span>›</span>
+            {property.country && (
+              <>
+                <Link
+                  href={`/explore?country=${encodeURIComponent(property.country)}`}
+                  className="hover:text-primary-900 dark:hover:text-sand-50 hover:underline"
+                >
+                  {property.country}
+                </Link>
+                <span>›</span>
+              </>
+            )}
+            {property.city && (
+              <>
+                <Link
+                  href={`/explore?city=${encodeURIComponent(property.city)}`}
+                  className="hover:text-primary-900 dark:hover:text-sand-50 hover:underline"
+                >
+                  {property.city}
+                </Link>
+                <span>›</span>
+              </>
+            )}
+            <span className="text-primary-900 dark:text-sand-50">{property.property_type || 'Property'}</span>
+          </nav>
+        )}
         {/* Title & Actions Row */}
         <div className="mb-6">
           <h1 className="text-2xl font-semibold text-primary-900 dark:text-sand-50 mb-1">
@@ -389,6 +423,18 @@ export function PropertyDetailsContent() {
               </div>
             )}
 
+            {/* Where you'll be — Location Map */}
+            {property && (
+              <div className="py-6 border-b border-neutral-200 dark:border-primary-700">
+                <PropertyLocationMap
+                  location={property.location}
+                  city={property.city}
+                  country={property.country}
+                  suburb={property.suburb}
+                />
+              </div>
+            )}
+
             {/* Nearby Points of Interest */}
             {property && (
               <div className="py-6">
@@ -413,6 +459,17 @@ export function PropertyDetailsContent() {
             </div>
           </div>
         </div>
+
+        {/* Similar Properties — Full Width */}
+        {property && (
+          <div className="mt-12 pt-8 border-t border-neutral-200 dark:border-primary-700">
+            <SimilarProperties
+              propertyId={property.id}
+              city={property.city}
+              country={property.country}
+            />
+          </div>
+        )}
       </div>
     </div>
   );
