@@ -15,8 +15,6 @@ import { format, differenceInDays, addDays } from 'date-fns';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
 import { useFeeConfiguration, calculateBookingCost } from '@/hooks/use-fees';
-import { useAuth } from '@/context/auth-context';
-import { toast } from 'react-hot-toast';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
@@ -44,7 +42,6 @@ export const BookingPanel: React.FC<BookingPanelProps> = ({
   isLoading = false,
 }) => {
   const router = useRouter();
-  const { isAuthenticated } = useAuth();
   const [checkInDate, setCheckInDate] = useState<Date | null>(null);
   const [checkOutDate, setCheckOutDate] = useState<Date | null>(null);
   const [guestCount, setGuestCount] = useState(1);
@@ -111,11 +108,6 @@ export const BookingPanel: React.FC<BookingPanelProps> = ({
   const hasDateConflict = hasSelectedDates && hasUnavailableDatesInRange(checkInDate!, checkOutDate!);
 
   const handleBook = () => {
-    if (!isAuthenticated) {
-      toast.error('Please log in to book');
-      router.push('/login');
-      return;
-    }
     if (checkInDate && checkOutDate && meetsMinStay && !hasDateConflict) {
       if (onBook) {
         onBook({ propertyId, checkIn: checkInDate, checkOut: checkOutDate }, guestCount);
