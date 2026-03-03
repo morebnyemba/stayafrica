@@ -413,7 +413,7 @@ CELERY_BEAT_SCHEDULE = {
         'options': {'queue': 'high_priority'},
     },
 
-    # ── Frequent operational tasks (every 10–15 minutes) ─────────
+    # ── Frequent operational tasks (every 10–30 minutes) ─────────
     'auto-host-payouts': {
         'task': 'tasks.payment_tasks.process_host_payouts',
         'schedule': timedelta(minutes=10),   # every 10 min
@@ -426,51 +426,51 @@ CELERY_BEAT_SCHEDULE = {
     },
     'daily-notifications': {
         'task': 'tasks.notification_tasks.send_daily_notifications',
-        'schedule': timedelta(hours=4),      # every 4 hrs
+        'schedule': timedelta(minutes=30),   # every 30 min
         'options': {'queue': 'high_priority'},
     },
 
-    # ── Analytics (every 2–4 hours — idempotent, safe to repeat) ─
+    # ── Analytics (every 1–2 hours — idempotent, safe to repeat) ─
     'property-analytics': {
         'task': 'tasks.analytics_tasks.compute_daily_property_analytics',
-        'schedule': timedelta(hours=4),      # every 4 hrs
+        'schedule': timedelta(hours=1),      # every 1 hr
         'options': {'queue': 'analytics'},
     },
     'message-analytics': {
         'task': 'tasks.analytics_tasks.compute_message_analytics',
-        'schedule': timedelta(hours=4),      # every 4 hrs
+        'schedule': timedelta(hours=1),      # every 1 hr
         'options': {'queue': 'analytics'},
     },
     'host-summaries': {
         'task': 'tasks.analytics_tasks.generate_host_summaries',
-        'schedule': timedelta(hours=6),      # every 6 hrs
+        'schedule': timedelta(hours=2),      # every 2 hrs
         'options': {'queue': 'analytics'},
     },
     'revenue-projections': {
         'task': 'tasks.analytics_tasks.generate_revenue_projections',
-        'schedule': timedelta(hours=12),     # every 12 hrs
+        'schedule': timedelta(hours=6),      # every 6 hrs
         'options': {'queue': 'analytics'},
     },
     'performance-benchmarks': {
         'task': 'tasks.analytics_tasks.compute_performance_benchmarks',
-        'schedule': timedelta(hours=12),     # every 12 hrs
+        'schedule': timedelta(hours=6),      # every 6 hrs
         'options': {'queue': 'analytics'},
     },
 
-    # ── Housekeeping (every 6–12 hours) ──────────────────────────
+    # ── Housekeeping (every 1–4 hours) ───────────────────────────
     'cleanup-old-images': {
         'task': 'tasks.image_tasks.cleanup_old_images',
-        'schedule': timedelta(hours=12),     # every 12 hrs
+        'schedule': timedelta(hours=4),      # every 4 hrs
         'options': {'queue': 'analytics'},
     },
     'refresh-property-geocodes': {
         'task': 'tasks.geocoding_tasks.refresh_property_geocodes',
-        'schedule': timedelta(hours=12),     # every 12 hrs
+        'schedule': timedelta(hours=4),      # every 4 hrs
         'options': {'queue': 'analytics'},
     },
     'refresh-property-pois': {
         'task': 'tasks.analytics_tasks.refresh_property_pois',
-        'schedule': timedelta(hours=6),      # every 6 hrs
+        'schedule': timedelta(hours=1),      # every 1 hr
         'options': {'queue': 'analytics'},
     },
 }
