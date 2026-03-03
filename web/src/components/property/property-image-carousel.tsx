@@ -169,7 +169,7 @@ export function PropertyImageCarousel({ images, title, mainImage }: PropertyImag
                 e.stopPropagation();
                 setShowGallery(true);
               }}
-              className="absolute bottom-4 right-4 flex items-center gap-2 bg-white text-neutral-900 px-4 py-2 rounded-lg text-sm font-medium shadow-md hover:shadow-lg transition border border-neutral-300"
+              className="absolute bottom-4 right-4 flex items-center gap-2 bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-50 px-4 py-2 rounded-lg text-sm font-medium shadow-md hover:shadow-lg transition border border-primary-200 dark:border-primary-600"
             >
               <Grid2X2 className="w-4 h-4" />
               Show all photos
@@ -188,16 +188,16 @@ export function PropertyImageCarousel({ images, title, mainImage }: PropertyImag
               <button
                 onClick={handlePrev}
                 aria-label="Previous image"
-                className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/90 p-2 rounded-full shadow-md opacity-0 group-hover:opacity-100 active:opacity-100 transition-opacity z-10"
+                className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/90 dark:bg-primary-800/90 p-2 rounded-full shadow-md opacity-0 group-hover:opacity-100 active:opacity-100 transition-opacity z-10"
               >
-                <ChevronLeft className="w-5 h-5 text-neutral-800" />
+                <ChevronLeft className="w-5 h-5 text-primary-900 dark:text-sand-50" />
               </button>
               <button
                 onClick={handleNext}
                 aria-label="Next image"
-                className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/90 p-2 rounded-full shadow-md opacity-0 group-hover:opacity-100 active:opacity-100 transition-opacity z-10"
+                className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/90 dark:bg-primary-800/90 p-2 rounded-full shadow-md opacity-0 group-hover:opacity-100 active:opacity-100 transition-opacity z-10"
               >
-                <ChevronRight className="w-5 h-5 text-neutral-800" />
+                <ChevronRight className="w-5 h-5 text-primary-900 dark:text-sand-50" />
               </button>
 
               {/* Dot indicators */}
@@ -222,7 +222,7 @@ export function PropertyImageCarousel({ images, title, mainImage }: PropertyImag
           {/* Tap to open gallery */}
           <button
             onClick={() => setShowGallery(true)}
-            className="absolute bottom-3 right-3 flex items-center gap-1.5 bg-white/90 text-neutral-900 px-3 py-1.5 rounded-full text-xs font-medium shadow-md z-10"
+            className="absolute bottom-3 right-3 flex items-center gap-1.5 bg-white/90 dark:bg-primary-800/90 text-primary-900 dark:text-sand-50 px-3 py-1.5 rounded-full text-xs font-medium shadow-md z-10"
           >
             <Grid2X2 className="w-3.5 h-3.5" />
             {processedImages.length} photos

@@ -73,7 +73,7 @@ export function PropertyAmenities({ amenities }: PropertyAmenitiesProps) {
       {hasMore && (
         <button
           onClick={() => setShowAll(true)}
-          className="mt-4 px-6 py-3 border border-primary-900 dark:border-sand-50 rounded-lg text-primary-900 dark:text-sand-50 font-semibold text-sm hover:bg-neutral-50 dark:hover:bg-primary-800 transition"
+          className="mt-4 px-6 py-3 border border-primary-900 dark:border-sand-50 rounded-lg text-primary-900 dark:text-sand-50 font-semibold text-sm hover:bg-sand-50 dark:hover:bg-primary-800 transition"
         >
           Show all {amenities.length} amenities
         </button>
@@ -83,13 +83,13 @@ export function PropertyAmenities({ amenities }: PropertyAmenitiesProps) {
       {showAll && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="bg-white dark:bg-primary-900 rounded-xl w-full max-w-lg mx-4 max-h-[80vh] flex flex-col shadow-2xl">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-200 dark:border-primary-700">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-primary-200 dark:border-primary-700">
               <h3 className="text-lg font-semibold text-primary-900 dark:text-sand-50">
                 What this place offers
               </h3>
               <button
                 onClick={() => setShowAll(false)}
-                className="p-1 rounded-full hover:bg-neutral-100 dark:hover:bg-primary-800 transition"
+                className="p-1 rounded-full hover:bg-sand-100 dark:hover:bg-primary-800 transition"
                 aria-label="Close"
               >
                 <X className="w-5 h-5 text-primary-900 dark:text-sand-50" />

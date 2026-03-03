@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { PropertyDetailContent } from '@/components/property/property-detail';
+import { PropertyDetailsContent } from '@/components/property/property-details-content';
 
 export default function PropertyPage({ params }: { params: Promise<{ id: string }> }) {
   const [propertyId, setPropertyId] = useState<string | null>(null);
@@ -24,5 +24,5 @@ export default function PropertyPage({ params }: { params: Promise<{ id: string 
     );
   }
 
-  return <PropertyDetailContent propertyId={propertyId} />;
+  return <PropertyDetailsContent propertyId={propertyId} />;
 }

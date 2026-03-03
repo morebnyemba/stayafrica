@@ -216,7 +216,7 @@ export function PropertyDetailsContent({ propertyId: propId }: PropertyDetailsCo
                     toast.success('Link copied!');
                   }
                 }}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-primary-800 transition text-sm font-medium text-primary-900 dark:text-sand-50 underline"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-sand-100 dark:hover:bg-primary-800 transition text-sm font-medium text-primary-900 dark:text-sand-50 underline"
               >
                 <Share2 className="w-4 h-4" />
                 Share
@@ -224,7 +224,7 @@ export function PropertyDetailsContent({ propertyId: propId }: PropertyDetailsCo
               <button
                 disabled={checkingSaved || saveMutation.isPending || unsaveMutation.isPending}
                 onClick={() => isSaved ? unsaveMutation.mutate() : saveMutation.mutate()}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-primary-800 transition text-sm font-medium text-primary-900 dark:text-sand-50 underline disabled:opacity-50"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-sand-100 dark:hover:bg-primary-800 transition text-sm font-medium text-primary-900 dark:text-sand-50 underline disabled:opacity-50"
               >
                 <Heart className={`w-4 h-4 ${isSaved ? 'fill-red-500 text-red-500' : ''}`} />
                 {isSaved ? 'Saved' : 'Save'}
@@ -244,7 +244,7 @@ export function PropertyDetailsContent({ propertyId: propId }: PropertyDetailsCo
           {/* Left Column */}
           <div className="lg:col-span-2">
             {/* Property Type + Host Intro */}
-            <div className="flex items-center justify-between py-6 border-b border-neutral-200 dark:border-primary-700">
+            <div className="flex items-center justify-between py-6 border-b border-primary-200 dark:border-primary-700">
               <div>
                 <h2 className="text-xl font-semibold text-primary-900 dark:text-sand-50">
                   {property?.property_type} hosted by {property?.host?.first_name || 'Host'}
@@ -273,7 +273,7 @@ export function PropertyDetailsContent({ propertyId: propId }: PropertyDetailsCo
             </div>
 
             {/* Property Highlights */}
-            <div className="py-6 border-b border-neutral-200 dark:border-primary-700 space-y-5">
+            <div className="py-6 border-b border-primary-200 dark:border-primary-700 space-y-5">
               {property?.host?.is_verified && (
                 <div className="flex items-start gap-4">
                   <UserCheck className="w-6 h-6 text-primary-900 dark:text-sand-50 flex-shrink-0 mt-0.5" />
@@ -312,7 +312,7 @@ export function PropertyDetailsContent({ propertyId: propId }: PropertyDetailsCo
             </div>
 
             {/* Description with Show More */}
-            <div className="py-6 border-b border-neutral-200 dark:border-primary-700">
+            <div className="py-6 border-b border-primary-200 dark:border-primary-700">
               <div className={`relative ${!showFullDescription && isLongDescription ? 'max-h-[120px] overflow-hidden' : ''}`}>
                 <p className="text-primary-700 dark:text-sand-200 leading-relaxed whitespace-pre-line text-[15px]">
                   {property?.description}
@@ -333,19 +333,19 @@ export function PropertyDetailsContent({ propertyId: propId }: PropertyDetailsCo
 
             {/* Amenities */}
             {property?.amenities && property.amenities.length > 0 && (
-              <div className="py-6 border-b border-neutral-200 dark:border-primary-700">
+              <div className="py-6 border-b border-primary-200 dark:border-primary-700">
                 <PropertyAmenities amenities={property.amenities} />
               </div>
             )}
 
             {/* Host Card */}
-            <div className="py-6 border-b border-neutral-200 dark:border-primary-700">
+            <div className="py-6 border-b border-primary-200 dark:border-primary-700">
               <PropertyHostCard host={property?.host} propertyId={propertyId} />
             </div>
 
             {/* Reviews Section */}
             {reviews && reviews.length > 0 && (
-              <div id="reviews" className="py-6 border-b border-neutral-200 dark:border-primary-700">
+              <div id="reviews" className="py-6 border-b border-primary-200 dark:border-primary-700">
                 {/* Rating Summary */}
                 <div className="flex items-center gap-3 mb-6">
                   <Star className="w-6 h-6 fill-primary-900 dark:fill-sand-50 text-primary-900 dark:text-sand-50" />
@@ -366,7 +366,7 @@ export function PropertyDetailsContent({ propertyId: propId }: PropertyDetailsCo
                     return (
                       <div key={star} className="flex items-center gap-2">
                         <span className="text-xs text-primary-900 dark:text-sand-50 w-3">{star}</span>
-                        <div className="flex-1 h-1 bg-neutral-200 dark:bg-primary-700 rounded-full overflow-hidden">
+                        <div className="flex-1 h-1 bg-primary-200 dark:bg-primary-700 rounded-full overflow-hidden">
                           <div
                             className="h-full bg-primary-900 dark:bg-sand-100 rounded-full transition-all"
                             style={{ width: `${pct}%` }}
@@ -404,7 +404,7 @@ export function PropertyDetailsContent({ propertyId: propId }: PropertyDetailsCo
                             className={`w-3 h-3 ${
                               i < review.rating
                                 ? 'fill-primary-900 dark:fill-sand-50 text-primary-900 dark:text-sand-50'
-                                : 'text-neutral-300 dark:text-primary-600'
+                                : 'text-primary-200 dark:text-primary-600'
                             }`}
                           />
                         ))}
@@ -419,7 +419,7 @@ export function PropertyDetailsContent({ propertyId: propId }: PropertyDetailsCo
                 {reviews.length > 6 && (
                   <button
                     onClick={() => setShowAllReviews(!showAllReviews)}
-                    className="mt-6 px-6 py-3 border border-primary-900 dark:border-sand-50 rounded-lg text-primary-900 dark:text-sand-50 font-semibold text-sm hover:bg-neutral-50 dark:hover:bg-primary-800 transition"
+                    className="mt-6 px-6 py-3 border border-primary-900 dark:border-sand-50 rounded-lg text-primary-900 dark:text-sand-50 font-semibold text-sm hover:bg-sand-50 dark:hover:bg-primary-800 transition"
                   >
                     {showAllReviews ? 'Show less' : `Show all ${reviews.length} reviews`}
                   </button>
@@ -429,7 +429,7 @@ export function PropertyDetailsContent({ propertyId: propId }: PropertyDetailsCo
 
             {/* Where you'll be — Location Map */}
             {property && (
-              <div className="py-6 border-b border-neutral-200 dark:border-primary-700">
+              <div className="py-6 border-b border-primary-200 dark:border-primary-700">
                 <PropertyLocationMap
                   location={property.location}
                   city={property.city}
@@ -466,7 +466,7 @@ export function PropertyDetailsContent({ propertyId: propId }: PropertyDetailsCo
 
         {/* Similar Properties — Full Width */}
         {property && (
-          <div className="mt-12 pt-8 border-t border-neutral-200 dark:border-primary-700">
+          <div className="mt-12 pt-8 border-t border-primary-200 dark:border-primary-700">
             <SimilarProperties
               propertyId={property.id}
               city={property.city}

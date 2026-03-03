@@ -129,9 +129,9 @@ export function PropertyLocationMap({ location, city, country, suburb }: Propert
       <h2 className="text-xl font-semibold text-primary-900 dark:text-sand-50 mb-4">
         Where you&apos;ll be
       </h2>
-      <div className="relative rounded-xl overflow-hidden bg-neutral-100 dark:bg-primary-800" style={{ height: 300 }}>
+      <div className="relative rounded-xl overflow-hidden bg-sand-100 dark:bg-primary-800" style={{ height: 300 }}>
         {loading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-neutral-100 dark:bg-primary-800 z-10">
+          <div className="absolute inset-0 flex items-center justify-center bg-sand-100 dark:bg-primary-800 z-10">
             <Loader className="w-6 h-6 animate-spin text-primary-600" />
           </div>
         )}

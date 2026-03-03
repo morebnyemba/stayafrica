@@ -129,7 +129,7 @@ export function PropertyHostCard({ host, propertyId }: PropertyHostCardProps) {
       <button
         onClick={contactHost}
         disabled={contactingHost}
-        className="inline-flex items-center justify-center gap-2 px-6 py-3 border border-primary-900 dark:border-sand-50 rounded-lg text-primary-900 dark:text-sand-50 font-semibold text-sm hover:bg-neutral-50 dark:hover:bg-primary-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
+        className="inline-flex items-center justify-center gap-2 px-6 py-3 border border-primary-900 dark:border-sand-50 rounded-lg text-primary-900 dark:text-sand-50 font-semibold text-sm hover:bg-sand-50 dark:hover:bg-primary-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {contactingHost ? (
           <>
@@ -145,7 +145,7 @@ export function PropertyHostCard({ host, propertyId }: PropertyHostCardProps) {
       </button>
 
       {/* Safety note */}
-      <div className="flex items-start gap-3 mt-5 pt-4 border-t border-neutral-200 dark:border-primary-700">
+      <div className="flex items-start gap-3 mt-5 pt-4 border-t border-primary-200 dark:border-primary-700">
         <Shield className="w-5 h-5 text-primary-500 dark:text-sand-400 flex-shrink-0 mt-0.5" />
         <p className="text-xs text-primary-500 dark:text-sand-400 leading-relaxed">
           To protect your payment, never transfer money or communicate outside of the StayAfrica website or app.
