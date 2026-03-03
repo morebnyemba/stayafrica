@@ -261,8 +261,8 @@ REST_FRAMEWORK = {
         'rest_framework.throttling.UserRateThrottle',
     ],
     'DEFAULT_THROTTLE_RATES': {
-        'anon': '100/day',   # Anonymous users: 100 requests per day
-        'user': '1000/day',  # Authenticated users: 1000 requests per day
+        'anon': '500/hour',   # Anonymous users: 500 requests per hour
+        'user': '2000/hour',  # Authenticated users: 2000 requests per hour
         'login': '5/minute',  # Stricter scope for login to prevent brute force
     },
     'EXCEPTION_HANDLER': 'utils.exception_handlers.custom_exception_handler',
