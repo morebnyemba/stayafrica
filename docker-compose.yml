@@ -70,11 +70,11 @@ services:
       redis:
         condition: service_healthy
 
-  # Celery Worker
+  # Celery Worker (dev: single worker, all queues)
   celery:
     build: ./backend
     container_name: stayafrica_celery
-    command: celery -A stayafrica worker --loglevel=info
+    command: celery -A stayafrica worker --loglevel=info -Q high_priority,default,analytics
     environment:
       - DEBUG=True
       - DB_ENGINE=django.contrib.gis.db.backends.postgis

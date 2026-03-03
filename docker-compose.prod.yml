@@ -103,12 +103,13 @@ services:
       - ./backend/firebase-credentials.json:/app/firebase-credentials.json:ro
     restart: unless-stopped
 
+  # Celery Worker — high-priority (emails, payments, notifications)
   celery:
     build:
       context: ./backend
       dockerfile: Dockerfile
     container_name: stayafrica_celery
-    command: celery -A stayafrica worker --loglevel=info --concurrency=4
+    command: celery -A stayafrica worker --loglevel=info --concurrency=4 -Q high_priority,default -n worker-fast@%h
     environment:
       DB_NAME: ${DB_NAME:-stayafrica_db}
       DB_USER: ${DB_USER:-stayafrica_user}
@@ -131,6 +132,36 @@ services:
       EMAIL_HOST_USER: ${EMAIL_HOST_USER}
       EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD}
       DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL:-StayAfrica <noreply@stayafrica.com>}
+      FIREBASE_CREDENTIALS_PATH: /app/firebase-credentials.json
+    volumes:
+      - ./backend/firebase-credentials.json:/app/firebase-credentials.json:ro
+    depends_on:
+      - db
+      - redis
+      - backend
+    restart: unless-stopped
+
+  # Celery Worker — analytics & housekeeping (batch processing)
+  celery-analytics:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: stayafrica_celery_analytics
+    command: celery -A stayafrica worker --loglevel=info --concurrency=2 -Q analytics -n worker-analytics@%h
+    environment:
+      DB_NAME: ${DB_NAME:-stayafrica_db}
+      DB_USER: ${DB_USER:-stayafrica_user}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_HOST: db
+      DB_PORT: 5432
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
+      CELERY_BROKER_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
+      CELERY_RESULT_BACKEND: redis://:${REDIS_PASSWORD}@redis:6379/0
+      SECRET_KEY: ${SECRET_KEY}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-${SECRET_KEY}}
+      DEBUG: ${DEBUG:-False}
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      APP_VERSION: ${APP_VERSION:-1.0.0}
       FIREBASE_CREDENTIALS_PATH: /app/firebase-credentials.json
     volumes:
       - ./backend/firebase-credentials.json:/app/firebase-credentials.json:ro

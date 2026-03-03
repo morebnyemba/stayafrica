@@ -359,64 +359,96 @@ CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60  # 30 minutes
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 
+from kombu import Queue
 from celery.schedules import crontab
+
+# Queue definitions — 3 priority levels
+CELERY_TASK_QUEUES = [
+    Queue('high_priority'),   # emails, payments, notifications — latency-sensitive
+    Queue('default'),         # general tasks
+    Queue('analytics'),       # heavy batch processing — can tolerate delay
+]
+CELERY_TASK_DEFAULT_QUEUE = 'default'
+
+# Route tasks to queues by module
+CELERY_TASK_ROUTES = {
+    # High priority — user-facing, latency-sensitive
+    'tasks.email_tasks.*': {'queue': 'high_priority'},
+    'tasks.payment_tasks.*': {'queue': 'high_priority'},
+    'tasks.notification_tasks.*': {'queue': 'high_priority'},
+    # Analytics — heavy batch, can run slower
+    'tasks.analytics_tasks.*': {'queue': 'analytics'},
+    # Housekeeping — low priority batch
+    'tasks.image_tasks.*': {'queue': 'analytics'},
+    'tasks.geocoding_tasks.*': {'queue': 'analytics'},
+}
 
 # Celery Beat Configuration
 CELERY_BEAT_SCHEDULE = {
-    # ── Existing ──────────────────────────────────────────────────
+    # ── High-priority interval tasks ─────────────────────────────
     'send-pending-emails': {
         'task': 'tasks.email_tasks.send_pending_emails',
         'schedule': timedelta(minutes=5),
+        'options': {'queue': 'high_priority'},
     },
     'expire-stale-payments': {
         'task': 'tasks.payment_tasks.expire_stale_payments',
         'schedule': timedelta(minutes=5),
-    },
-
-    # ── Notifications ─────────────────────────────────────────────
-    'daily-notifications': {
-        'task': 'tasks.notification_tasks.send_daily_notifications',
-        'schedule': crontab(hour=7, minute=0),  # 07:00 UTC
+        'options': {'queue': 'high_priority'},
     },
     'process-scheduled-messages': {
         'task': 'tasks.notification_tasks.process_scheduled_messages',
-        'schedule': timedelta(minutes=10),  # Every 10 minutes
+        'schedule': timedelta(minutes=10),
+        'options': {'queue': 'high_priority'},
+    },
+    'daily-notifications': {
+        'task': 'tasks.notification_tasks.send_daily_notifications',
+        'schedule': crontab(hour=7, minute=0),
+        'options': {'queue': 'high_priority'},
     },
 
-    # ── Analytics (runs after midnight so yesterday's data is complete) ──
+    # ── Analytics (runs after midnight) ──────────────────────────
     'daily-property-analytics': {
         'task': 'tasks.analytics_tasks.compute_daily_property_analytics',
-        'schedule': crontab(hour=2, minute=0),  # 02:00 UTC
+        'schedule': crontab(hour=2, minute=0),
+        'options': {'queue': 'analytics'},
     },
     'daily-message-analytics': {
         'task': 'tasks.analytics_tasks.compute_message_analytics',
-        'schedule': crontab(hour=2, minute=30),  # 02:30 UTC
+        'schedule': crontab(hour=2, minute=30),
+        'options': {'queue': 'analytics'},
     },
     'daily-host-summaries': {
         'task': 'tasks.analytics_tasks.generate_host_summaries',
-        'schedule': crontab(hour=3, minute=0),  # 03:00 UTC (after property analytics)
+        'schedule': crontab(hour=3, minute=0),
+        'options': {'queue': 'analytics'},
     },
     'weekly-revenue-projections': {
         'task': 'tasks.analytics_tasks.generate_revenue_projections',
-        'schedule': crontab(hour=4, minute=0, day_of_week=0),  # Sunday 04:00 UTC
+        'schedule': crontab(hour=4, minute=0, day_of_week=0),
+        'options': {'queue': 'analytics'},
     },
     'weekly-performance-benchmarks': {
         'task': 'tasks.analytics_tasks.compute_performance_benchmarks',
-        'schedule': crontab(hour=5, minute=0, day_of_week=0),  # Sunday 05:00 UTC
+        'schedule': crontab(hour=5, minute=0, day_of_week=0),
+        'options': {'queue': 'analytics'},
     },
 
-    # ── Housekeeping ──────────────────────────────────────────────
+    # ── Housekeeping ─────────────────────────────────────────────
     'cleanup-old-images': {
         'task': 'tasks.image_tasks.cleanup_old_images',
-        'schedule': crontab(hour=4, minute=0, day_of_week=1),  # Monday 04:00 UTC
+        'schedule': crontab(hour=4, minute=0, day_of_week=1),
+        'options': {'queue': 'analytics'},
     },
     'refresh-property-geocodes': {
         'task': 'tasks.geocoding_tasks.refresh_property_geocodes',
-        'schedule': crontab(hour=5, minute=0, day_of_week=1),  # Monday 05:00 UTC
+        'schedule': crontab(hour=5, minute=0, day_of_week=1),
+        'options': {'queue': 'analytics'},
     },
     'refresh-property-pois': {
         'task': 'tasks.analytics_tasks.refresh_property_pois',
-        'schedule': crontab(hour=5, minute=30, day_of_week=1),  # Monday 05:30 UTC
+        'schedule': crontab(hour=5, minute=30, day_of_week=1),
+        'options': {'queue': 'analytics'},
     },
 }
 
