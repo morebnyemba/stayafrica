@@ -306,7 +306,7 @@ def compute_message_analytics():
     return {"processed": total}
 
 
-@shared_task(bind=True, max_retries=1, default_retry_delay=300)
+@shared_task(bind=True, max_retries=1, default_retry_delay=300, rate_limit='1/m')
 def refresh_property_pois(self):
     """
     Import POIs from OpenStreetMap for active properties that have no
