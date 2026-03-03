@@ -254,3 +254,379 @@ class SavedPropertyAdmin(UnfoldModelAdmin):
     @display(description=_('Property'))
     def property_display(self, obj):
         return f"{obj.property.title} ({obj.property.city})"
+
+
+# ── POI Admin ─────────────────────────────────────────────────────────────
+
+from apps.properties.poi_models import POICategory, PointOfInterest, PropertyPOI
+
+
+@admin.register(POICategory)
+class POICategoryAdmin(UnfoldModelAdmin):
+    list_display = ['name', 'icon', 'color_swatch', 'display_order', 'poi_count']
+    search_fields = ['name']
+    list_editable = ['display_order']
+    ordering = ['display_order', 'name']
+
+    @display(description=_('Color'))
+    def color_swatch(self, obj):
+        return format_html(
+            '<span style="display:inline-block;width:18px;height:18px;border-radius:50%;'
+            'background:{};border:1px solid #ccc;vertical-align:middle;"></span> {}',
+            obj.color, obj.color
+        )
+
+    @display(description=_('POIs'))
+    def poi_count(self, obj):
+        return obj.pois.count()
+
+
+@admin.register(PointOfInterest)
+class PointOfInterestAdmin(UnfoldModelAdmin):
+    list_display = [
+        'name', 'poi_type_badge', 'city', 'country',
+        'rating_display', 'source_badge', 'active_badge', 'created_at'
+    ]
+    list_filter = ['poi_type', 'source', 'is_active', 'city', 'country']
+    search_fields = ['name', 'address', 'city', 'external_id']
+    readonly_fields = ['id', 'created_at', 'updated_at']
+    list_per_page = 50
+    date_hierarchy = 'created_at'
+
+    fieldsets = (
+        (_('Basic Info'), {
+            'fields': ('id', 'name', 'category', 'poi_type', 'description'),
+        }),
+        (_('Location'), {
+            'fields': ('location', 'address', 'city', 'country'),
+        }),
+        (_('Contact & Details'), {
+            'fields': ('phone', 'website', 'rating', 'review_count', 'price_level', 'image_url'),
+        }),
+        (_('Hours & Source'), {
+            'fields': ('opening_hours', 'source', 'external_id', 'is_active'),
+        }),
+        (_('Timestamps'), {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ['collapse'],
+        }),
+    )
+
+    @display(description=_('Type'), label=True)
+    def poi_type_badge(self, obj):
+        colors = {
+            'restaurant': 'info', 'cafe': 'info', 'bar': 'info',
+            'hospital': 'danger', 'pharmacy': 'danger',
+            'attraction': 'success', 'museum': 'success', 'park': 'success', 'beach': 'success',
+            'transport': 'warning', 'shopping': 'secondary',
+        }
+        return {'value': obj.get_poi_type_display(), 'color': colors.get(obj.poi_type, 'secondary')}
+
+    @display(description=_('Rating'))
+    def rating_display(self, obj):
+        if obj.rating:
+            return f"⭐ {obj.rating}"
+        return '-'
+
+    @display(description=_('Source'), label=True)
+    def source_badge(self, obj):
+        colors = {'manual': 'secondary', 'google_places': 'info', 'openstreetmap': 'success'}
+        return {'value': obj.source, 'color': colors.get(obj.source, 'secondary')}
+
+    @display(description=_('Active'), label=True)
+    def active_badge(self, obj):
+        return {'value': 'Active' if obj.is_active else 'Inactive',
+                'color': 'success' if obj.is_active else 'danger'}
+
+
+@admin.register(PropertyPOI)
+class PropertyPOIAdmin(UnfoldModelAdmin):
+    list_display = [
+        'property_display', 'poi_display', 'distance_display',
+        'walking_time', 'recommended_badge', 'created_at'
+    ]
+    list_filter = ['is_recommended', 'created_at']
+    search_fields = ['linked_property__title', 'poi__name']
+    readonly_fields = ['created_at', 'updated_at']
+    list_select_related = ['linked_property', 'poi']
+    raw_id_fields = ['linked_property', 'poi']
+    list_per_page = 50
+
+    @display(description=_('Property'))
+    def property_display(self, obj):
+        return obj.linked_property.title
+
+    @display(description=_('POI'))
+    def poi_display(self, obj):
+        return f"{obj.poi.name} ({obj.poi.get_poi_type_display()})"
+
+    @display(description=_('Distance'))
+    def distance_display(self, obj):
+        return obj.distance_display
+
+    @display(description=_('Walk'))
+    def walking_time(self, obj):
+        return f"{obj.walking_time_minutes} min" if obj.walking_time_minutes else '-'
+
+    @display(description=_('Recommended'), label=True)
+    def recommended_badge(self, obj):
+        return {'value': '⭐ Recommended' if obj.is_recommended else 'No',
+                'color': 'success' if obj.is_recommended else 'secondary'}
+
+
+# ── Analytics Admin ───────────────────────────────────────────────────────
+
+from apps.properties.analytics_models import (
+    PropertyAnalytics, HostAnalyticsSummary,
+    RevenueProjection, PerformanceBenchmark
+)
+
+
+@admin.register(PropertyAnalytics)
+class PropertyAnalyticsAdmin(UnfoldModelAdmin):
+    list_display = [
+        'property_display', 'date', 'revenue_display', 'bookings_count',
+        'occupancy_display', 'views_count', 'conversion_display'
+    ]
+    list_filter = ['date', 'property__city']
+    search_fields = ['property__title', 'property__host__email']
+    readonly_fields = ['created_at', 'updated_at']
+    date_hierarchy = 'date'
+    list_per_page = 50
+    ordering = ['-date']
+
+    @display(description=_('Property'))
+    def property_display(self, obj):
+        return obj.property.title
+
+    @display(description=_('Revenue'))
+    def revenue_display(self, obj):
+        return f"${obj.total_revenue:,.2f}"
+
+    @display(description=_('Occupancy'))
+    def occupancy_display(self, obj):
+        return f"{obj.occupancy_rate}%"
+
+    @display(description=_('Conversion'))
+    def conversion_display(self, obj):
+        return f"{obj.conversion_rate}%"
+
+    def has_add_permission(self, request):
+        return False
+
+
+@admin.register(HostAnalyticsSummary)
+class HostAnalyticsSummaryAdmin(UnfoldModelAdmin):
+    list_display = [
+        'host_display', 'period_badge', 'date_range', 'revenue_display',
+        'total_bookings', 'occupancy_display', 'avg_rating_display'
+    ]
+    list_filter = ['period', 'start_date']
+    search_fields = ['host__email', 'host__first_name', 'host__last_name']
+    readonly_fields = ['created_at', 'updated_at']
+    date_hierarchy = 'start_date'
+    ordering = ['-start_date']
+
+    @display(description=_('Host'))
+    def host_display(self, obj):
+        return obj.host.get_full_name() or obj.host.email
+
+    @display(description=_('Period'), label=True)
+    def period_badge(self, obj):
+        colors = {'daily': 'secondary', 'weekly': 'info', 'monthly': 'success', 'yearly': 'warning'}
+        return {'value': obj.get_period_display(), 'color': colors.get(obj.period, 'secondary')}
+
+    @display(description=_('Date Range'))
+    def date_range(self, obj):
+        return f"{obj.start_date} → {obj.end_date}"
+
+    @display(description=_('Revenue'))
+    def revenue_display(self, obj):
+        return f"${obj.total_revenue:,.2f}"
+
+    @display(description=_('Occupancy'))
+    def occupancy_display(self, obj):
+        return f"{obj.avg_occupancy_rate}%"
+
+    @display(description=_('Rating'))
+    def avg_rating_display(self, obj):
+        return f"⭐ {obj.avg_rating}" if obj.avg_rating else '-'
+
+    def has_add_permission(self, request):
+        return False
+
+
+@admin.register(RevenueProjection)
+class RevenueProjectionAdmin(UnfoldModelAdmin):
+    list_display = [
+        'host_display', 'property_display', 'target_month',
+        'revenue_display', 'confidence_display', 'projection_date'
+    ]
+    list_filter = ['target_month', 'projection_date']
+    search_fields = ['host__email', 'property__title']
+    readonly_fields = ['created_at']
+    ordering = ['-target_month']
+
+    @display(description=_('Host'))
+    def host_display(self, obj):
+        return obj.host.email
+
+    @display(description=_('Property'))
+    def property_display(self, obj):
+        return obj.property.title if obj.property else 'All Properties'
+
+    @display(description=_('Projected Revenue'))
+    def revenue_display(self, obj):
+        return f"${obj.projected_revenue:,.2f}"
+
+    @display(description=_('Confidence'), label=True)
+    def confidence_display(self, obj):
+        if obj.confidence_level >= 80:
+            color = 'success'
+        elif obj.confidence_level >= 50:
+            color = 'warning'
+        else:
+            color = 'danger'
+        return {'value': f"{obj.confidence_level}%", 'color': color}
+
+    def has_add_permission(self, request):
+        return False
+
+
+@admin.register(PerformanceBenchmark)
+class PerformanceBenchmarkAdmin(UnfoldModelAdmin):
+    list_display = [
+        'region', 'property_type', 'month', 'occupancy_display',
+        'rate_display', 'sample_size'
+    ]
+    list_filter = ['region', 'property_type', 'month']
+    search_fields = ['region', 'property_type']
+    readonly_fields = ['created_at', 'updated_at']
+    date_hierarchy = 'month'
+    ordering = ['-month']
+
+    @display(description=_('Avg Occupancy'))
+    def occupancy_display(self, obj):
+        return f"{obj.avg_occupancy_rate}%"
+
+    @display(description=_('Avg Nightly Rate'))
+    def rate_display(self, obj):
+        return f"${obj.avg_nightly_rate:,.2f}"
+
+    def has_add_permission(self, request):
+        return False
+
+
+# ── Wishlist Admin ────────────────────────────────────────────────────────
+
+from apps.properties.wishlist_models import Wishlist, WishlistItem, WishlistVote, WishlistComment
+
+
+@admin.register(Wishlist)
+class WishlistAdmin(UnfoldModelAdmin):
+    list_display = [
+        'name', 'owner_display', 'privacy_badge', 'item_count',
+        'collaborator_count', 'updated_at'
+    ]
+    list_filter = ['privacy', 'created_at']
+    search_fields = ['name', 'owner__email', 'description']
+    readonly_fields = ['id', 'share_token', 'created_at', 'updated_at']
+    filter_horizontal = ['collaborators']
+    list_select_related = ['owner']
+
+    @display(description=_('Owner'))
+    def owner_display(self, obj):
+        return obj.owner.get_full_name() or obj.owner.email
+
+    @display(description=_('Privacy'), label=True)
+    def privacy_badge(self, obj):
+        colors = {'private': 'secondary', 'shared': 'info', 'public': 'success'}
+        return {'value': obj.get_privacy_display(), 'color': colors.get(obj.privacy, 'secondary')}
+
+    @display(description=_('Items'))
+    def item_count(self, obj):
+        return obj.items.count()
+
+    @display(description=_('Collaborators'))
+    def collaborator_count(self, obj):
+        return obj.collaborators.count()
+
+
+@admin.register(WishlistItem)
+class WishlistItemAdmin(UnfoldModelAdmin):
+    list_display = [
+        'property_display', 'wishlist_display', 'added_by_display',
+        'votes', 'date_range', 'added_at'
+    ]
+    list_filter = ['added_at', 'wishlist__privacy']
+    search_fields = ['property__title', 'wishlist__name', 'added_by__email']
+    readonly_fields = ['added_at', 'updated_at', 'votes']
+    list_select_related = ['property', 'wishlist', 'added_by']
+
+    @display(description=_('Property'))
+    def property_display(self, obj):
+        return obj.property.title
+
+    @display(description=_('Wishlist'))
+    def wishlist_display(self, obj):
+        return obj.wishlist.name
+
+    @display(description=_('Added By'))
+    def added_by_display(self, obj):
+        return obj.added_by.email if obj.added_by else '-'
+
+    @display(description=_('Dates'))
+    def date_range(self, obj):
+        if obj.preferred_check_in and obj.preferred_check_out:
+            return f"{obj.preferred_check_in} → {obj.preferred_check_out}"
+        return '-'
+
+
+@admin.register(WishlistVote)
+class WishlistVoteAdmin(UnfoldModelAdmin):
+    list_display = ['user_display', 'item_display', 'vote_badge', 'created_at']
+    list_filter = ['vote', 'created_at']
+    search_fields = ['user__email', 'wishlist_item__property__title']
+    readonly_fields = ['user', 'wishlist_item', 'vote', 'created_at']
+    list_select_related = ['user', 'wishlist_item__property']
+
+    @display(description=_('User'))
+    def user_display(self, obj):
+        return obj.user.email
+
+    @display(description=_('Item'))
+    def item_display(self, obj):
+        return obj.wishlist_item.property.title
+
+    @display(description=_('Vote'), label=True)
+    def vote_badge(self, obj):
+        if obj.vote == 1:
+            return {'value': '👍 Upvote', 'color': 'success'}
+        return {'value': '👎 Downvote', 'color': 'danger'}
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(WishlistComment)
+class WishlistCommentAdmin(UnfoldModelAdmin):
+    list_display = ['user_display', 'item_display', 'text_preview', 'created_at']
+    list_filter = ['created_at']
+    search_fields = ['user__email', 'text', 'wishlist_item__property__title']
+    readonly_fields = ['created_at', 'updated_at']
+    list_select_related = ['user', 'wishlist_item__property']
+
+    @display(description=_('User'))
+    def user_display(self, obj):
+        return obj.user.email
+
+    @display(description=_('Item'))
+    def item_display(self, obj):
+        return obj.wishlist_item.property.title
+
+    @display(description=_('Comment'))
+    def text_preview(self, obj):
+        return obj.text[:80] + '...' if len(obj.text) > 80 else obj.text

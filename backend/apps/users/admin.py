@@ -89,29 +89,17 @@ class UserAdmin(UnfoldModelAdmin):
         self.message_user(request, f'{updated} user(s) banned.')
 
     # Custom display methods
-    @display(description=_('Role'), ordering='role', label=True)
+    @display(description=_('Role'), ordering='role', label={"Admin": "success", "Host": "info", "Guest": "secondary"})
     def role_badge(self, obj):
-        colors = {
-            'admin': 'success',
-            'host': 'info',
-            'guest': 'secondary'
-        }
-        return {
-            'value': obj.get_role_display(),
-            'color': colors.get(obj.role, 'secondary'),
-        }
+        return obj.get_role_display()
 
-    @display(description=_('Verified'), label=True, boolean=True)
+    @display(description=_('Verified'), label={"Verified": "success", "Unverified": "warning"})
     def verified_badge(self, obj):
-        if obj.is_verified:
-            return {'value': 'Verified', 'color': 'success'}
-        return {'value': 'Unverified', 'color': 'warning'}
+        return "Verified" if obj.is_verified else "Unverified"
 
-    @display(description=_('Active'), label=True, boolean=True)
+    @display(description=_('Active'), label={"Active": "success", "Inactive": "danger"})
     def active_badge(self, obj):
-        if obj.is_active:
-            return {'value': 'Active', 'color': 'success'}
-        return {'value': 'Inactive', 'color': 'danger'}
+        return "Active" if obj.is_active else "Inactive"
 
     @display(description=_('Full Name'))
     def full_name_display(self, obj):
@@ -296,19 +284,9 @@ class IdentityVerificationAdmin(UnfoldModelAdmin):
     def document_type_display(self, obj):
         return obj.get_document_type_display()
     
-    @display(description=_('Status'), label=True)
+    @display(description=_('Status'), label={"Pending": "warning", "Under Review": "info", "Approved": "success", "Rejected": "danger", "Expired": "secondary"})
     def status_badge(self, obj):
-        colors = {
-            'pending': 'warning',
-            'under_review': 'info',
-            'approved': 'success',
-            'rejected': 'danger',
-            'expired': 'secondary',
-        }
-        return {
-            'value': obj.get_status_display(),
-            'color': colors.get(obj.status, 'secondary'),
-        }
+        return obj.get_status_display()
     
     @display(description=_('Reviewed By'))
     def reviewed_by_name(self, obj):
@@ -359,12 +337,9 @@ class VerificationAttemptAdmin(UnfoldModelAdmin):
     def user_email(self, obj):
         return obj.user.email
     
-    @display(description=_('Success'), label=True)
+    @display(description=_('Success'), label={"Success": "success", "Failed": "danger"})
     def success_badge(self, obj):
-        return {
-            'value': 'Success' if obj.success else 'Failed',
-            'color': 'success' if obj.success else 'danger',
-        }
+        return "Success" if obj.success else "Failed"
     
     def has_add_permission(self, request):
         return False

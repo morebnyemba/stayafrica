@@ -117,11 +117,9 @@ class MessageAdmin(UnfoldModelAdmin):
         }),
     )
 
-    @display(description=_('Read'), label=True, boolean=True)
+    @display(description=_('Read'), label={"Read": "success", "Unread": "warning"})
     def read_badge(self, obj):
-        if obj.is_read:
-            return {'value': 'Read', 'color': 'success'}
-        return {'value': 'Unread', 'color': 'warning'}
+        return "Read" if obj.is_read else "Unread"
 
     @display(description=_('Sender'))
     def sender_display(self, obj):
@@ -194,11 +192,9 @@ class MessageTemplateAdmin(UnfoldModelAdmin):
         }),
     )
 
-    @display(description=_('Active'), label=True, boolean=True)
+    @display(description=_('Active'), label={"Active": "success", "Inactive": "danger"})
     def active_badge(self, obj):
-        if obj.is_active:
-            return {'value': 'Active', 'color': 'success'}
-        return {'value': 'Inactive', 'color': 'danger'}
+        return "Active" if obj.is_active else "Inactive"
 
     @display(description=_('Preview'))
     def template_preview(self, obj):
