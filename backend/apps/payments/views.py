@@ -458,6 +458,15 @@ class PaymentViewSet(viewsets.ModelViewSet):
                 # Send receipt email
                 send_payment_receipt_email.delay(payment.id)
                 
+                # Credit host wallet (deduct commission, pay host)
+                try:
+                    from services.transaction_service import TransactionService
+                    TransactionService.process_booking_payment(payment.booking, payment)
+                    logger.info(f"Host wallet credited for booking {payment.booking.booking_ref}")
+                except Exception as wallet_exc:
+                    # Don't fail the webhook — payout can be retried via admin bulk_payout
+                    logger.error(f"Failed to credit host wallet for {payment.booking.booking_ref}: {wallet_exc}")
+                
             elif normalized_status in ['failed', 'cancelled', 'declined', 'canceled']:
                 payment.status = 'failed'
             else:

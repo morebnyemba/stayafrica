@@ -138,11 +138,12 @@ class AdminStatsViewSet(viewsets.ViewSet):
     
     @action(detail=False, methods=['get'])
     def revenue_analytics(self, request):
-        """Revenue analytics with time-series data."""
+        """Revenue analytics with time-series data and commission breakdown."""
         period = request.query_params.get('period', 'monthly')
         trunc = self._get_trunc_func(period)
         
-        data = (
+        # Payment revenue by period
+        payment_data = (
             Payment.objects.filter(status='success')
             .annotate(period=trunc('created_at'))
             .values('period')
@@ -153,15 +154,54 @@ class AdminStatsViewSet(viewsets.ViewSet):
             .order_by('period')
         )
         
+        # Commission breakdown by period (from completed bookings)
+        commission_data = (
+            Booking.objects.filter(status__in=['completed', 'confirmed'])
+            .annotate(period=trunc('created_at'))
+            .values('period')
+            .annotate(
+                gross_revenue=Sum('grand_total'),
+                total_commission=Sum('commission_fee'),
+                total_service_fees=Sum('service_fee'),
+                host_payouts=Sum(F('grand_total') - F('commission_fee')),
+                booking_count=Count('id'),
+            )
+            .order_by('period')
+        )
+        
         total_revenue = Payment.objects.filter(status='success').aggregate(Sum('amount'))['amount__sum'] or 0
-        total_commission = Booking.objects.filter(status='completed').aggregate(Sum('commission'))['commission__sum'] or 0
+        total_commission = Booking.objects.filter(
+            status__in=['completed', 'confirmed']
+        ).aggregate(Sum('commission_fee'))['commission_fee__sum'] or 0
+        total_service_fees = Booking.objects.filter(
+            status__in=['completed', 'confirmed']
+        ).aggregate(Sum('service_fee'))['service_fee__sum'] or 0
+        total_host_payouts = Booking.objects.filter(
+            status__in=['completed', 'confirmed']
+        ).aggregate(
+            total=Sum(F('grand_total') - F('commission_fee'))
+        )['total'] or 0
+        
+        # Wallet payout stats
+        wallet_payouts = WalletTransaction.objects.filter(
+            txn_type='credit', status='completed',
+        ).aggregate(
+            total_credited=Sum('amount'),
+            count=Count('id'),
+        )
         
         return Response({
-            'data': list(data),
+            'payment_data': list(payment_data),
+            'commission_data': list(commission_data),
             'summary': {
                 'total_revenue': float(total_revenue),
                 'total_commission': float(total_commission),
-                'net_revenue': float(total_revenue - total_commission),
+                'total_service_fees': float(total_service_fees),
+                'total_host_payouts': float(total_host_payouts),
+                'platform_earnings': float(total_commission + total_service_fees),
+                'net_revenue': float(total_revenue - total_host_payouts),
+                'wallet_credits': float(wallet_payouts['total_credited'] or 0),
+                'wallet_credit_count': wallet_payouts['count'] or 0,
             },
         })
     

@@ -418,7 +418,19 @@ CELERY_BEAT_SCHEDULE = {
         'options': {'queue': 'high_priority'},
     },
 
-    # ── Analytics (runs after midnight) ──────────────────────────
+    # ── Hourly operational tasks ─────────────────────────────────
+    'auto-host-payouts': {
+        'task': 'tasks.payment_tasks.process_host_payouts',
+        'schedule': crontab(minute=15),  # every hour at :15
+        'options': {'queue': 'high_priority'},
+    },
+    'refresh-admin-stats': {
+        'task': 'tasks.payment_tasks.refresh_admin_stats',
+        'schedule': crontab(minute=45),  # every hour at :45
+        'options': {'queue': 'analytics'},
+    },
+
+    # ── Daily analytics (grouped 02:00–02:30 UTC) ───────────────
     'daily-property-analytics': {
         'task': 'tasks.analytics_tasks.compute_daily_property_analytics',
         'schedule': crontab(hour=2, minute=0),
@@ -426,39 +438,41 @@ CELERY_BEAT_SCHEDULE = {
     },
     'daily-message-analytics': {
         'task': 'tasks.analytics_tasks.compute_message_analytics',
-        'schedule': crontab(hour=2, minute=30),
+        'schedule': crontab(hour=2, minute=10),
         'options': {'queue': 'analytics'},
     },
     'daily-host-summaries': {
         'task': 'tasks.analytics_tasks.generate_host_summaries',
-        'schedule': crontab(hour=3, minute=0),
+        'schedule': crontab(hour=2, minute=20),
         'options': {'queue': 'analytics'},
     },
+
+    # ── Weekly analytics (Sunday 03:00–03:15 UTC) ────────────────
     'weekly-revenue-projections': {
         'task': 'tasks.analytics_tasks.generate_revenue_projections',
-        'schedule': crontab(hour=4, minute=0, day_of_week=0),
+        'schedule': crontab(hour=3, minute=0, day_of_week=0),
         'options': {'queue': 'analytics'},
     },
     'weekly-performance-benchmarks': {
         'task': 'tasks.analytics_tasks.compute_performance_benchmarks',
-        'schedule': crontab(hour=5, minute=0, day_of_week=0),
+        'schedule': crontab(hour=3, minute=15, day_of_week=0),
         'options': {'queue': 'analytics'},
     },
 
-    # ── Housekeeping ─────────────────────────────────────────────
+    # ── Weekly housekeeping (Monday 03:00–03:30 UTC) ─────────────
     'cleanup-old-images': {
         'task': 'tasks.image_tasks.cleanup_old_images',
-        'schedule': crontab(hour=4, minute=0, day_of_week=1),
+        'schedule': crontab(hour=3, minute=0, day_of_week=1),
         'options': {'queue': 'analytics'},
     },
     'refresh-property-geocodes': {
         'task': 'tasks.geocoding_tasks.refresh_property_geocodes',
-        'schedule': crontab(hour=5, minute=0, day_of_week=1),
+        'schedule': crontab(hour=3, minute=15, day_of_week=1),
         'options': {'queue': 'analytics'},
     },
     'refresh-property-pois': {
         'task': 'tasks.analytics_tasks.refresh_property_pois',
-        'schedule': crontab(hour=5, minute=30),
+        'schedule': crontab(hour=3, minute=30, day_of_week=1),
         'options': {'queue': 'analytics'},
     },
 }
