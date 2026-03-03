@@ -28,9 +28,13 @@ type Review = {
   created_at: string;
 };
 
-export function PropertyDetailsContent() {
+interface PropertyDetailsContentProps {
+  propertyId?: string;
+}
+
+export function PropertyDetailsContent({ propertyId: propId }: PropertyDetailsContentProps = {}) {
   const searchParams = useSearchParams();
-  const propertyId = searchParams.get('id') ?? '';
+  const propertyId = propId || searchParams.get('id') || '';
   const [isSaved, setIsSaved] = useState(false);
   const [checkingSaved, setCheckingSaved] = useState(true);
   const [showFullDescription, setShowFullDescription] = useState(false);
