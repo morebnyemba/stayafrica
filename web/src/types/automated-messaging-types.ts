@@ -1,53 +1,61 @@
 export interface AutoMessageSettings {
-  id: string;
-  user: string;
-  enabled: boolean;
-  triggers: {
-    booking_confirmed: boolean;
-    check_in_reminder: boolean;
-    check_out_reminder: boolean;
-    booking_inquiry: boolean;
-    booking_cancelled: boolean;
-    review_request: boolean;
-    payment_received: boolean;
-    custom_trigger: boolean;
-  };
-  templates: Record<string, string>;
+  id: number;
+  enable_auto_responses: boolean;
+  enable_quick_replies: boolean;
+  enable_scheduled_messages: boolean;
+  away_mode_enabled: boolean;
+  away_message: string;
+  target_response_time_hours: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AutomatedMessage {
+  id: number;
+  name: string;
+  trigger_type: string;
+  trigger_type_display: string;
+  template: number | null;
+  template_name: string | null;
+  delay_hours: number;
+  custom_message: string;
+  is_active: boolean;
   created_at: string;
   updated_at: string;
 }
 
 export interface QuickReply {
-  id: string;
-  user: string;
-  label: string;
-  message: string;
-  shortcut?: string;
+  id: number;
+  shortcut: string;
+  message_text: string;
+  category: string;
+  use_count: number;
+  is_active: boolean;
   created_at: string;
   updated_at: string;
 }
 
 export interface ScheduledMessage {
-  id: string;
-  user: string;
-  recipient: string;
-  recipient_name?: string;
-  message: string;
+  id: number;
+  conversation: number;
+  conversation_id: number;
+  message_text: string;
   scheduled_time: string;
-  timezone: string;
-  status: 'PENDING' | 'SENT' | 'FAILED' | 'CANCELLED';
-  sent_at?: string;
+  status: 'pending' | 'sent' | 'failed' | 'cancelled';
+  status_display: string;
+  sent_at: string | null;
+  booking: number | null;
   created_at: string;
 }
 
 export interface MessageTemplate {
-  id: string;
-  user: string;
+  id: number;
   name: string;
-  subject?: string;
-  content: string;
-  variables: string[];
-  category?: string;
+  template_type: string;
+  template_type_display: string;
+  subject: string;
+  body: string;
+  is_active: boolean;
   created_at: string;
   updated_at: string;
 }

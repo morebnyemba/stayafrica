@@ -11,8 +11,8 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8
 export const QuickRepliesManager = () => {
   const queryClient = useQueryClient();
   const [isAdding, setIsAdding] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [formData, setFormData] = useState({ label: '', message: '', shortcut: '' });
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [formData, setFormData] = useState({ shortcut: '', message_text: '', category: '' });
 
   const { data: quickReplies = [], isLoading } = useQuery<QuickReply[]>({
     queryKey: ['quick-replies'],
@@ -31,7 +31,7 @@ export const QuickRepliesManager = () => {
   });
 
   const createMutation = useMutation({
-    mutationFn: async (data: Omit<QuickReply, 'id' | 'user' | 'created_at' | 'updated_at'>) => {
+    mutationFn: async (data: { shortcut: string; message_text: string; category: string }) => {
       const token = localStorage.getItem('access_token');
       const response = await axios.post(
         `${API_BASE_URL}/api/v1/messaging/quick-replies/`,
@@ -52,7 +52,7 @@ export const QuickRepliesManager = () => {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: Partial<QuickReply> }) => {
+    mutationFn: async ({ id, data }: { id: number; data: Partial<QuickReply> }) => {
       const token = localStorage.getItem('access_token');
       const response = await axios.patch(
         `${API_BASE_URL}/api/v1/messaging/quick-replies/${id}/`,
@@ -73,7 +73,7 @@ export const QuickRepliesManager = () => {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: async (id: number) => {
       const token = localStorage.getItem('access_token');
       await axios.delete(
         `${API_BASE_URL}/api/v1/messaging/quick-replies/${id}/`,
@@ -90,15 +90,15 @@ export const QuickRepliesManager = () => {
   });
 
   const resetForm = () => {
-    setFormData({ label: '', message: '', shortcut: '' });
+    setFormData({ shortcut: '', message_text: '', category: '' });
     setIsAdding(false);
     setEditingId(null);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!formData.label.trim() || !formData.message.trim()) {
+
+    if (!formData.shortcut.trim() || !formData.message_text.trim()) {
       return;
     }
 
@@ -111,15 +111,15 @@ export const QuickRepliesManager = () => {
 
   const handleEdit = (reply: QuickReply) => {
     setFormData({
-      label: reply.label,
-      message: reply.message,
-      shortcut: reply.shortcut || '',
+      shortcut: reply.shortcut,
+      message_text: reply.message_text,
+      category: reply.category || '',
     });
     setEditingId(reply.id);
     setIsAdding(true);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = (id: number) => {
     if (confirm('Are you sure you want to delete this quick reply?')) {
       deleteMutation.mutate(id);
     }
@@ -140,7 +140,7 @@ export const QuickRepliesManager = () => {
           <div>
             <h2 className="text-xl font-semibold text-gray-900">Quick Replies</h2>
             <p className="text-sm text-gray-600 mt-1">
-              Create reusable message templates for faster responses
+              Create shortcut responses for faster guest communication
             </p>
           </div>
 
@@ -159,18 +159,36 @@ export const QuickRepliesManager = () => {
       <div className="p-6 space-y-4">
         {isAdding && (
           <form onSubmit={handleSubmit} className="border rounded-lg p-4 bg-gray-50 space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Label *
-              </label>
-              <input
-                type="text"
-                value={formData.label}
-                onChange={(e) => setFormData(prev => ({ ...prev, label: e.target.value }))}
-                placeholder="e.g., Welcome Message"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                required
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Shortcut *
+                </label>
+                <input
+                  type="text"
+                  value={formData.shortcut}
+                  onChange={(e) => setFormData(prev => ({ ...prev, shortcut: e.target.value }))}
+                  placeholder="e.g., /welcome or /wifi"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Type this shortcut in chat to insert the message
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Category (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={formData.category}
+                  onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
+                  placeholder="e.g., Booking, Support"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
             </div>
 
             <div>
@@ -178,29 +196,13 @@ export const QuickRepliesManager = () => {
                 Message *
               </label>
               <textarea
-                value={formData.message}
-                onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))}
+                value={formData.message_text}
+                onChange={(e) => setFormData(prev => ({ ...prev, message_text: e.target.value }))}
                 placeholder="Enter your quick reply message..."
                 rows={4}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
               />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Shortcut (Optional)
-              </label>
-              <input
-                type="text"
-                value={formData.shortcut}
-                onChange={(e) => setFormData(prev => ({ ...prev, shortcut: e.target.value }))}
-                placeholder="e.g., /welcome"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Type this shortcut in chat to quickly insert this message
-              </p>
             </div>
 
             <div className="flex gap-2">
@@ -245,15 +247,22 @@ export const QuickRepliesManager = () => {
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
-                      <h3 className="font-medium text-gray-900">{reply.label}</h3>
-                      {reply.shortcut && (
-                        <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded font-mono">
-                          {reply.shortcut}
+                      <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded font-mono">
+                        {reply.shortcut}
+                      </span>
+                      {reply.category && (
+                        <span className="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded">
+                          {reply.category}
+                        </span>
+                      )}
+                      {reply.use_count > 0 && (
+                        <span className="text-xs text-gray-400">
+                          Used {reply.use_count} times
                         </span>
                       )}
                     </div>
                     <p className="text-sm text-gray-600 whitespace-pre-wrap">
-                      {reply.message}
+                      {reply.message_text}
                     </p>
                   </div>
 

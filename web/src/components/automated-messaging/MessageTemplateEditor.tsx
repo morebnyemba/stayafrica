@@ -8,6 +8,15 @@ import { Plus, Edit2, Trash2, Loader2, Save, X, Eye } from 'lucide-react';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
+const TEMPLATE_TYPES = [
+  { value: 'booking_inquiry', label: 'Booking Inquiry' },
+  { value: 'booking_confirmation', label: 'Booking Confirmation' },
+  { value: 'cancellation', label: 'Cancellation Message' },
+  { value: 'review_request', label: 'Review Request' },
+  { value: 'welcome', label: 'Welcome Message' },
+  { value: 'custom', label: 'Custom Template' },
+];
+
 const extractVariables = (content: string): string[] => {
   const regex = /\{([^}]+)\}/g;
   const matches = content.matchAll(regex);
@@ -17,13 +26,13 @@ const extractVariables = (content: string): string[] => {
 export const MessageTemplateEditor = () => {
   const queryClient = useQueryClient();
   const [isCreating, setIsCreating] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<number | null>(null);
   const [previewMode, setPreviewMode] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     subject: '',
-    content: '',
-    category: '',
+    body: '',
+    template_type: 'custom',
   });
   const [previewData, setPreviewData] = useState<Record<string, string>>({});
 
@@ -44,7 +53,7 @@ export const MessageTemplateEditor = () => {
   });
 
   const createMutation = useMutation({
-    mutationFn: async (data: typeof formData & { variables: string[] }) => {
+    mutationFn: async (data: { name: string; subject: string; body: string; template_type: string }) => {
       const token = localStorage.getItem('access_token');
       const response = await axios.post(
         `${API_BASE_URL}/api/v1/messaging/templates/`,
@@ -65,7 +74,7 @@ export const MessageTemplateEditor = () => {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: Partial<MessageTemplate> }) => {
+    mutationFn: async ({ id, data }: { id: number; data: Partial<MessageTemplate> }) => {
       const token = localStorage.getItem('access_token');
       const response = await axios.patch(
         `${API_BASE_URL}/api/v1/messaging/templates/${id}/`,
@@ -86,7 +95,7 @@ export const MessageTemplateEditor = () => {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: async (id: number) => {
       const token = localStorage.getItem('access_token');
       await axios.delete(
         `${API_BASE_URL}/api/v1/messaging/templates/${id}/`,
@@ -103,7 +112,7 @@ export const MessageTemplateEditor = () => {
   });
 
   const resetForm = () => {
-    setFormData({ name: '', subject: '', content: '', category: '' });
+    setFormData({ name: '', subject: '', body: '', template_type: 'custom' });
     setPreviewData({});
     setIsCreating(false);
     setEditingId(null);
@@ -112,20 +121,15 @@ export const MessageTemplateEditor = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!formData.name.trim() || !formData.content.trim()) {
+
+    if (!formData.name.trim() || !formData.body.trim()) {
       return;
     }
 
-    const variables = extractVariables(formData.content);
-
     if (editingId) {
-      updateMutation.mutate({ 
-        id: editingId, 
-        data: { ...formData, variables } 
-      });
+      updateMutation.mutate({ id: editingId, data: formData });
     } else {
-      createMutation.mutate({ ...formData, variables });
+      createMutation.mutate(formData);
     }
   };
 
@@ -133,36 +137,35 @@ export const MessageTemplateEditor = () => {
     setFormData({
       name: template.name,
       subject: template.subject || '',
-      content: template.content,
-      category: template.category || '',
+      body: template.body,
+      template_type: template.template_type,
     });
-    
-    // Initialize preview data with variable names
+
     const initialPreview: Record<string, string> = {};
-    template.variables.forEach(v => {
+    extractVariables(template.body).forEach(v => {
       initialPreview[v] = '';
     });
     setPreviewData(initialPreview);
-    
+
     setEditingId(template.id);
     setIsCreating(true);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = (id: number) => {
     if (confirm('Are you sure you want to delete this template?')) {
       deleteMutation.mutate(id);
     }
   };
 
   const renderPreview = () => {
-    let preview = formData.content;
+    let preview = formData.body;
     Object.entries(previewData).forEach(([key, value]) => {
       preview = preview.replace(new RegExp(`\\{${key}\\}`, 'g'), value || `{${key}}`);
     });
     return preview;
   };
 
-  const variables = extractVariables(formData.content);
+  const variables = extractVariables(formData.body);
 
   if (isLoading) {
     return (
@@ -215,15 +218,17 @@ export const MessageTemplateEditor = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Category (Optional)
+                  Template Type
                 </label>
-                <input
-                  type="text"
-                  value={formData.category}
-                  onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
-                  placeholder="e.g., Booking, Support"
+                <select
+                  value={formData.template_type}
+                  onChange={(e) => setFormData(prev => ({ ...prev, template_type: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
+                >
+                  {TEMPLATE_TYPES.map(t => (
+                    <option key={t.value} value={t.value}>{t.label}</option>
+                  ))}
+                </select>
               </div>
             </div>
 
@@ -243,7 +248,7 @@ export const MessageTemplateEditor = () => {
             <div>
               <div className="flex items-center justify-between mb-2">
                 <label className="block text-sm font-medium text-gray-700">
-                  Message Content *
+                  Message Body *
                 </label>
                 <button
                   type="button"
@@ -258,8 +263,8 @@ export const MessageTemplateEditor = () => {
               {!previewMode ? (
                 <>
                   <textarea
-                    value={formData.content}
-                    onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
+                    value={formData.body}
+                    onChange={(e) => setFormData(prev => ({ ...prev, body: e.target.value }))}
                     placeholder="Enter template content... Use {variable_name} for variables"
                     rows={6}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
@@ -350,9 +355,7 @@ export const MessageTemplateEditor = () => {
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1">
                     <h3 className="font-medium text-gray-900">{template.name}</h3>
-                    {template.category && (
-                      <span className="text-xs text-gray-500">{template.category}</span>
-                    )}
+                    <span className="text-xs text-gray-500">{template.template_type_display}</span>
                   </div>
 
                   <div className="flex gap-2">
@@ -376,12 +379,12 @@ export const MessageTemplateEditor = () => {
                 </div>
 
                 <p className="text-sm text-gray-600 line-clamp-3 mb-2">
-                  {template.content}
+                  {template.body}
                 </p>
 
-                {template.variables.length > 0 && (
+                {extractVariables(template.body).length > 0 && (
                   <div className="flex flex-wrap gap-1 mt-2">
-                    {template.variables.map(v => (
+                    {extractVariables(template.body).map(v => (
                       <span key={v} className="px-2 py-0.5 bg-gray-100 text-gray-700 text-xs rounded">
                         {'{' + v + '}'}
                       </span>

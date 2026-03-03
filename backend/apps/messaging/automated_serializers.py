@@ -18,7 +18,7 @@ class HostMessageSettingsSerializer(serializers.ModelSerializer):
     class Meta:
         model = HostMessageSettings
         fields = [
-            'enable_auto_responses', 'enable_quick_replies',
+            'id', 'enable_auto_responses', 'enable_quick_replies',
             'enable_scheduled_messages', 'away_mode_enabled',
             'away_message', 'target_response_time_hours',
             'created_at', 'updated_at'
@@ -110,3 +110,7 @@ class MessageTemplateSerializer(serializers.ModelSerializer):
             'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
+        extra_kwargs = {
+            'is_active': {'default': True},
+            'subject': {'required': False, 'default': ''},
+        }

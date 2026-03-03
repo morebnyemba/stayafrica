@@ -40,7 +40,7 @@ class HostMessageSettingsViewSet(viewsets.ViewSet):
         return Response(serializer.data)
     
     def update(self, request, pk=None):
-        """Update host message settings"""
+        """Update host message settings (PUT)"""
         settings, created = HostMessageSettings.objects.get_or_create(
             host=request.user
         )
@@ -48,6 +48,10 @@ class HostMessageSettingsViewSet(viewsets.ViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
+
+    def partial_update(self, request, pk=None):
+        """Partial update host message settings (PATCH)"""
+        return self.update(request, pk)
 
 
 class AutomatedMessageViewSet(viewsets.ModelViewSet):

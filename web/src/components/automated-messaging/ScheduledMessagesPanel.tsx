@@ -4,34 +4,18 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { ScheduledMessage } from '@/types/automated-messaging-types';
-import { Calendar, Clock, Loader2, Plus, Trash2, X } from 'lucide-react';
+import { Calendar, Loader2, Plus, Trash2, X } from 'lucide-react';
 import { format } from 'date-fns';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
-
-const timezones = [
-  'America/New_York',
-  'America/Chicago',
-  'America/Denver',
-  'America/Los_Angeles',
-  'Europe/London',
-  'Europe/Paris',
-  'Africa/Johannesburg',
-  'Africa/Lagos',
-  'Africa/Nairobi',
-  'Asia/Dubai',
-  'Asia/Tokyo',
-  'Australia/Sydney',
-];
 
 export const ScheduledMessagesPanel = () => {
   const queryClient = useQueryClient();
   const [isScheduling, setIsScheduling] = useState(false);
   const [formData, setFormData] = useState({
-    recipient: '',
-    message: '',
+    conversation: '',
+    message_text: '',
     scheduled_time: '',
-    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/New_York',
   });
 
   const { data: messages = [], isLoading } = useQuery<ScheduledMessage[]>({
@@ -39,7 +23,7 @@ export const ScheduledMessagesPanel = () => {
     queryFn: async () => {
       const token = localStorage.getItem('access_token');
       const response = await axios.get(
-        `${API_BASE_URL}/api/v1/messaging/automated-messages/`,
+        `${API_BASE_URL}/api/v1/messaging/scheduled-messages/`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -51,10 +35,10 @@ export const ScheduledMessagesPanel = () => {
   });
 
   const createMutation = useMutation({
-    mutationFn: async (data: typeof formData) => {
+    mutationFn: async (data: { conversation: number; message_text: string; scheduled_time: string }) => {
       const token = localStorage.getItem('access_token');
       const response = await axios.post(
-        `${API_BASE_URL}/api/v1/messaging/automated-messages/`,
+        `${API_BASE_URL}/api/v1/messaging/scheduled-messages/`,
         data,
         {
           headers: {
@@ -72,15 +56,14 @@ export const ScheduledMessagesPanel = () => {
   });
 
   const cancelMutation = useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: async (id: number) => {
       const token = localStorage.getItem('access_token');
-      const response = await axios.patch(
-        `${API_BASE_URL}/api/v1/messaging/automated-messages/${id}/`,
-        { status: 'CANCELLED' },
+      const response = await axios.post(
+        `${API_BASE_URL}/api/v1/messaging/scheduled-messages/${id}/cancel/`,
+        {},
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
           },
         }
       );
@@ -93,10 +76,9 @@ export const ScheduledMessagesPanel = () => {
 
   const resetForm = () => {
     setFormData({
-      recipient: '',
-      message: '',
+      conversation: '',
+      message_text: '',
       scheduled_time: '',
-      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/New_York',
     });
     setIsScheduling(false);
   };
@@ -104,14 +86,18 @@ export const ScheduledMessagesPanel = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.recipient.trim() || !formData.message.trim() || !formData.scheduled_time) {
+    if (!formData.conversation.trim() || !formData.message_text.trim() || !formData.scheduled_time) {
       return;
     }
 
-    createMutation.mutate(formData);
+    createMutation.mutate({
+      conversation: parseInt(formData.conversation),
+      message_text: formData.message_text,
+      scheduled_time: new Date(formData.scheduled_time).toISOString(),
+    });
   };
 
-  const handleCancel = (id: string) => {
+  const handleCancel = (id: number) => {
     if (confirm('Are you sure you want to cancel this scheduled message?')) {
       cancelMutation.mutate(id);
     }
@@ -119,13 +105,13 @@ export const ScheduledMessagesPanel = () => {
 
   const getStatusColor = (status: ScheduledMessage['status']) => {
     switch (status) {
-      case 'PENDING':
+      case 'pending':
         return 'bg-yellow-100 text-yellow-800';
-      case 'SENT':
+      case 'sent':
         return 'bg-green-100 text-green-800';
-      case 'FAILED':
+      case 'failed':
         return 'bg-red-100 text-red-800';
-      case 'CANCELLED':
+      case 'cancelled':
         return 'bg-gray-100 text-gray-800';
     }
   };
@@ -166,13 +152,13 @@ export const ScheduledMessagesPanel = () => {
           <form onSubmit={handleSubmit} className="border rounded-lg p-4 bg-gray-50 space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Recipient User ID *
+                Conversation ID *
               </label>
               <input
-                type="text"
-                value={formData.recipient}
-                onChange={(e) => setFormData(prev => ({ ...prev, recipient: e.target.value }))}
-                placeholder="Enter recipient user ID"
+                type="number"
+                value={formData.conversation}
+                onChange={(e) => setFormData(prev => ({ ...prev, conversation: e.target.value }))}
+                placeholder="Enter conversation ID"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
               />
@@ -183,8 +169,8 @@ export const ScheduledMessagesPanel = () => {
                 Message *
               </label>
               <textarea
-                value={formData.message}
-                onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))}
+                value={formData.message_text}
+                onChange={(e) => setFormData(prev => ({ ...prev, message_text: e.target.value }))}
                 placeholder="Enter your message..."
                 rows={4}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -192,36 +178,18 @@ export const ScheduledMessagesPanel = () => {
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  <Calendar className="h-4 w-4 inline mr-1" />
-                  Scheduled Date & Time *
-                </label>
-                <input
-                  type="datetime-local"
-                  value={formData.scheduled_time}
-                  onChange={(e) => setFormData(prev => ({ ...prev, scheduled_time: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  <Clock className="h-4 w-4 inline mr-1" />
-                  Timezone
-                </label>
-                <select
-                  value={formData.timezone}
-                  onChange={(e) => setFormData(prev => ({ ...prev, timezone: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  {timezones.map(tz => (
-                    <option key={tz} value={tz}>{tz}</option>
-                  ))}
-                </select>
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                <Calendar className="h-4 w-4 inline mr-1" />
+                Scheduled Date & Time *
+              </label>
+              <input
+                type="datetime-local"
+                value={formData.scheduled_time}
+                onChange={(e) => setFormData(prev => ({ ...prev, scheduled_time: e.target.value }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                required
+              />
             </div>
 
             <div className="flex gap-2">
@@ -261,26 +229,26 @@ export const ScheduledMessagesPanel = () => {
           </div>
         ) : (
           <div className="space-y-3">
-            {messages.map((message) => (
-              <div key={message.id} className="border rounded-lg p-4">
+            {messages.map((msg) => (
+              <div key={msg.id} className="border rounded-lg p-4">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="font-medium text-gray-900">
-                        To: {message.recipient_name || message.recipient}
+                        Conversation #{msg.conversation_id}
                       </span>
-                      <span className={`px-2 py-0.5 text-xs rounded ${getStatusColor(message.status)}`}>
-                        {message.status}
+                      <span className={`px-2 py-0.5 text-xs rounded capitalize ${getStatusColor(msg.status)}`}>
+                        {msg.status_display || msg.status}
                       </span>
                     </div>
                     <p className="text-sm text-gray-600">
-                      {format(new Date(message.scheduled_time), 'PPpp')} ({message.timezone})
+                      {format(new Date(msg.scheduled_time), 'PPpp')}
                     </p>
                   </div>
 
-                  {message.status === 'PENDING' && (
+                  {msg.status === 'pending' && (
                     <button
-                      onClick={() => handleCancel(message.id)}
+                      onClick={() => handleCancel(msg.id)}
                       disabled={cancelMutation.isPending}
                       className="p-2 text-red-600 hover:bg-red-50 rounded transition-colors disabled:opacity-50"
                       aria-label="Cancel"
@@ -291,12 +259,12 @@ export const ScheduledMessagesPanel = () => {
                 </div>
 
                 <p className="text-sm text-gray-700 whitespace-pre-wrap">
-                  {message.message}
+                  {msg.message_text}
                 </p>
 
-                {message.sent_at && (
+                {msg.sent_at && (
                   <p className="text-xs text-gray-500 mt-2">
-                    Sent: {format(new Date(message.sent_at), 'PPpp')}
+                    Sent: {format(new Date(msg.sent_at), 'PPpp')}
                   </p>
                 )}
               </div>
