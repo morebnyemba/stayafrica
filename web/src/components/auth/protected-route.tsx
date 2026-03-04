@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/store/auth-store';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -15,14 +15,19 @@ export function ProtectedRoute({ children, requireAuth = true, requiredRole }: P
   const { isAuthenticated, isLoading, user } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     if (isLoading) return;
 
     if (requireAuth && !isAuthenticated) {
-      // Only pass pathname as redirect — never include existing query params
-      // (especially "redirect") to prevent infinite nested redirect loops.
-      const loginUrl = `/login?redirect=${encodeURIComponent(pathname)}`;
+      // Build the full return URL including query params (e.g. booking details)
+      // but strip any existing 'redirect' param to prevent infinite loops
+      const params = new URLSearchParams(searchParams.toString());
+      params.delete('redirect');
+      const queryString = params.toString();
+      const returnPath = queryString ? `${pathname}?${queryString}` : pathname;
+      const loginUrl = `/login?redirect=${encodeURIComponent(returnPath)}`;
       router.replace(loginUrl);
       return;
     }
@@ -30,7 +35,7 @@ export function ProtectedRoute({ children, requireAuth = true, requiredRole }: P
     if (requiredRole && user?.role !== requiredRole) {
       router.replace(requiredRole === 'host' ? '/host' : '/');
     }
-  }, [isAuthenticated, isLoading, requireAuth, requiredRole, router, user?.role, pathname]);
+  }, [isAuthenticated, isLoading, requireAuth, requiredRole, router, user?.role, pathname, searchParams]);
 
   if (isLoading) {
     return (
