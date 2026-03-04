@@ -26,7 +26,7 @@ export const PerformanceIndicator: React.FC<PerformanceIndicatorProps> = ({
       case 'poor':
         return 'text-red-600 bg-red-100 dark:bg-red-900/30';
       default:
-        return 'text-gray-600 bg-gray-100 dark:bg-gray-700';
+        return 'text-primary-500 bg-primary-100 dark:bg-primary-800';
     }
   };
 
@@ -46,16 +46,16 @@ export const PerformanceIndicator: React.FC<PerformanceIndicatorProps> = ({
   };
 
   const getTrendColor = () => {
-    if (!change) return 'text-gray-600';
+    if (!change) return 'text-primary-500 dark:text-sand-400';
     if (change > 0) return 'text-green-600';
     return 'text-red-600';
   };
 
   return (
-    <div className={`bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 ${className}`}>
+    <div className={`bg-white dark:bg-primary-800/40 rounded-xl p-4 border border-sand-200/50 dark:border-primary-700/50 ${className}`}>
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
-        <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+        <h4 className="text-sm font-medium text-primary-600 dark:text-sand-300">
           {label}
         </h4>
         <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor()}`}>
@@ -65,11 +65,11 @@ export const PerformanceIndicator: React.FC<PerformanceIndicatorProps> = ({
 
       {/* Value */}
       <div className="flex items-baseline space-x-2 mb-3">
-        <span className="text-2xl font-bold text-gray-900 dark:text-white">
+        <span className="text-2xl font-bold text-primary-900 dark:text-sand-50">
           {value.toFixed(1)}
         </span>
         {target && (
-          <span className="text-sm text-gray-600 dark:text-gray-400">
+          <span className="text-sm text-primary-500 dark:text-sand-400">
             / {target}
           </span>
         )}
@@ -83,7 +83,7 @@ export const PerformanceIndicator: React.FC<PerformanceIndicatorProps> = ({
 
       {/* Progress Bar */}
       {target && (
-        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+        <div className="w-full bg-primary-200 dark:bg-primary-700 rounded-full h-2">
           <div
             className={`h-2 rounded-full transition-all ${
               status === 'excellent' ? 'bg-green-600' :

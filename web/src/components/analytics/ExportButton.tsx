@@ -59,7 +59,7 @@ export const ExportButton: React.FC<ExportButtonProps> = ({
       <button
         onClick={() => setIsOpen(!isOpen)}
         disabled={isPending || !data}
-        className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg transition-colors"
+        className="flex items-center space-x-2 px-4 py-2 bg-secondary-600 hover:bg-secondary-700 disabled:bg-primary-300 text-white rounded-lg transition-colors"
       >
         {isPending ? (
           <Loader2 className="h-4 w-4 animate-spin" />
@@ -79,17 +79,17 @@ export const ExportButton: React.FC<ExportButtonProps> = ({
           ></div>
 
           {/* Menu */}
-          <div className="absolute right-0 mt-2 z-50 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 py-2">
+          <div className="absolute right-0 mt-2 z-50 w-48 bg-white dark:bg-primary-800 rounded-lg shadow-xl border border-sand-200/50 dark:border-primary-700/50 py-2">
             <button
               onClick={() => handleExport('csv')}
-              className="w-full flex items-center space-x-3 px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              className="w-full flex items-center space-x-3 px-4 py-2 hover:bg-sand-50 dark:hover:bg-primary-700 transition-colors"
             >
               <FileSpreadsheet className="h-4 w-4 text-green-600" />
               <div className="text-left">
-                <p className="text-sm font-medium text-gray-900 dark:text-white">
+                <p className="text-sm font-medium text-primary-900 dark:text-sand-50">
                   Export as CSV
                 </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
+                <p className="text-xs text-primary-400 dark:text-sand-500">
                   Spreadsheet format
                 </p>
               </div>
@@ -97,14 +97,14 @@ export const ExportButton: React.FC<ExportButtonProps> = ({
 
             <button
               onClick={() => handleExport('pdf')}
-              className="w-full flex items-center space-x-3 px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              className="w-full flex items-center space-x-3 px-4 py-2 hover:bg-sand-50 dark:hover:bg-primary-700 transition-colors"
             >
               <FileText className="h-4 w-4 text-red-600" />
               <div className="text-left">
-                <p className="text-sm font-medium text-gray-900 dark:text-white">
+                <p className="text-sm font-medium text-primary-900 dark:text-sand-50">
                   Export as PDF
                 </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
+                <p className="text-xs text-primary-400 dark:text-sand-500">
                   Printable report
                 </p>
               </div>

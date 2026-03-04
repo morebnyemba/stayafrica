@@ -59,10 +59,10 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
       {/* Trigger Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center space-x-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+        className="flex items-center space-x-2 px-4 py-2 bg-white dark:bg-primary-800 border border-primary-300 dark:border-primary-600 rounded-lg hover:bg-sand-50 dark:hover:bg-primary-700 transition-colors"
       >
-        <Calendar className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-        <span className="text-sm text-gray-700 dark:text-gray-300">
+        <Calendar className="h-4 w-4 text-primary-500 dark:text-sand-400" />
+        <span className="text-sm text-primary-700 dark:text-sand-200">
           {formatDateRange()}
         </span>
       </button>
@@ -77,24 +77,24 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
           ></div>
 
           {/* Picker Panel */}
-          <div className="absolute right-0 mt-2 z-50 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-4">
+          <div className="absolute right-0 mt-2 z-50 w-80 bg-white dark:bg-primary-800 rounded-lg shadow-xl border border-primary-200 dark:border-primary-700 p-4">
             {/* Header */}
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+              <h3 className="text-sm font-semibold text-primary-900 dark:text-sand-50">
                 Select Date Range
               </h3>
               <button
                 onClick={() => setIsOpen(false)}
-                className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+                className="p-1 hover:bg-primary-100 dark:hover:bg-primary-700 rounded"
               >
-                <X className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                <X className="h-4 w-4 text-primary-500 dark:text-sand-400" />
               </button>
             </div>
 
             {/* Date Inputs */}
             <div className="space-y-4">
               <div>
-                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-xs font-medium text-primary-700 dark:text-sand-200 mb-1">
                   Start Date
                 </label>
                 <input
@@ -102,12 +102,12 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
                   value={localStartDate}
                   onChange={(e) => setLocalStartDate(e.target.value)}
                   max={localEndDate || undefined}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-primary-300 dark:border-primary-600 rounded-lg text-sm bg-white dark:bg-primary-700 text-primary-900 dark:text-sand-50 focus:ring-2 focus:ring-secondary-500 focus:border-transparent"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-xs font-medium text-primary-700 dark:text-sand-200 mb-1">
                   End Date
                 </label>
                 <input
@@ -115,14 +115,14 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
                   value={localEndDate}
                   onChange={(e) => setLocalEndDate(e.target.value)}
                   min={localStartDate || undefined}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-primary-300 dark:border-primary-600 rounded-lg text-sm bg-white dark:bg-primary-700 text-primary-900 dark:text-sand-50 focus:ring-2 focus:ring-secondary-500 focus:border-transparent"
                 />
               </div>
             </div>
 
             {/* Quick Ranges */}
-            <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-              <p className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <div className="mt-4 pt-4 border-t border-primary-200 dark:border-primary-700">
+              <p className="text-xs font-medium text-primary-700 dark:text-sand-200 mb-2">
                 Quick Ranges
               </p>
               <div className="grid grid-cols-2 gap-2">
@@ -141,7 +141,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
                       setLocalStartDate(format(start, 'yyyy-MM-dd'));
                       setLocalEndDate(format(end, 'yyyy-MM-dd'));
                     }}
-                    className="px-3 py-1.5 text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded text-gray-700 dark:text-gray-300 transition-colors"
+                    className="px-3 py-1.5 text-xs bg-primary-100 dark:bg-primary-800 hover:bg-primary-200 dark:hover:bg-primary-700 rounded text-primary-700 dark:text-sand-200 transition-colors"
                   >
                     {label}
                   </button>
@@ -150,17 +150,17 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
             </div>
 
             {/* Actions */}
-            <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 flex items-center justify-end space-x-2">
+            <div className="mt-4 pt-4 border-t border-primary-200 dark:border-primary-700 flex items-center justify-end space-x-2">
               <button
                 onClick={handleClear}
-                className="px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+                className="px-3 py-1.5 text-sm text-primary-700 dark:text-sand-200 hover:bg-primary-100 dark:hover:bg-primary-700 rounded transition-colors"
               >
                 Clear
               </button>
               <button
                 onClick={handleApply}
                 disabled={!localStartDate || !localEndDate}
-                className="px-3 py-1.5 text-sm bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded transition-colors"
+                className="px-3 py-1.5 text-sm bg-secondary-600 hover:bg-secondary-700 disabled:bg-primary-300 text-white rounded transition-colors"
               >
                 Apply
               </button>

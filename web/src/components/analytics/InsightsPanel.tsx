@@ -63,21 +63,21 @@ export const InsightsPanel: React.FC<InsightsPanelProps> = ({
 
   if (isLoading) {
     return (
-      <div className={`bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 ${className}`}>
-        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+      <div className={`bg-white dark:bg-primary-800/40 rounded-lg shadow-sm border border-sand-200/50 dark:border-primary-700/50 ${className}`}>
+        <div className="px-6 py-4 border-b border-sand-200/50 dark:border-primary-700/50">
           <div className="flex items-center space-x-3">
             <div className="p-2 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg">
               <Lightbulb className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Insights & Recommendations</h3>
+            <h3 className="text-lg font-semibold text-primary-900 dark:text-sand-50">Insights & Recommendations</h3>
           </div>
         </div>
         <div className="p-6">
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
               <div key={i} className="animate-pulse">
-                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
-                <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-full"></div>
+                <div className="h-4 bg-primary-200 dark:bg-primary-700 rounded w-3/4 mb-2"></div>
+                <div className="h-3 bg-primary-200 dark:bg-primary-700 rounded w-full"></div>
               </div>
             ))}
           </div>
@@ -87,16 +87,16 @@ export const InsightsPanel: React.FC<InsightsPanelProps> = ({
   }
 
   return (
-    <div className={`bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 ${className}`}>
+    <div className={`bg-white dark:bg-primary-800/40 rounded-lg shadow-sm border border-sand-200/50 dark:border-primary-700/50 ${className}`}>
       {/* Header */}
-      <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+      <div className="px-6 py-4 border-b border-sand-200/50 dark:border-primary-700/50">
         <div className="flex items-center space-x-3">
           <div className="p-2 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg">
             <Lightbulb className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Insights & Recommendations</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            <h3 className="text-lg font-semibold text-primary-900 dark:text-sand-50">Insights & Recommendations</h3>
+            <p className="text-sm text-primary-500 dark:text-sand-400">
               AI-powered insights to improve your performance
             </p>
           </div>
@@ -106,7 +106,7 @@ export const InsightsPanel: React.FC<InsightsPanelProps> = ({
       {/* Content */}
       <div className="p-6">
         {!insights || insights.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12 text-gray-500 dark:text-gray-400">
+          <div className="flex flex-col items-center justify-center py-12 text-primary-400 dark:text-sand-500">
             <Lightbulb className="h-12 w-12 mb-3 opacity-50" />
             <p>No insights available at this time</p>
             <p className="text-sm mt-1">Check back after more data is collected</p>

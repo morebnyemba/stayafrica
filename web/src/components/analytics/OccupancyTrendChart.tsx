@@ -70,17 +70,17 @@ export const OccupancyTrendChart: React.FC<OccupancyTrendChartProps> = ({
       const data = payload[0]?.payload;
       if (!data) return null;
       return (
-        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
-          <p className="text-sm font-medium text-gray-900 dark:text-white mb-2">
+        <div className="bg-white dark:bg-primary-800 p-4 rounded-lg shadow-lg border border-sand-200 dark:border-primary-700">
+          <p className="text-sm font-medium text-primary-900 dark:text-sand-50 mb-2">
             {formatDate(data.date || '')}
           </p>
-          <p className="text-sm text-gray-600 dark:text-gray-300">
+          <p className="text-sm text-primary-500 dark:text-sand-300">
             Occupancy: <span className="font-semibold text-blue-600">{formatPercentage(data.occupancy_rate ?? 0)}</span>
           </p>
-          <p className="text-sm text-gray-600 dark:text-gray-300">
+          <p className="text-sm text-primary-500 dark:text-sand-300">
             Booked: <span className="font-semibold">{data.booked_nights ?? 0} nights</span>
           </p>
-          <p className="text-sm text-gray-600 dark:text-gray-300">
+          <p className="text-sm text-primary-500 dark:text-sand-300">
             Available: <span className="font-semibold">{data.available_nights ?? 0} nights</span>
           </p>
         </div>
@@ -91,7 +91,7 @@ export const OccupancyTrendChart: React.FC<OccupancyTrendChartProps> = ({
 
   if (error) {
     return (
-      <div className={`bg-white dark:bg-gray-800 rounded-lg p-6 ${className}`}>
+      <div className={`bg-white dark:bg-primary-800/40 rounded-xl p-6 ${className}`}>
         <div className="text-center text-red-600 dark:text-red-400">
           <p>Failed to load occupancy data</p>
         </div>
@@ -100,7 +100,7 @@ export const OccupancyTrendChart: React.FC<OccupancyTrendChartProps> = ({
   }
 
   return (
-    <div className={`bg-white dark:bg-gray-800 rounded-lg p-6 ${className}`}>
+    <div className={`bg-white dark:bg-primary-800/40 rounded-xl p-6 ${className}`}>
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center space-x-3">
@@ -108,9 +108,9 @@ export const OccupancyTrendChart: React.FC<OccupancyTrendChartProps> = ({
             <Calendar className="h-5 w-5 text-blue-600 dark:text-blue-400" />
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Occupancy Trend</h3>
+            <h3 className="text-lg font-semibold text-primary-900 dark:text-sand-50">Occupancy Trend</h3>
             <div className="flex items-center space-x-3 text-sm">
-              <span className="text-gray-600 dark:text-gray-400">
+              <span className="text-primary-500 dark:text-sand-400">
                 Average: <span className="font-semibold text-blue-600">{formatPercentage(avgOccupancy)}</span>
               </span>
               {trend && (
@@ -137,7 +137,7 @@ export const OccupancyTrendChart: React.FC<OccupancyTrendChartProps> = ({
         </div>
       ) : !data || data.length === 0 ? (
         <div className="flex items-center justify-center" style={{ height }}>
-          <div className="text-center text-gray-500 dark:text-gray-400">
+          <div className="text-center text-primary-400 dark:text-sand-500">
             <Calendar className="h-12 w-12 mx-auto mb-2 opacity-50" />
             <p>No occupancy data available for this period</p>
           </div>

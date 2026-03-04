@@ -64,19 +64,19 @@ export const RevenueProjectionChart: React.FC<RevenueProjectionChartProps> = ({
       const data = payload[0]?.payload;
       if (!data) return null;
       return (
-        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
-          <p className="text-sm font-medium text-gray-900 dark:text-white mb-2">
+        <div className="bg-white dark:bg-primary-800 p-4 rounded-lg shadow-lg border border-sand-200 dark:border-primary-700">
+          <p className="text-sm font-medium text-primary-900 dark:text-sand-50 mb-2">
             {formatDate(data.date || '')}
           </p>
           {data.actual_revenue != null && (
-            <p className="text-sm text-gray-600 dark:text-gray-300">
+            <p className="text-sm text-primary-500 dark:text-sand-300">
               Actual: <span className="font-semibold text-blue-600">{formatCurrency(data.actual_revenue)}</span>
             </p>
           )}
-          <p className="text-sm text-gray-600 dark:text-gray-300">
+          <p className="text-sm text-primary-500 dark:text-sand-300">
             Projected: <span className="font-semibold text-green-600">{formatCurrency(data.projected_revenue ?? 0)}</span>
           </p>
-          <p className="text-sm text-gray-600 dark:text-gray-300 text-xs mt-1">
+          <p className="text-sm text-primary-500 dark:text-sand-300 text-xs mt-1">
             Range: {formatCurrency(data.confidence_lower ?? 0)} - {formatCurrency(data.confidence_upper ?? 0)}
           </p>
         </div>
@@ -86,7 +86,7 @@ export const RevenueProjectionChart: React.FC<RevenueProjectionChartProps> = ({
   };
 
   return (
-    <div className={`bg-white dark:bg-gray-800 rounded-lg p-6 ${className}`}>
+    <div className={`bg-white dark:bg-primary-800/40 rounded-xl p-6 ${className}`}>
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center space-x-3">
@@ -94,8 +94,8 @@ export const RevenueProjectionChart: React.FC<RevenueProjectionChartProps> = ({
             <TrendingUp className="h-5 w-5 text-green-600 dark:text-green-400" />
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Revenue Projections</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            <h3 className="text-lg font-semibold text-primary-900 dark:text-sand-50">Revenue Projections</h3>
+            <p className="text-sm text-primary-500 dark:text-sand-400">
               Next {daysAhead} days forecast with confidence intervals
             </p>
           </div>
@@ -104,7 +104,7 @@ export const RevenueProjectionChart: React.FC<RevenueProjectionChartProps> = ({
         <button
           onClick={handleGenerateProjections}
           disabled={isPending}
-          className="flex items-center space-x-2 px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white rounded-lg transition-colors"
+          className="flex items-center space-x-2 px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-primary-300 text-white rounded-lg transition-colors"
         >
           <RefreshCw className={`h-4 w-4 ${isPending ? 'animate-spin' : ''}`} />
           <span>{isPending ? 'Generating...' : 'Refresh'}</span>
@@ -118,7 +118,7 @@ export const RevenueProjectionChart: React.FC<RevenueProjectionChartProps> = ({
         </div>
       ) : !projectionData || projectionData.length === 0 ? (
         <div className="flex items-center justify-center" style={{ height }}>
-          <div className="text-center text-gray-500 dark:text-gray-400">
+          <div className="text-center text-primary-400 dark:text-sand-500">
             <TrendingUp className="h-12 w-12 mx-auto mb-2 opacity-50" />
             <p>Click "Refresh" to generate projections</p>
           </div>
@@ -195,7 +195,7 @@ export const RevenueProjectionChart: React.FC<RevenueProjectionChartProps> = ({
 
       {/* Legend Info */}
       {projectionData.length > 0 && (
-        <div className="mt-4 flex items-center justify-center space-x-6 text-sm text-gray-600 dark:text-gray-400">
+        <div className="mt-4 flex items-center justify-center space-x-6 text-sm text-primary-500 dark:text-sand-400">
           <div className="flex items-center space-x-2">
             <div className="w-8 h-0.5 bg-blue-600"></div>
             <span>Actual</span>
