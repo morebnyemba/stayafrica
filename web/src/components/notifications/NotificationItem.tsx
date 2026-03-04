@@ -104,58 +104,62 @@ export const NotificationItem = ({ notification }: NotificationItemProps) => {
 
   const content = (
     <div
-      className={`flex items-start gap-3 p-4 border-b hover:bg-sand-50 dark:hover:bg-primary-800 transition-colors ${
-        !notification.is_read ? 'bg-blue-50' : ''
+      className={`flex items-start gap-3 p-3 sm:p-4 border-b border-sand-100 dark:border-primary-700/50 transition-colors ${
+        !notification.is_read
+          ? 'bg-secondary-50/50 dark:bg-secondary-900/10 hover:bg-secondary-50 dark:hover:bg-secondary-900/20'
+          : 'hover:bg-sand-50 dark:hover:bg-primary-800/50'
       }`}
     >
       <div className={`flex-shrink-0 p-2 rounded-full ${
-        !notification.is_read ? 'bg-blue-100 text-secondary-600' : 'bg-primary-100 dark:bg-primary-800 text-primary-500 dark:text-sand-400'
+        !notification.is_read
+          ? 'bg-secondary-100 dark:bg-secondary-900/30 text-secondary-600 dark:text-secondary-400'
+          : 'bg-sand-100 dark:bg-primary-800 text-primary-500 dark:text-sand-400'
       }`}>
         {getNotificationIcon(notification.notification_type)}
       </div>
       
       <div className="flex-1 min-w-0">
-        <div className="flex items-start justify-between gap-2">
-          <h4 className={`text-sm font-medium text-primary-900 dark:text-sand-50 ${
-            !notification.is_read ? 'font-semibold' : ''
+        <div className="flex items-start justify-between gap-1">
+          <h4 className={`text-sm leading-snug text-primary-900 dark:text-sand-50 ${
+            !notification.is_read ? 'font-semibold' : 'font-medium'
           }`}>
             {notification.title}
           </h4>
           
-          <div className="flex items-center gap-1 flex-shrink-0">
+          <div className="flex items-center gap-0.5 flex-shrink-0">
             {!notification.is_read && (
               <button
                 onClick={handleMarkAsRead}
-                className="p-1 text-secondary-600 hover:bg-blue-100 rounded"
+                className="p-1 text-secondary-600 dark:text-secondary-400 hover:bg-secondary-100 dark:hover:bg-secondary-900/30 rounded transition-colors"
                 aria-label="Mark as read"
                 title="Mark as read"
               >
-                <Check className="h-4 w-4" />
+                <Check className="h-3.5 w-3.5" />
               </button>
             )}
             
             <button
               onClick={handleDelete}
-              className="p-1 text-primary-300 dark:text-primary-500 hover:bg-primary-200 dark:hover:bg-primary-700 rounded"
+              className="p-1 text-primary-300 dark:text-primary-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
               aria-label="Delete notification"
               title="Delete"
             >
-              <X className="h-4 w-4" />
+              <X className="h-3.5 w-3.5" />
             </button>
           </div>
         </div>
         
-        <p className="text-sm text-primary-500 dark:text-sand-400 mt-1">
+        <p className="text-xs text-primary-500 dark:text-sand-400 mt-0.5 line-clamp-2">
           {notification.message}
         </p>
         
-        <p className="text-xs text-primary-300 dark:text-primary-500 mt-2">
+        <p className="text-xs text-primary-300 dark:text-primary-500 mt-1">
           {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
         </p>
       </div>
       
       {!notification.is_read && (
-        <div className="w-2 h-2 bg-secondary-600 rounded-full flex-shrink-0 mt-2" aria-label="Unread" />
+        <div className="w-2 h-2 bg-secondary-500 rounded-full flex-shrink-0 mt-2" aria-label="Unread" />
       )}
     </div>
   );

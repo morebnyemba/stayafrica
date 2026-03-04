@@ -79,7 +79,7 @@ export function LoginContent() {
   // Show 2FA verification screen when required
   if (showTwoFactor && twoFactorPending) {
     return (
-      <div className="min-h-screen flex items-center justify-center py-12 px-4 bg-gradient-to-br from-sand-100 via-secondary-50 to-primary-50 dark:from-primary-900 dark:via-primary-800 dark:to-primary-900">
+      <div className="min-h-screen flex items-center justify-center py-8 px-4 sm:py-12 bg-gradient-to-br from-sand-100 via-secondary-50 to-primary-50 dark:from-primary-900 dark:via-primary-800 dark:to-primary-900">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <Link href="/" className="inline-flex items-center justify-center">
@@ -122,24 +122,24 @@ export function LoginContent() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center py-12 px-4 bg-gradient-to-br from-sand-100 via-secondary-50 to-primary-50 dark:from-primary-900 dark:via-primary-800 dark:to-primary-900">
+    <div className="min-h-screen flex items-center justify-center py-8 px-4 sm:py-12 bg-gradient-to-br from-sand-100 via-secondary-50 to-primary-50 dark:from-primary-900 dark:via-primary-800 dark:to-primary-900">
       <div className="w-full max-w-md">
         {/* Logo/Branding */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-6 sm:mb-8">
           <Link href="/" className="inline-flex items-center justify-center">
-            <img src="/logo.png" alt="StayAfrica" className="h-28 w-auto" />
+            <img src="/logo.png" alt="StayAfrica" className="h-20 sm:h-28 w-auto" />
           </Link>
-          <p className="text-primary-600 dark:text-sand-300 mt-2">
+          <p className="text-primary-600 dark:text-sand-300 mt-2 text-sm sm:text-base">
             Welcome back to StayAfrica
           </p>
         </div>
 
-        <div className="bg-white dark:bg-primary-800 rounded-2xl shadow-elevated p-8 border border-primary-100 dark:border-primary-700">
-          <h1 className="text-3xl font-bold mb-6 text-center text-primary-900 dark:text-sand-50">
+        <div className="bg-white dark:bg-primary-800 rounded-2xl shadow-elevated p-6 sm:p-8 border border-primary-100 dark:border-primary-700">
+          <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-center text-primary-900 dark:text-sand-50">
             Sign In
           </h1>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-5">
             {/* Email Field */}
             <Input
               label="Email Address"
@@ -186,6 +186,7 @@ export function LoginContent() {
             {/* Submit Button */}
             <Button
               type="submit"
+              variant="secondary"
               fullWidth
               size="lg"
               isLoading={isLoading}
@@ -205,7 +206,7 @@ export function LoginContent() {
             <p className="text-sm text-primary-600 dark:text-sand-400 mb-3">New to StayAfrica?</p>
             <Link
               href={redirectUrl !== '/dashboard' ? `/register?redirect=${encodeURIComponent(redirectUrl)}` : '/register'}
-              className="inline-flex w-full items-center justify-center rounded-lg bg-secondary-500 px-6 py-3 text-lg font-medium text-neutral-900 hover:bg-secondary-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-secondary-500"
+              className="inline-flex w-full items-center justify-center rounded-lg border-2 border-secondary-500 dark:border-secondary-600 px-6 py-2.5 text-base font-semibold text-secondary-700 dark:text-secondary-400 hover:bg-secondary-50 dark:hover:bg-secondary-900/20 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-secondary-500"
             >
               Create an Account
             </Link>

@@ -126,8 +126,8 @@ export default function VerifyEmailPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sand-50 dark:from-primary-900 to-teal-100 flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white dark:bg-primary-800/40 rounded-2xl shadow-xl p-8">
+    <div className="min-h-screen bg-gradient-to-br from-sand-100 via-secondary-50 to-primary-50 dark:from-primary-900 dark:via-primary-800 dark:to-primary-900 flex items-center justify-center p-4">
+      <div className="max-w-md w-full bg-white dark:bg-primary-800 rounded-2xl shadow-elevated border border-primary-100 dark:border-primary-700 p-6 sm:p-8">
         {/* Back Button */}
         <Link
           href="/register"
@@ -174,7 +174,7 @@ export default function VerifyEmailPage() {
                   value={digit}
                   onChange={(e) => handleChange(index, e.target.value)}
                   onKeyDown={(e) => handleKeyDown(index, e)}
-                  className="w-14 h-16 text-center text-2xl font-bold border-2 border-primary-300 dark:border-primary-600 rounded-xl focus:ring-2 focus:ring-secondary-500 focus:border-transparent bg-sand-50 dark:bg-primary-900"
+                  className="w-11 h-14 sm:w-14 sm:h-16 text-center text-xl sm:text-2xl font-bold border-2 border-primary-300 dark:border-primary-600 rounded-xl focus:ring-2 focus:ring-secondary-500 focus:border-transparent bg-sand-50 dark:bg-primary-900 text-primary-900 dark:text-sand-50"
                   disabled={loading || resending}
                 />
               ))}

@@ -43,11 +43,17 @@ class NotificationPreferenceSerializer(serializers.ModelSerializer):
 
 class NotificationSerializer(serializers.ModelSerializer):
     """Serializer for notifications"""
+    is_read = serializers.SerializerMethodField()
+    message = serializers.CharField(source='body', read_only=True)
+    link = serializers.CharField(source='deep_link', read_only=True)
     
     class Meta:
         model = Notification
         fields = [
-            'id', 'notification_type', 'title', 'body', 'data',
-            'status', 'deep_link', 'sent_at', 'read_at', 'created_at'
+            'id', 'notification_type', 'title', 'body', 'message', 'data',
+            'status', 'is_read', 'link', 'deep_link', 'sent_at', 'read_at', 'created_at'
         ]
         read_only_fields = ['id', 'status', 'sent_at', 'read_at', 'created_at']
+    
+    def get_is_read(self, obj):
+        return obj.status == 'read'

@@ -94,11 +94,11 @@ export function NotificationsContent() {
         : notifications;
 
     return (
-        <div className="max-w-3xl mx-auto px-4 py-8">
+        <div className="max-w-3xl mx-auto px-4 py-6 sm:py-8">
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h1 className="text-2xl font-bold text-primary-900 dark:text-sand-100">Notifications</h1>
+                    <h1 className="text-xl sm:text-2xl font-bold text-primary-900 dark:text-sand-100">Notifications</h1>
                     {unreadCount > 0 && (
                         <p className="text-sm text-primary-500 dark:text-sand-400 mt-1">
                             {unreadCount} unread notification{unreadCount !== 1 ? 's' : ''}
@@ -108,10 +108,11 @@ export function NotificationsContent() {
                 {unreadCount > 0 && (
                     <button
                         onClick={markAllAsRead}
-                        className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-accent-600 hover:text-accent-700 hover:bg-accent-50 rounded-lg transition-colors dark:text-accent-400 dark:hover:bg-accent-900/30"
+                        className="flex items-center gap-2 px-3 sm:px-4 py-2 text-sm font-medium text-secondary-600 hover:text-secondary-700 hover:bg-secondary-50 rounded-lg transition-colors dark:text-secondary-400 dark:hover:bg-secondary-900/20"
                     >
                         <CheckCheck className="w-4 h-4" />
-                        Mark all read
+                        <span className="hidden sm:inline">Mark all read</span>
+                        <span className="sm:hidden">Read all</span>
                     </button>
                 )}
             </div>
@@ -140,10 +141,10 @@ export function NotificationsContent() {
 
             {/* Notifications List */}
             {loading ? (
-                <div className="space-y-4">
+                <div className="space-y-3">
                     {[...Array(5)].map((_, i) => (
-                        <div key={i} className="animate-pulse flex gap-4 p-4 rounded-xl bg-sand-100 dark:bg-primary-800/40">
-                            <div className="w-10 h-10 rounded-full bg-sand-200 dark:bg-primary-700" />
+                        <div key={i} className="animate-pulse flex gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl bg-white dark:bg-primary-800/40 border border-sand-200/50 dark:border-primary-700/50">
+                            <div className="w-10 h-10 rounded-full bg-sand-200 dark:bg-primary-700 shrink-0" />
                             <div className="flex-1 space-y-2">
                                 <div className="h-4 w-2/3 rounded bg-sand-200 dark:bg-primary-700" />
                                 <div className="h-3 w-1/2 rounded bg-sand-200 dark:bg-primary-700" />
@@ -153,7 +154,9 @@ export function NotificationsContent() {
                 </div>
             ) : filteredNotifications.length === 0 ? (
                 <div className="text-center py-16">
-                    <BellOff className="w-12 h-12 mx-auto text-sand-300 dark:text-primary-600 mb-4" />
+                    <div className="w-16 h-16 rounded-full bg-sand-100 dark:bg-primary-800 flex items-center justify-center mx-auto mb-4">
+                        <BellOff className="w-8 h-8 text-sand-400 dark:text-primary-500" />
+                    </div>
                     <h3 className="text-lg font-medium text-primary-700 dark:text-sand-300">
                         {filter === 'unread' ? 'No unread notifications' : 'No notifications yet'}
                     </h3>
@@ -167,15 +170,15 @@ export function NotificationsContent() {
                         <button
                             key={notification.id}
                             onClick={() => !notification.is_read && markAsRead(notification.id)}
-                            className={`w-full text-left flex gap-4 p-4 rounded-xl transition-all duration-200 ${notification.is_read
+                            className={`w-full text-left flex gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl transition-all duration-200 ${notification.is_read
                                 ? 'bg-white dark:bg-primary-800/30 hover:bg-sand-50 dark:hover:bg-primary-800/50'
-                                : 'bg-accent-50/50 dark:bg-accent-900/20 hover:bg-accent-50 dark:hover:bg-accent-900/30 border-l-4 border-accent-500'
+                                : 'bg-secondary-50/50 dark:bg-secondary-900/10 hover:bg-secondary-50 dark:hover:bg-secondary-900/20 border-l-4 border-secondary-500'
                                 }`}
                         >
                             {/* Icon */}
                             <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${notification.is_read
                                 ? 'bg-sand-200 dark:bg-primary-700 text-primary-500 dark:text-sand-400'
-                                : 'bg-accent-100 dark:bg-accent-900/40 text-accent-600 dark:text-accent-400'
+                                : 'bg-secondary-100 dark:bg-secondary-900/30 text-secondary-600 dark:text-secondary-400'
                                 }`}>
                                 {getNotificationIcon(notification.notification_type)}
                             </div>
@@ -199,7 +202,7 @@ export function NotificationsContent() {
 
                             {/* Read indicator */}
                             {!notification.is_read && (
-                                <div className="flex-shrink-0 w-2.5 h-2.5 rounded-full bg-accent-500 mt-2" />
+                                <div className="flex-shrink-0 w-2.5 h-2.5 rounded-full bg-secondary-500 mt-2" />
                             )}
                         </button>
                     ))}

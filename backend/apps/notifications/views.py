@@ -81,8 +81,11 @@ class NotificationPreferenceViewSet(viewsets.ViewSet):
         return Response(serializer.data)
 
 
-class NotificationViewSet(viewsets.ReadOnlyModelViewSet):
-    """View user notifications"""
+from rest_framework.mixins import DestroyModelMixin
+
+
+class NotificationViewSet(DestroyModelMixin, viewsets.ReadOnlyModelViewSet):
+    """View and manage user notifications"""
     serializer_class = NotificationSerializer
     permission_classes = [IsAuthenticated]
     
@@ -115,3 +118,9 @@ class NotificationViewSet(viewsets.ReadOnlyModelViewSet):
         ).update(status='read')
         
         return Response({'marked_read': updated})
+    
+    @action(detail=False, methods=['post'])
+    def clear_all(self, request):
+        """Delete all notifications for the user"""
+        count, _ = Notification.objects.filter(user=request.user).delete()
+        return Response({'deleted': count})
