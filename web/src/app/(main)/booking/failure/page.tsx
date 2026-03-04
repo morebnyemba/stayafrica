@@ -3,16 +3,18 @@
 import { useRouter, useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 const ProtectedRoute = dynamic(() => import('@/components/auth/protected-route').then(m => m.ProtectedRoute), { ssr: false });
-import { XCircle, Home, RefreshCcw, AlertCircle } from 'lucide-react';
+import {
+  XCircle, Home, RefreshCcw, AlertTriangle, CreditCard,
+  Wifi, ShieldAlert, Headphones, ArrowRight,
+} from 'lucide-react';
 import Link from 'next/link';
-import { Button } from '@/components/ui/Button';
 
 export default function BookingFailurePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  
+
   const bookingId = searchParams.get('bookingId');
-  const error = searchParams.get('error') || 'Payment failed';
+  const error = searchParams.get('error') || 'Payment could not be completed';
   const provider = searchParams.get('provider');
 
   const handleRetry = () => {
@@ -23,42 +25,42 @@ export default function BookingFailurePage() {
     }
   };
 
+  const reasons = [
+    { icon: CreditCard, label: 'Insufficient funds or expired card' },
+    { icon: ShieldAlert, label: 'Transaction declined by your bank' },
+    { icon: Wifi, label: 'Network or connectivity issue' },
+    { icon: AlertTriangle, label: 'Daily transaction limit exceeded' },
+  ];
+
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-sand-100 dark:bg-primary-900 flex items-center justify-center py-12 px-4">
-        <div className="max-w-2xl w-full">
-          {/* Failure icon */}
+      <div className="min-h-screen bg-sand-100 dark:bg-primary-900 py-12 px-4">
+        <div className="max-w-lg mx-auto">
+
+          {/* Error header */}
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-red-100 dark:bg-red-900/30 rounded-full mb-6">
+            <div className="w-20 h-20 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-5">
               <XCircle className="w-12 h-12 text-red-600 dark:text-red-400" />
             </div>
-            <h1 className="text-3xl md:text-4xl font-bold text-primary-900 dark:text-sand-50 mb-3">
-              Payment Failed
+            <h1 className="text-3xl font-bold text-primary-900 dark:text-sand-50 mb-2">
+              Payment didn&apos;t go through
             </h1>
-            <p className="text-lg text-primary-600 dark:text-sand-300">
-              We couldn't process your payment
+            <p className="text-primary-600 dark:text-sand-300">
+              Don&apos;t worry — your booking is still reserved. You can try again.
             </p>
           </div>
 
-          {/* Error details card */}
-          <div className="card p-6 md:p-8 mb-6 border-l-4 border-red-500">
-            <div className="flex items-start gap-4">
-              <AlertCircle className="w-6 h-6 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
-              <div className="flex-1">
-                <h2 className="text-lg font-semibold text-primary-900 dark:text-sand-50 mb-2">
-                  What went wrong?
-                </h2>
-                <p className="text-primary-700 dark:text-sand-200 mb-4">
-                  {error}
-                </p>
-                {bookingId && (
-                  <div className="text-sm text-primary-600 dark:text-sand-400">
-                    Booking Reference: <span className="font-mono font-medium">{bookingId}</span>
-                  </div>
-                )}
-                {provider && (
-                  <div className="text-sm text-primary-600 dark:text-sand-400">
-                    Payment Method: <span className="font-medium capitalize">{provider.replace('_', ' ')}</span>
+          {/* Error detail */}
+          <div className="card p-5 mb-5 border-l-4 border-red-400 dark:border-red-500">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="w-5 h-5 text-red-500 dark:text-red-400 mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="text-sm font-medium text-primary-900 dark:text-sand-50 mb-1">Error details</p>
+                <p className="text-sm text-primary-700 dark:text-sand-200">{error}</p>
+                {(bookingId || provider) && (
+                  <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-xs text-primary-500 dark:text-sand-400">
+                    {bookingId && <span>Ref: <span className="font-mono">{bookingId}</span></span>}
+                    {provider && <span>Via: <span className="capitalize">{provider.replace(/_/g, ' ')}</span></span>}
                   </div>
                 )}
               </div>
@@ -66,98 +68,71 @@ export default function BookingFailurePage() {
           </div>
 
           {/* Common reasons */}
-          <div className="card p-6 md:p-8 mb-6">
-            <h2 className="text-xl font-semibold text-primary-900 dark:text-sand-50 mb-4">
-              Common Reasons for Payment Failure
+          <div className="card p-5 mb-5">
+            <h2 className="text-sm font-semibold text-primary-900 dark:text-sand-50 uppercase tracking-wider mb-3">
+              This can happen when
             </h2>
-            <ul className="space-y-3 text-primary-700 dark:text-sand-200">
-              <li className="flex items-start gap-3">
-                <div className="w-2 h-2 bg-secondary-500 rounded-full mt-2 flex-shrink-0"></div>
-                <span>Insufficient funds in your account</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <div className="w-2 h-2 bg-secondary-500 rounded-full mt-2 flex-shrink-0"></div>
-                <span>Incorrect card details or expired card</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <div className="w-2 h-2 bg-secondary-500 rounded-full mt-2 flex-shrink-0"></div>
-                <span>Transaction declined by your bank</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <div className="w-2 h-2 bg-secondary-500 rounded-full mt-2 flex-shrink-0"></div>
-                <span>Network connectivity issues</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <div className="w-2 h-2 bg-secondary-500 rounded-full mt-2 flex-shrink-0"></div>
-                <span>Daily transaction limit exceeded</span>
-              </li>
-            </ul>
+            <div className="space-y-2.5">
+              {reasons.map((r, i) => (
+                <div key={i} className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-sand-50 dark:bg-primary-800 flex items-center justify-center flex-shrink-0">
+                    <r.icon className="w-4 h-4 text-primary-500 dark:text-sand-400" />
+                  </div>
+                  <span className="text-sm text-primary-700 dark:text-sand-200">{r.label}</span>
+                </div>
+              ))}
+            </div>
           </div>
 
-          {/* Next steps */}
-          <div className="card p-6 md:p-8 mb-6 bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800">
-            <h2 className="text-xl font-semibold text-primary-900 dark:text-sand-50 mb-4">
-              What You Can Do
+          {/* What to do */}
+          <div className="card p-5 mb-6">
+            <h2 className="text-sm font-semibold text-primary-900 dark:text-sand-50 uppercase tracking-wider mb-3">
+              What you can do
             </h2>
-            <ul className="space-y-3 text-primary-700 dark:text-sand-200">
-              <li className="flex items-start gap-3">
-                <div className="w-6 h-6 bg-amber-100 dark:bg-amber-800 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-xs font-bold text-amber-700 dark:text-amber-300">1</span>
-                </div>
-                <span>Check your card details and account balance</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <div className="w-6 h-6 bg-amber-100 dark:bg-amber-800 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-xs font-bold text-amber-700 dark:text-amber-300">2</span>
-                </div>
-                <span>Contact your bank to ensure the transaction is not blocked</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <div className="w-6 h-6 bg-amber-100 dark:bg-amber-800 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-xs font-bold text-amber-700 dark:text-amber-300">3</span>
-                </div>
-                <span>Try using a different payment method</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <div className="w-6 h-6 bg-amber-100 dark:bg-amber-800 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-xs font-bold text-amber-700 dark:text-amber-300">4</span>
-                </div>
-                <span>Contact our support team if the issue persists</span>
-              </li>
-            </ul>
+            <ol className="space-y-2">
+              {[
+                'Verify your account balance or card details',
+                'Try a different payment method',
+                'Contact your bank to allow the transaction',
+                'Reach out to our support team if issues persist',
+              ].map((step, i) => (
+                <li key={i} className="flex items-start gap-2.5">
+                  <span className="w-5 h-5 rounded-full bg-secondary-100 dark:bg-secondary-900/40 flex items-center justify-center flex-shrink-0 mt-0.5 text-[11px] font-bold text-secondary-700 dark:text-secondary-400">
+                    {i + 1}
+                  </span>
+                  <span className="text-sm text-primary-700 dark:text-sand-200">{step}</span>
+                </li>
+              ))}
+            </ol>
           </div>
 
-          {/* Action buttons */}
-          <div className="grid md:grid-cols-2 gap-4">
-            <Button 
-              onClick={handleRetry}
-              variant="primary"
-              size="lg"
-              className="flex items-center justify-center gap-2"
-            >
-              <RefreshCcw className="w-5 h-5" />
-              Try Again
-            </Button>
-            <Link href="/">
-              <Button
-                variant="secondary"
-                size="lg"
-                className="flex items-center justify-center gap-2"
-              >
-                <Home className="w-5 h-5" />
-                Back to Home
-              </Button>
-            </Link>
-          </div>
+          {/* Primary CTA */}
+          <button
+            onClick={handleRetry}
+            className="w-full flex items-center justify-center gap-2 bg-secondary-600 hover:bg-secondary-700 dark:bg-secondary-700 dark:hover:bg-secondary-600 text-white font-semibold py-3.5 rounded-lg transition mb-3"
+          >
+            <RefreshCcw className="w-5 h-5" />
+            {bookingId ? 'Try a different payment method' : 'Try again'}
+          </button>
 
-          {/* Support notice */}
-          <div className="mt-6 text-center">
-            <p className="text-sm text-primary-600 dark:text-sand-400">
-              Need help?{' '}
-              <Link href="/contact" className="text-secondary-600 dark:text-secondary-400 hover:underline font-medium">
-                Contact Support
+          {/* Secondary CTA */}
+          <Link
+            href="/"
+            className="w-full flex items-center justify-center gap-2 border border-primary-300 dark:border-primary-600 text-primary-700 dark:text-sand-200 font-semibold py-3 rounded-lg hover:bg-sand-50 dark:hover:bg-primary-800 transition"
+          >
+            <Home className="w-5 h-5" />
+            Back to home
+          </Link>
+
+          {/* Support footer */}
+          <div className="mt-8 text-center">
+            <div className="inline-flex items-center gap-2 text-sm text-primary-500 dark:text-sand-400">
+              <Headphones className="w-4 h-4" />
+              Need help?
+              <Link href="/contact" className="text-secondary-600 dark:text-secondary-400 hover:underline font-medium inline-flex items-center gap-0.5">
+                Contact support <ArrowRight className="w-3.5 h-3.5" />
               </Link>
-            </p>
+            </div>
           </div>
         </div>
       </div>
