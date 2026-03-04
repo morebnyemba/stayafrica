@@ -343,7 +343,7 @@ export function HostBookingsContent() {
                             </div>
 
                             {/* Guest + Dates row */}
-                            <div className="flex flex-wrap items-center gap-4 text-sm mb-3">
+                            <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-sm mb-3">
                               {/* Guest avatar */}
                               <div className="flex items-center gap-2">
                                 <div className="w-7 h-7 rounded-full bg-primary-200 dark:bg-primary-700 flex items-center justify-center text-xs font-bold text-primary-600 dark:text-sand-300">
@@ -353,14 +353,14 @@ export function HostBookingsContent() {
                                   {booking.guest?.first_name} {booking.guest?.last_name}
                                 </span>
                               </div>
-                              <span className="text-primary-300 dark:text-primary-600">|</span>
-                              <span className="text-primary-600 dark:text-sand-300">
+                              <span className="hidden sm:inline text-primary-300 dark:text-primary-600">|</span>
+                              <span className="text-primary-600 dark:text-sand-300 text-xs sm:text-sm">
                                 {formatDate(booking.check_in)} → {formatDate(booking.check_out)}
                               </span>
                             </div>
 
                             {/* Bottom row: ref + actions */}
-                            <div className="flex items-center justify-between mt-auto pt-3 border-t border-primary-100 dark:border-primary-700/50">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-auto pt-3 border-t border-primary-100 dark:border-primary-700/50">
                               <div className="flex items-center gap-3 text-xs text-primary-500 dark:text-sand-400">
                                 <span className="font-mono bg-primary-50 dark:bg-primary-800 px-2 py-0.5 rounded">
                                   {booking.booking_ref}

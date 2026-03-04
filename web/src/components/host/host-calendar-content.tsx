@@ -135,12 +135,12 @@ export function HostCalendarContent() {
             </div>
 
             {loading ? (
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div className="lg:col-span-2 card p-6 animate-pulse">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+                    <div className="lg:col-span-2 card p-4 sm:p-6 animate-pulse">
                         <div className="h-8 w-48 bg-primary-200 dark:bg-primary-700 rounded mx-auto mb-6" />
                         <div className="grid grid-cols-7 gap-1">
                             {Array.from({ length: 35 }).map((_, i) => (
-                                <div key={i} className="h-14 bg-primary-100 dark:bg-primary-700/50 rounded-lg" />
+                                <div key={i} className="h-10 sm:h-14 bg-primary-100 dark:bg-primary-700/50 rounded-lg" />
                             ))}
                         </div>
                     </div>
@@ -153,18 +153,18 @@ export function HostCalendarContent() {
                     </div>
                 </div>
             ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
                 {/* Calendar Grid */}
-                <div className="lg:col-span-2 card p-6">
+                <div className="lg:col-span-2 card p-4 sm:p-6">
                     {/* Month Navigation */}
-                    <div className="flex items-center justify-between mb-6">
-                        <button onClick={() => navigateMonth(-1)} className="p-2 hover:bg-sand-100 dark:hover:bg-primary-700 rounded-lg transition-colors">
+                    <div className="flex items-center justify-between mb-4 sm:mb-6">
+                        <button onClick={() => navigateMonth(-1)} className="p-2.5 hover:bg-sand-100 dark:hover:bg-primary-700 rounded-lg transition-colors">
                             <ChevronLeft className="w-5 h-5 text-primary-600 dark:text-sand-300" />
                         </button>
-                        <h2 className="text-lg font-semibold text-primary-900 dark:text-sand-100">
+                        <h2 className="text-base sm:text-lg font-semibold text-primary-900 dark:text-sand-100">
                             {MONTHS[month]} {year}
                         </h2>
-                        <button onClick={() => navigateMonth(1)} className="p-2 hover:bg-sand-100 dark:hover:bg-primary-700 rounded-lg transition-colors">
+                        <button onClick={() => navigateMonth(1)} className="p-2.5 hover:bg-sand-100 dark:hover:bg-primary-700 rounded-lg transition-colors">
                             <ChevronRight className="w-5 h-5 text-primary-600 dark:text-sand-300" />
                         </button>
                     </div>
@@ -182,7 +182,7 @@ export function HostCalendarContent() {
                     <div className="grid grid-cols-7 gap-1">
                         {/* Empty cells for days before the 1st */}
                         {Array.from({ length: firstDay }).map((_, i) => (
-                            <div key={`empty-${i}`} className="h-14" />
+                            <div key={`empty-${i}`} className="h-10 sm:h-14" />
                         ))}
                         {/* Actual days */}
                         {Array.from({ length: daysInMonth }).map((_, i) => {
@@ -195,7 +195,7 @@ export function HostCalendarContent() {
                                 <button
                                     key={day}
                                     onClick={() => setSelectedDay(day)}
-                                    className={`h-14 rounded-lg flex flex-col items-center justify-start pt-1 transition-all relative ${isSelected
+                                    className={`h-10 sm:h-14 rounded-lg flex flex-col items-center justify-start pt-1 transition-all relative ${isSelected
                                         ? 'bg-accent-100 dark:bg-accent-900/30 ring-2 ring-accent-500'
                                         : isToday
                                             ? 'bg-accent-50 dark:bg-accent-900/10'
@@ -243,7 +243,7 @@ export function HostCalendarContent() {
                 </div>
 
                 {/* Selected Day Details */}
-                <div className="card p-6">
+                <div className="card p-4 sm:p-6">
                     <h3 className="text-lg font-semibold text-primary-900 dark:text-sand-50 mb-4">
                         {selectedDay
                             ? `${MONTHS[month]} ${selectedDay}, ${year}`

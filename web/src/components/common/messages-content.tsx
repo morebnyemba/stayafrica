@@ -148,10 +148,10 @@ export function MessagesContent() {
 
   return (
     <ProtectedRoute>
-      <div className="h-screen bg-sand-100 dark:bg-primary-900 flex flex-col">
+      <div className="h-[100dvh] bg-sand-100 dark:bg-primary-900 flex flex-col">
         <div className="flex-1 flex overflow-hidden">
           {/* Conversations List */}
-          <div className={`${selectedConversation ? 'hidden md:flex' : 'flex'} w-full md:w-96 bg-white dark:bg-primary-800 border-r border-primary-200 dark:border-primary-700 flex-col`}>
+          <div className={`${selectedConversation ? 'hidden md:flex' : 'flex'} w-full md:w-80 lg:w-96 bg-white dark:bg-primary-800 border-r border-primary-200 dark:border-primary-700 flex-col`}>
             {/* Header */}
             <div className="p-4 border-b border-primary-200 dark:border-primary-700">
               <h1 className="text-2xl font-bold text-primary-900 dark:text-sand-50 mb-3">Messages</h1>
@@ -329,7 +329,7 @@ export function MessagesContent() {
                               )}
 
                               {/* Message Content */}
-                              <div className={`flex flex-col max-w-md ${isOwnMessage ? 'items-end' : 'items-start'}`}>
+                              <div className={`flex flex-col max-w-[75%] sm:max-w-md ${isOwnMessage ? 'items-end' : 'items-start'}`}>
                                 {/* Sender name - shown when conversation starts or user changes */}
                                 {showSenderInfo && (
                                   <span className={`text-xs font-semibold mb-1 ${

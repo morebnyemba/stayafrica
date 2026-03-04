@@ -98,14 +98,14 @@ export const HostTaxReport = () => {
 
   return (
     <div className="card">
-      <div className="p-6 border-b border-primary-200 dark:border-primary-700">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold text-primary-900 dark:text-sand-50">Tax Report</h2>
+      <div className="p-4 sm:p-6 border-b border-primary-200 dark:border-primary-700">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+          <h2 className="text-lg sm:text-xl font-semibold text-primary-900 dark:text-sand-50">Tax Report</h2>
           
           {report && (
             <button
               onClick={exportToCSV}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-secondary-600 text-white rounded-lg hover:bg-secondary-700 transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2.5 bg-secondary-600 text-white rounded-lg hover:bg-secondary-700 transition-colors text-sm"
             >
               <Download className="h-4 w-4" />
               <span>Export CSV</span>
@@ -142,7 +142,7 @@ export const HostTaxReport = () => {
         </div>
       </div>
 
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         {isLoading ? (
           <div className="animate-pulse space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

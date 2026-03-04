@@ -76,8 +76,8 @@ export function HostReviews() {
             <div className="h-5 w-72 bg-primary-200 dark:bg-primary-700 rounded animate-pulse" />
           </div>
           {/* Stats skeleton */}
-          <div className="card p-6 mb-6 animate-pulse">
-            <div className="flex items-start gap-8">
+          <div className="card p-4 sm:p-6 mb-6 animate-pulse">
+            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 sm:gap-8">
               <div className="text-center">
                 <div className="h-14 w-16 bg-primary-200 dark:bg-primary-700 rounded mx-auto mb-2" />
                 <div className="flex gap-1 mb-2 justify-center">
@@ -127,8 +127,8 @@ export function HostReviews() {
         </div>
 
         {/* Stats Card */}
-        <div className="card p-6 mb-6">
-          <div className="flex items-start gap-8">
+        <div className="card p-4 sm:p-6 mb-6">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 sm:gap-8">
             {/* Average Rating */}
             <div className="text-center">
               <div className="text-5xl font-bold text-primary-900 dark:text-sand-50 mb-2">
@@ -171,12 +171,12 @@ export function HostReviews() {
         </div>
 
         {/* Filters */}
-        <div className="flex gap-4 mb-6">
+        <div className="flex flex-col sm:flex-row gap-3 mb-6">
           <div className="flex-1">
             <select
               value={selectedProperty}
               onChange={(e) => setSelectedProperty(e.target.value)}
-              className="w-full px-4 py-3 bg-white dark:bg-primary-800/40 border border-primary-300 dark:border-primary-600 rounded-xl focus:ring-2 focus:ring-secondary-500 focus:border-transparent"
+              className="w-full px-4 py-3 bg-white dark:bg-primary-800/40 border border-primary-300 dark:border-primary-600 rounded-xl focus:ring-2 focus:ring-secondary-500 focus:border-transparent text-sm"
             >
               <option value="all">All Properties</option>
               {properties.map((property: any) => (
@@ -190,7 +190,7 @@ export function HostReviews() {
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as 'recent' | 'rating')}
-            className="px-4 py-3 bg-white dark:bg-primary-800/40 border border-primary-300 dark:border-primary-600 rounded-xl focus:ring-2 focus:ring-secondary-500 focus:border-transparent"
+            className="px-4 py-3 bg-white dark:bg-primary-800/40 border border-primary-300 dark:border-primary-600 rounded-xl focus:ring-2 focus:ring-secondary-500 focus:border-transparent text-sm"
           >
             <option value="recent">Most Recent</option>
             <option value="rating">Highest Rating</option>
@@ -213,11 +213,11 @@ export function HostReviews() {
             reviews.map((review) => (
               <div
                 key={review.id}
-                className="card p-6 hover:shadow-md transition-shadow"
+                className="card p-4 sm:p-6 hover:shadow-md transition-shadow"
               >
                 {/* Review Header */}
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center gap-4">
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
+                  <div className="flex items-center gap-3 sm:gap-4">
                     <div className="w-12 h-12 bg-secondary-100 dark:bg-secondary-900/30 rounded-full flex items-center justify-center">
                       <span className="text-lg font-semibold text-secondary-700 dark:text-secondary-300">
                         {review.guest.first_name[0]}

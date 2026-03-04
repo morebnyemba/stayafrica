@@ -165,8 +165,8 @@ export function BookingContent() {
         </div>
 
         {/* Status Filters */}
-        <div className="card p-6 mb-8">
-          <div className="flex flex-wrap gap-4">
+        <div className="card p-4 sm:p-6 mb-6 sm:mb-8">
+          <div className="flex flex-wrap gap-2 sm:gap-4">
             <Button
               onClick={() => setStatusFilter('')}
               variant={statusFilter === '' ? 'primary' : 'outline'}
@@ -270,7 +270,7 @@ export function BookingContent() {
                     </div>
 
                     {/* Card body */}
-                    <div className="flex-1 p-5">
+                    <div className="flex-1 p-4 sm:p-5">
                       <div className="flex flex-col md:flex-row md:items-start justify-between mb-3">
                         <div className="flex-1 mb-3 md:mb-0">
                           <div className="flex items-center gap-2 mb-1">
@@ -287,7 +287,7 @@ export function BookingContent() {
                           </div>
                         </div>
                         <div className="text-right">
-                          <div className="text-2xl font-bold text-primary-900 dark:text-sand-50">
+                          <div className="text-xl sm:text-2xl font-bold text-primary-900 dark:text-sand-50">
                             ${booking.grand_total}
                           </div>
                           <div className="text-xs text-primary-500 dark:text-sand-400">

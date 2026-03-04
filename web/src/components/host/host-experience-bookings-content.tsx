@@ -234,7 +234,7 @@ export function HostExperienceBookingsContent() {
                         {booking.experience_title || `Experience #${booking.experience}`}
                       </h3>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm text-primary-600 dark:text-sand-300">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-3 text-sm text-primary-600 dark:text-sand-300">
                         <div className="flex items-center gap-2">
                           <User className="w-4 h-4 text-primary-400" />
                           <span>{booking.guest_name || 'Guest'}</span>
@@ -249,7 +249,7 @@ export function HostExperienceBookingsContent() {
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2 text-sm font-medium">
+                      <div className="flex flex-wrap items-center gap-2 text-sm font-medium">
                         <DollarSign className="w-4 h-4 text-green-500" />
                         <span className="text-primary-900 dark:text-sand-50">
                           {booking.currency || 'USD'} {booking.total_amount?.toFixed(2) || ((booking.price_per_person || 0) * (booking.num_participants || 1)).toFixed(2)}

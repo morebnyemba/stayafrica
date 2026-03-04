@@ -79,7 +79,7 @@ export function WalletDashboard() {
               </div>
             ) : (
               <>
-                <div className="text-4xl sm:text-5xl font-bold mb-2">
+                <div className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-2">
                   {wallet?.currency || 'USD'} {parseFloat(wallet?.balance || '0').toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </div>
                 <div className="text-primary-200 text-sm">
@@ -87,7 +87,7 @@ export function WalletDashboard() {
                 </div>
               </>
             )}
-            <div className="flex gap-3 mt-6">
+            <div className="flex flex-wrap gap-3 mt-6">
               <button
                 onClick={() => setShowWithdrawModal(true)}
                 disabled={!wallet || wallet?.status !== 'active' || parseFloat(wallet?.balance || '0') < 10}
@@ -108,7 +108,7 @@ export function WalletDashboard() {
 
           {/* Tabs */}
           <div className="mb-6">
-            <nav className="inline-flex rounded-xl bg-white dark:bg-primary-800 p-1.5 border border-primary-200 dark:border-primary-700 overflow-x-auto">
+            <nav className="flex sm:inline-flex rounded-xl bg-white dark:bg-primary-800 p-1.5 border border-primary-200 dark:border-primary-700 overflow-x-auto">
               {[
                 { key: 'transactions' as const, label: 'Transactions', icon: ArrowDownLeft },
                 { key: 'withdrawals' as const, label: 'Withdrawals', icon: ArrowUpRight },

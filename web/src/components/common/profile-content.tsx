@@ -103,31 +103,31 @@ export function ProfileContent() {
             <div className="lg:col-span-3">
               {/* Profile Tab */}
               {activeTab === 'profile' && (
-                <div className="card p-8">
+                <div className="card p-4 sm:p-8">
                   <h2 className="text-2xl font-bold text-primary-900 dark:text-sand-50 mb-6">
                     Profile Information
                   </h2>
 
                   {/* Profile Picture */}
-                  <div className="flex items-center gap-6 mb-8 pb-8 border-b border-primary-200 dark:border-primary-700">
-                    <div className="relative">
+                  <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 mb-8 pb-8 border-b border-primary-200 dark:border-primary-700">
+                    <div className="relative flex-shrink-0">
                       {user?.profile_picture ? (
                         <img
                           src={user.profile_picture}
                           alt={user.first_name}
-                          className="w-24 h-24 rounded-full object-cover"
+                          className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover"
                         />
                       ) : (
-                        <div className="w-24 h-24 rounded-full bg-secondary-500 flex items-center justify-center">
-                          <User className="w-12 h-12 text-primary-900" />
+                        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-secondary-500 flex items-center justify-center">
+                          <User className="w-10 h-10 sm:w-12 sm:h-12 text-primary-900" />
                         </div>
                       )}
                       <button className="absolute bottom-0 right-0 p-2 bg-white dark:bg-primary-800 rounded-full border-2 border-primary-200 dark:border-primary-700 hover:bg-primary-50 dark:hover:bg-primary-700 transition">
                         <Camera className="w-4 h-4 text-primary-900 dark:text-sand-100" />
                       </button>
                     </div>
-                    <div>
-                      <h3 className="text-xl font-semibold text-primary-900 dark:text-sand-50 mb-1">
+                    <div className="text-center sm:text-left">
+                      <h3 className="text-lg sm:text-xl font-semibold text-primary-900 dark:text-sand-50 mb-1">
                         {user?.first_name} {user?.last_name}
                       </h3>
                       <p className="text-primary-600 dark:text-sand-300 mb-2">
@@ -263,7 +263,7 @@ export function ProfileContent() {
 
               {/* Security Tab */}
               {activeTab === 'security' && (
-                <div className="card p-8">
+                <div className="card p-4 sm:p-8">
                   <h2 className="text-2xl font-bold text-primary-900 dark:text-sand-50 mb-6">
                     Security Settings
                   </h2>
@@ -295,7 +295,7 @@ export function ProfileContent() {
 
               {/* Payments Tab */}
               {activeTab === 'payments' && (
-                <div className="card p-8">
+                <div className="card p-4 sm:p-8">
                   <h2 className="text-2xl font-bold text-primary-900 dark:text-sand-50 mb-6">
                     Payment Methods
                   </h2>
@@ -316,7 +316,7 @@ export function ProfileContent() {
 
               {/* Notifications Tab */}
               {activeTab === 'notifications' && (
-                <div className="card p-8">
+                <div className="card p-4 sm:p-8">
                   <h2 className="text-2xl font-bold text-primary-900 dark:text-sand-50 mb-6">
                     Notification Preferences
                   </h2>
@@ -462,14 +462,14 @@ function PreferencesTab() {
 
   if (isLoading) {
     return (
-      <div className="card p-8 text-center">
+      <div className="card p-4 sm:p-8 text-center">
         <Loader2 className="w-6 h-6 animate-spin mx-auto text-secondary-500" />
       </div>
     );
   }
 
   return (
-    <div className="card p-8">
+    <div className="card p-4 sm:p-8">
       <h2 className="text-2xl font-bold text-primary-900 dark:text-sand-50 mb-6">
         Travel Preferences
       </h2>
@@ -501,13 +501,13 @@ function PreferencesTab() {
           <label className="block text-sm font-medium text-primary-700 dark:text-sand-300 mb-2">
             Price Range (per night)
           </label>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <input
               type="number"
               placeholder="Min"
               value={form.preferred_min_price}
               onChange={e => setForm(f => ({ ...f, preferred_min_price: e.target.value }))}
-              className="w-32 px-3 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-50"
+              className="w-24 sm:w-32 px-3 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-50"
             />
             <span className="text-primary-600 dark:text-sand-400">—</span>
             <input
@@ -515,7 +515,7 @@ function PreferencesTab() {
               placeholder="Max"
               value={form.preferred_max_price}
               onChange={e => setForm(f => ({ ...f, preferred_max_price: e.target.value }))}
-              className="w-32 px-3 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-50"
+              className="w-24 sm:w-32 px-3 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-50"
             />
           </div>
         </div>
@@ -531,7 +531,7 @@ function PreferencesTab() {
             max="20"
             value={form.usual_guest_count}
             onChange={e => setForm(f => ({ ...f, usual_guest_count: e.target.value }))}
-            className="w-32 px-3 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-50"
+            className="w-24 sm:w-32 px-3 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-50"
           />
         </div>
 
