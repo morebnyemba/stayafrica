@@ -85,13 +85,13 @@ export default function TwoFactorSetupModal({ isOpen, onClose, onSuccess }: TwoF
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={onClose} />
+        <div className="fixed inset-0 bg-primary-500 bg-opacity-75 dark:bg-primary-950/80 transition-opacity" onClick={onClose} />
         
-        <div className="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
+        <div className="relative transform overflow-hidden rounded-lg bg-white dark:bg-primary-800/40 px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
           <div className="absolute right-0 top-0 pr-4 pt-4">
             <button
               type="button"
-              className="rounded-md bg-white text-gray-400 hover:text-gray-500"
+              className="rounded-md bg-white dark:bg-primary-800/40 text-primary-300 dark:text-primary-500 hover:text-primary-400 dark:hover:text-sand-500"
               onClick={onClose}
             >
               <span className="sr-only">Close</span>
@@ -103,13 +103,13 @@ export default function TwoFactorSetupModal({ isOpen, onClose, onSuccess }: TwoF
 
           <div className="sm:flex sm:items-start">
             <div className="mt-3 text-center sm:mt-0 sm:text-left w-full">
-              <h3 className="text-lg font-semibold leading-6 text-gray-900 mb-4">
+              <h3 className="text-lg font-semibold leading-6 text-primary-900 dark:text-sand-50 mb-4">
                 {step === 'setup' ? 'Setup Two-Factor Authentication' : 'Verify 2FA Setup'}
               </h3>
 
               {step === 'setup' ? (
                 <div>
-                  <p className="text-sm text-gray-500 mb-4">
+                  <p className="text-sm text-primary-400 dark:text-sand-500 mb-4">
                     Two-factor authentication adds an extra layer of security to your account.
                     You'll need to enter a code from your authenticator app each time you log in.
                   </p>
@@ -124,7 +124,7 @@ export default function TwoFactorSetupModal({ isOpen, onClose, onSuccess }: TwoF
               ) : (
                 <div>
                   <div className="mb-6">
-                    <p className="text-sm text-gray-500 mb-4">
+                    <p className="text-sm text-primary-400 dark:text-sand-500 mb-4">
                       1. Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.)
                     </p>
                     {qrCode && (
@@ -132,17 +132,17 @@ export default function TwoFactorSetupModal({ isOpen, onClose, onSuccess }: TwoF
                         <img src={qrCode} alt="QR Code" className="w-64 h-64" />
                       </div>
                     )}
-                    <p className="text-xs text-gray-500 text-center mb-4">
-                      Or enter this code manually: <code className="bg-gray-100 px-2 py-1 rounded">{secret}</code>
+                    <p className="text-xs text-primary-400 dark:text-sand-500 text-center mb-4">
+                      Or enter this code manually: <code className="bg-primary-100 dark:bg-primary-800 px-2 py-1 rounded">{secret}</code>
                     </p>
                   </div>
 
                   <div className="mb-6">
-                    <p className="text-sm font-medium text-gray-700 mb-2">Backup Codes</p>
-                    <p className="text-xs text-gray-500 mb-2">
+                    <p className="text-sm font-medium text-primary-700 dark:text-sand-200 mb-2">Backup Codes</p>
+                    <p className="text-xs text-primary-400 dark:text-sand-500 mb-2">
                       Save these backup codes in a safe place. You can use them to access your account if you lose your phone.
                     </p>
-                    <div className="bg-gray-50 rounded-lg p-3 mb-2">
+                    <div className="bg-sand-50 dark:bg-primary-900 rounded-lg p-3 mb-2">
                       <div className="grid grid-cols-2 gap-2 text-xs font-mono">
                         {backupCodes.map((code, index) => (
                           <div key={index}>{code}</div>
@@ -158,7 +158,7 @@ export default function TwoFactorSetupModal({ isOpen, onClose, onSuccess }: TwoF
                   </div>
 
                   <form onSubmit={handleVerifyAndEnable}>
-                    <p className="text-sm text-gray-500 mb-2">
+                    <p className="text-sm text-primary-400 dark:text-sand-500 mb-2">
                       2. Enter the 6-digit code from your authenticator app to verify setup
                     </p>
                     <input
@@ -167,7 +167,7 @@ export default function TwoFactorSetupModal({ isOpen, onClose, onSuccess }: TwoF
                       value={verificationCode}
                       onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, ''))}
                       placeholder="000000"
-                      className="w-full rounded-md border border-gray-300 px-3 py-2 text-center text-2xl tracking-widest mb-4"
+                      className="w-full rounded-md border border-primary-300 dark:border-primary-600 px-3 py-2 text-center text-2xl tracking-widest mb-4"
                       required
                     />
                     <button

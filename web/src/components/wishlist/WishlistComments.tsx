@@ -42,7 +42,7 @@ export default function WishlistComments({
       {comments.length > 0 && (
         <div className="space-y-2 max-h-60 overflow-y-auto">
           {comments.map((comment) => (
-            <div key={comment.id} className="bg-gray-50 rounded-lg p-3">
+            <div key={comment.id} className="bg-sand-50 dark:bg-primary-900 rounded-lg p-3">
               <div className="flex items-start gap-3">
                 {comment.user.avatar && (
                   <img
@@ -53,14 +53,14 @@ export default function WishlistComments({
                 )}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="font-semibold text-sm text-gray-900">
+                    <span className="font-semibold text-sm text-primary-900 dark:text-sand-50">
                       {comment.user.name}
                     </span>
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-primary-400 dark:text-sand-500">
                       {new Date(comment.created_at).toLocaleDateString()}
                     </span>
                   </div>
-                  <p className="text-sm text-gray-700">{comment.text}</p>
+                  <p className="text-sm text-primary-700 dark:text-sand-200">{comment.text}</p>
                 </div>
               </div>
             </div>
@@ -76,7 +76,7 @@ export default function WishlistComments({
           onChange={(e) => setNewComment(e.target.value)}
           placeholder="Add a comment..."
           disabled={commentMutation.isPending}
-          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+          className="flex-1 px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-primary-100 dark:disabled:bg-primary-800 disabled:cursor-not-allowed"
         />
         <button
           type="submit"

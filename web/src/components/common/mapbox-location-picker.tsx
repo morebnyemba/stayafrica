@@ -185,7 +185,7 @@ export function MapboxLocationPicker({
 
   return (
     <div className={`space-y-4 ${className}`}>
-      <div className="relative bg-gray-100 dark:bg-primary-800 rounded-lg overflow-hidden border border-primary-300 dark:border-primary-600">
+      <div className="relative bg-primary-100 dark:bg-primary-800 rounded-lg overflow-hidden border border-primary-300 dark:border-primary-600">
         {loading && (
           <div className="absolute inset-0 flex items-center justify-center bg-white/80 dark:bg-primary-900/80 z-10">
             <div className="flex flex-col items-center gap-2">
@@ -227,7 +227,7 @@ export function MapboxLocationPicker({
       </div>
 
       <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-        <div className="flex-1 bg-gray-50 dark:bg-primary-800 rounded-lg p-3 text-xs sm:text-sm">
+        <div className="flex-1 bg-sand-50 dark:bg-primary-900 rounded-lg p-3 text-xs sm:text-sm">
           <p className="text-primary-600 dark:text-sand-400 font-medium">Coordinates</p>
           <p className="text-primary-900 dark:text-sand-50 font-mono">
             {coordinates.lat.toFixed(6)}, {coordinates.lng.toFixed(6)}

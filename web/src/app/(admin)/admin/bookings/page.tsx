@@ -57,7 +57,7 @@ export default function BookingsManagement() {
       completed: 'bg-green-100 text-green-800',
       cancelled: 'bg-red-100 text-red-800',
     };
-    return colors[status] || 'bg-gray-100 text-gray-800';
+    return colors[status] || 'bg-primary-100 dark:bg-primary-800 text-primary-800 dark:text-sand-100';
   };
 
   const toggleSelectBooking = (bookingId: string) => {
@@ -145,7 +145,7 @@ export default function BookingsManagement() {
       </div>
 
       {/* Filters and Search */}
-      <div className="bg-white rounded-lg shadow p-6 mb-6">
+      <div className="bg-white dark:bg-primary-800/40 rounded-lg shadow p-6 mb-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="md:col-span-2">
             <label className="block text-sm font-medium text-[#122F26] mb-2">
@@ -209,22 +209,22 @@ export default function BookingsManagement() {
                 <ChevronDown className="w-4 h-4" />
               </button>
               {showBulkActions && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
+                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-primary-800/40 rounded-lg shadow-lg border border-sand-200/50 dark:border-primary-700/50 z-10">
                   <button
                     onClick={() => handleBulkAction('confirm')}
-                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 first:rounded-t-lg"
+                    className="w-full text-left px-4 py-2 text-sm text-primary-700 dark:text-sand-200 hover:bg-primary-100 dark:hover:bg-primary-800 first:rounded-t-lg"
                   >
                     Confirm Bookings
                   </button>
                   <button
                     onClick={() => handleBulkAction('cancel')}
-                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    className="w-full text-left px-4 py-2 text-sm text-primary-700 dark:text-sand-200 hover:bg-primary-100 dark:hover:bg-primary-800"
                   >
                     Cancel Bookings
                   </button>
                   <button
                     onClick={() => handleBulkAction('complete')}
-                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 last:rounded-b-lg"
+                    className="w-full text-left px-4 py-2 text-sm text-primary-700 dark:text-sand-200 hover:bg-primary-100 dark:hover:bg-primary-800 last:rounded-b-lg"
                   >
                     Mark as Completed
                   </button>
@@ -237,23 +237,23 @@ export default function BookingsManagement() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white rounded-lg shadow p-4">
+        <div className="bg-white dark:bg-primary-800/40 rounded-lg shadow p-4">
           <p className="text-sm text-[#3A5C50]">Total Bookings</p>
           <p className="text-2xl font-bold text-[#122F26]">{totalCount}</p>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
+        <div className="bg-white dark:bg-primary-800/40 rounded-lg shadow p-4">
           <p className="text-sm text-[#3A5C50]">Confirmed</p>
           <p className="text-2xl font-bold text-blue-600">
             {bookings.filter(b => b.status === 'confirmed').length}
           </p>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
+        <div className="bg-white dark:bg-primary-800/40 rounded-lg shadow p-4">
           <p className="text-sm text-[#3A5C50]">Completed</p>
           <p className="text-2xl font-bold text-green-600">
             {bookings.filter(b => b.status === 'completed').length}
           </p>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
+        <div className="bg-white dark:bg-primary-800/40 rounded-lg shadow p-4">
           <p className="text-sm text-[#3A5C50]">Pending</p>
           <p className="text-2xl font-bold text-yellow-600">
             {bookings.filter(b => b.status === 'pending').length}
@@ -262,7 +262,7 @@ export default function BookingsManagement() {
       </div>
 
       {/* Bookings Table */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="bg-white dark:bg-primary-800/40 rounded-lg shadow overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#D9B168]"></div>
@@ -270,8 +270,8 @@ export default function BookingsManagement() {
         ) : (
           <>
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+              <table className="min-w-full divide-y divide-primary-200 dark:divide-primary-700">
+                <thead className="bg-sand-50 dark:bg-primary-900">
                   <tr>
                     <th className="px-6 py-3 text-left">
                       <input
@@ -284,7 +284,7 @@ export default function BookingsManagement() {
                           }
                         }}
                         checked={selectedBookings.length === bookings.length && bookings.length > 0}
-                        className="rounded border-gray-300"
+                        className="rounded border-primary-300 dark:border-primary-600"
                       />
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-[#3A5C50] uppercase tracking-wider">
@@ -310,15 +310,15 @@ export default function BookingsManagement() {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-white dark:bg-primary-800/40 divide-y divide-primary-200 dark:divide-primary-700">
                   {bookings.map((booking) => (
-                    <tr key={booking.id} className="hover:bg-gray-50">
+                    <tr key={booking.id} className="hover:bg-sand-50 dark:hover:bg-primary-800">
                       <td className="px-6 py-4">
                         <input
                           type="checkbox"
                           checked={selectedBookings.includes(booking.id)}
                           onChange={() => toggleSelectBooking(booking.id)}
-                          className="rounded border-gray-300"
+                          className="rounded border-primary-300 dark:border-primary-600"
                         />
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -396,7 +396,7 @@ export default function BookingsManagement() {
             </div>
 
             {/* Pagination */}
-            <div className="bg-gray-50 px-6 py-4 flex items-center justify-between border-t">
+            <div className="bg-sand-50 dark:bg-primary-900 px-6 py-4 flex items-center justify-between border-t">
               <div className="text-sm text-[#122F26]">
                 Showing {(page - 1) * ITEMS_PER_PAGE + 1} to {Math.min(page * ITEMS_PER_PAGE, totalCount)} of {totalCount} bookings
               </div>
@@ -404,14 +404,14 @@ export default function BookingsManagement() {
                 <button
                   onClick={() => setPage(p => Math.max(1, p - 1))}
                   disabled={page === 1}
-                  className="px-4 py-2 border border-[#3A5C50] rounded-lg text-sm font-medium text-[#122F26] hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 border border-[#3A5C50] rounded-lg text-sm font-medium text-[#122F26] hover:bg-sand-50 dark:hover:bg-primary-800 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Previous
                 </button>
                 <button
                   onClick={() => setPage(p => p + 1)}
                   disabled={page * ITEMS_PER_PAGE >= totalCount}
-                  className="px-4 py-2 border border-[#3A5C50] rounded-lg text-sm font-medium text-[#122F26] hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 border border-[#3A5C50] rounded-lg text-sm font-medium text-[#122F26] hover:bg-sand-50 dark:hover:bg-primary-800 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Next
                 </button>

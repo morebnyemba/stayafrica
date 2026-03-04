@@ -104,19 +104,19 @@ export const NotificationItem = ({ notification }: NotificationItemProps) => {
 
   const content = (
     <div
-      className={`flex items-start gap-3 p-4 border-b hover:bg-gray-50 transition-colors ${
+      className={`flex items-start gap-3 p-4 border-b hover:bg-sand-50 dark:hover:bg-primary-800 transition-colors ${
         !notification.is_read ? 'bg-blue-50' : ''
       }`}
     >
       <div className={`flex-shrink-0 p-2 rounded-full ${
-        !notification.is_read ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600'
+        !notification.is_read ? 'bg-blue-100 text-secondary-600' : 'bg-primary-100 dark:bg-primary-800 text-primary-500 dark:text-sand-400'
       }`}>
         {getNotificationIcon(notification.notification_type)}
       </div>
       
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-2">
-          <h4 className={`text-sm font-medium text-gray-900 ${
+          <h4 className={`text-sm font-medium text-primary-900 dark:text-sand-50 ${
             !notification.is_read ? 'font-semibold' : ''
           }`}>
             {notification.title}
@@ -126,7 +126,7 @@ export const NotificationItem = ({ notification }: NotificationItemProps) => {
             {!notification.is_read && (
               <button
                 onClick={handleMarkAsRead}
-                className="p-1 text-blue-600 hover:bg-blue-100 rounded"
+                className="p-1 text-secondary-600 hover:bg-blue-100 rounded"
                 aria-label="Mark as read"
                 title="Mark as read"
               >
@@ -136,7 +136,7 @@ export const NotificationItem = ({ notification }: NotificationItemProps) => {
             
             <button
               onClick={handleDelete}
-              className="p-1 text-gray-400 hover:bg-gray-200 rounded"
+              className="p-1 text-primary-300 dark:text-primary-500 hover:bg-primary-200 dark:hover:bg-primary-700 rounded"
               aria-label="Delete notification"
               title="Delete"
             >
@@ -145,17 +145,17 @@ export const NotificationItem = ({ notification }: NotificationItemProps) => {
           </div>
         </div>
         
-        <p className="text-sm text-gray-600 mt-1">
+        <p className="text-sm text-primary-500 dark:text-sand-400 mt-1">
           {notification.message}
         </p>
         
-        <p className="text-xs text-gray-400 mt-2">
+        <p className="text-xs text-primary-300 dark:text-primary-500 mt-2">
           {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
         </p>
       </div>
       
       {!notification.is_read && (
-        <div className="w-2 h-2 bg-blue-600 rounded-full flex-shrink-0 mt-2" aria-label="Unread" />
+        <div className="w-2 h-2 bg-secondary-600 rounded-full flex-shrink-0 mt-2" aria-label="Unread" />
       )}
     </div>
   );

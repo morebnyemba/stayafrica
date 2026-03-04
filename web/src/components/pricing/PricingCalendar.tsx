@@ -34,22 +34,22 @@ export default function PricingCalendar({ propertyId }: PricingCalendarProps) {
     const change = ((day.dynamic_price - day.base_price) / day.base_price) * 100;
     if (change > 5) return <TrendingUp className="w-3 h-3 text-green-600" />;
     if (change < -5) return <TrendingDown className="w-3 h-3 text-red-600" />;
-    return <Minus className="w-3 h-3 text-gray-400" />;
+    return <Minus className="w-3 h-3 text-primary-300 dark:text-primary-500" />;
   };
 
   const getPriceChangeColor = (day: PricingCalendarDay) => {
     const change = ((day.dynamic_price - day.base_price) / day.base_price) * 100;
     if (change > 5) return 'text-green-700 bg-green-50 border-green-200';
     if (change < -5) return 'text-red-700 bg-red-50 border-red-200';
-    return 'text-gray-700 bg-gray-50 border-gray-200';
+    return 'text-primary-700 dark:text-sand-200 bg-sand-50 dark:bg-primary-900 border-sand-200/50 dark:border-primary-700/50';
   };
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-lg shadow p-6">
+      <div className="bg-white dark:bg-primary-800/40 rounded-lg shadow p-6">
         <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-gray-200 rounded w-1/3"></div>
-          <div className="h-64 bg-gray-200 rounded"></div>
+          <div className="h-8 bg-primary-200 dark:bg-primary-700 rounded w-1/3"></div>
+          <div className="h-64 bg-primary-200 dark:bg-primary-700 rounded"></div>
         </div>
       </div>
     );
@@ -58,7 +58,7 @@ export default function PricingCalendar({ propertyId }: PricingCalendarProps) {
   if (!calendar) return null;
 
   return (
-    <div className="bg-white rounded-lg shadow p-6">
+    <div className="bg-white dark:bg-primary-800/40 rounded-lg shadow p-6">
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-xl font-semibold">
           {currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
@@ -66,13 +66,13 @@ export default function PricingCalendar({ propertyId }: PricingCalendarProps) {
         <div className="flex gap-2">
           <button
             onClick={() => navigateMonth('prev')}
-            className="p-2 hover:bg-gray-100 rounded-lg transition"
+            className="p-2 hover:bg-primary-100 dark:hover:bg-primary-800 rounded-lg transition"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
           <button
             onClick={() => navigateMonth('next')}
-            className="p-2 hover:bg-gray-100 rounded-lg transition"
+            className="p-2 hover:bg-primary-100 dark:hover:bg-primary-800 rounded-lg transition"
           >
             <ChevronRight className="w-5 h-5" />
           </button>
@@ -98,7 +98,7 @@ export default function PricingCalendar({ propertyId }: PricingCalendarProps) {
       {/* Calendar Grid */}
       <div className="grid grid-cols-7 gap-2">
         {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
-          <div key={day} className="text-center text-sm font-medium text-gray-600 py-2">
+          <div key={day} className="text-center text-sm font-medium text-primary-500 dark:text-sand-400 py-2">
             {day}
           </div>
         ))}
@@ -126,7 +126,7 @@ export default function PricingCalendar({ propertyId }: PricingCalendarProps) {
                 <>
                   <p className="text-lg font-bold">${day.dynamic_price}</p>
                   {day.base_price !== day.dynamic_price && (
-                    <p className="text-xs line-through text-gray-500">${day.base_price}</p>
+                    <p className="text-xs line-through text-primary-400 dark:text-sand-500">${day.base_price}</p>
                   )}
                   {day.applied_rules.length > 0 && (
                     <div className="mt-1">
@@ -142,7 +142,7 @@ export default function PricingCalendar({ propertyId }: PricingCalendarProps) {
                   )}
                 </>
               ) : (
-                <p className="text-sm text-gray-500">Unavailable</p>
+                <p className="text-sm text-primary-400 dark:text-sand-500">Unavailable</p>
               )}
             </div>
           );
@@ -153,15 +153,15 @@ export default function PricingCalendar({ propertyId }: PricingCalendarProps) {
       <div className="mt-6 flex flex-wrap gap-4 text-sm">
         <div className="flex items-center gap-2">
           <TrendingUp className="w-4 h-4 text-green-600" />
-          <span className="text-gray-600">Price increased</span>
+          <span className="text-primary-500 dark:text-sand-400">Price increased</span>
         </div>
         <div className="flex items-center gap-2">
           <TrendingDown className="w-4 h-4 text-red-600" />
-          <span className="text-gray-600">Price decreased</span>
+          <span className="text-primary-500 dark:text-sand-400">Price decreased</span>
         </div>
         <div className="flex items-center gap-2">
-          <Minus className="w-4 h-4 text-gray-400" />
-          <span className="text-gray-600">Base price</span>
+          <Minus className="w-4 h-4 text-primary-300 dark:text-primary-500" />
+          <span className="text-primary-500 dark:text-sand-400">Base price</span>
         </div>
       </div>
     </div>

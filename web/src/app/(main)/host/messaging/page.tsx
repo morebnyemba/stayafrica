@@ -28,7 +28,7 @@ export default function HostMessagingPage() {
   const [activeTab, setActiveTab] = useState<Tab>('settings');
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-sand-50 dark:bg-primary-900">
       {/* Header */}
       <div className="bg-gradient-to-r from-forest to-forest/90 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -63,18 +63,18 @@ export default function HostMessagingPage() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-all text-left ${
                   isActive
-                    ? 'border-forest bg-white dark:bg-gray-800 shadow-md'
-                    : 'border-transparent bg-white/60 dark:bg-gray-800/60 hover:bg-white dark:hover:bg-gray-800 hover:border-gray-200'
+                    ? 'border-forest bg-white dark:bg-primary-800 shadow-md'
+                    : 'border-transparent bg-white/60 dark:bg-primary-800/60 hover:bg-white dark:hover:bg-primary-800 hover:border-sand-200/50 dark:hover:border-primary-700/50'
                 }`}
               >
-                <div className={`p-2 rounded-lg ${isActive ? 'bg-forest text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-500'}`}>
+                <div className={`p-2 rounded-lg ${isActive ? 'bg-forest text-white' : 'bg-primary-100 dark:bg-primary-700 text-primary-400 dark:text-sand-500'}`}>
                   <Icon className="h-5 w-5" />
                 </div>
                 <div className="min-w-0">
-                  <p className={`font-medium text-sm truncate ${isActive ? 'text-forest dark:text-white' : 'text-gray-700 dark:text-gray-300'}`}>
+                  <p className={`font-medium text-sm truncate ${isActive ? 'text-forest dark:text-white' : 'text-primary-700 dark:text-sand-200'}`}>
                     {tab.label}
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 hidden sm:block truncate">
+                  <p className="text-xs text-primary-400 dark:text-sand-500 hidden sm:block truncate">
                     {tab.description}
                   </p>
                 </div>

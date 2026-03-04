@@ -35,8 +35,8 @@ export default function DynamicPricingDisplay({
   if (isLoading) {
     return (
       <div className={`animate-pulse ${className}`}>
-        <div className="h-8 bg-gray-200 rounded w-32"></div>
-        <div className="h-4 bg-gray-200 rounded w-24 mt-2"></div>
+        <div className="h-8 bg-primary-200 dark:bg-primary-700 rounded w-32"></div>
+        <div className="h-4 bg-primary-200 dark:bg-primary-700 rounded w-24 mt-2"></div>
       </div>
     );
   }
@@ -45,7 +45,7 @@ export default function DynamicPricingDisplay({
     return (
       <div className={className}>
         <p className="text-2xl font-bold">${basePrice}</p>
-        <p className="text-sm text-gray-600">per night</p>
+        <p className="text-sm text-primary-500 dark:text-sand-400">per night</p>
       </div>
     );
   }
@@ -57,7 +57,7 @@ export default function DynamicPricingDisplay({
     <div className={`space-y-2 ${className}`}>
       <div className="flex items-baseline gap-3">
         <div className="flex items-center gap-2">
-          <span className="text-3xl font-bold text-gray-900">
+          <span className="text-3xl font-bold text-primary-900 dark:text-sand-50">
             ${pricing.adjusted_price.toFixed(0)}
           </span>
           {Math.abs(priceChange) > 1 && (
@@ -70,13 +70,13 @@ export default function DynamicPricingDisplay({
           )}
         </div>
         {Math.abs(priceChange) > 1 && (
-          <span className="text-lg text-gray-500 line-through">
+          <span className="text-lg text-primary-400 dark:text-sand-500 line-through">
             ${pricing.base_price.toFixed(0)}
           </span>
         )}
       </div>
 
-      <div className="flex items-center gap-2 text-sm text-gray-600">
+      <div className="flex items-center gap-2 text-sm text-primary-500 dark:text-sand-400">
         <span>per night</span>
         {pricing.applied_rules.length > 0 && (
           <>
@@ -100,7 +100,7 @@ export default function DynamicPricingDisplay({
           {pricing.applied_rules.length > 2 && (
             <button
               onClick={() => setShowBreakdown(true)}
-              className="px-2 py-1 text-xs font-medium text-gray-600 bg-gray-100 rounded-full hover:bg-gray-200 transition"
+              className="px-2 py-1 text-xs font-medium text-primary-500 dark:text-sand-400 bg-primary-100 dark:bg-primary-800 rounded-full hover:bg-primary-200 dark:hover:bg-primary-700 transition"
             >
               +{pricing.applied_rules.length - 2} more
             </button>

@@ -164,7 +164,7 @@ export default function POIManagement() {
       healthcare: 'bg-red-100 text-red-800',
       education: 'bg-green-100 text-green-800',
     };
-    return badges[type] || 'bg-gray-100 text-gray-800';
+    return badges[type] || 'bg-primary-100 dark:bg-primary-800 text-primary-800 dark:text-sand-100';
   };
 
   return (
@@ -175,7 +175,7 @@ export default function POIManagement() {
       </div>
 
       {/* Tabs */}
-      <div className="mb-6 border-b border-gray-200">
+      <div className="mb-6 border-b border-sand-200/50 dark:border-primary-700/50">
         <div className="flex space-x-8">
           <button
             onClick={() => {
@@ -185,7 +185,7 @@ export default function POIManagement() {
             className={`pb-4 px-1 border-b-2 font-medium text-sm transition-colors ${
               activeTab === 'pois'
                 ? 'border-[#D9B168] text-[#D9B168]'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
+                : 'border-transparent text-primary-400 dark:text-sand-500 hover:text-primary-700 dark:hover:text-sand-200'
             }`}
           >
             <div className="flex items-center space-x-2">
@@ -201,7 +201,7 @@ export default function POIManagement() {
             className={`pb-4 px-1 border-b-2 font-medium text-sm transition-colors ${
               activeTab === 'categories'
                 ? 'border-[#D9B168] text-[#D9B168]'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
+                : 'border-transparent text-primary-400 dark:text-sand-500 hover:text-primary-700 dark:hover:text-sand-200'
             }`}
           >
             <div className="flex items-center space-x-2">
@@ -268,8 +268,8 @@ export default function POIManagement() {
           <>
             {activeTab === 'pois' && (
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
+                <table className="min-w-full divide-y divide-primary-200 dark:divide-primary-700">
+                  <thead className="bg-sand-50 dark:bg-primary-900">
                     <tr>
                       <th className="px-6 py-3 text-left">
                         <input
@@ -282,7 +282,7 @@ export default function POIManagement() {
                             }
                           }}
                           checked={selectedPOIs.length === pois.length && pois.length > 0}
-                          className="rounded border-gray-300"
+                          className="rounded border-primary-300 dark:border-primary-600"
                         />
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-[#3A5C50] uppercase tracking-wider">
@@ -308,15 +308,15 @@ export default function POIManagement() {
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-white divide-y divide-primary-200 dark:divide-primary-700">
                     {pois.map((poi) => (
-                      <tr key={poi.id} className="hover:bg-gray-50">
+                      <tr key={poi.id} className="hover:bg-sand-50 dark:hover:bg-primary-800">
                         <td className="px-6 py-4">
                           <input
                             type="checkbox"
                             checked={selectedPOIs.includes(poi.id)}
                             onChange={() => toggleSelectPOI(poi.id)}
-                            className="rounded border-gray-300"
+                            className="rounded border-primary-300 dark:border-primary-600"
                           />
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -381,8 +381,8 @@ export default function POIManagement() {
 
             {activeTab === 'categories' && (
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
+                <table className="min-w-full divide-y divide-primary-200 dark:divide-primary-700">
+                  <thead className="bg-sand-50 dark:bg-primary-900">
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-[#3A5C50] uppercase tracking-wider">
                         Name
@@ -398,9 +398,9 @@ export default function POIManagement() {
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-white divide-y divide-primary-200 dark:divide-primary-700">
                     {categories.map((category) => (
-                      <tr key={category.id} className="hover:bg-gray-50">
+                      <tr key={category.id} className="hover:bg-sand-50 dark:hover:bg-primary-800">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm font-medium text-[#122F26]">
                             {category.name}
@@ -431,7 +431,7 @@ export default function POIManagement() {
             )}
 
             {/* Pagination */}
-            <div className="bg-gray-50 px-6 py-4 flex items-center justify-between border-t">
+            <div className="bg-sand-50 dark:bg-primary-900 px-6 py-4 flex items-center justify-between border-t">
               <div className="text-sm text-[#122F26]">
                 Showing {totalCount > 0 ? (page - 1) * ITEMS_PER_PAGE + 1 : 0} to {Math.min(page * ITEMS_PER_PAGE, totalCount)} of {totalCount} items
               </div>
@@ -439,14 +439,14 @@ export default function POIManagement() {
                 <button
                   onClick={() => setPage(p => Math.max(1, p - 1))}
                   disabled={page === 1}
-                  className="px-4 py-2 border border-[#3A5C50] rounded-lg text-sm font-medium text-[#122F26] hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 border border-[#3A5C50] rounded-lg text-sm font-medium text-[#122F26] hover:bg-sand-50 dark:hover:bg-primary-800 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Previous
                 </button>
                 <button
                   onClick={() => setPage(p => p + 1)}
                   disabled={page * ITEMS_PER_PAGE >= totalCount}
-                  className="px-4 py-2 border border-[#3A5C50] rounded-lg text-sm font-medium text-[#122F26] hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 border border-[#3A5C50] rounded-lg text-sm font-medium text-[#122F26] hover:bg-sand-50 dark:hover:bg-primary-800 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Next
                 </button>

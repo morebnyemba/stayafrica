@@ -21,15 +21,15 @@ export default function Error({
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
           </svg>
         </div>
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+        <h1 className="text-3xl font-bold text-primary-900 dark:text-sand-50 mb-4">
           Something went wrong
         </h1>
-        <p className="text-gray-600 dark:text-gray-400 mb-8">
+        <p className="text-primary-500 dark:text-sand-400 mb-8">
           We encountered an unexpected error. Our team has been notified.
           Please try again or contact support if the problem persists.
         </p>
         {error.digest && (
-          <p className="text-sm text-gray-400 mb-6 font-mono">
+          <p className="text-sm text-primary-300 dark:text-primary-500 mb-6 font-mono">
             Error ID: {error.digest}
           </p>
         )}

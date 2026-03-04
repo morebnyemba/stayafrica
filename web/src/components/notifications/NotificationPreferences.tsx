@@ -36,21 +36,21 @@ export const NotificationPreferences = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary-300 dark:text-primary-500" />
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 space-y-6">
+    <div className="bg-white dark:bg-primary-800/40 rounded-lg shadow-sm border border-sand-200/50 dark:border-primary-700/50 p-6 space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-gray-900">Notification Preferences</h2>
+        <h2 className="text-xl font-semibold text-primary-900 dark:text-sand-50">Notification Preferences</h2>
         
         {hasChanges && (
           <button
             onClick={handleSave}
             disabled={isUpdating}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-secondary-600 text-white rounded-lg hover:bg-secondary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {isUpdating ? (
               <>
@@ -69,58 +69,58 @@ export const NotificationPreferences = () => {
 
       <div className="space-y-6">
         <div className="space-y-4">
-          <h3 className="text-sm font-medium text-gray-700 uppercase tracking-wide">
+          <h3 className="text-sm font-medium text-primary-700 dark:text-sand-200 uppercase tracking-wide">
             Notification Channels
           </h3>
           
           <div className="space-y-3">
-            <label className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+            <label className="flex items-center justify-between p-4 border border-sand-200/50 dark:border-primary-700/50 rounded-lg hover:bg-sand-50 dark:hover:bg-primary-800 cursor-pointer">
               <div className="flex items-center gap-3">
-                <Bell className="h-5 w-5 text-gray-600" />
+                <Bell className="h-5 w-5 text-primary-500 dark:text-sand-400" />
                 <div>
-                  <p className="font-medium text-gray-900">Push Notifications</p>
-                  <p className="text-sm text-gray-500">Receive push notifications on your device</p>
+                  <p className="font-medium text-primary-900 dark:text-sand-50">Push Notifications</p>
+                  <p className="text-sm text-primary-400 dark:text-sand-500">Receive push notifications on your device</p>
                 </div>
               </div>
               <input
                 type="checkbox"
                 checked={localPreferences.push_notifications ?? false}
                 onChange={() => handleToggle('push_notifications')}
-                className="h-5 w-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                className="h-5 w-5 text-secondary-600 rounded focus:ring-2 focus:ring-secondary-500"
                 aria-label="Toggle push notifications"
               />
             </label>
 
-            <label className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+            <label className="flex items-center justify-between p-4 border border-sand-200/50 dark:border-primary-700/50 rounded-lg hover:bg-sand-50 dark:hover:bg-primary-800 cursor-pointer">
               <div className="flex items-center gap-3">
-                <Mail className="h-5 w-5 text-gray-600" />
+                <Mail className="h-5 w-5 text-primary-500 dark:text-sand-400" />
                 <div>
-                  <p className="font-medium text-gray-900">Email Notifications</p>
-                  <p className="text-sm text-gray-500">Receive notifications via email</p>
+                  <p className="font-medium text-primary-900 dark:text-sand-50">Email Notifications</p>
+                  <p className="text-sm text-primary-400 dark:text-sand-500">Receive notifications via email</p>
                 </div>
               </div>
               <input
                 type="checkbox"
                 checked={localPreferences.email_notifications ?? false}
                 onChange={() => handleToggle('email_notifications')}
-                className="h-5 w-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                className="h-5 w-5 text-secondary-600 rounded focus:ring-2 focus:ring-secondary-500"
                 aria-label="Toggle email notifications"
               />
             </label>
 
-            <label className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+            <label className="flex items-center justify-between p-4 border border-sand-200/50 dark:border-primary-700/50 rounded-lg hover:bg-sand-50 dark:hover:bg-primary-800 cursor-pointer">
               <div className="flex items-center gap-3">
-                <MessageSquare className="h-5 w-5 text-gray-600" />
+                <MessageSquare className="h-5 w-5 text-primary-500 dark:text-sand-400" />
                 <div>
-                  <p className="font-medium text-gray-900">SMS Notifications</p>
-                  <p className="text-sm text-gray-500">Receive notifications via text message</p>
+                  <p className="font-medium text-primary-900 dark:text-sand-50">SMS Notifications</p>
+                  <p className="text-sm text-primary-400 dark:text-sand-500">Receive notifications via text message</p>
                 </div>
               </div>
               <input
                 type="checkbox"
                 checked={localPreferences.sms_notifications ?? false}
                 onChange={() => handleToggle('sms_notifications')}
-                className="h-5 w-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                className="h-5 w-5 text-secondary-600 rounded focus:ring-2 focus:ring-secondary-500"
                 aria-label="Toggle SMS notifications"
               />
             </label>
@@ -128,77 +128,77 @@ export const NotificationPreferences = () => {
         </div>
 
         <div className="space-y-4">
-          <h3 className="text-sm font-medium text-gray-700 uppercase tracking-wide">
+          <h3 className="text-sm font-medium text-primary-700 dark:text-sand-200 uppercase tracking-wide">
             Notification Types
           </h3>
           
           <div className="space-y-3">
-            <label className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+            <label className="flex items-center justify-between p-4 border border-sand-200/50 dark:border-primary-700/50 rounded-lg hover:bg-sand-50 dark:hover:bg-primary-800 cursor-pointer">
               <div>
-                <p className="font-medium text-gray-900">Booking Updates</p>
-                <p className="text-sm text-gray-500">Confirmations, cancellations, and check-in reminders</p>
+                <p className="font-medium text-primary-900 dark:text-sand-50">Booking Updates</p>
+                <p className="text-sm text-primary-400 dark:text-sand-500">Confirmations, cancellations, and check-in reminders</p>
               </div>
               <input
                 type="checkbox"
                 checked={localPreferences.booking_updates ?? false}
                 onChange={() => handleToggle('booking_updates')}
-                className="h-5 w-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                className="h-5 w-5 text-secondary-600 rounded focus:ring-2 focus:ring-secondary-500"
                 aria-label="Toggle booking updates"
               />
             </label>
 
-            <label className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+            <label className="flex items-center justify-between p-4 border border-sand-200/50 dark:border-primary-700/50 rounded-lg hover:bg-sand-50 dark:hover:bg-primary-800 cursor-pointer">
               <div>
-                <p className="font-medium text-gray-900">Messages</p>
-                <p className="text-sm text-gray-500">New messages from guests or hosts</p>
+                <p className="font-medium text-primary-900 dark:text-sand-50">Messages</p>
+                <p className="text-sm text-primary-400 dark:text-sand-500">New messages from guests or hosts</p>
               </div>
               <input
                 type="checkbox"
                 checked={localPreferences.messages ?? false}
                 onChange={() => handleToggle('messages')}
-                className="h-5 w-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                className="h-5 w-5 text-secondary-600 rounded focus:ring-2 focus:ring-secondary-500"
                 aria-label="Toggle message notifications"
               />
             </label>
 
-            <label className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+            <label className="flex items-center justify-between p-4 border border-sand-200/50 dark:border-primary-700/50 rounded-lg hover:bg-sand-50 dark:hover:bg-primary-800 cursor-pointer">
               <div>
-                <p className="font-medium text-gray-900">Reviews</p>
-                <p className="text-sm text-gray-500">New reviews and review reminders</p>
+                <p className="font-medium text-primary-900 dark:text-sand-50">Reviews</p>
+                <p className="text-sm text-primary-400 dark:text-sand-500">New reviews and review reminders</p>
               </div>
               <input
                 type="checkbox"
                 checked={localPreferences.reviews ?? false}
                 onChange={() => handleToggle('reviews')}
-                className="h-5 w-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                className="h-5 w-5 text-secondary-600 rounded focus:ring-2 focus:ring-secondary-500"
                 aria-label="Toggle review notifications"
               />
             </label>
 
-            <label className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+            <label className="flex items-center justify-between p-4 border border-sand-200/50 dark:border-primary-700/50 rounded-lg hover:bg-sand-50 dark:hover:bg-primary-800 cursor-pointer">
               <div>
-                <p className="font-medium text-gray-900">Promotions</p>
-                <p className="text-sm text-gray-500">Special offers and discounts</p>
+                <p className="font-medium text-primary-900 dark:text-sand-50">Promotions</p>
+                <p className="text-sm text-primary-400 dark:text-sand-500">Special offers and discounts</p>
               </div>
               <input
                 type="checkbox"
                 checked={localPreferences.promotions ?? false}
                 onChange={() => handleToggle('promotions')}
-                className="h-5 w-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                className="h-5 w-5 text-secondary-600 rounded focus:ring-2 focus:ring-secondary-500"
                 aria-label="Toggle promotion notifications"
               />
             </label>
 
-            <label className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+            <label className="flex items-center justify-between p-4 border border-sand-200/50 dark:border-primary-700/50 rounded-lg hover:bg-sand-50 dark:hover:bg-primary-800 cursor-pointer">
               <div>
-                <p className="font-medium text-gray-900">Account Activity</p>
-                <p className="text-sm text-gray-500">Security alerts and account changes</p>
+                <p className="font-medium text-primary-900 dark:text-sand-50">Account Activity</p>
+                <p className="text-sm text-primary-400 dark:text-sand-500">Security alerts and account changes</p>
               </div>
               <input
                 type="checkbox"
                 checked={localPreferences.account_activity ?? false}
                 onChange={() => handleToggle('account_activity')}
-                className="h-5 w-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                className="h-5 w-5 text-secondary-600 rounded focus:ring-2 focus:ring-secondary-500"
                 aria-label="Toggle account activity notifications"
               />
             </label>

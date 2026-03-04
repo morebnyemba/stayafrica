@@ -112,25 +112,25 @@ export const ScheduledMessagesPanel = () => {
       case 'failed':
         return 'bg-red-100 text-red-800';
       case 'cancelled':
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-primary-100 dark:bg-primary-800 text-primary-800 dark:text-sand-100';
     }
   };
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary-300 dark:text-primary-500" />
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border">
+    <div className="bg-white dark:bg-primary-800/40 rounded-lg shadow-sm border">
       <div className="p-6 border-b">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-semibold text-gray-900">Scheduled Messages</h2>
-            <p className="text-sm text-gray-600 mt-1">
+            <h2 className="text-xl font-semibold text-primary-900 dark:text-sand-50">Scheduled Messages</h2>
+            <p className="text-sm text-primary-500 dark:text-sand-400 mt-1">
               Schedule messages to be sent at a specific time
             </p>
           </div>
@@ -138,7 +138,7 @@ export const ScheduledMessagesPanel = () => {
           {!isScheduling && (
             <button
               onClick={() => setIsScheduling(true)}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-secondary-600 text-white rounded-lg hover:bg-secondary-700 transition-colors"
             >
               <Plus className="h-4 w-4" />
               <span>Schedule Message</span>
@@ -149,9 +149,9 @@ export const ScheduledMessagesPanel = () => {
 
       <div className="p-6 space-y-4">
         {isScheduling && (
-          <form onSubmit={handleSubmit} className="border rounded-lg p-4 bg-gray-50 space-y-4">
+          <form onSubmit={handleSubmit} className="border rounded-lg p-4 bg-sand-50 dark:bg-primary-900 space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-primary-700 dark:text-sand-200 mb-2">
                 Conversation ID *
               </label>
               <input
@@ -159,13 +159,13 @@ export const ScheduledMessagesPanel = () => {
                 value={formData.conversation}
                 onChange={(e) => setFormData(prev => ({ ...prev, conversation: e.target.value }))}
                 placeholder="Enter conversation ID"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-primary-300 dark:border-primary-600 rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-primary-700 dark:text-sand-200 mb-2">
                 Message *
               </label>
               <textarea
@@ -173,13 +173,13 @@ export const ScheduledMessagesPanel = () => {
                 onChange={(e) => setFormData(prev => ({ ...prev, message_text: e.target.value }))}
                 placeholder="Enter your message..."
                 rows={4}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-primary-300 dark:border-primary-600 rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-primary-700 dark:text-sand-200 mb-2">
                 <Calendar className="h-4 w-4 inline mr-1" />
                 Scheduled Date & Time *
               </label>
@@ -187,7 +187,7 @@ export const ScheduledMessagesPanel = () => {
                 type="datetime-local"
                 value={formData.scheduled_time}
                 onChange={(e) => setFormData(prev => ({ ...prev, scheduled_time: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-primary-300 dark:border-primary-600 rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent"
                 required
               />
             </div>
@@ -196,7 +196,7 @@ export const ScheduledMessagesPanel = () => {
               <button
                 type="submit"
                 disabled={createMutation.isPending}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-secondary-600 text-white rounded-lg hover:bg-secondary-700 disabled:opacity-50 transition-colors"
               >
                 {createMutation.isPending ? (
                   <>
@@ -214,7 +214,7 @@ export const ScheduledMessagesPanel = () => {
               <button
                 type="button"
                 onClick={resetForm}
-                className="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                className="inline-flex items-center gap-2 px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg hover:bg-sand-50 dark:hover:bg-primary-800 transition-colors"
               >
                 <X className="h-4 w-4" />
                 <span>Cancel</span>
@@ -224,7 +224,7 @@ export const ScheduledMessagesPanel = () => {
         )}
 
         {messages.length === 0 ? (
-          <div className="text-center py-12 text-gray-500">
+          <div className="text-center py-12 text-primary-400 dark:text-sand-500">
             <p>No scheduled messages. Schedule your first message!</p>
           </div>
         ) : (
@@ -234,14 +234,14 @@ export const ScheduledMessagesPanel = () => {
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="font-medium text-gray-900">
+                      <span className="font-medium text-primary-900 dark:text-sand-50">
                         Conversation #{msg.conversation_id}
                       </span>
                       <span className={`px-2 py-0.5 text-xs rounded capitalize ${getStatusColor(msg.status)}`}>
                         {msg.status_display || msg.status}
                       </span>
                     </div>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-primary-500 dark:text-sand-400">
                       {format(new Date(msg.scheduled_time), 'PPpp')}
                     </p>
                   </div>
@@ -258,12 +258,12 @@ export const ScheduledMessagesPanel = () => {
                   )}
                 </div>
 
-                <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                <p className="text-sm text-primary-700 dark:text-sand-200 whitespace-pre-wrap">
                   {msg.message_text}
                 </p>
 
                 {msg.sent_at && (
-                  <p className="text-xs text-gray-500 mt-2">
+                  <p className="text-xs text-primary-400 dark:text-sand-500 mt-2">
                     Sent: {format(new Date(msg.sent_at), 'PPpp')}
                   </p>
                 )}

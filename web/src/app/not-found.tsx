@@ -5,10 +5,10 @@ export default function NotFound() {
     <div className="min-h-screen bg-sand-100 dark:bg-primary-900 flex items-center justify-center px-4">
       <div className="text-center max-w-lg">
         <h1 className="text-8xl font-bold text-primary-600 dark:text-primary-400 mb-4">404</h1>
-        <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">
+        <h2 className="text-2xl font-semibold text-primary-900 dark:text-sand-50 mb-4">
           Page Not Found
         </h2>
-        <p className="text-gray-600 dark:text-gray-400 mb-8">
+        <p className="text-primary-500 dark:text-sand-400 mb-8">
           The page you&apos;re looking for doesn&apos;t exist or has been moved.
           Let&apos;s get you back to discovering amazing stays across Africa.
         </p>

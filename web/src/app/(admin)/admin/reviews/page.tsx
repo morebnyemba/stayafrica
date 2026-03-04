@@ -135,7 +135,7 @@ export default function ReviewsManagement() {
           <Star
             key={star}
             className={`w-4 h-4 ${
-              star <= rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'
+              star <= rating ? 'text-yellow-400 fill-yellow-400' : 'text-primary-200 dark:text-primary-600'
             }`}
           />
         ))}
@@ -214,22 +214,22 @@ export default function ReviewsManagement() {
                 <ChevronDown className="w-4 h-4" />
               </button>
               {showBulkActions && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-sand-200/50 dark:border-primary-700/50 z-10">
                   <button
                     onClick={() => handleBulkAction('moderate')}
-                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 first:rounded-t-lg"
+                    className="w-full text-left px-4 py-2 text-sm text-primary-700 dark:text-sand-200 hover:bg-primary-100 dark:hover:bg-primary-800 first:rounded-t-lg"
                   >
                     Moderate Reviews
                   </button>
                   <button
                     onClick={() => handleBulkAction('hide')}
-                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    className="w-full text-left px-4 py-2 text-sm text-primary-700 dark:text-sand-200 hover:bg-primary-100 dark:hover:bg-primary-800"
                   >
                     Hide Reviews
                   </button>
                   <button
                     onClick={() => handleBulkAction('delete')}
-                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 last:rounded-b-lg"
+                    className="w-full text-left px-4 py-2 text-sm text-primary-700 dark:text-sand-200 hover:bg-primary-100 dark:hover:bg-primary-800 last:rounded-b-lg"
                   >
                     Delete Reviews
                   </button>
@@ -265,8 +265,8 @@ export default function ReviewsManagement() {
         ) : (
           <>
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+              <table className="min-w-full divide-y divide-primary-200 dark:divide-primary-700">
+                <thead className="bg-sand-50 dark:bg-primary-900">
                   <tr>
                     <th className="px-6 py-3 text-left">
                       <input
@@ -279,7 +279,7 @@ export default function ReviewsManagement() {
                           }
                         }}
                         checked={selectedReviews.length === reviews.length && reviews.length > 0}
-                        className="rounded border-gray-300"
+                        className="rounded border-primary-300 dark:border-primary-600"
                       />
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-[#3A5C50] uppercase tracking-wider">
@@ -299,15 +299,15 @@ export default function ReviewsManagement() {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-white divide-y divide-primary-200 dark:divide-primary-700">
                   {reviews.map((review) => (
-                    <tr key={review.id} className="hover:bg-gray-50">
+                    <tr key={review.id} className="hover:bg-sand-50 dark:hover:bg-primary-800">
                       <td className="px-6 py-4">
                         <input
                           type="checkbox"
                           checked={selectedReviews.includes(review.id)}
                           onChange={() => toggleSelectReview(review.id)}
-                          className="rounded border-gray-300"
+                          className="rounded border-primary-300 dark:border-primary-600"
                         />
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -361,7 +361,7 @@ export default function ReviewsManagement() {
             </div>
 
             {/* Pagination */}
-            <div className="bg-gray-50 px-6 py-4 flex items-center justify-between border-t">
+            <div className="bg-sand-50 dark:bg-primary-900 px-6 py-4 flex items-center justify-between border-t">
               <div className="text-sm text-[#122F26]">
                 Showing {totalCount > 0 ? (page - 1) * ITEMS_PER_PAGE + 1 : 0} to {Math.min(page * ITEMS_PER_PAGE, totalCount)} of {totalCount} reviews
               </div>
@@ -369,14 +369,14 @@ export default function ReviewsManagement() {
                 <button
                   onClick={() => setPage(p => Math.max(1, p - 1))}
                   disabled={page === 1}
-                  className="px-4 py-2 border border-[#3A5C50] rounded-lg text-sm font-medium text-[#122F26] hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 border border-[#3A5C50] rounded-lg text-sm font-medium text-[#122F26] hover:bg-sand-50 dark:hover:bg-primary-800 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Previous
                 </button>
                 <button
                   onClick={() => setPage(p => p + 1)}
                   disabled={page * ITEMS_PER_PAGE >= totalCount}
-                  className="px-4 py-2 border border-[#3A5C50] rounded-lg text-sm font-medium text-[#122F26] hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 border border-[#3A5C50] rounded-lg text-sm font-medium text-[#122F26] hover:bg-sand-50 dark:hover:bg-primary-800 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Next
                 </button>

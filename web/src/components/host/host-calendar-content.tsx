@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { apiClient } from '@/services/api-client';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Users, Clock, MapPin } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Users, Clock, MapPin, Building2 } from 'lucide-react';
 
 interface CalendarEvent {
     id: string;
@@ -44,11 +44,13 @@ export function HostCalendarContent() {
     const [properties, setProperties] = useState<Property[]>([]);
     const [selectedProperty, setSelectedProperty] = useState<string>('all');
     const [selectedDay, setSelectedDay] = useState<number | null>(null);
+    const [loading, setLoading] = useState(true);
 
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
 
     const fetchCalendarData = useCallback(async () => {
+        setLoading(true);
         try {
             const startDate = new Date(year, month, 1).toISOString().split('T')[0];
             const endDate = new Date(year, month + 1, 0).toISOString().split('T')[0];
@@ -80,6 +82,8 @@ export function HostCalendarContent() {
             }
         } catch (error) {
             console.error('Failed to fetch calendar data:', error);
+        } finally {
+            setLoading(false);
         }
     }, [year, month, selectedProperty]);
 
@@ -111,9 +115,9 @@ export function HostCalendarContent() {
             {/* Header */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
                 <div>
-                    <h1 className="text-2xl font-bold text-primary-900 dark:text-sand-100">Calendar</h1>
+                    <h1 className="text-2xl sm:text-3xl font-bold text-primary-900 dark:text-sand-50">Calendar</h1>
                     <p className="text-sm text-primary-500 dark:text-sand-400 mt-1">
-                        View bookings across all your properties
+                        View bookings across {properties.length || 'your'} propert{properties.length === 1 ? 'y' : 'ies'}
                     </p>
                 </div>
 
@@ -121,7 +125,7 @@ export function HostCalendarContent() {
                 <select
                     value={selectedProperty}
                     onChange={e => setSelectedProperty(e.target.value)}
-                    className="px-4 py-2 rounded-lg border border-sand-300 dark:border-primary-600 bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-100 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500"
+                    className="px-4 py-2 rounded-lg border border-primary-200 dark:border-primary-700 bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-100 text-sm focus:outline-none focus:ring-2 focus:ring-secondary-500"
                 >
                     <option value="all">All Properties</option>
                     {properties.map(prop => (
@@ -130,9 +134,28 @@ export function HostCalendarContent() {
                 </select>
             </div>
 
+            {loading ? (
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div className="lg:col-span-2 card p-6 animate-pulse">
+                        <div className="h-8 w-48 bg-primary-200 dark:bg-primary-700 rounded mx-auto mb-6" />
+                        <div className="grid grid-cols-7 gap-1">
+                            {Array.from({ length: 35 }).map((_, i) => (
+                                <div key={i} className="h-14 bg-primary-100 dark:bg-primary-700/50 rounded-lg" />
+                            ))}
+                        </div>
+                    </div>
+                    <div className="card p-6 animate-pulse">
+                        <div className="h-6 w-32 bg-primary-200 dark:bg-primary-700 rounded mb-4" />
+                        <div className="space-y-3">
+                            <div className="h-20 bg-primary-100 dark:bg-primary-700/50 rounded-lg" />
+                            <div className="h-20 bg-primary-100 dark:bg-primary-700/50 rounded-lg" />
+                        </div>
+                    </div>
+                </div>
+            ) : (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Calendar Grid */}
-                <div className="lg:col-span-2 bg-white dark:bg-primary-800/40 rounded-2xl p-6 shadow-sm border border-sand-200/50 dark:border-primary-700/50">
+                <div className="lg:col-span-2 card p-6">
                     {/* Month Navigation */}
                     <div className="flex items-center justify-between mb-6">
                         <button onClick={() => navigateMonth(-1)} className="p-2 hover:bg-sand-100 dark:hover:bg-primary-700 rounded-lg transition-colors">
@@ -220,8 +243,8 @@ export function HostCalendarContent() {
                 </div>
 
                 {/* Selected Day Details */}
-                <div className="bg-white dark:bg-primary-800/40 rounded-2xl p-6 shadow-sm border border-sand-200/50 dark:border-primary-700/50">
-                    <h3 className="text-lg font-semibold text-primary-900 dark:text-sand-100 mb-4">
+                <div className="card p-6">
+                    <h3 className="text-lg font-semibold text-primary-900 dark:text-sand-50 mb-4">
                         {selectedDay
                             ? `${MONTHS[month]} ${selectedDay}, ${year}`
                             : 'Select a day'}
@@ -229,42 +252,61 @@ export function HostCalendarContent() {
 
                     {!selectedDay ? (
                         <div className="text-center py-12">
-                            <CalendarIcon className="w-10 h-10 mx-auto text-sand-300 dark:text-primary-600 mb-3" />
-                            <p className="text-sm text-primary-500 dark:text-sand-400">
-                                Click a day to view bookings
+                            <div className="w-14 h-14 rounded-full bg-secondary-100 dark:bg-secondary-900/20 flex items-center justify-center mx-auto mb-3">
+                                <CalendarIcon className="w-7 h-7 text-secondary-600 dark:text-secondary-400" />
+                            </div>
+                            <p className="text-sm font-medium text-primary-700 dark:text-sand-300 mb-1">
+                                No day selected
+                            </p>
+                            <p className="text-xs text-primary-500 dark:text-sand-400">
+                                Click on a calendar day to view its bookings
                             </p>
                         </div>
                     ) : selectedDayEvents.length === 0 ? (
                         <div className="text-center py-12">
-                            <p className="text-sm text-primary-500 dark:text-sand-400">
-                                No bookings on this day
+                            <div className="w-14 h-14 rounded-full bg-sand-100 dark:bg-primary-700/50 flex items-center justify-center mx-auto mb-3">
+                                <Building2 className="w-7 h-7 text-primary-400 dark:text-sand-500" />
+                            </div>
+                            <p className="text-sm font-medium text-primary-700 dark:text-sand-300 mb-1">
+                                No bookings
+                            </p>
+                            <p className="text-xs text-primary-500 dark:text-sand-400">
+                                This day is free across all properties
                             </p>
                         </div>
                     ) : (
                         <div className="space-y-3">
+                            <p className="text-xs text-primary-500 dark:text-sand-400 mb-2">
+                                {selectedDayEvents.length} booking{selectedDayEvents.length > 1 ? 's' : ''}
+                            </p>
                             {selectedDayEvents.map(event => (
                                 <div
                                     key={event.id}
                                     className={`p-4 rounded-xl border ${STATUS_COLORS[event.status] || STATUS_COLORS.pending}`}
                                 >
-                                    <div className="flex items-center justify-between mb-2">
-                                        <span className="text-sm font-medium">{event.guest_name || 'Guest'}</span>
-                                        <span className="text-xs capitalize px-2 py-0.5 rounded-full bg-white/50 dark:bg-black/20">
+                                    <div className="flex items-center gap-3 mb-2">
+                                        <div className="w-8 h-8 rounded-full bg-white/50 dark:bg-black/20 flex items-center justify-center text-xs font-semibold">
+                                            {(event.guest_name || 'G').charAt(0).toUpperCase()}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <span className="text-sm font-medium block truncate">{event.guest_name || 'Guest'}</span>
+                                        </div>
+                                        <span className="text-xs capitalize px-2 py-0.5 rounded-full bg-white/50 dark:bg-black/20 font-medium">
                                             {event.status}
                                         </span>
                                     </div>
                                     <div className="space-y-1.5 text-xs opacity-80">
                                         <div className="flex items-center gap-1.5">
-                                            <MapPin className="w-3 h-3" />
+                                            <MapPin className="w-3 h-3 flex-shrink-0" />
                                             <span className="truncate">{event.property_title}</span>
                                         </div>
                                         <div className="flex items-center gap-1.5">
-                                            <Clock className="w-3 h-3" />
+                                            <Clock className="w-3 h-3 flex-shrink-0" />
                                             <span>{event.check_in?.split('T')[0]} → {event.check_out?.split('T')[0]}</span>
                                         </div>
                                         {event.num_guests && (
                                             <div className="flex items-center gap-1.5">
-                                                <Users className="w-3 h-3" />
+                                                <Users className="w-3 h-3 flex-shrink-0" />
                                                 <span>{event.num_guests} guest{event.num_guests > 1 ? 's' : ''}</span>
                                             </div>
                                         )}
@@ -275,6 +317,7 @@ export function HostCalendarContent() {
                     )}
                 </div>
             </div>
+            )}
         </div>
     );
 }

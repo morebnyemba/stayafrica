@@ -126,12 +126,12 @@ export default function VerifyEmailPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-100 flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8">
+    <div className="min-h-screen bg-gradient-to-br from-sand-50 dark:from-primary-900 to-teal-100 flex items-center justify-center p-4">
+      <div className="max-w-md w-full bg-white dark:bg-primary-800/40 rounded-2xl shadow-xl p-8">
         {/* Back Button */}
         <Link
           href="/register"
-          className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-6 transition-colors"
+          className="inline-flex items-center text-primary-500 dark:text-sand-400 hover:text-primary-900 dark:hover:text-sand-50 mb-6 transition-colors"
         >
           <ArrowLeft className="w-5 h-5 mr-2" />
           Back
@@ -139,15 +139,15 @@ export default function VerifyEmailPage() {
 
         {/* Header */}
         <div className="mb-8">
-          <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mb-6">
-            <Mail className="w-8 h-8 text-emerald-600" />
+          <div className="w-16 h-16 bg-secondary-100 dark:bg-secondary-900/30 rounded-full flex items-center justify-center mb-6">
+            <Mail className="w-8 h-8 text-secondary-600 dark:text-secondary-400" />
           </div>
 
-          <h1 className="text-3xl font-bold text-gray-900 mb-3">
+          <h1 className="text-3xl font-bold text-primary-900 dark:text-sand-50 mb-3">
             Verify Your Email
           </h1>
 
-          <p className="text-gray-600">
+          <p className="text-primary-500 dark:text-sand-400">
             We've sent a 6-digit verification code to{' '}
             <span className="font-semibold">{email || 'your email'}</span>. Please enter it below.
           </p>
@@ -174,12 +174,12 @@ export default function VerifyEmailPage() {
                   value={digit}
                   onChange={(e) => handleChange(index, e.target.value)}
                   onKeyDown={(e) => handleKeyDown(index, e)}
-                  className="w-14 h-16 text-center text-2xl font-bold border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-gray-50"
+                  className="w-14 h-16 text-center text-2xl font-bold border-2 border-primary-300 dark:border-primary-600 rounded-xl focus:ring-2 focus:ring-secondary-500 focus:border-transparent bg-sand-50 dark:bg-primary-900"
                   disabled={loading || resending}
                 />
               ))}
             </div>
-            <p className="text-sm text-gray-500 text-center">
+            <p className="text-sm text-primary-400 dark:text-sand-500 text-center">
               Enter the 6-digit code sent to your email
             </p>
           </div>
@@ -187,19 +187,19 @@ export default function VerifyEmailPage() {
           <button
             type="submit"
             disabled={loading || resending || code.join('').length !== 6}
-            className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-300 text-white font-semibold py-3 px-6 rounded-xl transition-colors"
+            className="w-full bg-secondary-600 hover:bg-secondary-700 disabled:bg-secondary-300 text-white font-semibold py-3 px-6 rounded-xl transition-colors"
           >
             {loading ? 'Verifying...' : 'Verify Email'}
           </button>
 
           <div className="text-center space-y-3">
             <div>
-              <span className="text-gray-600">Didn't receive the code? </span>
+              <span className="text-primary-500 dark:text-sand-400">Didn't receive the code? </span>
               <button
                 type="button"
                 onClick={handleResend}
                 disabled={loading || resending}
-                className="text-emerald-600 hover:text-emerald-700 font-semibold disabled:text-emerald-300"
+                className="text-secondary-600 dark:text-secondary-400 hover:text-secondary-700 font-semibold disabled:text-secondary-300"
               >
                 {resending ? 'Sending...' : 'Resend'}
               </button>
@@ -207,7 +207,7 @@ export default function VerifyEmailPage() {
 
             <Link
               href="/register"
-              className="block text-gray-600 hover:text-gray-900"
+              className="block text-primary-500 dark:text-sand-400 hover:text-primary-900 dark:hover:text-sand-50"
             >
               Wrong email address? Go back
             </Link>

@@ -69,10 +69,49 @@ export function HostReviews() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-sand-100 dark:bg-primary-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-secondary-600 mx-auto mb-4"></div>
-          <p className="text-primary-500 dark:text-sand-400">Loading reviews...</p>
+      <div className="min-h-screen bg-sand-100 dark:bg-primary-900 py-8">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="mb-8">
+            <div className="h-9 w-52 bg-primary-200 dark:bg-primary-700 rounded animate-pulse mb-2" />
+            <div className="h-5 w-72 bg-primary-200 dark:bg-primary-700 rounded animate-pulse" />
+          </div>
+          {/* Stats skeleton */}
+          <div className="card p-6 mb-6 animate-pulse">
+            <div className="flex items-start gap-8">
+              <div className="text-center">
+                <div className="h-14 w-16 bg-primary-200 dark:bg-primary-700 rounded mx-auto mb-2" />
+                <div className="flex gap-1 mb-2 justify-center">
+                  {[1,2,3,4,5].map(s => <div key={s} className="w-5 h-5 bg-primary-200 dark:bg-primary-700 rounded" />)}
+                </div>
+              </div>
+              <div className="flex-1 space-y-3">
+                {[1,2,3,4,5].map(r => (
+                  <div key={r} className="flex items-center gap-3">
+                    <div className="w-8 h-4 bg-primary-200 dark:bg-primary-700 rounded" />
+                    <div className="flex-1 h-2 bg-primary-200 dark:bg-primary-700 rounded-full" />
+                    <div className="w-8 h-4 bg-primary-200 dark:bg-primary-700 rounded" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          {/* Review cards skeleton */}
+          <div className="space-y-4">
+            {[1,2,3].map(i => (
+              <div key={i} className="card p-6 animate-pulse">
+                <div className="flex items-start gap-4 mb-4">
+                  <div className="w-12 h-12 bg-primary-200 dark:bg-primary-700 rounded-full" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-5 w-32 bg-primary-200 dark:bg-primary-700 rounded" />
+                    <div className="h-4 w-48 bg-primary-200 dark:bg-primary-700 rounded" />
+                  </div>
+                  <div className="flex gap-1">{[1,2,3,4,5].map(s => <div key={s} className="w-4 h-4 bg-primary-200 dark:bg-primary-700 rounded" />)}</div>
+                </div>
+                <div className="h-4 w-full bg-primary-200 dark:bg-primary-700 rounded mb-2" />
+                <div className="h-4 w-3/4 bg-primary-200 dark:bg-primary-700 rounded" />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -101,7 +140,7 @@ export function HostReviews() {
                     key={star}
                     className={`w-5 h-5 ${
                       star <= Math.round(averageRating)
-                        ? 'fill-yellow-400 text-yellow-400'
+                        ? 'fill-secondary-500 text-secondary-500'
                         : 'text-primary-200 dark:text-primary-600'
                     }`}
                   />
@@ -117,10 +156,10 @@ export function HostReviews() {
               {ratingDistribution.map(({ rating, count, percentage }) => (
                 <div key={rating} className="flex items-center gap-3 mb-2">
                   <span className="text-sm text-primary-500 dark:text-sand-400 w-8">{rating}</span>
-                  <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                  <Star className="w-4 h-4 text-secondary-500 fill-secondary-500" />
                   <div className="flex-1 h-2 bg-primary-200 dark:bg-primary-700 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-yellow-400 rounded-full"
+                      className="h-full bg-secondary-500 rounded-full"
                       style={{ width: `${percentage}%` }}
                     />
                   </div>
@@ -204,7 +243,7 @@ export function HostReviews() {
                           key={star}
                           className={`w-4 h-4 ${
                             star <= review.rating
-                              ? 'fill-yellow-400 text-yellow-400'
+                              ? 'fill-secondary-500 text-secondary-500'
                               : 'text-primary-200 dark:text-primary-600'
                           }`}
                         />

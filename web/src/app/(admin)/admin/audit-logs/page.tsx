@@ -47,7 +47,7 @@ export default function AuditLogsPage() {
       <div className="bg-white rounded-lg shadow p-6 mb-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-primary-700 dark:text-sand-200 mb-2">
               Filter by Action
             </label>
             <select
@@ -78,26 +78,26 @@ export default function AuditLogsPage() {
         ) : (
           <>
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+              <table className="min-w-full divide-y divide-primary-200 dark:divide-primary-700">
+                <thead className="bg-sand-50 dark:bg-primary-900">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-primary-400 dark:text-sand-500 uppercase tracking-wider">
                       Timestamp
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-primary-400 dark:text-sand-500 uppercase tracking-wider">
                       User
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-primary-400 dark:text-sand-500 uppercase tracking-wider">
                       Action
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-primary-400 dark:text-sand-500 uppercase tracking-wider">
                       Details
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-white divide-y divide-primary-200 dark:divide-primary-700">
                   {logs.map((log) => (
-                    <tr key={log.id} className="hover:bg-gray-50">
+                    <tr key={log.id} className="hover:bg-sand-50 dark:hover:bg-primary-800">
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-[#122F26]">
                         {new Date(log.timestamp).toLocaleString()}
                       </td>
@@ -107,10 +107,10 @@ export default function AuditLogsPage() {
                             <div className="text-sm font-medium text-[#122F26]">
                               {log.user.first_name} {log.user.last_name}
                             </div>
-                            <div className="text-sm text-gray-500">{log.user.email}</div>
+                            <div className="text-sm text-primary-400 dark:text-sand-500">{log.user.email}</div>
                           </div>
                         ) : (
-                          <span className="text-sm text-gray-500">System</span>
+                          <span className="text-sm text-primary-400 dark:text-sand-500">System</span>
                         )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -124,7 +124,7 @@ export default function AuditLogsPage() {
                             <span className="font-medium">{log.content_type}</span>
                           )}
                           {log.object_id && (
-                            <span className="text-gray-500"> #{log.object_id}</span>
+                            <span className="text-primary-400 dark:text-sand-500"> #{log.object_id}</span>
                           )}
                         </div>
                         {Object.keys(log.changes).length > 0 && (
@@ -132,7 +132,7 @@ export default function AuditLogsPage() {
                             <summary className="text-xs text-[#D9B168] cursor-pointer">
                               View changes
                             </summary>
-                            <pre className="mt-2 text-xs bg-gray-50 p-2 rounded overflow-auto max-w-lg">
+                            <pre className="mt-2 text-xs bg-sand-50 dark:bg-primary-900 p-2 rounded overflow-auto max-w-lg">
                               {JSON.stringify(log.changes, null, 2)}
                             </pre>
                           </details>
@@ -145,22 +145,22 @@ export default function AuditLogsPage() {
             </div>
 
             {/* Pagination */}
-            <div className="bg-gray-50 px-6 py-4 flex items-center justify-between border-t">
-              <div className="text-sm text-gray-700">
+            <div className="bg-sand-50 dark:bg-primary-900 px-6 py-4 flex items-center justify-between border-t">
+              <div className="text-sm text-primary-700 dark:text-sand-200">
                 Showing {(page - 1) * 30 + 1} to {Math.min(page * 30, totalCount)} of {totalCount} logs
               </div>
               <div className="flex space-x-2">
                 <button
                   onClick={() => setPage(p => Math.max(1, p - 1))}
                   disabled={page === 1}
-                  className="px-4 py-2 border border-[#3A5C50] rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 border border-[#3A5C50] rounded-lg text-sm font-medium text-primary-700 dark:text-sand-200 hover:bg-sand-50 dark:hover:bg-primary-800 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Previous
                 </button>
                 <button
                   onClick={() => setPage(p => p + 1)}
                   disabled={page * 30 >= totalCount}
-                  className="px-4 py-2 border border-[#3A5C50] rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 border border-[#3A5C50] rounded-lg text-sm font-medium text-primary-700 dark:text-sand-200 hover:bg-sand-50 dark:hover:bg-primary-800 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Next
                 </button>

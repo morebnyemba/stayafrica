@@ -156,7 +156,7 @@ export default function DynamicPricingPage() {
                         <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${
                           property.status === 'active'
                             ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
-                            : 'bg-gray-100 dark:bg-gray-900/30 text-gray-800 dark:text-gray-300'
+                            : 'bg-primary-100 dark:bg-primary-800 text-primary-800 dark:text-sand-100'
                         }`}>
                           {property.status}
                         </span>

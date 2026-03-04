@@ -37,12 +37,12 @@ export default function ConfirmDialog({
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={title} size="sm">
       <div className="space-y-4">
-        <p className="text-gray-700">{message}</p>
+        <p className="text-primary-700 dark:text-sand-200">{message}</p>
         
         <div className="flex justify-end space-x-3">
           <button
             onClick={onClose}
-            className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+            className="px-4 py-2 border border-primary-300 dark:border-primary-600 text-primary-700 dark:text-sand-200 rounded-lg hover:bg-sand-50 dark:hover:bg-primary-800 transition-colors"
           >
             {cancelText}
           </button>

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { HostTaxReport as TaxReportType } from '@/types/tax-types';
-import { Loader2, Download, Calendar } from 'lucide-react';
+import { Download, Calendar } from 'lucide-react';
 import { format, subMonths, startOfMonth, endOfMonth } from 'date-fns';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
@@ -97,15 +97,15 @@ export const HostTaxReport = () => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border">
-      <div className="p-6 border-b">
+    <div className="card">
+      <div className="p-6 border-b border-primary-200 dark:border-primary-700">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold text-gray-900">Tax Report</h2>
+          <h2 className="text-xl font-semibold text-primary-900 dark:text-sand-50">Tax Report</h2>
           
           {report && (
             <button
               onClick={exportToCSV}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-secondary-600 text-white rounded-lg hover:bg-secondary-700 transition-colors"
             >
               <Download className="h-4 w-4" />
               <span>Export CSV</span>
@@ -115,7 +115,7 @@ export const HostTaxReport = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-primary-700 dark:text-sand-200 mb-2">
               <Calendar className="h-4 w-4 inline mr-1" />
               Period Start
             </label>
@@ -123,12 +123,12 @@ export const HostTaxReport = () => {
               type="date"
               value={periodStart}
               onChange={(e) => setPeriodStart(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-primary-700 dark:text-sand-200 mb-2">
               <Calendar className="h-4 w-4 inline mr-1" />
               Period End
             </label>
@@ -136,7 +136,7 @@ export const HostTaxReport = () => {
               type="date"
               value={periodEnd}
               onChange={(e) => setPeriodEnd(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent"
             />
           </div>
         </div>
@@ -144,8 +144,21 @@ export const HostTaxReport = () => {
 
       <div className="p-6">
         {isLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+          <div className="animate-pulse space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {[1,2,3].map(i => (
+                <div key={i} className="rounded-lg p-4 bg-primary-100 dark:bg-primary-700/50">
+                  <div className="h-4 w-24 bg-primary-200 dark:bg-primary-600 rounded mb-2" />
+                  <div className="h-8 w-32 bg-primary-200 dark:bg-primary-600 rounded" />
+                </div>
+              ))}
+            </div>
+            <div className="space-y-3">
+              <div className="h-5 w-36 bg-primary-200 dark:bg-primary-700 rounded" />
+              {[1,2,3].map(i => (
+                <div key={i} className="h-10 bg-primary-100 dark:bg-primary-700/50 rounded" />
+              ))}
+            </div>
           </div>
         ) : error ? (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4">
@@ -159,7 +172,7 @@ export const HostTaxReport = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {report.total_revenue !== undefined && (
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <p className="text-sm text-blue-600 font-medium mb-1">Total Revenue</p>
+                  <p className="text-sm text-secondary-600 font-medium mb-1">Total Revenue</p>
                   <p className="text-2xl font-bold text-blue-900">
                     ${report.total_revenue.toFixed(2)}
                   </p>
@@ -184,43 +197,43 @@ export const HostTaxReport = () => {
             {/* Tax Breakdown Table */}
             {report.tax_breakdown && report.tax_breakdown.length > 0 ? (
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Tax Breakdown</h3>
+                <h3 className="text-lg font-semibold text-primary-900 dark:text-sand-50 mb-4">Tax Breakdown</h3>
                 <div className="overflow-x-auto">
                   <table className="w-full">
-                    <thead className="bg-gray-50 border-b">
+                    <thead className="bg-sand-50 dark:bg-primary-900 border-b">
                       <tr>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-4 py-3 text-left text-xs font-medium text-primary-400 dark:text-sand-500 uppercase tracking-wider">
                           Jurisdiction
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-4 py-3 text-left text-xs font-medium text-primary-400 dark:text-sand-500 uppercase tracking-wider">
                           Tax Type
                         </th>
-                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-4 py-3 text-right text-xs font-medium text-primary-400 dark:text-sand-500 uppercase tracking-wider">
                           Total Amount
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-200">
+                    <tbody className="divide-y divide-primary-200 dark:divide-primary-700">
                       {report.tax_breakdown.map((item, index) => (
-                        <tr key={index} className="hover:bg-gray-50">
-                          <td className="px-4 py-3 text-sm text-gray-900">
+                        <tr key={index} className="hover:bg-sand-50 dark:hover:bg-primary-800">
+                          <td className="px-4 py-3 text-sm text-primary-900 dark:text-sand-50">
                             {item.jurisdiction}
                           </td>
-                          <td className="px-4 py-3 text-sm text-gray-700">
+                          <td className="px-4 py-3 text-sm text-primary-700 dark:text-sand-200">
                             {item.tax_type}
                           </td>
-                          <td className="px-4 py-3 text-sm text-gray-900 text-right font-medium">
+                          <td className="px-4 py-3 text-sm text-primary-900 dark:text-sand-50 text-right font-medium">
                             ${item.total_amount.toFixed(2)}
                           </td>
                         </tr>
                       ))}
                     </tbody>
-                    <tfoot className="bg-gray-50 border-t-2">
+                    <tfoot className="bg-sand-50 dark:bg-primary-900 border-t-2">
                       <tr>
-                        <td colSpan={2} className="px-4 py-3 text-sm font-semibold text-gray-900">
+                        <td colSpan={2} className="px-4 py-3 text-sm font-semibold text-primary-900 dark:text-sand-50">
                           Total
                         </td>
-                        <td className="px-4 py-3 text-sm font-bold text-gray-900 text-right">
+                        <td className="px-4 py-3 text-sm font-bold text-primary-900 dark:text-sand-50 text-right">
                           ${report.total_taxes_collected.toFixed(2)}
                         </td>
                       </tr>
@@ -229,8 +242,14 @@ export const HostTaxReport = () => {
                 </div>
               </div>
             ) : (
-              <div className="text-center py-8 text-gray-500">
-                No tax data available for the selected period.
+              <div className="text-center py-12">
+                <div className="w-14 h-14 rounded-full bg-sand-100 dark:bg-primary-700/50 flex items-center justify-center mx-auto mb-3">
+                  <Calendar className="w-7 h-7 text-primary-400 dark:text-sand-500" />
+                </div>
+                <p className="text-sm font-medium text-primary-700 dark:text-sand-300 mb-1">No tax data</p>
+                <p className="text-xs text-primary-500 dark:text-sand-400">
+                  No tax records found for {periodStart} to {periodEnd}
+                </p>
               </div>
             )}
           </div>

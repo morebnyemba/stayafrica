@@ -26,15 +26,15 @@ export default function FlexibleDateSearchPanel({
   };
 
   return (
-    <div className={`bg-white rounded-xl shadow-lg p-6 ${className}`}>
+    <div className={`bg-white dark:bg-primary-800/40 rounded-xl shadow-lg p-6 ${className}`}>
       <div className="flex items-center gap-2 mb-6">
         <Calendar className="w-5 h-5 text-primary-600" />
-        <h3 className="text-lg font-semibold text-gray-900">Date Flexibility</h3>
+        <h3 className="text-lg font-semibold text-primary-900 dark:text-sand-50">Date Flexibility</h3>
       </div>
 
       {/* Flexibility Options */}
       <div className="space-y-3 mb-6">
-        <label className="flex items-start gap-3 p-4 border-2 rounded-lg cursor-pointer hover:bg-gray-50 transition">
+        <label className="flex items-start gap-3 p-4 border-2 rounded-lg cursor-pointer hover:bg-sand-50 dark:hover:bg-primary-800 transition">
           <input
             type="radio"
             name="flexibility"
@@ -44,14 +44,14 @@ export default function FlexibleDateSearchPanel({
             className="mt-0.5 w-4 h-4 text-primary-600"
           />
           <div className="flex-1">
-            <div className="font-medium text-gray-900">Exact dates</div>
-            <div className="text-sm text-gray-600 mt-1">
+            <div className="font-medium text-primary-900 dark:text-sand-50">Exact dates</div>
+            <div className="text-sm text-primary-500 dark:text-sand-400 mt-1">
               {checkIn.toLocaleDateString()} - {checkOut.toLocaleDateString()}
             </div>
           </div>
         </label>
 
-        <label className="flex items-start gap-3 p-4 border-2 rounded-lg cursor-pointer hover:bg-gray-50 transition">
+        <label className="flex items-start gap-3 p-4 border-2 rounded-lg cursor-pointer hover:bg-sand-50 dark:hover:bg-primary-800 transition">
           <input
             type="radio"
             name="flexibility"
@@ -61,8 +61,8 @@ export default function FlexibleDateSearchPanel({
             className="mt-0.5 w-4 h-4 text-primary-600"
           />
           <div className="flex-1">
-            <div className="font-medium text-gray-900">Flexible days</div>
-            <div className="text-sm text-gray-600 mt-1">
+            <div className="font-medium text-primary-900 dark:text-sand-50">Flexible days</div>
+            <div className="text-sm text-primary-500 dark:text-sand-400 mt-1">
               Shift dates by ±{flexibleDays} days to find better prices
             </div>
             {flexibility === 'flexible_days' && (
@@ -70,17 +70,17 @@ export default function FlexibleDateSearchPanel({
                 <button
                   type="button"
                   onClick={() => setFlexibleDays(Math.max(1, flexibleDays - 1))}
-                  className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition"
+                  className="p-2 rounded-lg bg-primary-100 dark:bg-primary-800 hover:bg-primary-200 dark:hover:bg-primary-700 transition"
                 >
                   <Minus className="w-4 h-4" />
                 </button>
-                <span className="font-semibold text-gray-900 min-w-[60px] text-center">
+                <span className="font-semibold text-primary-900 dark:text-sand-50 min-w-[60px] text-center">
                   ±{flexibleDays} days
                 </span>
                 <button
                   type="button"
                   onClick={() => setFlexibleDays(Math.min(7, flexibleDays + 1))}
-                  className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition"
+                  className="p-2 rounded-lg bg-primary-100 dark:bg-primary-800 hover:bg-primary-200 dark:hover:bg-primary-700 transition"
                 >
                   <Plus className="w-4 h-4" />
                 </button>
@@ -89,7 +89,7 @@ export default function FlexibleDateSearchPanel({
           </div>
         </label>
 
-        <label className="flex items-start gap-3 p-4 border-2 rounded-lg cursor-pointer hover:bg-gray-50 transition">
+        <label className="flex items-start gap-3 p-4 border-2 rounded-lg cursor-pointer hover:bg-sand-50 dark:hover:bg-primary-800 transition">
           <input
             type="radio"
             name="flexibility"
@@ -99,14 +99,14 @@ export default function FlexibleDateSearchPanel({
             className="mt-0.5 w-4 h-4 text-primary-600"
           />
           <div className="flex-1">
-            <div className="font-medium text-gray-900">Any weekend</div>
-            <div className="text-sm text-gray-600 mt-1">
+            <div className="font-medium text-primary-900 dark:text-sand-50">Any weekend</div>
+            <div className="text-sm text-primary-500 dark:text-sand-400 mt-1">
               Show properties available for weekend stays
             </div>
           </div>
         </label>
 
-        <label className="flex items-start gap-3 p-4 border-2 rounded-lg cursor-pointer hover:bg-gray-50 transition">
+        <label className="flex items-start gap-3 p-4 border-2 rounded-lg cursor-pointer hover:bg-sand-50 dark:hover:bg-primary-800 transition">
           <input
             type="radio"
             name="flexibility"
@@ -116,8 +116,8 @@ export default function FlexibleDateSearchPanel({
             className="mt-0.5 w-4 h-4 text-primary-600"
           />
           <div className="flex-1">
-            <div className="font-medium text-gray-900">Entire month</div>
-            <div className="text-sm text-gray-600 mt-1">
+            <div className="font-medium text-primary-900 dark:text-sand-50">Entire month</div>
+            <div className="text-sm text-primary-500 dark:text-sand-400 mt-1">
               Show all available dates in {checkIn.toLocaleString('default', { month: 'long' })}
             </div>
           </div>
@@ -133,7 +133,7 @@ export default function FlexibleDateSearchPanel({
       </button>
 
       {/* Info */}
-      <p className="text-xs text-gray-500 mt-4 text-center">
+      <p className="text-xs text-primary-400 dark:text-sand-500 mt-4 text-center">
         Flexible dates can help you find better prices and more options
       </p>
     </div>

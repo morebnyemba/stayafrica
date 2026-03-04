@@ -25,13 +25,13 @@ export default function PriceBreakdownModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-white dark:bg-primary-800/40 rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-gray-900">Price Breakdown</h2>
+        <div className="sticky top-0 bg-white dark:bg-primary-800/40 border-b px-6 py-4 flex items-center justify-between">
+          <h2 className="text-2xl font-bold text-primary-900 dark:text-sand-50">Price Breakdown</h2>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-full transition"
+            className="p-2 hover:bg-primary-100 dark:hover:bg-primary-800 rounded-full transition"
           >
             <X className="w-5 h-5" />
           </button>
@@ -53,15 +53,15 @@ export default function PriceBreakdownModal({
           {/* Base Price */}
           <div>
             <div className="flex items-center gap-2 mb-3">
-              <DollarSign className="w-5 h-5 text-gray-600" />
-              <h3 className="font-semibold text-gray-900">Base Price</h3>
+              <DollarSign className="w-5 h-5 text-primary-500 dark:text-sand-400" />
+              <h3 className="font-semibold text-primary-900 dark:text-sand-50">Base Price</h3>
             </div>
-            <div className="bg-gray-50 rounded-lg p-4">
+            <div className="bg-sand-50 dark:bg-primary-900 rounded-lg p-4">
               <div className="flex justify-between items-center">
-                <span className="text-gray-700">
+                <span className="text-primary-700 dark:text-sand-200">
                   ${pricing.base_price.toFixed(2)} × {nights} {nights === 1 ? 'night' : 'nights'}
                 </span>
-                <span className="font-semibold text-gray-900">
+                <span className="font-semibold text-primary-900 dark:text-sand-50">
                   ${baseTotal.toFixed(2)}
                 </span>
               </div>
@@ -73,7 +73,7 @@ export default function PriceBreakdownModal({
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <TrendingUp className="w-5 h-5 text-primary-600" />
-                <h3 className="font-semibold text-gray-900">Dynamic Pricing Adjustments</h3>
+                <h3 className="font-semibold text-primary-900 dark:text-sand-50">Dynamic Pricing Adjustments</h3>
               </div>
               <div className="space-y-2">
                 {pricing.applied_rules.map((rule, index) => {
@@ -134,14 +134,14 @@ export default function PriceBreakdownModal({
           {pricing.fees.length > 0 && (
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <Receipt className="w-5 h-5 text-gray-600" />
-                <h3 className="font-semibold text-gray-900">Fees</h3>
+                <Receipt className="w-5 h-5 text-primary-500 dark:text-sand-400" />
+                <h3 className="font-semibold text-primary-900 dark:text-sand-50">Fees</h3>
               </div>
               <div className="space-y-2">
                 {pricing.fees.map((fee, index) => (
-                  <div key={index} className="flex justify-between items-center bg-gray-50 rounded-lg p-3">
-                    <span className="text-gray-700">{fee.name}</span>
-                    <span className="font-medium text-gray-900">${fee.amount.toFixed(2)}</span>
+                  <div key={index} className="flex justify-between items-center bg-sand-50 dark:bg-primary-900 rounded-lg p-3">
+                    <span className="text-primary-700 dark:text-sand-200">{fee.name}</span>
+                    <span className="font-medium text-primary-900 dark:text-sand-50">${fee.amount.toFixed(2)}</span>
                   </div>
                 ))}
               </div>
@@ -151,15 +151,15 @@ export default function PriceBreakdownModal({
           {/* Taxes */}
           {pricing.taxes.length > 0 && (
             <div>
-              <h3 className="font-semibold text-gray-900 mb-3">Taxes</h3>
+              <h3 className="font-semibold text-primary-900 dark:text-sand-50 mb-3">Taxes</h3>
               <div className="space-y-2">
                 {pricing.taxes.map((tax, index) => (
-                  <div key={index} className="flex justify-between items-center bg-gray-50 rounded-lg p-3">
+                  <div key={index} className="flex justify-between items-center bg-sand-50 dark:bg-primary-900 rounded-lg p-3">
                     <div>
-                      <span className="text-gray-700">{tax.name}</span>
-                      <span className="text-sm text-gray-500 ml-2">({(tax.rate * 100).toFixed(1)}%)</span>
+                      <span className="text-primary-700 dark:text-sand-200">{tax.name}</span>
+                      <span className="text-sm text-primary-400 dark:text-sand-500 ml-2">({(tax.rate * 100).toFixed(1)}%)</span>
                     </div>
-                    <span className="font-medium text-gray-900">${tax.amount.toFixed(2)}</span>
+                    <span className="font-medium text-primary-900 dark:text-sand-50">${tax.amount.toFixed(2)}</span>
                   </div>
                 ))}
               </div>
@@ -169,13 +169,13 @@ export default function PriceBreakdownModal({
           {/* Total */}
           <div className="border-t pt-4">
             <div className="flex justify-between items-center">
-              <span className="text-xl font-bold text-gray-900">Total</span>
+              <span className="text-xl font-bold text-primary-900 dark:text-sand-50">Total</span>
               <span className="text-3xl font-bold text-primary-600">
                 ${pricing.total_price.toFixed(2)}
               </span>
             </div>
             {adjustedTotal !== baseTotal && (
-              <p className="text-sm text-gray-600 mt-2 text-right">
+              <p className="text-sm text-primary-500 dark:text-sand-400 mt-2 text-right">
                 You save ${(baseTotal - adjustedTotal).toFixed(2)} with dynamic pricing
               </p>
             )}

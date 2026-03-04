@@ -52,8 +52,8 @@ export default function EditPropertyPage({ params }: { params: Promise<{ id: str
         {property && <p className="text-lg text-primary-600 dark:text-sand-300 mb-8">{property.title}</p>}
 
         {loading && (
-          <div className="bg-white rounded-lg p-8 border border-gray-200 dark:bg-primary-900 dark:border-primary-700">
-            <p className="text-gray-600 dark:text-gray-400">Loading property details...</p>
+          <div className="bg-white rounded-lg p-8 border border-sand-200/50 dark:bg-primary-900 dark:border-primary-700">
+            <p className="text-primary-500 dark:text-sand-400">Loading property details...</p>
           </div>
         )}
 

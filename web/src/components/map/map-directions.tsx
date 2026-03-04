@@ -91,7 +91,7 @@ export function MapDirections({ destination, className = '' }: MapDirectionsProp
         new mapboxgl.Popup().setHTML(
           `<div class="p-2">
             <h3 class="font-semibold">${destination.name || 'Destination'}</h3>
-            ${destination.address ? `<p class="text-sm text-gray-600">${destination.address}</p>` : ''}
+            ${destination.address ? `<p class="text-sm text-primary-500 dark:text-sand-400">${destination.address}</p>` : ''}
           </div>`
         )
       )
@@ -225,7 +225,7 @@ export function MapDirections({ destination, className = '' }: MapDirectionsProp
       )}
 
       {/* Map Container */}
-      <div className="relative bg-gray-100 dark:bg-primary-800 rounded-lg overflow-hidden border border-primary-300 dark:border-primary-600">
+      <div className="relative bg-primary-100 dark:bg-primary-800 rounded-lg overflow-hidden border border-primary-300 dark:border-primary-600">
         {loading && (
           <div className="absolute inset-0 flex items-center justify-center bg-white/80 dark:bg-primary-900/80 z-10">
             <div className="flex flex-col items-center gap-2">

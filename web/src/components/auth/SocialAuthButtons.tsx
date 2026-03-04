@@ -98,7 +98,7 @@ export default function SocialAuthButtons({ mode: _mode = 'signin', onSuccess: _
         {/* Google */}
         <button
           onClick={handleGoogleAuth}
-          className="flex w-full items-center justify-center gap-3 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+          className="flex w-full items-center justify-center gap-3 rounded-md bg-white dark:bg-primary-800/40 px-3 py-2 text-sm font-semibold text-primary-900 dark:text-sand-50 shadow-sm ring-1 ring-inset ring-primary-300 dark:ring-primary-600 hover:bg-sand-50 dark:hover:bg-primary-800"
         >
           <svg className="h-5 w-5" viewBox="0 0 24 24">
             <path
@@ -135,7 +135,7 @@ export default function SocialAuthButtons({ mode: _mode = 'signin', onSuccess: _
         {/* Apple */}
         <button
           onClick={handleAppleAuth}
-          className="flex w-full items-center justify-center gap-3 rounded-md bg-black px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-900"
+          className="flex w-full items-center justify-center gap-3 rounded-md bg-black px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-900"
         >
           <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
             <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />

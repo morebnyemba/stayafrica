@@ -47,7 +47,7 @@ export default function PaymentsManagement() {
       failed: 'bg-red-100 text-red-800',
       pending: 'bg-yellow-100 text-yellow-800',
     };
-    return colors[status] || 'bg-gray-100 text-gray-800';
+    return colors[status] || 'bg-primary-100 dark:bg-primary-800 text-primary-800 dark:text-sand-100';
   };
 
   const getProviderBadge = (provider: string) => {
@@ -56,9 +56,9 @@ export default function PaymentsManagement() {
       payfast: 'bg-blue-100 text-blue-800',
       stripe: 'bg-indigo-100 text-indigo-800',
       ozow: 'bg-[#F4F1EA] text-[#122F26]',
-      cash_on_arrival: 'bg-gray-100 text-gray-800',
+      cash_on_arrival: 'bg-primary-100 dark:bg-primary-800 text-primary-800 dark:text-sand-100',
     };
-    return colors[provider] || 'bg-gray-100 text-gray-800';
+    return colors[provider] || 'bg-primary-100 dark:bg-primary-800 text-primary-800 dark:text-sand-100';
   };
 
   const handleRefund = (paymentId: string, amount: number) => {
@@ -93,7 +93,7 @@ export default function PaymentsManagement() {
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-lg shadow p-6 mb-6">
+      <div className="bg-white dark:bg-primary-800/40 rounded-lg shadow p-6 mb-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium text-[#122F26] mb-2">
@@ -119,23 +119,23 @@ export default function PaymentsManagement() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white rounded-lg shadow p-4">
+        <div className="bg-white dark:bg-primary-800/40 rounded-lg shadow p-4">
           <p className="text-sm text-[#3A5C50]">Total Transactions</p>
           <p className="text-2xl font-bold text-[#122F26]">{totalCount}</p>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
+        <div className="bg-white dark:bg-primary-800/40 rounded-lg shadow p-4">
           <p className="text-sm text-[#3A5C50]">Successful</p>
           <p className="text-2xl font-bold text-green-600">
             {payments.filter(p => p.status === 'success').length}
           </p>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
+        <div className="bg-white dark:bg-primary-800/40 rounded-lg shadow p-4">
           <p className="text-sm text-[#3A5C50]">Failed</p>
           <p className="text-2xl font-bold text-red-600">
             {payments.filter(p => p.status === 'failed').length}
           </p>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
+        <div className="bg-white dark:bg-primary-800/40 rounded-lg shadow p-4">
           <p className="text-sm text-[#3A5C50]">Total Revenue</p>
           <p className="text-2xl font-bold text-green-600">
             ${totalRevenue.toLocaleString()}
@@ -144,7 +144,7 @@ export default function PaymentsManagement() {
       </div>
 
       {/* Payments Table */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="bg-white dark:bg-primary-800/40 rounded-lg shadow overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#D9B168]"></div>
@@ -152,8 +152,8 @@ export default function PaymentsManagement() {
         ) : (
           <>
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+              <table className="min-w-full divide-y divide-primary-200 dark:divide-primary-700">
+                <thead className="bg-sand-50 dark:bg-primary-900">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-[#3A5C50] uppercase tracking-wider">
                       Transaction ID
@@ -178,9 +178,9 @@ export default function PaymentsManagement() {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-white dark:bg-primary-800/40 divide-y divide-primary-200 dark:divide-primary-700">
                   {payments.map((payment) => (
-                    <tr key={payment.id} className="hover:bg-gray-50">
+                    <tr key={payment.id} className="hover:bg-sand-50 dark:hover:bg-primary-800">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-[#122F26]">
                           {payment.id}
@@ -231,7 +231,7 @@ export default function PaymentsManagement() {
             </div>
 
             {/* Pagination */}
-            <div className="bg-gray-50 px-6 py-4 flex items-center justify-between border-t">
+            <div className="bg-sand-50 dark:bg-primary-900 px-6 py-4 flex items-center justify-between border-t">
               <div className="text-sm text-[#122F26]">
                 Showing {(page - 1) * 30 + 1} to {Math.min(page * 30, totalCount)} of {totalCount} payments
               </div>
@@ -239,14 +239,14 @@ export default function PaymentsManagement() {
                 <button
                   onClick={() => setPage(p => Math.max(1, p - 1))}
                   disabled={page === 1}
-                  className="px-4 py-2 border border-[#3A5C50] rounded-lg text-sm font-medium text-[#122F26] hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 border border-[#3A5C50] rounded-lg text-sm font-medium text-[#122F26] hover:bg-sand-50 dark:hover:bg-primary-800 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Previous
                 </button>
                 <button
                   onClick={() => setPage(p => p + 1)}
                   disabled={page * 30 >= totalCount}
-                  className="px-4 py-2 border border-[#3A5C50] rounded-lg text-sm font-medium text-[#122F26] hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 border border-[#3A5C50] rounded-lg text-sm font-medium text-[#122F26] hover:bg-sand-50 dark:hover:bg-primary-800 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Next
                 </button>
@@ -259,10 +259,10 @@ export default function PaymentsManagement() {
       {/* Refund Dialog */}
       {showRefundDialog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+          <div className="bg-white dark:bg-primary-800/40 rounded-lg shadow-xl p-6 w-full max-w-md">
             <h3 className="text-lg font-semibold text-[#122F26] mb-4">Process Refund</h3>
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-primary-700 dark:text-sand-200 mb-2">
                 Refund Amount ($)
               </label>
               <input
@@ -273,12 +273,12 @@ export default function PaymentsManagement() {
                 onChange={(e) => setRefundAmount(e.target.value)}
                 className="w-full px-4 py-2 border border-[#3A5C50] rounded-lg focus:ring-2 focus:ring-[#D9B168] focus:border-transparent"
               />
-              <p className="text-xs text-gray-500 mt-1">Enter partial or full amount to refund</p>
+              <p className="text-xs text-primary-400 dark:text-sand-500 mt-1">Enter partial or full amount to refund</p>
             </div>
             <div className="flex justify-end space-x-3">
               <button
                 onClick={() => { setShowRefundDialog(false); setRefundPaymentId(null); }}
-                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                className="px-4 py-2 border border-primary-300 dark:border-primary-600 text-primary-700 dark:text-sand-200 rounded-lg hover:bg-sand-50 dark:hover:bg-primary-800"
               >
                 Cancel
               </button>

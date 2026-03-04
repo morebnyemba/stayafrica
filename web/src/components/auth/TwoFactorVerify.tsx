@@ -54,8 +54,8 @@ export default function TwoFactorVerify({ email, password, onSuccess, onBack }: 
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900">Two-Factor Authentication</h2>
-        <p className="mt-2 text-sm text-gray-600">
+        <h2 className="text-2xl font-bold text-primary-900 dark:text-sand-50">Two-Factor Authentication</h2>
+        <p className="mt-2 text-sm text-primary-500 dark:text-sand-400">
           {useBackupCode
             ? 'Enter one of your backup codes'
             : 'Enter the 6-digit code from your authenticator app'}
@@ -65,7 +65,7 @@ export default function TwoFactorVerify({ email, password, onSuccess, onBack }: 
       <form onSubmit={handleVerify} className="space-y-4">
         {useBackupCode ? (
           <div>
-            <label htmlFor="backup-code" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="backup-code" className="block text-sm font-medium text-primary-700 dark:text-sand-200 mb-2">
               Backup Code
             </label>
             <input
@@ -74,13 +74,13 @@ export default function TwoFactorVerify({ email, password, onSuccess, onBack }: 
               value={backupCode}
               onChange={(e) => setBackupCode(e.target.value)}
               placeholder="xxxx-xxxx-xxxx-xxxx"
-              className="w-full rounded-md border border-gray-300 px-3 py-2"
+              className="w-full rounded-md border border-primary-300 dark:border-primary-600 px-3 py-2"
               required
             />
           </div>
         ) : (
           <div>
-            <label htmlFor="code" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="code" className="block text-sm font-medium text-primary-700 dark:text-sand-200 mb-2">
               Verification Code
             </label>
             <input
@@ -90,7 +90,7 @@ export default function TwoFactorVerify({ email, password, onSuccess, onBack }: 
               value={code}
               onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
               placeholder="000000"
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-center text-2xl tracking-widest"
+              className="w-full rounded-md border border-primary-300 dark:border-primary-600 px-3 py-2 text-center text-2xl tracking-widest"
               required
             />
           </div>
@@ -115,7 +115,7 @@ export default function TwoFactorVerify({ email, password, onSuccess, onBack }: 
           <button
             type="button"
             onClick={onBack}
-            className="text-gray-600 hover:text-gray-500"
+            className="text-primary-500 dark:text-sand-400 hover:text-primary-400 dark:hover:text-sand-500"
           >
             ← Back to login
           </button>

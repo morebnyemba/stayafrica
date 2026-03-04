@@ -33,12 +33,12 @@ export default function FlexibleDateResults({ results, isLoading }: FlexibleDate
     return (
       <div className="space-y-4">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="bg-white rounded-xl shadow p-6 animate-pulse">
-            <div className="h-6 bg-gray-200 rounded w-1/3 mb-4"></div>
+          <div key={i} className="bg-white dark:bg-primary-800/40 rounded-xl shadow p-6 animate-pulse">
+            <div className="h-6 bg-primary-200 dark:bg-primary-700 rounded w-1/3 mb-4"></div>
             <div className="grid grid-cols-3 gap-4">
-              <div className="h-48 bg-gray-200 rounded"></div>
-              <div className="h-48 bg-gray-200 rounded"></div>
-              <div className="h-48 bg-gray-200 rounded"></div>
+              <div className="h-48 bg-primary-200 dark:bg-primary-700 rounded"></div>
+              <div className="h-48 bg-primary-200 dark:bg-primary-700 rounded"></div>
+              <div className="h-48 bg-primary-200 dark:bg-primary-700 rounded"></div>
             </div>
           </div>
         ))}
@@ -48,10 +48,10 @@ export default function FlexibleDateResults({ results, isLoading }: FlexibleDate
 
   if (!results || results.length === 0) {
     return (
-      <div className="bg-white rounded-xl shadow p-12 text-center">
-        <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-        <h3 className="text-xl font-semibold text-gray-900 mb-2">No results found</h3>
-        <p className="text-gray-600">Try adjusting your search criteria or flexibility settings</p>
+      <div className="bg-white dark:bg-primary-800/40 rounded-xl shadow p-12 text-center">
+        <Calendar className="w-16 h-16 text-primary-300 dark:text-primary-500 mx-auto mb-4" />
+        <h3 className="text-xl font-semibold text-primary-900 dark:text-sand-50 mb-2">No results found</h3>
+        <p className="text-primary-500 dark:text-sand-400">Try adjusting your search criteria or flexibility settings</p>
       </div>
     );
   }
@@ -67,14 +67,14 @@ export default function FlexibleDateResults({ results, isLoading }: FlexibleDate
         const savings = option.price_range.max - option.price_range.min;
 
         return (
-          <div key={index} className="bg-white rounded-xl shadow hover:shadow-lg transition">
+          <div key={index} className="bg-white dark:bg-primary-800/40 rounded-xl shadow hover:shadow-lg transition">
             {/* Date Header */}
             <div className="bg-gradient-to-r from-primary-50 to-blue-50 p-6 rounded-t-xl border-b">
               <div className="flex items-center justify-between flex-wrap gap-4">
                 <div className="flex items-center gap-3">
                   <Calendar className="w-5 h-5 text-primary-600" />
                   <div>
-                    <div className="text-lg font-semibold text-gray-900">
+                    <div className="text-lg font-semibold text-primary-900 dark:text-sand-50">
                       {checkInDate.toLocaleDateString('en-US', { 
                         weekday: 'short', 
                         month: 'short', 
@@ -85,14 +85,14 @@ export default function FlexibleDateResults({ results, isLoading }: FlexibleDate
                         day: 'numeric' 
                       })}
                     </div>
-                    <div className="text-sm text-gray-600">
+                    <div className="text-sm text-primary-500 dark:text-sand-400">
                       {nights} {nights === 1 ? 'night' : 'nights'}
                     </div>
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-sm text-gray-600">Price range</div>
-                  <div className="text-2xl font-bold text-gray-900">
+                  <div className="text-sm text-primary-500 dark:text-sand-400">Price range</div>
+                  <div className="text-2xl font-bold text-primary-900 dark:text-sand-50">
                     ${option.price_range.min} - ${option.price_range.max}
                   </div>
                   {savings > 0 && (
@@ -108,7 +108,7 @@ export default function FlexibleDateResults({ results, isLoading }: FlexibleDate
             {/* Properties Grid */}
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <h4 className="text-sm font-semibold text-gray-900">
+                <h4 className="text-sm font-semibold text-primary-900 dark:text-sand-50">
                   {option.properties_count} {option.properties_count === 1 ? 'property' : 'properties'} available
                 </h4>
                 <Link
@@ -135,19 +135,19 @@ export default function FlexibleDateResults({ results, isLoading }: FlexibleDate
                       />
                     </div>
                     <div>
-                      <h5 className="font-semibold text-gray-900 group-hover:text-primary-600 transition line-clamp-1">
+                      <h5 className="font-semibold text-primary-900 dark:text-sand-50 group-hover:text-primary-600 transition line-clamp-1">
                         {property.name}
                       </h5>
-                      <div className="flex items-center gap-1 text-sm text-gray-600 mt-1">
+                      <div className="flex items-center gap-1 text-sm text-primary-500 dark:text-sand-400 mt-1">
                         <MapPin className="w-3 h-3" />
                         <span className="line-clamp-1">{property.location}</span>
                       </div>
                       <div className="flex items-center justify-between mt-2">
-                        <span className="text-lg font-bold text-gray-900">
+                        <span className="text-lg font-bold text-primary-900 dark:text-sand-50">
                           ${property.price}
                         </span>
                         {property.rating && (
-                          <span className="text-sm text-gray-600 flex items-center gap-1">
+                          <span className="text-sm text-primary-500 dark:text-sand-400 flex items-center gap-1">
                             <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" /> {property.rating.toFixed(1)}
                           </span>
                         )}

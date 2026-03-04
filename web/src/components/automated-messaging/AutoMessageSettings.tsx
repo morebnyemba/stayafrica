@@ -78,7 +78,7 @@ export const AutoMessageSettings = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary-300 dark:text-primary-500" />
       </div>
     );
   }
@@ -111,14 +111,14 @@ export const AutoMessageSettings = () => {
   ];
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border">
+    <div className="bg-white dark:bg-primary-800/40 rounded-lg shadow-sm border">
       <div className="p-6 border-b">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-semibold text-gray-900">
+            <h2 className="text-xl font-semibold text-primary-900 dark:text-sand-50">
               Messaging Settings
             </h2>
-            <p className="text-sm text-gray-600 mt-1">
+            <p className="text-sm text-primary-500 dark:text-sand-400 mt-1">
               Configure your automated messaging preferences
             </p>
           </div>
@@ -127,7 +127,7 @@ export const AutoMessageSettings = () => {
             <button
               onClick={handleSave}
               disabled={updateMutation.isPending}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-secondary-600 text-white rounded-lg hover:bg-secondary-700 disabled:opacity-50 transition-colors"
             >
               {updateMutation.isPending ? (
                 <>
@@ -149,17 +149,17 @@ export const AutoMessageSettings = () => {
         {toggleItems.map(({ field, icon: Icon, label, description }) => (
           <div key={field} className="flex items-center justify-between p-4 border rounded-lg">
             <div className="flex items-start gap-3">
-              <Icon className="h-5 w-5 text-gray-500 mt-0.5" />
+              <Icon className="h-5 w-5 text-primary-400 dark:text-sand-500 mt-0.5" />
               <div>
-                <h3 className="font-medium text-gray-900">{label}</h3>
-                <p className="text-sm text-gray-600 mt-0.5">{description}</p>
+                <h3 className="font-medium text-primary-900 dark:text-sand-50">{label}</h3>
+                <p className="text-sm text-primary-500 dark:text-sand-400 mt-0.5">{description}</p>
               </div>
             </div>
             <button
               onClick={() => handleToggle(field)}
               disabled={updateMutation.isPending}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                localSettings[field] ? 'bg-blue-600' : 'bg-gray-200'
+                localSettings[field] ? 'bg-secondary-600' : 'bg-primary-200 dark:bg-primary-700'
               }`}
             >
               <span
@@ -172,8 +172,8 @@ export const AutoMessageSettings = () => {
         ))}
 
         {localSettings.away_mode_enabled && (
-          <div className="ml-8 p-4 border rounded-lg bg-gray-50">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+          <div className="ml-8 p-4 border rounded-lg bg-sand-50 dark:bg-primary-900">
+            <label className="block text-sm font-medium text-primary-700 dark:text-sand-200 mb-2">
               Away Message
             </label>
             <textarea
@@ -181,17 +181,17 @@ export const AutoMessageSettings = () => {
               onChange={(e) => handleChange('away_message', e.target.value)}
               placeholder="Enter your away message..."
               rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+              className="w-full px-3 py-2 border border-primary-300 dark:border-primary-600 rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent text-sm"
             />
           </div>
         )}
 
         <div className="p-4 border rounded-lg">
           <div className="flex items-start gap-3">
-            <Clock className="h-5 w-5 text-gray-500 mt-0.5" />
+            <Clock className="h-5 w-5 text-primary-400 dark:text-sand-500 mt-0.5" />
             <div className="flex-1">
-              <h3 className="font-medium text-gray-900">Target Response Time</h3>
-              <p className="text-sm text-gray-600 mt-0.5">
+              <h3 className="font-medium text-primary-900 dark:text-sand-50">Target Response Time</h3>
+              <p className="text-sm text-primary-500 dark:text-sand-400 mt-0.5">
                 Set your goal for how quickly you respond to messages
               </p>
               <div className="mt-3 flex items-center gap-2">
@@ -201,9 +201,9 @@ export const AutoMessageSettings = () => {
                   max={72}
                   value={localSettings.target_response_time_hours || 24}
                   onChange={(e) => handleChange('target_response_time_hours', parseInt(e.target.value) || 24)}
-                  className="w-20 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  className="w-20 px-3 py-2 border border-primary-300 dark:border-primary-600 rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent text-sm"
                 />
-                <span className="text-sm text-gray-600">hours</span>
+                <span className="text-sm text-primary-500 dark:text-sand-400">hours</span>
               </div>
             </div>
           </div>

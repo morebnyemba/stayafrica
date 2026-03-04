@@ -216,6 +216,11 @@ export function HostExperienceBookingsContent() {
                     {/* Booking Info */}
                     <div className="flex-1 space-y-3">
                       <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-secondary-100 dark:bg-secondary-900/30 flex items-center justify-center flex-shrink-0">
+                          <span className="text-sm font-semibold text-secondary-700 dark:text-secondary-300">
+                            {(booking.guest_name || 'G').charAt(0).toUpperCase()}
+                          </span>
+                        </div>
                         <span className={`inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-full ${config.color}`}>
                           <StatusIcon className="w-3.5 h-3.5" />
                           {config.label}
