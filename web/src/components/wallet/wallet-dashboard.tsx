@@ -91,7 +91,7 @@ export function WalletDashboard() {
               <button
                 onClick={() => setShowWithdrawModal(true)}
                 disabled={!wallet || wallet?.status !== 'active' || parseFloat(wallet?.balance || '0') < 10}
-                className="flex items-center gap-2 bg-white text-primary-700 px-4 py-2 rounded-lg font-semibold hover:bg-primary-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 bg-secondary-500 text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-secondary-600 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
               >
                 <ArrowUpRight className="w-5 h-5" />
                 Withdraw
@@ -107,48 +107,27 @@ export function WalletDashboard() {
           </div>
 
           {/* Tabs */}
-          <div className="mb-6 border-b border-primary-200 dark:border-primary-700">
-            <nav className="flex gap-6">
-              <button
-                onClick={() => setActiveTab('transactions')}
-                className={`pb-3 px-1 font-semibold transition ${
-                  activeTab === 'transactions'
-                    ? 'border-b-2 border-primary-600 text-primary-900 dark:text-sand-50'
-                    : 'text-primary-600 dark:text-sand-400 hover:text-primary-900 dark:hover:text-sand-200'
-                }`}
-              >
-                Transactions
-              </button>
-              <button
-                onClick={() => setActiveTab('withdrawals')}
-                className={`pb-3 px-1 font-semibold transition ${
-                  activeTab === 'withdrawals'
-                    ? 'border-b-2 border-primary-600 text-primary-900 dark:text-sand-50'
-                    : 'text-primary-600 dark:text-sand-400 hover:text-primary-900 dark:hover:text-sand-200'
-                }`}
-              >
-                Withdrawals
-              </button>
-              <button
-                onClick={() => setActiveTab('banks')}
-                className={`pb-3 px-1 font-semibold transition ${
-                  activeTab === 'banks'
-                    ? 'border-b-2 border-primary-600 text-primary-900 dark:text-sand-50'
-                    : 'text-primary-600 dark:text-sand-400 hover:text-primary-900 dark:hover:text-sand-200'
-                }`}
-              >
-                Bank Accounts
-              </button>
-              <button
-                onClick={() => setActiveTab('payment-methods')}
-                className={`pb-3 px-1 font-semibold transition ${
-                  activeTab === 'payment-methods'
-                    ? 'border-b-2 border-primary-600 text-primary-900 dark:text-sand-50'
-                    : 'text-primary-600 dark:text-sand-400 hover:text-primary-900 dark:hover:text-sand-200'
-                }`}
-              >
-                Payment Methods
-              </button>
+          <div className="mb-6">
+            <nav className="inline-flex rounded-xl bg-white dark:bg-primary-800 p-1.5 border border-primary-200 dark:border-primary-700 overflow-x-auto">
+              {[
+                { key: 'transactions' as const, label: 'Transactions', icon: ArrowDownLeft },
+                { key: 'withdrawals' as const, label: 'Withdrawals', icon: ArrowUpRight },
+                { key: 'banks' as const, label: 'Banks', icon: Building },
+                { key: 'payment-methods' as const, label: 'Methods', icon: CreditCard },
+              ].map(({ key, label, icon: Icon }) => (
+                <button
+                  key={key}
+                  onClick={() => setActiveTab(key)}
+                  className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
+                    activeTab === key
+                      ? 'bg-secondary-500 text-white shadow-sm'
+                      : 'text-primary-600 dark:text-sand-400 hover:bg-primary-50 dark:hover:bg-primary-700'
+                  }`}
+                >
+                  <Icon className="w-4 h-4" />
+                  {label}
+                </button>
+              ))}
             </nav>
           </div>
 
@@ -200,18 +179,22 @@ function TransactionsList({ transactions, loading }: { transactions: any[]; load
 
   if (transactions.length === 0) {
     return (
-      <div className="bg-white dark:bg-primary-800 rounded-lg p-8 text-center border border-primary-200 dark:border-primary-700">
-        <p className="text-primary-600 dark:text-sand-300">No transactions yet</p>
+      <div className="card p-10 text-center">
+        <div className="w-16 h-16 rounded-full bg-primary-100 dark:bg-primary-800 mx-auto mb-4 flex items-center justify-center">
+          <ArrowDownLeft className="w-8 h-8 text-primary-300 dark:text-primary-600" />
+        </div>
+        <h3 className="text-lg font-semibold text-primary-900 dark:text-sand-50 mb-1">No transactions yet</h3>
+        <p className="text-sm text-primary-500 dark:text-sand-400">Your transaction history will appear here</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       {transactions.map((txn: any) => (
         <div
           key={txn.id}
-          className="bg-white dark:bg-primary-800 rounded-lg p-4 border border-primary-100 dark:border-primary-700 flex items-center justify-between"
+          className="card p-4 flex items-center justify-between hover:shadow-md transition-shadow"
         >
           <div className="flex items-center gap-4">
             <div className={`p-3 rounded-full ${
@@ -272,18 +255,22 @@ function WithdrawalsList({ withdrawals, loading }: { withdrawals: any[]; loading
 
   if (withdrawals.length === 0) {
     return (
-      <div className="bg-white dark:bg-primary-800 rounded-lg p-8 text-center border border-primary-200 dark:border-primary-700">
-        <p className="text-primary-600 dark:text-sand-300">No withdrawals yet</p>
+      <div className="card p-10 text-center">
+        <div className="w-16 h-16 rounded-full bg-primary-100 dark:bg-primary-800 mx-auto mb-4 flex items-center justify-center">
+          <ArrowUpRight className="w-8 h-8 text-primary-300 dark:text-primary-600" />
+        </div>
+        <h3 className="text-lg font-semibold text-primary-900 dark:text-sand-50 mb-1">No withdrawals yet</h3>
+        <p className="text-sm text-primary-500 dark:text-sand-400">When you withdraw funds, they&apos;ll appear here</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       {withdrawals.map((withdrawal: any) => (
         <div
           key={withdrawal.id}
-          className="bg-white dark:bg-primary-800 rounded-lg p-4 border border-primary-100 dark:border-primary-700"
+          className="card p-4"
         >
           <div className="flex items-start justify-between">
             <div>
@@ -361,7 +348,7 @@ function BankAccountsList({ bankAccounts, loading, onAddNew }: { bankAccounts: a
     toast((t) => (
       <div className="flex flex-col gap-2">
         <p className="font-medium">Delete this bank account?</p>
-        <p className="text-sm text-gray-500">This action cannot be undone.</p>
+        <p className="text-sm text-primary-400 dark:text-sand-500">This action cannot be undone.</p>
         <div className="flex gap-2 mt-2">
           <button
             onClick={() => {
@@ -374,7 +361,7 @@ function BankAccountsList({ bankAccounts, loading, onAddNew }: { bankAccounts: a
           </button>
           <button
             onClick={() => toast.dismiss(t.id)}
-            className="px-3 py-1 bg-gray-200 text-gray-800 text-sm rounded hover:bg-gray-300"
+            className="px-3 py-1 bg-primary-200 dark:bg-primary-700 text-primary-800 dark:text-sand-100 text-sm rounded hover:bg-primary-300 dark:hover:bg-primary-600"
           >
             Cancel
           </button>
@@ -408,7 +395,7 @@ function BankAccountsList({ bankAccounts, loading, onAddNew }: { bankAccounts: a
       {bankAccounts.map((account: any) => (
         <div
           key={account.id}
-          className="bg-white dark:bg-primary-800 rounded-lg p-4 border border-primary-100 dark:border-primary-700"
+          className="card p-4"
         >
           <div className="flex items-start justify-between">
             <div className="flex items-start gap-3">
@@ -420,8 +407,8 @@ function BankAccountsList({ bankAccounts, loading, onAddNew }: { bankAccounts: a
                 <div className="text-sm text-primary-600 dark:text-sand-400">{account.account_name}</div>
                 <div className="text-sm text-primary-600 dark:text-sand-400">•••• {account.account_number?.slice(-4)}</div>
                 {account.is_primary && (
-                  <span className="inline-block mt-2 px-2 py-1 bg-primary-600 text-white text-xs rounded">
-                    Primary
+                  <span className="inline-block mt-2 px-2 py-1 bg-secondary-500 text-white text-xs rounded-full font-medium">
+                    ✓ Primary
                   </span>
                 )}
               </div>
@@ -493,7 +480,7 @@ function PaymentMethodsList() {
     toast((t) => (
       <div className="flex flex-col gap-2">
         <p className="font-medium">Delete this payment method?</p>
-        <p className="text-sm text-gray-500">This action cannot be undone.</p>
+        <p className="text-sm text-primary-400 dark:text-sand-500">This action cannot be undone.</p>
         <div className="flex gap-2 mt-2">
           <button
             onClick={() => {
@@ -506,7 +493,7 @@ function PaymentMethodsList() {
           </button>
           <button
             onClick={() => toast.dismiss(t.id)}
-            className="px-3 py-1 bg-gray-200 text-gray-800 text-sm rounded hover:bg-gray-300"
+            className="px-3 py-1 bg-primary-200 dark:bg-primary-700 text-primary-800 dark:text-sand-100 text-sm rounded hover:bg-primary-300 dark:hover:bg-primary-600"
           >
             Cancel
           </button>
@@ -541,7 +528,7 @@ function PaymentMethodsList() {
       case 'paystack':
         return 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400';
       default:
-        return 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400';
+        return 'bg-primary-100 text-primary-700 dark:bg-primary-800 dark:text-sand-200';
     }
   };
 
@@ -568,9 +555,12 @@ function PaymentMethodsList() {
       </a>
 
       {paymentMethods.length === 0 && (
-        <div className="bg-white dark:bg-primary-800 rounded-lg p-8 text-center border border-primary-200 dark:border-primary-700">
-          <p className="text-primary-600 dark:text-sand-300">No payment methods added yet</p>
-          <p className="text-sm text-primary-500 dark:text-sand-400 mt-2">
+        <div className="card p-10 text-center">
+          <div className="w-16 h-16 rounded-full bg-primary-100 dark:bg-primary-800 mx-auto mb-4 flex items-center justify-center">
+            <CreditCard className="w-8 h-8 text-primary-300 dark:text-primary-600" />
+          </div>
+          <h3 className="text-lg font-semibold text-primary-900 dark:text-sand-50 mb-1">No payment methods yet</h3>
+          <p className="text-sm text-primary-500 dark:text-sand-400">
             Add a payment method to make bookings easier
           </p>
         </div>
@@ -579,7 +569,7 @@ function PaymentMethodsList() {
       {paymentMethods.map((method: any) => (
         <div
           key={method.id}
-          className="bg-white dark:bg-primary-800 rounded-lg p-4 border border-primary-100 dark:border-primary-700"
+          className="card p-4"
         >
           <div className="flex items-start justify-between">
             <div className="flex items-start gap-3">
@@ -600,8 +590,8 @@ function PaymentMethodsList() {
                     {method.provider}
                   </span>
                   {method.is_default && (
-                    <span className="inline-block px-2 py-1 bg-primary-600 text-white text-xs rounded">
-                      Default
+                    <span className="inline-block px-2 py-1 bg-secondary-500 text-white text-xs rounded-full font-medium">
+                      ✓ Default
                     </span>
                   )}
                 </div>
@@ -711,7 +701,7 @@ function WithdrawModal({ wallet, bankAccounts, onClose }: { wallet: any; bankAcc
                 onChange={(e) => setAmount(e.target.value)}
                 required
                 aria-describedby="withdraw-amount-hint"
-                className="w-full px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-white dark:bg-primary-900 text-primary-900 dark:text-sand-50 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                className="w-full px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-white dark:bg-primary-900 text-primary-900 dark:text-sand-50 focus:ring-2 focus:ring-secondary-500 focus:border-primary-500"
                 placeholder="Min 10.00"
               />
               <p id="withdraw-amount-hint" className="text-xs text-primary-600 dark:text-sand-400 mt-1">
@@ -728,7 +718,7 @@ function WithdrawModal({ wallet, bankAccounts, onClose }: { wallet: any; bankAcc
                 value={selectedBank}
                 onChange={(e) => setSelectedBank(e.target.value)}
                 required
-                className="w-full px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-white dark:bg-primary-900 text-primary-900 dark:text-sand-50 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                className="w-full px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-white dark:bg-primary-900 text-primary-900 dark:text-sand-50 focus:ring-2 focus:ring-secondary-500 focus:border-primary-500"
               >
                 <option value="">Select bank account</option>
                 {bankAccounts.map((account: any) => (
@@ -748,7 +738,7 @@ function WithdrawModal({ wallet, bankAccounts, onClose }: { wallet: any; bankAcc
                 id="withdraw-notes"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                className="w-full px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-white dark:bg-primary-900 text-primary-900 dark:text-sand-50 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                className="w-full px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-white dark:bg-primary-900 text-primary-900 dark:text-sand-50 focus:ring-2 focus:ring-secondary-500 focus:border-primary-500"
                 rows={3}
                 placeholder="Any additional notes..."
               />
@@ -772,7 +762,7 @@ function WithdrawModal({ wallet, bankAccounts, onClose }: { wallet: any; bankAcc
                 type="submit"
                 disabled={withdrawMutation.isPending}
                 aria-busy={withdrawMutation.isPending}
-                className="flex-1 px-4 py-2 bg-primary-600 text-white rounded-lg font-semibold hover:bg-primary-700 transition disabled:opacity-50"
+                className="flex-1 px-4 py-2 bg-secondary-600 text-white rounded-lg font-semibold hover:bg-secondary-700 transition disabled:opacity-50"
               >
                 {withdrawMutation.isPending ? 'Processing...' : 'Withdraw'}
               </button>
@@ -842,7 +832,7 @@ function BankAccountModal({ onClose }: { onClose: () => void }) {
               value={formData.bank_name}
               onChange={(e) => setFormData({ ...formData, bank_name: e.target.value })}
               required
-              className="w-full px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-white dark:bg-primary-900 text-primary-900 dark:text-sand-50 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              className="w-full px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-white dark:bg-primary-900 text-primary-900 dark:text-sand-50 focus:ring-2 focus:ring-secondary-500 focus:border-primary-500"
               placeholder="e.g., Standard Bank"
             />
           </div>
@@ -857,7 +847,7 @@ function BankAccountModal({ onClose }: { onClose: () => void }) {
               value={formData.account_name}
               onChange={(e) => setFormData({ ...formData, account_name: e.target.value })}
               required
-              className="w-full px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-white dark:bg-primary-900 text-primary-900 dark:text-sand-50 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              className="w-full px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-white dark:bg-primary-900 text-primary-900 dark:text-sand-50 focus:ring-2 focus:ring-secondary-500 focus:border-primary-500"
               placeholder="Account holder name"
             />
           </div>
@@ -872,7 +862,7 @@ function BankAccountModal({ onClose }: { onClose: () => void }) {
               value={formData.account_number}
               onChange={(e) => setFormData({ ...formData, account_number: e.target.value })}
               required
-              className="w-full px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-white dark:bg-primary-900 text-primary-900 dark:text-sand-50 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              className="w-full px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-white dark:bg-primary-900 text-primary-900 dark:text-sand-50 focus:ring-2 focus:ring-secondary-500 focus:border-primary-500"
               placeholder="1234567890"
             />
           </div>
@@ -886,7 +876,7 @@ function BankAccountModal({ onClose }: { onClose: () => void }) {
               type="text"
               value={formData.branch_code}
               onChange={(e) => setFormData({ ...formData, branch_code: e.target.value })}
-              className="w-full px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-white dark:bg-primary-900 text-primary-900 dark:text-sand-50 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              className="w-full px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-white dark:bg-primary-900 text-primary-900 dark:text-sand-50 focus:ring-2 focus:ring-secondary-500 focus:border-primary-500"
               placeholder="Optional"
             />
           </div>
@@ -900,7 +890,7 @@ function BankAccountModal({ onClose }: { onClose: () => void }) {
               type="text"
               value={formData.country}
               onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-              className="w-full px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-white dark:bg-primary-900 text-primary-900 dark:text-sand-50 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              className="w-full px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-white dark:bg-primary-900 text-primary-900 dark:text-sand-50 focus:ring-2 focus:ring-secondary-500 focus:border-primary-500"
               placeholder="e.g., Zimbabwe"
             />
           </div>
@@ -911,7 +901,7 @@ function BankAccountModal({ onClose }: { onClose: () => void }) {
               id="is_primary"
               checked={formData.is_primary}
               onChange={(e) => setFormData({ ...formData, is_primary: e.target.checked })}
-              className="w-4 h-4 text-primary-600 border-primary-300 dark:border-primary-600 rounded focus:ring-primary-500"
+              className="w-4 h-4 text-primary-600 border-primary-300 dark:border-primary-600 rounded focus:ring-secondary-500"
             />
             <label htmlFor="is_primary" className="text-sm text-primary-900 dark:text-sand-50">
               Set as primary account
@@ -936,7 +926,7 @@ function BankAccountModal({ onClose }: { onClose: () => void }) {
               type="submit"
               disabled={createMutation.isPending}
               aria-busy={createMutation.isPending}
-              className="flex-1 px-4 py-2 bg-primary-600 text-white rounded-lg font-semibold hover:bg-primary-700 transition disabled:opacity-50"
+              className="flex-1 px-4 py-2 bg-secondary-600 text-white rounded-lg font-semibold hover:bg-secondary-700 transition disabled:opacity-50"
             >
               {createMutation.isPending ? 'Adding...' : 'Add Account'}
             </button>
