@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
 import { Button } from '@/components/ui';
-import { Calendar, MapPin, Home, Compass, Users, Clock } from 'lucide-react';
+import { Calendar, MapPin, Home, Compass, Users, Clock, Image as ImageIcon } from 'lucide-react';
 import { useAuth } from '@/store/auth-store';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
@@ -241,71 +241,116 @@ export function BookingContent() {
               </a>
             </div>
           ) : (
-            <div className="space-y-6">
-              {bookings.map((booking: any) => (
+            <div className="space-y-4">
+              {/* Booking count */}
+              <p className="text-sm text-primary-500 dark:text-sand-400">
+                Showing {bookings.length} {bookings.length === 1 ? 'stay' : 'stays'}
+                {statusFilter ? ` · ${statusFilter}` : ''}
+              </p>
+              {bookings.map((booking: any) => {
+                const img = booking.property?.images?.[0]?.image || booking.property?.images?.[0]?.image_url || booking.property?.main_image_url;
+                const checkIn = new Date(booking.check_in);
+                const checkOut = new Date(booking.check_out);
+                const fmtDate = (d: Date) => d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+                return (
                 <article key={booking.id} className="card overflow-hidden">
-                  <div className="p-6">
-                    <div className="flex flex-col md:flex-row md:items-start justify-between mb-4">
-                      <div className="flex-1 mb-4 md:mb-0">
-                        <div className="flex items-center gap-3 mb-2">
-                          <span className="inline-flex items-center gap-1 text-xs font-medium text-primary-500 dark:text-sand-400 bg-primary-100 dark:bg-primary-800 px-2 py-0.5 rounded">
-                            <Home className="w-3 h-3" /> Stay
-                          </span>
-                          <h3 className="text-xl font-semibold text-primary-900 dark:text-sand-50">
+                  <div className="flex flex-col sm:flex-row">
+                    {/* Property thumbnail */}
+                    <div className="sm:w-48 h-40 sm:h-auto flex-shrink-0 bg-primary-200 dark:bg-primary-700 relative">
+                      {img ? (
+                        <img src={img} alt={booking.property?.title || ''} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <ImageIcon className="w-10 h-10 text-primary-400 dark:text-primary-600" />
+                        </div>
+                      )}
+                      <span className={`absolute top-2 left-2 px-2.5 py-1 rounded-full text-xs font-semibold ${getStatusColor(booking.status)}`}>
+                        {booking.status}
+                      </span>
+                    </div>
+
+                    {/* Card body */}
+                    <div className="flex-1 p-5">
+                      <div className="flex flex-col md:flex-row md:items-start justify-between mb-3">
+                        <div className="flex-1 mb-3 md:mb-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="inline-flex items-center gap-1 text-xs font-medium text-primary-500 dark:text-sand-400 bg-primary-100 dark:bg-primary-800 px-2 py-0.5 rounded">
+                              <Home className="w-3 h-3" /> Stay
+                            </span>
+                          </div>
+                          <h3 className="text-lg font-semibold text-primary-900 dark:text-sand-50 mb-1">
                             {booking.property?.title || booking.property_title || 'Property'}
                           </h3>
-                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(booking.status)}`}>
-                            {booking.status}
-                          </span>
+                          <div className="flex items-center gap-1.5 text-primary-500 dark:text-sand-400 text-sm">
+                            <MapPin className="w-3.5 h-3.5" />
+                            <span>{booking.property?.city || 'Unknown'}, {booking.property?.country || 'Unknown'}</span>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2 text-primary-600 dark:text-sand-300 text-sm mb-2">
-                          <MapPin className="w-4 h-4" />
-                          <span>{booking.property?.city || 'Unknown'}, {booking.property?.country || 'Unknown'}</span>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-2xl font-bold text-primary-900 dark:text-sand-50">
-                          ${booking.grand_total}
-                        </div>
-                        <div className="text-sm text-primary-600 dark:text-sand-300">
-                          Total Amount
+                        <div className="text-right">
+                          <div className="text-2xl font-bold text-primary-900 dark:text-sand-50">
+                            ${booking.grand_total}
+                          </div>
+                          <div className="text-xs text-primary-500 dark:text-sand-400">
+                            Total Amount
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    <div className="grid md:grid-cols-3 gap-4 py-4 border-t border-primary-200 dark:border-primary-700">
-                      <div>
-                        <div className="text-sm text-primary-600 dark:text-sand-400 mb-1">Check-in</div>
-                        <div className="font-semibold text-primary-900 dark:text-sand-50">
-                          {new Date(booking.check_in).toLocaleDateString()}
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 py-3 border-t border-primary-200 dark:border-primary-700">
+                        <div>
+                          <div className="text-xs text-primary-500 dark:text-sand-400 mb-0.5">Check-in</div>
+                          <div className="text-sm font-semibold text-primary-900 dark:text-sand-50">
+                            {fmtDate(checkIn)}
+                          </div>
                         </div>
-                      </div>
-                      <div>
-                        <div className="text-sm text-primary-600 dark:text-sand-400 mb-1">Check-out</div>
-                        <div className="font-semibold text-primary-900 dark:text-sand-50">
-                          {new Date(booking.check_out).toLocaleDateString()}
+                        <div>
+                          <div className="text-xs text-primary-500 dark:text-sand-400 mb-0.5">Check-out</div>
+                          <div className="text-sm font-semibold text-primary-900 dark:text-sand-50">
+                            {fmtDate(checkOut)}
+                          </div>
                         </div>
-                      </div>
-                      <div>
-                        <div className="text-sm text-primary-600 dark:text-sand-400 mb-1">Nights</div>
-                        <div className="font-semibold text-primary-900 dark:text-sand-50">
-                          {booking.nights}
+                        <div>
+                          <div className="text-xs text-primary-500 dark:text-sand-400 mb-0.5">Nights</div>
+                          <div className="text-sm font-semibold text-primary-900 dark:text-sand-50">
+                            {booking.nights}
+                          </div>
                         </div>
+                        {booking.booking_ref && (
+                          <div>
+                            <div className="text-xs text-primary-500 dark:text-sand-400 mb-0.5">Ref</div>
+                            <div className="text-sm font-semibold text-primary-900 dark:text-sand-50 font-mono">
+                              {booking.booking_ref}
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    </div>
 
-                    <div className="flex flex-wrap gap-3 mt-4">
-                      <a href={`/bookings/${booking.id}`} className="inline-block">
-                        <Button variant="secondary" size="sm">View Details</Button>
-                      </a>
-                      {['pending', 'confirmed', 'PENDING', 'CONFIRMED'].includes(booking.status) &&
-                        booking.payment_status !== 'success' && (
-                        <a href={`/booking/payment?bookingId=${booking.id}`} className="inline-block">
-                          <Button size="sm">Pay Now</Button>
+                      <div className="flex flex-wrap gap-2 mt-3">
+                        <a href={`/bookings/${booking.id}`} className="inline-block">
+                          <Button variant="secondary" size="sm">View Details</Button>
                         </a>
-                      )}
-                      {(booking.status === 'CONFIRMED' || booking.status === 'confirmed') && (
-                        <>
+                        {['pending', 'confirmed', 'PENDING', 'CONFIRMED'].includes(booking.status) &&
+                          booking.payment_status !== 'success' && (
+                          <a href={`/booking/payment?bookingId=${booking.id}`} className="inline-block">
+                            <Button size="sm">Pay Now</Button>
+                          </a>
+                        )}
+                        {(booking.status === 'CONFIRMED' || booking.status === 'confirmed') && (
+                          <>
+                            <Button
+                              onClick={() => handleContactHost(booking)}
+                              disabled={contactingHost === booking.id}
+                              variant="outline"
+                              size="sm"
+                            >
+                              {contactingHost === booking.id ? 'Starting...' : 'Contact Host'}
+                            </Button>
+                            <a href={`/bookings/${booking.id}/directions`} className="inline-block">
+                              <Button variant="outline" size="sm">Get Directions</Button>
+                            </a>
+                          </>
+                        )}
+                        {(booking.status === 'pending' || booking.status === 'PENDING') && (
                           <Button
                             onClick={() => handleContactHost(booking)}
                             disabled={contactingHost === booking.id}
@@ -314,25 +359,13 @@ export function BookingContent() {
                           >
                             {contactingHost === booking.id ? 'Starting...' : 'Contact Host'}
                           </Button>
-                          <a href={`/bookings/${booking.id}/directions`} className="inline-block">
-                            <Button variant="outline" size="sm">Get Directions</Button>
-                          </a>
-                        </>
-                      )}
-                      {(booking.status === 'pending' || booking.status === 'PENDING') && (
-                        <Button
-                          onClick={() => handleContactHost(booking)}
-                          disabled={contactingHost === booking.id}
-                          variant="outline"
-                          size="sm"
-                        >
-                          {contactingHost === booking.id ? 'Starting...' : 'Contact Host'}
-                        </Button>
-                      )}
+                        )}
+                      </div>
                     </div>
                   </div>
                 </article>
-              ))}
+                );
+              })}
             </div>
           )
         ) : (

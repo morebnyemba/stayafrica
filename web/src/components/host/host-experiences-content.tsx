@@ -25,7 +25,7 @@ import type { Experience, ExperienceStatus } from '@/types';
 
 const statusColors: Record<ExperienceStatus, string> = {
   active: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
-  inactive: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
+  inactive: 'bg-primary-100 text-primary-800 dark:bg-primary-700 dark:text-primary-300',
   pending_approval: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
 };
 
@@ -122,7 +122,7 @@ export function HostExperiencesContent() {
             { label: 'Total', value: stats.total, color: 'text-primary-900 dark:text-sand-50' },
             { label: 'Active', value: stats.active, color: 'text-green-600 dark:text-green-400' },
             { label: 'Pending', value: stats.pending, color: 'text-yellow-600 dark:text-yellow-400' },
-            { label: 'Inactive', value: stats.inactive, color: 'text-gray-600 dark:text-gray-400' },
+            { label: 'Inactive', value: stats.inactive, color: 'text-primary-500 dark:text-sand-400' },
           ].map((stat) => (
             <div key={stat.label} className="card p-4 text-center">
               <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>

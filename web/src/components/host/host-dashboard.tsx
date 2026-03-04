@@ -147,7 +147,7 @@ export function HostDashboard() {
   ];
 
   const financeLinks = [
-    { title: 'Earnings', icon: DollarSign, link: '/host/earnings', color: 'bg-emerald-500' },
+    { title: 'Earnings', icon: DollarSign, link: '/host/earnings', color: 'bg-green-500' },
     { title: 'Analytics', icon: BarChart3, link: '/host/earnings', color: 'bg-pink-500' },
     { title: 'Pricing', icon: TrendingUp, link: '/host/pricing', color: 'bg-amber-500' },
     { title: 'Tax Reports', icon: Receipt, link: '/host/tax-reports', color: 'bg-teal-500' },
@@ -157,7 +157,7 @@ export function HostDashboard() {
     { title: 'Experiences', icon: Compass, link: '/host/experiences', color: 'bg-cyan-500' },
     { title: 'Auto-Messaging', icon: Zap, link: '/host/messaging', color: 'bg-violet-500' },
     ...(!user?.is_verified ? [{ title: 'Verify ID', icon: ShieldCheck, link: '/host/verification', color: 'bg-indigo-500' }] : []),
-    { title: 'Settings', icon: Settings, link: '/host/settings', color: 'bg-gray-500' },
+    { title: 'Settings', icon: Settings, link: '/host/settings', color: 'bg-primary-500' },
   ];
 
   return (
@@ -335,7 +335,7 @@ export function HostDashboard() {
                                         ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
                                         : property.status === 'pending_approval'
                                         ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300'
-                                        : 'bg-gray-100 dark:bg-gray-900/30 text-gray-600 dark:text-gray-400'
+                                        : 'bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400'
                                     }`}>
                                       {property.status?.replace('_', ' ')}
                                     </span>
@@ -516,7 +516,7 @@ export function HostDashboard() {
                               <span className={`px-2 py-0.5 text-xs font-semibold rounded-full ${
                                 prop.status === 'active'
                                   ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
-                                  : 'bg-gray-100 dark:bg-gray-900/30 text-gray-600 dark:text-gray-400'
+                                  : 'bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400'
                               }`}>
                                 {prop.status}
                               </span>

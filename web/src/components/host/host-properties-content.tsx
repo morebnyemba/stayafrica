@@ -106,7 +106,7 @@ export function HostPropertiesContent() {
                             ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
                             : property.status === 'pending_approval'
                             ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300'
-                            : 'bg-gray-100 dark:bg-gray-900/30 text-gray-800 dark:text-gray-300'
+                            : 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300'
                         }`}
                         role="status"
                         aria-label={`Status: ${property.status.replace('_', ' ')}`}
@@ -245,7 +245,7 @@ export function HostPropertiesContent() {
               </div>
               <div className="card p-4">
                 <div className="text-sm text-primary-600 dark:text-sand-400 mb-1">Inactive</div>
-                <div className="text-2xl font-bold text-gray-600">
+                <div className="text-2xl font-bold text-primary-500 dark:text-sand-400">
                   {properties.filter((p: any) => p.status === 'inactive').length}
                 </div>
               </div>
