@@ -17,8 +17,9 @@ import {
   MessageSquare,
   Star,
   ShieldCheck,
+  ArrowRight,
+  Compass,
 } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
 import { VerificationStatus } from '@/components/verification/VerificationStatus';
 import dynamic from 'next/dynamic';
 const ProtectedRoute = dynamic(() => import('@/components/auth/protected-route').then(m => m.ProtectedRoute), { ssr: false });
@@ -26,7 +27,6 @@ const ProtectedRoute = dynamic(() => import('@/components/auth/protected-route')
 export function DashboardContent() {
   const { user, isAuthenticated } = useAuth();
 
-  // Fetch upcoming bookings
   const { data: upcomingBookings, isLoading: loadingBookings } = useQuery({
     queryKey: ['bookings', 'upcoming'],
     queryFn: async () => {
@@ -36,7 +36,6 @@ export function DashboardContent() {
     enabled: isAuthenticated,
   });
 
-  // Fetch total bookings count
   const { data: totalBookingsData } = useQuery({
     queryKey: ['bookings', 'total'],
     queryFn: async () => {
@@ -46,8 +45,6 @@ export function DashboardContent() {
     enabled: isAuthenticated,
   });
 
-
-  // Fetch recent bookings
   const { data: recentBookings } = useQuery({
     queryKey: ['bookings', 'recent'],
     queryFn: async () => {
@@ -63,7 +60,6 @@ export function DashboardContent() {
     enabled: isAuthenticated,
   });
 
-  // Fetch recent reviews written
   const { data: recentReviews } = useQuery({
     queryKey: ['reviews', 'recent'],
     queryFn: async () => {
@@ -80,7 +76,6 @@ export function DashboardContent() {
     enabled: isAuthenticated,
   });
 
-  // Fetch recent payments
   const { data: recentPayments } = useQuery({
     queryKey: ['payments', 'recent'],
     queryFn: async () => {
@@ -98,7 +93,6 @@ export function DashboardContent() {
     enabled: isAuthenticated,
   });
 
-  // Fetch recent wishlist changes (saved/unsaved)
   const { data: recentWishlist } = useQuery({
     queryKey: ['wishlist', 'recent'],
     queryFn: async () => {
@@ -113,15 +107,13 @@ export function DashboardContent() {
     enabled: isAuthenticated,
   });
 
-  // Merge and sort all activities by date
   const allActivities = [
     ...(recentBookings || []),
     ...(recentReviews || []),
     ...(recentPayments || []),
     ...(recentWishlist || []),
-  ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 8);
+  ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 6);
 
-  // Fetch unread messages count
   const { data: unreadMessages } = useQuery({
     queryKey: ['messages', 'unread'],
     queryFn: async () => {
@@ -129,10 +121,9 @@ export function DashboardContent() {
       return response.data?.unread_count || 0;
     },
     enabled: isAuthenticated,
-    refetchInterval: 30000, // Refetch every 30 seconds
+    refetchInterval: 30000,
   });
 
-  // Fetch saved properties count
   const { data: savedPropertiesData } = useQuery({
     queryKey: ['properties', 'saved'],
     queryFn: async () => {
@@ -156,7 +147,7 @@ export function DashboardContent() {
       link: '/bookings',
     },
     {
-      title: 'Saved Properties',
+      title: 'Saved Places',
       value: savedPropertiesData?.length || 0,
       icon: Heart,
       color: 'text-red-600 dark:text-red-400',
@@ -178,301 +169,234 @@ export function DashboardContent() {
       color: 'text-purple-600 dark:text-purple-400',
       bgColor: 'bg-purple-100 dark:bg-purple-900/30',
       link: '/messages',
+      badge: unreadMessages && unreadMessages > 0,
     },
   ];
 
-  const quickActions = [
-    {
-      title: 'Explore Properties',
-      description: 'Discover new places to stay',
-      icon: Home,
-      link: '/explore',
-      color: 'bg-secondary-500',
-    },
-    {
-      title: 'View Bookings',
-      description: 'Manage your reservations',
-      icon: Calendar,
-      link: '/bookings',
-      color: 'bg-blue-500',
-    },
-    {
-      title: 'My Profile',
-      description: 'Update your information',
-      icon: User,
-      link: '/profile',
-      color: 'bg-green-500',
-    },
-    {
-      title: 'Payment Methods',
-      description: 'Manage payment options',
-      icon: CreditCard,
-      link: '/profile?tab=payments',
-      color: 'bg-purple-500',
-    },
-    {
-      title: 'Payment History',
-      description: 'View all your payments',
-      icon: CreditCard,
-      link: '/payments',
-      color: 'bg-yellow-500',
-    },
-    {
-      title: 'My Reviews',
-      description: 'See reviews you wrote and received',
-      icon: Star,
-      link: '/reviews',
-      color: 'bg-pink-500',
-    },
-    {
-      title: 'Verify Identity',
-      description: 'Get verified for more trust',
-      icon: ShieldCheck,
-      link: '/profile/verification',
-      color: 'bg-indigo-500',
-    },
-  ];
+  const formatDate = (d: string) =>
+    new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+  const getActivityIcon = (activity: any) => {
+    if (activity.type === 'booking') {
+      return activity.status === 'CONFIRMED' ? CheckCircle
+        : activity.status === 'PENDING' ? Clock : XCircle;
+    }
+    if (activity.type === 'review') return Star;
+    if (activity.type === 'payment') return CreditCard;
+    return Heart;
+  };
+
+  const getActivityColor = (activity: any) => {
+    if (activity.type === 'booking') {
+      return activity.status === 'CONFIRMED'
+        ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400'
+        : activity.status === 'PENDING'
+        ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400'
+        : 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400';
+    }
+    if (activity.type === 'review') return 'bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400';
+    if (activity.type === 'payment') return 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400';
+    return 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400';
+  };
+
+  const getActivityLabel = (activity: any) => {
+    if (activity.type === 'booking') return `Booking ${activity.status?.toLowerCase()} · ${activity.property?.title || 'Property'}`;
+    if (activity.type === 'review') return `Reviewed ${activity.property?.title || 'Property'} · ${activity.rating}★`;
+    if (activity.type === 'payment') return `Payment ${activity.status} · $${activity.amount}`;
+    return `Saved · ${activity.property?.title || 'Property'}`;
+  };
+
+  const getActivityLink = (activity: any) => {
+    if (activity.type === 'booking') return '/bookings';
+    if (activity.type === 'review') return '/reviews';
+    if (activity.type === 'payment') return '/payments';
+    return '/wishlist';
+  };
 
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-sand-100 dark:bg-primary-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
-          {/* Welcome Section */}
+
+          {/* Welcome */}
           <div className="dashboard-header">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary-900 dark:text-sand-50 mb-2">
-              Welcome back, {user?.first_name}! 👋
+            <h1 className="text-2xl sm:text-3xl font-bold text-primary-900 dark:text-sand-50 mb-1">
+              Welcome back, {user?.first_name || 'Traveler'}! 👋
             </h1>
-            <p className="text-base sm:text-lg text-primary-600 dark:text-sand-300">
+            <p className="text-primary-600 dark:text-sand-300">
               Here&apos;s what&apos;s happening with your travels
             </p>
           </div>
 
-          {/* Verification Status Banner */}
-          <div className="mb-6 sm:mb-8">
+          {/* Verification */}
+          <div className="mb-6">
             <VerificationStatus />
           </div>
 
-          {/* Stats Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8">
-            {stats.map((stat, index) => (
-              <Link
-                key={index}
-                href={stat.link}
-                className="stats-card group"
-              >
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
-                  <div className="order-2 sm:order-1">
-                    <p className="text-xs sm:text-sm text-primary-600 dark:text-sand-400 mb-1">
-                      {stat.title}
-                    </p>
-                    <p className="text-2xl sm:text-3xl font-bold text-primary-900 dark:text-sand-50">
-                      {stat.value}
-                    </p>
+          {/* Stats */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
+            {stats.map((stat, i) => (
+              <Link key={i} href={stat.link} className="stats-card group relative">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs sm:text-sm text-primary-500 dark:text-sand-400">{stat.title}</p>
+                    <p className="text-2xl sm:text-3xl font-bold text-primary-900 dark:text-sand-50 mt-1">{stat.value}</p>
                   </div>
-                  <div className={`order-1 sm:order-2 ${stat.bgColor} ${stat.color} p-2 sm:p-3 rounded-full w-fit group-hover:scale-110 transition-transform`}>
+                  <div className={`${stat.bgColor} ${stat.color} p-2.5 sm:p-3 rounded-xl group-hover:scale-110 transition-transform`}>
                     <stat.icon className="w-5 h-5 sm:w-6 sm:h-6" />
                   </div>
                 </div>
+                {'badge' in stat && stat.badge && (
+                  <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse" />
+                )}
               </Link>
             ))}
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mb-6 sm:mb-8">
-            {/* Upcoming Trips */}
-            <div className="lg:col-span-2">
-              <div className="card-gradient p-4 sm:p-6">
-                <div className="flex items-center justify-between mb-4 sm:mb-6">
-                  <h2 className="text-xl sm:text-2xl font-bold text-primary-900 dark:text-sand-50">
-                    Upcoming Trips
-                  </h2>
-                  <Link
-                    href="/bookings"
-                    className="text-secondary-600 dark:text-secondary-400 hover:underline text-xs sm:text-sm font-medium"
-                  >
-                    View All
-                  </Link>
-                </div>
+          {/* Main content: Trips + Sidebar */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6 sm:mb-8">
 
-                {loadingBookings ? (
-                  <div className="space-y-4">
-                    {[1, 2].map((i) => (
-                      <div key={i} className="animate-pulse">
-                        <div className="h-24 bg-primary-200 dark:bg-primary-700 rounded-lg"></div>
-                      </div>
-                    ))}
-                  </div>
-                ) : upcomingBookings && upcomingBookings.length > 0 ? (
-                  <div className="space-y-3 sm:space-y-4">
-                    {upcomingBookings.slice(0, 3).map((booking: any) => (
-                      <div
+            {/* Upcoming trips — wider column */}
+            <div className="lg:col-span-2 card-gradient p-5 sm:p-6">
+              <div className="flex items-center justify-between mb-5">
+                <h2 className="text-lg sm:text-xl font-bold text-primary-900 dark:text-sand-50">
+                  Upcoming Trips
+                </h2>
+                <Link href="/bookings" className="text-secondary-600 dark:text-secondary-400 hover:underline text-sm font-medium flex items-center gap-1">
+                  View all <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+              </div>
+
+              {loadingBookings ? (
+                <div className="space-y-3">
+                  {[1, 2].map((i) => (
+                    <div key={i} className="animate-pulse h-24 bg-primary-200 dark:bg-primary-700 rounded-xl" />
+                  ))}
+                </div>
+              ) : upcomingBookings && upcomingBookings.length > 0 ? (
+                <div className="space-y-3">
+                  {upcomingBookings.slice(0, 3).map((booking: any) => {
+                    const img = booking.property?.images?.[0]?.image || booking.property?.images?.[0]?.image_url || booking.property?.main_image_url;
+                    return (
+                      <Link
                         key={booking.id}
-                        className="p-3 sm:p-4 border border-primary-200 dark:border-primary-700 rounded-lg hover:border-secondary-500 transition"
+                        href="/bookings"
+                        className="flex gap-4 p-3 rounded-xl border border-primary-200 dark:border-primary-700 hover:border-secondary-500 dark:hover:border-secondary-600 transition group"
                       >
-                        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4">
-                          <div className="flex-1">
-                            <h3 className="font-semibold text-sm sm:text-base text-primary-900 dark:text-sand-50 mb-1">
-                              {booking.property?.title || booking.property_title || 'Property'}
-                            </h3>
-                            <div className="flex items-center gap-2 text-xs sm:text-sm text-primary-600 dark:text-sand-300 mb-2">
-                              <MapPin className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
-                              <span className="truncate">
-                                {booking.property?.city || 'Unknown'}, {booking.property?.country || 'Unknown'}
-                              </span>
+                        {/* Property thumbnail */}
+                        <div className="w-20 h-20 sm:w-24 sm:h-20 rounded-lg overflow-hidden flex-shrink-0 bg-primary-200 dark:bg-primary-700">
+                          {img ? (
+                            <img src={img} alt="" className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <Home className="w-6 h-6 text-primary-400 dark:text-primary-600" />
                             </div>
-                            <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm">
-                              <div className="flex items-center gap-1">
-                                <Calendar className="w-3 h-3 sm:w-4 sm:h-4 text-primary-400" />
-                                <span className="text-primary-700 dark:text-sand-200">
-                                  {new Date(booking.check_in).toLocaleDateString()}
-                                </span>
-                              </div>
-                              <span className="text-primary-400">→</span>
-                              <div className="flex items-center gap-1">
-                                <Calendar className="w-3 h-3 sm:w-4 sm:h-4 text-primary-400" />
-                                <span className="text-primary-700 dark:text-sand-200">
-                                  {new Date(booking.check_out).toLocaleDateString()}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="self-start">
-                            <span className="px-2 sm:px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 text-xs font-semibold rounded-full">
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-sm sm:text-base text-primary-900 dark:text-sand-50 truncate group-hover:text-secondary-700 dark:group-hover:text-secondary-400 transition">
+                            {booking.property?.title || booking.property_title || 'Property'}
+                          </h3>
+                          <p className="text-xs sm:text-sm text-primary-500 dark:text-sand-400 flex items-center gap-1 mt-0.5">
+                            <MapPin className="w-3 h-3 flex-shrink-0" />
+                            <span className="truncate">{booking.property?.city || 'Unknown'}, {booking.property?.country || ''}</span>
+                          </p>
+                          <div className="flex items-center gap-3 mt-2 text-xs text-primary-600 dark:text-sand-300">
+                            <span className="flex items-center gap-1">
+                              <Calendar className="w-3 h-3" />
+                              {formatDate(booking.check_in)}
+                            </span>
+                            <span className="text-primary-400">→</span>
+                            <span>{formatDate(booking.check_out)}</span>
+                            <span className="ml-auto px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs font-medium rounded-full">
                               Confirmed
                             </span>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      </Link>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="text-center py-10">
+                  <div className="w-16 h-16 mx-auto rounded-full bg-primary-100 dark:bg-primary-800 flex items-center justify-center mb-4">
+                    <Compass className="w-8 h-8 text-primary-400 dark:text-primary-600" />
                   </div>
-                ) : (
-                  <div className="text-center py-8 sm:py-12">
-                    <Calendar className="w-12 h-12 sm:w-16 sm:h-16 text-primary-300 dark:text-primary-700 mx-auto mb-3 sm:mb-4" />
-                    <h3 className="text-base sm:text-lg font-semibold text-primary-900 dark:text-sand-50 mb-2">
-                      No Upcoming Trips
-                    </h3>
-                    <p className="text-sm sm:text-base text-primary-600 dark:text-sand-300 mb-4">
-                      Time to plan your next adventure!
-                    </p>
-                    <Link href="/explore">
-                      <Button variant="primary" size="lg">Explore Properties</Button>
-                    </Link>
-                  </div>
-                )}
-              </div>
+                  <h3 className="font-semibold text-primary-900 dark:text-sand-50 mb-1">No upcoming trips</h3>
+                  <p className="text-sm text-primary-500 dark:text-sand-400 mb-4">Time to plan your next adventure!</p>
+                  <Link
+                    href="/explore"
+                    className="inline-flex items-center gap-2 bg-secondary-600 hover:bg-secondary-700 text-white font-semibold text-sm py-2.5 px-5 rounded-lg transition"
+                  >
+                    <Compass className="w-4 h-4" /> Explore properties
+                  </Link>
+                </div>
+              )}
             </div>
 
-            {/* Quick Actions */}
-            <div className="lg:col-span-1">
-              <div className="card-gradient p-4 sm:p-6">
-                <h2 className="text-xl sm:text-2xl font-bold text-primary-900 dark:text-sand-50 mb-4 sm:mb-6">
-                  Quick Actions
-                </h2>
-                <div className="grid grid-cols-2 sm:grid-cols-1 gap-2 sm:gap-3">
-                  {quickActions.map((action, index) => (
+            {/* Sidebar: Quick links + activity */}
+            <div className="space-y-6">
+              {/* Quick links — compact */}
+              <div className="card-gradient p-5">
+                <h2 className="text-lg font-bold text-primary-900 dark:text-sand-50 mb-4">Quick Links</h2>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { title: 'Explore', icon: Compass, link: '/explore', color: 'bg-secondary-500' },
+                    { title: 'Bookings', icon: Calendar, link: '/bookings', color: 'bg-blue-500' },
+                    { title: 'Wishlist', icon: Heart, link: '/wishlist', color: 'bg-red-500' },
+                    { title: 'Profile', icon: User, link: '/profile', color: 'bg-green-500' },
+                    { title: 'Payments', icon: CreditCard, link: '/profile?tab=payments', color: 'bg-purple-500' },
+                    { title: 'Verify ID', icon: ShieldCheck, link: '/profile/verification', color: 'bg-indigo-500' },
+                  ].map((item, i) => (
                     <Link
-                      key={index}
-                      href={action.link}
-                      className="action-card"
+                      key={i}
+                      href={item.link}
+                      className="flex items-center gap-2.5 p-2.5 rounded-lg border border-primary-100 dark:border-primary-700/50 hover:border-secondary-500 dark:hover:border-secondary-600 transition group"
                     >
-                      <div className={`${action.color} p-1.5 sm:p-2 rounded-lg text-white group-hover:scale-110 transition-transform flex-shrink-0`}>
-                        <action.icon className="w-4 h-4 sm:w-5 sm:h-5" />
+                      <div className={`${item.color} p-1.5 rounded-md text-white group-hover:scale-110 transition-transform`}>
+                        <item.icon className="w-3.5 h-3.5" />
                       </div>
-                      <div className="min-w-0">
-                        <div className="font-semibold text-primary-900 dark:text-sand-50 text-xs sm:text-sm truncate">
-                          {action.title}
-                        </div>
-                        <div className="text-xs text-primary-600 dark:text-sand-400 hidden sm:block">
-                          {action.description}
-                        </div>
-                      </div>
+                      <span className="text-sm font-medium text-primary-800 dark:text-sand-100 truncate">{item.title}</span>
                     </Link>
                   ))}
                 </div>
               </div>
-            </div>
-          </div>
 
-          {/* Recent Activity */}
-          <div className="card-gradient p-4 sm:p-6">
-            <h2 className="text-xl sm:text-2xl font-bold text-primary-900 dark:text-sand-50 mb-4 sm:mb-6">
-              Recent Activity
-            </h2>
-            {allActivities.length > 0 ? (
-              <div className="space-y-3 sm:space-y-4">
-                {allActivities.map((activity: any) => (
-                  <div
-                    key={activity.type + '-' + activity.id}
-                    className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 border border-primary-200 dark:border-primary-700 rounded-lg"
-                  >
-                    <div className={`p-2 rounded-full w-fit ${
-                      activity.type === 'booking' ?
-                        activity.status === 'CONFIRMED'
-                          ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400'
-                          : activity.status === 'PENDING'
-                          ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400'
-                          : 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
-                      : activity.type === 'review' ? 'bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400'
-                      : activity.type === 'payment' ?
-                        activity.status === 'success'
-                          ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
-                          : activity.status === 'pending'
-                          ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400'
-                          : 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
-                      : 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400'
-                    }`}>
-                      {activity.type === 'booking' ? (
-                        activity.status === 'CONFIRMED' ? <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5" />
-                        : activity.status === 'PENDING' ? <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
-                        : <XCircle className="w-4 h-4 sm:w-5 sm:h-5" />
-                      ) : activity.type === 'review' ? (
-                        <Star className="w-4 h-4 sm:w-5 sm:h-5" />
-                      ) : activity.type === 'payment' ? (
-                        activity.status === 'success' ? <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5" />
-                        : activity.status === 'pending' ? <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
-                        : <XCircle className="w-4 h-4 sm:w-5 sm:h-5" />
-                      ) : (
-                        <Heart className="w-4 h-4 sm:w-5 sm:h-5" />
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      {activity.type === 'booking' ? (
-                        <p className="font-semibold text-sm sm:text-base text-primary-900 dark:text-sand-50 truncate">
-                          Booking {activity.status.toLowerCase()} - {activity.property?.title}
-                        </p>
-                      ) : activity.type === 'review' ? (
-                        <p className="font-semibold text-sm sm:text-base text-primary-900 dark:text-sand-50 truncate">
-                          Review {activity.rating}★ - {activity.property?.title}
-                        </p>
-                      ) : activity.type === 'payment' ? (
-                        <p className="font-semibold text-sm sm:text-base text-primary-900 dark:text-sand-50 truncate">
-                          Payment {activity.status} - {activity.provider} ${activity.amount}
-                        </p>
-                      ) : (
-                        <p className="font-semibold text-sm sm:text-base text-primary-900 dark:text-sand-50 truncate">
-                          Saved property - {activity.property?.title}
-                        </p>
-                      )}
-                      <p className="text-xs sm:text-sm text-primary-600 dark:text-sand-400">
-                        {new Date(activity.created_at).toLocaleDateString()} at {new Date(activity.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </p>
-                    </div>
-                    {activity.type === 'booking' ? (
-                      <Link href={`/bookings`} className="text-secondary-600 dark:text-secondary-400 hover:underline text-xs sm:text-sm font-medium whitespace-nowrap">View Details</Link>
-                    ) : activity.type === 'review' ? (
-                      <Link href={`/reviews`} className="text-secondary-600 dark:text-secondary-400 hover:underline text-xs sm:text-sm font-medium whitespace-nowrap">View Reviews</Link>
-                    ) : activity.type === 'payment' ? (
-                      <Link href={`/payments`} className="text-secondary-600 dark:text-secondary-400 hover:underline text-xs sm:text-sm font-medium whitespace-nowrap">View Payments</Link>
-                    ) : (
-                      <Link href={`/wishlist`} className="text-secondary-600 dark:text-secondary-400 hover:underline text-xs sm:text-sm font-medium whitespace-nowrap">View Wishlist</Link>
-                    )}
+              {/* Recent activity */}
+              <div className="card-gradient p-5">
+                <h2 className="text-lg font-bold text-primary-900 dark:text-sand-50 mb-4">Recent Activity</h2>
+                {allActivities.length > 0 ? (
+                  <div className="space-y-2.5">
+                    {allActivities.map((activity: any) => {
+                      const Icon = getActivityIcon(activity);
+                      return (
+                        <Link
+                          key={activity.type + '-' + activity.id}
+                          href={getActivityLink(activity)}
+                          className="flex items-center gap-3 p-2 rounded-lg hover:bg-sand-50 dark:hover:bg-primary-800/50 transition -mx-2"
+                        >
+                          <div className={`p-1.5 rounded-full flex-shrink-0 ${getActivityColor(activity)}`}>
+                            <Icon className="w-3.5 h-3.5" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm text-primary-800 dark:text-sand-100 truncate">
+                              {getActivityLabel(activity)}
+                            </p>
+                            <p className="text-xs text-primary-500 dark:text-sand-400">
+                              {formatDate(activity.created_at)}
+                            </p>
+                          </div>
+                        </Link>
+                      );
+                    })}
                   </div>
-                ))}
+                ) : (
+                  <p className="text-sm text-primary-500 dark:text-sand-400 text-center py-4">
+                    No recent activity
+                  </p>
+                )}
               </div>
-            ) : (
-              <div className="text-center py-6 sm:py-8 text-primary-600 dark:text-sand-400 text-sm sm:text-base">
-                No recent activity
-              </div>
-            )}
+            </div>
           </div>
         </div>
       </div>
