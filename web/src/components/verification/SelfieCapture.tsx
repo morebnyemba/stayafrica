@@ -143,14 +143,14 @@ export const SelfieCapture = ({ onCaptureComplete }: SelfieCaptureProps) => {
               <div className="flex gap-2 mt-4">
                 <button
                   onClick={capturePhoto}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-secondary-600 text-white rounded-lg hover:bg-secondary-700"
                 >
                   <Camera className="h-5 w-5" />
                   <span>Capture Photo</span>
                 </button>
                 <button
                   onClick={stopCamera}
-                  className="px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  className="px-4 py-3 border border-primary-300 dark:border-primary-600 rounded-lg hover:bg-sand-50 dark:hover:bg-primary-800"
                 >
                   Cancel
                 </button>
@@ -160,7 +160,7 @@ export const SelfieCapture = ({ onCaptureComplete }: SelfieCaptureProps) => {
             <div className="space-y-3">
               <button
                 onClick={startCamera}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-secondary-600 text-white rounded-lg hover:bg-secondary-700"
               >
                 <Camera className="h-5 w-5" />
                 <span>Use Camera</span>
@@ -168,16 +168,16 @@ export const SelfieCapture = ({ onCaptureComplete }: SelfieCaptureProps) => {
               
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-300" />
+                  <div className="w-full border-t border-primary-300 dark:border-primary-600" />
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white text-gray-500">or</span>
+                  <span className="px-2 bg-white text-primary-400 dark:text-sand-500">or</span>
                 </div>
               </div>
               
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50"
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 border border-primary-300 dark:border-primary-600 rounded-lg hover:bg-sand-50 dark:hover:bg-primary-800"
               >
                 <Camera className="h-5 w-5" />
                 <span>Upload Photo</span>
@@ -192,12 +192,12 @@ export const SelfieCapture = ({ onCaptureComplete }: SelfieCaptureProps) => {
             alt="Selfie preview"
             width={400}
             height={400}
-            className="w-full h-96 object-contain bg-gray-50"
+            className="w-full h-96 object-contain bg-sand-50 dark:bg-primary-900"
           />
           <div className="absolute top-2 right-2 flex gap-2">
             <button
               onClick={clear}
-              className="p-2 bg-white text-gray-700 rounded-full shadow-lg hover:bg-gray-100"
+              className="p-2 bg-white text-primary-700 dark:text-sand-200 rounded-full shadow-lg hover:bg-primary-100 dark:hover:bg-primary-800"
               aria-label="Retake photo"
             >
               <RefreshCw className="h-4 w-4" />

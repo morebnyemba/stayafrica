@@ -92,7 +92,7 @@ function ImagePreview({ src, alt }: { src?: string; alt: string }) {
   const imgSrc = src.startsWith('http') ? src : `${apiBase}/media/${src}`;
 
   return (
-    <div className="relative group rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800">
+    <div className="relative group rounded-lg overflow-hidden border border-sand-200/50 dark:border-primary-700/50 bg-primary-100 dark:bg-primary-800">
       <div className="aspect-[4/3] relative">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -106,7 +106,7 @@ function ImagePreview({ src, alt }: { src?: string; alt: string }) {
           <div className="absolute inset-0 flex items-center justify-center bg-black/10 dark:bg-black/30">
             <button
               onClick={() => setRevealed(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-white/90 dark:bg-gray-800/90 rounded-lg shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-white dark:hover:bg-gray-700 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-white/90 dark:bg-primary-800/90 rounded-lg shadow-sm text-sm font-medium text-primary-700 dark:text-sand-200 hover:bg-white dark:hover:bg-primary-700 transition-colors"
             >
               <Eye className="h-4 w-4" />
               Show preview
@@ -123,7 +123,7 @@ function ImagePreview({ src, alt }: { src?: string; alt: string }) {
           </button>
         )}
       </div>
-      <p className="text-xs text-center py-1.5 text-gray-500 dark:text-gray-400">{alt}</p>
+      <p className="text-xs text-center py-1.5 text-primary-400 dark:text-sand-500">{alt}</p>
     </div>
   );
 }
@@ -151,20 +151,20 @@ function StatusTimeline({ status }: { status: string }) {
                   ? 'border-green-500 bg-green-500 text-white'
                   : i === activeIndex
                     ? 'border-blue-500 bg-blue-500 text-white animate-pulse'
-                    : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-400 dark:text-gray-500'
+                    : 'border-primary-300 dark:border-primary-600 bg-white dark:bg-primary-800/40 text-primary-300 dark:text-primary-500'
                 }
               `}
             >
               {i < activeIndex ? <Check className="h-5 w-5" /> : stage.icon}
             </div>
             <span className={`mt-2 text-xs font-medium ${
-              i <= activeIndex ? 'text-gray-900 dark:text-gray-100' : 'text-gray-400 dark:text-gray-500'
+              i <= activeIndex ? 'text-primary-900 dark:text-sand-50' : 'text-primary-300 dark:text-primary-500'
             }`}>
               {stage.label}
             </span>
           </div>
           {i < stages.length - 1 && (
-            <div className={`flex-1 h-0.5 mx-3 ${i < activeIndex ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'}`} />
+            <div className={`flex-1 h-0.5 mx-3 ${i < activeIndex ? 'bg-green-500' : 'bg-primary-300 dark:bg-primary-600'}`} />
           )}
         </div>
       ))}
@@ -240,7 +240,7 @@ export const VerificationWizard = () => {
     return (
       <div className="flex flex-col items-center justify-center py-16 gap-3" role="status" aria-busy="true">
         <Loader2 className="h-10 w-10 animate-spin text-primary-500" />
-        <p className="text-sm text-gray-500 dark:text-gray-400">Checking verification status\u2026</p>
+        <p className="text-sm text-primary-400 dark:text-sand-500">Checking verification status\u2026</p>
       </div>
     );
   }
@@ -252,7 +252,7 @@ export const VerificationWizard = () => {
     return (
       <div className="space-y-6" role="region" aria-label="Verification status">
         {/* Main status card */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div className="bg-white dark:bg-primary-800/40 rounded-xl shadow-sm border border-sand-200/50 dark:border-primary-700/50 overflow-hidden">
           {/* Header banner */}
           <div className={`px-6 py-5 ${
             status.status === 'UNDER_REVIEW'
@@ -271,10 +271,10 @@ export const VerificationWizard = () => {
                   </div>
                 )}
                 <div>
-                  <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+                  <h2 className="text-xl font-bold text-primary-900 dark:text-sand-50">
                     Verification {status.status === 'UNDER_REVIEW' ? 'In Progress' : 'Submitted'}
                   </h2>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <p className="text-sm text-primary-500 dark:text-sand-400">
                     {status.status === 'UNDER_REVIEW'
                       ? 'Our team is currently reviewing your documents.'
                       : 'Your documents are in the queue. Review typically takes 1\u20132 business days.'}
@@ -292,42 +292,42 @@ export const VerificationWizard = () => {
 
           {/* Submission details */}
           <div className="px-6 pb-6">
-            <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">
+            <h3 className="text-sm font-semibold text-primary-400 dark:text-sand-500 uppercase tracking-wider mb-4">
               Submission Details
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="flex items-start gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-900/50">
-                <FileText className="h-5 w-5 text-gray-400 mt-0.5 flex-shrink-0" />
+              <div className="flex items-start gap-3 p-3 rounded-lg bg-sand-50 dark:bg-primary-900/50">
+                <FileText className="h-5 w-5 text-primary-300 dark:text-primary-500 mt-0.5 flex-shrink-0" />
                 <div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">Document Type</p>
-                  <p className="font-medium text-gray-900 dark:text-gray-100">
+                  <p className="text-xs text-primary-400 dark:text-sand-500">Document Type</p>
+                  <p className="font-medium text-primary-900 dark:text-sand-50">
                     {docTypeLabels[status.document_type || ''] || status.document_type_display || status.document_type || '\u2014'}
                   </p>
                 </div>
               </div>
-              <div className="flex items-start gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-900/50">
-                <Hash className="h-5 w-5 text-gray-400 mt-0.5 flex-shrink-0" />
+              <div className="flex items-start gap-3 p-3 rounded-lg bg-sand-50 dark:bg-primary-900/50">
+                <Hash className="h-5 w-5 text-primary-300 dark:text-primary-500 mt-0.5 flex-shrink-0" />
                 <div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">Document Number</p>
-                  <p className="font-medium text-gray-900 dark:text-gray-100 font-mono">
+                  <p className="text-xs text-primary-400 dark:text-sand-500">Document Number</p>
+                  <p className="font-medium text-primary-900 dark:text-sand-50 font-mono">
                     {status.document_number ? `\u2022\u2022\u2022\u2022${status.document_number.slice(-4)}` : '\u2014'}
                   </p>
                 </div>
               </div>
-              <div className="flex items-start gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-900/50">
-                <MapPin className="h-5 w-5 text-gray-400 mt-0.5 flex-shrink-0" />
+              <div className="flex items-start gap-3 p-3 rounded-lg bg-sand-50 dark:bg-primary-900/50">
+                <MapPin className="h-5 w-5 text-primary-300 dark:text-primary-500 mt-0.5 flex-shrink-0" />
                 <div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">Issuing Country</p>
-                  <p className="font-medium text-gray-900 dark:text-gray-100">
+                  <p className="text-xs text-primary-400 dark:text-sand-500">Issuing Country</p>
+                  <p className="font-medium text-primary-900 dark:text-sand-50">
                     {status.document_country || '\u2014'}
                   </p>
                 </div>
               </div>
-              <div className="flex items-start gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-900/50">
-                <Calendar className="h-5 w-5 text-gray-400 mt-0.5 flex-shrink-0" />
+              <div className="flex items-start gap-3 p-3 rounded-lg bg-sand-50 dark:bg-primary-900/50">
+                <Calendar className="h-5 w-5 text-primary-300 dark:text-primary-500 mt-0.5 flex-shrink-0" />
                 <div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">Submitted</p>
-                  <p className="font-medium text-gray-900 dark:text-gray-100">
+                  <p className="text-xs text-primary-400 dark:text-sand-500">Submitted</p>
+                  <p className="font-medium text-primary-900 dark:text-sand-50">
                     {status.created_at
                       ? `${format(new Date(status.created_at), 'PPp')} (${formatDistanceToNow(new Date(status.created_at), { addSuffix: true })})`
                       : '\u2014'}
@@ -337,7 +337,7 @@ export const VerificationWizard = () => {
             </div>
 
             {/* Image previews */}
-            <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mt-6 mb-4">
+            <h3 className="text-sm font-semibold text-primary-400 dark:text-sand-500 uppercase tracking-wider mt-6 mb-4">
               Uploaded Documents
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -374,13 +374,13 @@ export const VerificationWizard = () => {
   if (status && status.status === 'APPROVED') {
     return (
       <div className="space-y-6" role="region" aria-label="Verification approved">
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-green-200 dark:border-green-800 overflow-hidden">
-          <div className="px-6 py-8 text-center bg-gradient-to-b from-green-50 to-white dark:from-green-900/20 dark:to-gray-800">
+        <div className="bg-white dark:bg-primary-800/40 rounded-xl shadow-sm border border-green-200 dark:border-green-800 overflow-hidden">
+          <div className="px-6 py-8 text-center bg-gradient-to-b from-green-50 to-white dark:from-green-900/20 dark:to-primary-800">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 dark:bg-green-900/50 rounded-full mb-4">
               <CheckCircle className="h-8 w-8 text-green-600 dark:text-green-400" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Identity Verified</h2>
-            <p className="text-gray-600 dark:text-gray-400 mt-2 max-w-md mx-auto">
+            <h2 className="text-2xl font-bold text-primary-900 dark:text-sand-50">Identity Verified</h2>
+            <p className="text-primary-500 dark:text-sand-400 mt-2 max-w-md mx-auto">
               Your identity has been successfully verified. You now have full access to all platform features.
             </p>
             <div className="mt-4">
@@ -388,24 +388,24 @@ export const VerificationWizard = () => {
             </div>
           </div>
 
-          <div className="px-6 py-5 border-t border-gray-100 dark:border-gray-700">
+          <div className="px-6 py-5 border-t border-primary-100 dark:border-primary-800">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
               <div>
-                <p className="text-gray-500 dark:text-gray-400">Document</p>
-                <p className="font-medium text-gray-900 dark:text-gray-100">
+                <p className="text-primary-400 dark:text-sand-500">Document</p>
+                <p className="font-medium text-primary-900 dark:text-sand-50">
                   {docTypeLabels[status.document_type || ''] || status.document_type_display || '\u2014'}
                 </p>
               </div>
               <div>
-                <p className="text-gray-500 dark:text-gray-400">Verified On</p>
-                <p className="font-medium text-gray-900 dark:text-gray-100">
+                <p className="text-primary-400 dark:text-sand-500">Verified On</p>
+                <p className="font-medium text-primary-900 dark:text-sand-50">
                   {status.verified_at ? format(new Date(status.verified_at), 'PPP') : '\u2014'}
                 </p>
               </div>
               {status.expires_at && (
                 <div>
-                  <p className="text-gray-500 dark:text-gray-400">Expires</p>
-                  <p className="font-medium text-gray-900 dark:text-gray-100">
+                  <p className="text-primary-400 dark:text-sand-500">Expires</p>
+                  <p className="font-medium text-primary-900 dark:text-sand-50">
                     {format(new Date(status.expires_at), 'PPP')}
                   </p>
                 </div>
@@ -423,15 +423,15 @@ export const VerificationWizard = () => {
   if (status && status.status === 'REJECTED' && !showForm) {
     return (
       <div className="space-y-6" role="region" aria-label="Verification rejected">
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-red-200 dark:border-red-800 overflow-hidden">
+        <div className="bg-white dark:bg-primary-800/40 rounded-xl shadow-sm border border-red-200 dark:border-red-800 overflow-hidden">
           <div className="px-6 py-6 bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20">
             <div className="flex items-center gap-3">
               <div className="p-2.5 bg-red-100 dark:bg-red-900/50 rounded-full">
                 <XCircle className="h-6 w-6 text-red-600 dark:text-red-400" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Verification Not Approved</h2>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+                <h2 className="text-xl font-bold text-primary-900 dark:text-sand-50">Verification Not Approved</h2>
+                <p className="text-sm text-primary-500 dark:text-sand-400">
                   Submitted {status.created_at ? formatDistanceToNow(new Date(status.created_at), { addSuffix: true }) : ''}
                 </p>
               </div>
@@ -446,37 +446,37 @@ export const VerificationWizard = () => {
             </div>
           )}
           {status.admin_notes && (
-            <div className="mx-6 mt-3 p-4 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-lg">
-              <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Admin Notes</h4>
-              <p className="text-sm text-gray-600 dark:text-gray-400">{status.admin_notes}</p>
+            <div className="mx-6 mt-3 p-4 bg-sand-50 dark:bg-primary-900/50 border border-sand-200/50 dark:border-primary-700/50 rounded-lg">
+              <h4 className="text-sm font-semibold text-primary-700 dark:text-sand-200 mb-1">Admin Notes</h4>
+              <p className="text-sm text-primary-500 dark:text-sand-400">{status.admin_notes}</p>
             </div>
           )}
 
           {/* Previous submission preview */}
           <div className="px-6 py-5">
-            <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
+            <h3 className="text-sm font-semibold text-primary-400 dark:text-sand-500 uppercase tracking-wider mb-3">
               Previous Submission
             </h3>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
               <div>
-                <p className="text-gray-500 dark:text-gray-400">Type</p>
-                <p className="font-medium text-gray-900 dark:text-gray-100">
+                <p className="text-primary-400 dark:text-sand-500">Type</p>
+                <p className="font-medium text-primary-900 dark:text-sand-50">
                   {docTypeLabels[status.document_type || ''] || status.document_type_display || '\u2014'}
                 </p>
               </div>
               <div>
-                <p className="text-gray-500 dark:text-gray-400">Number</p>
-                <p className="font-medium text-gray-900 dark:text-gray-100 font-mono">
+                <p className="text-primary-400 dark:text-sand-500">Number</p>
+                <p className="font-medium text-primary-900 dark:text-sand-50 font-mono">
                   {status.document_number ? `\u2022\u2022\u2022\u2022${status.document_number.slice(-4)}` : '\u2014'}
                 </p>
               </div>
               <div>
-                <p className="text-gray-500 dark:text-gray-400">Country</p>
-                <p className="font-medium text-gray-900 dark:text-gray-100">{status.document_country || '\u2014'}</p>
+                <p className="text-primary-400 dark:text-sand-500">Country</p>
+                <p className="font-medium text-primary-900 dark:text-sand-50">{status.document_country || '\u2014'}</p>
               </div>
               <div>
-                <p className="text-gray-500 dark:text-gray-400">Submitted</p>
-                <p className="font-medium text-gray-900 dark:text-gray-100">
+                <p className="text-primary-400 dark:text-sand-500">Submitted</p>
+                <p className="font-medium text-primary-900 dark:text-sand-50">
                   {status.created_at ? format(new Date(status.created_at), 'PP') : '\u2014'}
                 </p>
               </div>
@@ -507,7 +507,7 @@ export const VerificationWizard = () => {
       {status?.status === 'REJECTED' && showForm && (
         <button
           onClick={() => setShowForm(false)}
-          className="inline-flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 mb-4 transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm text-primary-500 dark:text-sand-400 hover:text-primary-900 dark:hover:text-sand-100 mb-4 transition-colors"
         >
           <ChevronLeft className="h-4 w-4" /> Back to rejection details
         </button>
@@ -523,7 +523,7 @@ export const VerificationWizard = () => {
                   className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
                     index <= currentStepIndex
                       ? 'border-primary-600 bg-primary-600 text-white dark:border-primary-500 dark:bg-primary-500'
-                      : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400'
+                      : 'border-primary-300 dark:border-primary-600 bg-white dark:bg-primary-800/40 text-primary-400 dark:text-sand-500'
                   }`}
                   aria-current={index === currentStepIndex ? 'step' : undefined}
                 >
@@ -535,7 +535,7 @@ export const VerificationWizard = () => {
                 </div>
                 <span
                   className={`ml-2 text-sm font-medium ${
-                    index <= currentStepIndex ? 'text-gray-900 dark:text-gray-100' : 'text-gray-500 dark:text-gray-400'
+                    index <= currentStepIndex ? 'text-primary-900 dark:text-sand-50' : 'text-primary-400 dark:text-sand-500'
                   }`}
                 >
                   {step.label}
@@ -544,7 +544,7 @@ export const VerificationWizard = () => {
               {index < steps.length - 1 && (
                 <div
                   className={`flex-1 h-0.5 mx-4 ${
-                    index < currentStepIndex ? 'bg-primary-600 dark:bg-primary-500' : 'bg-gray-300 dark:bg-gray-600'
+                    index < currentStepIndex ? 'bg-primary-600 dark:bg-primary-500' : 'bg-primary-300 dark:bg-primary-600'
                   }`}
                   aria-hidden="true"
                 />
@@ -555,20 +555,20 @@ export const VerificationWizard = () => {
       </div>
 
       {/* Step Content */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
+      <div className="bg-white dark:bg-primary-800/40 rounded-lg shadow-sm border border-sand-200/50 dark:border-primary-700/50 p-6 mb-6">
         {currentStep === 'document' && (
           <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Upload Your ID Document</h2>
+            <h2 className="text-2xl font-bold text-primary-900 dark:text-sand-50">Upload Your ID Document</h2>
 
             <div>
-              <label htmlFor={docTypeId} className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label htmlFor={docTypeId} className="block text-sm font-medium text-primary-700 dark:text-sand-200 mb-2">
                 Document Type *
               </label>
               <select
                 id={docTypeId}
                 value={documentType}
                 onChange={(e) => setDocumentType(e.target.value as typeof documentType)}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-white dark:bg-primary-900 text-primary-900 dark:text-sand-50 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               >
                 <option value="PASSPORT">Passport</option>
                 <option value="NATIONAL_ID">National ID Card</option>
@@ -577,7 +577,7 @@ export const VerificationWizard = () => {
             </div>
 
             <div>
-              <label htmlFor={docNumberId} className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label htmlFor={docNumberId} className="block text-sm font-medium text-primary-700 dark:text-sand-200 mb-2">
                 Document Number *
               </label>
               <input
@@ -585,7 +585,7 @@ export const VerificationWizard = () => {
                 type="text"
                 value={documentNumber}
                 onChange={(e) => setDocumentNumber(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-white dark:bg-primary-900 text-primary-900 dark:text-sand-50 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 placeholder="Enter document number"
                 aria-required="true"
               />
@@ -593,14 +593,14 @@ export const VerificationWizard = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label htmlFor={issuedCountryId} className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label htmlFor={issuedCountryId} className="block text-sm font-medium text-primary-700 dark:text-sand-200 mb-2">
                   Issued Country *
                 </label>
                 <select
                   id={issuedCountryId}
                   value={issuedCountry}
                   onChange={(e) => setIssuedCountry(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-white dark:bg-primary-900 text-primary-900 dark:text-sand-50 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   aria-required="true"
                 >
                   <option value="">Select country</option>
@@ -611,7 +611,7 @@ export const VerificationWizard = () => {
               </div>
 
               <div>
-                <label htmlFor={expiryDateId} className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label htmlFor={expiryDateId} className="block text-sm font-medium text-primary-700 dark:text-sand-200 mb-2">
                   Expiry Date (Optional)
                 </label>
                 <input
@@ -619,7 +619,7 @@ export const VerificationWizard = () => {
                   type="date"
                   value={expiryDate}
                   onChange={(e) => setExpiryDate(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-white dark:bg-primary-900 text-primary-900 dark:text-sand-50 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 />
               </div>
             </div>
@@ -637,8 +637,8 @@ export const VerificationWizard = () => {
 
         {currentStep === 'selfie' && (
           <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Take a Selfie</h2>
-            <p className="text-gray-600 dark:text-gray-400">
+            <h2 className="text-2xl font-bold text-primary-900 dark:text-sand-50">Take a Selfie</h2>
+            <p className="text-primary-500 dark:text-sand-400">
               We&apos;ll use this to verify that you&apos;re the person in your ID document.
             </p>
             <SelfieCapture onCaptureComplete={setSelfieUrl} />
@@ -647,28 +647,28 @@ export const VerificationWizard = () => {
 
         {currentStep === 'review' && (
           <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Review &amp; Submit</h2>
+            <h2 className="text-2xl font-bold text-primary-900 dark:text-sand-50">Review &amp; Submit</h2>
 
             <div className="space-y-4">
-              <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
-                <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-2">Document Information</h3>
+              <div className="p-4 bg-sand-50 dark:bg-primary-900 rounded-lg">
+                <h3 className="font-medium text-primary-900 dark:text-sand-50 mb-2">Document Information</h3>
                 <dl className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <dt className="text-gray-600 dark:text-gray-400">Type:</dt>
-                    <dd className="text-gray-900 dark:text-gray-100">{docTypeLabels[documentType] || documentType}</dd>
+                    <dt className="text-primary-500 dark:text-sand-400">Type:</dt>
+                    <dd className="text-primary-900 dark:text-sand-50">{docTypeLabels[documentType] || documentType}</dd>
                   </div>
                   <div className="flex justify-between">
-                    <dt className="text-gray-600 dark:text-gray-400">Number:</dt>
-                    <dd className="text-gray-900 dark:text-gray-100">{documentNumber}</dd>
+                    <dt className="text-primary-500 dark:text-sand-400">Number:</dt>
+                    <dd className="text-primary-900 dark:text-sand-50">{documentNumber}</dd>
                   </div>
                   <div className="flex justify-between">
-                    <dt className="text-gray-600 dark:text-gray-400">Country:</dt>
-                    <dd className="text-gray-900 dark:text-gray-100">{issuedCountry}</dd>
+                    <dt className="text-primary-500 dark:text-sand-400">Country:</dt>
+                    <dd className="text-primary-900 dark:text-sand-50">{issuedCountry}</dd>
                   </div>
                   {expiryDate && (
                     <div className="flex justify-between">
-                      <dt className="text-gray-600 dark:text-gray-400">Expiry:</dt>
-                      <dd className="text-gray-900 dark:text-gray-100">{expiryDate}</dd>
+                      <dt className="text-primary-500 dark:text-sand-400">Expiry:</dt>
+                      <dd className="text-primary-900 dark:text-sand-50">{expiryDate}</dd>
                     </div>
                   )}
                 </dl>
@@ -689,7 +689,7 @@ export const VerificationWizard = () => {
         <button
           onClick={handleBack}
           disabled={currentStep === 'document'}
-          className="inline-flex items-center gap-2 px-6 py-3 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="inline-flex items-center gap-2 px-6 py-3 border border-primary-300 dark:border-primary-600 rounded-lg text-primary-700 dark:text-sand-200 hover:bg-sand-50 dark:hover:bg-primary-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           aria-label="Go to previous step"
         >
           <ChevronLeft className="h-4 w-4" aria-hidden="true" />

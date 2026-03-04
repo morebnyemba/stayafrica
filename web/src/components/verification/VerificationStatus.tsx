@@ -10,7 +10,7 @@ export const VerificationStatus = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8" role="status" aria-busy="true" aria-label="Loading verification status">
-        <Loader2 className="h-8 w-8 animate-spin text-gray-400" aria-hidden="true" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary-300 dark:text-primary-500" aria-hidden="true" />
         <span className="sr-only">Loading verification status...</span>
       </div>
     );
@@ -91,37 +91,37 @@ export const VerificationStatus = () => {
         
         <div className="flex-1">
           <div className="flex items-center justify-between">
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+            <h3 className="text-xl font-semibold text-primary-900 dark:text-sand-50">
               {getStatusText()}
             </h3>
             
             {status.updated_at && (
-              <span className="text-sm text-gray-600 dark:text-gray-400">
+              <span className="text-sm text-primary-500 dark:text-sand-400">
                 {formatDistanceToNow(new Date(status.updated_at), { addSuffix: true })}
               </span>
             )}
           </div>
           
-          <p className="text-sm text-gray-700 dark:text-gray-300 mt-2">
+          <p className="text-sm text-primary-700 dark:text-sand-200 mt-2">
             {getStatusDescription()}
           </p>
 
           {status.status === 'REJECTED' && status.rejection_reason && (
-            <div className="mt-4 p-4 bg-white dark:bg-gray-800 border border-red-200 dark:border-red-700 rounded-lg" role="alert">
+            <div className="mt-4 p-4 bg-white dark:bg-primary-800/40 border border-red-200 dark:border-red-700 rounded-lg" role="alert">
               <h4 className="text-sm font-medium text-red-900 dark:text-red-200 mb-1">Rejection Reason</h4>
               <p className="text-sm text-red-800 dark:text-red-300">{status.rejection_reason}</p>
             </div>
           )}
 
           {status.admin_notes && (
-            <div className="mt-4 p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
-              <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">Admin Notes</h4>
-              <p className="text-sm text-gray-700 dark:text-gray-300">{status.admin_notes}</p>
+            <div className="mt-4 p-4 bg-white dark:bg-primary-800/40 border border-sand-200/50 dark:border-primary-700/50 rounded-lg">
+              <h4 className="text-sm font-medium text-primary-900 dark:text-sand-50 mb-1">Admin Notes</h4>
+              <p className="text-sm text-primary-700 dark:text-sand-200">{status.admin_notes}</p>
             </div>
           )}
 
           {status.verified_at && (
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-4">
+            <p className="text-xs text-primary-400 dark:text-sand-500 mt-4">
               Verified on {new Date(status.verified_at).toLocaleDateString()}
             </p>
           )}
