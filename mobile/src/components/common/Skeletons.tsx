@@ -1,6 +1,9 @@
-import { View } from 'react-native';
+import { View, Dimensions } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withTiming, withSequence } from 'react-native-reanimated';
 import { useEffect } from 'react';
+
+const SCREEN_WIDTH = Dimensions.get('window').width;
+const GRID_CARD_WIDTH = (SCREEN_WIDTH - 48) / 2;
 
 interface SkeletonProps {
   width?: number | string;
@@ -39,6 +42,46 @@ export function Skeleton({ width = '100%', height = 20, borderRadius = 8, classN
         animatedStyle,
       ]}
     />
+  );
+}
+
+export function PropertyCardGridSkeleton() {
+  return (
+    <View
+      className="rounded-2xl overflow-hidden bg-white"
+      style={{
+        width: GRID_CARD_WIDTH,
+        shadowColor: '#122F26',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.08,
+        shadowRadius: 8,
+        elevation: 4,
+      }}
+    >
+      <Skeleton height={150} borderRadius={0} />
+      <View className="p-2.5">
+        <Skeleton height={16} width="85%" className="mb-1.5" borderRadius={6} />
+        <Skeleton height={12} width="60%" className="mb-2" borderRadius={4} />
+        <View className="flex-row items-center mb-2">
+          <Skeleton height={12} width={24} className="mr-2" borderRadius={4} />
+          <Skeleton height={12} width={24} className="mr-2" borderRadius={4} />
+          <Skeleton height={12} width={24} borderRadius={4} />
+        </View>
+        <Skeleton height={18} width="50%" borderRadius={6} />
+      </View>
+    </View>
+  );
+}
+
+export function PropertyCardGridSkeletonRow() {
+  return (
+    <View
+      className="flex-row justify-between mb-4"
+      style={{ paddingHorizontal: 16 }}
+    >
+      <PropertyCardGridSkeleton />
+      <PropertyCardGridSkeleton />
+    </View>
   );
 }
 
