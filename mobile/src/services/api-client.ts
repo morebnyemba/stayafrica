@@ -302,6 +302,22 @@ class APIClient {
     return (await this.client.post(`/bookings/${id}/confirm/`)).data;
   }
 
+  async checkInBooking(id: string, data?: { check_in_instructions?: string; access_code?: string }): Promise<{ status: string; booking_ref: string; checked_in_at: string }> {
+    return (await this.client.post(`/bookings/${id}/checkin/`, data || {})).data;
+  }
+
+  async checkOutBooking(id: string): Promise<{ status: string; booking_ref: string; checked_out_at: string }> {
+    return (await this.client.post(`/bookings/${id}/checkout/`)).data;
+  }
+
+  async completeBooking(id: string): Promise<{ status: string; booking_ref: string }> {
+    return (await this.client.post(`/bookings/${id}/complete/`)).data;
+  }
+
+  async updateCheckInInfo(id: string, data: { check_in_instructions?: string; access_code?: string }): Promise<{ check_in_instructions: string; access_code: string }> {
+    return (await this.client.patch(`/bookings/${id}/check-in-info/`, data)).data;
+  }
+
   // User
   async getUserProfile(): Promise<User> {
     return (await this.client.get('/users/profile/')).data;

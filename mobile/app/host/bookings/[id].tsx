@@ -5,6 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '@/context/auth-context';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useBookingById, useConfirmBooking, useCancelBooking } from '@/hooks/api-hooks';
+import { apiClient } from '@/services/api-client';
 import { useQueryClient } from '@tanstack/react-query';
 
 export default function HostBookingDetailScreen() {
@@ -290,7 +291,7 @@ export default function HostBookingDetailScreen() {
 
             {/* Actions for pending bookings */}
             {booking.status === 'pending' && (
-              <View className="flex-row gap-3">
+              <View className="flex-row gap-3 mb-4">
                 <TouchableOpacity 
                   className="flex-1 bg-green-500 py-4 rounded-2xl items-center"
                   onPress={handleApprove}
@@ -312,15 +313,153 @@ export default function HostBookingDetailScreen() {
               </View>
             )}
 
-            {/* Contact guest button for confirmed bookings */}
-            {booking.status === 'confirmed' && (
-              <TouchableOpacity>
+            {/* Check In action for confirmed bookings (on/after check-in date) */}
+            {booking.status === 'confirmed' && new Date(booking.check_in) <= new Date(new Date().toDateString()) && (
+              <TouchableOpacity
+                className="mb-4"
+                onPress={() => {
+                  Alert.alert(
+                    'Check In Guest',
+                    'Mark this guest as checked in?',
+                    [
+                      { text: 'Cancel', style: 'cancel' },
+                      {
+                        text: 'Check In',
+                        onPress: async () => {
+                          try {
+                            await apiClient.checkInBooking(id as string);
+                            queryClient.invalidateQueries({ queryKey: ['booking', id] });
+                            Alert.alert('Checked In', 'Guest has been marked as checked in.');
+                          } catch (error: any) {
+                            Alert.alert('Error', error?.response?.data?.error || 'Failed to check in guest');
+                          }
+                        },
+                      },
+                    ]
+                  );
+                }}
+              >
+                <LinearGradient
+                  colors={['#3B82F6', '#2563EB']}
+                  className="py-4 rounded-2xl items-center"
+                  style={{ shadowColor: '#3B82F6', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 5 }}
+                >
+                  <View className="flex-row items-center">
+                    <Ionicons name="enter" size={20} color="#fff" />
+                    <Text className="text-white font-bold ml-2">Check In Guest</Text>
+                  </View>
+                </LinearGradient>
+              </TouchableOpacity>
+            )}
+
+            {/* Checked-in status banner */}
+            {booking.status === 'checked_in' && (
+              <View className="bg-blue-50 border border-blue-200 rounded-2xl p-4 mb-4 flex-row items-center">
+                <View className="bg-blue-100 rounded-full p-2 mr-3">
+                  <Ionicons name="checkmark-circle" size={22} color="#3B82F6" />
+                </View>
+                <View className="flex-1">
+                  <Text className="text-blue-800 font-bold">Guest is Checked In</Text>
+                  <Text className="text-blue-600 text-xs mt-0.5">
+                    {booking.checked_in_at
+                      ? `Since ${new Date(booking.checked_in_at).toLocaleString()}`
+                      : 'Currently staying'}
+                  </Text>
+                </View>
+              </View>
+            )}
+
+            {/* Check Out action for checked-in bookings */}
+            {booking.status === 'checked_in' && (
+              <TouchableOpacity
+                className="mb-4"
+                onPress={() => {
+                  Alert.alert(
+                    'Check Out Guest',
+                    'Mark this guest as checked out?',
+                    [
+                      { text: 'Cancel', style: 'cancel' },
+                      {
+                        text: 'Check Out',
+                        onPress: async () => {
+                          try {
+                            await apiClient.checkOutBooking(id as string);
+                            queryClient.invalidateQueries({ queryKey: ['booking', id] });
+                            Alert.alert('Checked Out', 'Guest has been marked as checked out.');
+                          } catch (error: any) {
+                            Alert.alert('Error', error?.response?.data?.error || 'Failed to check out guest');
+                          }
+                        },
+                      },
+                    ]
+                  );
+                }}
+              >
+                <View className="bg-purple-100 border border-purple-200 py-4 rounded-2xl items-center">
+                  <View className="flex-row items-center">
+                    <Ionicons name="exit" size={20} color="#7C3AED" />
+                    <Text className="text-purple-700 font-bold ml-2">Check Out Guest</Text>
+                  </View>
+                </View>
+              </TouchableOpacity>
+            )}
+
+            {/* Complete action for checked-out bookings */}
+            {booking.status === 'checked_out' && (
+              <TouchableOpacity
+                className="mb-4"
+                onPress={() => {
+                  Alert.alert(
+                    'Complete Booking',
+                    'Mark this booking as completed?',
+                    [
+                      { text: 'Cancel', style: 'cancel' },
+                      {
+                        text: 'Complete',
+                        onPress: async () => {
+                          try {
+                            await apiClient.completeBooking(id as string);
+                            queryClient.invalidateQueries({ queryKey: ['booking', id] });
+                            Alert.alert('Completed', 'Booking has been marked as completed.');
+                          } catch (error: any) {
+                            Alert.alert('Error', error?.response?.data?.error || 'Failed to complete booking');
+                          }
+                        },
+                      },
+                    ]
+                  );
+                }}
+              >
+                <LinearGradient
+                  colors={['#D9B168', '#bea04f']}
+                  className="py-4 rounded-2xl items-center"
+                >
+                  <View className="flex-row items-center">
+                    <Ionicons name="checkmark-done" size={20} color="#122F26" />
+                    <Text className="text-forest font-bold ml-2">Mark as Completed</Text>
+                  </View>
+                </LinearGradient>
+              </TouchableOpacity>
+            )}
+
+            {/* Contact guest button */}
+            {['confirmed', 'checked_in'].includes(booking.status) && (
+              <TouchableOpacity className="mb-4">
                 <LinearGradient
                   colors={['#D9B168', '#bea04f']}
                   className="py-4 rounded-2xl items-center"
                 >
                   <Text className="text-forest font-bold">Contact Guest</Text>
                 </LinearGradient>
+              </TouchableOpacity>
+            )}
+
+            {/* Cancel for confirmed */}
+            {booking.status === 'confirmed' && (
+              <TouchableOpacity onPress={handleDecline}>
+                <View className="bg-red-50 border border-red-200 py-3 rounded-2xl items-center">
+                  <Text className="text-red-600 font-semibold">Cancel Booking</Text>
+                </View>
               </TouchableOpacity>
             )}
           </>

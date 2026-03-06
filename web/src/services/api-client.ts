@@ -150,6 +150,22 @@ class ApiClient {
     return this.client.post(`/bookings/${id}/cancel/`);
   }
 
+  async checkInBooking(id: string, data?: { check_in_instructions?: string; access_code?: string }) {
+    return this.client.post(`/bookings/${id}/checkin/`, data || {});
+  }
+
+  async checkOutBooking(id: string) {
+    return this.client.post(`/bookings/${id}/checkout/`);
+  }
+
+  async completeBooking(id: string) {
+    return this.client.post(`/bookings/${id}/complete/`);
+  }
+
+  async updateCheckInInfo(id: string, data: { check_in_instructions?: string; access_code?: string }) {
+    return this.client.patch(`/bookings/${id}/check-in-info/`, data);
+  }
+
   // Payments
   async initiatePayment(bookingId: string, provider: string) {
     return this.client.post('/payments/initiate/', {

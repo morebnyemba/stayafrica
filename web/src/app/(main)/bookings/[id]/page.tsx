@@ -1,7 +1,7 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
 import { useAuth } from '@/store/auth-store';
 import dynamic from 'next/dynamic';
@@ -22,13 +22,18 @@ import {
   Loader2,
   Home,
   RefreshCw,
+  LogIn,
+  LogOut,
+  KeyRound,
 } from 'lucide-react';
 import { Button } from '@/components/ui';
 import Link from 'next/link';
+import { useState } from 'react';
 
 export default function BookingDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { isAuthenticated } = useAuth();
   const bookingId = params.id as string;
 
@@ -127,6 +132,41 @@ export default function BookingDetailPage() {
 
   const paymentSuccess =
     payment && payment.status?.toLowerCase() === 'success';
+
+  // Check-in / check-out mutations
+  const [actionError, setActionError] = useState<string | null>(null);
+
+  const selfCheckIn = useMutation({
+    mutationFn: () => apiClient.checkInBooking(bookingId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['booking', bookingId] });
+      setActionError(null);
+    },
+    onError: (err: any) => {
+      setActionError(err?.response?.data?.error || 'Check-in failed');
+    },
+  });
+
+  const checkOutMutation = useMutation({
+    mutationFn: () => apiClient.checkOutBooking(bookingId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['booking', bookingId] });
+      setActionError(null);
+    },
+    onError: (err: any) => {
+      setActionError(err?.response?.data?.error || 'Check-out failed');
+    },
+  });
+
+  const canSelfCheckIn =
+    booking?.status === 'confirmed' &&
+    new Date(booking.check_in) <= new Date(new Date().toDateString());
+
+  const canCheckOut =
+    booking?.status === 'checked_in';
+
+  const isCheckedIn = booking?.status === 'checked_in';
+  const isCheckedOut = booking?.status === 'checked_out';
 
   const statusConfig = booking ? getStatusConfig(booking.status) : null;
 
@@ -373,6 +413,104 @@ export default function BookingDetailPage() {
                 )}
               </div>
 
+              {/* Check-in Information (shown when confirmed or checked in) */}
+              {(booking.status === 'confirmed' || isCheckedIn || isCheckedOut || booking.status === 'completed') &&
+                (booking.check_in_instructions || booking.access_code) && (
+                <div className="card p-6 border-l-4 border-gold-500">
+                  <h2 className="text-lg font-semibold text-primary-900 dark:text-sand-50 mb-4 flex items-center gap-2">
+                    <KeyRound className="w-5 h-5 text-gold-600" />
+                    Check-in Information
+                  </h2>
+                  {booking.check_in_instructions && (
+                    <div className="mb-3">
+                      <div className="text-sm text-primary-500 dark:text-sand-400 mb-1">Instructions</div>
+                      <p className="text-primary-900 dark:text-sand-50 whitespace-pre-line">
+                        {booking.check_in_instructions}
+                      </p>
+                    </div>
+                  )}
+                  {booking.access_code && (
+                    <div className="flex items-center gap-3 p-3 bg-primary-50 dark:bg-primary-800 rounded-lg">
+                      <KeyRound className="w-5 h-5 text-primary-600 dark:text-sand-300" />
+                      <div>
+                        <div className="text-xs text-primary-500 dark:text-sand-400">Access Code</div>
+                        <div className="font-mono font-bold text-lg text-primary-900 dark:text-sand-50">
+                          {booking.access_code}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Self Check-in / Check-out */}
+              {(canSelfCheckIn || canCheckOut) && (
+                <div className="card p-6">
+                  <h2 className="text-lg font-semibold text-primary-900 dark:text-sand-50 mb-4">
+                    {canSelfCheckIn ? 'Ready to Check In?' : 'Check Out'}
+                  </h2>
+                  {actionError && (
+                    <div className="flex items-center gap-2 p-3 mb-4 bg-red-50 dark:bg-red-900/20 rounded-lg text-red-700 dark:text-red-300 text-sm">
+                      <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                      {actionError}
+                    </div>
+                  )}
+                  {canSelfCheckIn && (
+                    <div className="space-y-3">
+                      <p className="text-primary-600 dark:text-sand-300 text-sm">
+                        You can check in now. Let your host know you&apos;ve arrived.
+                      </p>
+                      <Button
+                        onClick={() => selfCheckIn.mutate()}
+                        disabled={selfCheckIn.isPending}
+                        className="w-full flex items-center justify-center gap-2"
+                      >
+                        {selfCheckIn.isPending ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <LogIn className="w-4 h-4" />
+                        )}
+                        I&apos;ve Arrived — Check In
+                      </Button>
+                    </div>
+                  )}
+                  {canCheckOut && (
+                    <div className="space-y-3">
+                      <p className="text-primary-600 dark:text-sand-300 text-sm">
+                        Ready to leave? Let the host know you&apos;re checking out.
+                      </p>
+                      <Button
+                        onClick={() => checkOutMutation.mutate()}
+                        disabled={checkOutMutation.isPending}
+                        variant="secondary"
+                        className="w-full flex items-center justify-center gap-2"
+                      >
+                        {checkOutMutation.isPending ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <LogOut className="w-4 h-4" />
+                        )}
+                        Check Out
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Checked-in status banner */}
+              {isCheckedIn && (
+                <div className="flex items-center gap-3 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
+                  <CheckCircle className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                  <div>
+                    <div className="font-semibold text-blue-800 dark:text-blue-200">You&apos;re Checked In!</div>
+                    <div className="text-sm text-blue-600 dark:text-blue-400">
+                      Checked in {booking.checked_in_at ? new Date(booking.checked_in_at).toLocaleString() : 'recently'}.
+                      Enjoy your stay!
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Actions */}
               <div className="card p-6">
                 <div className="flex flex-wrap gap-3">
@@ -383,7 +521,7 @@ export default function BookingDetailPage() {
                       </Button>
                     </Link>
                   )}
-                  {(booking.status === 'confirmed' || booking.status === 'CONFIRMED') && (
+                  {(['confirmed', 'checked_in'].includes(booking.status)) && (
                     <Link href={`/bookings/${booking.id}/directions`}>
                       <Button variant="outline" size="sm">
                         Get Directions

@@ -473,6 +473,13 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': timedelta(hours=1),      # every 1 hr
         'options': {'queue': 'analytics'},
     },
+
+    # ── Booking lifecycle automation ──────────────────────────────
+    'auto-complete-bookings': {
+        'task': 'tasks.notification_tasks.auto_complete_bookings',
+        'schedule': timedelta(hours=6),      # every 6 hrs
+        'options': {'queue': 'default'},
+    },
 }
 
 # Sentry Configuration (Optional)

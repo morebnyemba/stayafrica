@@ -8,6 +8,8 @@ class Booking(models.Model):
     STATUS_CHOICES = [
         ('pending', 'Pending'),
         ('confirmed', 'Confirmed'),
+        ('checked_in', 'Checked In'),
+        ('checked_out', 'Checked Out'),
         ('cancelled', 'Cancelled'),
         ('completed', 'Completed'),
     ]
@@ -31,6 +33,12 @@ class Booking(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     
     special_requests = models.TextField(blank=True, null=True)
+
+    # Check-in / check-out tracking
+    checked_in_at = models.DateTimeField(null=True, blank=True, help_text='Actual check-in timestamp')
+    checked_out_at = models.DateTimeField(null=True, blank=True, help_text='Actual check-out timestamp')
+    check_in_instructions = models.TextField(blank=True, default='', help_text='Directions, access codes, or arrival info sent to guest')
+    access_code = models.CharField(max_length=100, blank=True, default='', help_text='Lockbox, keypad, or smart-lock code')
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -42,12 +50,15 @@ class Booking(models.Model):
             models.Index(fields=['rental_property']),
             models.Index(fields=['status']),
             models.Index(fields=['booking_ref']),
+            models.Index(fields=['check_in', 'status']),
         ]
     
     # Valid status transitions: current_status → allowed next statuses
     VALID_TRANSITIONS = {
         'pending': {'confirmed', 'cancelled'},
-        'confirmed': {'cancelled', 'completed'},
+        'confirmed': {'checked_in', 'cancelled'},
+        'checked_in': {'checked_out'},
+        'checked_out': {'completed'},
         'cancelled': set(),   # terminal state
         'completed': set(),   # terminal state
     }

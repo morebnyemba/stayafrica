@@ -322,9 +322,9 @@ class BookingViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_403_FORBIDDEN
             )
         
-        if booking.status != 'confirmed':
+        if booking.status not in ('confirmed', 'checked_out'):
             return Response(
-                {'error': 'Can only complete confirmed bookings'},
+                {'error': 'Can only complete confirmed or checked-out bookings'},
                 status=status.HTTP_400_BAD_REQUEST
             )
         
@@ -338,6 +338,9 @@ class BookingViewSet(viewsets.ModelViewSet):
         
         with transaction.atomic():
             booking.status = 'completed'
+            if not booking.checked_out_at:
+                from django.utils.timezone import now as tz_now
+                booking.checked_out_at = tz_now()
             booking.save()
             
             # Log the action
@@ -380,3 +383,193 @@ class BookingViewSet(viewsets.ModelViewSet):
         
         logger.info(f"Booking completed: {booking.booking_ref}")
         return Response({'status': 'completed', 'booking_ref': booking.booking_ref})
+
+    @action(detail=True, methods=['post'])
+    @log_action('checkin_booking')
+    def checkin(self, request, pk=None):
+        """
+        Mark guest as checked in.
+        Host can check in a guest, or guest can self-check-in on/after the check-in date.
+        Optionally accepts check_in_instructions and access_code from host.
+        """
+        booking = self.get_object()
+        is_guest = request.user == booking.guest
+        is_host = request.user == booking.rental_property.host
+        is_admin = request.user.is_admin_user
+
+        if not (is_guest or is_host or is_admin):
+            return Response(
+                {'error': 'Only the guest, host, or admin can check in'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        if booking.status != 'confirmed':
+            return Response(
+                {'error': 'Can only check in confirmed bookings'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        from datetime import date
+        if booking.check_in > date.today():
+            return Response(
+                {'error': 'Cannot check in before the check-in date'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        with transaction.atomic():
+            from django.utils.timezone import now as tz_now
+            booking.status = 'checked_in'
+            booking.checked_in_at = tz_now()
+
+            # Host can attach instructions / access code
+            if is_host or is_admin:
+                if 'check_in_instructions' in request.data:
+                    booking.check_in_instructions = request.data['check_in_instructions']
+                if 'access_code' in request.data:
+                    booking.access_code = request.data['access_code']
+
+            booking.save()
+
+            from django.contrib.contenttypes.models import ContentType
+            content_type = ContentType.objects.get_for_model(Booking)
+            AuditLoggerService.log_action(
+                user=request.user,
+                action='checkin',
+                content_type=content_type,
+                object_id=booking.id,
+                changes={'status': 'checked_in', 'by': 'guest' if is_guest else 'host'}
+            )
+
+        # Notifications
+        try:
+            from tasks.notification_tasks import send_push_notification
+            if is_guest:
+                send_push_notification.delay(
+                    booking.rental_property.host.id,
+                    'Guest Checked In',
+                    f'{booking.guest.first_name or booking.guest.email} has checked in at {booking.rental_property.title}.',
+                    {'booking_id': str(booking.id), 'type': 'guest_checked_in'}
+                )
+            else:
+                send_push_notification.delay(
+                    booking.guest.id,
+                    'You\'re Checked In!',
+                    f'Welcome to {booking.rental_property.title}! Enjoy your stay.',
+                    {'booking_id': str(booking.id), 'type': 'guest_checked_in'}
+                )
+        except Exception as e:
+            logger.warning(f"Could not send check-in notification: {e}")
+
+        try:
+            from services.automated_messaging_service import AutomatedMessagingService
+            AutomatedMessagingService.trigger_automated_message('guest_checked_in', booking=booking)
+        except Exception as e:
+            logger.warning(f"Could not trigger check-in message: {e}")
+
+        logger.info(f"Booking checked in: {booking.booking_ref}")
+        return Response({
+            'status': 'checked_in',
+            'booking_ref': booking.booking_ref,
+            'checked_in_at': booking.checked_in_at.isoformat(),
+        })
+
+    @action(detail=True, methods=['post'])
+    @log_action('checkout_booking')
+    def checkout(self, request, pk=None):
+        """
+        Mark guest as checked out.
+        Host or admin marks checkout. Guests cannot self-checkout.
+        """
+        booking = self.get_object()
+        is_host = request.user == booking.rental_property.host
+        is_admin = request.user.is_admin_user
+        is_guest = request.user == booking.guest
+
+        if not (is_host or is_admin or is_guest):
+            return Response(
+                {'error': 'Only the host or admin can check out a guest'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        if booking.status != 'checked_in':
+            return Response(
+                {'error': 'Can only check out a checked-in booking'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        with transaction.atomic():
+            from django.utils.timezone import now as tz_now
+            booking.status = 'checked_out'
+            booking.checked_out_at = tz_now()
+            booking.save()
+
+            from django.contrib.contenttypes.models import ContentType
+            content_type = ContentType.objects.get_for_model(Booking)
+            AuditLoggerService.log_action(
+                user=request.user,
+                action='checkout',
+                content_type=content_type,
+                object_id=booking.id,
+                changes={'status': 'checked_out'}
+            )
+
+        # Notifications
+        try:
+            from tasks.notification_tasks import send_push_notification
+            send_push_notification.delay(
+                booking.guest.id,
+                'Checked Out',
+                f'Thank you for staying at {booking.rental_property.title}! We hope you had a great time.',
+                {'booking_id': str(booking.id), 'type': 'guest_checked_out'}
+            )
+            send_push_notification.delay(
+                booking.rental_property.host.id,
+                'Guest Checked Out',
+                f'Booking {booking.booking_ref} has been checked out.',
+                {'booking_id': str(booking.id), 'type': 'guest_checked_out'}
+            )
+        except Exception as e:
+            logger.warning(f"Could not send checkout notification: {e}")
+
+        try:
+            from services.automated_messaging_service import AutomatedMessagingService
+            AutomatedMessagingService.trigger_automated_message('booking_completed', booking=booking)
+        except Exception as e:
+            logger.warning(f"Could not trigger checkout message: {e}")
+
+        logger.info(f"Booking checked out: {booking.booking_ref}")
+        return Response({
+            'status': 'checked_out',
+            'booking_ref': booking.booking_ref,
+            'checked_out_at': booking.checked_out_at.isoformat(),
+        })
+
+    @action(detail=True, methods=['patch'], url_path='check-in-info')
+    def check_in_info(self, request, pk=None):
+        """Host updates check-in instructions / access code without changing status."""
+        booking = self.get_object()
+        is_host = request.user == booking.rental_property.host
+        is_admin = request.user.is_admin_user
+
+        if not (is_host or is_admin):
+            return Response(
+                {'error': 'Only the host can update check-in info'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        if booking.status in ('cancelled', 'completed'):
+            return Response(
+                {'error': 'Cannot update check-in info for this booking'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if 'check_in_instructions' in request.data:
+            booking.check_in_instructions = request.data['check_in_instructions']
+        if 'access_code' in request.data:
+            booking.access_code = request.data['access_code']
+        booking.save(update_fields=['check_in_instructions', 'access_code', 'updated_at'])
+
+        return Response({
+            'check_in_instructions': booking.check_in_instructions,
+            'access_code': booking.access_code,
+        })

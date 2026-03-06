@@ -6,7 +6,7 @@ import { apiClient } from '@/services/api-client';
 import {
   Calendar, MapPin, CheckCircle, XCircle, Clock,
   List, Building2, Moon, Search, MessageSquare,
-  ArrowRight, TrendingUp, Eye,
+  ArrowRight, TrendingUp, Eye, LogIn, LogOut,
 } from 'lucide-react';
 import { Button } from '@/components/ui';
 import dynamic from 'next/dynamic';
@@ -59,6 +59,27 @@ export function HostBookingsContent() {
     },
   });
 
+  const checkInMutation = useMutation({
+    mutationFn: (bookingId: string) => apiClient.checkInBooking(bookingId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['host', 'bookings'] });
+    },
+  });
+
+  const checkOutMutation = useMutation({
+    mutationFn: (bookingId: string) => apiClient.checkOutBooking(bookingId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['host', 'bookings'] });
+    },
+  });
+
+  const completeMutation = useMutation({
+    mutationFn: (bookingId: string) => apiClient.completeBooking(bookingId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['host', 'bookings'] });
+    },
+  });
+
   const handleConfirm = (bookingId: string) => {
     if (window.confirm('Are you sure you want to confirm this booking?')) {
       confirmMutation.mutate(bookingId);
@@ -68,6 +89,24 @@ export function HostBookingsContent() {
   const handleCancel = (bookingId: string) => {
     if (window.confirm('Are you sure you want to cancel this booking? This action cannot be undone.')) {
       cancelMutation.mutate(bookingId);
+    }
+  };
+
+  const handleCheckIn = (bookingId: string) => {
+    if (window.confirm('Mark this guest as checked in?')) {
+      checkInMutation.mutate(bookingId);
+    }
+  };
+
+  const handleCheckOut = (bookingId: string) => {
+    if (window.confirm('Mark this guest as checked out?')) {
+      checkOutMutation.mutate(bookingId);
+    }
+  };
+
+  const handleComplete = (bookingId: string) => {
+    if (window.confirm('Mark this booking as completed?')) {
+      completeMutation.mutate(bookingId);
     }
   };
 
@@ -89,6 +128,8 @@ export function HostBookingsContent() {
     total: allBookings.length,
     pending: allBookings.filter((b: any) => b.status === 'pending').length,
     confirmed: allBookings.filter((b: any) => b.status === 'confirmed').length,
+    checked_in: allBookings.filter((b: any) => b.status === 'checked_in').length,
+    checked_out: allBookings.filter((b: any) => b.status === 'checked_out').length,
     completed: allBookings.filter((b: any) => b.status === 'completed').length,
     totalEarnings: allBookings.reduce((sum: number, b: any) =>
       sum + (parseFloat(b.nightly_total || 0) + parseFloat(b.cleaning_fee || 0) - parseFloat(b.commission_fee || 0)), 0),
@@ -97,6 +138,8 @@ export function HostBookingsContent() {
   const statusConfig: Record<string, { color: string; bg: string; icon: any; dotColor: string }> = {
     pending: { color: 'text-yellow-700 dark:text-yellow-300', bg: 'bg-yellow-50 dark:bg-yellow-900/20', icon: Clock, dotColor: 'bg-yellow-500' },
     confirmed: { color: 'text-green-700 dark:text-green-300', bg: 'bg-green-50 dark:bg-green-900/20', icon: CheckCircle, dotColor: 'bg-green-500' },
+    checked_in: { color: 'text-blue-700 dark:text-blue-300', bg: 'bg-blue-50 dark:bg-blue-900/20', icon: LogIn, dotColor: 'bg-blue-500' },
+    checked_out: { color: 'text-purple-700 dark:text-purple-300', bg: 'bg-purple-50 dark:bg-purple-900/20', icon: LogOut, dotColor: 'bg-purple-500' },
     cancelled: { color: 'text-red-700 dark:text-red-300', bg: 'bg-red-50 dark:bg-red-900/20', icon: XCircle, dotColor: 'bg-red-500' },
     completed: { color: 'text-blue-700 dark:text-blue-300', bg: 'bg-blue-50 dark:bg-blue-900/20', icon: CheckCircle, dotColor: 'bg-blue-500' },
   };
@@ -105,6 +148,8 @@ export function HostBookingsContent() {
     all: stats.total,
     pending: stats.pending,
     confirmed: stats.confirmed,
+    checked_in: stats.checked_in,
+    checked_out: stats.checked_out,
     completed: stats.completed,
     cancelled: allBookings.filter((b: any) => b.status === 'cancelled').length,
   };
@@ -187,7 +232,9 @@ export function HostBookingsContent() {
               />
             </div>
             <div className="flex gap-2 overflow-x-auto pb-1">
-              {['all', 'pending', 'confirmed', 'completed', 'cancelled'].map((status) => (
+              {['all', 'pending', 'confirmed', 'checked_in', 'checked_out', 'completed', 'cancelled'].map((status) => {
+                const label = status === 'checked_in' ? 'Checked In' : status === 'checked_out' ? 'Checked Out' : status.charAt(0).toUpperCase() + status.slice(1);
+                return (
                 <button
                   key={status}
                   onClick={() => setFilter(status)}
@@ -197,10 +244,11 @@ export function HostBookingsContent() {
                       : 'bg-white dark:bg-primary-800 text-primary-600 dark:text-sand-300 border border-primary-200 dark:border-primary-700 hover:border-secondary-300'
                   }`}
                 >
-                  {status.charAt(0).toUpperCase() + status.slice(1)}
+                  {label}
                   <span className="ml-1.5 text-xs opacity-70">{filterCounts[status]}</span>
                 </button>
-              ))}
+                );
+              })}
             </div>
           </div>
 
@@ -403,14 +451,52 @@ export function HostBookingsContent() {
                                   </>
                                 )}
                                 {booking.status === 'confirmed' && (
+                                  <>
+                                    {new Date(booking.check_in) <= new Date(new Date().toDateString()) && (
+                                      <Button
+                                        onClick={() => handleCheckIn(booking.id)}
+                                        disabled={checkInMutation.isPending}
+                                        variant="primary"
+                                        size="sm"
+                                        className="text-xs px-3"
+                                      >
+                                        <LogIn className="w-3.5 h-3.5 mr-1" />
+                                        Check In
+                                      </Button>
+                                    )}
+                                    <Button
+                                      onClick={() => handleCancel(booking.id)}
+                                      disabled={cancelMutation.isPending}
+                                      variant="danger"
+                                      size="sm"
+                                      className="text-xs px-3"
+                                    >
+                                      Cancel
+                                    </Button>
+                                  </>
+                                )}
+                                {booking.status === 'checked_in' && (
                                   <Button
-                                    onClick={() => handleCancel(booking.id)}
-                                    disabled={cancelMutation.isPending}
-                                    variant="danger"
+                                    onClick={() => handleCheckOut(booking.id)}
+                                    disabled={checkOutMutation.isPending}
+                                    variant="secondary"
                                     size="sm"
                                     className="text-xs px-3"
                                   >
-                                    Cancel
+                                    <LogOut className="w-3.5 h-3.5 mr-1" />
+                                    Check Out
+                                  </Button>
+                                )}
+                                {booking.status === 'checked_out' && (
+                                  <Button
+                                    onClick={() => handleComplete(booking.id)}
+                                    disabled={completeMutation.isPending}
+                                    variant="primary"
+                                    size="sm"
+                                    className="text-xs px-3"
+                                  >
+                                    <CheckCircle className="w-3.5 h-3.5 mr-1" />
+                                    Complete
                                   </Button>
                                 )}
                                 <Link href={`/property/${booking.property?.id || booking.rental_property}`}>

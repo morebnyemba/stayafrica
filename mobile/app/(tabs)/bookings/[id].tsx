@@ -398,10 +398,146 @@ export default function BookingDetailScreen() {
               )}
             </View>
 
+            {/* Check-in Information Card */}
+            {['confirmed', 'checked_in', 'checked_out', 'completed'].includes(booking.status) &&
+              (booking.check_in_instructions || booking.access_code) && (
+              <View className="bg-white rounded-2xl p-4 mb-4 border-l-4 border-gold" style={cardStyle}>
+                <View className="flex-row items-center mb-3">
+                  <Ionicons name="key" size={20} color="#D9B168" />
+                  <Text className="text-lg font-bold text-forest ml-2">Check-in Information</Text>
+                </View>
+                {booking.check_in_instructions ? (
+                  <View className="mb-3">
+                    <Text className="text-moss text-xs font-medium mb-1">Instructions</Text>
+                    <Text className="text-forest leading-5">{booking.check_in_instructions}</Text>
+                  </View>
+                ) : null}
+                {booking.access_code ? (
+                  <View className="bg-sand-100 rounded-xl p-3 flex-row items-center">
+                    <View className="bg-gold/20 rounded-full p-2 mr-3">
+                      <Ionicons name="keypad" size={20} color="#D9B168" />
+                    </View>
+                    <View>
+                      <Text className="text-moss text-xs">Access Code</Text>
+                      <Text className="text-forest font-bold text-xl font-mono tracking-wider">
+                        {booking.access_code}
+                      </Text>
+                    </View>
+                  </View>
+                ) : null}
+              </View>
+            )}
+
+            {/* Self Check-in / Check-out Card */}
+            {(booking.status === 'confirmed' && new Date(booking.check_in) <= new Date(new Date().toDateString())) && (
+              <View className="bg-white rounded-2xl p-4 mb-4" style={cardStyle}>
+                <Text className="text-lg font-bold text-forest mb-2">Ready to Check In?</Text>
+                <Text className="text-moss text-sm mb-4">
+                  Let your host know you&apos;ve arrived at the property.
+                </Text>
+                <TouchableOpacity
+                  onPress={() => {
+                    Alert.alert(
+                      'Check In',
+                      'Confirm that you have arrived at the property?',
+                      [
+                        { text: 'Not Yet', style: 'cancel' },
+                        {
+                          text: "I've Arrived",
+                          onPress: async () => {
+                            try {
+                              await apiClient.checkInBooking(id as string);
+                              Alert.alert('Checked In!', 'Welcome! Enjoy your stay.');
+                              // Refetch booking to update UI
+                            } catch (error: any) {
+                              Alert.alert('Error', error?.response?.data?.error || 'Check-in failed');
+                            }
+                          },
+                        },
+                      ]
+                    );
+                  }}
+                >
+                  <LinearGradient
+                    colors={['#3B82F6', '#2563EB']}
+                    className="py-4 rounded-2xl items-center"
+                    style={{
+                      shadowColor: '#3B82F6',
+                      shadowOffset: { width: 0, height: 4 },
+                      shadowOpacity: 0.3,
+                      shadowRadius: 8,
+                      elevation: 5,
+                    }}
+                  >
+                    <View className="flex-row items-center">
+                      <Ionicons name="enter" size={20} color="#fff" />
+                      <Text className="text-white font-bold ml-2 text-base">I&apos;ve Arrived — Check In</Text>
+                    </View>
+                  </LinearGradient>
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {/* Currently checked in banner */}
+            {booking.status === 'checked_in' && (
+              <View className="bg-blue-50 border border-blue-200 rounded-2xl p-4 mb-4 flex-row items-center">
+                <View className="bg-blue-100 rounded-full p-2 mr-3">
+                  <Ionicons name="checkmark-circle" size={22} color="#3B82F6" />
+                </View>
+                <View className="flex-1">
+                  <Text className="text-blue-800 font-bold">You&apos;re Checked In!</Text>
+                  <Text className="text-blue-600 text-xs mt-0.5">
+                    {booking.checked_in_at
+                      ? `Checked in ${new Date(booking.checked_in_at).toLocaleString()}`
+                      : 'Enjoy your stay!'}
+                  </Text>
+                </View>
+              </View>
+            )}
+
+            {/* Check-out action (for checked-in guests) */}
+            {booking.status === 'checked_in' && (
+              <View className="bg-white rounded-2xl p-4 mb-4" style={cardStyle}>
+                <Text className="text-lg font-bold text-forest mb-2">Ready to Leave?</Text>
+                <Text className="text-moss text-sm mb-4">
+                  Let the host know you&apos;re checking out.
+                </Text>
+                <TouchableOpacity
+                  onPress={() => {
+                    Alert.alert(
+                      'Check Out',
+                      'Confirm that you are checking out?',
+                      [
+                        { text: 'Not Yet', style: 'cancel' },
+                        {
+                          text: 'Check Out',
+                          onPress: async () => {
+                            try {
+                              await apiClient.checkOutBooking(id as string);
+                              Alert.alert('Checked Out', 'Thank you for your stay! We hope you enjoyed it.');
+                            } catch (error: any) {
+                              Alert.alert('Error', error?.response?.data?.error || 'Check-out failed');
+                            }
+                          },
+                        },
+                      ]
+                    );
+                  }}
+                >
+                  <View className="bg-purple-100 border border-purple-200 py-4 rounded-2xl items-center">
+                    <View className="flex-row items-center">
+                      <Ionicons name="exit" size={20} color="#7C3AED" />
+                      <Text className="text-purple-700 font-bold ml-2 text-base">Check Out</Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              </View>
+            )}
+
             {/* Actions */}
             <View className="bg-white rounded-2xl p-4 mb-4" style={cardStyle}>
               {/* Contact Host */}
-              {(booking.status === 'pending' || booking.status === 'confirmed') && (
+              {['pending', 'confirmed', 'checked_in'].includes(booking.status) && (
                 <TouchableOpacity
                   onPress={async () => {
                     try {
@@ -436,7 +572,7 @@ export default function BookingDetailScreen() {
               <View className="flex-row gap-3">
                 {booking.property?.id && (
                   <TouchableOpacity
-                    onPress={() => router.push(`/(tabs)/explore/${booking.property.id}`)}
+                    onPress={() => router.push(`/(tabs)/explore/${booking.property!.id}`)}
                     className="flex-1"
                   >
                     <View className="bg-white border border-sand-300 py-3 rounded-2xl items-center">
@@ -451,9 +587,10 @@ export default function BookingDetailScreen() {
                 {['confirmed', 'CONFIRMED', 'checked_in'].includes(booking.status) && (
                   <TouchableOpacity
                     onPress={() => {
-                      const lat = booking.property?.location?.latitude || booking.property?.latitude;
-                      const lng = booking.property?.location?.longitude || booking.property?.longitude;
-                      const address = booking.property?.location?.address || booking.property?.address || '';
+                      const prop = booking.property as any;
+                      const lat = prop?.location?.latitude || prop?.latitude;
+                      const lng = prop?.location?.longitude || prop?.longitude;
+                      const address = prop?.location?.address || prop?.address || '';
                       
                       if (lat && lng) {
                         const url = Platform.select({
@@ -524,7 +661,7 @@ export default function BookingDetailScreen() {
             {/* Booking Metadata */}
             <Text className="text-center text-xs text-moss mt-2">
               Booked on {new Date(booking.created_at).toLocaleDateString()} — Last updated{' '}
-              {new Date(booking.updated_at).toLocaleDateString()}
+              {new Date(booking.updated_at || booking.created_at).toLocaleDateString()}
             </Text>
           </>
         ) : (

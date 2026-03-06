@@ -85,6 +85,10 @@ export interface Booking {
   currency?: string;
   status: 'pending' | 'confirmed' | 'checked_in' | 'checked_out' | 'cancelled' | 'completed';
   special_requests?: string;
+  checked_in_at?: string;
+  checked_out_at?: string;
+  check_in_instructions?: string;
+  access_code?: string;
   created_at: string;
   updated_at?: string;
 }

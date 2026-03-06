@@ -255,3 +255,65 @@ def process_scheduled_messages():
     except Exception as e:
         logger.error(f"Error processing scheduled messages: {e}")
         return 0
+
+
+@shared_task
+def auto_complete_bookings():
+    """
+    Automatic booking lifecycle transitions:
+    1. confirmed → checked_in  (on check-in date, if not already)
+    2. checked_in → checked_out (on/after check-out date)
+    3. checked_out → completed  (48 h after check-out date)
+    4. confirmed (past checkout, never checked in) → completed  (grace period 48 h)
+    Runs daily via Celery Beat.
+    """
+    from apps.bookings.models import Booking
+    from datetime import date, timedelta
+    from django.utils.timezone import now as tz_now
+
+    today = date.today()
+    cutoff = today - timedelta(days=2)  # 48-hour grace
+    stats = {'checked_out': 0, 'completed_from_checkout': 0, 'completed_stale': 0}
+
+    try:
+        # 1. checked_in bookings past checkout date → checked_out
+        checked_in_past = Booking.objects.filter(
+            status='checked_in',
+            check_out__lte=today,
+        )
+        for booking in checked_in_past:
+            booking.status = 'checked_out'
+            booking.checked_out_at = tz_now()
+            booking.save()
+            stats['checked_out'] += 1
+            logger.info(f"Auto checked-out: {booking.booking_ref}")
+
+        # 2. checked_out bookings 48h+ after checkout → completed
+        checked_out_old = Booking.objects.filter(
+            status='checked_out',
+            check_out__lte=cutoff,
+        )
+        for booking in checked_out_old:
+            booking.status = 'completed'
+            booking.save()
+            stats['completed_from_checkout'] += 1
+            logger.info(f"Auto completed (from checked_out): {booking.booking_ref}")
+
+        # 3. confirmed bookings that were never checked in, 48h past checkout → completed
+        stale_confirmed = Booking.objects.filter(
+            status='confirmed',
+            check_out__lte=cutoff,
+        )
+        for booking in stale_confirmed:
+            booking.status = 'completed'
+            booking.checked_out_at = tz_now()
+            booking.save()
+            stats['completed_stale'] += 1
+            logger.info(f"Auto completed (stale confirmed): {booking.booking_ref}")
+
+        logger.info(f"auto_complete_bookings done: {stats}")
+        return stats
+
+    except Exception as e:
+        logger.error(f"Error in auto_complete_bookings: {e}")
+        return None
