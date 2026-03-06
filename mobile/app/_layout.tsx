@@ -4,7 +4,7 @@ import { Stack } from 'expo-router';
 import { useRouter, SplashScreen } from 'expo-router';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { ActivityIndicator, View, Platform, StatusBar } from 'react-native';
+import { ActivityIndicator, View, Platform, StatusBar, Image } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
 import { Providers } from '@/context/providers';
@@ -164,10 +164,15 @@ function RootLayoutContent() {
   const isReady = !isLoading && !checkingOnboarding && fontsLoaded;
 
   if (!isReady) {
-    // Still loading — show green background matching splash
+    // Still loading — show green background matching splash with subtle logo
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#122F26' }}>
-        <ActivityIndicator size="large" color="#D9B168" />
+        <Image
+          source={require('../assets/logo.png')}
+          style={{ width: 80, height: 80, opacity: 0.3, marginBottom: 20 }}
+          resizeMode="contain"
+        />
+        <ActivityIndicator size="small" color="#D9B168" />
       </View>
     );
   }
