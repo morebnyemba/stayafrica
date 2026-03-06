@@ -10,6 +10,8 @@ import {
   Share,
   Modal,
   Pressable,
+  Linking,
+  Platform,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -61,6 +63,16 @@ function parseAmenity(a: any) {
     icon: AMENITY_ICONS[key] || 'checkmark-circle',
     label: name.charAt(0).toUpperCase() + name.slice(1).replace(/_/g, ' '),
   };
+}
+
+function openDirections(lat: number, lng: number, label?: string) {
+  const encodedLabel = encodeURIComponent(label || 'Destination');
+  const fallback = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+  const url = Platform.select({
+    ios: `maps://app?daddr=${lat},${lng}&q=${encodedLabel}`,
+    default: `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`,
+  }) || fallback;
+  Linking.openURL(url).catch(() => Linking.openURL(fallback));
 }
 
 function getImageUrls(property: any): string[] {
@@ -819,6 +831,9 @@ export default function PropertyDetailsScreen() {
                     </Text>
                     {pois.slice(0, 3).map((item: any) => {
                       const poiIcon = POI_ICONS[category] || POI_ICONS.default;
+                      const poiLat = item.poi?.latitude ?? item.latitude;
+                      const poiLng = item.poi?.longitude ?? item.longitude;
+                      const poiName = item.poi?.name || item.name;
                       return (
                         <View
                           key={item.id}
@@ -829,13 +844,13 @@ export default function PropertyDetailsScreen() {
                           </View>
                           <View className="ml-3 flex-1">
                             <Text className="font-medium text-forest text-sm">
-                              {item.poi?.name || item.name}
+                              {poiName}
                             </Text>
                             <Text className="text-[11px] text-moss capitalize">
                               {(item.poi?.poi_type || category).replace(/_/g, ' ')}
                             </Text>
                           </View>
-                          <View className="items-end">
+                          <View className="items-end mr-2">
                             <Text className="text-xs text-moss font-medium">
                               {item.distance_display}
                             </Text>
@@ -845,6 +860,17 @@ export default function PropertyDetailsScreen() {
                               </Text>
                             )}
                           </View>
+                          {poiLat != null && poiLng != null && (
+                            <TouchableOpacity
+                              onPress={() => openDirections(poiLat, poiLng, poiName)}
+                              className="bg-forest/10 rounded-lg px-2.5 py-1.5 flex-row items-center"
+                              accessibilityRole="button"
+                              accessibilityLabel={`Get directions to ${poiName}`}
+                            >
+                              <Ionicons name="navigate" size={13} color="#122F26" />
+                              <Text className="text-forest text-[11px] font-semibold ml-1">Go</Text>
+                            </TouchableOpacity>
+                          )}
                         </View>
                       );
                     })}

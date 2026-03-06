@@ -148,10 +148,12 @@ function RootLayoutContent() {
     }
   }, [isLoading, checkingOnboarding, fontsLoaded]);
 
-  // Navigate after branded splash finishes
-  const handleSplashFinish = useCallback(() => {
-    setShowBrandedSplash(false);
-    if (!hasNavigated.current) {
+  // Navigate as soon as we know where to go. The BrandedSplash overlay is
+  // still fully opaque at this point, so the user sees nothing. This ensures
+  // the correct destination screen is rendered *underneath* the splash well
+  // before the splash fade-out begins (~1800ms later), eliminating any flash.
+  useEffect(() => {
+    if (!isLoading && !checkingOnboarding && fontsLoaded && !hasNavigated.current) {
       hasNavigated.current = true;
       if (hasSeenOnboarding === false) {
         router.replace('/(onboarding)/welcome');
@@ -159,7 +161,12 @@ function RootLayoutContent() {
         router.replace('/(tabs)');
       }
     }
-  }, [hasSeenOnboarding, router]);
+  }, [isLoading, checkingOnboarding, fontsLoaded, hasSeenOnboarding, router]);
+
+  // Branded splash finished its animation — just remove the overlay
+  const handleSplashFinish = useCallback(() => {
+    setShowBrandedSplash(false);
+  }, []);
 
   const isReady = !isLoading && !checkingOnboarding && fontsLoaded;
 
