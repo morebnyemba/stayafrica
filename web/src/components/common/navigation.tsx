@@ -11,6 +11,7 @@ import {
   Loader2,
   LayoutDashboard,
   Building2,
+  Plane,
   ChevronDown,
   Heart,
   MessageSquare,
