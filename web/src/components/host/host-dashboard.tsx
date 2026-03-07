@@ -17,7 +17,6 @@ import {
   Receipt,
   Settings,
   TrendingUp,
-  Compass,
   Home,
   Zap,
   ArrowRight,
@@ -154,7 +153,6 @@ export function HostDashboard() {
   ];
 
   const moreLinks = [
-    { title: 'Experiences', icon: Compass, link: '/host/experiences', color: 'bg-cyan-500' },
     { title: 'Auto-Messaging', icon: Zap, link: '/host/messaging', color: 'bg-violet-500' },
     ...(!user?.is_verified ? [{ title: 'Verify ID', icon: ShieldCheck, link: '/host/verification', color: 'bg-indigo-500' }] : []),
     { title: 'Settings', icon: Settings, link: '/host/settings', color: 'bg-primary-500' },

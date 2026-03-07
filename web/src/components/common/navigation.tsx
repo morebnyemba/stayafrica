@@ -11,17 +11,14 @@ import {
   Loader2,
   LayoutDashboard,
   Building2,
-  Plane,
   ChevronDown,
   Heart,
   MessageSquare,
   Compass,
-  Sparkles,
   Settings,
   ArrowRightLeft,
 } from 'lucide-react';
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { ThemeToggle } from './theme-toggle';
 import { MobileSearchBar } from './mobile-search-bar';
 import { Button } from '@/components/ui/Button';
 import { NotificationCenter } from '@/components/notifications/NotificationCenter';
@@ -218,9 +215,6 @@ export function Navigation() {
               <NavLink href="/explore" pathname={pathname} icon={Compass}>
                 Stays
               </NavLink>
-              <NavLink href="/experiences" pathname={pathname} icon={Sparkles}>
-                Experiences
-              </NavLink>
               {isAuthenticated && (
                 <>
                   <NavLink href="/wishlist" pathname={pathname} icon={Heart}>
@@ -236,7 +230,6 @@ export function Navigation() {
             {/* ── Right side (desktop) ──────────────────────────────── */}
             <div className="hidden md:flex items-center gap-2">
               <LocaleSwitcher />
-              <ThemeToggle />
 
               {isAuthenticated ? (
                 <>
@@ -399,7 +392,6 @@ export function Navigation() {
             {/* ── Mobile right side ─────────────────────────────────── */}
             <div className="flex md:hidden items-center gap-2">
               {isAuthenticated && <NotificationCenter />}
-              <ThemeToggle />
               <button
                 onClick={() => setMobileMenuOpen((o) => !o)}
                 className="p-2 rounded-lg text-sand-100 hover:bg-primary-700/60 transition"
@@ -475,9 +467,6 @@ export function Navigation() {
           <div className="py-3 space-y-0.5">
             <NavLink href="/explore" pathname={pathname} icon={Compass} onClick={closeMobile} mobile>
               Stays
-            </NavLink>
-            <NavLink href="/experiences" pathname={pathname} icon={Sparkles} onClick={closeMobile} mobile>
-              Experiences
             </NavLink>
             {isAuthenticated && (
               <>

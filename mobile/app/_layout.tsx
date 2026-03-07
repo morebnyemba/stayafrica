@@ -194,7 +194,6 @@ function RootLayoutContent() {
         <Stack.Screen name="host" options={{ animation: 'fade' }} />
         <Stack.Screen name="reviews" options={{ animation: 'fade' }} />
         <Stack.Screen name="booking" options={{ animation: 'slide_from_right' }} />
-        <Stack.Screen name="experiences" options={{ animation: 'slide_from_right' }} />
         <Stack.Screen name="notifications" options={{ animation: 'slide_from_right' }} />
         <Stack.Screen name="help" options={{ animation: 'slide_from_right' }} />
       </Stack>
