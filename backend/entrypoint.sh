@@ -11,17 +11,41 @@ done
 
 echo "✅ Database ready"
 
-echo "� Generating migration files..."
-python manage.py makemigrations --noinput 2>&1 || echo "⚠️ makemigrations had issues (may be OK if migrations are pre-built)"
+# ---------------------------------------------------------------------------
+# Smart migration flow:
+# 1. Check for pending migrations BEFORE running makemigrations
+# 2. Only makemigrations in dev (DJANGO_ENV != production)
+# 3. Apply with --fake-initial fallback for initial migrations
+# 4. Run schema drift check to catch issues early
+# ---------------------------------------------------------------------------
 
+# Step 1: Show migration status
+echo "📋 Checking migration status..."
+python manage.py showmigrations --plan 2>&1 | grep "\[ \]" | head -20 || echo "  All migrations applied."
+
+# Step 2: makemigrations only in non-production (prod should ship migration files)
+if [ "${DJANGO_ENV}" = "production" ]; then
+  echo "🔒 Production mode — skipping makemigrations (migrations must be committed)"
+else
+  echo "📝 Dev mode — generating migration files..."
+  python manage.py makemigrations --noinput 2>&1 || echo "⚠️ makemigrations had issues (may be OK if migrations are pre-built)"
+fi
+
+# Step 3: Apply migrations with smart fallback
 echo "🔄 Running database migrations..."
 if ! python manage.py migrate --noinput 2>&1; then
   echo "⚠️ Standard migrate failed, trying --fake-initial..."
-  if ! python manage.py migrate --fake-initial --noinput; then
-    echo "❌ Migration failed"
+  if ! python manage.py migrate --fake-initial --noinput 2>&1; then
+    echo "⚠️ --fake-initial also failed, running diagnostics..."
+    python manage.py fix_migrations 2>&1 || true
+    echo "❌ Migration failed — check output above for details"
     exit 1
   fi
 fi
+
+# Step 4: Quick schema drift check (non-blocking)
+echo "🔍 Verifying schema integrity..."
+python manage.py fix_migrations 2>&1 || echo "⚠️ Schema check had issues (non-blocking)"
 
 # If a command was passed (e.g. from docker-compose "command:"), run it.
 # Otherwise default to starting Uvicorn.
