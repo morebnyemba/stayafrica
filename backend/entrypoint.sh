@@ -12,24 +12,20 @@ done
 echo "✅ Database ready"
 
 # ---------------------------------------------------------------------------
-# Smart migration flow:
-# 1. Check for pending migrations BEFORE running makemigrations
-# 2. Only makemigrations in dev (DJANGO_ENV != production)
-# 3. Apply with --fake-initial fallback for initial migrations
-# 4. Run schema drift check to catch issues early
+# Migration flow:
+# 1. Show pending migrations
+# 2. Auto-generate migrations from model changes
+# 3. Apply with --fake-initial fallback
+# 4. Verify schema integrity
 # ---------------------------------------------------------------------------
 
-# Step 1: Show migration status
+# Step 1: Show pending migrations
 echo "📋 Checking migration status..."
 python manage.py showmigrations --plan 2>&1 | grep "\[ \]" | head -20 || echo "  All migrations applied."
 
-# Step 2: makemigrations only in non-production (prod should ship migration files)
-if [ "${DJANGO_ENV}" = "production" ]; then
-  echo "🔒 Production mode — skipping makemigrations (migrations must be committed)"
-else
-  echo "📝 Dev mode — generating migration files..."
-  python manage.py makemigrations --noinput 2>&1 || echo "⚠️ makemigrations had issues (may be OK if migrations are pre-built)"
-fi
+# Step 2: Auto-generate migrations from model changes
+echo "📝 Generating migration files..."
+python manage.py makemigrations --noinput 2>&1 || echo "⚠️ makemigrations had issues (may be OK if migrations are pre-built)"
 
 # Step 3: Apply migrations with smart fallback
 echo "🔄 Running database migrations..."
