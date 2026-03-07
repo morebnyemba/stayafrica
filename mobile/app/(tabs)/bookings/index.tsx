@@ -242,7 +242,7 @@ export default function BookingsScreen() {
           <View className="flex-row items-center">
             <Ionicons name="calendar" size={14} color="#D9B168" />
             <Text className="text-sand-200 text-sm ml-1.5">
-              {`${bookings.length} ${bookings.length === 1 ? 'stay' : 'stays'}`}
+              {`${bookings.length} ${bookings.length === 1 ? 'place to stay' : 'places to stay'}`}
             </Text>
           </View>
         </LinearGradient>
