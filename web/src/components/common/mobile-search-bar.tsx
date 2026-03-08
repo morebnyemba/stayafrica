@@ -9,12 +9,19 @@ export function MobileSearchBar() {
   const router = useRouter();
   const [location, setLocation] = useState('');
   const [isExpanded, setIsExpanded] = useState(false);
+  const [locationError, setLocationError] = useState(false);
 
   const handleSearch = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
+    if (!location.trim()) {
+      setLocationError(true);
+      setTimeout(() => setLocationError(false), 2000);
+      return;
+    }
+
     const params = new URLSearchParams();
-    if (location) params.append('city', location);
+    params.append('city', location.trim());
 
     router.push(`/explore?${params.toString()}`);
     setIsExpanded(false);
@@ -33,10 +40,14 @@ export function MobileSearchBar() {
                 <Input
                   type="text"
                   value={location}
-                  onChange={(e) => setLocation(e.target.value)}
+                  onChange={(e) => { setLocation(e.target.value); setLocationError(false); }}
                   placeholder="Where to go?"
                   autoFocus
+                  required
                 />
+                {locationError && (
+                  <p className="text-red-400 text-xs mt-0.5 pl-1 animate-pulse">Enter a destination</p>
+                )}
               </div>
               <button
                 type="submit"

@@ -28,13 +28,19 @@ export function HeroSection() {
   const [checkOut, setCheckOut] = useState('');
   const [guests, setGuests] = useState('2');
   const [selectedType, setSelectedType] = useState('');
-  
+  const [locationError, setLocationError] = useState(false);
 
   const handleSearch = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
+    if (!location.trim()) {
+      setLocationError(true);
+      setTimeout(() => setLocationError(false), 2000);
+      return;
+    }
+
     const params = new URLSearchParams();
-    if (location) params.append('city', location);
+    params.append('city', location.trim());
     if (checkIn) params.append('check_in', checkIn);
     if (checkOut) params.append('check_out', checkOut);
     if (guests) params.append('guests', guests);
@@ -159,10 +165,14 @@ export function HeroSection() {
               <Input
                 type="text"
                 value={location}
-                onChange={(e) => setLocation(e.target.value)}
+                onChange={(e) => { setLocation(e.target.value); setLocationError(false); }}
                 label="Where"
                 placeholder="Destination"
+                required
               />
+              {locationError && (
+                <p className="text-red-500 text-xs mt-1 pl-1 animate-pulse">Please enter a destination</p>
+              )}
             </div>
 
             {/* Check-in */}
