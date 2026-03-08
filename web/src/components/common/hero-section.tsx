@@ -166,8 +166,8 @@ export function HeroSection() {
                 type="text"
                 value={location}
                 onChange={(e) => { setLocation(e.target.value); setLocationError(false); }}
-                label="Where"
-                placeholder="Destination"
+                label="Destination"
+                placeholder="e.g. Harare, Victoria Falls"
                 required
               />
               {locationError && (
