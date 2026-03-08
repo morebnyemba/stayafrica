@@ -13,7 +13,7 @@ import dynamic from 'next/dynamic';
 const ProtectedRoute = dynamic(() => import('@/components/auth/protected-route').then(m => m.ProtectedRoute), { ssr: false });
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
+
 
 const formatDate = (dateStr: string) => {
   const d = new Date(dateStr);
@@ -256,8 +256,8 @@ export function HostBookingsContent() {
                     key={status}
                     onClick={() => setFilter(status)}
                     className={`px-3 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${filter === status
-                        ? 'bg-secondary-500 text-white'
-                        : 'bg-white dark:bg-primary-800 text-primary-600 dark:text-sand-300 border border-primary-200 dark:border-primary-700 hover:border-secondary-300'
+                      ? 'bg-secondary-500 text-white'
+                      : 'bg-white dark:bg-primary-800 text-primary-600 dark:text-sand-300 border border-primary-200 dark:border-primary-700 hover:border-secondary-300'
                       }`}
                   >
                     {label}
@@ -296,10 +296,10 @@ export function HostBookingsContent() {
                     <div
                       key={i}
                       className={`aspect-square rounded-lg text-xs sm:text-sm font-medium transition-colors flex flex-col items-center justify-center gap-0.5 ${isToday
-                          ? 'bg-secondary-500 text-white ring-2 ring-secondary-300'
-                          : dayBookings.length > 0
-                            ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800'
-                            : 'bg-white dark:bg-primary-800 text-primary-600 dark:text-sand-300'
+                        ? 'bg-secondary-500 text-white ring-2 ring-secondary-300'
+                        : dayBookings.length > 0
+                          ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800'
+                          : 'bg-white dark:bg-primary-800 text-primary-600 dark:text-sand-300'
                         }`}
                     >
                       {date.getDate()}
@@ -362,12 +362,10 @@ export function HostBookingsContent() {
                           {/* Property Thumbnail */}
                           <div className="relative sm:w-40 lg:w-48 h-40 sm:h-auto bg-primary-100 dark:bg-primary-800 flex-shrink-0">
                             {propertyImage ? (
-                              <Image
+                              <img
                                 src={propertyImage}
                                 alt={booking.property?.title || 'Property'}
-                                fill
-                                className="object-cover"
-                                sizes="(max-width: 640px) 100vw, 192px"
+                                className="absolute inset-0 w-full h-full object-cover"
                               />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center min-h-[120px]">
