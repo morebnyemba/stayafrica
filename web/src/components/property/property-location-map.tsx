@@ -5,10 +5,42 @@ import { MapPin, Loader } from 'lucide-react';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 interface PropertyLocationMapProps {
-  location?: { type: string; coordinates: number[] } | null;
+  // Accepts multiple formats: GeoJSON, [lng,lat] array, {lat,lng} dict, or WKT string
+  location?: { type?: string; coordinates?: number[] } | number[] | { lat?: number; lng?: number; latitude?: number; longitude?: number } | string | null;
   city?: string;
   country?: string;
   suburb?: string;
+}
+
+function extractCoords(location: PropertyLocationMapProps['location']): { lat: number; lng: number } | null {
+  if (!location) return null;
+
+  // Array format: [lng, lat] (GeoJSON order from DRF PointField serialization)
+  if (Array.isArray(location) && location.length >= 2) {
+    const [lng, lat] = location;
+    if (typeof lng === 'number' && typeof lat === 'number') return { lat, lng };
+  }
+
+  if (typeof location === 'object' && !Array.isArray(location)) {
+    // GeoJSON: { type: "Point", coordinates: [lng, lat] }
+    const geo = location as { type?: string; coordinates?: number[] };
+    if (geo.coordinates && Array.isArray(geo.coordinates) && geo.coordinates.length >= 2) {
+      return { lng: geo.coordinates[0], lat: geo.coordinates[1] };
+    }
+    // Dict: { lat, lng } or { latitude, longitude }
+    const dict = location as { lat?: number; lng?: number; latitude?: number; longitude?: number };
+    const lat = dict.lat ?? dict.latitude;
+    const lng = dict.lng ?? dict.longitude;
+    if (typeof lat === 'number' && typeof lng === 'number') return { lat, lng };
+  }
+
+  // WKT string: "POINT (lng lat)" or "SRID=4326;POINT (lng lat)"
+  if (typeof location === 'string') {
+    const match = location.match(/POINT\s*\(\s*([-\d.]+)\s+([-\d.]+)\s*\)/i);
+    if (match) return { lng: parseFloat(match[1]), lat: parseFloat(match[2]) };
+  }
+
+  return null;
 }
 
 export function PropertyLocationMap({ location, city, country, suburb }: PropertyLocationMapProps) {
@@ -19,9 +51,9 @@ export function PropertyLocationMap({ location, city, country, suburb }: Propert
 
   const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 
-  // Extract lat/lng from GeoJSON Point
-  const lng = location?.coordinates?.[0];
-  const lat = location?.coordinates?.[1];
+  const coords = extractCoords(location);
+  const lat = coords?.lat;
+  const lng = coords?.lng;
 
   useEffect(() => {
     if (!mapboxToken || !lat || !lng || !mapContainer.current || mapInstance.current) return;
