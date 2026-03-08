@@ -59,8 +59,6 @@ export function HeroSection() {
     2000,
     'eco-lodges',
     2000,
-    'beachfront hotels',
-    2000,
     'mountain resorts',
     2000,
     'boutique hotels',
@@ -125,7 +123,7 @@ export function HeroSection() {
             </span>
           </div>
           <p className="text-sand-200 mt-3 sm:mt-4 text-sm sm:text-base">
-            Explore diverse accommodation types across the continent
+            Explore diverse accommodation across Zimbabwe and the continent of Africa
           </p>
         </div>
 
