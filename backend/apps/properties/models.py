@@ -22,7 +22,7 @@ class Property(models.Model):
         ('apartment', 'Apartment'),
         ('house', 'House'),
         ('villa', 'Villa'),
-        ('cosy_rooms', 'Cosy Rooms'),
+        ('cosy_room', 'Cosy Room'),
     ]
     
     STATUS_CHOICES = [

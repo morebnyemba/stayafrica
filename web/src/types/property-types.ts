@@ -16,7 +16,7 @@ export enum PropertyType {
   COTTAGE = 'COTTAGE',
   CAMPGROUND = 'CAMPGROUND',
   BOAT = 'BOAT',
-  COSY_ROOMS = 'COSY_ROOMS',
+  COSY_ROOM = 'COSY_ROOM',
 }
 
 export interface PropertyTypeConfig {
@@ -125,9 +125,9 @@ export const PROPERTY_TYPES: Record<PropertyType, PropertyTypeConfig> = {
     color: 'text-blue-700',
     bgColor: 'bg-blue-50 dark:bg-blue-900/30',
   },
-  [PropertyType.COSY_ROOMS]: {
-    id: PropertyType.COSY_ROOMS,
-    label: 'Cosy Rooms',
+  [PropertyType.COSY_ROOM]: {
+    id: PropertyType.COSY_ROOM,
+    label: 'Cosy Room',
     description: 'Warm and intimate private rooms',
     icon: 'Sofa',
     color: 'text-amber-600',

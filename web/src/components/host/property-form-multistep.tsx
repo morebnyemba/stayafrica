@@ -296,8 +296,8 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
           <div key={step.id} className="flex-1">
             <div className={`flex items-center gap-2 mb-1 ${index <= currentStepIndex ? 'opacity-100' : 'opacity-50'}`}>
               <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-semibold ${index < currentStepIndex ? 'bg-green-500 text-white' :
-                  index === currentStepIndex ? 'bg-primary-600 text-white' :
-                    'bg-primary-200 dark:bg-primary-700 text-primary-900 dark:text-sand-50'
+                index === currentStepIndex ? 'bg-primary-600 text-white' :
+                  'bg-primary-200 dark:bg-primary-700 text-primary-900 dark:text-sand-50'
                 }`}>
                 {index < currentStepIndex ? '✓' : index + 1}
               </div>
@@ -357,7 +357,7 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
                 { value: 'cottage', label: 'Cottage' },
                 { value: 'lodge', label: 'Lodge' },
                 { value: 'room', label: 'Room' },
-                { value: 'cosy_rooms', label: 'Cosy Rooms' },
+                { value: 'cosy_room', label: 'Cosy Room' },
               ]}
             />
 

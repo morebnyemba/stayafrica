@@ -392,7 +392,7 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
                 { value: 'cottage', label: 'Cottage' },
                 { value: 'lodge', label: 'Lodge' },
                 { value: 'room', label: 'Room' },
-                { value: 'cosy_rooms', label: 'Cosy Rooms' },
+                { value: 'cosy_room', label: 'Cosy Room' },
               ]}
             />
           </div>

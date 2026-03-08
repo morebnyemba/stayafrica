@@ -377,7 +377,7 @@ export function ProfileContent() {
   );
 }
 
-const PROPERTY_TYPES = ['lodge', 'cottage', 'room', 'apartment', 'house', 'villa', 'cosy_rooms'];
+const PROPERTY_TYPES = ['lodge', 'cottage', 'room', 'apartment', 'house', 'villa', 'cosy_room'];
 
 function PreferencesTab() {
   const queryClient = useQueryClient();
