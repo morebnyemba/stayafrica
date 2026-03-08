@@ -48,7 +48,7 @@ export default function POIMapDisplay({
     const loadMapbox = () => {
       const existingScript = document.querySelector('script[src*="mapbox-gl.js"]');
       const existingLink = document.querySelector('link[href*="mapbox-gl.css"]');
-      
+
       if (!existingScript) {
         const script = document.createElement('script');
         script.src = 'https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js';
@@ -73,7 +73,7 @@ export default function POIMapDisplay({
       {/* Fallback Static Map */}
       <div className="bg-gradient-to-br from-primary-100 to-sand-100 dark:from-primary-800 dark:to-primary-700 rounded-xl overflow-hidden h-96 relative">
         <div ref={mapRef} className="w-full h-full" />
-        
+
         {/* Static representation when Mapbox not loaded */}
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-center p-8 bg-white/90 dark:bg-primary-800/90 backdrop-blur-sm rounded-xl shadow-lg max-w-md">
@@ -137,9 +137,9 @@ export default function POIMapDisplay({
         </div>
         <div className="bg-sand-100 dark:bg-primary-700 rounded-lg p-3 text-center">
           <div className="text-2xl font-bold text-primary-900 dark:text-sand-50">
-            {pois.filter(p => p.distance_meters <= 2000).length}
+            {pois.filter(p => p.distance_meters <= 5000).length}
           </div>
-          <div className="text-sm text-primary-700 dark:text-sand-300">Within 2km</div>
+          <div className="text-sm text-primary-700 dark:text-sand-300">Within 5km</div>
         </div>
       </div>
     </div>

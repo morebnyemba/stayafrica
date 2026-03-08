@@ -309,31 +309,64 @@ def compute_message_analytics():
 @shared_task(bind=True, max_retries=1, default_retry_delay=300, rate_limit='1/m')
 def refresh_property_pois(self):
     """
-    Import POIs from OpenStreetMap for active properties that have no
-    associated POIs yet.  Scheduled: weekly (Monday 05:30 UTC).
+    Import/refresh POIs from OpenStreetMap for ALL active properties
+    that have a location set.  Scheduled: weekly (Monday 05:30 UTC).
+
+    Processes all properties in batches of 50 using id-based pagination
+    to stay within Overpass rate limits.
     """
     from apps.properties.models import Property
+    from services.poi_service import POIService
+    import time
 
-    properties = Property.objects.filter(
-        status='active',
-        location__isnull=False,
-    ).exclude(
-        nearby_pois__isnull=False,
-    ).distinct()[:50]  # batch of 50 to stay within Overpass rate limits
+    BATCH_SIZE = 50
+    total_updated = 0
+    total_processed = 0
+    batch_number = 0
+    last_id = 0
 
-    count = 0
-    for prop in properties:
-        try:
-            from services.poi_service import POIService
-            import time
-            # associate_pois_with_property auto-imports from OSM if no POIs
-            # exist nearby, then creates PropertyPOI junction records.
-            associated = POIService.associate_pois_with_property(prop, radius_km=5)
-            if associated > 0:
-                count += 1
-            time.sleep(2)  # respect Overpass rate limits
-        except Exception as exc:
-            logger.error("POI refresh error for property %s: %s", prop.id, exc)
+    while True:
+        batch_number += 1
+        properties = list(
+            Property.objects.filter(
+                status='active',
+                location__isnull=False,
+                id__gt=last_id,
+            ).order_by('id')[:BATCH_SIZE]
+        )
 
-    logger.info("POI refresh: %d properties updated", count)
-    return {"updated": count}
+        if not properties:
+            break
+
+        logger.info(
+            "POI refresh: batch %d — processing %d properties (IDs %s–%s)",
+            batch_number, len(properties), properties[0].id, properties[-1].id,
+        )
+
+        for prop in properties:
+            total_processed += 1
+            try:
+                # associate_pois_with_property auto-imports from OSM if no POIs
+                # exist nearby, then creates PropertyPOI junction records.
+                associated = POIService.associate_pois_with_property(prop, radius_km=5)
+                if associated > 0:
+                    total_updated += 1
+                time.sleep(2)  # respect Overpass per-request rate limits
+            except Exception as exc:
+                logger.error("POI refresh error for property %s: %s", prop.id, exc)
+
+        last_id = properties[-1].id
+
+        # If this batch was smaller than BATCH_SIZE, we've reached the end
+        if len(properties) < BATCH_SIZE:
+            break
+
+        # Cooldown between batches to avoid hammering the Overpass API
+        logger.info("POI refresh: batch %d complete, cooling down 30s...", batch_number)
+        time.sleep(30)
+
+    logger.info(
+        "POI refresh complete: %d/%d properties updated across %d batches",
+        total_updated, total_processed, batch_number,
+    )
+    return {"updated": total_updated, "processed": total_processed, "batches": batch_number}
