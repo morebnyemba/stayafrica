@@ -14,7 +14,7 @@ import { AlertCircle, Check, Users, Calendar } from 'lucide-react';
 import { format, differenceInDays, addDays } from 'date-fns';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
-import { useFeeConfiguration, calculateBookingCost } from '@/hooks/use-fees';
+import { useFeeConfiguration, useTaxEstimate, calculateBookingCost } from '@/hooks/use-fees';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
@@ -26,6 +26,7 @@ interface BookingPanelProps {
   cancellationPolicy?: string;
   hostVerified?: boolean;
   hostRating?: number;
+  country?: string;
   onBook?: (details: { propertyId: string; checkIn: Date; checkOut: Date }, guests: number) => void;
   isLoading?: boolean;
 }
@@ -38,6 +39,7 @@ export const BookingPanel: React.FC<BookingPanelProps> = ({
   cancellationPolicy = 'Flexible',
   hostVerified = false,
   hostRating = 4.8,
+  country,
   onBook,
   isLoading = false,
 }) => {
@@ -90,13 +92,16 @@ export const BookingPanel: React.FC<BookingPanelProps> = ({
   // Fetch fee configuration from backend
   const { data: feeConfig } = useFeeConfiguration();
 
+  // Fetch applicable tax rate for this property's country
+  const { data: taxEstimate } = useTaxEstimate(country);
+
   // Calculate pricing using shared fee logic
   const nights =
     checkInDate && checkOutDate ? differenceInDays(checkOutDate, checkInDate) : 0;
   const costs = useMemo(() => {
-    if (!feeConfig || nights <= 0) return { basePrice: 0, serviceFee: 0, commissionFee: 0, commissionRate: 0, cleaningFee: 0, total: 0 };
-    return calculateBookingCost(pricePerNight, nights, feeConfig);
-  }, [pricePerNight, nights, feeConfig]);
+    if (!feeConfig || nights <= 0) return { basePrice: 0, serviceFee: 0, commissionFee: 0, commissionRate: 0, cleaningFee: 0, taxes: 0, taxRate: 0, total: 0 };
+    return calculateBookingCost(pricePerNight, nights, feeConfig, 0, taxEstimate?.combined_rate || 0);
+  }, [pricePerNight, nights, feeConfig, taxEstimate]);
   const subtotal = costs.basePrice;
   const serviceFee = costs.serviceFee;
   const total = costs.total;
@@ -255,6 +260,15 @@ export const BookingPanel: React.FC<BookingPanelProps> = ({
               <div className="flex justify-between text-sm">
                 <span className="text-primary-600 dark:text-sand-400">Commission ({(costs.commissionRate * 100).toFixed(1)}%)</span>
                 <span className="font-medium text-primary-900 dark:text-sand-100">${costs.commissionFee.toFixed(2)}</span>
+              </div>
+            )}
+
+            {costs.taxes > 0 && (
+              <div className="flex justify-between text-sm">
+                <span className="text-primary-600 dark:text-sand-400">
+                  Taxes ({costs.taxRate}%)
+                </span>
+                <span className="font-medium text-primary-900 dark:text-sand-100">${costs.taxes.toFixed(2)}</span>
               </div>
             )}
 

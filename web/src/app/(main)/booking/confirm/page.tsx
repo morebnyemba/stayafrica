@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
 import { useAuth } from '@/store/auth-store';
-import { useFeeConfiguration, calculateBookingCost } from '@/hooks/use-fees';
+import { useFeeConfiguration, useTaxEstimate, calculateBookingCost } from '@/hooks/use-fees';
 import dynamic from 'next/dynamic';
 const ProtectedRoute = dynamic(() => import('@/components/auth/protected-route').then(m => m.ProtectedRoute), { ssr: false });
 import {
@@ -58,9 +58,11 @@ export default function BookingConfirmPage() {
     enabled: !!propertyId,
   });
 
-  let costs = { basePrice: 0, serviceFee: 0, commissionFee: 0, commissionRate: 0, cleaningFee: 0, total: 0 };
+  const { data: taxEstimate } = useTaxEstimate(property?.country);
+
+  let costs = { basePrice: 0, serviceFee: 0, commissionFee: 0, commissionRate: 0, cleaningFee: 0, taxes: 0, taxRate: 0, total: 0 };
   if (property && feeConfig && nights > 0) {
-    costs = calculateBookingCost(property.price_per_night, nights, feeConfig, property.cleaning_fee);
+    costs = calculateBookingCost(property.price_per_night, nights, feeConfig, property.cleaning_fee, taxEstimate?.combined_rate || 0);
   }
 
   const [contactingHost, setContactingHost] = useState(false);
@@ -432,6 +434,16 @@ export default function BookingConfirmPage() {
                       </span>
                       <span className="font-medium text-primary-900 dark:text-sand-50">
                         {property?.currency} {costs.commissionFee.toFixed(2)}
+                      </span>
+                    </div>
+                  )}
+                  {costs.taxes > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-primary-600 dark:text-sand-300">
+                        Taxes ({costs.taxRate}%)
+                      </span>
+                      <span className="font-medium text-primary-900 dark:text-sand-50">
+                        {property?.currency} {costs.taxes.toFixed(2)}
                       </span>
                     </div>
                   )}

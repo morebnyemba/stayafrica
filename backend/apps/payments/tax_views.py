@@ -73,6 +73,53 @@ class TaxRateViewSet(viewsets.ModelViewSet):
         
         return queryset.order_by('-effective_from')
 
+    @action(detail=False, methods=['get'], permission_classes=[], authentication_classes=[])
+    def estimate(self, request):
+        """
+        Public endpoint: return applicable tax rates for a given country.
+        GET /api/v1/payments/tax/rates/estimate/?country=Zimbabwe
+        Returns combined tax percentage and individual tax line items.
+        """
+        country = request.query_params.get('country', '')
+        if not country:
+            return Response({'taxes': [], 'combined_rate': 0}, status=status.HTTP_200_OK)
+
+        today = timezone.now().date()
+
+        jurisdictions = TaxJurisdiction.objects.filter(is_active=True).filter(
+            db_models.Q(name__iexact=country) |
+            db_models.Q(country_code__iexact=country[:2])
+        )
+
+        if not jurisdictions.exists():
+            return Response({'taxes': [], 'combined_rate': 0}, status=status.HTTP_200_OK)
+
+        rates = TaxRate.objects.filter(
+            jurisdiction__in=jurisdictions,
+            is_active=True,
+            effective_from__lte=today,
+        ).filter(
+            db_models.Q(effective_to__isnull=True) | db_models.Q(effective_to__gte=today)
+        )
+
+        taxes = []
+        combined_rate = 0
+        for rate in rates:
+            taxes.append({
+                'name': rate.name,
+                'tax_type': rate.tax_type,
+                'rate_percentage': float(rate.rate_percentage),
+                'flat_fee': float(rate.flat_fee),
+                'applies_to_base_price': rate.applies_to_base_price,
+            })
+            if rate.applies_to_base_price:
+                combined_rate += float(rate.rate_percentage)
+
+        return Response({
+            'taxes': taxes,
+            'combined_rate': round(combined_rate, 2),
+        })
+
 
 class BookingTaxViewSet(viewsets.ReadOnlyModelViewSet):
     """ViewSet for booking taxes"""

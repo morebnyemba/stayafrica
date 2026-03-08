@@ -4,6 +4,14 @@ import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
 import { PropertyCard, Property } from '@/components/property/PropertyCard';
 
+const API_BASE = (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000').replace(/\/api\/v1\/?$/, '');
+
+function resolveImageUrl(url: string): string {
+  if (!url) return '';
+  if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) return url;
+  return `${API_BASE}${url.startsWith('/') ? '' : '/'}${url}`;
+}
+
 interface SimilarPropertiesProps {
   propertyId: string;
   city?: string;
@@ -32,11 +40,11 @@ export function SimilarProperties({ propertyId, city, country }: SimilarProperti
   // Normalize API data to PropertyCard's Property interface
   const normalized: Property[] = properties.map((p: any) => {
     const imageUrls = (p.images || [])
-      .map((img: any) => img.image_url || img.url || img.image || '')
+      .map((img: any) => resolveImageUrl(img.image_url || img.url || img.image || ''))
       .filter(Boolean);
     // Fallback to main_image_url or main_image if images array is empty
     if (imageUrls.length === 0) {
-      const fallback = p.main_image_url || p.main_image;
+      const fallback = resolveImageUrl(p.main_image_url || p.main_image || '');
       if (fallback) imageUrls.push(fallback);
     }
     return {

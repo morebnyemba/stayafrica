@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/store/auth-store';
-import { useFeeConfiguration, calculateBookingCost } from '@/hooks/use-fees';
+import { useFeeConfiguration, useTaxEstimate, calculateBookingCost } from '@/hooks/use-fees';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
 import { Star, AlertCircle, Calendar } from 'lucide-react';
@@ -20,6 +20,7 @@ interface BookingCardProps {
     average_rating?: number;
     booked_dates?: string[];
     cleaning_fee?: number;
+    country?: string;
   };
 }
 
@@ -32,6 +33,9 @@ export function BookingCard({ property }: BookingCardProps) {
 
   // Fetch fee configuration
   const { data: feeConfig } = useFeeConfiguration();
+
+  // Fetch applicable tax rate
+  const { data: taxEstimate } = useTaxEstimate(property?.country);
 
   // Fetch unavailable dates from backend
   const { data: unavailableDatesData } = useQuery({
@@ -79,8 +83,8 @@ export function BookingCard({ property }: BookingCardProps) {
   
   // Calculate costs using the fee configuration
   const costs = feeConfig && nights > 0
-    ? calculateBookingCost(property.price_per_night, nights, feeConfig, property.cleaning_fee)
-    : { basePrice: 0, serviceFee: 0, commissionFee: 0, commissionRate: 0, cleaningFee: 0, total: 0 };
+    ? calculateBookingCost(property.price_per_night, nights, feeConfig, property.cleaning_fee, taxEstimate?.combined_rate || 0)
+    : { basePrice: 0, serviceFee: 0, commissionFee: 0, commissionRate: 0, cleaningFee: 0, taxes: 0, taxRate: 0, total: 0 };
 
   const hasDateConflict = checkInDate && checkOutDate && hasUnavailableDatesInRange(checkInDate, checkOutDate);
 
@@ -230,6 +234,12 @@ export function BookingCard({ property }: BookingCardProps) {
             <span>Commission fee ({(costs.commissionRate * 100).toFixed(1)}%)</span>
             <span>{property.currency} {costs.commissionFee.toFixed(2)}</span>
           </div>
+          )}
+          {costs.taxes > 0 && (
+            <div className="flex justify-between text-primary-700 dark:text-sand-200">
+              <span>Taxes ({costs.taxRate}%)</span>
+              <span>{property.currency} {costs.taxes.toFixed(2)}</span>
+            </div>
           )}
           {costs.cleaningFee > 0 && (
             <div className="flex justify-between text-primary-700 dark:text-sand-200">

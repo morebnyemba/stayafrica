@@ -351,6 +351,11 @@ class ApiClient {
     return this.client.get('/admin/config/fees/');
   }
 
+  // Tax estimate for a country (public, no auth required)
+  async getTaxEstimate(country: string) {
+    return this.client.get('/payments/tax/rates/estimate/', { params: { country } });
+  }
+
   // Get available payment providers based on user country
   async getAvailableProviders(country?: string) {
     return this.client.get('/payments/providers/', { params: { country } });

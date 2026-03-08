@@ -473,6 +473,7 @@ export function PropertyDetailsContent({ propertyId: propId }: PropertyDetailsCo
                   minStay={property.min_stay_nights || 1}
                   hostVerified={property.host?.is_verified || false}
                   hostRating={property.average_rating || 0}
+                  country={property.country}
                 />
               )}
             </div>
