@@ -92,8 +92,10 @@ export function PropertyImageCarousel({ images, title, mainImage }: PropertyImag
           className={`relative rounded-xl overflow-hidden cursor-pointer ${
             gridImages.length >= 5
               ? 'grid grid-cols-4 grid-rows-2 gap-1.5 h-[400px]'
-              : gridImages.length >= 3
+              : gridImages.length === 4
               ? 'grid grid-cols-4 grid-rows-2 gap-1.5 h-[400px]'
+              : gridImages.length === 3
+              ? 'grid grid-cols-3 grid-rows-2 gap-1.5 h-[400px]'
               : gridImages.length === 2
               ? 'grid grid-cols-2 gap-1.5 h-[400px]'
               : 'h-[400px]'
@@ -117,7 +119,23 @@ export function PropertyImageCarousel({ images, title, mainImage }: PropertyImag
             </>
           )}
 
-          {gridImages.length >= 3 && gridImages.length <= 4 && (
+          {/* 3 IMAGES — large left + 2 stacked right */}
+          {gridImages.length === 3 && (
+            <>
+              <div className="col-span-2 row-span-2 overflow-hidden rounded-l-xl">
+                <ImageOrFallback idx={0} />
+              </div>
+              <div className="overflow-hidden rounded-tr-xl">
+                <ImageOrFallback idx={1} />
+              </div>
+              <div className="overflow-hidden rounded-br-xl">
+                <ImageOrFallback idx={2} />
+              </div>
+            </>
+          )}
+
+          {/* 4 IMAGES — large left + 3 on right (2 top, 1 bottom spanning) */}
+          {gridImages.length === 4 && (
             <>
               <div className="col-span-2 row-span-2 overflow-hidden rounded-l-xl">
                 <ImageOrFallback idx={0} />
@@ -125,20 +143,12 @@ export function PropertyImageCarousel({ images, title, mainImage }: PropertyImag
               <div className="overflow-hidden">
                 <ImageOrFallback idx={1} />
               </div>
-              <div className={`overflow-hidden ${gridImages.length === 3 ? 'rounded-tr-xl' : ''}`}>
+              <div className="overflow-hidden rounded-tr-xl">
                 <ImageOrFallback idx={2} />
               </div>
-              {gridImages.length === 4 && (
-                <>
-                  <div className="overflow-hidden">
-                    <ImageOrFallback idx={3} />
-                  </div>
-                  <div className="overflow-hidden rounded-br-xl bg-primary-100 dark:bg-primary-800" />
-                </>
-              )}
-              {gridImages.length === 3 && (
-                <div className="col-span-2 overflow-hidden rounded-br-xl bg-primary-100 dark:bg-primary-800 flex items-center justify-center" />
-              )}
+              <div className="col-span-2 overflow-hidden rounded-br-xl">
+                <ImageOrFallback idx={3} />
+              </div>
             </>
           )}
 
