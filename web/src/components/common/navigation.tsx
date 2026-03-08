@@ -214,7 +214,7 @@ export function Navigation() {
             {/* ── Center links (desktop) ────────────────────────────── */}
             <div className="hidden md:flex items-center gap-1">
               <NavLink href="/explore" pathname={pathname} icon={Compass}>
-                Stays
+                Places to Stay
               </NavLink>
               {isAuthenticated && (
                 <>
@@ -467,7 +467,7 @@ export function Navigation() {
           {/* Mobile nav links */}
           <div className="py-3 space-y-0.5">
             <NavLink href="/explore" pathname={pathname} icon={Compass} onClick={closeMobile} mobile>
-              Stays
+              Places to Stay
             </NavLink>
             {isAuthenticated && (
               <>
