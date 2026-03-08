@@ -258,11 +258,11 @@ export function PropertyImageCarousel({ images, title, mainImage }: PropertyImag
           </div>
 
           {/* Main Image */}
-          <div className="flex-1 flex items-center justify-center relative px-16">
+          <div className="flex-1 flex items-center justify-center relative px-16 min-h-0">
             <img
               src={getImageUrl(currentIndex) || ''}
               alt={processedImages[currentIndex]?.caption || `${title} photo ${currentIndex + 1}`}
-              className="max-w-full max-h-full object-contain"
+              className="w-full h-full object-contain"
             />
 
             {hasMultiple && (
