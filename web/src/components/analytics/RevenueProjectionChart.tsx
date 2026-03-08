@@ -117,11 +117,24 @@ export const RevenueProjectionChart: React.FC<RevenueProjectionChartProps> = ({
         <div className="flex items-center justify-center" style={{ height }}>
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
         </div>
+      ) : error ? (
+        <div className="flex items-center justify-center" style={{ height }}>
+          <div className="text-center text-red-500 dark:text-red-400">
+            <TrendingUp className="h-12 w-12 mx-auto mb-2 opacity-50" />
+            <p className="mb-2">{error}</p>
+            <button
+              onClick={handleGenerateProjections}
+              className="text-sm underline hover:no-underline"
+            >
+              Try again
+            </button>
+          </div>
+        </div>
       ) : !projectionData || projectionData.length === 0 ? (
         <div className="flex items-center justify-center" style={{ height }}>
           <div className="text-center text-primary-400 dark:text-sand-500">
             <TrendingUp className="h-12 w-12 mx-auto mb-2 opacity-50" />
-            <p>Click "Refresh" to generate projections</p>
+            <p>Click &quot;Refresh&quot; to generate projections</p>
           </div>
         </div>
       ) : (
