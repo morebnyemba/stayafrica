@@ -43,7 +43,7 @@ class BookingAdmin(UnfoldModelAdmin):
             'classes': ['tab'],
         }),
         (_('Pricing'), {
-            'fields': ('base_price', 'commission_fee', 'grand_total', 'currency'),
+            'fields': ('nightly_total', 'service_fee', 'cleaning_fee', 'taxes', 'commission_fee', 'grand_total', 'currency'),
             'classes': ['tab'],
         }),
         (_('Additional Information'), {
