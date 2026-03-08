@@ -61,6 +61,7 @@ const nextConfig = {
           value: [
             "default-src 'self'",
             "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://api.mapbox.com https://js.stripe.com https://static.cloudflareinsights.com",
+            "worker-src 'self' blob:",
             "style-src 'self' 'unsafe-inline' https://api.mapbox.com https://fonts.googleapis.com",
             "img-src 'self' data: blob: https://*.mapbox.com https://*.amazonaws.com https://*.cloudfront.net https://images.unsplash.com https://api.zimlegend.online https://api.stayafrica.app http://localhost:8000",
             "font-src 'self' https://fonts.gstatic.com",
