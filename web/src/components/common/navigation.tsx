@@ -21,7 +21,6 @@ import {
 } from 'lucide-react';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { MobileSearchBar } from './mobile-search-bar';
-import { Button } from '@/components/ui/Button';
 import { NotificationCenter } from '@/components/notifications/NotificationCenter';
 import { LocaleSwitcher } from '@/components/common/LocaleSwitcher';
 import { cn } from '@/lib/utils';
