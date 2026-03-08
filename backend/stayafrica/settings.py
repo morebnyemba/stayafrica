@@ -76,6 +76,7 @@ INSTALLED_APPS = [
     
     # Third-party apps
     'rest_framework',
+    'rest_framework_gis',
     'corsheaders',
     'django_filters',
     'drf_spectacular',

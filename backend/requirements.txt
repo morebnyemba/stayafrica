@@ -15,6 +15,9 @@ whitenoise==6.6.0
 # Environment
 python-dotenv==1.0.0
 
+# GIS serialization (PointField → GeoJSON)
+djangorestframework-gis==1.1
+
 # CORS & Filtering
 django-cors-headers==4.3.1
 django-filter==23.5
