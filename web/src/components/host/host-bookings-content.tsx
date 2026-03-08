@@ -154,8 +154,27 @@ export function HostBookingsContent() {
     cancelled: allBookings.filter((b: any) => b.status === 'cancelled').length,
   };
 
-  const getPropertyImage = (booking: any) =>
-    booking.property?.images?.[0]?.image || booking.property?.images?.[0]?.image_url || booking.property?.main_image_url || booking.property?.main_image || null;
+  const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || (process.env.NODE_ENV === 'production' ? 'https://api.zimlegend.online' : 'http://localhost:8000');
+
+  const resolveImageUrl = (url: string | null | undefined): string | null => {
+    if (!url) return null;
+    // Already absolute URL
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    // Relative path — prepend API base
+    const path = url.startsWith('/') ? url : `/media/${url}`;
+    return `${API_BASE}${path}`;
+  };
+
+  const getPropertyImage = (booking: any) => {
+    // Prefer image_url (absolute) over image (raw storage path)
+    const raw =
+      booking.property?.images?.[0]?.image_url ||
+      booking.property?.main_image_url ||
+      booking.property?.images?.[0]?.image ||
+      booking.property?.main_image ||
+      null;
+    return resolveImageUrl(raw);
+  };
 
   return (
     <ProtectedRoute>
@@ -172,24 +191,22 @@ export function HostBookingsContent() {
                   {stats.total} total booking{stats.total !== 1 ? 's' : ''} · ${stats.totalEarnings.toFixed(0)} earned
                 </p>
               </div>
-              
+
               <div className="flex items-center gap-2">
                 {/* View Toggle */}
                 <div className="inline-flex rounded-lg border border-primary-200 dark:border-primary-700 bg-white dark:bg-primary-800 p-1">
                   <button
                     onClick={() => setViewMode('list')}
-                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5 ${
-                      viewMode === 'list' ? 'bg-secondary-500 text-white' : 'text-primary-600 dark:text-sand-300'
-                    }`}
+                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5 ${viewMode === 'list' ? 'bg-secondary-500 text-white' : 'text-primary-600 dark:text-sand-300'
+                      }`}
                   >
                     <List className="w-4 h-4" />
                     <span className="hidden sm:inline">List</span>
                   </button>
                   <button
                     onClick={() => setViewMode('calendar')}
-                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5 ${
-                      viewMode === 'calendar' ? 'bg-secondary-500 text-white' : 'text-primary-600 dark:text-sand-300'
-                    }`}
+                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5 ${viewMode === 'calendar' ? 'bg-secondary-500 text-white' : 'text-primary-600 dark:text-sand-300'
+                      }`}
                   >
                     <Calendar className="w-4 h-4" />
                     <span className="hidden sm:inline">Calendar</span>
@@ -235,18 +252,17 @@ export function HostBookingsContent() {
               {['all', 'pending', 'confirmed', 'checked_in', 'checked_out', 'completed', 'cancelled'].map((status) => {
                 const label = status === 'checked_in' ? 'Checked In' : status === 'checked_out' ? 'Checked Out' : status.charAt(0).toUpperCase() + status.slice(1);
                 return (
-                <button
-                  key={status}
-                  onClick={() => setFilter(status)}
-                  className={`px-3 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
-                    filter === status
-                      ? 'bg-secondary-500 text-white'
-                      : 'bg-white dark:bg-primary-800 text-primary-600 dark:text-sand-300 border border-primary-200 dark:border-primary-700 hover:border-secondary-300'
-                  }`}
-                >
-                  {label}
-                  <span className="ml-1.5 text-xs opacity-70">{filterCounts[status]}</span>
-                </button>
+                  <button
+                    key={status}
+                    onClick={() => setFilter(status)}
+                    className={`px-3 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${filter === status
+                        ? 'bg-secondary-500 text-white'
+                        : 'bg-white dark:bg-primary-800 text-primary-600 dark:text-sand-300 border border-primary-200 dark:border-primary-700 hover:border-secondary-300'
+                      }`}
+                  >
+                    {label}
+                    <span className="ml-1.5 text-xs opacity-70">{filterCounts[status]}</span>
+                  </button>
                 );
               })}
             </div>
@@ -275,17 +291,16 @@ export function HostBookingsContent() {
                     return date >= checkIn && date <= checkOut;
                   });
                   const isToday = date.toDateString() === new Date().toDateString();
-                  
+
                   return (
                     <div
                       key={i}
-                      className={`aspect-square rounded-lg text-xs sm:text-sm font-medium transition-colors flex flex-col items-center justify-center gap-0.5 ${
-                        isToday
+                      className={`aspect-square rounded-lg text-xs sm:text-sm font-medium transition-colors flex flex-col items-center justify-center gap-0.5 ${isToday
                           ? 'bg-secondary-500 text-white ring-2 ring-secondary-300'
                           : dayBookings.length > 0
-                          ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800'
-                          : 'bg-white dark:bg-primary-800 text-primary-600 dark:text-sand-300'
-                      }`}
+                            ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800'
+                            : 'bg-white dark:bg-primary-800 text-primary-600 dark:text-sand-300'
+                        }`}
                     >
                       {date.getDate()}
                       {dayBookings.length > 0 && (

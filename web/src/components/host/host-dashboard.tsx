@@ -177,21 +177,19 @@ export function HostDashboard() {
               <div className="flex bg-primary-100 dark:bg-primary-800 rounded-lg p-1 self-start sm:self-auto">
                 <button
                   onClick={() => setActiveTab('overview')}
-                  className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                    activeTab === 'overview'
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${activeTab === 'overview'
                       ? 'bg-white dark:bg-primary-700 text-primary-900 dark:text-sand-50 shadow-sm'
                       : 'text-primary-600 dark:text-sand-300 hover:text-primary-900 dark:hover:text-sand-50'
-                  }`}
+                    }`}
                 >
                   Overview
                 </button>
                 <button
                   onClick={() => setActiveTab('analytics')}
-                  className={`px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center gap-1.5 ${
-                    activeTab === 'analytics'
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center gap-1.5 ${activeTab === 'analytics'
                       ? 'bg-white dark:bg-primary-700 text-primary-900 dark:text-sand-50 shadow-sm'
                       : 'text-primary-600 dark:text-sand-300 hover:text-primary-900 dark:hover:text-sand-50'
-                  }`}
+                    }`}
                 >
                   <BarChart3 className="w-4 h-4" />
                   Analytics
@@ -300,7 +298,9 @@ export function HostDashboard() {
                           .filter((p: any) => p?.id)
                           .slice(0, 4)
                           .map((property: any) => {
-                            const img = property.images?.[0]?.image || property.images?.[0]?.image_url || property.main_image_url;
+                            const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || (process.env.NODE_ENV === 'production' ? 'https://api.zimlegend.online' : 'http://localhost:8000');
+                            const rawImg = property.images?.[0]?.image_url || property.main_image_url || property.images?.[0]?.image || property.main_image;
+                            const img = rawImg ? (rawImg.startsWith('http') ? rawImg : `${API_BASE}${rawImg.startsWith('/') ? rawImg : `/media/${rawImg}`}`) : null;
                             return (
                               <Link
                                 key={property.id}
@@ -328,13 +328,12 @@ export function HostDashboard() {
                                     <span className="font-semibold text-secondary-700 dark:text-secondary-400">
                                       ${property.price_per_night}/night
                                     </span>
-                                    <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-semibold ${
-                                      property.status === 'active'
+                                    <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-semibold ${property.status === 'active'
                                         ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
                                         : property.status === 'pending_approval'
-                                        ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300'
-                                        : 'bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400'
-                                    }`}>
+                                          ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300'
+                                          : 'bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400'
+                                      }`}>
                                       {property.status?.replace('_', ' ')}
                                     </span>
                                   </div>
@@ -511,11 +510,10 @@ export function HostDashboard() {
                               </span>
                             </td>
                             <td className="py-3 px-2 text-center">
-                              <span className={`px-2 py-0.5 text-xs font-semibold rounded-full ${
-                                prop.status === 'active'
+                              <span className={`px-2 py-0.5 text-xs font-semibold rounded-full ${prop.status === 'active'
                                   ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
                                   : 'bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400'
-                              }`}>
+                                }`}>
                                 {prop.status}
                               </span>
                             </td>

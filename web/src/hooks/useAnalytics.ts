@@ -126,7 +126,22 @@ export function usePropertyPerformance(period: TimePeriod = 'monthly') {
       params.append('period', period);
 
       const response = await apiClient.get(`/analytics/properties/?${params}`);
-      return response.data;
+      // DRF ReadOnlyModelViewSet returns paginated {count, results} or plain array
+      const raw = response.data?.results ?? response.data;
+      if (!Array.isArray(raw)) return [];
+
+      // Normalize PropertyAnalytics → PropertyPerformance
+      return raw.map((item: any) => ({
+        property_id: String(item.property_id ?? item.property ?? item.id ?? ''),
+        property_name: item.property_name ?? 'Unknown Property',
+        property_image: item.property_image ?? undefined,
+        revenue: parseFloat(item.total_revenue ?? item.revenue ?? 0),
+        occupancy_rate: parseFloat(item.occupancy_rate ?? 0),
+        bookings: item.bookings_count ?? item.bookings ?? 0,
+        average_rating: parseFloat(item.average_rating ?? item.avg_rating ?? 0),
+        revenue_per_night: parseFloat(item.avg_nightly_rate ?? item.revenue_per_night ?? 0),
+        days_available: item.nights_available ?? item.days_available ?? 30,
+      })) as PropertyPerformance[];
     },
     staleTime: 5 * 60 * 1000,
     retry: 2,
@@ -146,7 +161,46 @@ export function useBenchmarks(propertyType?: string, location?: string) {
       if (location) params.append('location', location);
 
       const response = await apiClient.get(`/analytics/benchmarks/?${params}`);
-      return response.data;
+      // DRF ReadOnlyModelViewSet returns paginated {count, results} or plain array
+      const raw = response.data?.results ?? response.data;
+      if (!Array.isArray(raw) || raw.length === 0) return [];
+
+      // Normalize PerformanceBenchmark → BenchmarkData
+      const firstBenchmark = raw[0];
+      return [
+        {
+          metric: 'Occupancy Rate',
+          your_value: 0, // needs host-specific data
+          market_average: parseFloat(firstBenchmark.avg_occupancy_rate ?? 0),
+          percentile: 50,
+          top_10_percent: parseFloat(firstBenchmark.occupancy_90th_percentile ?? 0),
+          unit: '%',
+        },
+        {
+          metric: 'Nightly Rate',
+          your_value: 0,
+          market_average: parseFloat(firstBenchmark.avg_nightly_rate ?? 0),
+          percentile: 50,
+          top_10_percent: parseFloat(firstBenchmark.rate_90th_percentile ?? 0),
+          unit: '$',
+        },
+        {
+          metric: 'Revenue/Available Night',
+          your_value: 0,
+          market_average: parseFloat(firstBenchmark.avg_revenue_per_available_night ?? 0),
+          percentile: 50,
+          top_10_percent: 0,
+          unit: '$',
+        },
+        {
+          metric: 'Avg Length of Stay',
+          your_value: 0,
+          market_average: parseFloat(firstBenchmark.avg_length_of_stay ?? 0),
+          percentile: 50,
+          top_10_percent: 0,
+          unit: 'days',
+        },
+      ] as BenchmarkData[];
     },
     staleTime: 30 * 60 * 1000, // 30 minutes (benchmarks change less frequently)
     retry: 2,
