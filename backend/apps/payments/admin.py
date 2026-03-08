@@ -636,10 +636,13 @@ class TaxRateAdmin(UnfoldModelAdmin):
             'fields': ('jurisdiction', 'name', 'tax_type', 'is_active'),
         }),
         (_('Rate Configuration'), {
-            'fields': ('rate', 'is_compound'),
+            'fields': ('rate_percentage', 'flat_fee'),
         }),
         (_('Applicability'), {
-            'fields': ('applies_to_accommodation', 'applies_to_cleaning_fee', 'applies_to_service_fee'),
+            'fields': ('applies_to_base_price', 'applies_to_cleaning_fee', 'applies_to_service_fee'),
+        }),
+        (_('Effective Period'), {
+            'fields': ('effective_from', 'effective_to', 'collected_by_platform'),
         }),
         (_('Timestamps'), {
             'fields': ('created_at', 'updated_at'),
@@ -649,7 +652,7 @@ class TaxRateAdmin(UnfoldModelAdmin):
     
     @display(description=_('Rate'))
     def rate_display(self, obj):
-        return f"{obj.rate}%"
+        return f"{obj.rate_percentage}%"
     
     @display(description=_('Active'), label={"Active": "success", "Inactive": "secondary"})
     def active_badge(self, obj):
@@ -746,15 +749,15 @@ class TaxRemittanceAdmin(UnfoldModelAdmin):
     def total_amount_display(self, obj):
         return f"${obj.total_tax_collected:.2f}"
     
-    @display(description=_('Status'), label={"Pending": "warning", "Remitted": "success", "Overdue": "danger"})
+    @display(description=_('Status'), label={"Pending": "warning", "Processing": "info", "Completed": "success", "Failed": "danger"})
     def status_badge(self, obj):
-        return obj.get_status_display() if hasattr(obj, 'get_status_display') else obj.status
+        return obj.get_status_display()
     
-    @admin.action(description=_('Mark as remitted'))
+    @admin.action(description=_('Mark as completed'))
     def mark_remitted(self, request, queryset):
         from django.utils import timezone
-        updated = queryset.update(status='remitted', remittance_date=timezone.now())
-        self.message_user(request, f'{updated} remittance(s) marked as remitted.')
+        updated = queryset.update(status='completed', remittance_date=timezone.now())
+        self.message_user(request, f'{updated} remittance(s) marked as completed.')
     
     @admin.action(description=_('Mark as pending'))
     def mark_pending(self, request, queryset):
