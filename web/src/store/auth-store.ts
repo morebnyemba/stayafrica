@@ -66,7 +66,7 @@ interface AuthState {
   twoFactorPending: TwoFactorRequired | null;
   setUser: (user: User | null) => void;
   setLoading: (loading: boolean) => void;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<User>;
   loginWith2FA: (email: string, password: string, token: string) => Promise<void>;
   loginWithBackupCode: (email: string, password: string, backupCode: string) => Promise<void>;
   clearTwoFactorPending: () => void;
@@ -190,8 +190,13 @@ export const useAuthStore = create<AuthState>()(
             const { access, refresh, user: userData } = data;
             await setSession(access, refresh);
             set({ user: userData, isAuthenticated: true, twoFactorPending: null });
+            return userData;
           } else {
-            throw new Error(data.detail || 'Login failed');
+            // Handle specific HTTP status codes
+            if (response.status === 429) {
+              throw new Error('Too many login attempts. Please wait a moment and try again.');
+            }
+            throw new Error(data.detail || data.non_field_errors?.[0] || 'Login failed. Please check your credentials.');
           }
         } catch (error) {
           throw error;

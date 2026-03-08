@@ -111,19 +111,22 @@ export function LoginContent({ loginMode = 'universal' }: LoginContentProps) {
 
     setIsLoading(true);
     try {
-      await login(formData.email, formData.password);
+      const userData = await login(formData.email, formData.password);
 
       // Host login: check that the user actually has host/admin role
       if (loginMode === 'host') {
-        // After login, the store has the user data. Access it from localStorage 
-        // since the store may not have updated in this tick.
-        const storedAuth = localStorage.getItem('auth-storage');
-        let userRole = '';
-        if (storedAuth) {
-          try {
-            const parsed = JSON.parse(storedAuth);
-            userRole = parsed?.state?.user?.role || '';
-          } catch { }
+        // The login response may not include user data (SimpleJWT returns {access, refresh}).
+        // Read the role from the JWT access token which always includes the role claim.
+        let userRole = userData?.role || '';
+
+        if (!userRole) {
+          const token = localStorage.getItem('access_token');
+          if (token) {
+            try {
+              const payload = JSON.parse(atob(token.split('.')[1]));
+              userRole = payload.role || '';
+            } catch { }
+          }
         }
 
         if (userRole !== 'host' && userRole !== 'admin') {

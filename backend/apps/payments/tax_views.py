@@ -77,7 +77,7 @@ class TaxRateViewSet(viewsets.ModelViewSet):
     def estimate(self, request):
         """
         Public endpoint: return applicable tax rates for a given country.
-        GET /api/v1/payments/tax/rates/estimate/?country=Zimbabwe
+        GET /api/v1/tax/rates/estimate/?country=Zimbabwe
         Returns combined tax percentage and individual tax line items.
         """
         country = request.query_params.get('country', '')

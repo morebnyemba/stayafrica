@@ -235,8 +235,8 @@ class ApiClient {
   }
 
   async getConversationMessages(conversationId: string, params?: any) {
-    return this.client.get('/messaging/messages/', { 
-      params: { ...params, conversation: conversationId } 
+    return this.client.get('/messaging/messages/', {
+      params: { ...params, conversation: conversationId }
     });
   }
 
@@ -353,7 +353,7 @@ class ApiClient {
 
   // Tax estimate for a country (public, no auth required)
   async getTaxEstimate(country: string) {
-    return this.client.get('/payments/tax/rates/estimate/', { params: { country } });
+    return this.client.get('/tax/rates/estimate/', { params: { country } });
   }
 
   // Get available payment providers based on user country

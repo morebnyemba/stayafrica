@@ -264,7 +264,7 @@ REST_FRAMEWORK = {
     'DEFAULT_THROTTLE_RATES': {
         'anon': '500/hour',   # Anonymous users: 500 requests per hour
         'user': '2000/hour',  # Authenticated users: 2000 requests per hour
-        'login': '5/minute',  # Stricter scope for login to prevent brute force
+        'login': '10/minute', # Login throttle — prevents brute force while being reasonable
     },
     'EXCEPTION_HANDLER': 'utils.exception_handlers.custom_exception_handler',
 }

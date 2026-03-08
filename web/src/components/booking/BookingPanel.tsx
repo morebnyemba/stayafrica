@@ -15,6 +15,7 @@ import { format, differenceInDays, addDays } from 'date-fns';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
 import { useFeeConfiguration, useTaxEstimate, calculateBookingCost } from '@/hooks/use-fees';
+import { useAuth } from '@/store/auth-store';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
@@ -44,6 +45,7 @@ export const BookingPanel: React.FC<BookingPanelProps> = ({
   isLoading = false,
 }) => {
   const router = useRouter();
+  const { isAuthenticated } = useAuth();
   const [checkInDate, setCheckInDate] = useState<Date | null>(null);
   const [checkOutDate, setCheckOutDate] = useState<Date | null>(null);
   const [guestCount, setGuestCount] = useState(1);
@@ -114,14 +116,20 @@ export const BookingPanel: React.FC<BookingPanelProps> = ({
 
   const handleBook = () => {
     if (checkInDate && checkOutDate && meetsMinStay && !hasDateConflict) {
+      const checkIn = format(checkInDate, 'yyyy-MM-dd');
+      const checkOut = format(checkOutDate, 'yyyy-MM-dd');
+      const confirmUrl = `/booking/confirm?propertyId=${propertyId}&checkIn=${checkIn}&checkOut=${checkOut}&guests=${guestCount}`;
+
+      // If not authenticated, redirect to login with the booking URL preserved
+      if (!isAuthenticated) {
+        router.push(`/login?redirect=${encodeURIComponent(confirmUrl)}`);
+        return;
+      }
+
       if (onBook) {
         onBook({ propertyId, checkIn: checkInDate, checkOut: checkOutDate }, guestCount);
       } else {
-        const checkIn = format(checkInDate, 'yyyy-MM-dd');
-        const checkOut = format(checkOutDate, 'yyyy-MM-dd');
-        router.push(
-          `/booking/confirm?propertyId=${propertyId}&checkIn=${checkIn}&checkOut=${checkOut}&guests=${guestCount}`
-        );
+        router.push(confirmUrl);
       }
     }
   };
@@ -250,10 +258,10 @@ export const BookingPanel: React.FC<BookingPanelProps> = ({
             </div>
 
             {serviceFee > 0 && (
-            <div className="flex justify-between text-sm">
-              <span className="text-primary-600 dark:text-sand-400">Service fee</span>
-              <span className="font-medium text-primary-900 dark:text-sand-100">${serviceFee.toFixed(2)}</span>
-            </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-primary-600 dark:text-sand-400">Service fee</span>
+                <span className="font-medium text-primary-900 dark:text-sand-100">${serviceFee.toFixed(2)}</span>
+              </div>
             )}
 
             {costs.commissionFee > 0 && (
@@ -333,8 +341,8 @@ export const BookingPanel: React.FC<BookingPanelProps> = ({
               {cancellationPolicy === 'Flexible'
                 ? 'Full refund if cancelled at least 5 days before check-in.'
                 : cancellationPolicy === 'Moderate'
-                ? 'Full refund if cancelled at least 7 days before check-in.'
-                : 'Full refund if cancelled at least 30 days before check-in.'}
+                  ? 'Full refund if cancelled at least 7 days before check-in.'
+                  : 'Full refund if cancelled at least 30 days before check-in.'}
             </p>
           </div>
         )}

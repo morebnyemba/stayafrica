@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { Star, CheckCircle, MessageCircle, Loader2, Shield } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { toast } from 'react-hot-toast';
@@ -27,13 +27,19 @@ interface PropertyHostCardProps {
 
 export function PropertyHostCard({ host, propertyId }: PropertyHostCardProps) {
   const router = useRouter();
-  const { user } = useAuth();
+  const pathname = usePathname();
+  const { user, isAuthenticated } = useAuth();
   const [contactingHost, setContactingHost] = useState(false);
   if (!host) return null;
 
   const contactHost = async () => {
-    if (!host || !user?.id) {
-      toast.error('Host or user information missing');
+    if (!isAuthenticated || !user?.id) {
+      toast.error('You must be logged in to perform this action');
+      router.push(`/login?redirect=${encodeURIComponent(pathname || '/')}`);
+      return;
+    }
+    if (!host) {
+      toast.error('Host information is unavailable');
       return;
     }
     setContactingHost(true);

@@ -80,7 +80,7 @@ export function BookingCard({ property }: BookingCardProps) {
   }
 
   const nights = checkInDate && checkOutDate ? differenceInDays(checkOutDate, checkInDate) : 0;
-  
+
   // Calculate costs using the fee configuration
   const costs = feeConfig && nights > 0
     ? calculateBookingCost(property.price_per_night, nights, feeConfig, property.cleaning_fee, taxEstimate?.combined_rate || 0)
@@ -89,18 +89,13 @@ export function BookingCard({ property }: BookingCardProps) {
   const hasDateConflict = checkInDate && checkOutDate && hasUnavailableDatesInRange(checkInDate, checkOutDate);
 
   const handleBooking = () => {
-    if (!isAuthenticated) {
-      toast.error('Please log in to book');
-      router.push('/login');
-      return;
-    }
-
     if (!checkInDate || !checkOutDate) {
       toast.error('Please select check-in and check-out dates');
       return;
     }
 
-    if (nights <= 0) {
+    const nights_count = differenceInDays(checkOutDate, checkInDate);
+    if (nights_count <= 0) {
       toast.error('Check-out date must be after check-in date');
       return;
     }
@@ -112,11 +107,16 @@ export function BookingCard({ property }: BookingCardProps) {
 
     const checkIn = format(checkInDate, 'yyyy-MM-dd');
     const checkOut = format(checkOutDate, 'yyyy-MM-dd');
+    const confirmUrl = `/booking/confirm?propertyId=${property.id}&checkIn=${checkIn}&checkOut=${checkOut}&guests=${guests}`;
+
+    if (!isAuthenticated) {
+      toast.error('Please log in to book');
+      router.push(`/login?redirect=${encodeURIComponent(confirmUrl)}`);
+      return;
+    }
 
     // Navigate to booking confirmation page
-    router.push(
-      `/booking/confirm?propertyId=${property.id}&checkIn=${checkIn}&checkOut=${checkOut}&guests=${guests}`
-    );
+    router.push(confirmUrl);
   };
 
   return (
@@ -224,16 +224,16 @@ export function BookingCard({ property }: BookingCardProps) {
             <span>{property.currency} {costs.basePrice.toFixed(2)}</span>
           </div>
           {costs.serviceFee > 0 && (
-          <div className="flex justify-between text-primary-700 dark:text-sand-200">
-            <span>Service fee</span>
-            <span>{property.currency} {costs.serviceFee.toFixed(2)}</span>
-          </div>
+            <div className="flex justify-between text-primary-700 dark:text-sand-200">
+              <span>Service fee</span>
+              <span>{property.currency} {costs.serviceFee.toFixed(2)}</span>
+            </div>
           )}
           {costs.commissionFee > 0 && (
-          <div className="flex justify-between text-primary-700 dark:text-sand-200">
-            <span>Commission fee ({(costs.commissionRate * 100).toFixed(1)}%)</span>
-            <span>{property.currency} {costs.commissionFee.toFixed(2)}</span>
-          </div>
+            <div className="flex justify-between text-primary-700 dark:text-sand-200">
+              <span>Commission fee ({(costs.commissionRate * 100).toFixed(1)}%)</span>
+              <span>{property.currency} {costs.commissionFee.toFixed(2)}</span>
+            </div>
           )}
           {costs.taxes > 0 && (
             <div className="flex justify-between text-primary-700 dark:text-sand-200">

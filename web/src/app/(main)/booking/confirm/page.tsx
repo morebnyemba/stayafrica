@@ -69,7 +69,7 @@ export default function BookingConfirmPage() {
   const contactHost = async () => {
     const hostId = property?.host?.id || property?.host_id;
     if (!property || !hostId || !user?.id) {
-      toast.error('Host or user information missing');
+      toast.error(!user?.id ? 'You must be logged in to perform this action' : 'Host information is unavailable');
       return;
     }
     setContactingHost(true);
@@ -154,18 +154,16 @@ export default function BookingConfirmPage() {
             {['Details', 'Payment', 'Confirmation'].map((step, i) => (
               <div key={step} className="flex items-center gap-3">
                 <div className="flex items-center gap-2">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
-                    i === 0
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${i === 0
                       ? 'bg-secondary-600 text-white'
                       : 'bg-primary-200 dark:bg-primary-700 text-primary-500 dark:text-sand-400'
-                  }`}>
+                    }`}>
                     {i + 1}
                   </div>
-                  <span className={`text-sm font-medium ${
-                    i === 0
+                  <span className={`text-sm font-medium ${i === 0
                       ? 'text-primary-900 dark:text-sand-50'
                       : 'text-primary-400 dark:text-sand-500'
-                  }`}>
+                    }`}>
                     {step}
                   </span>
                 </div>
@@ -420,12 +418,12 @@ export default function BookingConfirmPage() {
                     </span>
                   </div>
                   {costs.serviceFee > 0 && (
-                  <div className="flex justify-between">
-                    <span className="text-primary-600 dark:text-sand-300">Service fee</span>
-                    <span className="font-medium text-primary-900 dark:text-sand-50">
-                      {property?.currency} {costs.serviceFee.toFixed(2)}
-                    </span>
-                  </div>
+                    <div className="flex justify-between">
+                      <span className="text-primary-600 dark:text-sand-300">Service fee</span>
+                      <span className="font-medium text-primary-900 dark:text-sand-50">
+                        {property?.currency} {costs.serviceFee.toFixed(2)}
+                      </span>
+                    </div>
                   )}
                   {costs.commissionFee > 0 && (
                     <div className="flex justify-between">
