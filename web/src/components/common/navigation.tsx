@@ -108,12 +108,16 @@ function AuthDropdown({
   label,
   icon: Icon,
   colorClass,
+  loginHref,
+  registerHref,
   onClose,
   inline = false,
 }: {
   label: string;
   icon: React.ElementType;
   colorClass: string;
+  loginHref: string;
+  registerHref: string;
   onClose?: () => void;
   inline?: boolean;
 }) {
@@ -148,7 +152,7 @@ function AuthDropdown({
         inline ? (
           <div className="mt-2 space-y-1 pl-2">
             <Link
-              href="/login"
+              href={loginHref}
               onClick={() => { setOpen(false); onClose?.(); }}
               className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-sand-100 hover:bg-primary-700/60 transition"
             >
@@ -156,7 +160,7 @@ function AuthDropdown({
               Log in
             </Link>
             <Link
-              href="/register"
+              href={registerHref}
               onClick={() => { setOpen(false); onClose?.(); }}
               className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-sand-100 hover:bg-primary-700/60 transition"
             >
@@ -167,7 +171,7 @@ function AuthDropdown({
         ) : (
           <div className="absolute right-0 mt-2 w-44 bg-white dark:bg-primary-800 rounded-xl shadow-xl ring-1 ring-black/10 dark:ring-white/10 py-1.5 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
             <Link
-              href="/login"
+              href={loginHref}
               onClick={() => { setOpen(false); onClose?.(); }}
               className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-neutral-700 dark:text-sand-100 hover:bg-neutral-50 dark:hover:bg-primary-700/60 transition"
             >
@@ -175,7 +179,7 @@ function AuthDropdown({
               Log in
             </Link>
             <Link
-              href="/register"
+              href={registerHref}
               onClick={() => { setOpen(false); onClose?.(); }}
               className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-neutral-700 dark:text-sand-100 hover:bg-neutral-50 dark:hover:bg-primary-700/60 transition"
             >
@@ -458,11 +462,15 @@ export function Navigation() {
                     label="Guest"
                     icon={Plane}
                     colorClass="border-sky-400/40 text-sky-300 hover:bg-sky-500/10 ring-sky-400/30"
+                    loginHref="/login/guest"
+                    registerHref="/register"
                   />
                   <AuthDropdown
                     label="Host"
                     icon={Building2}
                     colorClass="border-secondary-400/40 text-secondary-300 hover:bg-secondary-500/10 ring-secondary-400/30"
+                    loginHref="/login/host"
+                    registerHref="/register?role=host"
                   />
                 </div>
               )}
@@ -627,6 +635,8 @@ export function Navigation() {
                   label="Guest"
                   icon={Plane}
                   colorClass="border-sky-400/40 text-sky-300 hover:bg-sky-500/10 ring-sky-400/30"
+                  loginHref="/login/guest"
+                  registerHref="/register"
                   onClose={closeMobile}
                   inline
                 />
@@ -634,6 +644,8 @@ export function Navigation() {
                   label="Host"
                   icon={Building2}
                   colorClass="border-secondary-400/40 text-secondary-300 hover:bg-secondary-500/10 ring-secondary-400/30"
+                  loginHref="/login/host"
+                  registerHref="/register?role=host"
                   onClose={closeMobile}
                   inline
                 />
