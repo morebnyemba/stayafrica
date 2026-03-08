@@ -349,88 +349,98 @@ export function PropertyDetailsContent({ propertyId: propId }: PropertyDetailsCo
             </div>
 
             {/* Reviews Section */}
-            {reviews && reviews.length > 0 && (
-              <div id="reviews" className="py-6 border-b border-primary-200 dark:border-primary-700">
-                {/* Rating Summary */}
-                <div className="flex items-center gap-3 mb-6">
-                  <Star className="w-6 h-6 fill-primary-900 dark:fill-sand-50 text-primary-900 dark:text-sand-50" />
-                  <span className="text-2xl font-semibold text-primary-900 dark:text-sand-50">
-                    {avgRating}
-                  </span>
-                  <span className="text-primary-600 dark:text-sand-400 text-lg">·</span>
-                  <span className="text-2xl font-semibold text-primary-900 dark:text-sand-50">
-                    {reviews.length} review{reviews.length !== 1 ? 's' : ''}
-                  </span>
-                </div>
+            <div id="reviews" className="py-6 border-b border-primary-200 dark:border-primary-700">
+              {reviews && reviews.length > 0 ? (
+                <>
+                  {/* Rating Summary */}
+                  <div className="flex items-center gap-3 mb-6">
+                    <Star className="w-6 h-6 fill-primary-900 dark:fill-sand-50 text-primary-900 dark:text-sand-50" />
+                    <span className="text-2xl font-semibold text-primary-900 dark:text-sand-50">
+                      {avgRating}
+                    </span>
+                    <span className="text-primary-600 dark:text-sand-400 text-lg">·</span>
+                    <span className="text-2xl font-semibold text-primary-900 dark:text-sand-50">
+                      {reviews.length} review{reviews.length !== 1 ? 's' : ''}
+                    </span>
+                  </div>
 
-                {/* Rating Breakdown Bars */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-16 gap-y-2 mb-8 max-w-lg">
-                  {[5, 4, 3, 2, 1].map((star) => {
-                    const count = ratingBreakdown[star] || 0;
-                    const pct = reviews.length > 0 ? (count / reviews.length) * 100 : 0;
-                    return (
-                      <div key={star} className="flex items-center gap-2">
-                        <span className="text-xs text-primary-900 dark:text-sand-50 w-3">{star}</span>
-                        <div className="flex-1 h-1 bg-primary-200 dark:bg-primary-700 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-primary-900 dark:bg-sand-100 rounded-full transition-all"
-                            style={{ width: `${pct}%` }}
-                          />
+                  {/* Rating Breakdown Bars */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-16 gap-y-2 mb-8 max-w-lg">
+                    {[5, 4, 3, 2, 1].map((star) => {
+                      const count = ratingBreakdown[star] || 0;
+                      const pct = reviews.length > 0 ? (count / reviews.length) * 100 : 0;
+                      return (
+                        <div key={star} className="flex items-center gap-2">
+                          <span className="text-xs text-primary-900 dark:text-sand-50 w-3">{star}</span>
+                          <div className="flex-1 h-1 bg-primary-200 dark:bg-primary-700 rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-primary-900 dark:bg-sand-100 rounded-full transition-all"
+                              style={{ width: `${pct}%` }}
+                            />
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
-                </div>
+                      );
+                    })}
+                  </div>
 
-                {/* Review Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  {displayedReviews?.map((review: Review) => (
-                    <div key={review.id}>
-                      <div className="flex items-center gap-3 mb-3">
-                        {/* Avatar */}
-                        <div className="w-10 h-10 rounded-full bg-primary-800 dark:bg-primary-600 flex items-center justify-center flex-shrink-0">
-                          <span className="text-white text-sm font-semibold">
-                            {review.guest?.first_name?.[0] || '?'}{review.guest?.last_name?.[0] || ''}
-                          </span>
+                  {/* Review Cards */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {displayedReviews?.map((review: Review) => (
+                      <div key={review.id}>
+                        <div className="flex items-center gap-3 mb-3">
+                          {/* Avatar */}
+                          <div className="w-10 h-10 rounded-full bg-primary-800 dark:bg-primary-600 flex items-center justify-center flex-shrink-0">
+                            <span className="text-white text-sm font-semibold">
+                              {review.guest?.first_name?.[0] || '?'}{review.guest?.last_name?.[0] || ''}
+                            </span>
+                          </div>
+                          <div>
+                            <p className="font-semibold text-sm text-primary-900 dark:text-sand-50">
+                              {review.guest?.first_name} {review.guest?.last_name}
+                            </p>
+                            <p className="text-xs text-primary-500 dark:text-sand-500">
+                              {new Date(review.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-semibold text-sm text-primary-900 dark:text-sand-50">
-                            {review.guest?.first_name} {review.guest?.last_name}
-                          </p>
-                          <p className="text-xs text-primary-500 dark:text-sand-500">
-                            {new Date(review.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-                          </p>
+                        <div className="flex items-center gap-0.5 mb-2">
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`w-3 h-3 ${
+                                i < review.rating
+                                  ? 'fill-primary-900 dark:fill-sand-50 text-primary-900 dark:text-sand-50'
+                                  : 'text-primary-200 dark:text-primary-600'
+                              }`}
+                            />
+                          ))}
                         </div>
+                        <p className="text-[15px] text-primary-700 dark:text-sand-200 line-clamp-4 leading-relaxed">
+                          {review.text}
+                        </p>
                       </div>
-                      <div className="flex items-center gap-0.5 mb-2">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            className={`w-3 h-3 ${
-                              i < review.rating
-                                ? 'fill-primary-900 dark:fill-sand-50 text-primary-900 dark:text-sand-50'
-                                : 'text-primary-200 dark:text-primary-600'
-                            }`}
-                          />
-                        ))}
-                      </div>
-                      <p className="text-[15px] text-primary-700 dark:text-sand-200 line-clamp-4 leading-relaxed">
-                        {review.text}
-                      </p>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
 
-                {reviews.length > 6 && (
-                  <button
-                    onClick={() => setShowAllReviews(!showAllReviews)}
-                    className="mt-6 px-6 py-3 border border-primary-900 dark:border-sand-50 rounded-lg text-primary-900 dark:text-sand-50 font-semibold text-sm hover:bg-sand-50 dark:hover:bg-primary-800 transition"
-                  >
-                    {showAllReviews ? 'Show less' : `Show all ${reviews.length} reviews`}
-                  </button>
-                )}
-              </div>
-            )}
+                  {reviews.length > 6 && (
+                    <button
+                      onClick={() => setShowAllReviews(!showAllReviews)}
+                      className="mt-6 px-6 py-3 border border-primary-900 dark:border-sand-50 rounded-lg text-primary-900 dark:text-sand-50 font-semibold text-sm hover:bg-sand-50 dark:hover:bg-primary-800 transition"
+                    >
+                      {showAllReviews ? 'Show less' : `Show all ${reviews.length} reviews`}
+                    </button>
+                  )}
+                </>
+              ) : (
+                <>
+                  <h2 className="text-xl font-semibold text-primary-900 dark:text-sand-50 mb-4">Reviews</h2>
+                  <div className="flex items-center gap-3 text-primary-500 dark:text-sand-400">
+                    <Star className="w-5 h-5" />
+                    <p className="text-[15px]">No reviews yet. Be the first to review this property!</p>
+                  </div>
+                </>
+              )}
+            </div>
 
             {/* Where you'll be — Location Map */}
             {property && (

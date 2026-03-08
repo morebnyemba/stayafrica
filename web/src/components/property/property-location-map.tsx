@@ -107,7 +107,19 @@ export function PropertyLocationMap({ location, city, country, suburb }: Propert
     };
   }, [mapboxToken, lat, lng]);
 
-  if (!lat || !lng) return null;
+  if (!lat || !lng) {
+    return (
+      <div>
+        <h2 className="text-xl font-semibold text-primary-900 dark:text-sand-50 mb-4">
+          Where you&apos;ll be
+        </h2>
+        <div className="flex items-center gap-2 text-primary-700 dark:text-sand-200">
+          <MapPin className="w-5 h-5" />
+          <span>{[suburb, city, country].filter(Boolean).join(', ') || 'Location details coming soon'}</span>
+        </div>
+      </div>
+    );
+  }
 
   if (!mapboxToken || error) {
     // Fallback: static location info without map
