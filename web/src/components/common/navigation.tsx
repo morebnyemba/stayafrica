@@ -104,6 +104,68 @@ function ModeBadge({ mode }: { mode: 'guest' | 'host' }) {
   );
 }
 
+// ─── Auth Dropdown (Guest Login / Host Login) ────────────────────────────────
+function AuthDropdown({
+  label,
+  icon: Icon,
+  colorClass,
+  onClose,
+}: {
+  label: string;
+  icon: React.ElementType;
+  colorClass: string;
+  onClose?: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className={cn(
+          'flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-semibold transition-all duration-200 border',
+          colorClass,
+          open && 'ring-2 ring-offset-1 ring-offset-transparent'
+        )}
+      >
+        <Icon className="w-4 h-4" />
+        {label}
+        <ChevronDown className={cn('w-3.5 h-3.5 transition-transform duration-200', open && 'rotate-180')} />
+      </button>
+
+      {open && (
+        <div className="absolute right-0 mt-2 w-44 bg-white dark:bg-primary-800 rounded-xl shadow-xl ring-1 ring-black/10 dark:ring-white/10 py-1.5 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+          <Link
+            href="/login"
+            onClick={() => { setOpen(false); onClose?.(); }}
+            className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-neutral-700 dark:text-sand-100 hover:bg-neutral-50 dark:hover:bg-primary-700/60 transition"
+          >
+            <User className="w-4 h-4 text-neutral-400 dark:text-sand-400" />
+            Log in
+          </Link>
+          <Link
+            href="/register"
+            onClick={() => { setOpen(false); onClose?.(); }}
+            className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-neutral-700 dark:text-sand-100 hover:bg-neutral-50 dark:hover:bg-primary-700/60 transition"
+          >
+            <Settings className="w-4 h-4 text-neutral-400 dark:text-sand-400" />
+            Sign up
+          </Link>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Main Navigation ────────────────────────────────────────────────────────
 export function Navigation() {
   const { user, isAuthenticated, logout, upgradeToHost, switchProfile } = useAuth();
@@ -368,25 +430,18 @@ export function Navigation() {
                   </div>
                 </>
               ) : (
-                <>
-                  <button
-                    onClick={handleBecomeHost}
-                    disabled={hostLoading}
-                    className="flex items-center gap-2 text-sand-200 hover:text-sand-50 text-sm font-medium px-3 py-2 rounded-lg hover:bg-primary-700/40 transition"
-                  >
-                    {hostLoading && <Loader2 className="w-4 h-4 animate-spin" />}
-                    Become a Host
-                  </button>
-                  <Link
-                    href="/login"
-                    className="text-sand-200 hover:text-sand-50 text-sm font-medium px-3 py-2 rounded-lg hover:bg-primary-700/40 transition"
-                  >
-                    Login
-                  </Link>
-                  <Link href="/register">
-                    <Button size="sm">Sign Up</Button>
-                  </Link>
-                </>
+                <div className="flex items-center gap-2">
+                  <AuthDropdown
+                    label="Guest"
+                    icon={Plane}
+                    colorClass="border-sky-400/40 text-sky-300 hover:bg-sky-500/10 ring-sky-400/30"
+                  />
+                  <AuthDropdown
+                    label="Host"
+                    icon={Building2}
+                    colorClass="border-secondary-400/40 text-secondary-300 hover:bg-secondary-500/10 ring-secondary-400/30"
+                  />
+                </div>
               )}
             </div>
 
@@ -542,16 +597,23 @@ export function Navigation() {
               Sign out
             </button>
           ) : (
-            <>
-              <Link href="/login" onClick={closeMobile} className="block">
-                <Button variant="secondary" fullWidth>
-                  Login
-                </Button>
-              </Link>
-              <Link href="/register" onClick={closeMobile} className="block">
-                <Button fullWidth>Sign Up</Button>
-              </Link>
-            </>
+            <div className="space-y-3">
+              <p className="text-sand-400 text-xs font-medium uppercase tracking-wider px-1">Get started</p>
+              <div className="flex gap-2">
+                <AuthDropdown
+                  label="Guest"
+                  icon={Plane}
+                  colorClass="border-sky-400/40 text-sky-300 hover:bg-sky-500/10 ring-sky-400/30"
+                  onClose={closeMobile}
+                />
+                <AuthDropdown
+                  label="Host"
+                  icon={Building2}
+                  colorClass="border-secondary-400/40 text-secondary-300 hover:bg-secondary-500/10 ring-secondary-400/30"
+                  onClose={closeMobile}
+                />
+              </div>
+            </div>
           )}
         </div>
       </div>
