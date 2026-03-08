@@ -13,15 +13,6 @@ import { cn } from '@/lib/utils';
 import { useAuth } from '@/store/auth-store';
 import { apiClient } from '@/services/api-client';
 
-const API_BASE = (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000').replace(/\/api\/v1\/?$/, '');
-
-/** Ensure image URL is absolute — handles /media/... relative paths from API */
-function resolveImageUrl(url: string): string {
-  if (!url) return '';
-  if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) return url;
-  return `${API_BASE}${url.startsWith('/') ? '' : '/'}${url}`;
-}
-
 export interface Property {
   id: string;
   title: string;
@@ -118,7 +109,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
       <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl bg-sand-100 dark:bg-primary-800">
         {totalImages > 0 ? (
           <Image
-            src={resolveImageUrl(property.images[currentImageIndex])}
+            src={property.images[currentImageIndex]}
             alt={property.title}
             fill
             className="object-cover transition-opacity duration-300"
