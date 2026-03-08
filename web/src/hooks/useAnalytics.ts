@@ -27,11 +27,33 @@ export function useAnalyticsDashboard(filters?: FilterOptions) {
       if (filters?.start_date) params.append('start_date', filters.start_date);
       if (filters?.end_date) params.append('end_date', filters.end_date);
 
-      const response = await apiClient.get(`/analytics/host/dashboard/?${params}`);
-      return response.data;
+      const response = await apiClient.get(`/analytics/host/dashboard_full/?${params}`);
+      const data = response.data;
+
+      // Normalize response with safe defaults
+      return {
+        summary: {
+          total_revenue: data?.summary?.total_revenue ?? 0,
+          average_occupancy: data?.summary?.average_occupancy ?? 0,
+          total_bookings: data?.summary?.total_bookings ?? 0,
+          average_rating: data?.summary?.average_rating ?? 0,
+          revenue_change: data?.summary?.revenue_change ?? 0,
+          occupancy_change: data?.summary?.occupancy_change ?? 0,
+          bookings_change: data?.summary?.bookings_change ?? 0,
+          rating_change: data?.summary?.rating_change ?? 0,
+          period: data?.summary?.period ?? (filters?.period || 'monthly'),
+        },
+        revenue_chart: Array.isArray(data?.revenue_chart) ? data.revenue_chart : [],
+        occupancy_chart: Array.isArray(data?.occupancy_chart) ? data.occupancy_chart : [],
+        booking_timeline: Array.isArray(data?.booking_timeline) ? data.booking_timeline : [],
+        property_performance: Array.isArray(data?.property_performance) ? data.property_performance : [],
+        insights: Array.isArray(data?.insights) ? data.insights : [],
+        period: data?.period ?? (filters?.period || 'monthly'),
+        date_range: data?.date_range ?? { start_date: '', end_date: '' },
+      } as AnalyticsDashboardData;
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    retry: 2, // Retry failed requests up to 2 times
+    staleTime: 5 * 60 * 1000,
+    retry: 2,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
   });
 }
@@ -47,8 +69,8 @@ export function useRevenueChart(period: TimePeriod = 'monthly', propertyId?: str
       params.append('period', period);
       if (propertyId) params.append('property_id', propertyId);
 
-      const response = await apiClient.get(`/analytics/host/revenue_chart/?${params}`);
-      return response.data;
+      const response = await apiClient.get(`/analytics/host/revenue_chart_v2/?${params}`);
+      return Array.isArray(response.data) ? response.data : [];
     },
     staleTime: 5 * 60 * 1000,
     retry: 2,
@@ -67,8 +89,8 @@ export function useOccupancyTrend(period: TimePeriod = 'monthly', propertyId?: s
       params.append('period', period);
       if (propertyId) params.append('property_id', propertyId);
 
-      const response = await apiClient.get(`/analytics/host/occupancy_trend/?${params}`);
-      return response.data;
+      const response = await apiClient.get(`/analytics/host/occupancy_trend_v2/?${params}`);
+      return Array.isArray(response.data) ? response.data : [];
     },
     staleTime: 5 * 60 * 1000,
     retry: 2,

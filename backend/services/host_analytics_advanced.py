@@ -343,3 +343,261 @@ class HostAnalyticsService:
             })
         
         return insights
+
+    # ── New helpers for the analytics dashboard (additive) ──────────
+
+    @staticmethod
+    def get_revenue_chart_data(host, start_date, end_date):
+        """
+        Generate RevenueDataPoint[] for the revenue chart.
+        Returns list of {date, revenue, bookings, label}.
+        """
+        from apps.properties.analytics_models import PropertyAnalytics
+        from django.db import models as db_models
+
+        analytics = (
+            PropertyAnalytics.objects.filter(
+                property__host=host,
+                date__gte=start_date,
+                date__lte=end_date,
+            )
+            .values('date')
+            .annotate(
+                revenue=db_models.Sum('total_revenue'),
+                bookings=db_models.Sum('bookings_count'),
+            )
+            .order_by('date')
+        )
+
+        return [
+            {
+                'date': str(item['date']),
+                'revenue': float(item['revenue'] or 0),
+                'bookings': item['bookings'] or 0,
+                'label': item['date'].strftime('%b %d'),
+            }
+            for item in analytics
+        ]
+
+    @staticmethod
+    def get_occupancy_chart_data(host, start_date, end_date):
+        """
+        Generate OccupancyDataPoint[] for the occupancy trend chart.
+        Returns list of {date, occupancy_rate, booked_nights, available_nights}.
+        """
+        from apps.properties.analytics_models import PropertyAnalytics
+        from django.db import models as db_models
+
+        analytics = (
+            PropertyAnalytics.objects.filter(
+                property__host=host,
+                date__gte=start_date,
+                date__lte=end_date,
+            )
+            .values('date')
+            .annotate(
+                occupancy_rate=db_models.Avg('occupancy_rate'),
+                booked_nights=db_models.Sum('nights_booked'),
+                available_nights=db_models.Sum('nights_available'),
+            )
+            .order_by('date')
+        )
+
+        return [
+            {
+                'date': str(item['date']),
+                'occupancy_rate': float(item['occupancy_rate'] or 0),
+                'booked_nights': item['booked_nights'] or 0,
+                'available_nights': item['available_nights'] or 0,
+            }
+            for item in analytics
+        ]
+
+    @staticmethod
+    def get_booking_timeline_data(host, start_date, end_date):
+        """
+        Generate BookingDataPoint[] for the booking timeline chart.
+        Returns list of {date, count, confirmed, pending, cancelled}.
+        """
+        from apps.bookings.models import Booking
+        from django.db.models.functions import TruncDate
+        from django.db import models as db_models
+
+        bookings = (
+            Booking.objects.filter(
+                rental_property__host=host,
+                created_at__date__gte=start_date,
+                created_at__date__lte=end_date,
+            )
+            .annotate(booking_date=TruncDate('created_at'))
+            .values('booking_date')
+            .annotate(
+                count=db_models.Count('id'),
+                confirmed=db_models.Count('id', filter=db_models.Q(status='confirmed')),
+                pending=db_models.Count('id', filter=db_models.Q(status='pending')),
+                cancelled=db_models.Count('id', filter=db_models.Q(status='cancelled')),
+            )
+            .order_by('booking_date')
+        )
+
+        return [
+            {
+                'date': str(item['booking_date']),
+                'count': item['count'],
+                'confirmed': item['confirmed'],
+                'pending': item['pending'],
+                'cancelled': item['cancelled'],
+            }
+            for item in bookings
+        ]
+
+    @staticmethod
+    def get_property_performance_data(host):
+        """
+        Generate PropertyPerformance[] matching frontend type.
+        Returns list of {property_id, property_name, property_image,
+        revenue, occupancy_rate, bookings, average_rating, revenue_per_night, days_available}.
+        """
+        from apps.properties.models import Property
+        from apps.bookings.models import Booking
+        from apps.reviews.models import Review
+        from django.db.models import Sum, Avg, Count, F
+        from decimal import Decimal
+
+        properties = Property.objects.filter(host=host)
+        result = []
+
+        for prop in properties:
+            completed = Booking.objects.filter(
+                rental_property=prop, status='completed'
+            )
+            earnings = completed.aggregate(
+                total=Sum(F('nightly_total') + F('cleaning_fee') - F('commission_fee'))
+            )['total'] or Decimal('0.00')
+
+            total_bookings = Booking.objects.filter(rental_property=prop).count()
+
+            reviews = Review.objects.filter(property_id=prop.id)
+            avg_rating = reviews.aggregate(avg=Avg('rating'))['avg'] or 0.0
+
+            # Get image
+            image_url = None
+            first_image = prop.images.first() if hasattr(prop, 'images') else None
+            if first_image:
+                image_url = getattr(first_image, 'image_url', None) or (
+                    first_image.image.url if hasattr(first_image, 'image') and first_image.image else None
+                )
+
+            # Revenue per night
+            total_nights = completed.aggregate(
+                nights=Sum(F('check_out') - F('check_in'))
+            )['nights']
+            nights_count = total_nights.days if total_nights else 0
+            rev_per_night = float(earnings) / nights_count if nights_count > 0 else 0
+
+            result.append({
+                'property_id': str(prop.id),
+                'property_name': prop.title,
+                'property_image': image_url,
+                'revenue': float(earnings),
+                'occupancy_rate': 0,  # calculated separately if analytics exist
+                'bookings': total_bookings,
+                'average_rating': round(avg_rating, 2),
+                'revenue_per_night': round(rev_per_night, 2),
+                'days_available': 30,
+            })
+
+        return result
+
+    @staticmethod
+    def get_insights_list(host):
+        """
+        Generate Insight[] matching frontend type.
+        Returns list of {id, type, title, description, recommendation}.
+        """
+        raw = HostAnalyticsService.get_performance_insights(host)
+
+        insights = []
+        recommendations = raw.get('recommendations', [])
+
+        for i, rec in enumerate(recommendations):
+            priority_to_type = {
+                'high': 'danger',
+                'medium': 'warning',
+                'low': 'info',
+            }
+            insights.append({
+                'id': f'insight-{i}',
+                'type': priority_to_type.get(rec.get('priority', 'low'), 'info'),
+                'title': rec.get('type', 'Insight').replace('_', ' ').title(),
+                'description': rec.get('message', ''),
+                'recommendation': rec.get('message', ''),
+            })
+
+        # Add summary-based insights
+        if raw.get('bookings_last_30_days', 0) > 0:
+            revenue = raw.get('revenue_last_30_days', Decimal('0'))
+            insights.append({
+                'id': 'insight-revenue-30d',
+                'type': 'success',
+                'title': 'Recent Revenue',
+                'description': f'You earned ${float(revenue):,.2f} from {raw["bookings_last_30_days"]} bookings in the last 30 days.',
+            })
+
+        return insights
+
+    @staticmethod
+    def compute_period_changes(host, start_date, end_date, period='monthly'):
+        """
+        Compute period-over-period percentage changes for summary cards.
+        Returns {revenue_change, occupancy_change, bookings_change, rating_change}.
+        """
+        from apps.bookings.models import Booking
+        from apps.reviews.models import Review
+        from apps.properties.models import Property
+        from django.db.models import Sum, Avg, Count
+
+        # Current period
+        period_length = (end_date - start_date).days or 1
+        prev_start = start_date - timedelta(days=period_length)
+        prev_end = start_date - timedelta(days=1)
+
+        properties = Property.objects.filter(host=host)
+
+        def _get_metrics(s, e):
+            bookings = Booking.objects.filter(
+                rental_property__in=properties,
+                status__in=['confirmed', 'completed'],
+                created_at__date__gte=s,
+                created_at__date__lte=e,
+            )
+            agg = bookings.aggregate(
+                revenue=Sum('grand_total'),
+                count=Count('id'),
+            )
+            property_ids = properties.values_list('id', flat=True)
+            rating = Review.objects.filter(
+                property_id__in=property_ids,
+                created_at__gte=s,
+                created_at__lte=e,
+            ).aggregate(avg=Avg('rating'))['avg'] or 0
+            return {
+                'revenue': float(agg['revenue'] or 0),
+                'bookings': agg['count'] or 0,
+                'rating': float(rating),
+            }
+
+        current = _get_metrics(start_date, end_date)
+        previous = _get_metrics(prev_start, prev_end)
+
+        def _pct_change(cur, prev):
+            if prev == 0:
+                return 0
+            return round(((cur - prev) / prev) * 100, 1)
+
+        return {
+            'revenue_change': _pct_change(current['revenue'], previous['revenue']),
+            'occupancy_change': 0,  # simplified — would need PropertyAnalytics
+            'bookings_change': _pct_change(current['bookings'], previous['bookings']),
+            'rating_change': _pct_change(current['rating'], previous['rating']),
+        }

@@ -20,6 +20,7 @@ export const RevenueProjectionChart: React.FC<RevenueProjectionChartProps> = ({
   className = '',
 }) => {
   const [projectionData, setProjectionData] = useState<ProjectionDataPoint[]>([]);
+  const [error, setError] = useState<string | null>(null);
   const { mutate: generateProjections, isPending } = useGenerateProjections();
 
   const {
@@ -31,19 +32,19 @@ export const RevenueProjectionChart: React.FC<RevenueProjectionChartProps> = ({
   } = config;
 
   const handleGenerateProjections = React.useCallback(() => {
+    setError(null);
     generateProjections(
       { property_id: propertyId, days_ahead: daysAhead },
       {
         onSuccess: (data) => {
-          setProjectionData(data);
+          setProjectionData(Array.isArray(data) ? data : []);
+        },
+        onError: (err) => {
+          setError(err?.message || 'Failed to generate projections');
         },
       }
     );
   }, [propertyId, daysAhead, generateProjections]);
-
-  React.useEffect(() => {
-    handleGenerateProjections();
-  }, [handleGenerateProjections]);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-US', {

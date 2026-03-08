@@ -1,9 +1,19 @@
 'use client';
 
 import React from 'react';
-import { TrendingUp, TrendingDown, Minus, LucideIcon } from 'lucide-react';
-import * as LucideIcons from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus, DollarSign, Calendar, Star, LucideIcon } from 'lucide-react';
+import { CalendarCheck } from 'lucide-react';
 import type { MetricCardData } from '@/types/analytics-types';
+
+// Small icon map instead of importing all ~1400 icons
+const ICON_MAP: Record<string, LucideIcon> = {
+  DollarSign,
+  Calendar,
+  CalendarCheck,
+  Star,
+  TrendingUp,
+  TrendingDown,
+};
 
 interface MetricCardProps {
   data: MetricCardData;
@@ -66,9 +76,7 @@ export const MetricCard: React.FC<MetricCardProps> = ({ data, className = '' }) 
 
   const getIconComponent = () => {
     if (!icon) return null;
-    type LucideIconsType = typeof LucideIcons;
-    type IconName = keyof LucideIconsType;
-    const IconComponent = LucideIcons[icon as IconName] as LucideIcon | undefined;
+    const IconComponent = ICON_MAP[icon];
     return IconComponent ? <IconComponent className="h-5 w-5" /> : null;
   };
 

@@ -20,7 +20,10 @@ from apps.properties.analytics_serializers import (
     HostAnalyticsSummarySerializer,
     RevenueProjectionSerializer,
     PerformanceBenchmarkSerializer,
-    AnalyticsDashboardSerializer
+    AnalyticsDashboardSerializer,
+    FullDashboardSerializer,
+    RevenueDataPointSerializer,
+    OccupancyDataPointSerializer,
 )
 from services.host_analytics_advanced import HostAnalyticsService
 import logging
@@ -227,6 +230,125 @@ class HostAnalyticsViewSet(viewsets.ViewSet):
                 logger.error(f"Error generating projection for {target_month}: {e}")
         
         serializer = RevenueProjectionSerializer(projections, many=True)
+        return Response(serializer.data)
+
+    # ── New v2 endpoints (additive) ──────────
+
+    @action(detail=False, methods=['get'], url_path='dashboard_full')
+    def dashboard_full(self, request):
+        """
+        Complete analytics dashboard matching frontend AnalyticsDashboardData.
+        Returns all chart data, summary with changes, insights as array.
+        """
+        host = request.user
+        period = request.query_params.get('period', 'monthly')
+
+        today = timezone.now().date()
+        if period == 'monthly':
+            start_date = date(today.year, today.month, 1)
+            end_date = today
+        elif period == 'weekly':
+            start_date = today - timedelta(days=7)
+            end_date = today
+        elif period == 'daily':
+            start_date = today
+            end_date = today
+        elif period == 'yearly':
+            start_date = date(today.year, 1, 1)
+            end_date = today
+        else:
+            start_date_str = request.query_params.get('start_date', str(today))
+            end_date_str = request.query_params.get('end_date', str(today))
+            start_date = date.fromisoformat(start_date_str)
+            end_date = date.fromisoformat(end_date_str)
+
+        try:
+            # Generate summary from existing model
+            summary_obj = HostAnalyticsService.generate_host_summary(
+                host, start_date, end_date, period
+            )
+
+            # Compute period-over-period changes
+            changes = HostAnalyticsService.compute_period_changes(
+                host, start_date, end_date, period
+            )
+
+            summary_data = {
+                'total_revenue': float(summary_obj.total_revenue or 0),
+                'average_occupancy': float(summary_obj.avg_occupancy_rate or 0),
+                'total_bookings': summary_obj.total_bookings or 0,
+                'average_rating': float(summary_obj.avg_rating or 0),
+                'revenue_change': changes['revenue_change'],
+                'occupancy_change': changes['occupancy_change'],
+                'bookings_change': changes['bookings_change'],
+                'rating_change': changes['rating_change'],
+                'period': period,
+            }
+
+            # Build full dashboard response
+            dashboard_data = {
+                'summary': summary_data,
+                'revenue_chart': HostAnalyticsService.get_revenue_chart_data(
+                    host, start_date, end_date
+                ),
+                'occupancy_chart': HostAnalyticsService.get_occupancy_chart_data(
+                    host, start_date, end_date
+                ),
+                'booking_timeline': HostAnalyticsService.get_booking_timeline_data(
+                    host, start_date, end_date
+                ),
+                'property_performance': HostAnalyticsService.get_property_performance_data(host),
+                'insights': HostAnalyticsService.get_insights_list(host),
+                'period': period,
+                'date_range': {
+                    'start_date': str(start_date),
+                    'end_date': str(end_date),
+                },
+            }
+
+            serializer = FullDashboardSerializer(dashboard_data)
+            return Response(serializer.data)
+        except Exception as e:
+            logger.error(f"Error building full dashboard: {e}")
+            return Response(
+                {'error': 'Failed to load analytics dashboard'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+    @action(detail=False, methods=['get'], url_path='revenue_chart_v2')
+    def revenue_chart_v2(self, request):
+        """
+        Revenue chart data as RevenueDataPoint[] array.
+        Query params: period (daily/weekly/monthly/yearly)
+        """
+        host = request.user
+        period = request.query_params.get('period', 'monthly')
+        property_id = request.query_params.get('property_id')
+
+        today = timezone.now().date()
+        period_days = {'daily': 1, 'weekly': 7, 'monthly': 30, 'yearly': 365}
+        start_date = today - timedelta(days=period_days.get(period, 30))
+
+        data = HostAnalyticsService.get_revenue_chart_data(host, start_date, today)
+        serializer = RevenueDataPointSerializer(data, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['get'], url_path='occupancy_trend_v2')
+    def occupancy_trend_v2(self, request):
+        """
+        Occupancy trend data as OccupancyDataPoint[] array.
+        Query params: period (daily/weekly/monthly/yearly)
+        """
+        host = request.user
+        period = request.query_params.get('period', 'monthly')
+        property_id = request.query_params.get('property_id')
+
+        today = timezone.now().date()
+        period_days = {'daily': 1, 'weekly': 7, 'monthly': 30, 'yearly': 365}
+        start_date = today - timedelta(days=period_days.get(period, 30))
+
+        data = HostAnalyticsService.get_occupancy_chart_data(host, start_date, today)
+        serializer = OccupancyDataPointSerializer(data, many=True)
         return Response(serializer.data)
 
 

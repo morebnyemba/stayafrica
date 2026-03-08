@@ -88,3 +88,94 @@ class AnalyticsDashboardSerializer(serializers.Serializer):
     projections = RevenueProjectionSerializer(many=True)
     insights = serializers.DictField()
     benchmarks = PerformanceBenchmarkSerializer(many=True, required=False)
+
+
+# ── New serializers for v2 dashboard (additive) ──────────
+
+class DashboardSummaryV2Serializer(serializers.Serializer):
+    """Maps HostAnalyticsSummary model fields to frontend DashboardSummary shape."""
+    total_revenue = serializers.FloatField(default=0)
+    average_occupancy = serializers.FloatField(default=0)
+    total_bookings = serializers.IntegerField(default=0)
+    average_rating = serializers.FloatField(default=0)
+    revenue_change = serializers.FloatField(default=0)
+    occupancy_change = serializers.FloatField(default=0)
+    bookings_change = serializers.FloatField(default=0)
+    rating_change = serializers.FloatField(default=0)
+    period = serializers.CharField(default='monthly')
+
+
+class RevenueDataPointSerializer(serializers.Serializer):
+    """Matches frontend RevenueDataPoint type."""
+    date = serializers.CharField()
+    revenue = serializers.FloatField(default=0)
+    bookings = serializers.IntegerField(default=0)
+    label = serializers.CharField(required=False, allow_blank=True)
+
+
+class OccupancyDataPointSerializer(serializers.Serializer):
+    """Matches frontend OccupancyDataPoint type."""
+    date = serializers.CharField()
+    occupancy_rate = serializers.FloatField(default=0)
+    booked_nights = serializers.IntegerField(default=0)
+    available_nights = serializers.IntegerField(default=0)
+
+
+class BookingTimelinePointSerializer(serializers.Serializer):
+    """Matches frontend BookingDataPoint type."""
+    date = serializers.CharField()
+    count = serializers.IntegerField(default=0)
+    confirmed = serializers.IntegerField(default=0)
+    pending = serializers.IntegerField(default=0)
+    cancelled = serializers.IntegerField(default=0)
+
+
+class PropertyPerformanceV2Serializer(serializers.Serializer):
+    """Matches frontend PropertyPerformance type."""
+    property_id = serializers.CharField()
+    property_name = serializers.CharField()
+    property_image = serializers.CharField(required=False, allow_null=True)
+    revenue = serializers.FloatField(default=0)
+    occupancy_rate = serializers.FloatField(default=0)
+    bookings = serializers.IntegerField(default=0)
+    average_rating = serializers.FloatField(default=0)
+    revenue_per_night = serializers.FloatField(default=0)
+    days_available = serializers.IntegerField(default=30)
+
+
+class InsightItemSerializer(serializers.Serializer):
+    """Matches frontend Insight type."""
+    id = serializers.CharField()
+    type = serializers.ChoiceField(
+        choices=['success', 'warning', 'info', 'danger'],
+        default='info',
+    )
+    title = serializers.CharField()
+    description = serializers.CharField()
+    recommendation = serializers.CharField(required=False, allow_blank=True)
+    action_url = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    action_label = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    metric = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    value = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+
+
+class DateRangeSerializer(serializers.Serializer):
+    """Matches frontend DateRange type."""
+    start_date = serializers.CharField()
+    end_date = serializers.CharField()
+
+
+class FullDashboardSerializer(serializers.Serializer):
+    """
+    Complete analytics dashboard matching frontend AnalyticsDashboardData.
+    Used by the dashboard_full endpoint.
+    """
+    summary = DashboardSummaryV2Serializer()
+    revenue_chart = RevenueDataPointSerializer(many=True)
+    occupancy_chart = OccupancyDataPointSerializer(many=True)
+    booking_timeline = BookingTimelinePointSerializer(many=True)
+    property_performance = PropertyPerformanceV2Serializer(many=True)
+    insights = InsightItemSerializer(many=True)
+    period = serializers.CharField()
+    date_range = DateRangeSerializer()
+
