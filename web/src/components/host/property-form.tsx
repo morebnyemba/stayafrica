@@ -23,7 +23,7 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
   const [premisesStatus, setPremisesStatus] = useState<{ isOnPremises: boolean | null; distanceKm: number | null; message: string }>(
     { isOnPremises: null, distanceKm: null, message: '' }
   );
-  
+
   const [formData, setFormData] = useState({
     title: initialData?.title || '',
     description: initialData?.description || '',
@@ -87,7 +87,7 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
 
   const removeExistingImage = async (imageId: number) => {
     if (!window.confirm('Are you sure you want to delete this image?')) return;
-    
+
     try {
       // You may need to implement this endpoint on the backend
       // await apiClient.deletePropertyImage(propertyId, imageId);
@@ -181,8 +181,8 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
     const dLat = toRad(lat2 - lat1);
     const dLon = toRad(lon2 - lon1);
     const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-              Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-              Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   };
@@ -299,7 +299,7 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
       };
 
       let propertyId_local = propertyId || initialData?.id;
-      
+
       if (isEdit && propertyId_local) {
         await apiClient.updateProperty(propertyId_local, propertyData);
       } else {
@@ -350,7 +350,7 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
           <Home className="w-4 h-4 sm:w-5 sm:h-5" />
           Basic Information
         </h3>
-        
+
         <div className="space-y-4">
           <div>
             <Input
@@ -392,6 +392,7 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
                 { value: 'cottage', label: 'Cottage' },
                 { value: 'lodge', label: 'Lodge' },
                 { value: 'room', label: 'Room' },
+                { value: 'cosy_rooms', label: 'Cosy Rooms' },
               ]}
             />
           </div>
@@ -440,7 +441,7 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
           <MapPin className="w-5 h-5" />
           <span>Location <span className="hidden sm:inline">(GDAL-Powered)</span></span>
         </h3>
-        
+
         <div className="space-y-4">
           <div className="relative">
             <Input
@@ -449,7 +450,7 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
               placeholder="Search for your property location..."
               onChange={(e) => handleLocationSearch(e.target.value)}
             />
-            
+
             {locationSuggestions.length > 0 && (
               <div className="absolute z-10 w-full mt-1 bg-white dark:bg-primary-800 border border-primary-300 dark:border-primary-600 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                 {locationSuggestions.map((suggestion, index) => (
@@ -607,7 +608,7 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
           <ImageIcon className="w-4 h-4 sm:w-5 sm:h-5" />
           Property Images
         </h3>
-        
+
         <div className="space-y-4">
           <p className="text-xs sm:text-sm text-primary-600 dark:text-sand-400">
             Add up to 10 images of your property. The first image will be used as the main thumbnail.
@@ -706,7 +707,7 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
           <DollarSign className="w-4 h-4 sm:w-5 sm:h-5" />
           Pricing
         </h3>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <Input

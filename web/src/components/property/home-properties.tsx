@@ -197,6 +197,7 @@ export function HomeProperties() {
             { type: 'COTTAGE', label: 'Cottages', icon: Home },
             { type: 'HOUSE', label: 'Houses', icon: Building2 },
             { type: 'CAMPGROUND', label: 'Campgrounds', icon: Tent },
+            { type: 'COSY_ROOMS', label: 'Cosy Rooms', icon: Home },
           ].map((item) => {
             const IconComponent = item.icon;
             return (

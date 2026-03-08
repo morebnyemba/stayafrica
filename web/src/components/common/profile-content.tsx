@@ -42,7 +42,7 @@ export function ProfileContent() {
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     try {
       await updateProfile(formData);
       toast.success('Profile updated successfully!');
@@ -85,11 +85,10 @@ export function ProfileContent() {
                     <button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id)}
-                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition ${
-                        activeTab === tab.id
-                          ? 'bg-secondary-500 text-primary-900 font-semibold'
-                          : 'text-primary-700 dark:text-sand-200 hover:bg-primary-100 dark:hover:bg-primary-700'
-                      }`}
+                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition ${activeTab === tab.id
+                        ? 'bg-secondary-500 text-primary-900 font-semibold'
+                        : 'text-primary-700 dark:text-sand-200 hover:bg-primary-100 dark:hover:bg-primary-700'
+                        }`}
                     >
                       <tab.icon className="w-5 h-5" />
                       <span>{tab.label}</span>
@@ -133,11 +132,10 @@ export function ProfileContent() {
                       <p className="text-primary-600 dark:text-sand-300 mb-2">
                         {user?.email}
                       </p>
-                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                        user?.is_verified
-                          ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
-                          : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300'
-                      }`}>
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${user?.is_verified
+                        ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
+                        : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300'
+                        }`}>
                         {user?.is_verified ? 'Verified' : 'Unverified'}
                       </span>
                     </div>
@@ -379,7 +377,7 @@ export function ProfileContent() {
   );
 }
 
-const PROPERTY_TYPES = ['lodge', 'cottage', 'room', 'apartment', 'house', 'villa'];
+const PROPERTY_TYPES = ['lodge', 'cottage', 'room', 'apartment', 'house', 'villa', 'cosy_rooms'];
 
 function PreferencesTab() {
   const queryClient = useQueryClient();
@@ -484,13 +482,12 @@ function PreferencesTab() {
               <button
                 key={type}
                 onClick={() => togglePropertyType(type)}
-                className={`px-4 py-2 rounded-full text-sm font-medium border transition-colors ${
-                  form.preferred_property_types.includes(type)
-                    ? 'bg-secondary-500 text-white border-secondary-500'
-                    : 'border-primary-300 dark:border-primary-600 text-primary-700 dark:text-sand-300 hover:border-secondary-400'
-                }`}
+                className={`px-4 py-2 rounded-full text-sm font-medium border transition-colors ${form.preferred_property_types.includes(type)
+                  ? 'bg-secondary-500 text-white border-secondary-500'
+                  : 'border-primary-300 dark:border-primary-600 text-primary-700 dark:text-sand-300 hover:border-secondary-400'
+                  }`}
               >
-                {type.charAt(0).toUpperCase() + type.slice(1)}
+                {type.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
               </button>
             ))}
           </div>
