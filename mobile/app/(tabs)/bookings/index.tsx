@@ -72,11 +72,18 @@ export default function BookingsScreen() {
             </View>
             <Text className="text-2xl font-bold text-forest mb-3">Sign In Required</Text>
             <Text className="text-moss text-center mb-8 px-4 leading-6">Please sign in to view and manage your bookings</Text>
-            <TouchableOpacity onPress={() => router.replace('/(auth)/login')}>
-              <LinearGradient colors={['#D9B168', '#bea04f']} className="px-8 py-4 rounded-2xl" style={{ shadowColor: '#D9B168', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 5 }}>
-                <Text className="text-forest font-bold text-base">Sign In Now</Text>
-              </LinearGradient>
-            </TouchableOpacity>
+            <View className="flex-row gap-3">
+              <TouchableOpacity className="flex-1" onPress={() => router.push('/(auth)/login')}>
+                <LinearGradient colors={['#D9B168', '#bea04f']} className="px-6 py-4 rounded-2xl items-center" style={{ shadowColor: '#D9B168', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 5 }}>
+                  <Text className="text-forest font-bold text-base">Log In</Text>
+                </LinearGradient>
+              </TouchableOpacity>
+              <TouchableOpacity className="flex-1" onPress={() => router.push('/(auth)/register')}>
+                <LinearGradient colors={['#122F26', '#1d392f']} className="px-6 py-4 rounded-2xl items-center" style={{ shadowColor: '#122F26', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 5 }}>
+                  <Text className="text-gold font-bold text-base">Sign Up</Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </SafeAreaView>

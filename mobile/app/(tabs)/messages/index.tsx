@@ -8,7 +8,6 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Skeleton } from '@/components/common/Skeletons';
 import { Avatar } from '@/components/common/Avatar';
 import { Sidebar } from '@/components/common/Sidebar';
-import { EmptyState } from '@/components/common/EmptyState';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
@@ -90,13 +89,27 @@ export default function MessagesScreen() {
           <Text className="text-3xl font-black text-white tracking-tight">Messages</Text>
           <Text className="text-sand-200 text-sm mt-1">Chat with hosts and guests</Text>
         </LinearGradient>
-        <EmptyState
-          icon="chatbubbles-outline"
-          title="Sign In to Chat"
-          description="Sign in to start conversations with hosts and guests"
-          actionLabel="Sign In Now"
-          onAction={() => router.replace('/(auth)/login')}
-        />
+        <View className="flex-1 items-center justify-center px-6">
+          <View className="bg-white rounded-3xl p-8 items-center" style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.1, shadowRadius: 16, elevation: 8 }}>
+            <View className="bg-sand-200 rounded-full p-8 mb-6">
+              <Ionicons name="chatbubbles-outline" size={72} color="#D9B168" />
+            </View>
+            <Text className="text-2xl font-bold text-forest mb-3">Sign In to Chat</Text>
+            <Text className="text-moss text-center mb-8 px-4 leading-6">Sign in to start conversations with hosts and guests</Text>
+            <View className="flex-row gap-3">
+              <TouchableOpacity className="flex-1" onPress={() => router.push('/(auth)/login')}>
+                <LinearGradient colors={['#D9B168', '#bea04f']} className="px-6 py-4 rounded-2xl items-center" style={{ shadowColor: '#D9B168', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 5 }}>
+                  <Text className="text-forest font-bold text-base">Log In</Text>
+                </LinearGradient>
+              </TouchableOpacity>
+              <TouchableOpacity className="flex-1" onPress={() => router.push('/(auth)/register')}>
+                <LinearGradient colors={['#122F26', '#1d392f']} className="px-6 py-4 rounded-2xl items-center" style={{ shadowColor: '#122F26', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 5 }}>
+                  <Text className="text-gold font-bold text-base">Sign Up</Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
       </SafeAreaView>
     );
   }
