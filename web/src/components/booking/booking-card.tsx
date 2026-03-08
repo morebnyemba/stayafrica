@@ -219,14 +219,18 @@ export function BookingCard({ property }: BookingCardProps) {
             </span>
             <span>{property.currency} {costs.basePrice.toFixed(2)}</span>
           </div>
+          {costs.serviceFee > 0 && (
           <div className="flex justify-between text-primary-700 dark:text-sand-200">
             <span>Service fee</span>
             <span>{property.currency} {costs.serviceFee.toFixed(2)}</span>
           </div>
+          )}
+          {costs.commissionFee > 0 && (
           <div className="flex justify-between text-primary-700 dark:text-sand-200">
             <span>Commission fee ({(costs.commissionRate * 100).toFixed(1)}%)</span>
             <span>{property.currency} {costs.commissionFee.toFixed(2)}</span>
           </div>
+          )}
           {costs.cleaningFee > 0 && (
             <div className="flex justify-between text-primary-700 dark:text-sand-200">
               <span>Cleaning fee</span>

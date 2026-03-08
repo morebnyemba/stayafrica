@@ -417,12 +417,14 @@ export default function BookingConfirmPage() {
                       {property?.currency} {costs.basePrice.toFixed(2)}
                     </span>
                   </div>
+                  {costs.serviceFee > 0 && (
                   <div className="flex justify-between">
                     <span className="text-primary-600 dark:text-sand-300">Service fee</span>
                     <span className="font-medium text-primary-900 dark:text-sand-50">
                       {property?.currency} {costs.serviceFee.toFixed(2)}
                     </span>
                   </div>
+                  )}
                   {costs.commissionFee > 0 && (
                     <div className="flex justify-between">
                       <span className="text-primary-600 dark:text-sand-300">

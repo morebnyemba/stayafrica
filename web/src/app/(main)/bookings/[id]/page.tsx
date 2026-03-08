@@ -314,12 +314,14 @@ export default function BookingDetailPage() {
                       </span>
                     </div>
                   )}
+                  {Number(booking.service_fee) > 0 && (
                   <div className="flex justify-between text-primary-700 dark:text-sand-200">
                     <span>Service fee</span>
                     <span>
                       {booking.currency} {Number(booking.service_fee).toFixed(2)}
                     </span>
                   </div>
+                  )}
                   <div className="border-t border-primary-200 dark:border-primary-700 pt-3 flex justify-between font-bold text-primary-900 dark:text-sand-50 text-lg">
                     <span>Total</span>
                     <span>
