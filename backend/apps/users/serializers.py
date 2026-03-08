@@ -5,8 +5,59 @@ from django.core.validators import RegexValidator
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 class UserSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, min_length=8)
+    password = serializers.CharField(
+        write_only=True,
+        min_length=8,
+        error_messages={
+            'min_length': 'Password must be at least 8 characters long.',
+            'required': 'Password is required.',
+            'blank': 'Password is required.',
+        }
+    )
     username = serializers.CharField(required=False)
+    first_name = serializers.CharField(
+        required=True,
+        min_length=2,
+        max_length=50,
+        error_messages={
+            'required': 'First name is required.',
+            'blank': 'First name is required.',
+            'min_length': 'First name must be at least 2 characters.',
+            'max_length': 'First name must be 50 characters or less.',
+        }
+    )
+    last_name = serializers.CharField(
+        required=True,
+        min_length=2,
+        max_length=50,
+        error_messages={
+            'required': 'Last name is required.',
+            'blank': 'Last name is required.',
+            'min_length': 'Last name must be at least 2 characters.',
+            'max_length': 'Last name must be 50 characters or less.',
+        }
+    )
+    phone_number = serializers.CharField(
+        required=True,
+        validators=[
+            RegexValidator(
+                regex=r'^\+?1?\d{9,15}$',
+                message='Phone number must be between 9 and 15 digits.'
+            )
+        ],
+        error_messages={
+            'required': 'Phone number is required.',
+            'blank': 'Phone number is required.',
+        }
+    )
+    country_of_residence = serializers.CharField(
+        required=True,
+        max_length=100,
+        error_messages={
+            'required': 'Country of residence is required.',
+            'blank': 'Please select your country.',
+        }
+    )
     
     class Meta:
         model = User
@@ -16,6 +67,16 @@ class UserSerializer(serializers.ModelSerializer):
             'bio', 'password', 'is_online', 'last_seen', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at', 'is_verified', 'is_staff', 'is_online', 'last_seen']
+        extra_kwargs = {
+            'email': {
+                'error_messages': {
+                    'required': 'Email address is required.',
+                    'blank': 'Email address is required.',
+                    'invalid': 'Please enter a valid email address.',
+                    'unique': 'An account with this email already exists.',
+                }
+            },
+        }
     
     def create(self, validated_data):
         password = validated_data.pop('password')

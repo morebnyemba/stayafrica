@@ -160,9 +160,9 @@ export const useAuthStore = create<AuthState>()(
             // Token existed but was expired
             localStorage.removeItem('access_token');
             localStorage.removeItem('refresh_token');
-            fetch('/api/auth/clear-cookie', { method: 'POST' }).catch(() => {});
+            fetch('/api/auth/clear-cookie', { method: 'POST' }).catch(() => { });
             document.cookie = 'access_token=; path=/; max-age=0';
-            try { localStorage.removeItem('auth-storage'); } catch {}
+            try { localStorage.removeItem('auth-storage'); } catch { }
           }
           set({ user: null, isAuthenticated: false, isLoading: false });
         }
@@ -249,12 +249,18 @@ export const useAuthStore = create<AuthState>()(
           });
 
           if (response.ok) {
-            const { access, refresh, user: newUser } = await response.json();
+            const data = await response.json();
+            const { access, refresh } = data;
             await setSession(access, refresh);
-            set({ user: newUser, isAuthenticated: true });
+            // Backend returns user fields at top level alongside tokens
+            const { access: _a, refresh: _r, ...userData2 } = data;
+            set({ user: userData2 as User, isAuthenticated: true });
           } else {
-            const error = await response.json();
-            throw new Error(error.detail || 'Registration failed');
+            const errorData = await response.json();
+            // Throw a rich error with field-specific details for toast display
+            const err = new Error(errorData.detail || 'Registration failed') as Error & { fieldErrors?: Record<string, unknown> };
+            err.fieldErrors = errorData;
+            throw err;
           }
         } catch (error) {
           throw error;
@@ -269,13 +275,13 @@ export const useAuthStore = create<AuthState>()(
         localStorage.removeItem('refresh_token');
 
         // Clear via server-side route (removes the cookie the same way it was set)
-        fetch('/api/auth/clear-cookie', { method: 'POST' }).catch(() => {});
+        fetch('/api/auth/clear-cookie', { method: 'POST' }).catch(() => { });
         // Also clear client-side as a fallback
         document.cookie = 'access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
         document.cookie = 'access_token=; path=/; max-age=0';
 
         // Clear persisted Zustand state so rehydration doesn't restore the user
-        try { localStorage.removeItem('auth-storage'); } catch {}
+        try { localStorage.removeItem('auth-storage'); } catch { }
 
         set({ user: null, isAuthenticated: false, isLoading: false });
       },
@@ -381,9 +387,9 @@ export const useAuth = () => {
       // User was persisted but the token is gone or expired — force logout.
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
-      fetch('/api/auth/clear-cookie', { method: 'POST' }).catch(() => {});
+      fetch('/api/auth/clear-cookie', { method: 'POST' }).catch(() => { });
       document.cookie = 'access_token=; path=/; max-age=0';
-      try { localStorage.removeItem('auth-storage'); } catch {}
+      try { localStorage.removeItem('auth-storage'); } catch { }
       useAuthStore.setState({ user: null, isAuthenticated: false, isLoading: false });
     } else {
       // No persisted user — run full initialization (fetch profile etc.)

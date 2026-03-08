@@ -23,6 +23,38 @@ function getRedirectUrl(searchParams: URLSearchParams): string {
   return '/dashboard';
 }
 
+/**
+ * Parse backend error response into user-friendly toast messages.
+ * Backend returns errors like: { email: ["message"], password: ["message"], non_field_errors: ["message"] }
+ */
+function parseBackendErrors(errorData: Record<string, unknown>): string[] {
+  const messages: string[] = [];
+
+  if (typeof errorData === 'string') {
+    return [errorData];
+  }
+
+  for (const [field, value] of Object.entries(errorData)) {
+    if (field === 'detail' && typeof value === 'string') {
+      messages.push(value);
+    } else if (Array.isArray(value)) {
+      const fieldLabel = field === 'non_field_errors'
+        ? ''
+        : `${field.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}: `;
+      for (const msg of value) {
+        messages.push(`${fieldLabel}${msg}`);
+      }
+    } else if (typeof value === 'string') {
+      const fieldLabel = field === 'non_field_errors'
+        ? ''
+        : `${field.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}: `;
+      messages.push(`${fieldLabel}${value}`);
+    }
+  }
+
+  return messages.length > 0 ? messages : ['Registration failed. Please try again.'];
+}
+
 export function RegisterContent() {
   const { register } = useAuth();
   const searchParams = useSearchParams();
@@ -31,15 +63,15 @@ export function RegisterContent() {
   const [currentStep, setCurrentStep] = useState<Step>(1);
   const [availableCountries, setAvailableCountries] = useState<string[]>([]);
   const [formData, setFormData] = useState({
-    // Step 1
-    email: '',
-    password: '',
-    confirmPassword: '',
-    // Step 2
+    // Step 1: Personal Information
     first_name: '',
     last_name: '',
     phone_number: '',
-    // Step 3
+    // Step 2: Account Credentials
+    email: '',
+    password: '',
+    confirmPassword: '',
+    // Step 3: Additional Details
     country_of_residence: '',
     role: 'guest' as 'guest' | 'host',
   });
@@ -64,50 +96,84 @@ export function RegisterContent() {
 
   const validateStep1 = () => {
     const newErrors: Record<string, string> = {};
-    
-    if (!validateEmail(formData.email)) {
-      newErrors.email = 'Please enter a valid email address';
+
+    if (!formData.first_name.trim()) {
+      newErrors.first_name = 'First name is required';
+    } else if (formData.first_name.trim().length < 2) {
+      newErrors.first_name = 'First name must be at least 2 characters';
+    } else if (formData.first_name.trim().length > 50) {
+      newErrors.first_name = 'First name must be 50 characters or less';
     }
-    
-    if (!validatePassword(formData.password)) {
-      newErrors.password = 'Password must be at least 8 characters';
+
+    if (!formData.last_name.trim()) {
+      newErrors.last_name = 'Last name is required';
+    } else if (formData.last_name.trim().length < 2) {
+      newErrors.last_name = 'Last name must be at least 2 characters';
+    } else if (formData.last_name.trim().length > 50) {
+      newErrors.last_name = 'Last name must be 50 characters or less';
     }
-    
-    if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
+
+    if (!formData.phone_number.trim()) {
+      newErrors.phone_number = 'Phone number is required';
+    } else {
+      const phoneResult = validatePhoneNumber(formData.phone_number);
+      if (!phoneResult.isValid) {
+        newErrors.phone_number = phoneResult.error || 'Please enter a valid phone number';
+      }
     }
-    
+
     setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) {
+      toast.error(Object.values(newErrors)[0]);
+    }
     return Object.keys(newErrors).length === 0;
   };
 
   const validateStep2 = () => {
     const newErrors: Record<string, string> = {};
-    
-    if (!formData.first_name.trim()) {
-      newErrors.first_name = 'First name is required';
+
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email address is required';
+    } else {
+      const emailResult = validateEmail(formData.email);
+      if (!emailResult.isValid) {
+        newErrors.email = emailResult.error || 'Please enter a valid email address';
+      }
     }
-    
-    if (!formData.last_name.trim()) {
-      newErrors.last_name = 'Last name is required';
+
+    if (!formData.password) {
+      newErrors.password = 'Password is required';
+    } else {
+      const passwordResult = validatePassword(formData.password);
+      if (!passwordResult.isValid) {
+        newErrors.password = passwordResult.error || 'Password must be at least 8 characters';
+      }
     }
-    
-    if (!validatePhoneNumber(formData.phone_number)) {
-      newErrors.phone_number = 'Please enter a valid phone number';
+
+    if (!formData.confirmPassword) {
+      newErrors.confirmPassword = 'Please confirm your password';
+    } else if (formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = 'Passwords do not match';
     }
-    
+
     setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) {
+      toast.error(Object.values(newErrors)[0]);
+    }
     return Object.keys(newErrors).length === 0;
   };
 
   const validateStep3 = () => {
     const newErrors: Record<string, string> = {};
-    
+
     if (!formData.country_of_residence) {
-      newErrors.country_of_residence = 'Country is required';
+      newErrors.country_of_residence = 'Please select your country';
     }
-    
+
     setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) {
+      toast.error(Object.values(newErrors)[0]);
+    }
     return Object.keys(newErrors).length === 0;
   };
 
@@ -154,9 +220,17 @@ export function RegisterContent() {
       toast.success('Account created successfully!');
       // Force a full-page navigation so middleware/SSR see the new cookie
       window.location.replace(redirectUrl);
-    } catch (error) {
-      toast.error('Registration failed. Please try again.');
-      console.error('Registration error:', error);
+    } catch (error: unknown) {
+      // Parse field-specific errors from the backend
+      if (error && typeof error === 'object' && 'fieldErrors' in error) {
+        const fieldErrors = (error as { fieldErrors: Record<string, unknown> }).fieldErrors;
+        const messages = parseBackendErrors(fieldErrors);
+        messages.forEach((msg) => toast.error(msg));
+      } else if (error instanceof Error) {
+        toast.error(error.message || 'Registration failed. Please try again.');
+      } else {
+        toast.error('Registration failed. Please try again.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -178,22 +252,20 @@ export function RegisterContent() {
             {[1, 2, 3].map((step) => (
               <div key={step} className="flex items-center">
                 <div
-                  className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full border-2 flex items-center justify-center text-sm font-semibold transition ${
-                    currentStep > step
+                  className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full border-2 flex items-center justify-center text-sm font-semibold transition ${currentStep > step
                       ? 'border-secondary-500 bg-secondary-500 text-white'
                       : currentStep === step
                         ? 'border-secondary-500 bg-secondary-50 dark:bg-secondary-900/20 text-secondary-700 dark:text-secondary-400'
                         : 'border-primary-200 dark:border-primary-700 text-primary-400 dark:text-primary-500'
-                  }`}
+                    }`}
                   aria-label={`Step ${step}`}
                 >
                   {currentStep > step ? <CheckCircle2 className="w-5 h-5" /> : step}
                 </div>
                 {step < 3 && (
                   <div
-                    className={`w-8 sm:w-12 h-0.5 mx-1.5 sm:mx-2 rounded-full transition ${
-                      currentStep > step ? 'bg-secondary-500' : 'bg-primary-200 dark:bg-primary-700'
-                    }`}
+                    className={`w-8 sm:w-12 h-0.5 mx-1.5 sm:mx-2 rounded-full transition ${currentStep > step ? 'bg-secondary-500' : 'bg-primary-200 dark:bg-primary-700'
+                      }`}
                   />
                 )}
               </div>
@@ -205,9 +277,9 @@ export function RegisterContent() {
           </h1>
           <p className="text-center text-sm text-primary-500 dark:text-sand-400 mb-6">
             Step {currentStep} of 3 &middot; {
-              currentStep === 1 ? 'Account Credentials' :
-              currentStep === 2 ? 'Personal Information' :
-              'Additional Details'
+              currentStep === 1 ? 'Personal Information' :
+                currentStep === 2 ? 'Account Credentials' :
+                  'Additional Details'
             }
           </p>
 
@@ -222,46 +294,8 @@ export function RegisterContent() {
             }}
             className="space-y-5"
           >
-            {/* Step 1: Credentials */}
+            {/* Step 1: Personal Info (was Step 2) */}
             {currentStep === 1 && (
-              <>
-                <Input
-                  label="Email Address"
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  placeholder="you@example.com"
-                  error={errors.email}
-                  icon={<Mail className="w-5 h-5" />}
-                  required
-                />
-
-                <Input
-                  label="Password"
-                  type="password"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  placeholder="••••••••"
-                  error={errors.password}
-                  icon={<Lock className="w-5 h-5" />}
-                  required
-                />
-
-                <Input
-                  label="Confirm Password"
-                  type="password"
-                  value={formData.confirmPassword}
-                  onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                  placeholder="••••••••"
-                  error={errors.confirmPassword}
-                  icon={<Lock className="w-5 h-5" />}
-                  required
-                />
-              </>
-            )}
-
-            {/* Step 2: Personal Info */}
-            {currentStep === 2 && (
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Input
@@ -300,6 +334,44 @@ export function RegisterContent() {
               </>
             )}
 
+            {/* Step 2: Credentials (was Step 1) */}
+            {currentStep === 2 && (
+              <>
+                <Input
+                  label="Email Address"
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  placeholder="you@example.com"
+                  error={errors.email}
+                  icon={<Mail className="w-5 h-5" />}
+                  required
+                />
+
+                <Input
+                  label="Password"
+                  type="password"
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  placeholder="••••••••"
+                  error={errors.password}
+                  icon={<Lock className="w-5 h-5" />}
+                  required
+                />
+
+                <Input
+                  label="Confirm Password"
+                  type="password"
+                  value={formData.confirmPassword}
+                  onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                  placeholder="••••••••"
+                  error={errors.confirmPassword}
+                  icon={<Lock className="w-5 h-5" />}
+                  required
+                />
+              </>
+            )}
+
             {/* Step 3: Additional Details */}
             {currentStep === 3 && (
               <>
@@ -325,11 +397,10 @@ export function RegisterContent() {
                     <button
                       type="button"
                       onClick={() => setFormData({ ...formData, role: 'guest' })}
-                      className={`p-3 sm:p-4 border-2 rounded-xl transition-all ${
-                        formData.role === 'guest'
+                      className={`p-3 sm:p-4 border-2 rounded-xl transition-all ${formData.role === 'guest'
                           ? 'border-secondary-500 bg-secondary-50 dark:bg-secondary-900/20 shadow-sm'
                           : 'border-primary-200 dark:border-primary-700 hover:border-primary-300 dark:hover:border-primary-600'
-                      }`}
+                        }`}
                     >
                       <div className="text-center">
                         <div className="flex justify-center mb-2">
@@ -342,11 +413,10 @@ export function RegisterContent() {
                     <button
                       type="button"
                       onClick={() => setFormData({ ...formData, role: 'host' })}
-                      className={`p-3 sm:p-4 border-2 rounded-xl transition-all ${
-                        formData.role === 'host'
+                      className={`p-3 sm:p-4 border-2 rounded-xl transition-all ${formData.role === 'host'
                           ? 'border-secondary-500 bg-secondary-50 dark:bg-secondary-900/20 shadow-sm'
                           : 'border-primary-200 dark:border-primary-700 hover:border-primary-300 dark:hover:border-primary-600'
-                      }`}
+                        }`}
                     >
                       <div className="text-center">
                         <div className="flex justify-center mb-2">

@@ -166,27 +166,41 @@ class UserViewSet(viewsets.ModelViewSet):
         
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
-            with transaction.atomic():
-                user = serializer.save()
-                
-                # Send verification email if Celery is available
-                if CELERY_AVAILABLE and send_verification_email:
-                    try:
-                        send_verification_email.delay(user.id)
-                    except Exception as e:
-                        logger.warning(f"Could not queue verification email: {e}")
-                else:
-                    logger.info("Celery not available, skipping verification email")
-                
-                # Log the action
-                from django.contrib.contenttypes.models import ContentType
-                content_type = ContentType.objects.get_for_model(User)
-                AuditLoggerService.log_action(
-                    user=user,
-                    action='register',
-                    content_type=content_type,
-                    object_id=user.id,
-                    changes={'email': user.email, 'role': user.role}
+            try:
+                with transaction.atomic():
+                    user = serializer.save()
+                    
+                    # Send verification email if Celery is available
+                    if CELERY_AVAILABLE and send_verification_email:
+                        try:
+                            send_verification_email.delay(user.id)
+                        except Exception as e:
+                            logger.warning(f"Could not queue verification email: {e}")
+                    else:
+                        logger.info("Celery not available, skipping verification email")
+                    
+                    # Log the action
+                    from django.contrib.contenttypes.models import ContentType
+                    content_type = ContentType.objects.get_for_model(User)
+                    AuditLoggerService.log_action(
+                        user=user,
+                        action='register',
+                        content_type=content_type,
+                        object_id=user.id,
+                        changes={'email': user.email, 'role': user.role}
+                    )
+            except Exception as e:
+                # Catch IntegrityError for duplicate email/username
+                error_str = str(e).lower()
+                if 'email' in error_str or 'unique' in error_str:
+                    return Response(
+                        {'email': ['An account with this email already exists.']},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+                logger.error(f"Registration error: {e}", exc_info=True)
+                return Response(
+                    {'detail': 'Registration failed. Please try again.'},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
                 )
             
             logger.info(f"New user registered: {user.email}")
