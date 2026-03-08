@@ -30,20 +30,30 @@ export function SimilarProperties({ propertyId, city, country }: SimilarProperti
   if (!properties || properties.length === 0) return null;
 
   // Normalize API data to PropertyCard's Property interface
-  const normalized: Property[] = properties.map((p: any) => ({
-    id: p.id,
-    title: p.title || '',
-    location: [p.city, p.country].filter(Boolean).join(', '),
-    price: p.price_per_night || 0,
-    rating: p.average_rating || 0,
-    reviewCount: p.review_count || 0,
-    images: (p.images || []).map((img: any) => img.image_url || img.url || img.image || '').filter(Boolean),
-    amenities: (p.amenities || []).map((a: any) => typeof a === 'string' ? a : a.name),
-    beds: p.bedrooms || 0,
-    baths: p.bathrooms || 0,
-    guests: p.max_guests || 0,
-    isFavorite: false,
-  }));
+  const normalized: Property[] = properties.map((p: any) => {
+    const imageUrls = (p.images || [])
+      .map((img: any) => img.image_url || img.url || img.image || '')
+      .filter(Boolean);
+    // Fallback to main_image_url or main_image if images array is empty
+    if (imageUrls.length === 0) {
+      const fallback = p.main_image_url || p.main_image;
+      if (fallback) imageUrls.push(fallback);
+    }
+    return {
+      id: p.id,
+      title: p.title || '',
+      location: [p.city, p.country].filter(Boolean).join(', '),
+      price: p.price_per_night || 0,
+      rating: p.average_rating || 0,
+      reviewCount: p.review_count || 0,
+      images: imageUrls,
+      amenities: (p.amenities || []).map((a: any) => typeof a === 'string' ? a : a.name),
+      beds: p.bedrooms || 0,
+      baths: p.bathrooms || 0,
+      guests: p.max_guests || 0,
+      isFavorite: false,
+    };
+  });
 
   return (
     <div>

@@ -107,13 +107,19 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
     <Link href={`/property/${property.id}`} className="group block">
       {/* Image Container */}
       <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl bg-sand-100 dark:bg-primary-800">
-        <Image
-          src={property.images[currentImageIndex]}
-          alt={property.title}
-          fill
-          className="object-cover transition-opacity duration-300"
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-        />
+        {totalImages > 0 ? (
+          <Image
+            src={property.images[currentImageIndex]}
+            alt={property.title}
+            fill
+            className="object-cover transition-opacity duration-300"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+          />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center bg-sand-200 dark:bg-primary-700">
+            <span className="text-sm text-primary-400 dark:text-sand-500">No image</span>
+          </div>
+        )}
 
         {/* Favorite Button */}
         <button
