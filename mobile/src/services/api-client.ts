@@ -354,12 +354,17 @@ class APIClient {
     }
   }
 
-  async createConversation(propertyId: string, hostId?: string): Promise<any> {
+  async createConversation(data: {
+    participants?: number[];
+    property?: string | number;
+    booking?: string | number;
+    subject?: string;
+    initial_message?: string;
+    metadata?: any;
+  }): Promise<any> {
     try {
-      const body: Record<string, any> = { property: propertyId };
-      if (hostId) body.participants = [Number(hostId)];
       return (
-        await this.client.post('/messaging/conversations/', body)
+        await this.client.post('/messaging/conversations/', data)
       ).data;
     } catch (error: any) {
       if (error?.response?.status === 404) {

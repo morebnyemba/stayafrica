@@ -134,8 +134,8 @@ class MessageTemplate(models.Model):
     
     name = models.CharField(max_length=100)
     template_type = models.CharField(max_length=30, choices=TEMPLATE_TYPES)
-    subject = models.CharField(max_length=255)
-    body = models.TextField(help_text='Use {variable} for dynamic content')
+    subject = models.CharField(max_length=255, blank=True)
+    body = models.TextField(help_text='Use {variable} for dynamic content', blank=True)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

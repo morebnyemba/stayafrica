@@ -25,7 +25,7 @@ export default function NewMessageScreen() {
     }
     try {
       setCreating(booking.id);
-      const conversation = await createConversation.mutateAsync(propertyId);
+      const conversation = await createConversation.mutateAsync({ property: propertyId });
       if (conversation?.id) {
         router.replace(
           `/(tabs)/messages/${conversation.id}?participantId=${conversation.participant_id || ''}`

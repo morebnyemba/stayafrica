@@ -27,6 +27,7 @@ import {
 } from '@/hooks/api-hooks';
 import { Skeleton } from '@/components/common/Skeletons';
 import { EmptyState } from '@/components/common/EmptyState';
+import { ContactHostModal } from '@/components/property/ContactHostModal';
 import { useAuth } from '@/context/auth-context';
 import { useState, useCallback, useMemo } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -120,8 +121,7 @@ export default function PropertyDetailsScreen() {
   const { data: property, isLoading } = usePropertyById(id as string);
   const { data: nearbyPOIs } = useNearbyPOIs(id as string);
   const { data: reviewsData } = usePropertyReviews(id as string);
-  const { mutate: createConversation, isPending: isCreatingConversation } = useCreateConversation();
-  const { isAuthenticated } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const { mutate: addToWishlist, isPending: isAdding } = useAddToWishlist();
   const { mutate: removeFromWishlist, isPending: isRemoving } = useRemoveFromWishlist();
 
@@ -131,6 +131,7 @@ export default function PropertyDetailsScreen() {
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [showAllAmenities, setShowAllAmenities] = useState(false);
   const [showAllReviews, setShowAllReviews] = useState(false);
+  const [contactModalVisible, setContactModalVisible] = useState(false);
 
   const reviews = reviewsData?.results || [];
 
@@ -194,14 +195,7 @@ export default function PropertyDetailsScreen() {
   const handleMessageHost = () => {
     if (!isAuthenticated) { router.push('/(auth)/login'); return; }
     if (!property?.id) return;
-    createConversation(property.id, {
-      onSuccess: (data) => {
-        if (!data) { Alert.alert('Unavailable', 'Messaging is not available right now.'); return; }
-        const conversationId = data?.id;
-        router.push(conversationId ? `/(tabs)/messages/${conversationId}` : '/(tabs)/messages');
-      },
-      onError: () => Alert.alert('Error', 'Unable to start conversation with host.'),
-    });
+    setContactModalVisible(true);
   };
 
   // ── Loading skeleton ────────────────────────────────────
@@ -700,19 +694,12 @@ export default function PropertyDetailsScreen() {
               {/* Contact host */}
               <TouchableOpacity
                 onPress={handleMessageHost}
-                disabled={isCreatingConversation}
                 accessibilityRole="button"
                 accessibilityLabel="Message host"
                 className="mt-4 py-3 border border-forest rounded-xl flex-row justify-center items-center"
               >
-                {isCreatingConversation ? (
-                  <ActivityIndicator color="#122F26" size="small" />
-                ) : (
-                  <>
-                    <Ionicons name="chatbubble-ellipses-outline" size={18} color="#122F26" />
-                    <Text className="text-forest font-semibold text-sm ml-2">Contact Host</Text>
-                  </>
-                )}
+                <Ionicons name="chatbubble-ellipses-outline" size={18} color="#122F26" />
+                <Text className="text-forest font-semibold text-sm ml-2">Contact Host</Text>
               </TouchableOpacity>
 
               {/* Safety note */}
@@ -880,6 +867,17 @@ export default function PropertyDetailsScreen() {
           </Animated.View>
         )}
       </ScrollView>
+
+      {/* Modals */}
+      {property?.host && (
+        <ContactHostModal
+          visible={contactModalVisible}
+          onClose={() => setContactModalVisible(false)}
+          host={property.host}
+          propertyId={property.id}
+          userId={user?.id}
+        />
+      )}
 
       {/* ── Sticky Bottom Booking Bar ────────────────────── */}
       <View

@@ -3,7 +3,7 @@ import { View, Text, FlatList, TextInput, TouchableOpacity, ActivityIndicator, K
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useConversationMessages, useSendMessage, useEditMessage, useDeleteMessage, useMarkConversationAsRead, useArchiveConversation } from '@/hooks/api-hooks';
+import { useConversations, useConversationMessages, useSendMessage, useEditMessage, useDeleteMessage, useMarkConversationAsRead, useArchiveConversation } from '@/hooks/api-hooks';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface ConversationMessage {
@@ -40,6 +40,11 @@ export default function ConversationDetailScreen() {
   const { mutate: archiveConversation } = useArchiveConversation();
 
   const messages = (messagesData as any)?.results ?? [];
+
+  const { data: conversationsData } = useConversations();
+  const conversation = conversationsData?.results?.find((c: any) => String(c.id) === String(conversationId));
+  const inquiryData = messages.find((m: any) => m.metadata?.check_in)?.metadata;
+  const canRequestBooking = conversation?.property && !conversation?.booking_id && inquiryData;
 
   // Mark conversation as read when entering
   useEffect(() => {
@@ -221,6 +226,15 @@ export default function ConversationDetailScreen() {
               <Text className="text-xl font-black text-white tracking-tight">Conversation</Text>
             </View>
             <View className="flex-row items-center">
+              {canRequestBooking && (
+                <TouchableOpacity
+                  onPress={() => router.push(`/booking/confirm?propertyId=${conversation.property}&checkIn=${inquiryData.check_in}&checkOut=${inquiryData.check_out}&guests=${inquiryData.guests}`)}
+                  className="mr-3 px-3 h-10 rounded-xl items-center justify-center bg-gold"
+                  style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.2, shadowRadius: 3, elevation: 3 }}
+                >
+                  <Text className="text-white font-bold text-xs">Request</Text>
+                </TouchableOpacity>
+              )}
               <TouchableOpacity
                 onPress={() => refetch()}
                 className="mr-3 w-10 h-10 rounded-xl items-center justify-center"

@@ -135,7 +135,7 @@ export function useConversations() {
 export function useCreateConversation() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (propertyId: string) => apiClient.createConversation(propertyId),
+    mutationFn: (data: any) => apiClient.createConversation(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['conversations'] });
     },
