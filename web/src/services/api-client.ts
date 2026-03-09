@@ -142,8 +142,8 @@ class ApiClient {
     return this.client.post('/bookings/', data);
   }
 
-  async confirmBooking(id: string) {
-    return this.client.post(`/bookings/${id}/confirm/`);
+  async approveBooking(id: string) {
+    return this.client.post(`/bookings/${id}/approve/`);
   }
 
   async cancelBooking(id: string) {

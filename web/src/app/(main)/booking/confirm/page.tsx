@@ -108,8 +108,13 @@ export default function BookingConfirmPage() {
         cleaning_fee: costs.cleaningFee || 0,
       });
       const booking = response.data;
-      toast.success('Booking created! Redirecting to payment...');
-      router.push(`/booking/payment?bookingId=${booking.id}`);
+      if (booking.status === 'requested') {
+        toast.success('Booking requested! The host will review your request.');
+        router.push(`/booking/success?bookingId=${booking.id}&status=requested`);
+      } else {
+        toast.success('Booking created! Redirecting to payment...');
+        router.push(`/booking/payment?bookingId=${booking.id}`);
+      }
     } catch (error: any) {
       const rawMsg = error.response?.data?.detail
         || error.response?.data?.non_field_errors?.[0]
@@ -459,14 +464,16 @@ export default function BookingConfirmPage() {
                   className="w-full mt-6 bg-secondary-600 hover:bg-secondary-700 dark:bg-secondary-700 dark:hover:bg-secondary-600 text-white font-semibold py-3.5 px-4 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-base"
                 >
                   {isCreatingBooking ? (
-                    <><Loader2 className="w-5 h-5 animate-spin" /> Creating booking...</>
+                    <><Loader2 className="w-5 h-5 animate-spin" /> {property?.instant_booking_enabled ? 'Creating booking...' : 'Sending request...'}</>
                   ) : (
-                    'Confirm booking'
+                    property?.instant_booking_enabled ? 'Confirm booking' : 'Request to book'
                   )}
                 </button>
 
                 <p className="text-xs text-center text-primary-500 dark:text-sand-400 mt-3">
-                  You won&apos;t be charged yet. Payment is on the next step.
+                  {property?.instant_booking_enabled
+                    ? "You won't be charged yet. Payment is on the next step."
+                    : "You won't be charged until the host accepts your request."}
                 </p>
 
                 {/* Trust signals */}
@@ -507,7 +514,7 @@ export default function BookingConfirmPage() {
             {isCreatingBooking ? (
               <><Loader2 className="w-5 h-5 animate-spin" /> Creating...</>
             ) : (
-              'Confirm booking'
+              property?.instant_booking_enabled ? 'Confirm booking' : 'Request to book'
             )}
           </button>
         </div>

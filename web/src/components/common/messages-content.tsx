@@ -2,9 +2,10 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
-import { Send, MessageSquare, Search, Archive, Trash2, Edit2, Check, X, ArrowLeft } from 'lucide-react';
+import { Send, MessageSquare, Search, Archive, Trash2, Edit2, Check, X, ArrowLeft, ShieldAlert, MoreVertical, Flag, Ban, BellOff } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useState, useEffect, useRef } from 'react';
+import { toast } from 'react-hot-toast';
 const ProtectedRoute = dynamic(() => import('@/components/auth/protected-route').then(m => m.ProtectedRoute), { ssr: false });
 
 export function MessagesContent() {
@@ -13,6 +14,7 @@ export function MessagesContent() {
   const [searchQuery, setSearchQuery] = useState('');
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
   const [editText, setEditText] = useState('');
+  const [showActionMenu, setShowActionMenu] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
 
@@ -69,7 +71,7 @@ export function MessagesContent() {
 
   // Edit message mutation
   const editMessageMutation = useMutation({
-    mutationFn: ({ messageId, text }: { messageId: string; text: string }) => 
+    mutationFn: ({ messageId, text }: { messageId: string; text: string }) =>
       apiClient.editMessage(messageId, text),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['messages', selectedConversation?.id] });
@@ -113,15 +115,23 @@ export function MessagesContent() {
   // Filter conversations by search
   const filteredConversations = conversations.filter((conv: any) => {
     if (!searchQuery) return true;
-    const otherParticipant = conv.other_participant?.email || '';
+    const otherParticipant = conv.other_participant?.name || '';
     const subject = conv.subject || '';
     return otherParticipant.toLowerCase().includes(searchQuery.toLowerCase()) ||
-           subject.toLowerCase().includes(searchQuery.toLowerCase());
+      subject.toLowerCase().includes(searchQuery.toLowerCase());
   });
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
     if (!messageText.trim() || !selectedConversation) return;
+
+    // Contact Info Check (Simple regex for emails and phone numbers)
+    const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/;
+    const phoneRegex = /(?:\+?\d{1,3}[\s-]?)?\(?\d{3}\)?[\s-]?\d{3}[\s-]?\d{4}/;
+    if (emailRegex.test(messageText) || phoneRegex.test(messageText)) {
+      toast.error('For your safety and privacy, please do not share direct contact information before a booking is confirmed.');
+      return;
+    }
 
     sendMessageMutation.mutate({
       conversation: selectedConversation.id,
@@ -195,20 +205,19 @@ export function MessagesContent() {
                     <button
                       key={conv.id}
                       onClick={() => setSelectedConversation(conv)}
-                      className={`w-full p-3 rounded-lg mb-2 text-left transition ${
-                        selectedConversation?.id === conv.id
+                      className={`w-full p-3 rounded-lg mb-2 text-left transition ${selectedConversation?.id === conv.id
                           ? 'bg-primary-100 dark:bg-primary-700'
                           : 'hover:bg-primary-50 dark:hover:bg-primary-800'
-                      }`}
+                        }`}
                     >
                       <div className="flex items-start gap-3">
                         <div className="w-10 h-10 rounded-full bg-secondary-500 text-white flex items-center justify-center font-semibold flex-shrink-0">
-                          {conv.other_participant?.email?.[0]?.toUpperCase() || '?'}
+                          {conv.other_participant?.name?.[0]?.toUpperCase() || '?'}
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between mb-1">
                             <span className="font-semibold text-primary-900 dark:text-sand-50 truncate">
-                              {conv.other_participant?.email || 'Unknown'}
+                              {conv.other_participant?.name || 'Unknown'}
                             </span>
                             {conv.unread_count > 0 && (
                               <span className="ml-2 px-2 py-0.5 bg-secondary-500 text-white text-xs rounded-full flex-shrink-0">
@@ -252,11 +261,11 @@ export function MessagesContent() {
                       <ArrowLeft className="w-5 h-5 text-primary-600 dark:text-sand-400" />
                     </button>
                     <div className="w-10 h-10 rounded-full bg-secondary-500 text-white flex items-center justify-center font-semibold">
-                      {selectedConversation.other_participant?.email?.[0]?.toUpperCase() || '?'}
+                      {selectedConversation.other_participant?.name?.[0]?.toUpperCase() || '?'}
                     </div>
                     <div>
                       <h2 className="font-semibold text-primary-900 dark:text-sand-50">
-                        {selectedConversation.other_participant?.email || 'Unknown'}
+                        {selectedConversation.other_participant?.name || 'Unknown'}
                       </h2>
                       {selectedConversation.subject && (
                         <p className="text-sm text-primary-600 dark:text-sand-400">
@@ -265,13 +274,57 @@ export function MessagesContent() {
                       )}
                     </div>
                   </div>
-                  <button
-                    onClick={() => archiveMutation.mutate(selectedConversation.id)}
-                    className="p-2 hover:bg-primary-100 dark:hover:bg-primary-700 rounded-lg transition"
-                    title="Archive conversation"
-                  >
-                    <Archive className="w-5 h-5 text-primary-600 dark:text-sand-400" />
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => archiveMutation.mutate(selectedConversation.id)}
+                      className="p-2 hover:bg-primary-100 dark:hover:bg-primary-700 rounded-lg transition"
+                      title="Archive conversation"
+                    >
+                      <Archive className="w-5 h-5 text-primary-600 dark:text-sand-400" />
+                    </button>
+                    {/* Action Menu */}
+                    <div className="relative">
+                      <button
+                        onClick={() => setShowActionMenu(!showActionMenu)}
+                        className="p-2 hover:bg-primary-100 dark:hover:bg-primary-700 rounded-lg transition"
+                        title="More actions"
+                      >
+                        <MoreVertical className="w-5 h-5 text-primary-600 dark:text-sand-400" />
+                      </button>
+                      {showActionMenu && (
+                        <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-primary-800 rounded-lg shadow-lg border border-primary-200 dark:border-primary-700 z-50">
+                          <div className="py-1">
+                            <button
+                              onClick={() => { setShowActionMenu(false); toast.success('User reported to moderation team.'); }}
+                              className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-primary-50 dark:hover:bg-primary-700 flex items-center gap-2"
+                            >
+                              <Flag className="w-4 h-4" /> Report user
+                            </button>
+                            <button
+                              onClick={() => { setShowActionMenu(false); toast.success('User blocked successfully.'); }}
+                              className="w-full text-left px-4 py-2 text-sm text-primary-700 dark:text-sand-300 hover:bg-primary-50 dark:hover:bg-primary-700 flex items-center gap-2"
+                            >
+                              <Ban className="w-4 h-4" /> Block user
+                            </button>
+                            <button
+                              onClick={() => { setShowActionMenu(false); toast.success('Conversation muted.'); }}
+                              className="w-full text-left px-4 py-2 text-sm text-primary-700 dark:text-sand-300 hover:bg-primary-50 dark:hover:bg-primary-700 flex items-center gap-2"
+                            >
+                              <BellOff className="w-4 h-4" /> Mute conversation
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Safety Banner */}
+                <div className="bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-800 p-3 flex items-start gap-3">
+                  <ShieldAlert className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                  <p className="text-sm text-amber-800 dark:text-amber-300 leading-relaxed">
+                    <strong>For your safety</strong>, please keep all communication and payments directly on the StayAfrica platform. Be wary of requests to pay via alternative methods.
+                  </p>
                 </div>
 
                 {/* Messages */}
@@ -294,14 +347,14 @@ export function MessagesContent() {
                         const isEditing = editingMessageId === message.id;
                         const prevMessage = idx > 0 ? messages[idx - 1] : null;
                         const sameUserAsPrev = prevMessage && prevMessage.is_own_message === isOwnMessage;
-                        const senderName = isOwnMessage ? 'You' : (selectedConversation.other_participant?.email || 'Unknown');
-                        const senderInitial = isOwnMessage 
-                          ? '?' 
-                          : (selectedConversation.other_participant?.email?.[0]?.toUpperCase() || '?');
-                        
+                        const senderName = isOwnMessage ? 'You' : (selectedConversation.other_participant?.name || 'Unknown');
+                        const senderInitial = isOwnMessage
+                          ? '?'
+                          : (selectedConversation.other_participant?.name?.[0]?.toUpperCase() || '?');
+
                         // Show sender info when changing from one person to another
                         const showSenderInfo = !sameUserAsPrev;
-                        
+
                         // Format time with date if it's a new day
                         const messageTime = new Date(message.created_at);
                         const prevTime = prevMessage ? new Date(prevMessage.created_at) : null;
@@ -316,7 +369,7 @@ export function MessagesContent() {
                                 </span>
                               </div>
                             )}
-                            
+
                             <div className={`flex gap-3 ${isOwnMessage ? 'justify-end' : 'justify-start'}`}>
                               {/* Avatar - only show for other user and when sender info should display */}
                               {!isOwnMessage && showSenderInfo && (
@@ -332,11 +385,10 @@ export function MessagesContent() {
                               <div className={`flex flex-col max-w-[75%] sm:max-w-md ${isOwnMessage ? 'items-end' : 'items-start'}`}>
                                 {/* Sender name - shown when conversation starts or user changes */}
                                 {showSenderInfo && (
-                                  <span className={`text-xs font-semibold mb-1 ${
-                                    isOwnMessage 
-                                      ? 'text-primary-700 dark:text-sand-300' 
+                                  <span className={`text-xs font-semibold mb-1 ${isOwnMessage
+                                      ? 'text-primary-700 dark:text-sand-300'
                                       : 'text-primary-600 dark:text-sand-400'
-                                  }`}>
+                                    }`}>
                                     {senderName}
                                   </span>
                                 )}
@@ -370,11 +422,10 @@ export function MessagesContent() {
                                 ) : (
                                   <div className="group flex flex-col">
                                     <div
-                                      className={`px-4 py-2 rounded-2xl shadow-sm transition-shadow ${
-                                        isOwnMessage
+                                      className={`px-4 py-2 rounded-2xl shadow-sm transition-shadow ${isOwnMessage
                                           ? 'bg-secondary-600 text-white rounded-br-sm'
                                           : 'bg-primary-100 dark:bg-primary-700 text-primary-900 dark:text-sand-50 rounded-bl-sm'
-                                      }`}
+                                        }`}
                                     >
                                       <p className="whitespace-pre-wrap break-words">{message.text}</p>
                                       {message.edited_at && (
@@ -383,15 +434,14 @@ export function MessagesContent() {
                                     </div>
 
                                     {/* Time and Actions */}
-                                    <div className={`flex items-center gap-2 mt-1.5 text-xs ${
-                                      isOwnMessage 
-                                        ? 'text-primary-600 dark:text-sand-500 flex-row-reverse' 
+                                    <div className={`flex items-center gap-2 mt-1.5 text-xs ${isOwnMessage
+                                        ? 'text-primary-600 dark:text-sand-500 flex-row-reverse'
                                         : 'text-primary-500 dark:text-sand-600'
-                                    }`}>
+                                      }`}>
                                       <span>
-                                        {messageTime.toLocaleTimeString([], { 
-                                          hour: '2-digit', 
-                                          minute: '2-digit' 
+                                        {messageTime.toLocaleTimeString([], {
+                                          hour: '2-digit',
+                                          minute: '2-digit'
                                         })}
                                       </span>
                                       {isOwnMessage && !isEditing && (

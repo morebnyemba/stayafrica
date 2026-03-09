@@ -5,27 +5,27 @@ from apps.users.models import User
 
 class MessageSerializer(serializers.ModelSerializer):
     """Serializer for individual messages"""
-    sender_email = serializers.CharField(source='sender.email', read_only=True)
     sender_name = serializers.SerializerMethodField()
-    receiver_email = serializers.CharField(source='receiver.email', read_only=True)
     receiver_name = serializers.SerializerMethodField()
     is_own_message = serializers.SerializerMethodField()
     
     class Meta:
         model = Message
         fields = [
-            'id', 'conversation', 'sender', 'sender_email', 'sender_name',
-            'receiver', 'receiver_email', 'receiver_name', 'text',
+            'id', 'conversation', 'sender', 'sender_name',
+            'receiver', 'receiver_name', 'text',
             'message_type', 'is_read', 'read_at', 'created_at', 'edited_at',
             'metadata', 'is_own_message'
         ]
         read_only_fields = ['id', 'sender', 'created_at', 'read_at', 'edited_at']
     
     def get_sender_name(self, obj):
-        return f"{obj.sender.first_name} {obj.sender.last_name}".strip() or obj.sender.email
+        name = obj.sender.first_name.strip()
+        return name if name else obj.sender.email.split('@')[0]
     
     def get_receiver_name(self, obj):
-        return f"{obj.receiver.first_name} {obj.receiver.last_name}".strip() or obj.receiver.email
+        name = obj.receiver.first_name.strip()
+        return name if name else obj.receiver.email.split('@')[0]
     
     def get_is_own_message(self, obj):
         request = self.context.get('request')
@@ -56,8 +56,7 @@ class ConversationSerializer(serializers.ModelSerializer):
         return [
             {
                 'id': user.id,
-                'email': user.email,
-                'name': f"{user.first_name} {user.last_name}".strip() or user.email
+                'name': user.first_name.strip() or user.email.split('@')[0]
             }
             for user in obj.participants.all()
         ]
@@ -71,8 +70,7 @@ class ConversationSerializer(serializers.ModelSerializer):
                 user = other_users.first()
                 return {
                     'id': user.id,
-                    'email': user.email,
-                    'name': f"{user.first_name} {user.last_name}".strip() or user.email,
+                    'name': user.first_name.strip() or user.email.split('@')[0],
                     'is_host': user.is_host
                 }
         return None
@@ -83,7 +81,7 @@ class ConversationSerializer(serializers.ModelSerializer):
             return {
                 'id': last_msg.id,
                 'text': last_msg.text[:100],
-                'sender_email': last_msg.sender.email,
+                'sender_name': last_msg.sender.first_name.strip() or last_msg.sender.email.split('@')[0],
                 'created_at': last_msg.created_at,
                 'is_read': last_msg.is_read
             }

@@ -21,6 +21,7 @@ function nightsBetween(checkIn: string, checkOut: string): number {
 }
 
 const STATUS_CONFIG: Record<string, { bg: string; text: string; icon: keyof typeof Ionicons.glyphMap }> = {
+  requested: { bg: '#D9770618', text: '#D97706', icon: 'hourglass-outline' },
   confirmed: { bg: '#10B98118', text: '#10B981', icon: 'checkmark-circle' },
   pending: { bg: '#F59E0B18', text: '#F59E0B', icon: 'time' },
   cancelled: { bg: '#EF444418', text: '#EF4444', icon: 'close-circle' },
@@ -121,7 +122,7 @@ export default function BookingsScreen() {
               <View className="px-2.5 py-1 rounded-full flex-row items-center" style={{ backgroundColor: sc.bg }}>
                 <Ionicons name={sc.icon} size={12} color={sc.text} />
                 <Text className="text-xs font-semibold capitalize ml-1" style={{ color: sc.text }}>
-                  {booking.status.replace('_', ' ')}
+                  {booking.status === 'requested' ? 'Awaiting Approval' : booking.status === 'pending' ? 'Awaiting Payment' : booking.status.replace('_', ' ')}
                 </Text>
               </View>
             </View>
@@ -158,7 +159,7 @@ export default function BookingsScreen() {
               </View>
 
               <View className="flex-row items-center" style={{ gap: 8 }}>
-                {booking.status === 'confirmed' && (booking as any).payment_status !== 'success' && (
+                {(booking.status === 'pending' || booking.status === 'confirmed') && (booking as any).payment_status !== 'success' && (
                   <TouchableOpacity
                     onPress={(e) => {
                       e.stopPropagation();

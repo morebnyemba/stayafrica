@@ -43,8 +43,8 @@ export function HostBookingsContent() {
     enabled: isAuthenticated && user?.role === 'host',
   });
 
-  const confirmMutation = useMutation({
-    mutationFn: (bookingId: string) => apiClient.confirmBooking(bookingId),
+  const approveMutation = useMutation({
+    mutationFn: (bookingId: string) => apiClient.approveBooking(bookingId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['host', 'bookings'] });
       queryClient.invalidateQueries({ queryKey: ['host', 'analytics'] });
@@ -80,9 +80,9 @@ export function HostBookingsContent() {
     },
   });
 
-  const handleConfirm = (bookingId: string) => {
-    if (window.confirm('Are you sure you want to confirm this booking?')) {
-      confirmMutation.mutate(bookingId);
+  const handleApprove = (bookingId: string) => {
+    if (window.confirm('Are you sure you want to approve this booking request?')) {
+      approveMutation.mutate(bookingId);
     }
   };
 
@@ -126,6 +126,7 @@ export function HostBookingsContent() {
 
   const stats = useMemo(() => ({
     total: allBookings.length,
+    requested: allBookings.filter((b: any) => b.status === 'requested').length,
     pending: allBookings.filter((b: any) => b.status === 'pending').length,
     confirmed: allBookings.filter((b: any) => b.status === 'confirmed').length,
     checked_in: allBookings.filter((b: any) => b.status === 'checked_in').length,
@@ -136,7 +137,8 @@ export function HostBookingsContent() {
   }), [allBookings]);
 
   const statusConfig: Record<string, { color: string; bg: string; icon: any; dotColor: string }> = {
-    pending: { color: 'text-yellow-700 dark:text-yellow-300', bg: 'bg-yellow-50 dark:bg-yellow-900/20', icon: Clock, dotColor: 'bg-yellow-500' },
+    requested: { color: 'text-amber-700 dark:text-amber-300', bg: 'bg-amber-50 dark:bg-amber-900/40 border border-amber-200 dark:border-amber-800', icon: Clock, dotColor: 'bg-amber-500' },
+    pending: { color: 'text-yellow-700 dark:text-yellow-300', bg: 'bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800', icon: Clock, dotColor: 'bg-yellow-500' },
     confirmed: { color: 'text-green-700 dark:text-green-300', bg: 'bg-green-50 dark:bg-green-900/20', icon: CheckCircle, dotColor: 'bg-green-500' },
     checked_in: { color: 'text-blue-700 dark:text-blue-300', bg: 'bg-blue-50 dark:bg-blue-900/20', icon: LogIn, dotColor: 'bg-blue-500' },
     checked_out: { color: 'text-purple-700 dark:text-purple-300', bg: 'bg-purple-50 dark:bg-purple-900/20', icon: LogOut, dotColor: 'bg-purple-500' },
@@ -146,6 +148,7 @@ export function HostBookingsContent() {
 
   const filterCounts: Record<string, number> = {
     all: stats.total,
+    requested: stats.requested,
     pending: stats.pending,
     confirmed: stats.confirmed,
     checked_in: stats.checked_in,
@@ -219,9 +222,9 @@ export function HostBookingsContent() {
           {/* Stats Row */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
             {[
+              { label: 'Requests', value: stats.requested, icon: Clock, color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-900/20' },
               { label: 'Pending', value: stats.pending, icon: Clock, color: 'text-yellow-600 dark:text-yellow-400', bg: 'bg-yellow-50 dark:bg-yellow-900/20' },
               { label: 'Confirmed', value: stats.confirmed, icon: CheckCircle, color: 'text-green-600 dark:text-green-400', bg: 'bg-green-50 dark:bg-green-900/20' },
-              { label: 'Completed', value: stats.completed, icon: CheckCircle, color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-900/20' },
               { label: 'Revenue', value: `$${stats.totalEarnings.toFixed(0)}`, icon: TrendingUp, color: 'text-secondary-600 dark:text-secondary-400', bg: 'bg-secondary-50 dark:bg-secondary-900/20' },
             ].map((stat) => (
               <div key={stat.label} className="card p-4 flex items-center gap-3">
@@ -249,7 +252,7 @@ export function HostBookingsContent() {
               />
             </div>
             <div className="flex gap-2 overflow-x-auto pb-1">
-              {['all', 'pending', 'confirmed', 'checked_in', 'checked_out', 'completed', 'cancelled'].map((status) => {
+              {['all', 'requested', 'pending', 'confirmed', 'checked_in', 'checked_out', 'completed', 'cancelled'].map((status) => {
                 const label = status === 'checked_in' ? 'Checked In' : status === 'checked_out' ? 'Checked Out' : status.charAt(0).toUpperCase() + status.slice(1);
                 return (
                   <button
@@ -439,17 +442,17 @@ export function HostBookingsContent() {
 
                               {/* Action buttons */}
                               <div className="flex gap-2">
-                                {booking.status === 'pending' && (
+                                {booking.status === 'requested' && (
                                   <>
                                     <Button
-                                      onClick={() => handleConfirm(booking.id)}
-                                      disabled={confirmMutation.isPending}
+                                      onClick={() => handleApprove(booking.id)}
+                                      disabled={approveMutation.isPending}
                                       variant="primary"
                                       size="sm"
                                       className="text-xs px-3"
                                     >
                                       <CheckCircle className="w-3.5 h-3.5 mr-1" />
-                                      Confirm
+                                      Approve
                                     </Button>
                                     <Button
                                       onClick={() => handleCancel(booking.id)}
@@ -462,6 +465,18 @@ export function HostBookingsContent() {
                                       Decline
                                     </Button>
                                   </>
+                                )}
+                                {booking.status === 'pending' && (
+                                  <Button
+                                    onClick={() => handleCancel(booking.id)}
+                                    disabled={cancelMutation.isPending}
+                                    variant="danger"
+                                    size="sm"
+                                    className="text-xs px-3"
+                                  >
+                                    <XCircle className="w-3.5 h-3.5 mr-1" />
+                                    Cancel
+                                  </Button>
                                 )}
                                 {booking.status === 'confirmed' && (
                                   <>

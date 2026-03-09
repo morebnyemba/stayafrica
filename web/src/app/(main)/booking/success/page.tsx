@@ -18,6 +18,8 @@ export default function BookingSuccessPage() {
   const bookingId = searchParams.get('bookingId');
   const provider = searchParams.get('provider');
   const isPending = searchParams.get('pending') === 'true';
+  const bookingStatus = searchParams.get('status'); // e.g. 'requested'
+  const isRequested = bookingStatus === 'requested';
 
   const { data: booking, isLoading } = useQuery({
     queryKey: ['booking', bookingId],
@@ -98,12 +100,14 @@ export default function BookingSuccessPage() {
               </div>
             </div>
             <h1 className="text-3xl sm:text-4xl font-bold text-primary-900 dark:text-sand-50 mb-2">
-              {isPending ? 'Booking submitted!' : 'Booking confirmed!'}
+              {isRequested ? 'Booking requested!' : (isPending ? 'Booking submitted!' : 'Booking confirmed!')}
             </h1>
             <p className="text-primary-600 dark:text-sand-300 text-lg">
-              {isPending
-                ? 'Your payment is being verified — we\'ll notify you shortly'
-                : 'Your reservation is all set. Get ready for your trip!'}
+              {isRequested
+                ? "Your request has been sent to the host. You'll be notified when they accept. You won't be charged until accepted."
+                : (isPending
+                  ? 'Your payment is being verified — we\'ll notify you shortly'
+                  : 'Your reservation is all set. Get ready for your trip!')}
             </p>
           </div>
 
@@ -226,16 +230,14 @@ export default function BookingSuccessPage() {
                 { icon: FileText, text: 'View full booking details in your dashboard anytime', done: false },
               ].map((item, i) => (
                 <div key={i} className="flex items-start gap-3">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                    item.done
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${item.done
                       ? 'bg-green-100 dark:bg-green-900/30'
                       : 'bg-primary-100 dark:bg-primary-800'
-                  }`}>
-                    <item.icon className={`w-4 h-4 ${
-                      item.done
+                    }`}>
+                    <item.icon className={`w-4 h-4 ${item.done
                         ? 'text-green-600 dark:text-green-400'
                         : 'text-primary-500 dark:text-sand-400'
-                    }`} />
+                      }`} />
                   </div>
                   <p className="text-sm text-primary-700 dark:text-sand-200 pt-1.5">{item.text}</p>
                 </div>

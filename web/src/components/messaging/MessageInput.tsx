@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Send, Paperclip, Smile, Loader2 } from 'lucide-react';
 import { useTypingIndicator } from './useTypingIndicator';
+import { toast } from 'react-hot-toast';
 
 interface MessageInputProps {
   onSend: (content: string) => void;
@@ -11,16 +12,16 @@ interface MessageInputProps {
   placeholder?: string;
 }
 
-export const MessageInput = ({ 
-  onSend, 
-  onTypingChange, 
+export const MessageInput = ({
+  onSend,
+  onTypingChange,
   disabled = false,
   placeholder = 'Type a message...'
 }: MessageInputProps) => {
   const [content, setContent] = useState('');
   const [isSending, setIsSending] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  
+
   const { startTyping, stopTyping } = useTypingIndicator({
     onTypingChange,
     debounceMs: 1000,
@@ -45,12 +46,20 @@ export const MessageInput = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!content.trim() || isSending || disabled) return;
+
+    // Contact Info Check
+    const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/;
+    const phoneRegex = /(?:\+?\d{1,3}[\s-]?)?\(?\d{3}\)?[\s-]?\d{3}[\s-]?\d{4}/;
+    if (emailRegex.test(content) || phoneRegex.test(content)) {
+      toast.error('For your safety and privacy, please do not share direct contact information before a booking is confirmed.');
+      return;
+    }
 
     setIsSending(true);
     stopTyping();
-    
+
     try {
       await onSend(content.trim());
       setContent('');

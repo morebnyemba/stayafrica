@@ -15,7 +15,7 @@ export default function BookingConfirmScreen() {
   const insets = useSafeAreaInsets();
   const { isAuthenticated, user } = useAuth();
   const params = useLocalSearchParams();
-  
+
   const propertyId = params.propertyId as string;
   const checkIn = params.checkIn as string;
   const checkOut = params.checkOut as string;
@@ -95,17 +95,27 @@ export default function BookingConfirmScreen() {
         cleaning_fee: costs.cleaningFee || 0,
       });
 
-      router.push({
-        pathname: '/booking/payment',
-        params: {
-          bookingId: String(booking.id),
-          propertyName: property?.title || '',
-          checkIn,
-          checkOut,
-          guests: guests.toString(),
-          total: costs.total.toString(),
-        },
-      });
+      if (booking.status === 'requested') {
+        router.push({
+          pathname: '/booking/success',
+          params: {
+            bookingId: String(booking.id),
+            status: 'requested',
+          },
+        });
+      } else {
+        router.push({
+          pathname: '/booking/payment',
+          params: {
+            bookingId: String(booking.id),
+            propertyName: property?.title || '',
+            checkIn,
+            checkOut,
+            guests: guests.toString(),
+            total: costs.total.toString(),
+          },
+        });
+      }
     } catch (error: any) {
       const msg =
         error.response?.data?.detail ||
@@ -131,7 +141,9 @@ export default function BookingConfirmScreen() {
               <Ionicons name="arrow-back" size={24} color="#fff" />
             </View>
           </TouchableOpacity>
-          <Text className="text-2xl font-bold text-white">Confirm Booking</Text>
+          <Text className="text-2xl font-bold text-white">
+            {property?.instant_booking_enabled ? 'Confirm Booking' : 'Request to Book'}
+          </Text>
         </LinearGradient>
         <View className="flex-1 items-center justify-center px-6">
           <Text className="text-forest text-lg">Please sign in to continue</Text>
@@ -165,8 +177,8 @@ export default function BookingConfirmScreen() {
   }
 
   return (
-    <ScrollView 
-      className="flex-1 bg-sand-100" 
+    <ScrollView
+      className="flex-1 bg-sand-100"
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
       contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
@@ -183,7 +195,7 @@ export default function BookingConfirmScreen() {
           </View>
         </TouchableOpacity>
         <Text className="text-3xl font-black text-white tracking-tight">
-          Confirm Booking
+          {property?.instant_booking_enabled ? 'Confirm Booking' : 'Request to Book'}
         </Text>
         <Text className="text-sand-200 text-sm mt-1">
           Review your trip details
@@ -360,9 +372,8 @@ export default function BookingConfirmScreen() {
             elevation: 2,
           }}
         >
-          <View className={`w-6 h-6 rounded border-2 ${
-            agreedToTerms ? 'bg-gold border-gold' : 'border-moss'
-          } items-center justify-center mr-3`}>
+          <View className={`w-6 h-6 rounded border-2 ${agreedToTerms ? 'bg-gold border-gold' : 'border-moss'
+            } items-center justify-center mr-3`}>
             {agreedToTerms && <Ionicons name="checkmark" size={16} color="#122F26" />}
           </View>
           <Text className="flex-1 text-sm text-moss">
@@ -374,9 +385,8 @@ export default function BookingConfirmScreen() {
         <TouchableOpacity
           onPress={handleConfirmBooking}
           disabled={!agreedToTerms || isCreatingBooking}
-          className={`rounded-2xl overflow-hidden ${
-            (!agreedToTerms || isCreatingBooking) ? 'opacity-50' : ''
-          }`}
+          className={`rounded-2xl overflow-hidden ${(!agreedToTerms || isCreatingBooking) ? 'opacity-50' : ''
+            }`}
         >
           <LinearGradient
             colors={['#D9B168', '#bea04f']}
@@ -398,7 +408,9 @@ export default function BookingConfirmScreen() {
               ) : (
                 <>
                   <Ionicons name="checkmark-circle" size={20} color="#122F26" />
-                  <Text className="text-forest font-bold text-base ml-2">Confirm Booking</Text>
+                  <Text className="text-forest font-bold text-base ml-2">
+                    {property?.instant_booking_enabled ? 'Confirm Booking' : 'Request to Book'}
+                  </Text>
                 </>
               )}
             </View>
@@ -406,7 +418,9 @@ export default function BookingConfirmScreen() {
         </TouchableOpacity>
 
         <Text className="text-xs text-center text-moss mt-3">
-          You won't be charged yet. Payment will be processed on the next page.
+          {property?.instant_booking_enabled
+            ? "You won't be charged yet. Payment will be processed on the next page."
+            : "You won't be charged yet. The host has 24 hours to accept your request."}
         </Text>
       </View>
     </ScrollView>

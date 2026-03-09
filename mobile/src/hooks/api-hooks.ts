@@ -94,10 +94,10 @@ export function useCancelBooking() {
   });
 }
 
-export function useConfirmBooking() {
+export function useApproveBooking() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => apiClient.confirmBooking(id),
+    mutationFn: (id: string) => apiClient.approveBooking(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bookings'] });
       queryClient.invalidateQueries({ queryKey: ['host', 'bookings'] });
@@ -359,7 +359,7 @@ export function useCreateProperty() {
 export function useUpdateProperty() {
   const queryClient = useQueryClient();
   return useMutation<Property, Error, { id: string; data: UpdatePropertyRequest }>({
-    mutationFn: ({ id, data }: { id: string; data: UpdatePropertyRequest }) => 
+    mutationFn: ({ id, data }: { id: string; data: UpdatePropertyRequest }) =>
       apiClient.updateProperty(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['host', 'properties'] });

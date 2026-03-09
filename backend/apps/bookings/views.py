@@ -140,21 +140,21 @@ class BookingViewSet(viewsets.ModelViewSet):
         logger.info(f"Booking created: {booking.booking_ref} (instant_confirmed={instant_confirmed})")
     
     @action(detail=True, methods=['post'])
-    @log_action('confirm_booking')
-    def confirm(self, request, pk=None):
-        """Confirm a pending booking (host only)"""
+    @log_action('approve_booking')
+    def approve(self, request, pk=None):
+        """Approve a booking request (host only)"""
         booking = self.get_object()
         
-        # Only host can confirm
+        # Only host can approve
         if request.user != booking.rental_property.host and not request.user.is_admin_user:
             return Response(
-                {'error': 'Only the host can confirm bookings'},
+                {'error': 'Only the host can approve bookings'},
                 status=status.HTTP_403_FORBIDDEN
             )
         
-        if booking.status != 'pending':
+        if booking.status != 'requested':
             return Response(
-                {'error': 'Can only confirm pending bookings'},
+                {'error': 'Can only approve requested bookings'},
                 status=status.HTTP_400_BAD_REQUEST
             )
         
@@ -166,7 +166,7 @@ class BookingViewSet(viewsets.ModelViewSet):
             )
         
         with transaction.atomic():
-            booking.status = 'confirmed'
+            booking.status = 'pending'
             booking.save()
             
             # Log the action
@@ -174,10 +174,10 @@ class BookingViewSet(viewsets.ModelViewSet):
             content_type = ContentType.objects.get_for_model(Booking)
             AuditLoggerService.log_action(
                 user=request.user,
-                action='confirm',
+                action='approve',
                 content_type=content_type,
                 object_id=booking.id,
-                changes={'status': 'confirmed'}
+                changes={'status': 'pending'}
             )
             
             # Send push notification to guest
@@ -201,8 +201,8 @@ class BookingViewSet(viewsets.ModelViewSet):
         except Exception as e:
             logger.warning(f"Could not trigger automated message: {e}")
         
-        logger.info(f"Booking confirmed: {booking.booking_ref}")
-        return Response({'status': 'confirmed', 'booking_ref': booking.booking_ref})
+        logger.info(f"Booking approved: {booking.booking_ref}")
+        return Response({'status': 'pending', 'booking_ref': booking.booking_ref})
     
     @action(detail=True, methods=['post'])
     @log_action('cancel_booking')
@@ -217,7 +217,7 @@ class BookingViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_403_FORBIDDEN
             )
         
-        if booking.status not in ['pending', 'confirmed']:
+        if booking.status not in ['requested', 'pending', 'confirmed']:
             return Response(
                 {'error': 'Cannot cancel completed or cancelled bookings'},
                 status=status.HTTP_400_BAD_REQUEST

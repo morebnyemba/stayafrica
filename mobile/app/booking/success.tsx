@@ -12,6 +12,8 @@ export default function BookingSuccessScreen() {
   const params = useLocalSearchParams();
   const bookingId = params.bookingId as string;
   const pending = params.pending as string;
+  const statusParam = params.status as string;
+  const isRequested = statusParam === 'requested';
 
   // Fetch real booking data
   const { data: booking, isLoading } = useQuery({
@@ -32,8 +34,8 @@ export default function BookingSuccessScreen() {
   };
 
   return (
-    <ScrollView 
-      className="flex-1 bg-sand-100" 
+    <ScrollView
+      className="flex-1 bg-sand-100"
       showsVerticalScrollIndicator={false}
       contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
     >
@@ -43,10 +45,10 @@ export default function BookingSuccessScreen() {
         style={{ paddingTop: Platform.OS === 'ios' ? 50 : 35 }}
       >
         <Text className="text-3xl font-black text-white tracking-tight text-center mt-8">
-          Booking Confirmed!
+          {isRequested ? 'Booking Requested!' : 'Booking Confirmed!'}
         </Text>
         <Text className="text-white/80 text-center mt-2">
-          Your payment was successful
+          {isRequested ? 'Your request has been sent to the host' : 'Your payment was successful'}
         </Text>
       </LinearGradient>
 
@@ -64,12 +66,14 @@ export default function BookingSuccessScreen() {
           </View>
 
           <Text className="text-2xl font-bold text-forest mb-2 text-center">
-            {pending ? 'Payment Processing' : 'Payment Successful'}
+            {isRequested ? 'Request Sent' : (pending ? 'Payment Processing' : 'Payment Successful')}
           </Text>
           <Text className="text-moss text-center mb-6">
-            {pending
-              ? 'Your payment is being processed. We\'ll send a confirmation email once complete.'
-              : 'Your booking has been confirmed. You\'ll receive a confirmation email shortly.'}
+            {isRequested
+              ? 'Your booking request has been sent. The host has 24 hours to confirm.'
+              : (pending
+                ? 'Your payment is being processed. We\'ll send a confirmation email once complete.'
+                : 'Your booking has been confirmed. You\'ll receive a confirmation email shortly.')}
           </Text>
 
           {isLoading ? (
@@ -108,7 +112,7 @@ export default function BookingSuccessScreen() {
                 <Text className="text-moss">Status</Text>
                 <View className="bg-green-100 px-3 py-1 rounded-full">
                   <Text className="text-green-800 font-semibold text-xs">
-                    {pending ? 'Processing' : 'Confirmed'}
+                    {isRequested ? 'Requested' : (pending ? 'Processing' : 'Confirmed')}
                   </Text>
                 </View>
               </View>

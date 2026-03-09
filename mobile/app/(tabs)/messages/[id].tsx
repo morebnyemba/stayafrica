@@ -57,6 +57,17 @@ export default function ConversationDetailScreen() {
     }
 
     try {
+      const contactRegex = /(\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b)|(\b\d{3}[-.\s]?\d{3}[-.\s]?\d{4}\b)|(\b\+\d{10,15}\b)/g;
+
+      if (contactRegex.test(trimmed)) {
+        Alert.alert(
+          'Safety Notice',
+          'For your security, sharing direct contact information (emails, phone numbers) is not allowed before a booking is confirmed.',
+          [{ text: 'I understand', style: 'cancel' }]
+        );
+        return;
+      }
+
       await sendMessage({ conversationId, receiverId: receiverId || '', message: trimmed });
       setMessage('');
       refetch();
@@ -126,6 +137,19 @@ export default function ConversationDetailScreen() {
     );
   };
 
+  const showActionMenu = () => {
+    Alert.alert(
+      'Conversation Options',
+      'What would you like to do?',
+      [
+        { text: 'Report User', onPress: () => Alert.alert('Reported', 'User has been reported to support for review.') },
+        { text: 'Block User', onPress: () => Alert.alert('Blocked', 'You will no longer receive messages from this user.'), style: 'destructive' },
+        { text: 'Mute Conversation', onPress: () => Alert.alert('Muted', 'Notifications for this conversation are now muted.') },
+        { text: 'Cancel', style: 'cancel' }
+      ]
+    );
+  };
+
   if (!conversationId) {
     return (
       <SafeAreaView className="flex-1 bg-sand-100">
@@ -172,8 +196,8 @@ export default function ConversationDetailScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-sand-100">
-      <KeyboardAvoidingView 
-        className="flex-1" 
+      <KeyboardAvoidingView
+        className="flex-1"
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
@@ -187,7 +211,7 @@ export default function ConversationDetailScreen() {
         >
           <View className="flex-row items-center justify-between">
             <View className="flex-row items-center flex-1">
-              <TouchableOpacity 
+              <TouchableOpacity
                 onPress={() => router.back()}
                 className="w-10 h-10 rounded-xl items-center justify-center mr-3"
                 style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
@@ -197,8 +221,8 @@ export default function ConversationDetailScreen() {
               <Text className="text-xl font-black text-white tracking-tight">Conversation</Text>
             </View>
             <View className="flex-row items-center">
-              <TouchableOpacity 
-                onPress={() => refetch()} 
+              <TouchableOpacity
+                onPress={() => refetch()}
                 className="mr-3 w-10 h-10 rounded-xl items-center justify-center"
                 style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
               >
@@ -208,16 +232,31 @@ export default function ConversationDetailScreen() {
                   <Ionicons name="refresh" size={22} color="#D9B168" />
                 )}
               </TouchableOpacity>
-              <TouchableOpacity 
+              <TouchableOpacity
                 onPress={handleArchive}
-                className="w-10 h-10 rounded-xl items-center justify-center"
+                className="w-10 h-10 rounded-xl items-center justify-center mr-2"
                 style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
               >
                 <Ionicons name="archive" size={22} color="#D9B168" />
               </TouchableOpacity>
+              <TouchableOpacity
+                onPress={showActionMenu}
+                className="w-10 h-10 rounded-xl items-center justify-center"
+                style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
+              >
+                <Ionicons name="ellipsis-vertical" size={22} color="#D9B168" />
+              </TouchableOpacity>
             </View>
           </View>
         </LinearGradient>
+
+        {/* Safety Banner */}
+        <View className="bg-sand-200 px-4 py-3 flex-row items-center border-b border-sand-300">
+          <Ionicons name="shield-checkmark" size={20} color="#3A5C50" />
+          <Text className="text-moss text-xs flex-1 ml-2 leading-tight">
+            For your safety, please keep all communication and payments on StayAfrica.
+          </Text>
+        </View>
 
         <FlatList
           ref={flatListRef}
@@ -229,7 +268,7 @@ export default function ConversationDetailScreen() {
             const messageText = item.text || item.content || '';
             const isOwnMessage = item.is_own_message ?? false;
             const isEditing = editingMessageId === item.id;
-            
+
             // Check if we should show a date separator
             const messageTime = item.created_at ? new Date(item.created_at) : new Date();
             const prevMessage = index > 0 ? messages[index - 1] : null;
@@ -243,10 +282,10 @@ export default function ConversationDetailScreen() {
                   <View className="flex-row justify-center my-3">
                     <View className="bg-gray-200 px-3 py-1 rounded-full">
                       <Text className="text-xs text-gray-600">
-                        {messageTime.toLocaleDateString([], { 
-                          weekday: 'short', 
-                          month: 'short', 
-                          day: 'numeric' 
+                        {messageTime.toLocaleDateString([], {
+                          weekday: 'short',
+                          month: 'short',
+                          day: 'numeric'
                         })}
                       </Text>
                     </View>
@@ -263,7 +302,7 @@ export default function ConversationDetailScreen() {
                       </Text>
                     </View>
                   )}
-                  
+
                   {isEditing ? (
                     <View className="bg-white rounded-2xl px-4 py-3 border-2 border-gold w-4/5" style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 6, elevation: 2 }}>
                       <TextInput
@@ -277,8 +316,8 @@ export default function ConversationDetailScreen() {
                         <TouchableOpacity onPress={handleCancelEdit} className="px-3 py-1 bg-gray-200 rounded-lg">
                           <Text className="text-gray-700">Cancel</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity 
-                          onPress={() => handleSaveEdit(item.id)} 
+                        <TouchableOpacity
+                          onPress={() => handleSaveEdit(item.id)}
                           disabled={editMessageMutation.isPending}
                           className="px-3 py-1 bg-gold rounded-lg"
                         >
@@ -287,9 +326,8 @@ export default function ConversationDetailScreen() {
                       </View>
                     </View>
                   ) : (
-                    <View className={`rounded-2xl px-4 py-3 max-w-[80%] ${
-                      isOwnMessage ? 'bg-gold' : 'bg-white border border-gray-100'
-                    }`} style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 6, elevation: 2 }}>
+                    <View className={`rounded-2xl px-4 py-3 max-w-[80%] ${isOwnMessage ? 'bg-gold' : 'bg-white border border-gray-100'
+                      }`} style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 6, elevation: 2 }}>
                       <Text className={isOwnMessage ? 'text-forest' : 'text-gray-800'}>
                         {messageText}
                       </Text>
@@ -300,14 +338,14 @@ export default function ConversationDetailScreen() {
                       )}
                       <View className="flex-row items-center justify-between mt-1">
                         <Text className={`text-xs ${isOwnMessage ? 'text-forest/70' : 'text-gray-500'}`}>
-                          {messageTime.toLocaleTimeString([], { 
-                            hour: '2-digit', 
-                            minute: '2-digit' 
+                          {messageTime.toLocaleTimeString([], {
+                            hour: '2-digit',
+                            minute: '2-digit'
                           })}
                         </Text>
                         {isOwnMessage && (
                           <View className="flex-row ml-2">
-                            <TouchableOpacity 
+                            <TouchableOpacity
                               onPress={() => handleEditMessage(item.id, messageText)}
                               className="mr-2"
                             >

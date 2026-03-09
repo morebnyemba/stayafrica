@@ -6,6 +6,7 @@ import uuid
 
 class Booking(models.Model):
     STATUS_CHOICES = [
+        ('requested', 'Requested'),
         ('pending', 'Pending'),
         ('confirmed', 'Confirmed'),
         ('checked_in', 'Checked In'),
@@ -30,7 +31,7 @@ class Booking(models.Model):
     grand_total = models.DecimalField(max_digits=10, decimal_places=2)
     
     currency = models.CharField(max_length=3, default='USD')
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='requested')
     
     special_requests = models.TextField(blank=True, null=True)
 
@@ -55,6 +56,7 @@ class Booking(models.Model):
     
     # Valid status transitions: current_status → allowed next statuses
     VALID_TRANSITIONS = {
+        'requested': {'pending', 'cancelled'},
         'pending': {'confirmed', 'cancelled'},
         'confirmed': {'checked_in', 'cancelled'},
         'checked_in': {'checked_out'},

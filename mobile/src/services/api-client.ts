@@ -94,7 +94,7 @@ class APIClient {
         const requestUrl = config.url || '';
         // Skip adding token for auth endpoints
         const isAuthEndpoint = requestUrl.includes('/auth/') || requestUrl.includes('/users/register');
-        
+
         if (!isAuthEndpoint) {
           const token = await this.getAccessToken();
           if (token) {
@@ -112,7 +112,7 @@ class APIClient {
       async (error: AxiosError) => {
         const originalRequest = error.config as any;
         const requestUrl = originalRequest?.url || '';
-        
+
         // Skip token refresh for auth endpoints (login, register, refresh)
         const isAuthEndpoint = requestUrl.includes('/auth/') || requestUrl.includes('/users/register');
 
@@ -298,8 +298,8 @@ class APIClient {
     return (await this.client.post(`/bookings/${id}/cancel/`)).data;
   }
 
-  async confirmBooking(id: string): Promise<{ message: string; booking: Booking }> {
-    return (await this.client.post(`/bookings/${id}/confirm/`)).data;
+  async approveBooking(id: string): Promise<{ message: string; booking: Booking }> {
+    return (await this.client.post(`/bookings/${id}/approve/`)).data;
   }
 
   async checkInBooking(id: string, data?: { check_in_instructions?: string; access_code?: string }): Promise<{ status: string; booking_ref: string; checked_in_at: string }> {

@@ -116,20 +116,20 @@ class InstantBookingService:
             logger.info(f"Booking {booking.booking_ref} not auto-confirmed: {reason}")
             return False, reason
         
-        # Auto-confirm the booking
-        booking.status = 'confirmed'
+        # Auto-approve the booking request (awaiting payment)
+        booking.status = 'pending'
         booking.save(update_fields=['status', 'updated_at'])
         
-        logger.info(f"Booking {booking.booking_ref} auto-confirmed via instant booking")
+        logger.info(f"Booking {booking.booking_ref} auto-approved via instant booking")
         
         # Send confirmation notification
         try:
             from services.notification_service import NotificationService
             NotificationService.send_booking_confirmation(booking)
         except Exception as e:
-            logger.warning(f"Failed to send auto-confirmation notification: {e}")
+            logger.warning(f"Failed to send auto-approval notification: {e}")
         
-        return True, "Booking automatically confirmed"
+        return True, "Booking automatically approved, awaiting payment"
     
     @staticmethod
     def get_instant_booking_info(property_obj, guest=None):
