@@ -101,8 +101,8 @@ export const BookingPanel: React.FC<BookingPanelProps> = ({
   const nights =
     checkInDate && checkOutDate ? differenceInDays(checkOutDate, checkInDate) : 0;
   const costs = useMemo(() => {
-    if (!feeConfig || nights <= 0) return { basePrice: 0, serviceFee: 0, commissionFee: 0, commissionRate: 0, cleaningFee: 0, taxes: 0, taxRate: 0, total: 0 };
-    return calculateBookingCost(pricePerNight, nights, feeConfig, 0, taxEstimate?.combined_rate || 0);
+    if (!feeConfig || nights <= 0) return { basePrice: 0, serviceFee: 0, commissionFee: 0, commissionRate: 0, cleaningFee: 0, taxes: 0, taxRate: 0, individualTaxes: [], total: 0 };
+    return calculateBookingCost(pricePerNight, nights, feeConfig, 0, taxEstimate || null);
   }, [pricePerNight, nights, feeConfig, taxEstimate]);
   const subtotal = costs.basePrice;
   const serviceFee = costs.serviceFee;
@@ -266,14 +266,12 @@ export const BookingPanel: React.FC<BookingPanelProps> = ({
 
 
 
-            {costs.taxes > 0 && (
-              <div className="flex justify-between text-sm">
-                <span className="text-primary-600 dark:text-sand-400">
-                  Taxes ({costs.taxRate}%)
-                </span>
-                <span className="font-medium text-primary-900 dark:text-sand-100">${costs.taxes.toFixed(2)}</span>
+            {costs.individualTaxes?.map((tax, idx) => (
+              <div key={idx} className="flex justify-between text-sm">
+                <span className="text-primary-600 dark:text-sand-400">{tax.name}</span>
+                <span className="font-medium text-primary-900 dark:text-sand-100">${tax.amount.toFixed(2)}</span>
               </div>
-            )}
+            ))}
 
             <div className="flex justify-between font-semibold border-t border-primary-200 dark:border-primary-700 pt-3">
               <span className="text-primary-900 dark:text-sand-50">Total</span>
