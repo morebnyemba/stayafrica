@@ -1,9 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Loader2, X, Calendar, Users, MessageSquare } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { useQuery } from '@tanstack/react-query';
+import { format, addDays } from 'date-fns';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 import { apiClient } from '@/services/api-client';
 
 interface ContactHostModalProps {
@@ -28,6 +32,54 @@ export function ContactHostModal({ isOpen, onClose, host, propertyId, userId }: 
         guests: 1,
         message: ''
     });
+
+    // Date handling
+    const [checkInDate, setCheckInDate] = useState<Date | null>(null);
+    const [checkOutDate, setCheckOutDate] = useState<Date | null>(null);
+
+    // Fetch unavailable dates
+    const { data: unavailableDatesData } = useQuery({
+        queryKey: ['unavailable-dates', propertyId],
+        queryFn: async () => {
+            if (!propertyId) return { unavailable_dates: [] };
+            const response = await apiClient.getUnavailableDates(propertyId);
+            return response.data;
+        },
+        enabled: !!propertyId,
+    });
+
+    const unavailableDates: Set<string> = useMemo(() => 
+        new Set(unavailableDatesData?.unavailable_dates || []), 
+        [unavailableDatesData]
+    );
+
+    // Convert unavailable date strings to Date objects for react-datepicker
+    const excludedDates = useMemo(() => {
+        return [...unavailableDates].map(dateStr => {
+            const [year, month, day] = dateStr.split('-').map(Number);
+            return new Date(year, month - 1, day);
+        });
+    }, [unavailableDates]);
+
+    const getDayClassName = useCallback((date: Date) => {
+        const dateStr = format(date, 'yyyy-MM-dd');
+        return unavailableDates.has(dateStr) ? 'booked-date' : '';
+    }, [unavailableDates]);
+
+    // Sync Date objects with formData strings
+    const handleCheckInChange = (date: Date | null) => {
+        setCheckInDate(date);
+        setFormData(p => ({ ...p, checkIn: date ? format(date, 'yyyy-MM-dd') : '' }));
+        if (checkOutDate && date && date >= checkOutDate) {
+            setCheckOutDate(null);
+            setFormData(p => ({ ...p, checkOut: '' }));
+        }
+    };
+
+    const handleCheckOutChange = (date: Date | null) => {
+        setCheckOutDate(date);
+        setFormData(p => ({ ...p, checkOut: date ? format(date, 'yyyy-MM-dd') : '' }));
+    };
 
     if (!isOpen) return null;
 
@@ -109,14 +161,17 @@ export function ContactHostModal({ isOpen, onClose, host, propertyId, userId }: 
                                     Check-in
                                 </label>
                                 <div className="relative">
-                                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary-400" />
-                                    <input
-                                        type="date"
-                                        required
-                                        min={new Date().toISOString().split('T')[0]}
-                                        value={formData.checkIn}
-                                        onChange={(e) => setFormData(p => ({ ...p, checkIn: e.target.value }))}
+                                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary-400 z-10 pointer-events-none" />
+                                    <DatePicker
+                                        selected={checkInDate}
+                                        onChange={handleCheckInChange}
+                                        minDate={new Date()}
+                                        excludeDates={excludedDates}
+                                        dayClassName={getDayClassName}
+                                        dateFormat="yyyy-MM-dd"
+                                        placeholderText="Check-in"
                                         className="w-full pl-9 pr-3 py-2.5 bg-primary-50 dark:bg-primary-800 border border-primary-200 dark:border-primary-700 rounded-lg text-sm focus:ring-2 focus:ring-secondary-500 text-primary-900 dark:text-sand-50"
+                                        required
                                     />
                                 </div>
                             </div>
@@ -125,14 +180,18 @@ export function ContactHostModal({ isOpen, onClose, host, propertyId, userId }: 
                                     Check-out
                                 </label>
                                 <div className="relative">
-                                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary-400" />
-                                    <input
-                                        type="date"
+                                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary-400 z-10 pointer-events-none" />
+                                    <DatePicker
+                                        selected={checkOutDate}
+                                        onChange={handleCheckOutChange}
+                                        minDate={checkInDate ? addDays(checkInDate, 1) : new Date()}
+                                        excludeDates={excludedDates}
+                                        dayClassName={getDayClassName}
+                                        dateFormat="yyyy-MM-dd"
+                                        placeholderText="Check-out"
+                                        disabled={!checkInDate}
+                                        className={`w-full pl-9 pr-3 py-2.5 bg-primary-50 dark:bg-primary-800 border border-primary-200 dark:border-primary-700 rounded-lg text-sm focus:ring-2 focus:ring-secondary-500 text-primary-900 dark:text-sand-50 ${!checkInDate ? 'opacity-50 cursor-not-allowed' : ''}`}
                                         required
-                                        min={formData.checkIn || new Date().toISOString().split('T')[0]}
-                                        value={formData.checkOut}
-                                        onChange={(e) => setFormData(p => ({ ...p, checkOut: e.target.value }))}
-                                        className="w-full pl-9 pr-3 py-2.5 bg-primary-50 dark:bg-primary-800 border border-primary-200 dark:border-primary-700 rounded-lg text-sm focus:ring-2 focus:ring-secondary-500 text-primary-900 dark:text-sand-50"
                                     />
                                 </div>
                             </div>

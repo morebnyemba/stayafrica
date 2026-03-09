@@ -277,18 +277,36 @@ export function MessagesContent() {
                   </div>
                   <div className="flex items-center gap-2">
                     {(() => {
-                      const inquiryData = messages.find((m: any) => m.metadata?.check_in)?.metadata;
+                      // Find the message that contains the inquiry metadata
+                      const inquiryMessage = messages.find((m: any) => m.metadata?.check_in);
+                      const inquiryData = inquiryMessage?.metadata;
+                      const isGuest = inquiryMessage?.is_own_message;
+                      
                       // Show button if: there is a property, no booking is linked yet, and we found inquiry data
                       if (selectedConversation.property && !selectedConversation.booking_id && inquiryData) {
-                        return (
-                          <Link
-                            href={`/booking/confirm?propertyId=${selectedConversation.property}&checkIn=${inquiryData.check_in}&checkOut=${inquiryData.check_out}&guests=${inquiryData.guests}`}
-                            className="hidden sm:flex items-center gap-2 px-4 py-2 bg-secondary-600 hover:bg-secondary-700 text-white rounded-lg text-sm font-medium transition"
-                          >
-                            <Calendar className="w-4 h-4" />
-                            Request Booking
-                          </Link>
-                        );
+                        if (isGuest) {
+                          // Current user is the Guest -> Show Request Booking
+                          return (
+                            <Link
+                              href={`/booking/confirm?propertyId=${selectedConversation.property}&checkIn=${inquiryData.check_in}&checkOut=${inquiryData.check_out}&guests=${inquiryData.guests}`}
+                              className="hidden sm:flex items-center gap-2 px-4 py-2 bg-secondary-600 hover:bg-secondary-700 text-white rounded-lg text-sm font-medium transition"
+                            >
+                              <Calendar className="w-4 h-4" />
+                              Request Booking
+                            </Link>
+                          );
+                        } else {
+                          // Current user is the Host -> Show Allow Instant Booking
+                          return (
+                            <button
+                              onClick={() => toast.success('Instant booking pre-approved for this guest')}
+                              className="hidden sm:flex items-center gap-2 px-4 py-2 bg-secondary-600 hover:bg-secondary-700 text-white rounded-lg text-sm font-medium transition"
+                            >
+                              <Check className="w-4 h-4" />
+                              Allow Instant Booking
+                            </button>
+                          );
+                        }
                       }
                       return null;
                     })()}
@@ -408,6 +426,34 @@ export function MessagesContent() {
                                     }`}>
                                     {senderName}
                                   </span>
+                                )}
+
+                                {/* Inquiry Details (Dates/Guests) - Show inside message if metadata exists */}
+                                {message.metadata?.check_in && (
+                                  <div className={`mb-2 p-2.5 rounded-lg text-xs w-full shadow-sm border ${
+                                    isOwnMessage 
+                                      ? 'bg-secondary-700 text-white border-secondary-600' 
+                                      : 'bg-white dark:bg-primary-800 text-primary-700 dark:text-sand-300 border-primary-200 dark:border-primary-700'
+                                  }`}>
+                                    <div className="flex items-center gap-2 mb-1.5 font-medium border-b border-white/20 pb-1.5">
+                                      <Calendar className="w-3.5 h-3.5" />
+                                      <span>Booking Inquiry</span>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                                      <div>
+                                        <span className="opacity-80 block text-[10px] uppercase tracking-wider">Check-in</span>
+                                        <span>{message.metadata.check_in}</span>
+                                      </div>
+                                      <div>
+                                        <span className="opacity-80 block text-[10px] uppercase tracking-wider">Check-out</span>
+                                        <span>{message.metadata.check_out}</span>
+                                      </div>
+                                      <div className="col-span-2 mt-1">
+                                        <span className="opacity-80 block text-[10px] uppercase tracking-wider">Guests</span>
+                                        <span>{message.metadata.guests} {message.metadata.guests === 1 ? 'Guest' : 'Guests'}</span>
+                                      </div>
+                                    </div>
+                                  </div>
                                 )}
 
                                 {/* Message Bubble */}
