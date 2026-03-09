@@ -27,8 +27,8 @@ export default function BookingsManagement() {
   const loadBookings = async () => {
     try {
       setLoading(true);
-      const data = await adminApi.getBookings({ 
-        page, 
+      const data = await adminApi.getBookings({
+        page,
         status: statusFilter || undefined,
         search: search.trim() || undefined,
         per_page: ITEMS_PER_PAGE,
@@ -61,15 +61,15 @@ export default function BookingsManagement() {
   };
 
   const toggleSelectBooking = (bookingId: string) => {
-    setSelectedBookings(prev => 
-      prev.includes(bookingId) 
+    setSelectedBookings(prev =>
+      prev.includes(bookingId)
         ? prev.filter(id => id !== bookingId)
         : [...prev, bookingId]
     );
   };
 
-  const handleMarkConfirmed = (bookingId: string) => {
-    setConfirmAction({ type: 'confirm', bookingId });
+  const handleMarkApproved = (bookingId: string) => {
+    setConfirmAction({ type: 'approve', bookingId });
     setShowConfirmDialog(true);
   };
 
@@ -91,9 +91,9 @@ export default function BookingsManagement() {
 
     try {
       switch (action) {
-        case 'confirm':
-          await Promise.all(selectedBookings.map(id => adminApi.confirmBooking(id)));
-          toast.success(`${selectedBookings.length} bookings confirmed`);
+        case 'approve':
+          await Promise.all(selectedBookings.map(id => adminApi.approveBooking(id)));
+          toast.success(`${selectedBookings.length} bookings approved`);
           break;
         case 'cancel':
           await Promise.all(selectedBookings.map(id => adminApi.cancelBooking(id, 'Bulk cancelled by admin')));
@@ -123,9 +123,9 @@ export default function BookingsManagement() {
       if (confirmAction.type === 'cancel') {
         await adminApi.cancelBooking(confirmAction.bookingId, 'Cancelled by admin');
         toast.success('Booking cancelled successfully');
-      } else if (confirmAction.type === 'confirm') {
-        await adminApi.confirmBooking(confirmAction.bookingId);
-        toast.success('Booking confirmed successfully');
+      } else if (confirmAction.type === 'approve') {
+        await adminApi.approveBooking(confirmAction.bookingId);
+        toast.success('Booking approved successfully');
       } else if (confirmAction.type === 'complete') {
         await adminApi.completeBooking(confirmAction.bookingId);
         toast.success('Booking marked as completed');
@@ -211,10 +211,10 @@ export default function BookingsManagement() {
               {showBulkActions && (
                 <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-primary-800/40 rounded-lg shadow-lg border border-sand-200/50 dark:border-primary-700/50 z-10">
                   <button
-                    onClick={() => handleBulkAction('confirm')}
+                    onClick={() => handleBulkAction('approve')}
                     className="w-full text-left px-4 py-2 text-sm text-primary-700 dark:text-sand-200 hover:bg-primary-100 dark:hover:bg-primary-800 first:rounded-t-lg"
                   >
-                    Confirm Bookings
+                    Approve Bookings
                   </button>
                   <button
                     onClick={() => handleBulkAction('cancel')}
@@ -357,11 +357,11 @@ export default function BookingsManagement() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex items-center space-x-2">
-                          {booking.status === 'pending' && (
+                          {booking.status === 'requested' && (
                             <button
-                              onClick={() => handleMarkConfirmed(booking.id)}
+                              onClick={() => handleMarkApproved(booking.id)}
                               className="text-green-600 hover:text-green-900"
-                              title="Confirm booking"
+                              title="Approve booking"
                             >
                               <CheckCircle className="w-5 h-5" />
                             </button>
@@ -426,16 +426,16 @@ export default function BookingsManagement() {
         isOpen={showConfirmDialog}
         onClose={() => setShowConfirmDialog(false)}
         onConfirm={handleConfirm}
-        title={confirmAction?.type === 'cancel' ? 'Cancel Booking' : confirmAction?.type === 'complete' ? 'Complete Booking' : 'Confirm Booking'}
+        title={confirmAction?.type === 'cancel' ? 'Cancel Booking' : confirmAction?.type === 'complete' ? 'Complete Booking' : 'Approve Booking'}
         message={
           confirmAction?.type === 'cancel'
             ? 'Are you sure you want to cancel this booking? This action cannot be undone.'
             : confirmAction?.type === 'complete'
-            ? 'Are you sure you want to mark this booking as completed?'
-            : 'Are you sure you want to confirm this booking?'
+              ? 'Are you sure you want to mark this booking as completed?'
+              : 'Are you sure you want to approve this booking?'
         }
         variant={confirmAction?.type === 'cancel' ? 'danger' : 'info'}
-        confirmText={confirmAction?.type === 'cancel' ? 'Cancel Booking' : confirmAction?.type === 'complete' ? 'Complete' : 'Confirm'}
+        confirmText={confirmAction?.type === 'cancel' ? 'Cancel Booking' : confirmAction?.type === 'complete' ? 'Complete' : 'Approve'}
       />
     </div>
   );

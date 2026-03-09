@@ -10,9 +10,9 @@ export const adminApi = {
   },
 
   // User Management - uses regular users endpoint (admin can access all)
-  async getUsers(params?: { 
-    search?: string; 
-    role?: string; 
+  async getUsers(params?: {
+    search?: string;
+    role?: string;
     is_verified?: boolean;
     page?: number;
     per_page?: number;
@@ -102,8 +102,8 @@ export const adminApi = {
     return response.data;
   },
 
-  async confirmBooking(id: string): Promise<Booking> {
-    const response = await apiClient.post(`/bookings/${id}/confirm/`);
+  async approveBooking(id: string): Promise<Booking> {
+    const response = await apiClient.post(`/bookings/${id}/approve/`);
     return response.data;
   },
 

@@ -55,14 +55,14 @@ export function HostBookingDetailContent({ params }: { params: Promise<{ id: str
         enabled: !!bookingId,
     });
 
-    const confirmMutation = useMutation({
-        mutationFn: (id: string) => apiClient.confirmBooking(id),
+    const approveMutation = useMutation({
+        mutationFn: (id: string) => apiClient.approveBooking(id),
         onSuccess: () => {
-            toast.success('Booking confirmed');
+            toast.success('Booking approved');
             queryClient.invalidateQueries({ queryKey: ['booking', bookingId] });
             queryClient.invalidateQueries({ queryKey: ['hostBookings'] });
         },
-        onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to confirm booking'),
+        onError: (err: any) => toast.error(err.response?.data?.error || 'Failed to approve booking'),
     });
 
     const cancelMutation = useMutation({
@@ -166,15 +166,15 @@ export function HostBookingDetailContent({ params }: { params: Promise<{ id: str
 
                             {/* Action Buttons */}
                             <div className="flex flex-wrap gap-2">
-                                {booking.status === 'pending' && (
+                                {booking.status === 'requested' && (
                                     <>
                                         <Button
-                                            onClick={() => confirmMutation.mutate(booking.id)}
-                                            disabled={confirmMutation.isPending}
+                                            onClick={() => approveMutation.mutate(booking.id)}
+                                            disabled={approveMutation.isPending}
                                             variant="primary"
                                         >
                                             <CheckCircle className="w-4 h-4 mr-2" />
-                                            Confirm
+                                            Approve
                                         </Button>
                                         <Button
                                             onClick={() => cancelMutation.mutate(booking.id)}
@@ -186,9 +186,9 @@ export function HostBookingDetailContent({ params }: { params: Promise<{ id: str
                                         </Button>
                                     </>
                                 )}
-                                {booking.status === 'confirmed' && (
+                                {(booking.status === 'pending' || booking.status === 'confirmed') && (
                                     <>
-                                        {new Date(booking.check_in) <= new Date(new Date().toDateString()) && (
+                                        {booking.status === 'confirmed' && new Date(booking.check_in) <= new Date(new Date().toDateString()) && (
                                             <Button
                                                 onClick={() => checkInMutation.mutate(booking.id)}
                                                 disabled={checkInMutation.isPending}

@@ -60,10 +60,10 @@ export function useCreateBooking() {
   });
 }
 
-export function useConfirmBooking() {
+export function useApproveBooking() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => apiClient.confirmBooking(id),
+    mutationFn: (id: string) => apiClient.approveBooking(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bookings'] });
     },
