@@ -286,7 +286,7 @@ export default function BookingPaymentPage() {
 
   const isCashOnArrival = selectedProvider === 'cash_on_arrival';
   const chargesOnly = booking
-    ? (parseFloat(booking.service_fee || '0') + parseFloat(booking.commission_fee || '0') + parseFloat(booking.cleaning_fee || '0') + parseFloat(booking.taxes || '0')).toFixed(2)
+    ? (parseFloat(booking.service_fee || '0') + parseFloat(booking.cleaning_fee || '0') + parseFloat(booking.taxes || '0')).toFixed(2)
     : '0.00';
   const displayAmount = isCashOnArrival ? chargesOnly : booking?.grand_total;
 
@@ -319,18 +319,16 @@ export default function BookingPaymentPage() {
             {['Details', 'Payment', 'Confirmation'].map((step, i) => (
               <div key={step} className="flex items-center gap-3">
                 <div className="flex items-center gap-2">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
-                    i <= 1
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${i <= 1
                       ? 'bg-secondary-600 text-white'
                       : 'bg-primary-200 dark:bg-primary-700 text-primary-500 dark:text-sand-400'
-                  }`}>
+                    }`}>
                     {i === 0 ? <CheckCircle className="w-4 h-4" /> : i + 1}
                   </div>
-                  <span className={`text-sm font-medium ${
-                    i <= 1
+                  <span className={`text-sm font-medium ${i <= 1
                       ? 'text-primary-900 dark:text-sand-50'
                       : 'text-primary-400 dark:text-sand-500'
-                  }`}>
+                    }`}>
                     {step}
                   </span>
                 </div>
@@ -370,18 +368,16 @@ export default function BookingPaymentPage() {
                         <button
                           key={provider.id}
                           onClick={() => setSelectedProvider(provider.id)}
-                          className={`w-full card p-5 text-left transition hover:shadow-lg ${
-                            isSelected
+                          className={`w-full card p-5 text-left transition hover:shadow-lg ${isSelected
                               ? 'ring-2 ring-secondary-500 dark:ring-secondary-400 bg-secondary-50/50 dark:bg-secondary-900/20'
                               : 'hover:border-primary-300 dark:hover:border-primary-600'
-                          }`}
+                            }`}
                         >
                           <div className="flex items-start gap-4">
-                            <div className={`p-2.5 rounded-xl ${
-                              isSelected
+                            <div className={`p-2.5 rounded-xl ${isSelected
                                 ? 'bg-secondary-100 dark:bg-secondary-800 text-secondary-600 dark:text-secondary-400'
                                 : 'bg-primary-100 dark:bg-primary-700 text-primary-600 dark:text-sand-400'
-                            }`}>
+                              }`}>
                               <ProviderIcon id={provider.id} />
                             </div>
                             <div className="flex-1 min-w-0">
@@ -448,18 +444,16 @@ export default function BookingPaymentPage() {
                         <button
                           key={provider.id}
                           onClick={() => setSelectedProvider(provider.id)}
-                          className={`w-full card p-5 text-left transition hover:shadow-lg ${
-                            isSelected
+                          className={`w-full card p-5 text-left transition hover:shadow-lg ${isSelected
                               ? 'ring-2 ring-secondary-500 dark:ring-secondary-400 bg-secondary-50/50 dark:bg-secondary-900/20'
                               : 'hover:border-primary-300 dark:hover:border-primary-600'
-                          }`}
+                            }`}
                         >
                           <div className="flex items-start gap-4">
-                            <div className={`p-2.5 rounded-xl ${
-                              isSelected
+                            <div className={`p-2.5 rounded-xl ${isSelected
                                 ? 'bg-secondary-100 dark:bg-secondary-800 text-secondary-600 dark:text-secondary-400'
                                 : 'bg-primary-100 dark:bg-primary-700 text-primary-600 dark:text-sand-400'
-                            }`}>
+                              }`}>
                               <ProviderIcon id={provider.id} />
                             </div>
                             <div className="flex-1 min-w-0">
@@ -608,12 +602,7 @@ export default function BookingPaymentPage() {
                         <span className="text-primary-900 dark:text-sand-50">{booking.currency} {booking.service_fee}</span>
                       </div>
                     )}
-                    {parseFloat(booking.commission_fee || '0') > 0 && (
-                      <div className="flex justify-between">
-                        <span className="text-primary-600 dark:text-sand-300">Commission</span>
-                        <span className="text-primary-900 dark:text-sand-50">{booking.currency} {booking.commission_fee}</span>
-                      </div>
-                    )}
+
                     {parseFloat(booking.cleaning_fee || '0') > 0 && (
                       <div className="flex justify-between">
                         <span className="text-primary-600 dark:text-sand-300">Cleaning fee</span>

@@ -58,11 +58,11 @@ def calculate_booking_total(price_per_night, nights, cleaning_fee=0, service_fee
             fees_total = Decimal(str(cleaning_fee))
             taxes_total = Decimal('0')
     else:
-        # Static pricing (legacy)
+        # Static pricing (legacy fallback)
         price_per_night = Decimal(str(price_per_night))
         nightly_total = price_per_night * nights
-        fees_total = Decimal(str(cleaning_fee))
-        taxes_total = Decimal('0')
+        fees_total = Decimal(str(cleaning_fee)) if cleaning_fee else Decimal('0')
+        taxes_total = Decimal('0')  # Needs to come from TaxEstimate if we want it static, but dynamic handles it properly
     
     # Use service fee from config if not provided
     if service_fee is None:

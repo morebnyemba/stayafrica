@@ -75,7 +75,7 @@ class BookingViewSet(viewsets.ModelViewSet):
         totals = calculate_booking_total(
             property_obj.price_per_night,
             nights,
-            cleaning_fee=serializer.validated_data.get('cleaning_fee', 0),
+            cleaning_fee=serializer.validated_data.get('cleaning_fee', property_obj.cleaning_fee if hasattr(property_obj, 'cleaning_fee') else 0),
             property_obj=property_obj,
             check_in=check_in,
             check_out=check_out
