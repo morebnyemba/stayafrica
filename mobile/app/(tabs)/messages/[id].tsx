@@ -3,7 +3,7 @@ import { View, Text, FlatList, TextInput, TouchableOpacity, ActivityIndicator, K
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useConversations, useConversationMessages, useSendMessage, useEditMessage, useDeleteMessage, useMarkConversationAsRead, useArchiveConversation } from '@/hooks/api-hooks';
+import { useConversations, useConversationMessages, useSendMessage, useEditMessage, useDeleteMessage, useMarkConversationAsRead, useArchiveConversation, usePreApproveConversation } from '@/hooks/api-hooks';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface ConversationMessage {
@@ -38,12 +38,17 @@ export default function ConversationDetailScreen() {
   const { mutate: deleteMessage } = useDeleteMessage();
   const { mutate: markAsRead } = useMarkConversationAsRead();
   const { mutate: archiveConversation } = useArchiveConversation();
+  const { mutate: preApprove, isPending: isPreApproving } = usePreApproveConversation();
 
   const messages = (messagesData as any)?.results ?? [];
 
   const { data: conversationsData } = useConversations();
   const conversation = conversationsData?.results?.find((c: any) => String(c.id) === String(conversationId));
-  const inquiryData = messages.find((m: any) => m.metadata?.check_in)?.metadata;
+  
+  const inquiryMessage = messages.find((m: any) => m.metadata?.check_in);
+  const inquiryData = inquiryMessage?.metadata;
+  const isGuest = inquiryMessage?.is_own_message;
+  
   const canRequestBooking = conversation?.property && !conversation?.booking_id && inquiryData;
 
   // Mark conversation as read when entering
@@ -227,13 +232,34 @@ export default function ConversationDetailScreen() {
             </View>
             <View className="flex-row items-center">
               {canRequestBooking && (
-                <TouchableOpacity
-                  onPress={() => router.push(`/booking/confirm?propertyId=${conversation.property}&checkIn=${inquiryData.check_in}&checkOut=${inquiryData.check_out}&guests=${inquiryData.guests}`)}
-                  className="mr-3 px-3 h-10 rounded-xl items-center justify-center bg-gold"
-                  style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.2, shadowRadius: 3, elevation: 3 }}
-                >
-                  <Text className="text-white font-bold text-xs">Request</Text>
-                </TouchableOpacity>
+                isGuest ? (
+                  <TouchableOpacity
+                    onPress={() => router.push(`/booking/confirm?propertyId=${conversation.property}&checkIn=${inquiryData.check_in}&checkOut=${inquiryData.check_out}&guests=${inquiryData.guests}`)}
+                    className="mr-3 px-3 h-10 rounded-xl items-center justify-center bg-gold"
+                    style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.2, shadowRadius: 3, elevation: 3 }}
+                  >
+                    <Text className="text-white font-bold text-xs">Request</Text>
+                  </TouchableOpacity>
+                ) : (
+                  conversation?.metadata?.pre_approved ? (
+                     <View className="mr-3 px-3 h-10 rounded-xl items-center justify-center bg-green-100 border border-green-200">
+                        <Text className="text-green-700 font-bold text-xs">Pre-approved</Text>
+                     </View>
+                  ) : (
+                    <TouchableOpacity
+                      onPress={() => preApprove(conversationId)}
+                      disabled={isPreApproving}
+                      className="mr-3 px-3 h-10 rounded-xl items-center justify-center bg-secondary-600"
+                      style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.2, shadowRadius: 3, elevation: 3 }}
+                    >
+                      {isPreApproving ? (
+                         <ActivityIndicator size="small" color="#fff" />
+                      ) : (
+                         <Text className="text-white font-bold text-xs">Allow Instant</Text>
+                      )}
+                    </TouchableOpacity>
+                  )
+                )
               )}
               <TouchableOpacity
                 onPress={() => refetch()}

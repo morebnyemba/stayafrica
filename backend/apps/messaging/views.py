@@ -176,6 +176,42 @@ class ConversationViewSet(viewsets.ModelViewSet):
         total_unread = sum(conv.get_unread_count(request.user) for conv in conversations)
         return Response({'unread_count': total_unread})
 
+    @action(detail=True, methods=['post'])
+    def pre_approve(self, request, pk=None):
+        """Pre-approve a guest for instant booking"""
+        conversation = self.get_object()
+        
+        if not conversation.property:
+            return Response(
+                {'error': 'Conversation is not linked to a property'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            
+        # Verify request user is the host
+        if conversation.property.host != request.user:
+            return Response(
+                {'error': 'Only the host can pre-approve bookings'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+            
+        # Update metadata
+        metadata = conversation.metadata or {}
+        metadata['pre_approved'] = True
+        conversation.metadata = metadata
+        conversation.save()
+        
+        # Send system message
+        Message.objects.create(
+            conversation=conversation,
+            sender=request.user, # Sent by host
+            receiver=conversation.get_other_participant(request.user),
+            text="I've pre-approved your request! You can now book instantly for these dates.",
+            message_type='system',
+            metadata={'type': 'pre_approval'}
+        )
+        
+        return Response({'status': 'pre_approved'})
+
 
 class MessageViewSet(viewsets.ModelViewSet):
     """ViewSet for managing messages"""

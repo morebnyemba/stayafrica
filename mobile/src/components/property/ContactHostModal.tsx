@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, Modal, TouchableOpacity, TextInput, ActivityIndicator, Alert, KeyboardAvoidingView, ScrollView, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useCreateConversation } from '@/hooks/api-hooks';
+import { useCreateConversation, useUnavailableDates } from '@/hooks/api-hooks';
 import { useRouter } from 'expo-router';
+import { Calendar, DateData } from 'react-native-calendars';
+import { format, addDays, isBefore, parseISO } from 'date-fns';
 
 interface ContactHostModalProps {
     visible: boolean;
@@ -20,10 +22,80 @@ export function ContactHostModal({ visible, onClose, host, propertyId, userId }:
     const router = useRouter();
     const [checkIn, setCheckIn] = useState('');
     const [checkOut, setCheckOut] = useState('');
+    const [showCalendar, setShowCalendar] = useState(false);
+    const [selecting, setSelecting] = useState<'checkIn' | 'checkOut'>('checkIn');
+    
     const [guests, setGuests] = useState('1');
     const [message, setMessage] = useState('');
 
     const { mutateAsync: createConversation, isPending: isSubmitting } = useCreateConversation();
+    
+    // Fetch unavailable dates
+    const { data: unavailableDatesData } = useUnavailableDates(propertyId ? String(propertyId) : '');
+    
+    const unavailableDates = useMemo(() => {
+        const dates: { [key: string]: any } = {};
+        if (unavailableDatesData?.unavailable_dates) {
+            unavailableDatesData.unavailable_dates.forEach((date: string) => {
+                dates[date] = { disabled: true, disableTouchEvent: true, color: '#fee2e2', textColor: '#dc2626' };
+            });
+        }
+        return dates;
+    }, [unavailableDatesData]);
+
+    const markedDates = useMemo(() => {
+        const marks = { ...unavailableDates };
+        
+        if (checkIn) {
+            marks[checkIn] = { ...marks[checkIn], selected: true, startingDay: true, color: '#d9b168', textColor: '#ffffff' };
+        }
+        if (checkOut) {
+            marks[checkOut] = { ...marks[checkOut], selected: true, endingDay: true, color: '#d9b168', textColor: '#ffffff' };
+        }
+        
+        if (checkIn && checkOut) {
+            let start = new Date(checkIn);
+            let end = new Date(checkOut);
+            
+            // Swap if check-out is before check-in
+            if (start > end) {
+                const temp = start;
+                start = end;
+                end = temp;
+            }
+
+            let current = addDays(start, 1);
+            while (isBefore(current, end)) {
+                const dateString = format(current, 'yyyy-MM-dd');
+                if (!marks[dateString]?.disabled) {
+                    marks[dateString] = { color: 'rgba(217, 177, 104, 0.2)', textColor: '#122f26' };
+                }
+                current = addDays(current, 1);
+            }
+        }
+        
+        return marks;
+    }, [checkIn, checkOut, unavailableDates]);
+
+    const onDayPress = (day: DateData) => {
+        if (unavailableDates[day.dateString]) return;
+
+        if (selecting === 'checkIn') {
+            setCheckIn(day.dateString);
+            setSelecting('checkOut');
+            if (checkOut && day.dateString >= checkOut) {
+                setCheckOut('');
+            }
+        } else {
+            if (day.dateString <= checkIn) {
+                setCheckIn(day.dateString);
+                setCheckOut('');
+            } else {
+                setCheckOut(day.dateString);
+                setShowCalendar(false);
+            }
+        }
+    };
 
     const handleSubmit = async () => {
         if (!userId) {
@@ -106,33 +178,56 @@ export function ContactHostModal({ visible, onClose, host, propertyId, userId }:
 
                         {/* Dates */}
                         <View className="flex-row gap-4 mb-4">
-                            <View className="flex-1">
+                            <TouchableOpacity 
+                                className="flex-1"
+                                onPress={() => { setSelecting('checkIn'); setShowCalendar(true); }}
+                            >
                                 <Text className="text-xs font-bold text-forest uppercase mb-1.5">Check-in</Text>
                                 <View className="flex-row items-center border border-sand-200 rounded-xl px-3 h-12 bg-sand-50">
                                     <Ionicons name="calendar-outline" size={18} color="#789c8d" />
-                                    <TextInput
-                                        placeholder="YYYY-MM-DD"
-                                        value={checkIn}
-                                        onChangeText={setCheckIn}
-                                        className="flex-1 ml-2 text-forest text-sm pt-0 pb-0"
-                                        placeholderTextColor="#a0b3aa"
-                                    />
+                                    <Text className={`flex-1 ml-2 text-sm ${checkIn ? 'text-forest' : 'text-[#a0b3aa]'}`}>
+                                        {checkIn || 'Select Date'}
+                                    </Text>
                                 </View>
-                            </View>
-                            <View className="flex-1">
+                            </TouchableOpacity>
+                            <TouchableOpacity 
+                                className="flex-1"
+                                onPress={() => { setSelecting('checkOut'); setShowCalendar(true); }}
+                            >
                                 <Text className="text-xs font-bold text-forest uppercase mb-1.5">Check-out</Text>
                                 <View className="flex-row items-center border border-sand-200 rounded-xl px-3 h-12 bg-sand-50">
                                     <Ionicons name="calendar-outline" size={18} color="#789c8d" />
-                                    <TextInput
-                                        placeholder="YYYY-MM-DD"
-                                        value={checkOut}
-                                        onChangeText={setCheckOut}
-                                        className="flex-1 ml-2 text-forest text-sm pt-0 pb-0"
-                                        placeholderTextColor="#a0b3aa"
-                                    />
+                                    <Text className={`flex-1 ml-2 text-sm ${checkOut ? 'text-forest' : 'text-[#a0b3aa]'}`}>
+                                        {checkOut || 'Select Date'}
+                                    </Text>
                                 </View>
-                            </View>
+                            </TouchableOpacity>
                         </View>
+
+                        {showCalendar && (
+                            <View className="mb-4 border border-sand-200 rounded-xl overflow-hidden">
+                                <Calendar
+                                    current={checkIn || new Date().toISOString().split('T')[0]}
+                                    minDate={new Date().toISOString().split('T')[0]}
+                                    onDayPress={onDayPress}
+                                    markedDates={markedDates}
+                                    markingType={'period'}
+                                    theme={{
+                                        todayTextColor: '#d9b168',
+                                        arrowColor: '#d9b168',
+                                        textDayFontWeight: '500',
+                                        textMonthFontWeight: 'bold',
+                                        textDayHeaderFontWeight: 'bold',
+                                    }}
+                                />
+                                <TouchableOpacity 
+                                    onPress={() => setShowCalendar(false)}
+                                    className="bg-sand-100 py-3 items-center border-t border-sand-200"
+                                >
+                                    <Text className="text-forest font-semibold">Close Calendar</Text>
+                                </TouchableOpacity>
+                            </View>
+                        )}
 
                         {/* Guests */}
                         <View className="mb-4">

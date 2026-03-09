@@ -396,6 +396,12 @@ class APIClient {
     ).data;
   }
 
+  async preApproveConversation(conversationId: string): Promise<any> {
+    return (
+      await this.client.post(`/messaging/conversations/${conversationId}/pre_approve/`)
+    ).data;
+  }
+
   async editMessage(messageId: string, text: string): Promise<any> {
     return (
       await this.client.put(`/messaging/messages/${messageId}/edit/`, { text })

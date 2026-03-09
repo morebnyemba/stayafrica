@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
-import { Send, MessageSquare, Search, Archive, Trash2, Edit2, Check, X, ArrowLeft, ShieldAlert, MoreVertical, Flag, Ban, BellOff, Calendar } from 'lucide-react';
+import { Send, MessageSquare, Search, Archive, Trash2, Edit2, Check, X, ArrowLeft, ShieldAlert, MoreVertical, Flag, Ban, BellOff, Calendar, Loader2 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useState, useEffect, useRef } from 'react';
@@ -141,6 +141,16 @@ export function MessagesContent() {
       message_type: 'text',
     });
   };
+
+  // Pre-approve mutation
+  const preApproveMutation = useMutation({
+    mutationFn: (conversationId: string) => apiClient.preApproveConversation(conversationId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['messages', selectedConversation?.id] });
+      queryClient.invalidateQueries({ queryKey: ['conversations'] });
+      toast.success('Guest pre-approved for instant booking');
+    },
+  });
 
   const handleEditMessage = (messageId: string, currentText: string) => {
     setEditingMessageId(messageId);
@@ -297,12 +307,24 @@ export function MessagesContent() {
                           );
                         } else {
                           // Current user is the Host -> Show Allow Instant Booking
+                          const isPreApproved = selectedConversation.metadata?.pre_approved;
+                          
+                          if (isPreApproved) {
+                            return (
+                              <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-green-100 text-green-700 rounded-lg text-sm font-medium border border-green-200">
+                                <Check className="w-4 h-4" />
+                                Pre-approved
+                              </div>
+                            );
+                          }
+                          
                           return (
                             <button
-                              onClick={() => toast.success('Instant booking pre-approved for this guest')}
-                              className="hidden sm:flex items-center gap-2 px-4 py-2 bg-secondary-600 hover:bg-secondary-700 text-white rounded-lg text-sm font-medium transition"
+                              onClick={() => preApproveMutation.mutate(selectedConversation.id)}
+                              disabled={preApproveMutation.isPending}
+                              className="hidden sm:flex items-center gap-2 px-4 py-2 bg-secondary-600 hover:bg-secondary-700 text-white rounded-lg text-sm font-medium transition disabled:opacity-50"
                             >
-                              <Check className="w-4 h-4" />
+                              {preApproveMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
                               Allow Instant Booking
                             </button>
                           );

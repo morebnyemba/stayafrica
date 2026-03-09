@@ -57,6 +57,14 @@ export function usePropertyById(id: string) {
   });
 }
 
+export function useUnavailableDates(propertyId: string, start?: string, end?: string) {
+  return useQuery({
+    queryKey: ['properties', propertyId, 'unavailable-dates', start, end],
+    queryFn: () => apiClient.getUnavailableDates(propertyId, start, end),
+    enabled: !!propertyId,
+  });
+}
+
 // Bookings
 export function useBookings(status?: string) {
   return useQuery<{ results: Booking[] }>({
@@ -182,6 +190,17 @@ export function useArchiveConversation() {
     mutationFn: (conversationId: string) => apiClient.archiveConversation(conversationId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['conversations'] });
+    },
+  });
+}
+
+export function usePreApproveConversation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (conversationId: string) => apiClient.preApproveConversation(conversationId),
+    onSuccess: (data, conversationId) => {
+      queryClient.invalidateQueries({ queryKey: ['conversations'] });
+      queryClient.invalidateQueries({ queryKey: ['conversations', conversationId, 'messages'] });
     },
   });
 }

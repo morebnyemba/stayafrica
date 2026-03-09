@@ -231,6 +231,11 @@ class ApiClient {
     return this.client.post(`/messaging/conversations/${safeId}/mark_as_read/`);
   }
 
+  async preApproveConversation(conversationId: string) {
+    const safeId = this.assertId(conversationId, 'Conversation ID');
+    return this.client.post(`/messaging/conversations/${safeId}/pre_approve/`);
+  }
+
   async archiveConversation(conversationId: string) {
     const safeId = this.assertId(conversationId, 'Conversation ID');
     return this.client.post(`/messaging/conversations/${safeId}/archive/`);
