@@ -60,9 +60,9 @@ export default function BookingConfirmPage() {
 
   const { data: taxEstimate } = useTaxEstimate(property?.country);
 
-  let costs = { basePrice: 0, serviceFee: 0, commissionFee: 0, commissionRate: 0, cleaningFee: 0, taxes: 0, taxRate: 0, total: 0 };
+  let costs = { basePrice: 0, serviceFee: 0, commissionFee: 0, commissionRate: 0, cleaningFee: 0, taxes: 0, taxRate: 0, individualTaxes: [{ name: '', amount: 0 }], total: 0 };
   if (property && feeConfig && nights > 0) {
-    costs = calculateBookingCost(property.price_per_night, nights, feeConfig, property.cleaning_fee, taxEstimate?.combined_rate || 0);
+    costs = calculateBookingCost(property.price_per_night, nights, feeConfig, property.cleaning_fee, taxEstimate || null);
   }
 
   const [contactingHost, setContactingHost] = useState(false);
@@ -426,16 +426,16 @@ export default function BookingConfirmPage() {
                     </div>
                   )}
 
-                  {costs.taxes > 0 && (
-                    <div className="flex justify-between">
+                  {costs.individualTaxes?.map((tax, idx) => (
+                    <div key={idx} className="flex justify-between">
                       <span className="text-primary-600 dark:text-sand-300">
-                        Taxes ({costs.taxRate}%)
+                        {tax.name}
                       </span>
                       <span className="font-medium text-primary-900 dark:text-sand-50">
-                        {property?.currency} {costs.taxes.toFixed(2)}
+                        {property?.currency} {tax.amount.toFixed(2)}
                       </span>
                     </div>
-                  )}
+                  ))}
                   {costs.cleaningFee > 0 && (
                     <div className="flex justify-between">
                       <span className="text-primary-600 dark:text-sand-300">Cleaning fee</span>

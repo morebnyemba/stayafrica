@@ -83,8 +83,8 @@ export function BookingCard({ property }: BookingCardProps) {
 
   // Calculate costs using the fee configuration
   const costs = feeConfig && nights > 0
-    ? calculateBookingCost(property.price_per_night, nights, feeConfig, property.cleaning_fee, taxEstimate?.combined_rate || 0)
-    : { basePrice: 0, serviceFee: 0, commissionFee: 0, commissionRate: 0, cleaningFee: 0, taxes: 0, taxRate: 0, total: 0 };
+    ? calculateBookingCost(property.price_per_night, nights, feeConfig, property.cleaning_fee, taxEstimate || null)
+    : { basePrice: 0, serviceFee: 0, commissionFee: 0, commissionRate: 0, cleaningFee: 0, taxes: 0, taxRate: 0, individualTaxes: [], total: 0 };
 
   const hasDateConflict = checkInDate && checkOutDate && hasUnavailableDatesInRange(checkInDate, checkOutDate);
 
@@ -230,12 +230,12 @@ export function BookingCard({ property }: BookingCardProps) {
             </div>
           )}
 
-          {costs.taxes > 0 && (
-            <div className="flex justify-between text-primary-700 dark:text-sand-200">
-              <span>Taxes ({costs.taxRate}%)</span>
-              <span>{property.currency} {costs.taxes.toFixed(2)}</span>
+          {costs.individualTaxes?.map((tax, idx) => (
+            <div key={idx} className="flex justify-between text-primary-700 dark:text-sand-200">
+              <span>{tax.name}</span>
+              <span>{property.currency} {tax.amount.toFixed(2)}</span>
             </div>
-          )}
+          ))}
           {costs.cleaningFee > 0 && (
             <div className="flex justify-between text-primary-700 dark:text-sand-200">
               <span>Cleaning fee</span>
