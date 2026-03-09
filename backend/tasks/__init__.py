@@ -10,3 +10,4 @@ from tasks import notification_tasks  # noqa: F401
 from tasks import image_tasks      # noqa: F401
 from tasks import geocoding_tasks  # noqa: F401
 from tasks import analytics_tasks  # noqa: F401
+from tasks import booking_expiration_tasks  # noqa: F401

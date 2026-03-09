@@ -366,6 +366,7 @@ CELERY_IMPORTS = [
     'tasks.email_tasks',
     'tasks.payment_tasks',
     'tasks.notification_tasks',
+    'tasks.booking_expiration_tasks',
     'tasks.image_tasks',
     'tasks.geocoding_tasks',
     'tasks.analytics_tasks',
@@ -388,6 +389,7 @@ CELERY_TASK_ROUTES = {
     'tasks.email_tasks.*': {'queue': 'high_priority'},
     'tasks.payment_tasks.*': {'queue': 'high_priority'},
     'tasks.notification_tasks.*': {'queue': 'high_priority'},
+    'tasks.booking_expiration_tasks.*': {'queue': 'high_priority'},
     # Analytics — heavy batch, can run slower
     'tasks.analytics_tasks.*': {'queue': 'analytics'},
     # Housekeeping — low priority batch
@@ -428,6 +430,18 @@ CELERY_BEAT_SCHEDULE = {
     'daily-notifications': {
         'task': 'tasks.notification_tasks.send_daily_notifications',
         'schedule': timedelta(minutes=2),    # every 2 min — near-instant
+        'options': {'queue': 'high_priority'},
+    },
+
+    # ── Booking Expiration (every 15 minutes) ────────────────────
+    'expire-pending-bookings': {
+        'task': 'tasks.booking_expiration_tasks.expire_pending_bookings',
+        'schedule': timedelta(minutes=15),
+        'options': {'queue': 'high_priority'},
+    },
+    'send-pending-reminders': {
+        'task': 'tasks.booking_expiration_tasks.send_pending_reminders',
+        'schedule': timedelta(minutes=15),
         'options': {'queue': 'high_priority'},
     },
 
