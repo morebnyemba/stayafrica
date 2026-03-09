@@ -220,6 +220,8 @@ class ApiClient {
     property?: number;
     booking?: number;
     subject?: string;
+    initial_message?: string;
+    metadata?: any;
   }) {
     return this.client.post('/messaging/conversations/', data);
   }
