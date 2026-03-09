@@ -80,7 +80,7 @@ export interface Booking {
   commission_fee: number;
   cleaning_fee?: number;
   grand_total: number;
-  status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
+  status: 'requested' | 'pending' | 'confirmed' | 'completed' | 'cancelled';
   created_at: string;
   updated_at: string;
 }
