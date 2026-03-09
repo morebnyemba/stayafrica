@@ -105,6 +105,34 @@ class InstantBookingService:
         property_obj = booking.rental_property
         guest = booking.guest
         
+        # Check for pre-approval (overrides other checks)
+        try:
+            from apps.messaging.models import Conversation
+            # Find conversation between guest and host for this property
+            conversation = Conversation.objects.filter(
+                property=property_obj,
+                participants=guest
+            ).filter(
+                participants=property_obj.host
+            ).order_by('-updated_at').first()
+            
+            if conversation and conversation.metadata and conversation.metadata.get('pre_approved'):
+                booking.status = 'pending'
+                booking.save(update_fields=['status', 'updated_at'])
+                
+                logger.info(f"Booking {booking.booking_ref} auto-approved via pre-approval")
+                
+                # Send confirmation notification
+                try:
+                    from services.notification_service import NotificationService
+                    NotificationService.send_booking_confirmation(booking)
+                except Exception as e:
+                    logger.warning(f"Failed to send auto-approval notification: {e}")
+
+                return True, "Guest was pre-approved by host"
+        except Exception as e:
+            logger.warning(f"Pre-approval check failed: {e}")
+
         # Check if property has instant booking enabled
         if not property_obj.instant_booking_enabled:
             return False, "Property does not have instant booking enabled"
