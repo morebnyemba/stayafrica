@@ -2,8 +2,9 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
-import { Send, MessageSquare, Search, Archive, Trash2, Edit2, Check, X, ArrowLeft, ShieldAlert, MoreVertical, Flag, Ban, BellOff } from 'lucide-react';
+import { Send, MessageSquare, Search, Archive, Trash2, Edit2, Check, X, ArrowLeft, ShieldAlert, MoreVertical, Flag, Ban, BellOff, Calendar } from 'lucide-react';
 import dynamic from 'next/dynamic';
+import Link from 'next/link';
 import { useState, useEffect, useRef } from 'react';
 import { toast } from 'react-hot-toast';
 const ProtectedRoute = dynamic(() => import('@/components/auth/protected-route').then(m => m.ProtectedRoute), { ssr: false });
@@ -206,8 +207,8 @@ export function MessagesContent() {
                       key={conv.id}
                       onClick={() => setSelectedConversation(conv)}
                       className={`w-full p-3 rounded-lg mb-2 text-left transition ${selectedConversation?.id === conv.id
-                          ? 'bg-primary-100 dark:bg-primary-700'
-                          : 'hover:bg-primary-50 dark:hover:bg-primary-800'
+                        ? 'bg-primary-100 dark:bg-primary-700'
+                        : 'hover:bg-primary-50 dark:hover:bg-primary-800'
                         }`}
                     >
                       <div className="flex items-start gap-3">
@@ -275,6 +276,22 @@ export function MessagesContent() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
+                    {(() => {
+                      const inquiryData = messages.find((m: any) => m.metadata?.check_in)?.metadata;
+                      // Show button if: there is a property, no booking is linked yet, and we found inquiry data
+                      if (selectedConversation.property && !selectedConversation.booking_id && inquiryData) {
+                        return (
+                          <Link
+                            href={`/booking/confirm?propertyId=${selectedConversation.property}&checkIn=${inquiryData.check_in}&checkOut=${inquiryData.check_out}&guests=${inquiryData.guests}`}
+                            className="hidden sm:flex items-center gap-2 px-4 py-2 bg-secondary-600 hover:bg-secondary-700 text-white rounded-lg text-sm font-medium transition"
+                          >
+                            <Calendar className="w-4 h-4" />
+                            Request Booking
+                          </Link>
+                        );
+                      }
+                      return null;
+                    })()}
                     <button
                       onClick={() => archiveMutation.mutate(selectedConversation.id)}
                       className="p-2 hover:bg-primary-100 dark:hover:bg-primary-700 rounded-lg transition"
@@ -386,8 +403,8 @@ export function MessagesContent() {
                                 {/* Sender name - shown when conversation starts or user changes */}
                                 {showSenderInfo && (
                                   <span className={`text-xs font-semibold mb-1 ${isOwnMessage
-                                      ? 'text-primary-700 dark:text-sand-300'
-                                      : 'text-primary-600 dark:text-sand-400'
+                                    ? 'text-primary-700 dark:text-sand-300'
+                                    : 'text-primary-600 dark:text-sand-400'
                                     }`}>
                                     {senderName}
                                   </span>
@@ -423,8 +440,8 @@ export function MessagesContent() {
                                   <div className="group flex flex-col">
                                     <div
                                       className={`px-4 py-2 rounded-2xl shadow-sm transition-shadow ${isOwnMessage
-                                          ? 'bg-secondary-600 text-white rounded-br-sm'
-                                          : 'bg-primary-100 dark:bg-primary-700 text-primary-900 dark:text-sand-50 rounded-bl-sm'
+                                        ? 'bg-secondary-600 text-white rounded-br-sm'
+                                        : 'bg-primary-100 dark:bg-primary-700 text-primary-900 dark:text-sand-50 rounded-bl-sm'
                                         }`}
                                     >
                                       <p className="whitespace-pre-wrap break-words">{message.text}</p>
@@ -435,8 +452,8 @@ export function MessagesContent() {
 
                                     {/* Time and Actions */}
                                     <div className={`flex items-center gap-2 mt-1.5 text-xs ${isOwnMessage
-                                        ? 'text-primary-600 dark:text-sand-500 flex-row-reverse'
-                                        : 'text-primary-500 dark:text-sand-600'
+                                      ? 'text-primary-600 dark:text-sand-500 flex-row-reverse'
+                                      : 'text-primary-500 dark:text-sand-600'
                                       }`}>
                                       <span>
                                         {messageTime.toLocaleTimeString([], {

@@ -2,11 +2,9 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import axios from 'axios';
+import { apiClient } from '@/services/api-client';
 import { MessageTemplate } from '@/types/automated-messaging-types';
 import { Plus, Edit2, Trash2, Loader2, Save, X, Eye } from 'lucide-react';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
 const TEMPLATE_TYPES = [
   { value: 'booking_inquiry', label: 'Booking Inquiry' },
@@ -39,32 +37,14 @@ export const MessageTemplateEditor = () => {
   const { data: templates = [], isLoading } = useQuery<MessageTemplate[]>({
     queryKey: ['message-templates'],
     queryFn: async () => {
-      const token = localStorage.getItem('access_token');
-      const response = await axios.get(
-        `${API_BASE_URL}/api/v1/messaging/templates/`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await apiClient.get('/messaging/templates/');
       return response.data.results || response.data;
     },
   });
 
   const createMutation = useMutation({
     mutationFn: async (data: { name: string; subject: string; body: string; template_type: string }) => {
-      const token = localStorage.getItem('access_token');
-      const response = await axios.post(
-        `${API_BASE_URL}/api/v1/messaging/templates/`,
-        data,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      const response = await apiClient.post('/messaging/templates/', data);
       return response.data;
     },
     onSuccess: () => {
@@ -75,17 +55,7 @@ export const MessageTemplateEditor = () => {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: Partial<MessageTemplate> }) => {
-      const token = localStorage.getItem('access_token');
-      const response = await axios.patch(
-        `${API_BASE_URL}/api/v1/messaging/templates/${id}/`,
-        data,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      const response = await apiClient.patch(`/messaging/templates/${id}/`, data);
       return response.data;
     },
     onSuccess: () => {
@@ -96,15 +66,7 @@ export const MessageTemplateEditor = () => {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      const token = localStorage.getItem('access_token');
-      await axios.delete(
-        `${API_BASE_URL}/api/v1/messaging/templates/${id}/`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      await apiClient.delete(`/messaging/templates/${id}/`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['message-templates'] });

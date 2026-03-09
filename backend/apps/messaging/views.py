@@ -77,19 +77,72 @@ class ConversationViewSet(viewsets.ModelViewSet):
                 ).first()
                 
                 if existing_conv:
-                    serializer = self.get_serializer(existing_conv)
-                    return Response(serializer.data, status=status.HTTP_200_OK)
+                    target_conv = existing_conv
+                    status_code = status.HTTP_200_OK
+                else:
+                    target_conv = None
+                    status_code = status.HTTP_201_CREATED
+            else:
+                target_conv = None
+                status_code = status.HTTP_201_CREATED
             
-            # Create new conversation
-            conversation = Conversation.objects.create(
-                property_id=property_id,
-                booking_id=booking_id,
-                subject=request.data.get('subject', '')
-            )
-            conversation.participants.set(participants)
+            if not target_conv:
+                # Create new conversation
+                target_conv = Conversation.objects.create(
+                    property_id=property_id,
+                    booking_id=booking_id,
+                    subject=request.data.get('subject', '')
+                )
+                target_conv.participants.set(participants)
             
-            serializer = self.get_serializer(conversation)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            # Create first message if provided
+            initial_message = request.data.get('initial_message')
+            metadata = request.data.get('metadata')
+            
+            if initial_message:
+                receiver_id = [p for p in participants if p != request.user.id][0]
+                receiver = User.objects.get(id=receiver_id)
+                
+                # Check Rate Limiting
+                if target_conv.property:
+                    guest_msgs = Message.objects.filter(conversation=target_conv, sender=request.user).count()
+                    host_msgs = Message.objects.filter(conversation=target_conv, receiver=request.user).count()
+                    
+                    if guest_msgs >= 1 and host_msgs == 0:
+                        from apps.bookings.models import Booking
+                        has_booking = Booking.objects.filter(
+                            guest=request.user,
+                            rental_property=target_conv.property,
+                            status__in=['requested', 'pending', 'confirmed', 'completed']
+                        ).exists()
+                        if not has_booking:
+                            raise PermissionDenied("You can only send another message if the host has replied or your booking is confirmed.")
+                
+                # Create Message
+                msg = Message.objects.create(
+                    conversation=target_conv,
+                    sender=request.user,
+                    receiver=receiver,
+                    text=initial_message,
+                    metadata=metadata
+                )
+                
+                try:
+                    from services.erlang_messaging import erlang_client
+                    erlang_client.send_message(
+                        conversation_id=msg.conversation.id,
+                        sender_id=msg.sender.id,
+                        receiver_id=msg.receiver.id,
+                        text=msg.text,
+                        message_type=msg.message_type,
+                        priority='normal',
+                        metadata=msg.metadata
+                    )
+                except Exception as e:
+                    logger.warning(f"Failed to route message through Erlang: {str(e)}")
+            
+            serializer = self.get_serializer(target_conv)
+            return Response(serializer.data, status=status_code)
             
         except Exception as e:
             logger.error(f"Error creating conversation: {str(e)}")
@@ -161,8 +214,26 @@ class MessageViewSet(viewsets.ModelViewSet):
     
     def perform_create(self, serializer):
         """Set the sender to the current user and route through Erlang if available"""
+        conversation = serializer.validated_data.get('conversation')
+        sender = self.request.user
+        
+        # RATE LIMITING LOGIC
+        if conversation and conversation.property:
+            guest_msgs = Message.objects.filter(conversation=conversation, sender=sender).count()
+            host_msgs = Message.objects.filter(conversation=conversation, receiver=sender).count()
+            
+            if guest_msgs >= 1 and host_msgs == 0:
+                from apps.bookings.models import Booking
+                has_booking = Booking.objects.filter(
+                    guest=sender,
+                    rental_property=conversation.property,
+                    status__in=['requested', 'pending', 'confirmed', 'completed']
+                ).exists()
+                if not has_booking:
+                    raise PermissionDenied("You can only send another message if the host has replied or your booking is confirmed.")
+        
         try:
-            message = serializer.save(sender=self.request.user)
+            message = serializer.save(sender=sender)
             
             # Try to route through Erlang for real-time delivery
             try:

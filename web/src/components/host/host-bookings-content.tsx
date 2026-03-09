@@ -411,10 +411,10 @@ export function HostBookingsContent() {
                               {/* Guest avatar */}
                               <div className="flex items-center gap-2">
                                 <div className="w-7 h-7 rounded-full bg-primary-200 dark:bg-primary-700 flex items-center justify-center text-xs font-bold text-primary-600 dark:text-sand-300">
-                                  {getInitials(booking.guest?.first_name, booking.guest?.last_name)}
+                                  {getInitials(booking.guest_first_name, booking.guest_last_name)}
                                 </div>
                                 <span className="text-primary-900 dark:text-sand-100 font-medium">
-                                  {booking.guest?.first_name} {booking.guest?.last_name}
+                                  {booking.guest_first_name} {booking.guest_last_name}
                                 </span>
                               </div>
                               <span className="hidden sm:inline text-primary-300 dark:text-primary-600">|</span>
@@ -429,9 +429,9 @@ export function HostBookingsContent() {
                                 <span className="font-mono bg-primary-50 dark:bg-primary-800 px-2 py-0.5 rounded">
                                   {booking.booking_ref}
                                 </span>
-                                {booking.guest?.email && (
+                                {booking.guest_email && (
                                   <Link
-                                    href={`/host/messages?guest=${booking.guest?.id}`}
+                                    href={`/host/messages?guest=${booking.guest}`}
                                     className="flex items-center gap-1 hover:text-secondary-600 transition-colors"
                                   >
                                     <MessageSquare className="w-3.5 h-3.5" />

@@ -2,12 +2,10 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import axios from 'axios';
+import { apiClient } from '@/services/api-client';
 import { ScheduledMessage } from '@/types/automated-messaging-types';
 import { Calendar, Loader2, Plus, Trash2, X } from 'lucide-react';
 import { format } from 'date-fns';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
 export const ScheduledMessagesPanel = () => {
   const queryClient = useQueryClient();
@@ -21,32 +19,14 @@ export const ScheduledMessagesPanel = () => {
   const { data: messages = [], isLoading } = useQuery<ScheduledMessage[]>({
     queryKey: ['scheduled-messages'],
     queryFn: async () => {
-      const token = localStorage.getItem('access_token');
-      const response = await axios.get(
-        `${API_BASE_URL}/api/v1/messaging/scheduled-messages/`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await apiClient.get('/messaging/scheduled-messages/');
       return response.data.results || response.data;
     },
   });
 
   const createMutation = useMutation({
     mutationFn: async (data: { conversation: number; message_text: string; scheduled_time: string }) => {
-      const token = localStorage.getItem('access_token');
-      const response = await axios.post(
-        `${API_BASE_URL}/api/v1/messaging/scheduled-messages/`,
-        data,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      const response = await apiClient.post('/messaging/scheduled-messages/', data);
       return response.data;
     },
     onSuccess: () => {
@@ -57,16 +37,7 @@ export const ScheduledMessagesPanel = () => {
 
   const cancelMutation = useMutation({
     mutationFn: async (id: number) => {
-      const token = localStorage.getItem('access_token');
-      const response = await axios.post(
-        `${API_BASE_URL}/api/v1/messaging/scheduled-messages/${id}/cancel/`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await apiClient.post(`/messaging/scheduled-messages/${id}/cancel/`);
       return response.data;
     },
     onSuccess: () => {
@@ -85,7 +56,7 @@ export const ScheduledMessagesPanel = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.conversation.trim() || !formData.message_text.trim() || !formData.scheduled_time) {
       return;
     }

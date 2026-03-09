@@ -2,11 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import axios from 'axios';
+import { apiClient } from '@/services/api-client';
 import { AutoMessageSettings as SettingsType } from '@/types/automated-messaging-types';
 import { Loader2, Save, Clock, MessageSquare, Calendar, Moon } from 'lucide-react';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
 export const AutoMessageSettings = () => {
   const queryClient = useQueryClient();
@@ -16,15 +14,7 @@ export const AutoMessageSettings = () => {
   const { data: settings, isLoading } = useQuery<SettingsType>({
     queryKey: ['auto-message-settings'],
     queryFn: async () => {
-      const token = localStorage.getItem('access_token');
-      const response = await axios.get(
-        `${API_BASE_URL}/api/v1/messaging/settings/`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await apiClient.get('/messaging/settings/');
       return response.data;
     },
   });
@@ -37,18 +27,8 @@ export const AutoMessageSettings = () => {
 
   const updateMutation = useMutation({
     mutationFn: async (data: Partial<SettingsType>) => {
-      const token = localStorage.getItem('access_token');
       if (!settings?.id) return;
-      const response = await axios.patch(
-        `${API_BASE_URL}/api/v1/messaging/settings/${settings.id}/`,
-        data,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      const response = await apiClient.patch(`/messaging/settings/${settings.id}/`, data);
       return response.data;
     },
     onSuccess: () => {
@@ -158,14 +138,12 @@ export const AutoMessageSettings = () => {
             <button
               onClick={() => handleToggle(field)}
               disabled={updateMutation.isPending}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                localSettings[field] ? 'bg-secondary-600' : 'bg-primary-200 dark:bg-primary-700'
-              }`}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${localSettings[field] ? 'bg-secondary-600' : 'bg-primary-200 dark:bg-primary-700'
+                }`}
             >
               <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  localSettings[field] ? 'translate-x-6' : 'translate-x-1'
-                }`}
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${localSettings[field] ? 'translate-x-6' : 'translate-x-1'
+                  }`}
               />
             </button>
           </div>

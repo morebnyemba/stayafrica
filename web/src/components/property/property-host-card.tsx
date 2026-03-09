@@ -2,11 +2,11 @@
 
 import { useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { Star, CheckCircle, MessageCircle, Loader2, Shield } from 'lucide-react';
+import { Star, CheckCircle, MessageCircle, Shield } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { toast } from 'react-hot-toast';
-import { apiClient } from '@/services/api-client';
 import { useAuth } from '@/store/auth-store';
+import { ContactHostModal } from './ContactHostModal';
 
 interface PropertyHostCardProps {
   host?: {
@@ -29,10 +29,11 @@ export function PropertyHostCard({ host, propertyId }: PropertyHostCardProps) {
   const router = useRouter();
   const pathname = usePathname();
   const { user, isAuthenticated } = useAuth();
-  const [contactingHost, setContactingHost] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   if (!host) return null;
 
-  const contactHost = async () => {
+  const handleContactClick = () => {
     if (!isAuthenticated || !user?.id) {
       toast.error('You must be logged in to perform this action');
       router.push(`/login?redirect=${encodeURIComponent(pathname || '/')}`);
@@ -42,20 +43,7 @@ export function PropertyHostCard({ host, propertyId }: PropertyHostCardProps) {
       toast.error('Host information is unavailable');
       return;
     }
-    setContactingHost(true);
-    try {
-      await apiClient.createConversation({
-        participants: [parseInt(host.id), parseInt(user.id)],
-        property: propertyId ? parseInt(propertyId) : undefined,
-        subject: `Inquiry from interested guest`,
-      });
-      toast.success('Conversation started!');
-      router.push(`/messages`);
-    } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Failed to start conversation');
-    } finally {
-      setContactingHost(false);
-    }
+    setIsModalOpen(true);
   };
 
   return (
@@ -133,21 +121,11 @@ export function PropertyHostCard({ host, propertyId }: PropertyHostCardProps) {
 
       {/* Contact Button */}
       <button
-        onClick={contactHost}
-        disabled={contactingHost}
-        className="inline-flex items-center justify-center gap-2 px-6 py-3 border border-primary-900 dark:border-sand-50 rounded-lg text-primary-900 dark:text-sand-50 font-semibold text-sm hover:bg-sand-50 dark:hover:bg-primary-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
+        onClick={handleContactClick}
+        className="inline-flex items-center justify-center gap-2 px-6 py-3 border border-primary-900 dark:border-sand-50 rounded-lg text-primary-900 dark:text-sand-50 font-semibold text-sm hover:bg-sand-50 dark:hover:bg-primary-800 transition"
       >
-        {contactingHost ? (
-          <>
-            <Loader2 className="w-4 h-4 animate-spin" />
-            Contacting...
-          </>
-        ) : (
-          <>
-            <MessageCircle className="w-4 h-4" />
-            Contact Host
-          </>
-        )}
+        <MessageCircle className="w-4 h-4" />
+        Contact Host
       </button>
 
       {/* Safety note */}
@@ -157,6 +135,14 @@ export function PropertyHostCard({ host, propertyId }: PropertyHostCardProps) {
           To protect your payment, never transfer money or communicate outside of the StayAfrica website or app.
         </p>
       </div>
+
+      <ContactHostModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        host={host as any}
+        propertyId={propertyId}
+        userId={user?.id}
+      />
     </div>
   );
 }

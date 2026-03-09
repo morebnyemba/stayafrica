@@ -2,11 +2,9 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import axios from 'axios';
+import { apiClient } from '@/services/api-client';
 import { QuickReply } from '@/types/automated-messaging-types';
 import { Plus, Edit2, Trash2, Loader2, Save, X } from 'lucide-react';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
 export const QuickRepliesManager = () => {
   const queryClient = useQueryClient();
@@ -17,32 +15,14 @@ export const QuickRepliesManager = () => {
   const { data: quickReplies = [], isLoading } = useQuery<QuickReply[]>({
     queryKey: ['quick-replies'],
     queryFn: async () => {
-      const token = localStorage.getItem('access_token');
-      const response = await axios.get(
-        `${API_BASE_URL}/api/v1/messaging/quick-replies/`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await apiClient.get('/messaging/quick-replies/');
       return response.data.results || response.data;
     },
   });
 
   const createMutation = useMutation({
     mutationFn: async (data: { shortcut: string; message_text: string; category: string }) => {
-      const token = localStorage.getItem('access_token');
-      const response = await axios.post(
-        `${API_BASE_URL}/api/v1/messaging/quick-replies/`,
-        data,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      const response = await apiClient.post('/messaging/quick-replies/', data);
       return response.data;
     },
     onSuccess: () => {
@@ -53,17 +33,7 @@ export const QuickRepliesManager = () => {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: Partial<QuickReply> }) => {
-      const token = localStorage.getItem('access_token');
-      const response = await axios.patch(
-        `${API_BASE_URL}/api/v1/messaging/quick-replies/${id}/`,
-        data,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      const response = await apiClient.patch(`/messaging/quick-replies/${id}/`, data);
       return response.data;
     },
     onSuccess: () => {
@@ -74,15 +44,7 @@ export const QuickRepliesManager = () => {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      const token = localStorage.getItem('access_token');
-      await axios.delete(
-        `${API_BASE_URL}/api/v1/messaging/quick-replies/${id}/`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      await apiClient.delete(`/messaging/quick-replies/${id}/`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['quick-replies'] });
