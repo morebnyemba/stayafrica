@@ -155,14 +155,14 @@ export default function BookingConfirmPage() {
               <div key={step} className="flex items-center gap-3">
                 <div className="flex items-center gap-2">
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${i === 0
-                      ? 'bg-secondary-600 text-white'
-                      : 'bg-primary-200 dark:bg-primary-700 text-primary-500 dark:text-sand-400'
+                    ? 'bg-secondary-600 text-white'
+                    : 'bg-primary-200 dark:bg-primary-700 text-primary-500 dark:text-sand-400'
                     }`}>
                     {i + 1}
                   </div>
                   <span className={`text-sm font-medium ${i === 0
-                      ? 'text-primary-900 dark:text-sand-50'
-                      : 'text-primary-400 dark:text-sand-500'
+                    ? 'text-primary-900 dark:text-sand-50'
+                    : 'text-primary-400 dark:text-sand-500'
                     }`}>
                     {step}
                   </span>
@@ -425,16 +425,7 @@ export default function BookingConfirmPage() {
                       </span>
                     </div>
                   )}
-                  {costs.commissionFee > 0 && (
-                    <div className="flex justify-between">
-                      <span className="text-primary-600 dark:text-sand-300">
-                        Commission ({(costs.commissionRate * 100).toFixed(1)}%)
-                      </span>
-                      <span className="font-medium text-primary-900 dark:text-sand-50">
-                        {property?.currency} {costs.commissionFee.toFixed(2)}
-                      </span>
-                    </div>
-                  )}
+
                   {costs.taxes > 0 && (
                     <div className="flex justify-between">
                       <span className="text-primary-600 dark:text-sand-300">

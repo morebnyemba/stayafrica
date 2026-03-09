@@ -264,12 +264,7 @@ export const BookingPanel: React.FC<BookingPanelProps> = ({
               </div>
             )}
 
-            {costs.commissionFee > 0 && (
-              <div className="flex justify-between text-sm">
-                <span className="text-primary-600 dark:text-sand-400">Commission ({(costs.commissionRate * 100).toFixed(1)}%)</span>
-                <span className="font-medium text-primary-900 dark:text-sand-100">${costs.commissionFee.toFixed(2)}</span>
-              </div>
-            )}
+
 
             {costs.taxes > 0 && (
               <div className="flex justify-between text-sm">

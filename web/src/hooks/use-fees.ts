@@ -61,7 +61,7 @@ export function calculateBookingCost(
   const commissionRate = parseFloat(feeConfig.commission_rate.toString());
   const commissionFee = (basePrice + serviceFee) * commissionRate;
   const taxes = basePrice * (taxRate / 100);
-  const total = basePrice + serviceFee + commissionFee + cleaningFee + taxes;
+  const total = basePrice + serviceFee + cleaningFee + taxes;
 
   return {
     basePrice,
