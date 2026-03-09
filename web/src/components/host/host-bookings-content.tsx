@@ -512,7 +512,7 @@ export function HostBookingsContent() {
                                     Complete
                                   </Button>
                                 )}
-                                <Link href={`/property/${booking.property?.id || booking.rental_property}`}>
+                                <Link href={`/host/bookings/${booking.id}`}>
                                   <Button variant="secondary" size="sm" className="text-xs px-3">
                                     <Eye className="w-3.5 h-3.5 mr-1" />
                                     View

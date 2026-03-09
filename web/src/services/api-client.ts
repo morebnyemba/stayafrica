@@ -413,6 +413,11 @@ class ApiClient {
     return this.client.get('/bookings/', { params });
   }
 
+  async getBooking(bookingId: string) {
+    const safeId = this.assertId(bookingId, 'Booking ID');
+    return this.client.get(`/bookings/${safeId}/`);
+  }
+
   // Wallet Management
   async getMyWallet() {
     return this.client.get('/wallets/my_wallet/');
