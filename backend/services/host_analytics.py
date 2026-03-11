@@ -48,12 +48,17 @@ class HostAnalyticsService:
         total_bookings = bookings.count()
         confirmed_bookings = bookings.filter(status='confirmed').count()
         pending_bookings = bookings.filter(status='pending').count()
-        completed_bookings = bookings.filter(status='completed').count()
+        completed_bookings = bookings.filter(
+            status__in=['checked_in', 'checked_out', 'completed']
+        ).count()
         
-        # Calculate total earnings (completed bookings only)
+        # Revenue statuses: bookings where the host earns money
+        REVENUE_STATUSES = ['confirmed', 'checked_in', 'checked_out', 'completed']
+        revenue_bookings = bookings.filter(status__in=REVENUE_STATUSES)
+        
+        # Total earnings across all revenue-generating bookings
         # Host gets: (nightly_total + cleaning_fee) - commission_fee
-        completed = bookings.filter(status='completed')
-        earnings_agg = completed.aggregate(
+        earnings_agg = revenue_bookings.aggregate(
             total_net=Sum(F('nightly_total') + F('cleaning_fee') - F('commission_fee')),
             total_gross=Sum(F('nightly_total') + F('cleaning_fee')),
             total_commission=Sum(F('commission_fee')),
@@ -66,7 +71,8 @@ class HostAnalyticsService:
         total_service_fee = earnings_agg['total_service_fee'] or Decimal('0.00')
         total_taxes = earnings_agg['total_taxes'] or Decimal('0.00')
         
-        # Pending earnings (confirmed but not completed)
+        # Pending earnings: confirmed but NOT yet credited to wallet
+        # Wallet is credited on check-in, so only 'confirmed' bookings are pending
         pending_earnings = bookings.filter(status='confirmed').aggregate(
             total=Sum(F('nightly_total') + F('cleaning_fee') - F('commission_fee'))
         )['total'] or Decimal('0.00')
