@@ -59,7 +59,7 @@ export interface Property {
   max_guests: number;
   amenities: Amenity[];
   images: PropertyImage[];
-  status: 'active' | 'inactive' | 'pending_approval';
+  status: 'active' | 'inactive' | 'pending_approval' | 'rejected';
   host_id: string;
   rating: number;
   review_count: number;

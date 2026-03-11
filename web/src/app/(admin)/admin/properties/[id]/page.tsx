@@ -23,7 +23,7 @@ export default function PropertyDetails() {
     const [bedrooms, setBedrooms] = useState(0);
     const [bathrooms, setBathrooms] = useState(0);
     const [maxGuests, setMaxGuests] = useState(0);
-    const [status, setStatus] = useState<'active' | 'inactive' | 'pending_approval'>('pending_approval');
+    const [status, setStatus] = useState<'active' | 'inactive' | 'pending_approval' | 'rejected'>('pending_approval');
 
     // Location
     const [address, setAddress] = useState('');
@@ -50,9 +50,12 @@ export default function PropertyDetails() {
             setStatus(data.status || 'pending_approval');
 
             if (data.location) {
-                setAddress(data.location.address || '');
-                setCity(data.location.city || '');
-                setCountry(data.location.country || '');
+                setAddress(data.location.address || (data as any).address || '');
+                setCity(data.location.city || (data as any).city || '');
+                setCountry(data.location.country || (data as any).country || '');
+            } else {
+                setCity((data as any).city || '');
+                setCountry((data as any).country || '');
             }
         } catch (err: any) {
             toast.error('Failed to load property details');
@@ -153,6 +156,7 @@ export default function PropertyDetails() {
                             <option value="active">Active (Published)</option>
                             <option value="inactive">Inactive (Suspended)</option>
                             <option value="pending_approval">Pending Approval</option>
+                            <option value="rejected">Rejected</option>
                         </select>
                     </div>
 

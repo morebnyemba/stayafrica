@@ -2,13 +2,26 @@
 
 import { useEffect, useState } from 'react';
 import { adminApi } from '@/lib/admin-api';
-import { Property } from '@/types';
-import { Search, CheckCircle, XCircle, Eye, ChevronDown, Ban, Power } from 'lucide-react';
+import { Search, CheckCircle, XCircle, Eye, ChevronDown, Ban, Power, Home, ExternalLink } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ConfirmDialog from '@/components/admin/ConfirmDialog';
 
+const STATUS_COLORS: Record<string, string> = {
+  active: 'bg-green-100 text-green-800',
+  pending_approval: 'bg-yellow-100 text-yellow-800',
+  inactive: 'bg-red-100 text-red-800',
+  rejected: 'bg-gray-100 text-gray-800',
+};
+
+const STATUS_LABELS: Record<string, string> = {
+  active: 'Active',
+  pending_approval: 'Pending',
+  inactive: 'Inactive',
+  rejected: 'Rejected',
+};
+
 export default function PropertiesManagement() {
-  const [properties, setProperties] = useState<Property[]>([]);
+  const [properties, setProperties] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('');
@@ -17,7 +30,10 @@ export default function PropertiesManagement() {
   const [selectedProperties, setSelectedProperties] = useState<string[]>([]);
   const [showBulkActions, setShowBulkActions] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [confirmAction, setConfirmAction] = useState<{ type: string; propertyId?: string; data?: any } | null>(null);
+  const [confirmAction, setConfirmAction] = useState<{ type: string; propertyId?: string } | null>(null);
+  const [showRejectDialog, setShowRejectDialog] = useState(false);
+  const [rejectPropertyId, setRejectPropertyId] = useState<string | null>(null);
+  const [rejectReason, setRejectReason] = useState('');
   const ITEMS_PER_PAGE = 20;
 
   useEffect(() => {
@@ -48,24 +64,28 @@ export default function PropertiesManagement() {
     setPage(1);
   };
 
-  const handleApprove = async (propertyId: string) => {
-    try {
-      await adminApi.approveProperty(propertyId);
-      toast.success('Property approved successfully');
-      loadProperties();
-    } catch (err) {
-      toast.error('Failed to approve property');
-      console.error(err);
-    }
+  const handleApprove = (propertyId: string) => {
+    setConfirmAction({ type: 'approve', propertyId });
+    setShowConfirmDialog(true);
   };
 
-  const handleReject = async (propertyId: string) => {
+  const handleReject = (propertyId: string) => {
+    setRejectPropertyId(propertyId);
+    setRejectReason('');
+    setShowRejectDialog(true);
+  };
+
+  const submitReject = async () => {
+    if (!rejectPropertyId) return;
     try {
-      await adminApi.rejectProperty(propertyId, 'Rejected by admin');
-      toast.success('Property rejected successfully');
+      await adminApi.rejectProperty(rejectPropertyId, rejectReason || 'Rejected by admin');
+      toast.success('Property rejected');
+      setShowRejectDialog(false);
+      setRejectPropertyId(null);
+      setRejectReason('');
       loadProperties();
-    } catch (err) {
-      toast.error('Failed to reject property');
+    } catch (err: any) {
+      toast.error(err?.response?.data?.detail || 'Failed to reject property');
       console.error(err);
     }
   };
@@ -118,15 +138,22 @@ export default function PropertiesManagement() {
   };
 
   const handleConfirm = async () => {
-    if (!confirmAction) return;
+    if (!confirmAction || !confirmAction.propertyId) return;
 
     try {
-      if (confirmAction.type === 'suspend' && confirmAction.propertyId) {
-        await adminApi.deactivateProperty(confirmAction.propertyId);
-        toast.success('Property suspended successfully');
-      } else if (confirmAction.type === 'activate' && confirmAction.propertyId) {
-        await adminApi.activateProperty(confirmAction.propertyId);
-        toast.success('Property activated successfully');
+      switch (confirmAction.type) {
+        case 'approve':
+          await adminApi.approveProperty(confirmAction.propertyId);
+          toast.success('Property approved successfully');
+          break;
+        case 'suspend':
+          await adminApi.deactivateProperty(confirmAction.propertyId);
+          toast.success('Property suspended successfully');
+          break;
+        case 'activate':
+          await adminApi.activateProperty(confirmAction.propertyId);
+          toast.success('Property activated successfully');
+          break;
       }
       loadProperties();
     } catch (err) {
@@ -142,6 +169,12 @@ export default function PropertiesManagement() {
         : [...prev, propertyId]
     );
   };
+
+  // Helper to safely get city/country from either flat or nested location
+  const getCity = (p: any) => p.city || p.location?.city || '';
+  const getCountry = (p: any) => p.country || p.location?.country || '';
+
+  const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
 
   return (
     <div className="p-8">
@@ -193,6 +226,7 @@ export default function PropertiesManagement() {
               <option value="active">Active</option>
               <option value="pending_approval">Pending Approval</option>
               <option value="inactive">Inactive</option>
+              <option value="rejected">Rejected</option>
             </select>
           </div>
         </div>
@@ -244,32 +278,25 @@ export default function PropertiesManagement() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
         <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-[#3A5C50]">Total Properties</p>
+          <p className="text-sm text-[#3A5C50]">Total</p>
           <p className="text-2xl font-bold text-[#122F26]">{totalCount}</p>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-[#3A5C50]">Active</p>
-          <p className="text-2xl font-bold text-green-600">
-            {properties.filter(p => p.status === 'active').length}
-          </p>
-          <p className="text-xs text-gray-400">on this page</p>
-        </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-[#3A5C50]">Pending Approval</p>
-          <p className="text-2xl font-bold text-yellow-600">
-            {properties.filter(p => p.status === 'pending_approval').length}
-          </p>
-          <p className="text-xs text-gray-400">on this page</p>
-        </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-[#3A5C50]">Inactive</p>
-          <p className="text-2xl font-bold text-red-600">
-            {properties.filter(p => p.status === 'inactive').length}
-          </p>
-          <p className="text-xs text-gray-400">on this page</p>
-        </div>
+        {['active', 'pending_approval', 'inactive', 'rejected'].map((s) => {
+          const count = properties.filter(p => p.status === s).length;
+          const colors: Record<string, string> = {
+            active: 'text-green-600', pending_approval: 'text-yellow-600',
+            inactive: 'text-red-600', rejected: 'text-gray-600',
+          };
+          return (
+            <div key={s} className="bg-white rounded-lg shadow p-4">
+              <p className="text-sm text-[#3A5C50]">{STATUS_LABELS[s]}</p>
+              <p className={`text-2xl font-bold ${colors[s]}`}>{count}</p>
+              <p className="text-xs text-gray-400">on this page</p>
+            </div>
+          );
+        })}
       </div>
 
       {/* Properties Table */}
@@ -278,41 +305,58 @@ export default function PropertiesManagement() {
           <div className="flex items-center justify-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#D9B168]"></div>
           </div>
+        ) : properties.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-64 text-[#3A5C50]">
+            <Home className="w-12 h-12 mb-3 opacity-30" />
+            <p className="text-lg font-medium">No properties found</p>
+            <p className="text-sm mt-1">
+              {search || statusFilter
+                ? 'Try adjusting your search or filters'
+                : 'No properties have been created yet'}
+            </p>
+          </div>
         ) : (
           <>
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-primary-200 dark:divide-primary-700">
                 <thead className="bg-sand-50 dark:bg-primary-900">
                   <tr>
-                    <th className="px-6 py-3 text-left">
+                    <th className="px-4 py-3 text-left">
                       <input
                         type="checkbox"
                         onChange={(e) => {
                           if (e.target.checked) {
-                            setSelectedProperties(properties.filter(p => p.status === 'pending_approval').map(p => p.id));
+                            setSelectedProperties(properties.map(p => p.id));
                           } else {
                             setSelectedProperties([]);
                           }
                         }}
+                        checked={selectedProperties.length === properties.length && properties.length > 0}
                         className="rounded border-primary-300 dark:border-primary-600"
                       />
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-[#3A5C50] uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-[#3A5C50] uppercase tracking-wider">
                       Property
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-[#3A5C50] uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-[#3A5C50] uppercase tracking-wider">
+                      Host
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-[#3A5C50] uppercase tracking-wider">
                       Location
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-[#3A5C50] uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-[#3A5C50] uppercase tracking-wider">
                       Type
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-[#3A5C50] uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-[#3A5C50] uppercase tracking-wider">
                       Price/Night
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-[#3A5C50] uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-[#3A5C50] uppercase tracking-wider">
                       Status
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-[#3A5C50] uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-[#3A5C50] uppercase tracking-wider">
+                      Created
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-[#3A5C50] uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
@@ -320,109 +364,126 @@ export default function PropertiesManagement() {
                 <tbody className="bg-white divide-y divide-primary-200 dark:divide-primary-700">
                   {properties.map((property) => (
                     <tr key={property.id} className="hover:bg-sand-50 dark:hover:bg-primary-800">
-                      <td className="px-6 py-4">
+                      <td className="px-4 py-4">
                         <input
                           type="checkbox"
                           checked={selectedProperties.includes(property.id)}
                           onChange={() => toggleSelectProperty(property.id)}
-                          disabled={property.status !== 'pending_approval'}
                           className="rounded border-primary-300 dark:border-primary-600"
                         />
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-4 py-4">
                         <div className="flex items-center">
                           {property.images?.[0] ? (
                             <img
                               src={property.images[0].image_url}
                               alt={property.title}
-                              className="h-12 w-12 rounded object-cover"
+                              className="h-12 w-12 rounded object-cover flex-shrink-0"
+                            />
+                          ) : property.main_image_url ? (
+                            <img
+                              src={property.main_image_url}
+                              alt={property.title}
+                              className="h-12 w-12 rounded object-cover flex-shrink-0"
                             />
                           ) : (
-                            <div className="h-12 w-12 rounded bg-primary-200 dark:bg-primary-700 flex items-center justify-center">
-                              <Eye className="w-6 h-6 text-primary-300 dark:text-primary-500" />
+                            <div className="h-12 w-12 rounded bg-primary-200 dark:bg-primary-700 flex items-center justify-center flex-shrink-0">
+                              <Home className="w-6 h-6 text-primary-400" />
                             </div>
                           )}
-                          <div className="ml-4">
-                            <div className="text-sm font-medium text-[#122F26]">
+                          <div className="ml-3 min-w-0">
+                            <div className="text-sm font-medium text-[#122F26] truncate max-w-[200px]" title={property.title}>
                               {property.title}
                             </div>
-                            <div className="text-sm text-[#3A5C50]">
-                              {property.bedrooms} bed • {property.bathrooms} bath
+                            <div className="text-xs text-[#3A5C50]">
+                              {property.bedrooms} bed • {property.bathrooms} bath • {property.max_guests} guests
                             </div>
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-[#122F26]">{property.location.city}</div>
-                        <div className="text-sm text-[#3A5C50]">{property.location.country}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-[#122F26] capitalize">
-                        {property.property_type}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-[#122F26]">
-                        ${property.price_per_night}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {property.status === 'active' && (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                            Active
-                          </span>
-                        )}
-                        {property.status === 'pending_approval' && (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                            Pending
-                          </span>
-                        )}
-                        {property.status === 'inactive' && (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                            Inactive
-                          </span>
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        <div className="text-sm text-[#122F26] truncate max-w-[120px]" title={property.host_name || property.host_email}>
+                          {property.host_name || `Host #${property.host}`}
+                        </div>
+                        {property.host_email && (
+                          <div className="text-xs text-[#3A5C50] truncate max-w-[120px]" title={property.host_email}>
+                            {property.host_email}
+                          </div>
                         )}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                        {property.status === 'pending_approval' && (
-                          <>
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        <div className="text-sm text-[#122F26]">{getCity(property)}</div>
+                        <div className="text-xs text-[#3A5C50]">{getCountry(property)}</div>
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-[#122F26] capitalize">
+                        {(property.property_type || '').replace('_', ' ')}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-[#122F26]">
+                        {property.currency || '$'}{property.price_per_night}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[property.status] || 'bg-gray-100 text-gray-800'}`}>
+                          {STATUS_LABELS[property.status] || property.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-xs text-[#3A5C50]">
+                        {property.created_at
+                          ? new Date(property.created_at).toLocaleDateString()
+                          : '—'}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm font-medium">
+                        <div className="flex items-center space-x-1">
+                          {property.status === 'pending_approval' && (
+                            <>
+                              <button
+                                onClick={() => handleApprove(property.id)}
+                                className="p-1 text-green-600 hover:text-green-900 hover:bg-green-50 rounded"
+                                title="Approve"
+                              >
+                                <CheckCircle className="w-5 h-5" />
+                              </button>
+                              <button
+                                onClick={() => handleReject(property.id)}
+                                className="p-1 text-red-600 hover:text-red-900 hover:bg-red-50 rounded"
+                                title="Reject"
+                              >
+                                <XCircle className="w-5 h-5" />
+                              </button>
+                            </>
+                          )}
+                          {property.status === 'active' && (
                             <button
-                              onClick={() => handleApprove(property.id)}
-                              className="text-green-600 hover:text-green-900"
-                              title="Approve"
+                              onClick={() => handleSuspend(property.id)}
+                              className="p-1 text-yellow-600 hover:text-yellow-900 hover:bg-yellow-50 rounded"
+                              title="Suspend"
                             >
-                              <CheckCircle className="w-5 h-5" />
+                              <Ban className="w-5 h-5" />
                             </button>
+                          )}
+                          {(property.status === 'inactive' || property.status === 'rejected') && (
                             <button
-                              onClick={() => handleReject(property.id)}
-                              className="text-red-600 hover:text-red-900"
-                              title="Reject"
+                              onClick={() => handleActivate(property.id)}
+                              className="p-1 text-green-600 hover:text-green-900 hover:bg-green-50 rounded"
+                              title="Reactivate"
                             >
-                              <XCircle className="w-5 h-5" />
+                              <Power className="w-5 h-5" />
                             </button>
-                          </>
-                        )}
-                        {property.status === 'active' && (
+                          )}
                           <button
-                            onClick={() => handleSuspend(property.id)}
-                            className="text-yellow-600 hover:text-yellow-900"
-                            title="Suspend"
+                            onClick={() => window.open(`/admin/properties/${property.id}`, '_blank')}
+                            className="p-1 text-[#3A5C50] hover:text-[#122F26] hover:bg-sand-100 rounded"
+                            title="Admin detail"
                           >
-                            <Ban className="w-5 h-5" />
+                            <Eye className="w-5 h-5" />
                           </button>
-                        )}
-                        {property.status === 'inactive' && (
                           <button
-                            onClick={() => handleActivate(property.id)}
-                            className="text-green-600 hover:text-green-900"
-                            title="Reactivate"
+                            onClick={() => window.open(`/properties/${property.id}`, '_blank')}
+                            className="p-1 text-[#D9B168] hover:text-[#c9a158] hover:bg-yellow-50 rounded"
+                            title="Public page"
                           >
-                            <Power className="w-5 h-5" />
+                            <ExternalLink className="w-4 h-4" />
                           </button>
-                        )}
-                        <button
-                          onClick={() => window.open(`/properties/${property.id}`, '_blank')}
-                          className="text-[#D9B168] hover:text-[#c9a158]"
-                          title="View details"
-                        >
-                          <Eye className="w-5 h-5" />
-                        </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -434,6 +495,7 @@ export default function PropertiesManagement() {
             <div className="bg-sand-50 dark:bg-primary-900 px-6 py-4 flex items-center justify-between border-t">
               <div className="text-sm text-[#122F26]">
                 Showing {totalCount > 0 ? (page - 1) * ITEMS_PER_PAGE + 1 : 0} to {Math.min(page * ITEMS_PER_PAGE, totalCount)} of {totalCount} properties
+                {totalPages > 1 && <span className="ml-2 text-[#3A5C50]">(Page {page} of {totalPages})</span>}
               </div>
               <div className="flex space-x-2">
                 <button
@@ -461,13 +523,65 @@ export default function PropertiesManagement() {
         isOpen={showConfirmDialog}
         onClose={() => setShowConfirmDialog(false)}
         onConfirm={handleConfirm}
-        title={confirmAction?.type === 'activate' ? 'Activate Property' : 'Suspend Property'}
-        message={confirmAction?.type === 'activate' 
-          ? 'Are you sure you want to reactivate this property?' 
-          : 'Are you sure you want to suspend this property? It will be marked as inactive.'}
-        variant={confirmAction?.type === 'activate' ? 'info' : 'warning'}
-        confirmText={confirmAction?.type === 'activate' ? 'Activate' : 'Suspend'}
+        title={
+          confirmAction?.type === 'approve' ? 'Approve Property' :
+          confirmAction?.type === 'activate' ? 'Activate Property' : 'Suspend Property'
+        }
+        message={
+          confirmAction?.type === 'approve'
+            ? 'Are you sure you want to approve this property? It will become visible to all users.'
+            : confirmAction?.type === 'activate'
+            ? 'Are you sure you want to reactivate this property?'
+            : 'Are you sure you want to suspend this property? It will be marked as inactive.'
+        }
+        variant={confirmAction?.type === 'suspend' ? 'warning' : 'info'}
+        confirmText={
+          confirmAction?.type === 'approve' ? 'Approve' :
+          confirmAction?.type === 'activate' ? 'Activate' : 'Suspend'
+        }
       />
+
+      {/* Reject Dialog with Reason */}
+      {showRejectDialog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md mx-4">
+            <h3 className="text-lg font-semibold text-[#122F26] mb-2">Reject Property</h3>
+            <p className="text-sm text-[#3A5C50] mb-4">
+              This property will be marked as rejected and hidden from public listings.
+            </p>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-[#122F26] mb-1">
+                Reason for rejection
+              </label>
+              <textarea
+                value={rejectReason}
+                onChange={(e) => setRejectReason(e.target.value)}
+                rows={3}
+                placeholder="E.g., Incomplete listing, inappropriate content, duplicate..."
+                className="w-full px-3 py-2 border border-[#3A5C50] rounded-lg focus:ring-2 focus:ring-[#D9B168] focus:border-transparent text-sm"
+              />
+            </div>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setShowRejectDialog(false);
+                  setRejectPropertyId(null);
+                  setRejectReason('');
+                }}
+                className="px-4 py-2 border border-[#3A5C50] rounded-lg text-sm font-medium text-[#122F26] hover:bg-sand-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={submitReject}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700"
+              >
+                Reject Property
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

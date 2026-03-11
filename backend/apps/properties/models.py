@@ -29,6 +29,7 @@ class Property(models.Model):
         ('active', 'Active'),
         ('inactive', 'Inactive'),
         ('pending_approval', 'Pending Approval'),
+        ('rejected', 'Rejected'),
     ]
     
     host = models.ForeignKey(User, on_delete=models.CASCADE, related_name='properties')

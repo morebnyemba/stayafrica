@@ -138,13 +138,16 @@ class PropertyListSerializer(serializers.ModelSerializer):
     main_image_url = serializers.SerializerMethodField()
     average_rating = serializers.SerializerMethodField()
     review_count = serializers.SerializerMethodField()
+    host_email = serializers.CharField(source='host.email', read_only=True, default='')
+    host_name = serializers.SerializerMethodField()
     
     class Meta:
         model = Property
         fields = [
-            'id', 'title', 'location', 'country', 'city', 'price_per_night',
+            'id', 'title', 'property_type', 'location', 'country', 'city', 'price_per_night',
             'currency', 'main_image', 'main_image_url', 'bedrooms', 'bathrooms', 'max_guests',
-            'amenities', 'images', 'status', 'average_rating', 'review_count'
+            'amenities', 'images', 'status', 'average_rating', 'review_count',
+            'host', 'host_email', 'host_name', 'created_at',
         ]
 
     def _absolute_media_url(self, file_field):
@@ -158,6 +161,12 @@ class PropertyListSerializer(serializers.ModelSerializer):
 
     def get_main_image_url(self, obj):
         return self._absolute_media_url(obj.main_image)
+
+    def get_host_name(self, obj):
+        if not obj.host:
+            return ''
+        parts = [obj.host.first_name or '', obj.host.last_name or '']
+        return ' '.join(p for p in parts if p) or obj.host.email
     
     def _get_review_stats(self, obj):
         """Cache review stats to avoid duplicate queries"""
