@@ -9,7 +9,7 @@ import { useState } from 'react';
 import toast from 'react-hot-toast';
 import type { PricingRule, PricingRuleFormData, PricingRuleType } from '@/types/pricing-types';
 import { 
-  TrendingUp, Calendar, DollarSign, ChevronRight, Building, Percent,
+  TrendingUp, Calendar, DollarSign, Building, Percent,
   AlertCircle, Lightbulb, Plus, Pencil, Trash2, Power, X, Eye,
 } from 'lucide-react';
 

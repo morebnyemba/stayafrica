@@ -5,11 +5,10 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
 import { pricingApi } from '@/services/pricing-api';
 import Link from 'next/link';
-import { useState } from 'react';
 import toast from 'react-hot-toast';
-import { ArrowLeft, Plus, Pencil, Trash2, Power, TrendingUp, Calendar, Percent, DollarSign, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Power } from 'lucide-react';
 import PricingCalendar from '@/components/pricing/PricingCalendar';
-import type { PricingRule, PricingRuleFormData, PricingRuleType } from '@/types/pricing-types';
+import type { PricingRule } from '@/types/pricing-types';
 
 const RULE_TYPE_META: Record<string, { label: string; color: string }> = {
   seasonal: { label: 'Seasonal', color: 'text-green-600 bg-green-100' },
