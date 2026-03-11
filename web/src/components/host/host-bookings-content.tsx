@@ -191,7 +191,7 @@ export function HostBookingsContent() {
                   Manage Bookings
                 </h1>
                 <p className="text-primary-600 dark:text-sand-300 mt-1">
-                  {stats.total} total booking{stats.total !== 1 ? 's' : ''} · ${stats.totalEarnings.toFixed(0)} earned
+                  {stats.total} total booking{stats.total !== 1 ? 's' : ''} · {allBookings[0]?.currency || 'USD'} {stats.totalEarnings.toFixed(0)} earned
                 </p>
               </div>
 
@@ -225,7 +225,7 @@ export function HostBookingsContent() {
               { label: 'Requests', value: stats.requested, icon: Clock, color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-900/20' },
               { label: 'Pending', value: stats.pending, icon: Clock, color: 'text-yellow-600 dark:text-yellow-400', bg: 'bg-yellow-50 dark:bg-yellow-900/20' },
               { label: 'Confirmed', value: stats.confirmed, icon: CheckCircle, color: 'text-green-600 dark:text-green-400', bg: 'bg-green-50 dark:bg-green-900/20' },
-              { label: 'Revenue', value: `$${stats.totalEarnings.toFixed(0)}`, icon: TrendingUp, color: 'text-secondary-600 dark:text-secondary-400', bg: 'bg-secondary-50 dark:bg-secondary-900/20' },
+              { label: 'Revenue', value: `${allBookings[0]?.currency || 'USD'} ${stats.totalEarnings.toFixed(0)}`, icon: TrendingUp, color: 'text-secondary-600 dark:text-secondary-400', bg: 'bg-secondary-50 dark:bg-secondary-900/20' },
             ].map((stat) => (
               <div key={stat.label} className="card p-4 flex items-center gap-3">
                 <div className={`p-2 rounded-lg ${stat.bg}`}>
@@ -402,7 +402,7 @@ export function HostBookingsContent() {
                                 </p>
                               </div>
                               <p className="text-lg font-bold text-green-600 dark:text-green-400 whitespace-nowrap">
-                                ${earnings.toFixed(2)}
+                                {booking.currency || 'USD'} {earnings.toFixed(2)}
                               </p>
                             </div>
 

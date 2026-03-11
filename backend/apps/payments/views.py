@@ -183,6 +183,14 @@ class PaymentViewSet(viewsets.ModelViewSet):
                     payment.save()
                     booking.status = 'confirmed'
                     booking.save()
+
+                    # Credit host wallet for cash_on_arrival too
+                    try:
+                        from services.transaction_service import TransactionService
+                        TransactionService.process_booking_payment(booking, payment)
+                        logger.info(f"Host wallet credited (cash_on_arrival) for {booking.booking_ref}")
+                    except Exception as wallet_exc:
+                        logger.error(f"Failed to credit host wallet (cash_on_arrival) for {booking.booking_ref}: {wallet_exc}")
                 
                 # Log the action
                 AuditLoggerService.log_action(

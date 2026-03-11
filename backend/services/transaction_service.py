@@ -235,8 +235,14 @@ class TransactionService:
         host = booking.rental_property.host
         host_wallet = TransactionService.create_wallet(host, booking.currency)
         
-        # Calculate host payout (total - commission)
-        host_payout = booking.grand_total - booking.commission_fee
+        # Calculate host payout: nightly accommodation + property fees - commission
+        # NOTE: grand_total includes service_fee and taxes which belong to the platform/government,
+        # so we must NOT use grand_total - commission_fee (that would overpay the host).
+        host_payout = (
+            booking.nightly_total
+            + booking.cleaning_fee
+            - booking.commission_fee
+        )
         
         # Credit host wallet
         credit_txn = TransactionService.credit_wallet(

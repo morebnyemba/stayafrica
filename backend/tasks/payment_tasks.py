@@ -43,37 +43,54 @@ def expire_stale_payments():
 @shared_task(bind=True, max_retries=2, default_retry_delay=120)
 def process_host_payouts(self):
     """
-    Automatically credit host wallets for completed bookings that haven't
-    been paid out yet. Runs hourly to catch any missed webhook payouts.
+    Automatically credit host wallets for bookings that have been checked-in
+    or completed but haven't been paid out yet.
+
+    Payout eligibility:
+    - checked_in: guest has arrived and payment is confirmed — release funds
+    - checked_out / completed: past checkout — also eligible (fallback)
+
+    Runs every 10 minutes via Celery Beat to catch any missed webhook payouts.
     """
     from django.db import transaction as db_transaction
     from apps.bookings.models import Booking
-    from apps.payments.models import Wallet, WalletTransaction
+    from apps.payments.models import Wallet, WalletTransaction, Payment
     from django.db.models import F
     import uuid
 
-    # Find completed bookings not yet paid out
+    # Find bookings that already have a successful payout transaction
     paid_booking_ids = WalletTransaction.objects.filter(
         metadata__type='host_payout',
         status='completed',
     ).values_list('booking_id', flat=True)
 
+    # Eligible statuses: guest checked in or later (funds should be released)
     unpaid_bookings = Booking.objects.filter(
-        status='completed',
+        status__in=['checked_in', 'checked_out', 'completed'],
     ).exclude(
         id__in=paid_booking_ids,
     ).select_related('rental_property__host')[:100]  # batch of 100
 
     processed = 0
     errors = 0
+    skipped = 0
 
     for booking in unpaid_bookings:
         try:
+            # Only pay out if the guest actually paid (has a successful payment)
+            has_payment = Payment.objects.filter(
+                booking=booking, status='success'
+            ).exists()
+            if not has_payment:
+                skipped += 1
+                continue
+
             with db_transaction.atomic():
                 host = booking.rental_property.host
                 wallet, _ = Wallet.objects.get_or_create(user=host)
 
-                payout_amount = booking.grand_total - booking.commission_fee
+                # Host payout = accommodation + property fees - platform commission
+                payout_amount = booking.nightly_total + booking.cleaning_fee - booking.commission_fee
 
                 WalletTransaction.objects.create(
                     wallet=wallet,
@@ -83,7 +100,12 @@ def process_host_payouts(self):
                     amount=payout_amount,
                     currency=booking.currency,
                     reference=f'AUTO-PAYOUT-{booking.booking_ref}-{uuid.uuid4().hex[:8]}',
-                    metadata={'type': 'host_payout', 'booking_ref': booking.booking_ref, 'auto': True},
+                    metadata={
+                        'type': 'host_payout',
+                        'booking_ref': booking.booking_ref,
+                        'booking_status': booking.status,
+                        'auto': True,
+                    },
                 )
 
                 wallet.balance = F('balance') + payout_amount
@@ -93,9 +115,10 @@ def process_host_payouts(self):
             errors += 1
             logger.error(f"Auto-payout failed for booking {booking.booking_ref}: {e}")
 
-    if processed > 0:
-        logger.info(f"Auto-payout: {processed} hosts credited, {errors} errors")
-    return {'processed': processed, 'errors': errors}
+    logger.info(
+        f"Auto-payout: {processed} credited, {skipped} skipped (no payment), {errors} errors"
+    )
+    return {'processed': processed, 'skipped': skipped, 'errors': errors}
 
 
 @shared_task
