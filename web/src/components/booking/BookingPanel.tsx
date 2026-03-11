@@ -10,10 +10,11 @@ import { useRouter } from 'next/navigation';
 import { Card, CardHeader, CardBody, CardFooter } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
-import { AlertCircle, Check, Users, Calendar } from 'lucide-react';
+import { AlertCircle, Check, Users, Calendar, TrendingDown } from 'lucide-react';
 import { format, differenceInDays, addDays } from 'date-fns';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
+import { pricingApi } from '@/services/pricing-api';
 import { useFeeConfiguration, useTaxEstimate, calculateBookingCost } from '@/hooks/use-fees';
 import { useAuth } from '@/store/auth-store';
 import DatePicker from 'react-datepicker';
@@ -28,6 +29,8 @@ interface BookingPanelProps {
   hostVerified?: boolean;
   hostRating?: number;
   country?: string;
+  currency?: string;
+  cleaningFee?: number;
   onBook?: (details: { propertyId: string; checkIn: Date; checkOut: Date }, guests: number) => void;
   isLoading?: boolean;
 }
@@ -41,6 +44,8 @@ export const BookingPanel: React.FC<BookingPanelProps> = ({
   hostVerified = false,
   hostRating = 4.8,
   country,
+  currency = 'USD',
+  cleaningFee = 0,
   onBook,
   isLoading = false,
 }) => {
@@ -100,13 +105,36 @@ export const BookingPanel: React.FC<BookingPanelProps> = ({
   // Calculate pricing using shared fee logic
   const nights =
     checkInDate && checkOutDate ? differenceInDays(checkOutDate, checkInDate) : 0;
-  const costs = useMemo(() => {
+  const checkIn = checkInDate ? format(checkInDate, 'yyyy-MM-dd') : '';
+  const checkOut = checkOutDate ? format(checkOutDate, 'yyyy-MM-dd') : '';
+
+  // Dynamic pricing from backend (includes pricing rules)
+  const { data: dynamicPricing, isLoading: dynamicLoading } = useQuery({
+    queryKey: ['dynamic-pricing', propertyId, checkIn, checkOut, guestCount],
+    queryFn: () => pricingApi.calculateBookingTotal(propertyId, checkIn, checkOut, guestCount),
+    enabled: !!checkIn && !!checkOut && nights > 0,
+    retry: false,
+    staleTime: 30000,
+  });
+
+  // Static fallback when dynamic pricing not available
+  const staticCosts = useMemo(() => {
     if (!feeConfig || nights <= 0) return { basePrice: 0, serviceFee: 0, commissionFee: 0, commissionRate: 0, cleaningFee: 0, taxes: 0, taxRate: 0, individualTaxes: [], total: 0 };
-    return calculateBookingCost(pricePerNight, nights, feeConfig, 0, taxEstimate || null);
-  }, [pricePerNight, nights, feeConfig, taxEstimate]);
-  const subtotal = costs.basePrice;
-  const serviceFee = costs.serviceFee;
-  const total = costs.total;
+    return calculateBookingCost(pricePerNight, nights, feeConfig, cleaningFee, taxEstimate || null);
+  }, [pricePerNight, nights, feeConfig, cleaningFee, taxEstimate]);
+
+  // Use dynamic pricing if available, otherwise fall back to static
+  const hasDynamic = !!dynamicPricing && !dynamicLoading;
+  const displayNightly = hasDynamic ? dynamicPricing.nightly_total : staticCosts.basePrice;
+  const displayServiceFee = hasDynamic ? dynamicPricing.service_fee : staticCosts.serviceFee;
+  const displayCleaningFee = hasDynamic ? (dynamicPricing.cleaning_fee || 0) : staticCosts.cleaningFee;
+  const displayTaxes = hasDynamic ? (dynamicPricing.taxes || 0) : staticCosts.taxes;
+  const total = hasDynamic ? dynamicPricing.grand_total : staticCosts.total;
+  const appliedRules = dynamicPricing?.applied_rules || [];
+  const adjustedPerNight = dynamicPricing?.adjusted_price_per_night;
+  const hasDiscount = hasDynamic && adjustedPerNight && adjustedPerNight < pricePerNight;
+
+  const subtotal = displayNightly;
 
   // Validation state
   const hasSelectedDates = checkInDate && checkOutDate;
@@ -116,8 +144,6 @@ export const BookingPanel: React.FC<BookingPanelProps> = ({
 
   const handleBook = () => {
     if (checkInDate && checkOutDate && meetsMinStay && !hasDateConflict) {
-      const checkIn = format(checkInDate, 'yyyy-MM-dd');
-      const checkOut = format(checkOutDate, 'yyyy-MM-dd');
       const confirmUrl = `/booking/confirm?propertyId=${propertyId}&checkIn=${checkIn}&checkOut=${checkOut}&guests=${guestCount}`;
 
       // If not authenticated, redirect to login with the booking URL preserved
@@ -150,9 +176,27 @@ export const BookingPanel: React.FC<BookingPanelProps> = ({
     <Card variant="elevated" className="sticky top-24" role="region" aria-label="Booking details">
       <CardHeader className="border-b border-primary-200">
         <div className="flex items-baseline gap-2">
-          <span className="text-3xl font-bold text-primary-900">${pricePerNight}</span>
-          <span className="text-sm text-primary-600">per night</span>
+          {hasDiscount ? (
+            <>
+              <span className="text-3xl font-bold text-green-700">{currency} {adjustedPerNight.toFixed(0)}</span>
+              <span className="text-lg text-primary-400 line-through">{currency} {pricePerNight}</span>
+              <span className="text-sm text-primary-600">per night</span>
+            </>
+          ) : (
+            <>
+              <span className="text-3xl font-bold text-primary-900">{currency} {pricePerNight}</span>
+              <span className="text-sm text-primary-600">per night</span>
+            </>
+          )}
         </div>
+        {appliedRules.length > 0 && (
+          <div className="flex items-center gap-1 mt-1">
+            <TrendingDown className="w-3.5 h-3.5 text-green-600" />
+            <span className="text-xs text-green-700 font-medium">
+              {appliedRules.map((r: { name: string }) => r.name).join(', ')} applied
+            </span>
+          </div>
+        )}
       </CardHeader>
 
       <CardBody className="space-y-4">
@@ -250,33 +294,57 @@ export const BookingPanel: React.FC<BookingPanelProps> = ({
         {/* Price Breakdown */}
         {nights > 0 && (
           <div className="space-y-3 border-t border-primary-200 pt-4" role="region" aria-label="Price breakdown">
-            <div className="flex justify-between text-sm">
-              <span className="text-primary-600">
-                ${pricePerNight} × {nights} night{nights !== 1 ? 's' : ''}
-              </span>
-              <span className="font-medium text-primary-900">${subtotal}</span>
-            </div>
-
-            {serviceFee > 0 && (
-              <div className="flex justify-between text-sm">
-                <span className="text-primary-600">Service fee</span>
-                <span className="font-medium text-primary-900">${serviceFee.toFixed(2)}</span>
+            {dynamicLoading ? (
+              <div className="animate-pulse space-y-2">
+                <div className="h-4 bg-primary-100 rounded w-3/4" />
+                <div className="h-4 bg-primary-100 rounded w-1/2" />
               </div>
+            ) : (
+              <>
+                <div className="flex justify-between text-sm">
+                  <span className="text-primary-600">
+                    {hasDiscount ? (
+                      <>{currency} <span className="line-through text-primary-400">{pricePerNight}</span> {adjustedPerNight.toFixed(2)} × {nights} night{nights !== 1 ? 's' : ''}</>
+                    ) : (
+                      <>{currency} {pricePerNight} × {nights} night{nights !== 1 ? 's' : ''}</>
+                    )}
+                  </span>
+                  <span className="font-medium text-primary-900">{currency} {subtotal.toFixed(2)}</span>
+                </div>
+
+                {displayServiceFee > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-primary-600">Service fee</span>
+                    <span className="font-medium text-primary-900">{currency} {displayServiceFee.toFixed(2)}</span>
+                  </div>
+                )}
+
+                {displayCleaningFee > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-primary-600">Cleaning fee</span>
+                    <span className="font-medium text-primary-900">{currency} {displayCleaningFee.toFixed(2)}</span>
+                  </div>
+                )}
+
+                {displayTaxes > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-primary-600">Taxes</span>
+                    <span className="font-medium text-primary-900">{currency} {displayTaxes.toFixed(2)}</span>
+                  </div>
+                )}
+
+                {appliedRules.length > 0 && (
+                  <div className="pt-1 text-xs text-green-700 font-medium">
+                    💡 {appliedRules.map((r: { name: string }) => r.name).join(', ')}
+                  </div>
+                )}
+
+                <div className="flex justify-between font-semibold border-t border-primary-200 pt-3">
+                  <span className="text-primary-900">Total</span>
+                  <span className="text-xl text-secondary-600">{currency} {total.toFixed(2)}</span>
+                </div>
+              </>
             )}
-
-
-
-            {costs.individualTaxes?.map((tax, idx) => (
-              <div key={idx} className="flex justify-between text-sm">
-                <span className="text-primary-600">{tax.name}</span>
-                <span className="font-medium text-primary-900">${tax.amount.toFixed(2)}</span>
-              </div>
-            ))}
-
-            <div className="flex justify-between font-semibold border-t border-primary-200 pt-3">
-              <span className="text-primary-900">Total</span>
-              <span className="text-xl text-secondary-600">${total.toFixed(2)}</span>
-            </div>
           </div>
         )}
       </CardBody>
@@ -290,7 +358,7 @@ export const BookingPanel: React.FC<BookingPanelProps> = ({
           disabled={!isValidBooking}
           isLoading={isLoading}
           className="py-3"
-          aria-label={isValidBooking ? `Book now for $${total.toFixed(2)} total` : getButtonText()}
+          aria-label={isValidBooking ? `Book now for ${currency} ${total.toFixed(2)} total` : getButtonText()}
         >
           {getButtonText()}
         </Button>

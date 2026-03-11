@@ -904,18 +904,36 @@ class PropertyViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['get'], permission_classes=[AllowAny])
     def pricing_calendar(self, request, pk=None):
         """
-        Get pricing calendar for a property showing daily prices
-        GET /api/v1/properties/{id}/pricing_calendar/?start_date=YYYY-MM-DD&end_date=YYYY-MM-DD
+        Get pricing calendar for a property showing daily prices.
+        Accepts either:
+          ?start_date=YYYY-MM-DD&end_date=YYYY-MM-DD
+          ?month=M&year=YYYY  (computes first/last day of month)
         """
+        import calendar as cal
         property_obj = self.get_object()
         start_date = request.query_params.get('start_date')
         end_date = request.query_params.get('end_date')
-        
+
+        # Support month/year shorthand
         if not start_date or not end_date:
-            return Response(
-                {'error': 'start_date and end_date are required (format: YYYY-MM-DD)'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            month = request.query_params.get('month')
+            year = request.query_params.get('year')
+            if month and year:
+                try:
+                    m, y = int(month), int(year)
+                    last_day = cal.monthrange(y, m)[1]
+                    start_date = f'{y}-{m:02d}-01'
+                    end_date = f'{y}-{m:02d}-{last_day:02d}'
+                except (ValueError, TypeError):
+                    return Response(
+                        {'error': 'Invalid month/year values'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+            else:
+                return Response(
+                    {'error': 'Provide start_date & end_date, or month & year'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
         
         try:
             from services.pricing_service import PricingService

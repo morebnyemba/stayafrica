@@ -474,6 +474,8 @@ export function PropertyDetailsContent({ propertyId: propId }: PropertyDetailsCo
                   hostVerified={property.host?.is_verified || false}
                   hostRating={property.average_rating || 0}
                   country={property.country}
+                  currency={property.currency || 'USD'}
+                  cleaningFee={property.cleaning_fee || 0}
                 />
               )}
             </div>
