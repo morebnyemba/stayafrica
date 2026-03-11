@@ -100,8 +100,13 @@ export default function SettingsPage() {
               <input
                 type="number"
                 step="0.01"
-                value={parseFloat(config.commission_rate) * 100}
-                onChange={(e) => updateField('commission_rate', (parseFloat(e.target.value) / 100).toString())}
+                value={Number((parseFloat(config.commission_rate) * 100).toFixed(2))}
+                onChange={(e) => {
+                  const pct = parseFloat(e.target.value);
+                  if (!isNaN(pct)) {
+                    updateField('commission_rate', (pct / 100).toFixed(4));
+                  }
+                }}
                 className="w-full px-4 py-2 border border-[#3A5C50] rounded-lg focus:ring-2 focus:ring-[#D9B168] focus:border-transparent"
               />
               <p className="text-xs text-primary-400 dark:text-sand-500 mt-1">

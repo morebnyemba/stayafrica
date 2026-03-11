@@ -16,10 +16,6 @@ export default function BookingDetails({ params }: { params: { id: string } }) {
 
     // Editable fields
     const [status, setStatus] = useState<Booking['status']>('pending');
-    const [checkIn, setCheckIn] = useState('');
-    const [checkOut, setCheckOut] = useState('');
-    const [guests, setGuests] = useState(1);
-    const [adminNotes, setAdminNotes] = useState('');
 
     useEffect(() => {
         loadBooking();
@@ -31,10 +27,6 @@ export default function BookingDetails({ params }: { params: { id: string } }) {
             const data = await adminApi.getBookingById(params.id);
             setBooking(data);
             setStatus(data.status);
-            setCheckIn(data.check_in.substring(0, 10)); // YYYY-MM-DD
-            setCheckOut(data.check_out.substring(0, 10));
-            setGuests(data.number_of_guests);
-            // setAdminNotes(data.admin_notes || '')
         } catch (err: any) {
             toast.error('Failed to load booking details');
             console.error(err);
@@ -50,23 +42,20 @@ export default function BookingDetails({ params }: { params: { id: string } }) {
         try {
             setSaving(true);
 
-            // Update booking flow placeholder. 
-            // Replace with `adminApi.updateBooking` when available if full CRUD is required by backend.
-            // E.g. await adminApi.updateBooking(booking.id, { status, check_in, check_out, number_of_guests, admin_notes });
-            toast.success('Booking updated successfully (Mock save for unsupported fields)');
-
-            // Since our admin API interface currently doesn't have an expose deep update endpoint,
-            // we only trigger individual state actions if they changed.
+            // The admin API supports status transitions via dedicated endpoints
             if (status !== booking.status) {
                 if (status === 'confirmed') await adminApi.approveBooking(booking.id);
-                if (status === 'cancelled') await adminApi.cancelBooking(booking.id, 'Cancelled via detailed edit');
+                if (status === 'cancelled') await adminApi.cancelBooking(booking.id, 'Cancelled via admin panel');
                 if (status === 'completed') await adminApi.completeBooking(booking.id);
+                toast.success('Booking status updated successfully');
+            } else {
+                toast.success('No changes needed');
             }
 
             setEditMode(false);
             loadBooking();
         } catch (err: any) {
-            toast.error('Failed to update booking');
+            toast.error(err?.response?.data?.detail || 'Failed to update booking');
             console.error(err);
         } finally {
             setSaving(false);
@@ -169,65 +158,25 @@ export default function BookingDetails({ params }: { params: { id: string } }) {
 
                             <div>
                                 <label className="block text-sm font-medium text-[#3A5C50] mb-1">Guests</label>
-                                {editMode ? (
-                                    <input
-                                        type="number"
-                                        min="1"
-                                        value={guests}
-                                        onChange={(e) => setGuests(parseInt(e.target.value))}
-                                        className="w-full px-4 py-2 border border-[#3A5C50] rounded-lg focus:ring-2 focus:ring-[#D9B168]"
-                                    />
-                                ) : (
-                                    <div className="px-4 py-2 bg-sand-50 rounded-lg text-[#122F26]">
-                                        {booking.number_of_guests} Guest(s)
-                                    </div>
-                                )}
+                                <div className="px-4 py-2 bg-sand-50 rounded-lg text-[#122F26]">
+                                    {booking.number_of_guests} Guest(s)
+                                </div>
                             </div>
 
                             <div>
                                 <label className="block text-sm font-medium text-[#3A5C50] mb-1">Check-in</label>
-                                {editMode ? (
-                                    <input
-                                        type="date"
-                                        value={checkIn}
-                                        onChange={(e) => setCheckIn(e.target.value)}
-                                        className="w-full px-4 py-2 border border-[#3A5C50] rounded-lg focus:ring-2 focus:ring-[#D9B168]"
-                                    />
-                                ) : (
-                                    <div className="px-4 py-2 bg-sand-50 rounded-lg text-[#122F26]">
-                                        {new Date(booking.check_in).toLocaleDateString()}
-                                    </div>
-                                )}
+                                <div className="px-4 py-2 bg-sand-50 rounded-lg text-[#122F26]">
+                                    {new Date(booking.check_in).toLocaleDateString()}
+                                </div>
                             </div>
 
                             <div>
                                 <label className="block text-sm font-medium text-[#3A5C50] mb-1">Check-out</label>
-                                {editMode ? (
-                                    <input
-                                        type="date"
-                                        value={checkOut}
-                                        onChange={(e) => setCheckOut(e.target.value)}
-                                        className="w-full px-4 py-2 border border-[#3A5C50] rounded-lg focus:ring-2 focus:ring-[#D9B168]"
-                                    />
-                                ) : (
-                                    <div className="px-4 py-2 bg-sand-50 rounded-lg text-[#122F26]">
-                                        {new Date(booking.check_out).toLocaleDateString()}
-                                    </div>
-                                )}
+                                <div className="px-4 py-2 bg-sand-50 rounded-lg text-[#122F26]">
+                                    {new Date(booking.check_out).toLocaleDateString()}
+                                </div>
                             </div>
 
-                            {editMode && (
-                                <div className="col-span-full">
-                                    <label className="block text-sm font-medium text-[#3A5C50] mb-1">Admin Resolution Notes</label>
-                                    <textarea
-                                        rows={4}
-                                        value={adminNotes}
-                                        onChange={(e) => setAdminNotes(e.target.value)}
-                                        placeholder="E.g., Adjusted dates per host request..."
-                                        className="w-full px-4 py-2 border border-[#3A5C50] rounded-lg focus:ring-2 focus:ring-[#D9B168]"
-                                    />
-                                </div>
-                            )}
                         </form>
 
                         {editMode && (
@@ -237,9 +186,6 @@ export default function BookingDetails({ params }: { params: { id: string } }) {
                                     onClick={() => {
                                         setEditMode(false);
                                         setStatus(booking.status);
-                                        setCheckIn(booking.check_in.substring(0, 10));
-                                        setCheckOut(booking.check_out.substring(0, 10));
-                                        setGuests(booking.number_of_guests);
                                     }}
                                     className="px-6 py-2 border border-[#3A5C50] text-[#122F26] rounded-lg hover:bg-sand-50 transition"
                                     disabled={saving}

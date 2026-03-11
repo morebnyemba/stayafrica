@@ -246,14 +246,19 @@ export default function ReviewsManagement() {
           <p className="text-sm text-[#3A5C50]">Total Reviews</p>
           <p className="text-2xl font-bold text-[#122F26]">{totalCount}</p>
         </div>
-        {[5, 4, 3, 2, 1].map((rating) => (
-          <div key={rating} className="bg-white rounded-lg shadow p-4">
-            <p className="text-sm text-[#3A5C50]">{rating} Stars</p>
-            <p className="text-2xl font-bold text-[#122F26]">
-              {reviews.filter(r => r.rating === rating).length}
-            </p>
-          </div>
-        ))}
+        {[5, 4, 3, 2, 1].map((rating) => {
+          const count = reviews.filter(r => r.rating === rating).length;
+          return (
+            <div key={rating} className="bg-white rounded-lg shadow p-4">
+              <div className="flex items-center gap-1">
+                <p className="text-sm text-[#3A5C50]">{rating} Stars</p>
+                {renderStars(rating)}
+              </div>
+              <p className="text-2xl font-bold text-[#122F26]">{count}</p>
+              <p className="text-xs text-gray-400">on this page</p>
+            </div>
+          );
+        })}
       </div>
 
       {/* Reviews Table */}
@@ -336,14 +341,14 @@ export default function ReviewsManagement() {
                             className="text-yellow-600 hover:text-yellow-900"
                             title="Moderate review"
                           >
-                            <EyeOff className="w-5 h-5" />
+                            <Eye className="w-5 h-5" />
                           </button>
                           <button
                             onClick={() => handleHide(review.id)}
                             className="text-orange-600 hover:text-orange-900"
                             title="Hide review"
                           >
-                            <Eye className="w-5 h-5" />
+                            <EyeOff className="w-5 h-5" />
                           </button>
                           <button
                             onClick={() => handleDelete(review.id)}

@@ -24,7 +24,7 @@ export default function IdentityVerificationManagement() {
   useEffect(() => {
     loadVerifications();
     loadStats();
-  }, [page]);
+  }, [page, userIdFilter]);
 
   const loadVerifications = async () => {
     try {

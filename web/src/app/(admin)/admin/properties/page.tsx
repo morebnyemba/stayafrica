@@ -254,18 +254,21 @@ export default function PropertiesManagement() {
           <p className="text-2xl font-bold text-green-600">
             {properties.filter(p => p.status === 'active').length}
           </p>
+          <p className="text-xs text-gray-400">on this page</p>
         </div>
         <div className="bg-white rounded-lg shadow p-4">
           <p className="text-sm text-[#3A5C50]">Pending Approval</p>
           <p className="text-2xl font-bold text-yellow-600">
             {properties.filter(p => p.status === 'pending_approval').length}
           </p>
+          <p className="text-xs text-gray-400">on this page</p>
         </div>
         <div className="bg-white rounded-lg shadow p-4">
           <p className="text-sm text-[#3A5C50]">Inactive</p>
           <p className="text-2xl font-bold text-red-600">
             {properties.filter(p => p.status === 'inactive').length}
           </p>
+          <p className="text-xs text-gray-400">on this page</p>
         </div>
       </div>
 
@@ -413,7 +416,11 @@ export default function PropertiesManagement() {
                             <Power className="w-5 h-5" />
                           </button>
                         )}
-                        <button className="text-[#D9B168] hover:text-[#c9a158]" title="View details">
+                        <button
+                          onClick={() => window.open(`/properties/${property.id}`, '_blank')}
+                          className="text-[#D9B168] hover:text-[#c9a158]"
+                          title="View details"
+                        >
                           <Eye className="w-5 h-5" />
                         </button>
                       </td>

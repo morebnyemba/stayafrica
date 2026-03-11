@@ -147,7 +147,7 @@ export default function AuditLogsPage() {
             {/* Pagination */}
             <div className="bg-sand-50 dark:bg-primary-900 px-6 py-4 flex items-center justify-between border-t">
               <div className="text-sm text-primary-700 dark:text-sand-200">
-                Showing {(page - 1) * 30 + 1} to {Math.min(page * 30, totalCount)} of {totalCount} logs
+                Showing {(page - 1) * ITEMS_PER_PAGE + 1} to {Math.min(page * ITEMS_PER_PAGE, totalCount)} of {totalCount} logs
               </div>
               <div className="flex space-x-2">
                 <button
@@ -159,7 +159,7 @@ export default function AuditLogsPage() {
                 </button>
                 <button
                   onClick={() => setPage(p => p + 1)}
-                  disabled={page * 30 >= totalCount}
+                  disabled={page * ITEMS_PER_PAGE >= totalCount}
                   className="px-4 py-2 border border-[#3A5C50] rounded-lg text-sm font-medium text-primary-700 dark:text-sand-200 hover:bg-sand-50 dark:hover:bg-primary-800 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Next

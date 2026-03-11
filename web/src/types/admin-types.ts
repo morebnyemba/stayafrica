@@ -181,3 +181,19 @@ export interface PointOfInterest {
   is_active: boolean;
   created_at?: string;
 }
+
+export interface Wallet {
+  id: string;
+  user_id: string;
+  user: {
+    id: string;
+    email: string;
+    first_name: string;
+    last_name: string;
+  };
+  balance: number;
+  currency: string;
+  status: 'active' | 'suspended' | 'closed';
+  created_at: string;
+  updated_at: string;
+}
