@@ -124,6 +124,8 @@ export function HostBookingsContent() {
     );
   }, [allBookings, searchTerm]);
 
+  const REVENUE_STATUSES = ['confirmed', 'checked_in', 'checked_out', 'completed'];
+
   const stats = useMemo(() => ({
     total: allBookings.length,
     requested: allBookings.filter((b: any) => b.status === 'requested').length,
@@ -132,8 +134,10 @@ export function HostBookingsContent() {
     checked_in: allBookings.filter((b: any) => b.status === 'checked_in').length,
     checked_out: allBookings.filter((b: any) => b.status === 'checked_out').length,
     completed: allBookings.filter((b: any) => b.status === 'completed').length,
-    totalEarnings: allBookings.reduce((sum: number, b: any) =>
-      sum + (parseFloat(b.nightly_total || 0) + parseFloat(b.cleaning_fee || 0) - parseFloat(b.commission_fee || 0)), 0),
+    totalEarnings: allBookings
+      .filter((b: any) => REVENUE_STATUSES.includes(b.status))
+      .reduce((sum: number, b: any) =>
+        sum + (parseFloat(b.nightly_total || 0) + parseFloat(b.cleaning_fee || 0) - parseFloat(b.commission_fee || 0)), 0),
   }), [allBookings]);
 
   const statusConfig: Record<string, { color: string; bg: string; icon: any; dotColor: string }> = {
@@ -355,6 +359,8 @@ export function HostBookingsContent() {
                       parseFloat(booking.cleaning_fee || 0) -
                       parseFloat(booking.commission_fee || 0)
                     );
+                    const isRevenue = REVENUE_STATUSES.includes(booking.status);
+                    const isCancelled = booking.status === 'cancelled';
 
                     return (
                       <article
@@ -401,7 +407,7 @@ export function HostBookingsContent() {
                                   {booking.property?.city}, {booking.property?.country}
                                 </p>
                               </div>
-                              <p className="text-lg font-bold text-green-600 dark:text-green-400 whitespace-nowrap">
+                              <p className={`text-lg font-bold whitespace-nowrap ${isCancelled ? 'text-red-400 line-through' : isRevenue ? 'text-green-600 dark:text-green-400' : 'text-primary-400 dark:text-sand-500'}`}>
                                 {booking.currency || 'USD'} {earnings.toFixed(2)}
                               </p>
                             </div>
