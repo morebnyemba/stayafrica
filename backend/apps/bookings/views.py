@@ -37,14 +37,18 @@ class BookingViewSet(viewsets.ModelViewSet):
             if search:
                 from django.db.models import Q
                 qs = qs.filter(Q(booking_ref__icontains=search) | Q(guest__email__icontains=search))
-            status_filter = self.request.query_params.get('status')
-            if status_filter:
-                qs = qs.filter(status=status_filter)
-            return qs
-        active_profile = getattr(user, 'active_profile', user.role)
-        if active_profile == 'host':
-            return Booking.objects.filter(rental_property__host=user).select_related('guest', 'rental_property')
-        return Booking.objects.filter(guest=user).select_related('rental_property__host')
+        else:
+            active_profile = getattr(user, 'active_profile', user.role)
+            if active_profile == 'host':
+                qs = Booking.objects.filter(rental_property__host=user).select_related('guest', 'rental_property')
+            else:
+                qs = Booking.objects.filter(guest=user).select_related('rental_property__host')
+
+        # Status filter applies to all roles
+        status_filter = self.request.query_params.get('status')
+        if status_filter:
+            qs = qs.filter(status=status_filter)
+        return qs
     
     @transaction.atomic
     @log_action('create_booking')
