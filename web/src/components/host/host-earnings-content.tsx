@@ -20,6 +20,9 @@ import {
   Trash2,
   Edit2,
   Building2,
+  Wallet,
+  ArrowUpRight,
+  XCircle,
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { Button } from '@/components/ui';
@@ -28,11 +31,18 @@ import { HostTaxReport } from '@/components/tax/HostTaxReport';
 
 type Period = 'week' | 'month' | 'year';
 
+function formatCurrency(amount: number | string | undefined | null, currency?: string): string {
+  const num = typeof amount === 'string' ? parseFloat(amount) : (amount ?? 0);
+  const sym = currency || 'USD';
+  return `${sym} ${num.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
 export function HostEarningsContent() {
   const { user, isAuthenticated } = useAuth();
   const [period, setPeriod] = useState<Period>('month');
   const [showFilters, setShowFilters] = useState(false);
   const [showBankAccountForm, setShowBankAccountForm] = useState(false);
+  const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [editingAccount, setEditingAccount] = useState<any>(null);
   const queryClient = useQueryClient();
 
@@ -43,6 +53,26 @@ export function HostEarningsContent() {
     branch_code: '',
     country: '',
     is_primary: false,
+  });
+
+  // Fetch wallet data
+  const { data: walletData, isLoading: loadingWallet } = useQuery({
+    queryKey: ['wallet'],
+    queryFn: async () => {
+      const response = await apiClient.getMyWallet();
+      return response.data;
+    },
+    enabled: isAuthenticated,
+  });
+
+  // Fetch recent withdrawals
+  const { data: withdrawalsData } = useQuery({
+    queryKey: ['withdrawals'],
+    queryFn: async () => {
+      const response = await apiClient.getWithdrawals();
+      return response.data;
+    },
+    enabled: isAuthenticated,
   });
 
   // Fetch earnings data
@@ -131,6 +161,9 @@ export function HostEarningsContent() {
 
   const bankAccounts = bankAccountsData?.results || bankAccountsData || [];
   const earnings = earningsData?.earnings || [];
+  const withdrawals = withdrawalsData?.results || withdrawalsData || [];
+  const currency = walletData?.currency || 'USD';
+  const walletBalance = parseFloat(walletData?.balance || '0');
   
   // Get trend (compare last 2 periods)
   const lastPeriod = earnings[earnings.length - 1];
@@ -184,42 +217,6 @@ export function HostEarningsContent() {
     }
   };
 
-  const summaryCards = [
-    {
-      title: 'Total Earnings',
-      value: `$${analytics?.total_earnings?.toFixed(2) || '0.00'}`,
-      icon: DollarSign,
-      color: 'text-green-600',
-      bgColor: 'bg-green-100',
-      description: 'All-time earnings',
-    },
-    {
-      title: 'This Period',
-      value: `$${lastPeriod?.total || '0.00'}`,
-      icon: Calendar,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-100',
-      description: `${period} earnings`,
-      trend: trend !== 0 ? trend : null,
-    },
-    {
-      title: 'Pending Payout',
-      value: `$${analytics?.pending_earnings?.toFixed(2) || '0.00'}`,
-      icon: Clock,
-      color: 'text-yellow-600',
-      bgColor: 'bg-yellow-100',
-      description: 'Awaiting payout',
-    },
-    {
-      title: 'Completed Bookings',
-      value: analytics?.completed_bookings || 0,
-      icon: CheckCircle,
-      color: 'text-purple-600',
-      bgColor: 'bg-purple-100',
-      description: 'Paid bookings',
-    },
-  ];
-
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-sand-100">
@@ -229,10 +226,10 @@ export function HostEarningsContent() {
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
                 <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary-900 mb-2">
-                  Earnings Dashboard
+                  Earnings &amp; Wallet
                 </h1>
                 <p className="text-base sm:text-lg text-primary-600">
-                  Track your revenue and financial performance
+                  Track your revenue, manage payouts, and withdraw funds
                 </p>
               </div>
               
@@ -256,6 +253,47 @@ export function HostEarningsContent() {
               </div>
             </div>
           </header>
+
+          {/* Wallet Balance & Withdraw — Hero Card */}
+          <section aria-labelledby="wallet-heading" className="mb-8">
+            <div className="card p-6 sm:p-8 bg-gradient-to-r from-secondary-600 to-secondary-700 text-white rounded-xl">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Wallet className="w-5 h-5 text-white/80" />
+                    <h2 id="wallet-heading" className="text-sm font-medium text-white/80 uppercase tracking-wide">
+                      Available Balance
+                    </h2>
+                  </div>
+                  {loadingWallet ? (
+                    <div className="animate-pulse h-10 w-48 bg-white/20 rounded" />
+                  ) : (
+                    <p className="text-3xl sm:text-4xl font-bold">
+                      {formatCurrency(walletBalance, currency)}
+                    </p>
+                  )}
+                  <p className="text-sm text-white/70 mt-1">
+                    Funds available for withdrawal
+                  </p>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Button
+                    onClick={() => setShowWithdrawModal(true)}
+                    disabled={walletBalance < 10 || !walletData}
+                    className="bg-white text-secondary-700 hover:bg-white/90 font-semibold px-6 py-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <ArrowUpRight className="w-4 h-4 mr-2" />
+                    Withdraw Funds
+                  </Button>
+                </div>
+              </div>
+              {walletBalance < 10 && walletData && (
+                <p className="text-xs text-white/60 mt-3">
+                  Minimum withdrawal amount is {formatCurrency(10, currency)}
+                </p>
+              )}
+            </div>
+          </section>
 
           {/* Period Selector */}
           <div className="mb-6">
@@ -281,7 +319,41 @@ export function HostEarningsContent() {
           <section aria-labelledby="earnings-summary-heading" className="mb-8">
             <h2 id="earnings-summary-heading" className="sr-only">Earnings Summary</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-              {summaryCards.map((card, index) => (
+              {[
+                {
+                  title: 'Total Earnings',
+                  value: formatCurrency(analytics?.total_earnings, currency),
+                  icon: DollarSign,
+                  color: 'text-green-600',
+                  bgColor: 'bg-green-100',
+                  description: 'All-time net earnings',
+                },
+                {
+                  title: 'This Period',
+                  value: formatCurrency(lastPeriod?.total, currency),
+                  icon: Calendar,
+                  color: 'text-blue-600',
+                  bgColor: 'bg-blue-100',
+                  description: `${period} earnings`,
+                  trend: trend !== 0 ? trend : null,
+                },
+                {
+                  title: 'Pending Payout',
+                  value: formatCurrency(analytics?.pending_earnings, currency),
+                  icon: Clock,
+                  color: 'text-yellow-600',
+                  bgColor: 'bg-yellow-100',
+                  description: 'Awaiting completion',
+                },
+                {
+                  title: 'Completed Bookings',
+                  value: analytics?.completed_bookings || 0,
+                  icon: CheckCircle,
+                  color: 'text-purple-600',
+                  bgColor: 'bg-purple-100',
+                  description: 'Paid bookings',
+                },
+              ].map((card, index) => (
                 <div
                   key={index}
                   className="card p-4 sm:p-6 hover:shadow-lg transition-shadow"
@@ -327,22 +399,22 @@ export function HostEarningsContent() {
                 <div className="space-y-3">
                   <div className="flex justify-between items-center text-primary-900">
                     <span className="font-medium">Total Gross Revenue</span>
-                    <span className="text-xl font-bold">${analytics.gross_earnings?.toFixed(2) || '0.00'}</span>
+                    <span className="text-xl font-bold">{formatCurrency(analytics.gross_earnings, currency)}</span>
                   </div>
                   <div className="h-px bg-primary-200"></div>
                   <div className="flex justify-between items-center text-red-600">
                     <span className="pl-4">Platform Commission (15%)</span>
-                    <span className="font-semibold">-${analytics.total_commission?.toFixed(2) || '0.00'}</span>
+                    <span className="font-semibold">-{formatCurrency(analytics.total_commission, currency)}</span>
                   </div>
                   <div className="h-px bg-primary-200"></div>
                   <div className="flex justify-between items-center text-green-600">
                     <span className="font-bold text-lg">Net Earnings to You</span>
-                    <span className="text-2xl font-bold">${analytics.total_earnings?.toFixed(2) || '0.00'}</span>
+                    <span className="text-2xl font-bold">{formatCurrency(analytics.total_earnings, currency)}</span>
                   </div>
                 </div>
                 <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
                   <p className="text-xs text-blue-800">
-                    <strong>Note:</strong> The platform commission of 15% helps us provide secure payments, customer support, marketing, and platform maintenance. Guest service fees and taxes are charged separately to guests and don't affect your payout.
+                    <strong>Note:</strong> The platform commission of 15% helps us provide secure payments, customer support, marketing, and platform maintenance. Guest service fees and taxes are charged separately to guests and don&apos;t affect your payout.
                   </p>
                 </div>
               </div>
@@ -386,13 +458,13 @@ export function HostEarningsContent() {
                           <div className="flex items-center gap-4 text-sm text-primary-600">
                             <span>{bookingsCount} booking{bookingsCount !== 1 ? 's' : ''}</span>
                             <span>•</span>
-                            <span>Avg: ${bookingsCount > 0 ? (amount / bookingsCount).toFixed(2) : '0.00'}</span>
+                            <span>Avg: {formatCurrency(bookingsCount > 0 ? amount / bookingsCount : 0, currency)}</span>
                           </div>
                         </div>
                         
                         <div className="text-right">
                           <p className="text-xl sm:text-2xl font-bold text-green-600">
-                            ${amount.toFixed(2)}
+                            {formatCurrency(amount, currency)}
                           </p>
                           <p className="text-xs text-primary-500">
                             Net earnings
@@ -409,17 +481,17 @@ export function HostEarningsContent() {
                               <DollarSign className="w-3 h-3" />
                               Gross Revenue
                             </span>
-                            <span className="font-medium">${gross.toFixed(2)}</span>
+                            <span className="font-medium">{formatCurrency(gross, currency)}</span>
                           </div>
                           <div className="flex justify-between text-red-600">
                             <span className="flex items-center gap-1.5 pl-4">
                               - Platform Commission (15%)
                             </span>
-                            <span className="font-medium">-${commission.toFixed(2)}</span>
+                            <span className="font-medium">-{formatCurrency(commission, currency)}</span>
                           </div>
                           <div className="flex justify-between font-semibold text-green-600 pt-1.5 border-t border-primary-100">
                             <span>Net to Host</span>
-                            <span>${amount.toFixed(2)}</span>
+                            <span>{formatCurrency(amount, currency)}</span>
                           </div>
                         </div>
                       </div>
@@ -440,57 +512,101 @@ export function HostEarningsContent() {
             )}
           </section>
 
+          {/* Recent Withdrawals */}
+          <section aria-labelledby="withdrawals-heading" className="card p-4 sm:p-6 mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <h2 id="withdrawals-heading" className="text-xl sm:text-2xl font-bold text-primary-900">
+                Recent Withdrawals
+              </h2>
+              {walletBalance >= 10 && (
+                <Button onClick={() => setShowWithdrawModal(true)} size="sm">
+                  <ArrowUpRight className="w-4 h-4" />
+                  <span className="hidden sm:inline">Withdraw</span>
+                </Button>
+              )}
+            </div>
+
+            {withdrawals.length > 0 ? (
+              <div className="space-y-3">
+                {withdrawals.slice(0, 5).map((w: any) => {
+                  const statusColors: Record<string, string> = {
+                    completed: 'bg-green-100 text-green-800',
+                    pending: 'bg-yellow-100 text-yellow-800',
+                    processing: 'bg-blue-100 text-blue-800',
+                    failed: 'bg-red-100 text-red-800',
+                    cancelled: 'bg-gray-100 text-gray-800',
+                  };
+                  const StatusIcon = w.status === 'completed' ? CheckCircle
+                    : w.status === 'failed' ? XCircle
+                    : Clock;
+                  return (
+                    <div key={w.id} className="flex items-center justify-between p-3 border border-primary-100 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <StatusIcon className={`w-5 h-5 ${
+                          w.status === 'completed' ? 'text-green-600' :
+                          w.status === 'failed' ? 'text-red-600' : 'text-yellow-600'
+                        }`} />
+                        <div>
+                          <p className="font-medium text-primary-900 text-sm">
+                            {formatCurrency(w.amount, w.currency || currency)}
+                          </p>
+                          <p className="text-xs text-primary-500">
+                            {w.bank_account_details?.bank_name || 'Bank account'} •{' '}
+                            {new Date(w.created_at).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                      <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${statusColors[w.status] || 'bg-gray-100 text-gray-800'}`}>
+                        {w.status?.charAt(0).toUpperCase() + w.status?.slice(1)}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <ArrowUpRight className="w-10 h-10 text-primary-300 mx-auto mb-3" />
+                <p className="text-sm text-primary-600">No withdrawals yet</p>
+                <p className="text-xs text-primary-400 mt-1">
+                  When you withdraw funds, they will appear here
+                </p>
+              </div>
+            )}
+          </section>
+
           {/* Payout Information */}
           <section aria-labelledby="payout-info-heading" className="card p-4 sm:p-6 mb-8">
             <h2 id="payout-info-heading" className="text-xl sm:text-2xl font-bold text-primary-900 mb-4">
-              Payout Information
+              How Payouts Work
             </h2>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-3">
-                <h3 className="font-semibold text-primary-900 mb-2">
-                  How Payouts Work
-                </h3>
-                <ul className="space-y-2 text-sm text-primary-600">
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span>Earnings are calculated after platform commission (15%)</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span>Payouts are processed within 24 hours of booking completion</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span>You can track pending and completed payouts in this dashboard</span>
-                  </li>
-                </ul>
-              </div>
-              
-              <div className="p-4 bg-secondary-50 rounded-lg border border-secondary-200">
-                <h3 className="font-semibold text-primary-900 mb-3">
-                  Next Payout
-                </h3>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-primary-600">Amount:</span>
-                    <span className="font-semibold text-primary-900">
-                      ${analytics?.pending_earnings?.toFixed(2) || '0.00'}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-primary-600">Status:</span>
-                    <span className="font-semibold text-yellow-600">
-                      Processing
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-primary-600">Expected:</span>
-                    <span className="font-semibold text-primary-900">
-                      Within 24 hours
-                    </span>
-                  </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="p-4 bg-sand-50 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-8 h-8 bg-secondary-100 rounded-full flex items-center justify-center text-secondary-700 font-bold text-sm">1</div>
+                  <h3 className="font-semibold text-primary-900 text-sm">Booking Completed</h3>
                 </div>
+                <p className="text-xs text-primary-600">
+                  After guest check-in, earnings are credited to your wallet after the platform commission (15%) is deducted.
+                </p>
+              </div>
+              <div className="p-4 bg-sand-50 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-8 h-8 bg-secondary-100 rounded-full flex items-center justify-center text-secondary-700 font-bold text-sm">2</div>
+                  <h3 className="font-semibold text-primary-900 text-sm">Balance Available</h3>
+                </div>
+                <p className="text-xs text-primary-600">
+                  Funds appear in your wallet balance above. You can accumulate earnings or withdraw anytime.
+                </p>
+              </div>
+              <div className="p-4 bg-sand-50 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-8 h-8 bg-secondary-100 rounded-full flex items-center justify-center text-secondary-700 font-bold text-sm">3</div>
+                  <h3 className="font-semibold text-primary-900 text-sm">Withdraw to Bank</h3>
+                </div>
+                <p className="text-xs text-primary-600">
+                  Click &quot;Withdraw Funds&quot; to send money to your bank account. Minimum: {formatCurrency(10, currency)}. Processing: 1-3 business days.
+                </p>
               </div>
             </div>
           </section>
@@ -687,7 +803,7 @@ export function HostEarningsContent() {
                   No Bank Accounts
                 </h3>
                 <p className="text-primary-600 mb-4">
-                  Add a bank account to receive your earnings
+                  Add a bank account to withdraw your earnings
                 </p>
                 <Button
                   onClick={handleAddBankAccount}
@@ -706,6 +822,152 @@ export function HostEarningsContent() {
           </section>
         </div>
       </div>
+
+      {/* Withdraw Modal */}
+      {showWithdrawModal && walletData && (
+        <WithdrawModal
+          wallet={walletData}
+          bankAccounts={bankAccounts}
+          onClose={() => setShowWithdrawModal(false)}
+        />
+      )}
     </ProtectedRoute>
+  );
+}
+
+/** Withdraw funds modal */
+function WithdrawModal({ wallet, bankAccounts, onClose }: { wallet: any; bankAccounts: any[]; onClose: () => void }) {
+  const [amount, setAmount] = useState('');
+  const [selectedBank, setSelectedBank] = useState('');
+  const [notes, setNotes] = useState('');
+  const queryClient = useQueryClient();
+
+  const withdrawMutation = useMutation({
+    mutationFn: (data: any) => apiClient.initiateWithdrawal(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['wallet'] });
+      queryClient.invalidateQueries({ queryKey: ['withdrawals'] });
+      queryClient.invalidateQueries({ queryKey: ['wallet-transactions'] });
+      toast.success('Withdrawal initiated! It will be processed within 1–3 business days.');
+      onClose();
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.error || 'Failed to initiate withdrawal.');
+    },
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    withdrawMutation.mutate({
+      wallet: wallet.id,
+      bank_account: selectedBank,
+      amount,
+      currency: wallet.currency,
+      notes,
+    });
+  };
+
+  return (
+    <div
+      className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
+      onClick={onClose}
+      onKeyDown={(e) => e.key === 'Escape' && onClose()}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="withdraw-modal-title"
+    >
+      <div className="bg-white rounded-xl p-6 max-w-md w-full" onClick={(e) => e.stopPropagation()}>
+        <h2 id="withdraw-modal-title" className="text-2xl font-bold text-primary-900 mb-4">Withdraw Funds</h2>
+
+        {bankAccounts.length === 0 ? (
+          <div className="text-center py-4">
+            <p className="text-primary-600 mb-4">You need to add a bank account first</p>
+            <Button onClick={onClose} variant="primary" size="sm">Close</Button>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label htmlFor="earnings-withdraw-amount" className="block text-sm font-medium text-primary-900 mb-1">
+                Amount ({wallet.currency})
+              </label>
+              <input
+                id="earnings-withdraw-amount"
+                type="number"
+                step="0.01"
+                min="10"
+                max={wallet.balance}
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                required
+                className="w-full px-4 py-2 border border-primary-300 rounded-lg bg-white text-primary-900 focus:ring-2 focus:ring-secondary-500 focus:border-primary-500"
+                placeholder="Min 10.00"
+              />
+              <p className="text-xs text-primary-600 mt-1">
+                Available: {formatCurrency(wallet.balance, wallet.currency)}
+              </p>
+            </div>
+
+            <div>
+              <label htmlFor="earnings-withdraw-bank" className="block text-sm font-medium text-primary-900 mb-1">
+                Bank Account
+              </label>
+              <select
+                id="earnings-withdraw-bank"
+                value={selectedBank}
+                onChange={(e) => setSelectedBank(e.target.value)}
+                required
+                className="w-full px-4 py-2 border border-primary-300 rounded-lg bg-white text-primary-900 focus:ring-2 focus:ring-secondary-500 focus:border-primary-500"
+              >
+                <option value="">Select bank account</option>
+                {bankAccounts.map((account: any) => (
+                  <option key={account.id} value={account.id}>
+                    {account.bank_name} - {account.account_name} (•••• {account.account_number?.slice(-4)})
+                    {account.is_primary ? ' ★ Primary' : ''}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="earnings-withdraw-notes" className="block text-sm font-medium text-primary-900 mb-1">
+                Notes (Optional)
+              </label>
+              <textarea
+                id="earnings-withdraw-notes"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                className="w-full px-4 py-2 border border-primary-300 rounded-lg bg-white text-primary-900 focus:ring-2 focus:ring-secondary-500 focus:border-primary-500"
+                rows={2}
+                placeholder="Any additional notes..."
+              />
+            </div>
+
+            {withdrawMutation.isError && (
+              <div className="bg-red-100 text-red-700 p-3 rounded-lg text-sm" role="alert">
+                {(withdrawMutation.error as any)?.response?.data?.error || 'Failed to initiate withdrawal'}
+              </div>
+            )}
+
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex-1 px-4 py-2 border border-primary-300 rounded-lg text-primary-700 font-semibold hover:bg-primary-50 transition"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={withdrawMutation.isPending}
+                aria-busy={withdrawMutation.isPending}
+                className="flex-1 px-4 py-2 bg-secondary-600 text-white rounded-lg font-semibold hover:bg-secondary-700 transition disabled:opacity-50"
+              >
+                {withdrawMutation.isPending ? 'Processing...' : 'Withdraw'}
+              </button>
+            </div>
+          </form>
+        )}
+      </div>
+    </div>
   );
 }
