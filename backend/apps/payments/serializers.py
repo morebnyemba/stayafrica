@@ -169,11 +169,12 @@ class BankAccountSerializer(serializers.ModelSerializer):
             'id', 'user', 'bank_name', 'account_name', 'account_number',
             'branch_code', 'country', 'is_primary', 'created_at', 'updated_at'
         ]
-        read_only_fields = ['id', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'user', 'created_at', 'updated_at']
     
     def validate(self, data):
         # Ensure only one primary account per user
-        user = data.get('user', self.instance.user if self.instance else None)
+        request = self.context.get('request')
+        user = self.instance.user if self.instance else (request.user if request else None)
         is_primary = data.get('is_primary', False)
         
         if is_primary and user:
@@ -182,9 +183,10 @@ class BankAccountSerializer(serializers.ModelSerializer):
             ).exclude(id=self.instance.id if self.instance else None).exists()
             
             if existing_primary:
-                raise serializers.ValidationError(
-                    'User already has a primary bank account. Set is_primary=False for existing account first.'
-                )
+                # Auto-unset existing primary instead of blocking
+                BankAccount.objects.filter(
+                    user=user, is_primary=True
+                ).update(is_primary=False)
         
         return data
 
