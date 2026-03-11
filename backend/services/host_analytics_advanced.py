@@ -126,6 +126,12 @@ class HostAnalyticsService:
             ),
             avg_booking_value=Avg('grand_total')
         )
+        # Sum of date diffs returns timedelta; convert to integer days
+        total_nights_val = revenue_data.get('total_nights')
+        if hasattr(total_nights_val, 'days'):
+            revenue_data['total_nights'] = total_nights_val.days
+        elif total_nights_val is None:
+            revenue_data['total_nights'] = 0
         
         # Get property analytics for occupancy
         property_analytics = []
