@@ -144,7 +144,7 @@ export function AddPaymentMethodWizard() {
           <div
             key={step}
             className={`flex-1 h-2 rounded-full transition ${
-              index <= currentIndex ? 'bg-secondary-500' : 'bg-primary-200 dark:bg-primary-700'
+              index <= currentIndex ? 'bg-secondary-500' : 'bg-primary-200'
             }`}
           />
         ))}
@@ -155,8 +155,8 @@ export function AddPaymentMethodWizard() {
   // Provider Selection Step
   const renderProviderStep = () => (
     <div>
-      <h2 className="text-3xl font-bold text-primary-900 dark:text-sand-50 mb-2">Select Payment Provider</h2>
-      <p className="text-primary-600 dark:text-sand-300 mb-8">Choose your preferred payment method provider</p>
+      <h2 className="text-3xl font-bold text-primary-900 mb-2">Select Payment Provider</h2>
+      <p className="text-primary-600 mb-8">Choose your preferred payment method provider</p>
 
       <div className="grid gap-4">
         {PROVIDERS.map((provider) => {
@@ -168,14 +168,14 @@ export function AddPaymentMethodWizard() {
               className="card p-6 text-left hover:shadow-lg transition group"
             >
               <div className="flex items-start gap-4">
-                <div className="p-3 bg-secondary-100 dark:bg-secondary-900/30 rounded-xl group-hover:bg-secondary-200 dark:group-hover:bg-secondary-800/50 transition">
-                  <IconComponent className="w-6 h-6 text-secondary-600 dark:text-secondary-400" />
+                <div className="p-3 bg-secondary-100 rounded-xl group-hover:bg-secondary-200 transition">
+                  <IconComponent className="w-6 h-6 text-secondary-600" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-bold text-primary-900 dark:text-sand-50 mb-1">{provider.name}</h3>
-                  <p className="text-sm text-primary-600 dark:text-sand-300">{provider.description}</p>
+                  <h3 className="font-bold text-primary-900 mb-1">{provider.name}</h3>
+                  <p className="text-sm text-primary-600">{provider.description}</p>
                 </div>
-                <ArrowRight className="w-5 h-5 text-primary-400 dark:text-sand-500 group-hover:text-secondary-600 dark:group-hover:text-secondary-400 transition" />
+                <ArrowRight className="w-5 h-5 text-primary-400 group-hover:text-secondary-600 transition" />
               </div>
             </button>
           );
@@ -194,14 +194,14 @@ export function AddPaymentMethodWizard() {
       <div>
         <button
           onClick={() => setCurrentStep('provider')}
-          className="flex items-center gap-2 text-primary-600 dark:text-sand-300 hover:text-secondary-600 dark:hover:text-secondary-400 mb-6 transition"
+          className="flex items-center gap-2 text-primary-600 hover:text-secondary-600 mb-6 transition"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to providers
         </button>
 
-        <h2 className="text-3xl font-bold text-primary-900 dark:text-sand-50 mb-2">Select Payment Method</h2>
-        <p className="text-primary-600 dark:text-sand-300 mb-8">
+        <h2 className="text-3xl font-bold text-primary-900 mb-2">Select Payment Method</h2>
+        <p className="text-primary-600 mb-8">
           Choose how you want to pay with {PROVIDERS.find(p => p.id === paymentData.provider)?.name}
         </p>
 
@@ -215,13 +215,13 @@ export function AddPaymentMethodWizard() {
                 className="card p-6 text-left hover:shadow-lg transition group"
               >
                 <div className="flex items-center gap-4">
-                  <div className="p-3 bg-secondary-100 dark:bg-secondary-900/30 rounded-xl group-hover:bg-secondary-200 dark:group-hover:bg-secondary-800/50 transition">
-                    <IconComponent className="w-6 h-6 text-secondary-600 dark:text-secondary-400" />
+                  <div className="p-3 bg-secondary-100 rounded-xl group-hover:bg-secondary-200 transition">
+                    <IconComponent className="w-6 h-6 text-secondary-600" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-bold text-primary-900 dark:text-sand-50">{method.name}</h3>
+                    <h3 className="font-bold text-primary-900">{method.name}</h3>
                   </div>
-                  <ArrowRight className="w-5 h-5 text-primary-400 dark:text-sand-500 group-hover:text-secondary-600 dark:group-hover:text-secondary-400 transition" />
+                  <ArrowRight className="w-5 h-5 text-primary-400 group-hover:text-secondary-600 transition" />
                 </div>
               </button>
             );
@@ -239,21 +239,21 @@ export function AddPaymentMethodWizard() {
       <div>
         <button
           onClick={() => setCurrentStep('method')}
-          className="flex items-center gap-2 text-primary-600 dark:text-sand-300 hover:text-secondary-600 dark:hover:text-secondary-400 mb-6 transition"
+          className="flex items-center gap-2 text-primary-600 hover:text-secondary-600 mb-6 transition"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to methods
         </button>
 
-        <h2 className="text-3xl font-bold text-primary-900 dark:text-sand-50 mb-2">Enter Payment Details</h2>
-        <p className="text-primary-600 dark:text-sand-300 mb-8">Provide your payment information securely</p>
+        <h2 className="text-3xl font-bold text-primary-900 mb-2">Enter Payment Details</h2>
+        <p className="text-primary-600 mb-8">Provide your payment information securely</p>
 
         <div className="card p-8 space-y-6">
           {/* Card Payment */}
           {paymentData.method === 'card' && (
             <>
               <div>
-                <label className="block text-sm font-semibold text-primary-700 dark:text-sand-200 mb-2">
+                <label className="block text-sm font-semibold text-primary-700 mb-2">
                   Card Number
                 </label>
                 <input
@@ -262,13 +262,13 @@ export function AddPaymentMethodWizard() {
                   maxLength={19}
                   value={paymentData.cardNumber}
                   onChange={(e) => setPaymentData({ ...paymentData, cardNumber: e.target.value })}
-                  className="w-full px-4 py-3 border border-primary-200 dark:border-primary-700 rounded-xl bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-50 focus:ring-2 focus:ring-secondary-500 dark:focus:ring-secondary-400 focus:border-transparent transition"
+                  className="w-full px-4 py-3 border border-primary-200 rounded-xl bg-white text-primary-900 focus:ring-2 focus:ring-secondary-500 focus:border-transparent transition"
                 />
               </div>
 
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold text-primary-700 dark:text-sand-200 mb-2">
+                  <label className="block text-sm font-semibold text-primary-700 mb-2">
                     Month
                   </label>
                   <input
@@ -277,12 +277,12 @@ export function AddPaymentMethodWizard() {
                     maxLength={2}
                     value={paymentData.expiryMonth}
                     onChange={(e) => setPaymentData({ ...paymentData, expiryMonth: e.target.value })}
-                    className="w-full px-4 py-3 border border-primary-200 dark:border-primary-700 rounded-xl bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-50 focus:ring-2 focus:ring-secondary-500 dark:focus:ring-secondary-400 focus:border-transparent transition"
+                    className="w-full px-4 py-3 border border-primary-200 rounded-xl bg-white text-primary-900 focus:ring-2 focus:ring-secondary-500 focus:border-transparent transition"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-primary-700 dark:text-sand-200 mb-2">
+                  <label className="block text-sm font-semibold text-primary-700 mb-2">
                     Year
                   </label>
                   <input
@@ -291,12 +291,12 @@ export function AddPaymentMethodWizard() {
                     maxLength={4}
                     value={paymentData.expiryYear}
                     onChange={(e) => setPaymentData({ ...paymentData, expiryYear: e.target.value })}
-                    className="w-full px-4 py-3 border border-primary-200 dark:border-primary-700 rounded-xl bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-50 focus:ring-2 focus:ring-secondary-500 dark:focus:ring-secondary-400 focus:border-transparent transition"
+                    className="w-full px-4 py-3 border border-primary-200 rounded-xl bg-white text-primary-900 focus:ring-2 focus:ring-secondary-500 focus:border-transparent transition"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-primary-700 dark:text-sand-200 mb-2">
+                  <label className="block text-sm font-semibold text-primary-700 mb-2">
                     CVV
                   </label>
                   <input
@@ -305,7 +305,7 @@ export function AddPaymentMethodWizard() {
                     maxLength={4}
                     value={paymentData.cvv}
                     onChange={(e) => setPaymentData({ ...paymentData, cvv: e.target.value })}
-                    className="w-full px-4 py-3 border border-primary-200 dark:border-primary-700 rounded-xl bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-50 focus:ring-2 focus:ring-secondary-500 dark:focus:ring-secondary-400 focus:border-transparent transition"
+                    className="w-full px-4 py-3 border border-primary-200 rounded-xl bg-white text-primary-900 focus:ring-2 focus:ring-secondary-500 focus:border-transparent transition"
                   />
                 </div>
               </div>
@@ -315,7 +315,7 @@ export function AddPaymentMethodWizard() {
           {/* Mobile Money */}
           {paymentData.method === 'mobile' && (
             <div>
-              <label className="block text-sm font-semibold text-primary-700 dark:text-sand-200 mb-2">
+              <label className="block text-sm font-semibold text-primary-700 mb-2">
                 Phone Number
               </label>
               <input
@@ -323,7 +323,7 @@ export function AddPaymentMethodWizard() {
                 placeholder="+263 77 123 4567"
                 value={paymentData.phoneNumber}
                 onChange={(e) => setPaymentData({ ...paymentData, phoneNumber: e.target.value })}
-                className="w-full px-4 py-3 border border-primary-200 dark:border-primary-700 rounded-xl bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-50 focus:ring-2 focus:ring-secondary-500 dark:focus:ring-secondary-400 focus:border-transparent transition"
+                className="w-full px-4 py-3 border border-primary-200 rounded-xl bg-white text-primary-900 focus:ring-2 focus:ring-secondary-500 focus:border-transparent transition"
               />
             </div>
           )}
@@ -332,7 +332,7 @@ export function AddPaymentMethodWizard() {
           {paymentData.method === 'bank' && (
             <>
               <div>
-                <label className="block text-sm font-semibold text-primary-700 dark:text-sand-200 mb-2">
+                <label className="block text-sm font-semibold text-primary-700 mb-2">
                   Bank Name
                 </label>
                 <input
@@ -340,12 +340,12 @@ export function AddPaymentMethodWizard() {
                   placeholder="Enter bank name"
                   value={paymentData.bankName}
                   onChange={(e) => setPaymentData({ ...paymentData, bankName: e.target.value })}
-                  className="w-full px-4 py-3 border border-primary-200 dark:border-primary-700 rounded-xl bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-50 focus:ring-2 focus:ring-secondary-500 dark:focus:ring-secondary-400 focus:border-transparent transition"
+                  className="w-full px-4 py-3 border border-primary-200 rounded-xl bg-white text-primary-900 focus:ring-2 focus:ring-secondary-500 focus:border-transparent transition"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-primary-700 dark:text-sand-200 mb-2">
+                <label className="block text-sm font-semibold text-primary-700 mb-2">
                   Account Number
                 </label>
                 <input
@@ -353,7 +353,7 @@ export function AddPaymentMethodWizard() {
                   placeholder="Enter account number"
                   value={paymentData.accountNumber}
                   onChange={(e) => setPaymentData({ ...paymentData, accountNumber: e.target.value })}
-                  className="w-full px-4 py-3 border border-primary-200 dark:border-primary-700 rounded-xl bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-50 focus:ring-2 focus:ring-secondary-500 dark:focus:ring-secondary-400 focus:border-transparent transition"
+                  className="w-full px-4 py-3 border border-primary-200 rounded-xl bg-white text-primary-900 focus:ring-2 focus:ring-secondary-500 focus:border-transparent transition"
                 />
               </div>
             </>
@@ -362,7 +362,7 @@ export function AddPaymentMethodWizard() {
           {/* USSD */}
           {paymentData.method === 'ussd' && (
             <div>
-              <label className="block text-sm font-semibold text-primary-700 dark:text-sand-200 mb-2">
+              <label className="block text-sm font-semibold text-primary-700 mb-2">
                 Phone Number
               </label>
               <input
@@ -370,17 +370,17 @@ export function AddPaymentMethodWizard() {
                 placeholder="+234 80 1234 5678"
                 value={paymentData.phoneNumber}
                 onChange={(e) => setPaymentData({ ...paymentData, phoneNumber: e.target.value })}
-                className="w-full px-4 py-3 border border-primary-200 dark:border-primary-700 rounded-xl bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-50 focus:ring-2 focus:ring-secondary-500 dark:focus:ring-secondary-400 focus:border-transparent transition"
+                className="w-full px-4 py-3 border border-primary-200 rounded-xl bg-white text-primary-900 focus:ring-2 focus:ring-secondary-500 focus:border-transparent transition"
               />
             </div>
           )}
 
           {/* Security Note */}
-          <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl flex items-start gap-3">
-            <CheckCircle className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+          <div className="bg-blue-50 p-4 rounded-xl flex items-start gap-3">
+            <CheckCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
             <div>
-              <p className="text-sm font-semibold text-blue-900 dark:text-blue-200 mb-1">Secure Payment</p>
-              <p className="text-xs text-blue-800 dark:text-blue-300">
+              <p className="text-sm font-semibold text-blue-900 mb-1">Secure Payment</p>
+              <p className="text-xs text-blue-800">
                 Your payment information is encrypted and secure. We never store full card details.
               </p>
             </div>
@@ -401,7 +401,7 @@ export function AddPaymentMethodWizard() {
   };
 
   return (
-    <div className="min-h-screen bg-sand-100 dark:bg-primary-900">
+    <div className="min-h-screen bg-sand-100">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {renderProgressBar()}
 

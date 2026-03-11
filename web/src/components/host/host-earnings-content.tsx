@@ -189,16 +189,16 @@ export function HostEarningsContent() {
       title: 'Total Earnings',
       value: `$${analytics?.total_earnings?.toFixed(2) || '0.00'}`,
       icon: DollarSign,
-      color: 'text-green-600 dark:text-green-400',
-      bgColor: 'bg-green-100 dark:bg-green-900/30',
+      color: 'text-green-600',
+      bgColor: 'bg-green-100',
       description: 'All-time earnings',
     },
     {
       title: 'This Period',
       value: `$${lastPeriod?.total || '0.00'}`,
       icon: Calendar,
-      color: 'text-blue-600 dark:text-blue-400',
-      bgColor: 'bg-blue-100 dark:bg-blue-900/30',
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-100',
       description: `${period} earnings`,
       trend: trend !== 0 ? trend : null,
     },
@@ -206,32 +206,32 @@ export function HostEarningsContent() {
       title: 'Pending Payout',
       value: `$${analytics?.pending_earnings?.toFixed(2) || '0.00'}`,
       icon: Clock,
-      color: 'text-yellow-600 dark:text-yellow-400',
-      bgColor: 'bg-yellow-100 dark:bg-yellow-900/30',
+      color: 'text-yellow-600',
+      bgColor: 'bg-yellow-100',
       description: 'Awaiting payout',
     },
     {
       title: 'Completed Bookings',
       value: analytics?.completed_bookings || 0,
       icon: CheckCircle,
-      color: 'text-purple-600 dark:text-purple-400',
-      bgColor: 'bg-purple-100 dark:bg-purple-900/30',
+      color: 'text-purple-600',
+      bgColor: 'bg-purple-100',
       description: 'Paid bookings',
     },
   ];
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-sand-100 dark:bg-primary-900">
+      <div className="min-h-screen bg-sand-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Header */}
           <header className="mb-8">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary-900 dark:text-sand-50 mb-2">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary-900 mb-2">
                   Earnings Dashboard
                 </h1>
-                <p className="text-base sm:text-lg text-primary-600 dark:text-sand-300">
+                <p className="text-base sm:text-lg text-primary-600">
                   Track your revenue and financial performance
                 </p>
               </div>
@@ -259,7 +259,7 @@ export function HostEarningsContent() {
 
           {/* Period Selector */}
           <div className="mb-6">
-            <div className="inline-flex rounded-lg border border-primary-200 dark:border-primary-700 bg-white dark:bg-primary-800 p-1">
+            <div className="inline-flex rounded-lg border border-primary-200 bg-white p-1">
               {(['week', 'month', 'year'] as Period[]).map((p) => (
                 <button
                   key={p}
@@ -267,7 +267,7 @@ export function HostEarningsContent() {
                   className={`px-4 sm:px-6 py-2 rounded-md font-medium transition-colors ${
                     period === p
                       ? 'bg-secondary-500 text-white'
-                      : 'text-primary-700 dark:text-sand-300 hover:bg-primary-50 dark:hover:bg-primary-700'
+                      : 'text-primary-700 hover:bg-primary-50'
                   }`}
                   aria-label={`View ${p} earnings`}
                 >
@@ -292,7 +292,7 @@ export function HostEarningsContent() {
                     </div>
                     {card.trend !== null && card.trend !== undefined && (
                       <div className={`flex items-center gap-1 text-xs sm:text-sm font-semibold ${
-                        card.trend > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
+                        card.trend > 0 ? 'text-green-600' : 'text-red-600'
                       }`}>
                         {card.trend > 0 ? (
                           <TrendingUp className="w-4 h-4" aria-hidden="true" />
@@ -303,13 +303,13 @@ export function HostEarningsContent() {
                       </div>
                     )}
                   </div>
-                  <h3 className="text-xs sm:text-sm font-medium text-primary-600 dark:text-sand-400 mb-1">
+                  <h3 className="text-xs sm:text-sm font-medium text-primary-600 mb-1">
                     {card.title}
                   </h3>
-                  <p className="text-xl sm:text-2xl font-bold text-primary-900 dark:text-sand-50 mb-1">
+                  <p className="text-xl sm:text-2xl font-bold text-primary-900 mb-1">
                     {card.value}
                   </p>
-                  <p className="text-xs text-primary-500 dark:text-sand-500">
+                  <p className="text-xs text-primary-500">
                     {card.description}
                   </p>
                 </div>
@@ -320,28 +320,28 @@ export function HostEarningsContent() {
           {/* Charges Breakdown Summary */}
           {analytics && (
             <section aria-labelledby="charges-summary-heading" className="card p-4 sm:p-6 mb-8">
-              <h2 id="charges-summary-heading" className="text-xl sm:text-2xl font-bold text-primary-900 dark:text-sand-50 mb-4">
+              <h2 id="charges-summary-heading" className="text-xl sm:text-2xl font-bold text-primary-900 mb-4">
                 Your Disbursement Breakdown
               </h2>
-              <div className="bg-sand-50 dark:bg-primary-800 rounded-lg p-4 sm:p-6">
+              <div className="bg-sand-50 rounded-lg p-4 sm:p-6">
                 <div className="space-y-3">
-                  <div className="flex justify-between items-center text-primary-900 dark:text-sand-50">
+                  <div className="flex justify-between items-center text-primary-900">
                     <span className="font-medium">Total Gross Revenue</span>
                     <span className="text-xl font-bold">${analytics.gross_earnings?.toFixed(2) || '0.00'}</span>
                   </div>
-                  <div className="h-px bg-primary-200 dark:bg-primary-600"></div>
-                  <div className="flex justify-between items-center text-red-600 dark:text-red-400">
+                  <div className="h-px bg-primary-200"></div>
+                  <div className="flex justify-between items-center text-red-600">
                     <span className="pl-4">Platform Commission (15%)</span>
                     <span className="font-semibold">-${analytics.total_commission?.toFixed(2) || '0.00'}</span>
                   </div>
-                  <div className="h-px bg-primary-200 dark:bg-primary-600"></div>
-                  <div className="flex justify-between items-center text-green-600 dark:text-green-400">
+                  <div className="h-px bg-primary-200"></div>
+                  <div className="flex justify-between items-center text-green-600">
                     <span className="font-bold text-lg">Net Earnings to You</span>
                     <span className="text-2xl font-bold">${analytics.total_earnings?.toFixed(2) || '0.00'}</span>
                   </div>
                 </div>
-                <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                  <p className="text-xs text-blue-800 dark:text-blue-300">
+                <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                  <p className="text-xs text-blue-800">
                     <strong>Note:</strong> The platform commission of 15% helps us provide secure payments, customer support, marketing, and platform maintenance. Guest service fees and taxes are charged separately to guests and don't affect your payout.
                   </p>
                 </div>
@@ -351,14 +351,14 @@ export function HostEarningsContent() {
 
           {/* Earnings Timeline */}
           <section aria-labelledby="earnings-timeline-heading" className="card p-4 sm:p-6 mb-8">
-            <h2 id="earnings-timeline-heading" className="text-xl sm:text-2xl font-bold text-primary-900 dark:text-sand-50 mb-6">
+            <h2 id="earnings-timeline-heading" className="text-xl sm:text-2xl font-bold text-primary-900 mb-6">
               Earnings Timeline
             </h2>
             
             {loadingEarnings ? (
               <div className="space-y-4" aria-busy="true" aria-live="polite">
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className="animate-pulse h-16 bg-primary-200 dark:bg-primary-700 rounded-lg" />
+                  <div key={i} className="animate-pulse h-16 bg-primary-200 rounded-lg" />
                 ))}
               </div>
             ) : earnings.length > 0 ? (
@@ -372,18 +372,18 @@ export function HostEarningsContent() {
                   return (
                     <article
                       key={index}
-                      className="p-4 border border-primary-100 dark:border-primary-700 rounded-lg hover:bg-primary-50 dark:hover:bg-primary-800 transition-colors"
+                      className="p-4 border border-primary-100 rounded-lg hover:bg-primary-50 transition-colors"
                       aria-label={`Earnings for ${earning.period}`}
                     >
                       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-4">
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-2">
-                            <Calendar className="w-5 h-5 text-secondary-600 dark:text-secondary-400" aria-hidden="true" />
-                            <h3 className="font-semibold text-primary-900 dark:text-sand-50">
+                            <Calendar className="w-5 h-5 text-secondary-600" aria-hidden="true" />
+                            <h3 className="font-semibold text-primary-900">
                               {earning.period}
                             </h3>
                           </div>
-                          <div className="flex items-center gap-4 text-sm text-primary-600 dark:text-sand-300">
+                          <div className="flex items-center gap-4 text-sm text-primary-600">
                             <span>{bookingsCount} booking{bookingsCount !== 1 ? 's' : ''}</span>
                             <span>•</span>
                             <span>Avg: ${bookingsCount > 0 ? (amount / bookingsCount).toFixed(2) : '0.00'}</span>
@@ -391,33 +391,33 @@ export function HostEarningsContent() {
                         </div>
                         
                         <div className="text-right">
-                          <p className="text-xl sm:text-2xl font-bold text-green-600 dark:text-green-400">
+                          <p className="text-xl sm:text-2xl font-bold text-green-600">
                             ${amount.toFixed(2)}
                           </p>
-                          <p className="text-xs text-primary-500 dark:text-sand-500">
+                          <p className="text-xs text-primary-500">
                             Net earnings
                           </p>
                         </div>
                       </div>
 
                       {/* Charge Breakdown */}
-                      <div className="border-t border-primary-100 dark:border-primary-700 pt-3 mt-3">
-                        <p className="text-xs font-semibold text-primary-700 dark:text-sand-300 mb-2">Disbursement Breakdown:</p>
+                      <div className="border-t border-primary-100 pt-3 mt-3">
+                        <p className="text-xs font-semibold text-primary-700 mb-2">Disbursement Breakdown:</p>
                         <div className="space-y-1.5 text-xs">
-                          <div className="flex justify-between text-primary-600 dark:text-sand-300">
+                          <div className="flex justify-between text-primary-600">
                             <span className="flex items-center gap-1.5">
                               <DollarSign className="w-3 h-3" />
                               Gross Revenue
                             </span>
                             <span className="font-medium">${gross.toFixed(2)}</span>
                           </div>
-                          <div className="flex justify-between text-red-600 dark:text-red-400">
+                          <div className="flex justify-between text-red-600">
                             <span className="flex items-center gap-1.5 pl-4">
                               - Platform Commission (15%)
                             </span>
                             <span className="font-medium">-${commission.toFixed(2)}</span>
                           </div>
-                          <div className="flex justify-between font-semibold text-green-600 dark:text-green-400 pt-1.5 border-t border-primary-100 dark:border-primary-700">
+                          <div className="flex justify-between font-semibold text-green-600 pt-1.5 border-t border-primary-100">
                             <span>Net to Host</span>
                             <span>${amount.toFixed(2)}</span>
                           </div>
@@ -429,11 +429,11 @@ export function HostEarningsContent() {
               </div>
             ) : (
               <div className="text-center py-12">
-                <CreditCard className="w-12 h-12 text-primary-300 dark:text-primary-700 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-primary-900 dark:text-sand-50 mb-2">
+                <CreditCard className="w-12 h-12 text-primary-300 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-primary-900 mb-2">
                   No Earnings Yet
                 </h3>
-                <p className="text-primary-600 dark:text-sand-300">
+                <p className="text-primary-600">
                   Start receiving bookings to see your earnings here.
                 </p>
               </div>
@@ -442,16 +442,16 @@ export function HostEarningsContent() {
 
           {/* Payout Information */}
           <section aria-labelledby="payout-info-heading" className="card p-4 sm:p-6 mb-8">
-            <h2 id="payout-info-heading" className="text-xl sm:text-2xl font-bold text-primary-900 dark:text-sand-50 mb-4">
+            <h2 id="payout-info-heading" className="text-xl sm:text-2xl font-bold text-primary-900 mb-4">
               Payout Information
             </h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-3">
-                <h3 className="font-semibold text-primary-900 dark:text-sand-50 mb-2">
+                <h3 className="font-semibold text-primary-900 mb-2">
                   How Payouts Work
                 </h3>
-                <ul className="space-y-2 text-sm text-primary-600 dark:text-sand-300">
+                <ul className="space-y-2 text-sm text-primary-600">
                   <li className="flex items-start gap-2">
                     <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
                     <span>Earnings are calculated after platform commission (15%)</span>
@@ -467,26 +467,26 @@ export function HostEarningsContent() {
                 </ul>
               </div>
               
-              <div className="p-4 bg-secondary-50 dark:bg-secondary-900/20 rounded-lg border border-secondary-200 dark:border-secondary-800">
-                <h3 className="font-semibold text-primary-900 dark:text-sand-50 mb-3">
+              <div className="p-4 bg-secondary-50 rounded-lg border border-secondary-200">
+                <h3 className="font-semibold text-primary-900 mb-3">
                   Next Payout
                 </h3>
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
-                    <span className="text-primary-600 dark:text-sand-300">Amount:</span>
-                    <span className="font-semibold text-primary-900 dark:text-sand-50">
+                    <span className="text-primary-600">Amount:</span>
+                    <span className="font-semibold text-primary-900">
                       ${analytics?.pending_earnings?.toFixed(2) || '0.00'}
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-primary-600 dark:text-sand-300">Status:</span>
-                    <span className="font-semibold text-yellow-600 dark:text-yellow-400">
+                    <span className="text-primary-600">Status:</span>
+                    <span className="font-semibold text-yellow-600">
                       Processing
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-primary-600 dark:text-sand-300">Expected:</span>
-                    <span className="font-semibold text-primary-900 dark:text-sand-50">
+                    <span className="text-primary-600">Expected:</span>
+                    <span className="font-semibold text-primary-900">
                       Within 24 hours
                     </span>
                   </div>
@@ -499,10 +499,10 @@ export function HostEarningsContent() {
           <section aria-labelledby="bank-accounts-heading" className="card p-4 sm:p-6 mb-8">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 id="bank-accounts-heading" className="text-xl sm:text-2xl font-bold text-primary-900 dark:text-sand-50 mb-1">
+                <h2 id="bank-accounts-heading" className="text-xl sm:text-2xl font-bold text-primary-900 mb-1">
                   Disbursement Details
                 </h2>
-                <p className="text-sm text-primary-600 dark:text-sand-300">
+                <p className="text-sm text-primary-600">
                   Manage your bank accounts for receiving payouts
                 </p>
               </div>
@@ -517,8 +517,8 @@ export function HostEarningsContent() {
 
             {/* Bank Account Form */}
             {showBankAccountForm && (
-              <form onSubmit={handleSubmitBankAccount} className="mb-6 p-4 bg-sand-50 dark:bg-primary-700 rounded-lg border border-primary-200 dark:border-primary-600">
-                <h3 className="font-semibold text-primary-900 dark:text-sand-50 mb-4">
+              <form onSubmit={handleSubmitBankAccount} className="mb-6 p-4 bg-sand-50 rounded-lg border border-primary-200">
+                <h3 className="font-semibold text-primary-900 mb-4">
                   {editingAccount ? 'Edit' : 'Add'} Bank Account
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -610,7 +610,7 @@ export function HostEarningsContent() {
             {loadingBankAccounts ? (
               <div className="space-y-3">
                 {[1, 2].map(i => (
-                  <div key={i} className="animate-pulse h-20 bg-primary-100 dark:bg-primary-700 rounded-lg"></div>
+                  <div key={i} className="animate-pulse h-20 bg-primary-100 rounded-lg"></div>
                 ))}
               </div>
             ) : bankAccounts.length > 0 ? (
@@ -618,32 +618,32 @@ export function HostEarningsContent() {
                 {bankAccounts.map((account: any) => (
                   <div
                     key={account.id}
-                    className="p-4 border border-primary-200 dark:border-primary-700 rounded-lg hover:bg-primary-50 dark:hover:bg-primary-800 transition"
+                    className="p-4 border border-primary-200 rounded-lg hover:bg-primary-50 transition"
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex items-start gap-3">
-                        <div className="p-2 bg-secondary-100 dark:bg-secondary-900/30 rounded-lg">
+                        <div className="p-2 bg-secondary-100 rounded-lg">
                           <Building2 className="w-5 h-5 text-secondary-600" />
                         </div>
                         <div>
                           <div className="flex items-center gap-2 mb-1">
-                            <h4 className="font-semibold text-primary-900 dark:text-sand-50">
+                            <h4 className="font-semibold text-primary-900">
                               {account.bank_name}
                             </h4>
                             {account.is_primary && (
-                              <span className="px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 text-xs font-medium rounded">
+                              <span className="px-2 py-0.5 bg-green-100 text-green-800 text-xs font-medium rounded">
                                 Primary
                               </span>
                             )}
                           </div>
-                          <p className="text-sm text-primary-600 dark:text-sand-300">
+                          <p className="text-sm text-primary-600">
                             {account.account_name}
                           </p>
-                          <p className="text-sm text-primary-500 dark:text-sand-400">
+                          <p className="text-sm text-primary-500">
                             ****{account.account_number.slice(-4)}
                           </p>
                           {account.branch_code && (
-                            <p className="text-xs text-primary-400 dark:text-sand-500">
+                            <p className="text-xs text-primary-400">
                               Branch: {account.branch_code}
                             </p>
                           )}
@@ -654,26 +654,26 @@ export function HostEarningsContent() {
                           <button
                             onClick={() => setPrimaryBankAccountMutation.mutate(account.id)}
                             disabled={setPrimaryBankAccountMutation.isPending}
-                            className="p-2 hover:bg-primary-100 dark:hover:bg-primary-700 rounded-lg transition text-xs"
+                            className="p-2 hover:bg-primary-100 rounded-lg transition text-xs"
                             title="Set as primary"
                           >
-                            <CheckCircle className="w-4 h-4 text-primary-600 dark:text-sand-400" />
+                            <CheckCircle className="w-4 h-4 text-primary-600" />
                           </button>
                         )}
                         <button
                           onClick={() => handleEditBankAccount(account)}
-                          className="p-2 hover:bg-primary-100 dark:hover:bg-primary-700 rounded-lg transition"
+                          className="p-2 hover:bg-primary-100 rounded-lg transition"
                           title="Edit account"
                         >
-                          <Edit2 className="w-4 h-4 text-primary-600 dark:text-sand-400" />
+                          <Edit2 className="w-4 h-4 text-primary-600" />
                         </button>
                         <button
                           onClick={() => handleDeleteBankAccount(account.id)}
                           disabled={deleteBankAccountMutation.isPending}
-                          className="p-2 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition"
+                          className="p-2 hover:bg-red-100 rounded-lg transition"
                           title="Delete account"
                         >
-                          <Trash2 className="w-4 h-4 text-red-600 dark:text-red-400" />
+                          <Trash2 className="w-4 h-4 text-red-600" />
                         </button>
                       </div>
                     </div>
@@ -682,11 +682,11 @@ export function HostEarningsContent() {
               </div>
             ) : (
               <div className="text-center py-12">
-                <Building2 className="w-12 h-12 text-primary-300 dark:text-primary-700 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-primary-900 dark:text-sand-50 mb-2">
+                <Building2 className="w-12 h-12 text-primary-300 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-primary-900 mb-2">
                   No Bank Accounts
                 </h3>
-                <p className="text-primary-600 dark:text-sand-300 mb-4">
+                <p className="text-primary-600 mb-4">
                   Add a bank account to receive your earnings
                 </p>
                 <Button

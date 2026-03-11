@@ -52,8 +52,8 @@ export function PropertyAmenities({ amenities }: PropertyAmenitiesProps) {
       amenityIcons[amenity.name.toLowerCase().replace(/\s+/g, '')] || Home;
     return (
       <div className="flex items-center gap-4 py-3">
-        <IconComponent className="w-6 h-6 text-primary-700 dark:text-sand-300 flex-shrink-0" />
-        <span className="text-[15px] text-primary-900 dark:text-sand-100">
+        <IconComponent className="w-6 h-6 text-primary-700 flex-shrink-0" />
+        <span className="text-[15px] text-primary-900">
           {amenity.name}
         </span>
       </div>
@@ -62,7 +62,7 @@ export function PropertyAmenities({ amenities }: PropertyAmenitiesProps) {
 
   return (
     <div>
-      <h2 className="text-xl font-semibold text-primary-900 dark:text-sand-50 mb-4">
+      <h2 className="text-xl font-semibold text-primary-900 mb-4">
         What this place offers
       </h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8">
@@ -73,7 +73,7 @@ export function PropertyAmenities({ amenities }: PropertyAmenitiesProps) {
       {hasMore && (
         <button
           onClick={() => setShowAll(true)}
-          className="mt-4 px-6 py-3 border border-primary-900 dark:border-sand-50 rounded-lg text-primary-900 dark:text-sand-50 font-semibold text-sm hover:bg-sand-50 dark:hover:bg-primary-800 transition"
+          className="mt-4 px-6 py-3 border border-primary-900 rounded-lg text-primary-900 font-semibold text-sm hover:bg-sand-50 transition"
         >
           Show all {amenities.length} amenities
         </button>
@@ -82,17 +82,17 @@ export function PropertyAmenities({ amenities }: PropertyAmenitiesProps) {
       {/* All Amenities Modal */}
       {showAll && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white dark:bg-primary-900 rounded-xl w-full max-w-lg mx-4 max-h-[80vh] flex flex-col shadow-2xl">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-primary-200 dark:border-primary-700">
-              <h3 className="text-lg font-semibold text-primary-900 dark:text-sand-50">
+          <div className="bg-white rounded-xl w-full max-w-lg mx-4 max-h-[80vh] flex flex-col shadow-2xl">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-primary-200">
+              <h3 className="text-lg font-semibold text-primary-900">
                 What this place offers
               </h3>
               <button
                 onClick={() => setShowAll(false)}
-                className="p-1 rounded-full hover:bg-sand-100 dark:hover:bg-primary-800 transition"
+                className="p-1 rounded-full hover:bg-sand-100 transition"
                 aria-label="Close"
               >
-                <X className="w-5 h-5 text-primary-900 dark:text-sand-50" />
+                <X className="w-5 h-5 text-primary-900" />
               </button>
             </div>
             <div className="flex-1 overflow-y-auto px-6 py-4">

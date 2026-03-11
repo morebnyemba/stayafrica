@@ -20,10 +20,10 @@ export const ChartLegend: React.FC<ChartLegendProps> = ({ items, className = '' 
             className="w-3 h-3 rounded-full"
             style={{ backgroundColor: item.color }}
           ></div>
-          <span className="text-sm text-primary-500 dark:text-sand-400">
+          <span className="text-sm text-primary-500">
             {item.label}
             {item.value && (
-              <span className="font-semibold text-primary-900 dark:text-sand-50 ml-1">
+              <span className="font-semibold text-primary-900 ml-1">
                 {item.value}
               </span>
             )}

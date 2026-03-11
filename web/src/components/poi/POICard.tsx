@@ -22,14 +22,14 @@ export default function POICard({ poi }: POICardProps) {
 
   return (
     <div className={`
-      bg-white dark:bg-primary-800 rounded-lg border-2 p-4 hover:shadow-md transition
-      ${is_recommended ? 'border-green-400 dark:border-green-600 bg-green-50/30 dark:bg-green-900/20' : 'border-primary-200 dark:border-primary-700'}
+      bg-white rounded-lg border-2 p-4 hover:shadow-md transition
+      ${is_recommended ? 'border-green-400 bg-green-50/30' : 'border-primary-200'}
     `}>
       {/* Header */}
       <div className="flex items-start justify-between mb-3">
         <div className="flex-1 min-w-0">
-          <h5 className="font-semibold text-primary-900 dark:text-sand-50 line-clamp-1">{poiData.name}</h5>
-          <p className="text-sm text-primary-600 dark:text-sand-400 capitalize mt-0.5">
+          <h5 className="font-semibold text-primary-900 line-clamp-1">{poiData.name}</h5>
+          <p className="text-sm text-primary-600 capitalize mt-0.5">
             {poiData.poi_type.replace(/_/g, ' ')}
           </p>
         </div>
@@ -47,11 +47,11 @@ export default function POICard({ poi }: POICardProps) {
           {poiData.rating && (
             <div className="flex items-center gap-1 text-sm">
               <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-              <span className="font-medium text-primary-900 dark:text-sand-50">{poiData.rating.toFixed(1)}</span>
+              <span className="font-medium text-primary-900">{poiData.rating.toFixed(1)}</span>
             </div>
           )}
           {poiData.price_level && (
-            <div className="flex items-center gap-1 text-sm text-primary-600 dark:text-sand-400">
+            <div className="flex items-center gap-1 text-sm text-primary-600">
               <DollarSign className="w-4 h-4" />
               <span>{getPriceLevelDisplay(poiData.price_level)}</span>
             </div>
@@ -61,12 +61,12 @@ export default function POICard({ poi }: POICardProps) {
 
       {/* Distance Info */}
       <div className="space-y-2 mb-3">
-        <div className="flex items-center gap-2 text-sm text-primary-700 dark:text-sand-300">
+        <div className="flex items-center gap-2 text-sm text-primary-700">
           <MapPin className="w-4 h-4 text-primary-600" />
           <span className="font-medium">{distance_display}</span>
         </div>
         {walking_time_minutes && (
-          <div className="flex items-center gap-2 text-sm text-primary-600 dark:text-sand-400">
+          <div className="flex items-center gap-2 text-sm text-primary-600">
             <Clock className="w-4 h-4" />
             <span>{walking_time_minutes} min walk</span>
           </div>
@@ -75,13 +75,13 @@ export default function POICard({ poi }: POICardProps) {
 
       {/* Host Notes */}
       {host_notes && (
-        <div className="bg-secondary-50 dark:bg-secondary-900/20 border border-secondary-200 dark:border-secondary-800 rounded-lg p-3 mb-3">
-          <p className="text-sm text-secondary-900 dark:text-secondary-200 italic">"{host_notes}"</p>
+        <div className="bg-secondary-50 border border-secondary-200 rounded-lg p-3 mb-3">
+          <p className="text-sm text-secondary-900 italic">"{host_notes}"</p>
         </div>
       )}
 
       {/* Address */}
-      <p className="text-xs text-primary-600 dark:text-sand-400 mb-3 line-clamp-2">{poiData.address}</p>
+      <p className="text-xs text-primary-600 mb-3 line-clamp-2">{poiData.address}</p>
 
       {/* Actions */}
       <div className="flex gap-2">
@@ -97,19 +97,19 @@ export default function POICard({ poi }: POICardProps) {
             href={poiData.website}
             target="_blank"
             rel="noopener noreferrer"
-            className="p-2 border border-primary-200 dark:border-primary-600 rounded-lg hover:bg-sand-50 dark:hover:bg-primary-700 transition"
+            className="p-2 border border-primary-200 rounded-lg hover:bg-sand-50 transition"
             title="Visit website"
           >
-            <Globe className="w-4 h-4 text-primary-600 dark:text-sand-400" />
+            <Globe className="w-4 h-4 text-primary-600" />
           </a>
         )}
         {poiData.phone && (
           <a
             href={`tel:${poiData.phone}`}
-            className="p-2 border border-primary-200 dark:border-primary-600 rounded-lg hover:bg-sand-50 dark:hover:bg-primary-700 transition"
+            className="p-2 border border-primary-200 rounded-lg hover:bg-sand-50 transition"
             title="Call"
           >
-            <Phone className="w-4 h-4 text-primary-600 dark:text-sand-400" />
+            <Phone className="w-4 h-4 text-primary-600" />
           </a>
         )}
       </div>

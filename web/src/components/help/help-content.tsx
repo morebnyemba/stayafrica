@@ -119,23 +119,23 @@ function FaqAccordion({ item }: { item: FaqItem }) {
     const [isOpen, setIsOpen] = useState(false);
 
     return (
-        <div className="border-b border-sand-200 dark:border-primary-700 last:border-0">
+        <div className="border-b border-sand-200 last:border-0">
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="w-full flex items-center justify-between py-4 text-left hover:text-accent-600 dark:hover:text-accent-400 transition-colors"
+                className="w-full flex items-center justify-between py-4 text-left hover:text-accent-600 transition-colors"
             >
-                <span className="text-sm font-medium text-primary-800 dark:text-sand-200 pr-4">
+                <span className="text-sm font-medium text-primary-800 pr-4">
                     {item.question}
                 </span>
                 {isOpen ? (
-                    <ChevronDown className="w-4 h-4 text-primary-400 dark:text-sand-500 flex-shrink-0" />
+                    <ChevronDown className="w-4 h-4 text-primary-400 flex-shrink-0" />
                 ) : (
-                    <ChevronRight className="w-4 h-4 text-primary-400 dark:text-sand-500 flex-shrink-0" />
+                    <ChevronRight className="w-4 h-4 text-primary-400 flex-shrink-0" />
                 )}
             </button>
             {isOpen && (
                 <div className="pb-4">
-                    <p className="text-sm text-primary-600 dark:text-sand-400 leading-relaxed">
+                    <p className="text-sm text-primary-600 leading-relaxed">
                         {item.answer}
                     </p>
                 </div>
@@ -162,34 +162,34 @@ export function HelpContent() {
         <div className="max-w-3xl mx-auto px-4 py-8">
             {/* Header */}
             <div className="text-center mb-8">
-                <h1 className="text-3xl font-bold text-primary-900 dark:text-sand-100 mb-2">
+                <h1 className="text-3xl font-bold text-primary-900 mb-2">
                     How can we help?
                 </h1>
-                <p className="text-primary-500 dark:text-sand-400">
+                <p className="text-primary-500">
                     Find answers to common questions about StayAfrica
                 </p>
             </div>
 
             {/* Search */}
             <div className="relative mb-8">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-primary-400 dark:text-sand-500" />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-primary-400" />
                 <input
                     type="text"
                     placeholder="Search for help..."
                     value={searchQuery}
                     onChange={e => setSearchQuery(e.target.value)}
-                    className="w-full pl-12 pr-4 py-3 rounded-xl border border-sand-300 dark:border-primary-600 bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-100 placeholder-primary-400 dark:placeholder-sand-500 focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-transparent transition-all"
+                    className="w-full pl-12 pr-4 py-3 rounded-xl border border-sand-300 bg-white text-primary-900 placeholder-primary-400 focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-transparent transition-all"
                 />
             </div>
 
             {/* FAQ Sections */}
             {filteredSections.length === 0 ? (
                 <div className="text-center py-16">
-                    <HelpCircle className="w-12 h-12 mx-auto text-sand-300 dark:text-primary-600 mb-4" />
-                    <h3 className="text-lg font-medium text-primary-700 dark:text-sand-300">
+                    <HelpCircle className="w-12 h-12 mx-auto text-sand-300 mb-4" />
+                    <h3 className="text-lg font-medium text-primary-700">
                         No results found
                     </h3>
-                    <p className="text-sm text-primary-500 dark:text-sand-400 mt-1">
+                    <p className="text-sm text-primary-500 mt-1">
                         Try different keywords or browse the sections below
                     </p>
                 </div>
@@ -200,13 +200,13 @@ export function HelpContent() {
                         return (
                             <div
                                 key={section.title}
-                                className="bg-white dark:bg-primary-800/40 rounded-2xl p-6 shadow-sm border border-sand-200/50 dark:border-primary-700/50"
+                                className="bg-white rounded-2xl p-6 shadow-sm border border-sand-200/50"
                             >
                                 <div className="flex items-center gap-3 mb-4">
-                                    <div className="w-8 h-8 rounded-lg bg-accent-100 dark:bg-accent-900/30 flex items-center justify-center">
-                                        <SectionIcon className="w-4 h-4 text-accent-600 dark:text-accent-400" />
+                                    <div className="w-8 h-8 rounded-lg bg-accent-100 flex items-center justify-center">
+                                        <SectionIcon className="w-4 h-4 text-accent-600" />
                                     </div>
-                                    <h2 className="text-lg font-semibold text-primary-900 dark:text-sand-100">
+                                    <h2 className="text-lg font-semibold text-primary-900">
                                         {section.title}
                                     </h2>
                                 </div>
@@ -222,11 +222,11 @@ export function HelpContent() {
             )}
 
             {/* Contact Support */}
-            <div className="mt-12 bg-gradient-to-br from-accent-50 to-sand-100 dark:from-accent-900/20 dark:to-primary-800/40 rounded-2xl p-8 text-center border border-accent-200/50 dark:border-accent-800/30">
-                <h3 className="text-lg font-semibold text-primary-900 dark:text-sand-100 mb-2">
+            <div className="mt-12 bg-gradient-to-br from-accent-50 to-sand-100 rounded-2xl p-8 text-center border border-accent-200/50">
+                <h3 className="text-lg font-semibold text-primary-900 mb-2">
                     Still need help?
                 </h3>
-                <p className="text-sm text-primary-600 dark:text-sand-400 mb-6">
+                <p className="text-sm text-primary-600 mb-6">
                     Can&apos;t find what you&apos;re looking for? Our support team is here to help.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -239,7 +239,7 @@ export function HelpContent() {
                     </a>
                     <a
                         href="/messages"
-                        className="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-white dark:bg-primary-700 hover:bg-sand-50 dark:hover:bg-primary-600 text-primary-900 dark:text-sand-100 rounded-lg text-sm font-medium border border-sand-300 dark:border-primary-600 transition-colors"
+                        className="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-white hover:bg-sand-50 text-primary-900 rounded-lg text-sm font-medium border border-sand-300 transition-colors"
                     >
                         <MessageSquare className="w-4 h-4" />
                         Live Chat

@@ -43,23 +43,23 @@ export function CookieNotice() {
 
     return (
         <div className="fixed bottom-0 left-0 right-0 z-[100] md:bottom-6 md:left-6 md:right-auto md:max-w-md w-full">
-            <div className="bg-white dark:bg-primary-900 border-t border-sand-200 dark:border-primary-700 md:border md:rounded-2xl shadow-2xl p-5 md:p-6 animate-in slide-in-from-bottom-5 fade-in duration-500">
+            <div className="bg-white border-t border-sand-200 md:border md:rounded-2xl shadow-2xl p-5 md:p-6 animate-in slide-in-from-bottom-5 fade-in duration-500">
                 <div className="flex justify-between items-start mb-3">
-                    <h3 className="text-lg font-bold text-primary-900 dark:text-sand-100 flex items-center gap-2">
+                    <h3 className="text-lg font-bold text-primary-900 flex items-center gap-2">
                         🍪 We use cookies
                     </h3>
                     <button
                         onClick={() => hide('dismissed')}
-                        className="text-primary-400 hover:text-primary-600 dark:text-sand-500 dark:hover:text-sand-300 transition-colors"
+                        className="text-primary-400 hover:text-primary-600 transition-colors"
                         aria-label="Close cookie notice"
                     >
                         <X className="w-5 h-5" />
                     </button>
                 </div>
 
-                <p className="text-sm text-primary-600 dark:text-sand-400 mb-5 leading-relaxed">
+                <p className="text-sm text-primary-600 mb-5 leading-relaxed">
                     We use cookies to enhance your browsing experience, serve personalized content, and analyze our traffic. By clicking &quot;Accept All&quot;, you consent to our use of cookies.
-                    <Link href="/cookies" className="text-secondary-600 dark:text-secondary-400 hover:underline ml-1 font-medium">
+                    <Link href="/cookies" className="text-secondary-600 hover:underline ml-1 font-medium">
                         Read more
                     </Link>
                 </p>
@@ -73,7 +73,7 @@ export function CookieNotice() {
                     </button>
                     <button
                         onClick={() => hide('declined')}
-                        className="flex-1 px-4 py-2.5 bg-white dark:bg-primary-800 border border-sand-300 dark:border-primary-600 text-primary-700 dark:text-sand-300 hover:bg-sand-50 dark:hover:bg-primary-700 rounded-xl text-sm font-medium transition-colors"
+                        className="flex-1 px-4 py-2.5 bg-white border border-sand-300 text-primary-700 hover:bg-sand-50 rounded-xl text-sm font-medium transition-colors"
                     >
                         Decline
                     </button>

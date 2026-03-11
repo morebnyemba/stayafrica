@@ -10,12 +10,12 @@ type BaseProps = {
 export function FormField({ label, error, hint, className, children }: React.PropsWithChildren<BaseProps>) {
   return (
     <div className={className}>
-      {label && <label className="block text-sm font-medium text-primary-900 dark:text-sand-100 mb-2">{label}</label>}
+      {label && <label className="block text-sm font-medium text-primary-900 mb-2">{label}</label>}
       {children}
       {error ? (
-        <p className="mt-1 text-sm text-red-600 dark:text-red-400" role="alert">{error}</p>
+        <p className="mt-1 text-sm text-red-600" role="alert">{error}</p>
       ) : hint ? (
-        <p className="mt-1 text-xs text-primary-500 dark:text-sand-400">{hint}</p>
+        <p className="mt-1 text-xs text-primary-500">{hint}</p>
       ) : null}
     </div>
   );
@@ -28,8 +28,8 @@ export const Input = React.forwardRef<HTMLInputElement, React.InputHTMLAttribute
         ref={ref}
         {...props}
         className={
-          `w-full px-4 py-3 bg-sand-50 dark:bg-primary-700 border rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent transition ` +
-          `border-primary-200 dark:border-primary-600 text-primary-900 dark:text-sand-100 placeholder-primary-400 dark:placeholder-sand-400 ` +
+          `w-full px-4 py-3 bg-sand-50 border rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent transition ` +
+          `border-primary-200 text-primary-900 placeholder-primary-400 ` +
           className
         }
       />
@@ -44,8 +44,8 @@ export const Select = React.forwardRef<HTMLSelectElement, React.SelectHTMLAttrib
         ref={ref}
         {...props}
         className={
-          `w-full px-4 py-3 bg-sand-50 dark:bg-primary-700 border rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent transition ` +
-          `border-primary-200 dark:border-primary-600 text-primary-900 dark:text-sand-100 ` +
+          `w-full px-4 py-3 bg-sand-50 border rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent transition ` +
+          `border-primary-200 text-primary-900 ` +
           className
         }
       >
@@ -62,8 +62,8 @@ export const TextArea = React.forwardRef<HTMLTextAreaElement, React.TextareaHTML
         ref={ref}
         {...props}
         className={
-          `w-full px-4 py-3 bg-sand-50 dark:bg-primary-700 border rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent transition ` +
-          `border-primary-200 dark:border-primary-600 text-primary-900 dark:text-sand-100 placeholder-primary-400 dark:placeholder-sand-400 ` +
+          `w-full px-4 py-3 bg-sand-50 border rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent transition ` +
+          `border-primary-200 text-primary-900 placeholder-primary-400 ` +
           className
         }
       />
@@ -73,5 +73,5 @@ export const TextArea = React.forwardRef<HTMLTextAreaElement, React.TextareaHTML
 
 export function FieldError({ children }: React.PropsWithChildren<{}>) {
   if (!children) return null;
-  return <p className="mt-1 text-sm text-red-600 dark:text-red-400" role="alert">{children}</p>;
+  return <p className="mt-1 text-sm text-red-600" role="alert">{children}</p>;
 }

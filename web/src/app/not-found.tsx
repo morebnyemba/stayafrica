@@ -2,13 +2,13 @@ import Link from 'next/link';
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-sand-100 dark:bg-primary-900 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-sand-100 flex items-center justify-center px-4">
       <div className="text-center max-w-lg">
-        <h1 className="text-8xl font-bold text-primary-600 dark:text-primary-400 mb-4">404</h1>
-        <h2 className="text-2xl font-semibold text-primary-900 dark:text-sand-50 mb-4">
+        <h1 className="text-8xl font-bold text-primary-600 mb-4">404</h1>
+        <h2 className="text-2xl font-semibold text-primary-900 mb-4">
           Page Not Found
         </h2>
-        <p className="text-primary-500 dark:text-sand-400 mb-8">
+        <p className="text-primary-500 mb-8">
           The page you&apos;re looking for doesn&apos;t exist or has been moved.
           Let&apos;s get you back to discovering amazing stays across Africa.
         </p>
@@ -24,7 +24,7 @@ export default function NotFound() {
           </Link>
           <Link
             href="/search"
-            className="inline-flex items-center px-6 py-3 rounded-full border-2 border-primary-600 text-primary-600 dark:text-primary-400 font-medium hover:bg-primary-50 dark:hover:bg-primary-900/50 transition-colors"
+            className="inline-flex items-center px-6 py-3 rounded-full border-2 border-primary-600 text-primary-600 font-medium hover:bg-primary-50 transition-colors"
           >
             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />

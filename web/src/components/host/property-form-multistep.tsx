@@ -285,7 +285,7 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {error && (
-        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3 sm:p-4 text-xs sm:text-sm text-red-800 dark:text-red-200">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-3 sm:p-4 text-xs sm:text-sm text-red-800">
           {error}
         </div>
       )}
@@ -297,17 +297,17 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
             <div className={`flex items-center gap-2 mb-1 ${index <= currentStepIndex ? 'opacity-100' : 'opacity-50'}`}>
               <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-semibold ${index < currentStepIndex ? 'bg-green-500 text-white' :
                 index === currentStepIndex ? 'bg-primary-600 text-white' :
-                  'bg-primary-200 dark:bg-primary-700 text-primary-900 dark:text-sand-50'
+                  'bg-primary-200 text-primary-900'
                 }`}>
                 {index < currentStepIndex ? '✓' : index + 1}
               </div>
               <div className="hidden sm:block">
-                <p className="text-xs sm:text-sm font-medium text-primary-900 dark:text-sand-50">{step.label}</p>
-                <p className="text-xs text-primary-600 dark:text-sand-400">{step.description}</p>
+                <p className="text-xs sm:text-sm font-medium text-primary-900">{step.label}</p>
+                <p className="text-xs text-primary-600">{step.description}</p>
               </div>
             </div>
             {index < STEPS.length - 1 && (
-              <div className={`h-0.5 mx-3 sm:mx-4 mt-2 ${index < currentStepIndex ? 'bg-green-500' : 'bg-primary-200 dark:bg-primary-700'}`} />
+              <div className={`h-0.5 mx-3 sm:mx-4 mt-2 ${index < currentStepIndex ? 'bg-green-500' : 'bg-primary-200'}`} />
             )}
           </div>
         ))}
@@ -316,7 +316,7 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
       {/* Step Content */}
       {currentStep === 'basic' && (
         <div className="card p-4 sm:p-6 space-y-4">
-          <h3 className="text-lg sm:text-xl font-bold text-primary-900 dark:text-sand-50 flex items-center gap-2">
+          <h3 className="text-lg sm:text-xl font-bold text-primary-900 flex items-center gap-2">
             <Home className="w-4 h-4 sm:w-5 sm:h-5" />
             Basic Information
           </h3>
@@ -396,7 +396,7 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
 
       {currentStep === 'location' && (
         <div className="card p-4 sm:p-6 space-y-4">
-          <h3 className="text-lg sm:text-xl font-bold text-primary-900 dark:text-sand-50 flex items-center gap-2">
+          <h3 className="text-lg sm:text-xl font-bold text-primary-900 flex items-center gap-2">
             <MapPin className="w-4 h-4 sm:w-5 sm:h-5" />
             <span>Location <span className="hidden sm:inline">(Pin on Map)</span></span>
           </h3>
@@ -412,18 +412,18 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
               />
 
               {locationSuggestions.length > 0 && (
-                <div className="absolute z-10 w-full mt-1 bg-white dark:bg-primary-800 border border-primary-300 dark:border-primary-600 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                <div className="absolute z-10 w-full mt-1 bg-white border border-primary-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                   {locationSuggestions.map((suggestion, index) => (
                     <button
                       key={index}
                       type="button"
                       onClick={() => handleSelectLocation(suggestion)}
-                      className="w-full text-left px-3 sm:px-4 py-2 sm:py-3 hover:bg-secondary-50 dark:hover:bg-secondary-900/10 border-b border-primary-100 dark:border-primary-700 last:border-b-0"
+                      className="w-full text-left px-3 sm:px-4 py-2 sm:py-3 hover:bg-secondary-50 border-b border-primary-100 last:border-b-0"
                     >
-                      <div className="font-medium text-primary-900 dark:text-sand-50 text-sm sm:text-base break-words">
+                      <div className="font-medium text-primary-900 text-sm sm:text-base break-words">
                         {suggestion.display_name}
                       </div>
-                      <div className="text-xs sm:text-sm text-primary-600 dark:text-sand-400">
+                      <div className="text-xs sm:text-sm text-primary-600">
                         {suggestion.type}
                       </div>
                     </button>
@@ -456,7 +456,7 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
 
             {/* Mapbox Map */}
             <div>
-              <label className="block text-sm font-medium text-primary-900 dark:text-sand-50 mb-2">
+              <label className="block text-sm font-medium text-primary-900 mb-2">
                 Pin Your Property on Map *
               </label>
               <MapboxLocationPicker
@@ -531,18 +531,18 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
 
       {currentStep === 'images' && (
         <div className="card p-4 sm:p-6 space-y-4">
-          <h3 className="text-lg sm:text-xl font-bold text-primary-900 dark:text-sand-50 flex items-center gap-2">
+          <h3 className="text-lg sm:text-xl font-bold text-primary-900 flex items-center gap-2">
             <ImageIcon className="w-4 h-4 sm:w-5 sm:h-5" />
             Property Images
           </h3>
 
           <div className="space-y-4">
-            <p className="text-xs sm:text-sm text-primary-600 dark:text-sand-400">
+            <p className="text-xs sm:text-sm text-primary-600">
               Add up to 10 images of your property. The first image will be used as the main thumbnail.
             </p>
 
             {/* Image Upload Area */}
-            <div className="border-2 border-dashed border-primary-300 dark:border-primary-600 rounded-lg p-4 sm:p-8 text-center hover:border-secondary-500 dark:hover:border-secondary-400 transition cursor-pointer"
+            <div className="border-2 border-dashed border-primary-300 rounded-lg p-4 sm:p-8 text-center hover:border-secondary-500 transition cursor-pointer"
               onClick={() => document.getElementById('image-input')?.click()}
             >
               <input
@@ -555,13 +555,13 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
                 disabled={imageFiles.length >= 10}
               />
               <Upload className="w-6 h-6 sm:w-8 sm:h-8 text-primary-400 mx-auto mb-2" />
-              <p className="font-medium text-sm sm:text-base text-primary-900 dark:text-sand-50 mb-1">
+              <p className="font-medium text-sm sm:text-base text-primary-900 mb-1">
                 Click to upload images
               </p>
-              <p className="text-xs sm:text-sm text-primary-600 dark:text-sand-400">
+              <p className="text-xs sm:text-sm text-primary-600">
                 or drag and drop (JPG, PNG, WebP up to 5MB each)
               </p>
-              <p className="text-xs text-primary-500 dark:text-sand-400 mt-2">
+              <p className="text-xs text-primary-500 mt-2">
                 {imageFiles.length}/10 images added
               </p>
             </div>
@@ -569,7 +569,7 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
             {/* Existing Images */}
             {existingImages.length > 0 && (
               <div className="mb-4">
-                <p className="text-xs sm:text-sm font-medium text-primary-900 dark:text-sand-50 mb-2">
+                <p className="text-xs sm:text-sm font-medium text-primary-900 mb-2">
                   Current Images ({existingImages.length})
                 </p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4">
@@ -578,7 +578,7 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
                       <img
                         src={image.image_url || image.image}
                         alt={`Current ${index + 1}`}
-                        className="w-full h-32 object-cover rounded-lg border border-primary-200 dark:border-primary-700"
+                        className="w-full h-32 object-cover rounded-lg border border-primary-200"
                       />
                       {index === 0 && (
                         <span className="absolute top-2 left-2 bg-secondary-600 text-white text-xs font-semibold px-2 py-1 rounded">
@@ -602,7 +602,7 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
             {/* New Image Previews */}
             {imagePreviews.length > 0 && (
               <div>
-                <p className="text-xs sm:text-sm font-medium text-primary-900 dark:text-sand-50 mb-2">
+                <p className="text-xs sm:text-sm font-medium text-primary-900 mb-2">
                   New Images ({imagePreviews.length})
                 </p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4">
@@ -611,7 +611,7 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
                       <img
                         src={preview}
                         alt={`Preview ${index + 1}`}
-                        className="w-full h-32 object-cover rounded-lg border border-primary-200 dark:border-primary-700"
+                        className="w-full h-32 object-cover rounded-lg border border-primary-200"
                       />
                       <button
                         type="button"
@@ -631,7 +631,7 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
 
       {currentStep === 'pricing' && (
         <div className="card p-4 sm:p-6 space-y-4">
-          <h3 className="text-lg sm:text-xl font-bold text-primary-900 dark:text-sand-50 flex items-center gap-2">
+          <h3 className="text-lg sm:text-xl font-bold text-primary-900 flex items-center gap-2">
             <DollarSign className="w-4 h-4 sm:w-5 sm:h-5" />
             Pricing
           </h3>
@@ -664,7 +664,7 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
             />
           </div>
 
-          <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3 sm:p-4 text-xs sm:text-sm text-green-800 dark:text-green-200">
+          <div className="bg-green-50 border border-green-200 rounded-lg p-3 sm:p-4 text-xs sm:text-sm text-green-800">
             <p className="font-medium">Ready to submit!</p>
             <p className="mt-1">Review your information and click "Create Property" to complete the listing.</p>
           </div>

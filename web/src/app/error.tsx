@@ -14,22 +14,22 @@ export default function Error({
   }, [error]);
 
   return (
-    <div className="min-h-screen bg-sand-100 dark:bg-primary-900 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-sand-100 flex items-center justify-center px-4">
       <div className="text-center max-w-lg">
         <div className="mb-6">
           <svg className="w-20 h-20 mx-auto text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
           </svg>
         </div>
-        <h1 className="text-3xl font-bold text-primary-900 dark:text-sand-50 mb-4">
+        <h1 className="text-3xl font-bold text-primary-900 mb-4">
           Something went wrong
         </h1>
-        <p className="text-primary-500 dark:text-sand-400 mb-8">
+        <p className="text-primary-500 mb-8">
           We encountered an unexpected error. Our team has been notified.
           Please try again or contact support if the problem persists.
         </p>
         {error.digest && (
-          <p className="text-sm text-primary-300 dark:text-primary-500 mb-6 font-mono">
+          <p className="text-sm text-primary-300 mb-6 font-mono">
             Error ID: {error.digest}
           </p>
         )}
@@ -45,7 +45,7 @@ export default function Error({
           </button>
           <a
             href="/"
-            className="inline-flex items-center px-6 py-3 rounded-full border-2 border-primary-600 text-primary-600 dark:text-primary-400 font-medium hover:bg-primary-50 dark:hover:bg-primary-900/50 transition-colors"
+            className="inline-flex items-center px-6 py-3 rounded-full border-2 border-primary-600 text-primary-600 font-medium hover:bg-primary-50 transition-colors"
           >
             Go Home
           </a>

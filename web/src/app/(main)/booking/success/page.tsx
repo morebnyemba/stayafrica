@@ -43,18 +43,18 @@ export default function BookingSuccessPage() {
   if (!bookingId) {
     return (
       <ProtectedRoute>
-        <div className="min-h-screen bg-sand-100 dark:bg-primary-900 flex items-center justify-center px-4">
+        <div className="min-h-screen bg-sand-100 flex items-center justify-center px-4">
           <div className="card p-8 text-center max-w-md">
-            <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-              <CheckCircle className="w-10 h-10 text-green-600 dark:text-green-400" />
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <CheckCircle className="w-10 h-10 text-green-600" />
             </div>
-            <h2 className="text-2xl font-bold text-primary-900 dark:text-sand-50 mb-3">Payment Received</h2>
-            <p className="text-primary-600 dark:text-sand-300 mb-6">Your payment has been processed. Check your bookings for details.</p>
+            <h2 className="text-2xl font-bold text-primary-900 mb-3">Payment Received</h2>
+            <p className="text-primary-600 mb-6">Your payment has been processed. Check your bookings for details.</p>
             <div className="flex gap-3 justify-center">
               <Link href="/bookings" className="bg-secondary-600 hover:bg-secondary-700 text-white font-semibold py-2.5 px-6 rounded-lg transition">
                 View My Bookings
               </Link>
-              <Link href="/" className="border border-primary-300 dark:border-primary-600 text-primary-700 dark:text-sand-200 font-semibold py-2.5 px-6 rounded-lg hover:bg-sand-50 dark:hover:bg-primary-800 transition">
+              <Link href="/" className="border border-primary-300 text-primary-700 font-semibold py-2.5 px-6 rounded-lg hover:bg-sand-50 transition">
                 Home
               </Link>
             </div>
@@ -67,10 +67,10 @@ export default function BookingSuccessPage() {
   if (isLoading) {
     return (
       <ProtectedRoute>
-        <div className="min-h-screen bg-sand-100 dark:bg-primary-900 flex items-center justify-center">
+        <div className="min-h-screen bg-sand-100 flex items-center justify-center">
           <div className="text-center">
-            <Loader2 className="w-12 h-12 text-secondary-600 dark:text-secondary-400 animate-spin mx-auto mb-4" />
-            <p className="text-primary-700 dark:text-sand-200">Loading booking details...</p>
+            <Loader2 className="w-12 h-12 text-secondary-600 animate-spin mx-auto mb-4" />
+            <p className="text-primary-700">Loading booking details...</p>
           </div>
         </div>
       </ProtectedRoute>
@@ -88,21 +88,21 @@ export default function BookingSuccessPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-sand-100 dark:bg-primary-900 py-12 px-4">
+      <div className="min-h-screen bg-sand-100 py-12 px-4">
         <div className="max-w-2xl mx-auto">
 
           {/* Animated success header */}
           <div className="text-center mb-10">
             <div className="relative inline-flex items-center justify-center mb-6">
-              <div className="absolute w-24 h-24 bg-green-200 dark:bg-green-800/30 rounded-full animate-ping opacity-20" />
-              <div className="w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
-                <CheckCircle className="w-12 h-12 text-green-600 dark:text-green-400" />
+              <div className="absolute w-24 h-24 bg-green-200 rounded-full animate-ping opacity-20" />
+              <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center">
+                <CheckCircle className="w-12 h-12 text-green-600" />
               </div>
             </div>
-            <h1 className="text-3xl sm:text-4xl font-bold text-primary-900 dark:text-sand-50 mb-2">
+            <h1 className="text-3xl sm:text-4xl font-bold text-primary-900 mb-2">
               {isRequested ? 'Booking requested!' : (isPending ? 'Booking submitted!' : 'Booking confirmed!')}
             </h1>
-            <p className="text-primary-600 dark:text-sand-300 text-lg">
+            <p className="text-primary-600 text-lg">
               {isRequested
                 ? "Your request has been sent to the host. You'll be notified when they accept. You won't be charged until accepted."
                 : (isPending
@@ -130,9 +130,9 @@ export default function BookingSuccessPage() {
             )}
             {!propertyImage && (
               <div className="p-5 pb-0">
-                <h3 className="font-semibold text-primary-900 dark:text-sand-50">{propertyTitle}</h3>
+                <h3 className="font-semibold text-primary-900">{propertyTitle}</h3>
                 {(propertyCity || propertyCountry) && (
-                  <p className="text-sm text-primary-500 dark:text-sand-400 flex items-center gap-1 mt-1">
+                  <p className="text-sm text-primary-500 flex items-center gap-1 mt-1">
                     <MapPin className="w-3.5 h-3.5" />
                     {[propertyCity, propertyCountry].filter(Boolean).join(', ')}
                   </p>
@@ -142,18 +142,18 @@ export default function BookingSuccessPage() {
 
             <div className="p-5">
               {/* Booking reference — prominent */}
-              <div className="flex items-center justify-between p-3 rounded-lg bg-sand-50 dark:bg-primary-800 mb-4">
+              <div className="flex items-center justify-between p-3 rounded-lg bg-sand-50 mb-4">
                 <div>
-                  <div className="text-[11px] uppercase tracking-wider font-semibold text-primary-500 dark:text-sand-400">
+                  <div className="text-[11px] uppercase tracking-wider font-semibold text-primary-500">
                     Booking reference
                   </div>
-                  <div className="font-mono text-lg font-bold text-secondary-700 dark:text-secondary-400">
+                  <div className="font-mono text-lg font-bold text-secondary-700">
                     {booking?.booking_ref}
                   </div>
                 </div>
                 <button
                   onClick={copyRef}
-                  className="p-2 rounded-lg hover:bg-primary-100 dark:hover:bg-primary-700 transition text-primary-500 dark:text-sand-400"
+                  className="p-2 rounded-lg hover:bg-primary-100 transition text-primary-500"
                   title="Copy reference"
                 >
                   <Copy className="w-5 h-5" />
@@ -163,37 +163,37 @@ export default function BookingSuccessPage() {
               {/* Trip details grid */}
               <div className="grid grid-cols-2 gap-4 mb-4">
                 <div className="flex items-start gap-2.5">
-                  <Calendar className="w-4 h-4 text-secondary-600 dark:text-secondary-400 mt-1 flex-shrink-0" />
+                  <Calendar className="w-4 h-4 text-secondary-600 mt-1 flex-shrink-0" />
                   <div>
-                    <div className="text-[11px] uppercase tracking-wider font-semibold text-primary-500 dark:text-sand-400">Check-in</div>
-                    <div className="text-sm font-medium text-primary-900 dark:text-sand-50">
+                    <div className="text-[11px] uppercase tracking-wider font-semibold text-primary-500">Check-in</div>
+                    <div className="text-sm font-medium text-primary-900">
                       {booking?.check_in ? formatDate(booking.check_in) : '—'}
                     </div>
                   </div>
                 </div>
                 <div className="flex items-start gap-2.5">
-                  <Calendar className="w-4 h-4 text-secondary-600 dark:text-secondary-400 mt-1 flex-shrink-0" />
+                  <Calendar className="w-4 h-4 text-secondary-600 mt-1 flex-shrink-0" />
                   <div>
-                    <div className="text-[11px] uppercase tracking-wider font-semibold text-primary-500 dark:text-sand-400">Check-out</div>
-                    <div className="text-sm font-medium text-primary-900 dark:text-sand-50">
+                    <div className="text-[11px] uppercase tracking-wider font-semibold text-primary-500">Check-out</div>
+                    <div className="text-sm font-medium text-primary-900">
                       {booking?.check_out ? formatDate(booking.check_out) : '—'}
                     </div>
                   </div>
                 </div>
                 <div className="flex items-start gap-2.5">
-                  <Clock className="w-4 h-4 text-secondary-600 dark:text-secondary-400 mt-1 flex-shrink-0" />
+                  <Clock className="w-4 h-4 text-secondary-600 mt-1 flex-shrink-0" />
                   <div>
-                    <div className="text-[11px] uppercase tracking-wider font-semibold text-primary-500 dark:text-sand-400">Duration</div>
-                    <div className="text-sm font-medium text-primary-900 dark:text-sand-50">
+                    <div className="text-[11px] uppercase tracking-wider font-semibold text-primary-500">Duration</div>
+                    <div className="text-sm font-medium text-primary-900">
                       {nights} night{nights !== 1 ? 's' : ''}
                     </div>
                   </div>
                 </div>
                 <div className="flex items-start gap-2.5">
-                  <Users className="w-4 h-4 text-secondary-600 dark:text-secondary-400 mt-1 flex-shrink-0" />
+                  <Users className="w-4 h-4 text-secondary-600 mt-1 flex-shrink-0" />
                   <div>
-                    <div className="text-[11px] uppercase tracking-wider font-semibold text-primary-500 dark:text-sand-400">Guests</div>
-                    <div className="text-sm font-medium text-primary-900 dark:text-sand-50">
+                    <div className="text-[11px] uppercase tracking-wider font-semibold text-primary-500">Guests</div>
+                    <div className="text-sm font-medium text-primary-900">
                       {booking?.number_of_guests || 1} guest{(booking?.number_of_guests || 1) !== 1 ? 's' : ''}
                     </div>
                   </div>
@@ -201,16 +201,16 @@ export default function BookingSuccessPage() {
               </div>
 
               {/* Payment summary */}
-              <div className="flex items-center justify-between pt-4 border-t border-primary-100 dark:border-primary-800">
+              <div className="flex items-center justify-between pt-4 border-t border-primary-100">
                 <div>
-                  <div className="text-sm text-primary-500 dark:text-sand-400 flex items-center gap-1.5">
+                  <div className="text-sm text-primary-500 flex items-center gap-1.5">
                     <CreditCard className="w-3.5 h-3.5" />
                     Paid via {provider?.replace(/_/g, ' ') || 'card'}
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-[11px] uppercase tracking-wider font-semibold text-primary-500 dark:text-sand-400">Total</div>
-                  <div className="text-xl font-bold text-secondary-700 dark:text-secondary-400">
+                  <div className="text-[11px] uppercase tracking-wider font-semibold text-primary-500">Total</div>
+                  <div className="text-xl font-bold text-secondary-700">
                     {booking?.currency} {booking?.grand_total}
                   </div>
                 </div>
@@ -220,7 +220,7 @@ export default function BookingSuccessPage() {
 
           {/* What's next */}
           <div className="card p-6 mb-6">
-            <h2 className="text-lg font-semibold text-primary-900 dark:text-sand-50 mb-4">
+            <h2 className="text-lg font-semibold text-primary-900 mb-4">
               What happens next
             </h2>
             <div className="space-y-3">
@@ -231,23 +231,23 @@ export default function BookingSuccessPage() {
               ].map((item, i) => (
                 <div key={i} className="flex items-start gap-3">
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${item.done
-                      ? 'bg-green-100 dark:bg-green-900/30'
-                      : 'bg-primary-100 dark:bg-primary-800'
+                      ? 'bg-green-100'
+                      : 'bg-primary-100'
                     }`}>
                     <item.icon className={`w-4 h-4 ${item.done
-                        ? 'text-green-600 dark:text-green-400'
-                        : 'text-primary-500 dark:text-sand-400'
+                        ? 'text-green-600'
+                        : 'text-primary-500'
                       }`} />
                   </div>
-                  <p className="text-sm text-primary-700 dark:text-sand-200 pt-1.5">{item.text}</p>
+                  <p className="text-sm text-primary-700 pt-1.5">{item.text}</p>
                 </div>
               ))}
               {provider === 'cash_on_arrival' && (
                 <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-amber-100 dark:bg-amber-900/30">
-                    <CreditCard className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-amber-100">
+                    <CreditCard className="w-4 h-4 text-amber-600" />
                   </div>
-                  <p className="text-sm text-amber-700 dark:text-amber-300 pt-1.5 font-medium">
+                  <p className="text-sm text-amber-700 pt-1.5 font-medium">
                     Remember to bring cash for the accommodation cost on arrival
                   </p>
                 </div>
@@ -259,14 +259,14 @@ export default function BookingSuccessPage() {
           <div className="grid sm:grid-cols-2 gap-3">
             <Link
               href="/bookings"
-              className="flex items-center justify-center gap-2 bg-secondary-600 hover:bg-secondary-700 dark:bg-secondary-700 dark:hover:bg-secondary-600 text-white font-semibold py-3 px-4 rounded-lg transition"
+              className="flex items-center justify-center gap-2 bg-secondary-600 hover:bg-secondary-700 text-white font-semibold py-3 px-4 rounded-lg transition"
             >
               <FileText className="w-5 h-5" />
               View my bookings
             </Link>
             <Link
               href={propertyId ? `/property/${propertyId}` : '/'}
-              className="flex items-center justify-center gap-2 border border-primary-300 dark:border-primary-600 text-primary-700 dark:text-sand-200 font-semibold py-3 px-4 rounded-lg hover:bg-sand-50 dark:hover:bg-primary-800 transition"
+              className="flex items-center justify-center gap-2 border border-primary-300 text-primary-700 font-semibold py-3 px-4 rounded-lg hover:bg-sand-50 transition"
             >
               <Home className="w-5 h-5" />
               Back to property

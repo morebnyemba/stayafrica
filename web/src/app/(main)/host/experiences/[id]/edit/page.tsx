@@ -41,7 +41,7 @@ export default function EditExperiencePage({ params }: { params: Promise<{ id: s
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-sand-100 dark:bg-primary-900 flex items-center justify-center">
+      <div className="min-h-screen bg-sand-100 flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-secondary-500" />
       </div>
     );
@@ -49,15 +49,15 @@ export default function EditExperiencePage({ params }: { params: Promise<{ id: s
 
   if (error) {
     return (
-      <div className="min-h-screen bg-sand-100 dark:bg-primary-900 flex items-center justify-center">
+      <div className="min-h-screen bg-sand-100 flex items-center justify-center">
         <div className="card-gradient p-8 text-center max-w-md">
-          <h2 className="text-2xl font-bold text-primary-900 dark:text-sand-50 mb-2">
+          <h2 className="text-2xl font-bold text-primary-900 mb-2">
             Error Loading Experience
           </h2>
-          <p className="text-primary-600 dark:text-sand-300 mb-4">{error}</p>
+          <p className="text-primary-600 mb-4">{error}</p>
           <button
             onClick={() => router.push('/host/experiences')}
-            className="text-secondary-600 dark:text-secondary-400 hover:underline"
+            className="text-secondary-600 hover:underline"
           >
             Back to Experiences
           </button>
@@ -67,13 +67,13 @@ export default function EditExperiencePage({ params }: { params: Promise<{ id: s
   }
 
   return (
-    <div className="min-h-screen bg-sand-100 dark:bg-primary-900">
+    <div className="min-h-screen bg-sand-100">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-primary-900 dark:text-sand-50 mb-2">
+          <h1 className="text-3xl md:text-4xl font-bold text-primary-900 mb-2">
             Edit Experience
           </h1>
-          <p className="text-lg text-primary-600 dark:text-sand-300">
+          <p className="text-lg text-primary-600">
             Update your experience details
           </p>
         </div>

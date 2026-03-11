@@ -46,14 +46,14 @@ export function WishlistContent() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-sand-100 dark:bg-primary-900">
+      <div className="min-h-screen bg-sand-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold text-primary-900 dark:text-sand-50 mb-2">
+            <h1 className="text-3xl md:text-4xl font-bold text-primary-900 mb-2">
               My Wishlist
             </h1>
-            <p className="text-lg text-primary-600 dark:text-sand-200">
+            <p className="text-lg text-primary-600">
               Properties you&apos;ve saved for later
             </p>
           </div>
@@ -63,18 +63,18 @@ export function WishlistContent() {
             <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="card overflow-hidden animate-pulse">
-                  <div className="h-48 bg-primary-200 dark:bg-primary-700"></div>
+                  <div className="h-48 bg-primary-200"></div>
                   <div className="p-4 space-y-3">
-                    <div className="h-6 bg-primary-200 dark:bg-primary-700 rounded"></div>
-                    <div className="h-4 bg-primary-200 dark:bg-primary-700 rounded w-2/3"></div>
-                    <div className="h-4 bg-primary-200 dark:bg-primary-700 rounded w-1/2"></div>
+                    <div className="h-6 bg-primary-200 rounded"></div>
+                    <div className="h-4 bg-primary-200 rounded w-2/3"></div>
+                    <div className="h-4 bg-primary-200 rounded w-1/2"></div>
                   </div>
                 </div>
               ))}
             </div>
           ) : error ? (
             <div className="card p-12 text-center">
-              <p className="text-primary-600 dark:text-sand-300 mb-4">
+              <p className="text-primary-600 mb-4">
                 Unable to load your wishlist. Please try again later.
               </p>
               <Button
@@ -87,11 +87,11 @@ export function WishlistContent() {
             </div>
           ) : savedPropertiesData?.length === 0 ? (
             <div className="card p-12 text-center">
-              <Heart className="w-20 h-20 text-primary-300 dark:text-primary-700 mx-auto mb-4" />
-              <h3 className="text-2xl font-semibold text-primary-900 dark:text-sand-50 mb-2">
+              <Heart className="w-20 h-20 text-primary-300 mx-auto mb-4" />
+              <h3 className="text-2xl font-semibold text-primary-900 mb-2">
                 Your wishlist is empty
               </h3>
-              <p className="text-primary-600 dark:text-sand-300 mb-8 max-w-md mx-auto">
+              <p className="text-primary-600 mb-8 max-w-md mx-auto">
                 Start exploring properties and save your favorites here for easy access later
               </p>
               <Link href="/explore">
@@ -100,7 +100,7 @@ export function WishlistContent() {
             </div>
           ) : (
             <>
-              <div className="mb-6 text-primary-600 dark:text-sand-300">
+              <div className="mb-6 text-primary-600">
                 {savedPropertiesData?.length} {savedPropertiesData?.length === 1 ? 'property' : 'properties'} saved
               </div>
               <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -126,16 +126,16 @@ export function WishlistContent() {
                         />
                         <button
                           onClick={(e) => removeFromWishlist(property.id, e)}
-                          className="absolute top-3 right-3 p-2 bg-white/90 dark:bg-primary-800/90 rounded-full hover:bg-red-50 dark:hover:bg-red-900/30 transition z-10"
+                          className="absolute top-3 right-3 p-2 bg-white/90 rounded-full hover:bg-red-50 transition z-10"
                           title="Remove from wishlist"
                         >
-                          <X className="w-5 h-5 text-red-600 dark:text-red-400" />
+                          <X className="w-5 h-5 text-red-600" />
                         </button>
                         {property.average_rating && (
-                          <div className="absolute top-3 left-3 px-3 py-1 bg-white/95 dark:bg-primary-800/95 backdrop-blur-sm rounded-full">
+                          <div className="absolute top-3 left-3 px-3 py-1 bg-white/95 backdrop-blur-sm rounded-full">
                             <div className="flex items-center gap-1">
                               <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                              <span className="text-sm font-semibold text-primary-900 dark:text-sand-50">
+                              <span className="text-sm font-semibold text-primary-900">
                                 {property.average_rating.toFixed(1)}
                               </span>
                             </div>
@@ -145,11 +145,11 @@ export function WishlistContent() {
 
                       {/* Property Info */}
                       <div className="p-4">
-                        <h3 className="font-semibold text-lg text-primary-900 dark:text-sand-50 mb-2 line-clamp-1">
+                        <h3 className="font-semibold text-lg text-primary-900 mb-2 line-clamp-1">
                           {property.title}
                         </h3>
 
-                        <div className="flex items-center gap-2 text-primary-600 dark:text-sand-300 text-sm mb-3">
+                        <div className="flex items-center gap-2 text-primary-600 text-sm mb-3">
                           <MapPin className="w-4 h-4" />
                           <span className="line-clamp-1">
                             {property.city}, {property.country}
@@ -157,7 +157,7 @@ export function WishlistContent() {
                         </div>
 
                         {(property.max_guests || property.bedrooms) && (
-                          <div className="flex items-center gap-4 text-sm text-primary-600 dark:text-sand-300 mb-4">
+                          <div className="flex items-center gap-4 text-sm text-primary-600 mb-4">
                             {property.max_guests && (
                               <div className="flex items-center gap-1">
                                 <Users className="w-4 h-4" />
@@ -173,14 +173,14 @@ export function WishlistContent() {
                           </div>
                         )}
 
-                        <div className="flex items-center justify-between pt-3 border-t border-primary-200 dark:border-primary-700">
+                        <div className="flex items-center justify-between pt-3 border-t border-primary-200">
                           <div>
                             <div className="flex items-center gap-1">
-                              <span className="text-2xl font-bold text-primary-900 dark:text-sand-50">
+                              <span className="text-2xl font-bold text-primary-900">
                                 ${property.price_per_night}
                               </span>
                             </div>
-                            <span className="text-xs text-primary-600 dark:text-sand-400">per night</span>
+                            <span className="text-xs text-primary-600">per night</span>
                           </div>
                           <Button
                             onClick={(e) => {
@@ -194,7 +194,7 @@ export function WishlistContent() {
                           </Button>
                         </div>
 
-                        <div className="text-xs text-primary-500 dark:text-sand-500 pt-2 mt-2 border-t border-primary-100 dark:border-primary-700">
+                        <div className="text-xs text-primary-500 pt-2 mt-2 border-t border-primary-100">
                           Saved {new Date(saved.created_at).toLocaleDateString()}
                         </div>
                       </div>

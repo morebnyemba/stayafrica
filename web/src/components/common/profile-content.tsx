@@ -64,14 +64,14 @@ export function ProfileContent() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-sand-100 dark:bg-primary-900">
+      <div className="min-h-screen bg-sand-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold text-primary-900 dark:text-sand-50 mb-2">
+            <h1 className="text-3xl md:text-4xl font-bold text-primary-900 mb-2">
               Account Settings
             </h1>
-            <p className="text-lg text-primary-600 dark:text-sand-200">
+            <p className="text-lg text-primary-600">
               Manage your profile and preferences
             </p>
           </div>
@@ -87,7 +87,7 @@ export function ProfileContent() {
                       onClick={() => setActiveTab(tab.id)}
                       className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition ${activeTab === tab.id
                         ? 'bg-secondary-500 text-primary-900 font-semibold'
-                        : 'text-primary-700 dark:text-sand-200 hover:bg-primary-100 dark:hover:bg-primary-700'
+                        : 'text-primary-700 hover:bg-primary-100'
                         }`}
                     >
                       <tab.icon className="w-5 h-5" />
@@ -103,12 +103,12 @@ export function ProfileContent() {
               {/* Profile Tab */}
               {activeTab === 'profile' && (
                 <div className="card p-4 sm:p-8">
-                  <h2 className="text-2xl font-bold text-primary-900 dark:text-sand-50 mb-6">
+                  <h2 className="text-2xl font-bold text-primary-900 mb-6">
                     Profile Information
                   </h2>
 
                   {/* Profile Picture */}
-                  <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 mb-8 pb-8 border-b border-primary-200 dark:border-primary-700">
+                  <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 mb-8 pb-8 border-b border-primary-200">
                     <div className="relative flex-shrink-0">
                       {user?.profile_picture ? (
                         <img
@@ -121,20 +121,20 @@ export function ProfileContent() {
                           <User className="w-10 h-10 sm:w-12 sm:h-12 text-primary-900" />
                         </div>
                       )}
-                      <button className="absolute bottom-0 right-0 p-2 bg-white dark:bg-primary-800 rounded-full border-2 border-primary-200 dark:border-primary-700 hover:bg-primary-50 dark:hover:bg-primary-700 transition">
-                        <Camera className="w-4 h-4 text-primary-900 dark:text-sand-100" />
+                      <button className="absolute bottom-0 right-0 p-2 bg-white rounded-full border-2 border-primary-200 hover:bg-primary-50 transition">
+                        <Camera className="w-4 h-4 text-primary-900" />
                       </button>
                     </div>
                     <div className="text-center sm:text-left">
-                      <h3 className="text-lg sm:text-xl font-semibold text-primary-900 dark:text-sand-50 mb-1">
+                      <h3 className="text-lg sm:text-xl font-semibold text-primary-900 mb-1">
                         {user?.first_name} {user?.last_name}
                       </h3>
-                      <p className="text-primary-600 dark:text-sand-300 mb-2">
+                      <p className="text-primary-600 mb-2">
                         {user?.email}
                       </p>
                       <span className={`px-3 py-1 rounded-full text-xs font-semibold ${user?.is_verified
-                        ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
-                        : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300'
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-yellow-100 text-yellow-800'
                         }`}>
                         {user?.is_verified ? 'Verified' : 'Unverified'}
                       </span>
@@ -145,81 +145,81 @@ export function ProfileContent() {
                   <form onSubmit={handleUpdateProfile} className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
-                        <label htmlFor="first_name" className="block text-sm font-medium text-primary-900 dark:text-sand-100 mb-2">
+                        <label htmlFor="first_name" className="block text-sm font-medium text-primary-900 mb-2">
                           First Name
                         </label>
                         <div className="relative">
-                          <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-primary-400 dark:text-sand-400" />
+                          <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-primary-400" />
                           <input
                             id="first_name"
                             type="text"
                             value={formData.first_name}
                             onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
-                            className="w-full pl-10 pr-4 py-3 bg-sand-50 dark:bg-primary-700 border border-primary-200 dark:border-primary-600 rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent text-primary-900 dark:text-sand-100"
+                            className="w-full pl-10 pr-4 py-3 bg-sand-50 border border-primary-200 rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent text-primary-900"
                           />
                         </div>
                       </div>
 
                       <div>
-                        <label htmlFor="last_name" className="block text-sm font-medium text-primary-900 dark:text-sand-100 mb-2">
+                        <label htmlFor="last_name" className="block text-sm font-medium text-primary-900 mb-2">
                           Last Name
                         </label>
                         <div className="relative">
-                          <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-primary-400 dark:text-sand-400" />
+                          <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-primary-400" />
                           <input
                             id="last_name"
                             type="text"
                             value={formData.last_name}
                             onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
-                            className="w-full pl-10 pr-4 py-3 bg-sand-50 dark:bg-primary-700 border border-primary-200 dark:border-primary-600 rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent text-primary-900 dark:text-sand-100"
+                            className="w-full pl-10 pr-4 py-3 bg-sand-50 border border-primary-200 rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent text-primary-900"
                           />
                         </div>
                       </div>
                     </div>
 
                     <div>
-                      <label htmlFor="email" className="block text-sm font-medium text-primary-900 dark:text-sand-100 mb-2">
+                      <label htmlFor="email" className="block text-sm font-medium text-primary-900 mb-2">
                         Email Address
                       </label>
                       <div className="relative">
-                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-primary-400 dark:text-sand-400" />
+                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-primary-400" />
                         <input
                           id="email"
                           type="email"
                           value={formData.email}
                           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                          className="w-full pl-10 pr-4 py-3 bg-sand-50 dark:bg-primary-700 border border-primary-200 dark:border-primary-600 rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent text-primary-900 dark:text-sand-100"
+                          className="w-full pl-10 pr-4 py-3 bg-sand-50 border border-primary-200 rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent text-primary-900"
                         />
                       </div>
                     </div>
 
                     <div>
-                      <label htmlFor="phone_number" className="block text-sm font-medium text-primary-900 dark:text-sand-100 mb-2">
+                      <label htmlFor="phone_number" className="block text-sm font-medium text-primary-900 mb-2">
                         Phone Number
                       </label>
                       <div className="relative">
-                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-primary-400 dark:text-sand-400" />
+                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-primary-400" />
                         <input
                           id="phone_number"
                           type="tel"
                           value={formData.phone_number}
                           onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
-                          className="w-full pl-10 pr-4 py-3 bg-sand-50 dark:bg-primary-700 border border-primary-200 dark:border-primary-600 rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent text-primary-900 dark:text-sand-100"
+                          className="w-full pl-10 pr-4 py-3 bg-sand-50 border border-primary-200 rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent text-primary-900"
                         />
                       </div>
                     </div>
 
                     <div>
-                      <label htmlFor="country_of_residence" className="block text-sm font-medium text-primary-900 dark:text-sand-100 mb-2">
+                      <label htmlFor="country_of_residence" className="block text-sm font-medium text-primary-900 mb-2">
                         Country of Residence
                       </label>
                       <div className="relative">
-                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-primary-400 dark:text-sand-400" />
+                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-primary-400" />
                         <select
                           id="country_of_residence"
                           value={formData.country_of_residence}
                           onChange={(e) => setFormData({ ...formData, country_of_residence: e.target.value })}
-                          className="w-full pl-10 pr-4 py-3 bg-sand-50 dark:bg-primary-700 border border-primary-200 dark:border-primary-600 rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent text-primary-900 dark:text-sand-100"
+                          className="w-full pl-10 pr-4 py-3 bg-sand-50 border border-primary-200 rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent text-primary-900"
                         >
                           <option value="">Select your country</option>
                           {WORLD_COUNTRIES.map((country) => (
@@ -262,15 +262,15 @@ export function ProfileContent() {
               {/* Security Tab */}
               {activeTab === 'security' && (
                 <div className="card p-4 sm:p-8">
-                  <h2 className="text-2xl font-bold text-primary-900 dark:text-sand-50 mb-6">
+                  <h2 className="text-2xl font-bold text-primary-900 mb-6">
                     Security Settings
                   </h2>
                   <div className="space-y-6">
-                    <div className="p-6 bg-sand-50 dark:bg-primary-700 rounded-lg">
-                      <h3 className="font-semibold text-primary-900 dark:text-sand-50 mb-2">
+                    <div className="p-6 bg-sand-50 rounded-lg">
+                      <h3 className="font-semibold text-primary-900 mb-2">
                         Change Password
                       </h3>
-                      <p className="text-sm text-primary-600 dark:text-sand-300 mb-4">
+                      <p className="text-sm text-primary-600 mb-4">
                         Update your password to keep your account secure
                       </p>
                       <Button variant="secondary" size="sm">
@@ -278,11 +278,11 @@ export function ProfileContent() {
                       </Button>
                     </div>
 
-                    <div className="p-6 bg-sand-50 dark:bg-primary-700 rounded-lg">
-                      <h3 className="font-semibold text-primary-900 dark:text-sand-50 mb-2">
+                    <div className="p-6 bg-sand-50 rounded-lg">
+                      <h3 className="font-semibold text-primary-900 mb-2">
                         Two-Factor Authentication
                       </h3>
-                      <p className="text-sm text-primary-600 dark:text-sand-300 mb-4">
+                      <p className="text-sm text-primary-600 mb-4">
                         Add an extra layer of security to your account
                       </p>
                       <TwoFactorSettings />
@@ -294,15 +294,15 @@ export function ProfileContent() {
               {/* Payments Tab */}
               {activeTab === 'payments' && (
                 <div className="card p-4 sm:p-8">
-                  <h2 className="text-2xl font-bold text-primary-900 dark:text-sand-50 mb-6">
+                  <h2 className="text-2xl font-bold text-primary-900 mb-6">
                     Payment Methods
                   </h2>
                   <div className="text-center py-12">
-                    <CreditCard className="w-16 h-16 text-primary-300 dark:text-primary-700 mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-primary-900 dark:text-sand-50 mb-2">
+                    <CreditCard className="w-16 h-16 text-primary-300 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-primary-900 mb-2">
                       No Payment Methods
                     </h3>
-                    <p className="text-primary-600 dark:text-sand-300 mb-6">
+                    <p className="text-primary-600 mb-6">
                       Add a payment method to make bookings easier
                     </p>
                     <Button variant="primary" size="lg">
@@ -315,52 +315,52 @@ export function ProfileContent() {
               {/* Notifications Tab */}
               {activeTab === 'notifications' && (
                 <div className="card p-4 sm:p-8">
-                  <h2 className="text-2xl font-bold text-primary-900 dark:text-sand-50 mb-6">
+                  <h2 className="text-2xl font-bold text-primary-900 mb-6">
                     Notification Preferences
                   </h2>
                   <div className="space-y-6">
-                    <div className="flex items-center justify-between p-4 border border-primary-200 dark:border-primary-700 rounded-lg">
+                    <div className="flex items-center justify-between p-4 border border-primary-200 rounded-lg">
                       <div>
-                        <h3 className="font-semibold text-primary-900 dark:text-sand-50 mb-1">
+                        <h3 className="font-semibold text-primary-900 mb-1">
                           Email Notifications
                         </h3>
-                        <p className="text-sm text-primary-600 dark:text-sand-300">
+                        <p className="text-sm text-primary-600">
                           Receive updates about your bookings
                         </p>
                       </div>
                       <label className="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" className="sr-only peer" defaultChecked />
-                        <div className="w-11 h-6 bg-primary-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-secondary-300 dark:peer-focus:ring-secondary-800 rounded-full peer dark:bg-primary-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-primary-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-primary-600 peer-checked:bg-secondary-500"></div>
+                        <div className="w-11 h-6 bg-primary-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-secondary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-primary-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-secondary-500"></div>
                       </label>
                     </div>
 
-                    <div className="flex items-center justify-between p-4 border border-primary-200 dark:border-primary-700 rounded-lg">
+                    <div className="flex items-center justify-between p-4 border border-primary-200 rounded-lg">
                       <div>
-                        <h3 className="font-semibold text-primary-900 dark:text-sand-50 mb-1">
+                        <h3 className="font-semibold text-primary-900 mb-1">
                           SMS Notifications
                         </h3>
-                        <p className="text-sm text-primary-600 dark:text-sand-300">
+                        <p className="text-sm text-primary-600">
                           Get text messages for important updates
                         </p>
                       </div>
                       <label className="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" className="sr-only peer" />
-                        <div className="w-11 h-6 bg-primary-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-secondary-300 dark:peer-focus:ring-secondary-800 rounded-full peer dark:bg-primary-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-primary-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-primary-600 peer-checked:bg-secondary-500"></div>
+                        <div className="w-11 h-6 bg-primary-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-secondary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-primary-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-secondary-500"></div>
                       </label>
                     </div>
 
-                    <div className="flex items-center justify-between p-4 border border-primary-200 dark:border-primary-700 rounded-lg">
+                    <div className="flex items-center justify-between p-4 border border-primary-200 rounded-lg">
                       <div>
-                        <h3 className="font-semibold text-primary-900 dark:text-sand-50 mb-1">
+                        <h3 className="font-semibold text-primary-900 mb-1">
                           Marketing Emails
                         </h3>
-                        <p className="text-sm text-primary-600 dark:text-sand-300">
+                        <p className="text-sm text-primary-600">
                           Receive newsletters and promotions
                         </p>
                       </div>
                       <label className="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" className="sr-only peer" defaultChecked />
-                        <div className="w-11 h-6 bg-primary-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-secondary-300 dark:peer-focus:ring-secondary-800 rounded-full peer dark:bg-primary-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-primary-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-primary-600 peer-checked:bg-secondary-500"></div>
+                        <div className="w-11 h-6 bg-primary-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-secondary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-primary-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-secondary-500"></div>
                       </label>
                     </div>
                   </div>
@@ -468,13 +468,13 @@ function PreferencesTab() {
 
   return (
     <div className="card p-4 sm:p-8">
-      <h2 className="text-2xl font-bold text-primary-900 dark:text-sand-50 mb-6">
+      <h2 className="text-2xl font-bold text-primary-900 mb-6">
         Travel Preferences
       </h2>
       <div className="space-y-6">
         {/* Property Types */}
         <div>
-          <label className="block text-sm font-medium text-primary-700 dark:text-sand-300 mb-2">
+          <label className="block text-sm font-medium text-primary-700 mb-2">
             Preferred Property Types
           </label>
           <div className="flex flex-wrap gap-2">
@@ -484,7 +484,7 @@ function PreferencesTab() {
                 onClick={() => togglePropertyType(type)}
                 className={`px-4 py-2 rounded-full text-sm font-medium border transition-colors ${form.preferred_property_types.includes(type)
                   ? 'bg-secondary-500 text-white border-secondary-500'
-                  : 'border-primary-300 dark:border-primary-600 text-primary-700 dark:text-sand-300 hover:border-secondary-400'
+                  : 'border-primary-300 text-primary-700 hover:border-secondary-400'
                   }`}
               >
                 {type.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
@@ -495,7 +495,7 @@ function PreferencesTab() {
 
         {/* Price Range */}
         <div>
-          <label className="block text-sm font-medium text-primary-700 dark:text-sand-300 mb-2">
+          <label className="block text-sm font-medium text-primary-700 mb-2">
             Price Range (per night)
           </label>
           <div className="flex flex-wrap items-center gap-3">
@@ -504,22 +504,22 @@ function PreferencesTab() {
               placeholder="Min"
               value={form.preferred_min_price}
               onChange={e => setForm(f => ({ ...f, preferred_min_price: e.target.value }))}
-              className="w-24 sm:w-32 px-3 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-50"
+              className="w-24 sm:w-32 px-3 py-2 border border-primary-300 rounded-lg bg-white text-primary-900"
             />
-            <span className="text-primary-600 dark:text-sand-400">—</span>
+            <span className="text-primary-600">—</span>
             <input
               type="number"
               placeholder="Max"
               value={form.preferred_max_price}
               onChange={e => setForm(f => ({ ...f, preferred_max_price: e.target.value }))}
-              className="w-24 sm:w-32 px-3 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-50"
+              className="w-24 sm:w-32 px-3 py-2 border border-primary-300 rounded-lg bg-white text-primary-900"
             />
           </div>
         </div>
 
         {/* Guest Count */}
         <div>
-          <label className="block text-sm font-medium text-primary-700 dark:text-sand-300 mb-2">
+          <label className="block text-sm font-medium text-primary-700 mb-2">
             Usual Number of Guests
           </label>
           <input
@@ -528,13 +528,13 @@ function PreferencesTab() {
             max="20"
             value={form.usual_guest_count}
             onChange={e => setForm(f => ({ ...f, usual_guest_count: e.target.value }))}
-            className="w-24 sm:w-32 px-3 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-50"
+            className="w-24 sm:w-32 px-3 py-2 border border-primary-300 rounded-lg bg-white text-primary-900"
           />
         </div>
 
         {/* Preferred Cities */}
         <div>
-          <label className="block text-sm font-medium text-primary-700 dark:text-sand-300 mb-2">
+          <label className="block text-sm font-medium text-primary-700 mb-2">
             Preferred Cities
           </label>
           <div className="flex gap-2 mb-2">
@@ -544,13 +544,13 @@ function PreferencesTab() {
               value={cityInput}
               onChange={e => setCityInput(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addCity(); } }}
-              className="flex-1 px-3 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-50"
+              className="flex-1 px-3 py-2 border border-primary-300 rounded-lg bg-white text-primary-900"
             />
             <Button onClick={addCity} size="sm" variant="outline">Add</Button>
           </div>
           <div className="flex flex-wrap gap-2">
             {form.preferred_cities.map(city => (
-              <span key={city} className="inline-flex items-center gap-1 bg-primary-100 dark:bg-primary-700 text-primary-800 dark:text-sand-200 px-3 py-1 rounded-full text-sm">
+              <span key={city} className="inline-flex items-center gap-1 bg-primary-100 text-primary-800 px-3 py-1 rounded-full text-sm">
                 {city}
                 <button onClick={() => setForm(f => ({ ...f, preferred_cities: f.preferred_cities.filter(c => c !== city) }))} className="hover:text-red-500">×</button>
               </span>
@@ -560,7 +560,7 @@ function PreferencesTab() {
 
         {/* Preferred Amenities */}
         <div>
-          <label className="block text-sm font-medium text-primary-700 dark:text-sand-300 mb-2">
+          <label className="block text-sm font-medium text-primary-700 mb-2">
             Preferred Amenities
           </label>
           <div className="flex gap-2 mb-2">
@@ -570,13 +570,13 @@ function PreferencesTab() {
               value={amenityInput}
               onChange={e => setAmenityInput(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addAmenity(); } }}
-              className="flex-1 px-3 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-50"
+              className="flex-1 px-3 py-2 border border-primary-300 rounded-lg bg-white text-primary-900"
             />
             <Button onClick={addAmenity} size="sm" variant="outline">Add</Button>
           </div>
           <div className="flex flex-wrap gap-2">
             {form.preferred_amenities.map(amenity => (
-              <span key={amenity} className="inline-flex items-center gap-1 bg-primary-100 dark:bg-primary-700 text-primary-800 dark:text-sand-200 px-3 py-1 rounded-full text-sm">
+              <span key={amenity} className="inline-flex items-center gap-1 bg-primary-100 text-primary-800 px-3 py-1 rounded-full text-sm">
                 {amenity}
                 <button onClick={() => setForm(f => ({ ...f, preferred_amenities: f.preferred_amenities.filter(a => a !== amenity) }))} className="hover:text-red-500">×</button>
               </span>

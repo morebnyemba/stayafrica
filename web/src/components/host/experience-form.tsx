@@ -151,7 +151,7 @@ export function ExperienceForm({ experience, mode }: ExperienceFormProps) {
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* Basic Info */}
           <section className="card p-6">
-            <h2 className="text-lg font-semibold text-primary-900 dark:text-sand-50 mb-4 flex items-center gap-2">
+            <h2 className="text-lg font-semibold text-primary-900 mb-4 flex items-center gap-2">
               <FileText className="w-5 h-5 text-secondary-500" />
               Basic Information
             </h2>
@@ -193,7 +193,7 @@ export function ExperienceForm({ experience, mode }: ExperienceFormProps) {
 
           {/* Location */}
           <section className="card p-6">
-            <h2 className="text-lg font-semibold text-primary-900 dark:text-sand-50 mb-4 flex items-center gap-2">
+            <h2 className="text-lg font-semibold text-primary-900 mb-4 flex items-center gap-2">
               <MapPin className="w-5 h-5 text-secondary-500" />
               Location
             </h2>
@@ -254,7 +254,7 @@ export function ExperienceForm({ experience, mode }: ExperienceFormProps) {
 
           {/* Pricing & Duration */}
           <section className="card p-6">
-            <h2 className="text-lg font-semibold text-primary-900 dark:text-sand-50 mb-4 flex items-center gap-2">
+            <h2 className="text-lg font-semibold text-primary-900 mb-4 flex items-center gap-2">
               <DollarSign className="w-5 h-5 text-secondary-500" />
               Pricing & Duration
             </h2>
@@ -333,7 +333,7 @@ export function ExperienceForm({ experience, mode }: ExperienceFormProps) {
 
           {/* Capacity */}
           <section className="card p-6">
-            <h2 className="text-lg font-semibold text-primary-900 dark:text-sand-50 mb-4 flex items-center gap-2">
+            <h2 className="text-lg font-semibold text-primary-900 mb-4 flex items-center gap-2">
               <Users className="w-5 h-5 text-secondary-500" />
               Capacity
             </h2>
@@ -359,7 +359,7 @@ export function ExperienceForm({ experience, mode }: ExperienceFormProps) {
 
           {/* Image */}
           <section className="card p-6">
-            <h2 className="text-lg font-semibold text-primary-900 dark:text-sand-50 mb-4 flex items-center gap-2">
+            <h2 className="text-lg font-semibold text-primary-900 mb-4 flex items-center gap-2">
               <ImageIcon className="w-5 h-5 text-secondary-500" />
               Cover Image
             </h2>
@@ -379,10 +379,10 @@ export function ExperienceForm({ experience, mode }: ExperienceFormProps) {
                   </button>
                 </div>
               ) : (
-                <label className="w-full h-48 border-2 border-dashed border-primary-300 dark:border-primary-600 rounded-lg cursor-pointer hover:border-secondary-500 transition-colors flex items-center justify-center">
+                <label className="w-full h-48 border-2 border-dashed border-primary-300 rounded-lg cursor-pointer hover:border-secondary-500 transition-colors flex items-center justify-center">
                   <div className="text-center">
-                    <ImageIcon className="w-10 h-10 text-primary-400 dark:text-sand-500 mx-auto mb-2" />
-                    <p className="text-sm text-primary-600 dark:text-sand-300">
+                    <ImageIcon className="w-10 h-10 text-primary-400 mx-auto mb-2" />
+                    <p className="text-sm text-primary-600">
                       Click to upload a cover image
                     </p>
                   </div>
@@ -399,7 +399,7 @@ export function ExperienceForm({ experience, mode }: ExperienceFormProps) {
 
           {/* Additional Details */}
           <section className="card p-6">
-            <h2 className="text-lg font-semibold text-primary-900 dark:text-sand-50 mb-4">
+            <h2 className="text-lg font-semibold text-primary-900 mb-4">
               Additional Details
             </h2>
             <div className="space-y-4">

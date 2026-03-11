@@ -176,7 +176,7 @@ export function MapboxLocationPicker({
 
   if (!mapboxToken) {
     return (
-      <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 text-red-800 dark:text-red-200 text-sm">
+      <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-800 text-sm">
         <p className="font-medium">Map Configuration Error</p>
         <p>Mapbox token is not configured. Please set NEXT_PUBLIC_MAPBOX_TOKEN environment variable.</p>
       </div>
@@ -185,19 +185,19 @@ export function MapboxLocationPicker({
 
   return (
     <div className={`space-y-4 ${className}`}>
-      <div className="relative bg-primary-100 dark:bg-primary-800 rounded-lg overflow-hidden border border-primary-300 dark:border-primary-600">
+      <div className="relative bg-primary-100 rounded-lg overflow-hidden border border-primary-300">
         {loading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-white/80 dark:bg-primary-900/80 z-10">
+          <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
             <div className="flex flex-col items-center gap-2">
               <Loader className="w-6 h-6 animate-spin text-primary-600" />
-              <p className="text-sm text-primary-600 dark:text-sand-400">Loading map...</p>
+              <p className="text-sm text-primary-600">Loading map...</p>
             </div>
           </div>
         )}
         <div ref={mapContainer} className="w-full h-96" />
       </div>
 
-      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 sm:p-4 text-xs sm:text-sm text-blue-800 dark:text-blue-200">
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4 text-xs sm:text-sm text-blue-800">
         <p className="font-medium mb-2 flex items-center gap-2">
           <MapPin className="w-4 h-4" />
           How to use the map
@@ -217,7 +217,7 @@ export function MapboxLocationPicker({
               className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
                 mapStyle === style
                   ? 'bg-blue-600 text-white'
-                  : 'bg-blue-100 dark:bg-blue-800 text-blue-900 dark:text-blue-100 hover:bg-blue-200 dark:hover:bg-blue-700'
+                  : 'bg-blue-100 text-blue-900 hover:bg-blue-200'
               }`}
             >
               {style.charAt(0).toUpperCase() + style.slice(1)}
@@ -227,9 +227,9 @@ export function MapboxLocationPicker({
       </div>
 
       <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-        <div className="flex-1 bg-sand-50 dark:bg-primary-900 rounded-lg p-3 text-xs sm:text-sm">
-          <p className="text-primary-600 dark:text-sand-400 font-medium">Coordinates</p>
-          <p className="text-primary-900 dark:text-sand-50 font-mono">
+        <div className="flex-1 bg-sand-50 rounded-lg p-3 text-xs sm:text-sm">
+          <p className="text-primary-600 font-medium">Coordinates</p>
+          <p className="text-primary-900 font-mono">
             {coordinates.lat.toFixed(6)}, {coordinates.lng.toFixed(6)}
           </p>
         </div>

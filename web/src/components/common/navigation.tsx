@@ -169,21 +169,21 @@ function AuthDropdown({
             </Link>
           </div>
         ) : (
-          <div className="absolute right-0 mt-2 w-44 bg-white dark:bg-primary-800 rounded-xl shadow-xl ring-1 ring-black/10 dark:ring-white/10 py-1.5 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="absolute right-0 mt-2 w-44 bg-white rounded-xl shadow-xl ring-1 ring-black/10 py-1.5 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
             <Link
               href={loginHref}
               onClick={() => { setOpen(false); onClose?.(); }}
-              className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-neutral-700 dark:text-sand-100 hover:bg-neutral-50 dark:hover:bg-primary-700/60 transition"
+              className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-neutral-700 hover:bg-neutral-50 transition"
             >
-              <User className="w-4 h-4 text-neutral-400 dark:text-sand-400" />
+              <User className="w-4 h-4 text-neutral-400" />
               Log in
             </Link>
             <Link
               href={registerHref}
               onClick={() => { setOpen(false); onClose?.(); }}
-              className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-neutral-700 dark:text-sand-100 hover:bg-neutral-50 dark:hover:bg-primary-700/60 transition"
+              className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-neutral-700 hover:bg-neutral-50 transition"
             >
-              <Settings className="w-4 h-4 text-neutral-400 dark:text-sand-400" />
+              <Settings className="w-4 h-4 text-neutral-400" />
               Sign up
             </Link>
           </div>
@@ -394,13 +394,13 @@ export function Navigation() {
 
                     {/* Dropdown */}
                     {userMenuOpen && (
-                      <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-primary-800 rounded-xl shadow-xl ring-1 ring-black/10 dark:ring-white/10 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                      <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-xl ring-1 ring-black/10 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
                         {/* User info */}
-                        <div className="px-4 py-3 border-b border-neutral-100 dark:border-primary-700">
-                          <p className="text-sm font-semibold text-neutral-900 dark:text-sand-50 truncate">
+                        <div className="px-4 py-3 border-b border-neutral-100">
+                          <p className="text-sm font-semibold text-neutral-900 truncate">
                             {user?.first_name} {user?.last_name}
                           </p>
-                          <p className="text-xs text-neutral-500 dark:text-sand-400 truncate">
+                          <p className="text-xs text-neutral-500 truncate">
                             {user?.email}
                           </p>
                           {isHost && (
@@ -413,14 +413,14 @@ export function Navigation() {
                         <div className="py-1">
                           <Link
                             href={dashboardHref}
-                            className="flex items-center gap-3 px-4 py-2.5 text-sm text-neutral-700 dark:text-sand-200 hover:bg-neutral-50 dark:hover:bg-primary-700 transition"
+                            className="flex items-center gap-3 px-4 py-2.5 text-sm text-neutral-700 hover:bg-neutral-50 transition"
                           >
                             <LayoutDashboard className="w-4 h-4" />
                             Dashboard
                           </Link>
                           <Link
                             href="/profile"
-                            className="flex items-center gap-3 px-4 py-2.5 text-sm text-neutral-700 dark:text-sand-200 hover:bg-neutral-50 dark:hover:bg-primary-700 transition"
+                            className="flex items-center gap-3 px-4 py-2.5 text-sm text-neutral-700 hover:bg-neutral-50 transition"
                           >
                             <User className="w-4 h-4" />
                             Profile
@@ -428,7 +428,7 @@ export function Navigation() {
                           {isHost && (
                             <Link
                               href="/host/dashboard"
-                              className="flex items-center gap-3 px-4 py-2.5 text-sm text-neutral-700 dark:text-sand-200 hover:bg-neutral-50 dark:hover:bg-primary-700 transition"
+                              className="flex items-center gap-3 px-4 py-2.5 text-sm text-neutral-700 hover:bg-neutral-50 transition"
                             >
                               <Building2 className="w-4 h-4" />
                               Host Dashboard
@@ -436,17 +436,17 @@ export function Navigation() {
                           )}
                           <Link
                             href="/profile"
-                            className="flex items-center gap-3 px-4 py-2.5 text-sm text-neutral-700 dark:text-sand-200 hover:bg-neutral-50 dark:hover:bg-primary-700 transition"
+                            className="flex items-center gap-3 px-4 py-2.5 text-sm text-neutral-700 hover:bg-neutral-50 transition"
                           >
                             <Settings className="w-4 h-4" />
                             Settings
                           </Link>
                         </div>
 
-                        <div className="border-t border-neutral-100 dark:border-primary-700 pt-1">
+                        <div className="border-t border-neutral-100 pt-1">
                           <button
                             onClick={handleLogout}
-                            className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition"
+                            className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition"
                           >
                             <LogOut className="w-4 h-4" />
                             Sign out

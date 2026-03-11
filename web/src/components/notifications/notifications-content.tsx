@@ -98,9 +98,9 @@ export function NotificationsContent() {
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h1 className="text-xl sm:text-2xl font-bold text-primary-900 dark:text-sand-100">Notifications</h1>
+                    <h1 className="text-xl sm:text-2xl font-bold text-primary-900">Notifications</h1>
                     {unreadCount > 0 && (
-                        <p className="text-sm text-primary-500 dark:text-sand-400 mt-1">
+                        <p className="text-sm text-primary-500 mt-1">
                             {unreadCount} unread notification{unreadCount !== 1 ? 's' : ''}
                         </p>
                     )}
@@ -108,7 +108,7 @@ export function NotificationsContent() {
                 {unreadCount > 0 && (
                     <button
                         onClick={markAllAsRead}
-                        className="flex items-center gap-2 px-3 sm:px-4 py-2 text-sm font-medium text-secondary-600 hover:text-secondary-700 hover:bg-secondary-50 rounded-lg transition-colors dark:text-secondary-400 dark:hover:bg-secondary-900/20"
+                        className="flex items-center gap-2 px-3 sm:px-4 py-2 text-sm font-medium text-secondary-600 hover:text-secondary-700 hover:bg-secondary-50 rounded-lg transition-colors"
                     >
                         <CheckCheck className="w-4 h-4" />
                         <span className="hidden sm:inline">Mark all read</span>
@@ -118,12 +118,12 @@ export function NotificationsContent() {
             </div>
 
             {/* Filter Tabs */}
-            <div className="flex gap-1 mb-6 bg-sand-200/50 dark:bg-primary-800/50 rounded-lg p-1">
+            <div className="flex gap-1 mb-6 bg-sand-200/50 rounded-lg p-1">
                 <button
                     onClick={() => setFilter('all')}
                     className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${filter === 'all'
-                        ? 'bg-white dark:bg-primary-700 text-primary-900 dark:text-sand-100 shadow-sm'
-                        : 'text-primary-500 dark:text-sand-400 hover:text-primary-700'
+                        ? 'bg-white text-primary-900 shadow-sm'
+                        : 'text-primary-500 hover:text-primary-700'
                         }`}
                 >
                     All
@@ -131,8 +131,8 @@ export function NotificationsContent() {
                 <button
                     onClick={() => setFilter('unread')}
                     className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${filter === 'unread'
-                        ? 'bg-white dark:bg-primary-700 text-primary-900 dark:text-sand-100 shadow-sm'
-                        : 'text-primary-500 dark:text-sand-400 hover:text-primary-700'
+                        ? 'bg-white text-primary-900 shadow-sm'
+                        : 'text-primary-500 hover:text-primary-700'
                         }`}
                 >
                     Unread {unreadCount > 0 && `(${unreadCount})`}
@@ -143,24 +143,24 @@ export function NotificationsContent() {
             {loading ? (
                 <div className="space-y-3">
                     {[...Array(5)].map((_, i) => (
-                        <div key={i} className="animate-pulse flex gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl bg-white dark:bg-primary-800/40 border border-sand-200/50 dark:border-primary-700/50">
-                            <div className="w-10 h-10 rounded-full bg-sand-200 dark:bg-primary-700 shrink-0" />
+                        <div key={i} className="animate-pulse flex gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl bg-white border border-sand-200/50">
+                            <div className="w-10 h-10 rounded-full bg-sand-200 shrink-0" />
                             <div className="flex-1 space-y-2">
-                                <div className="h-4 w-2/3 rounded bg-sand-200 dark:bg-primary-700" />
-                                <div className="h-3 w-1/2 rounded bg-sand-200 dark:bg-primary-700" />
+                                <div className="h-4 w-2/3 rounded bg-sand-200" />
+                                <div className="h-3 w-1/2 rounded bg-sand-200" />
                             </div>
                         </div>
                     ))}
                 </div>
             ) : filteredNotifications.length === 0 ? (
                 <div className="text-center py-16">
-                    <div className="w-16 h-16 rounded-full bg-sand-100 dark:bg-primary-800 flex items-center justify-center mx-auto mb-4">
-                        <BellOff className="w-8 h-8 text-sand-400 dark:text-primary-500" />
+                    <div className="w-16 h-16 rounded-full bg-sand-100 flex items-center justify-center mx-auto mb-4">
+                        <BellOff className="w-8 h-8 text-sand-400" />
                     </div>
-                    <h3 className="text-lg font-medium text-primary-700 dark:text-sand-300">
+                    <h3 className="text-lg font-medium text-primary-700">
                         {filter === 'unread' ? 'No unread notifications' : 'No notifications yet'}
                     </h3>
-                    <p className="text-sm text-primary-500 dark:text-sand-400 mt-1">
+                    <p className="text-sm text-primary-500 mt-1">
                         {filter === 'unread' ? "You're all caught up!" : "We'll notify you about bookings, messages, and more."}
                     </p>
                 </div>
@@ -171,14 +171,14 @@ export function NotificationsContent() {
                             key={notification.id}
                             onClick={() => !notification.is_read && markAsRead(notification.id)}
                             className={`w-full text-left flex gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl transition-all duration-200 ${notification.is_read
-                                ? 'bg-white dark:bg-primary-800/30 hover:bg-sand-50 dark:hover:bg-primary-800/50'
-                                : 'bg-secondary-50/50 dark:bg-secondary-900/10 hover:bg-secondary-50 dark:hover:bg-secondary-900/20 border-l-4 border-secondary-500'
+                                ? 'bg-white hover:bg-sand-50'
+                                : 'bg-secondary-50/50 hover:bg-secondary-50 border-l-4 border-secondary-500'
                                 }`}
                         >
                             {/* Icon */}
                             <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${notification.is_read
-                                ? 'bg-sand-200 dark:bg-primary-700 text-primary-500 dark:text-sand-400'
-                                : 'bg-secondary-100 dark:bg-secondary-900/30 text-secondary-600 dark:text-secondary-400'
+                                ? 'bg-sand-200 text-primary-500'
+                                : 'bg-secondary-100 text-secondary-600'
                                 }`}>
                                 {getNotificationIcon(notification.notification_type)}
                             </div>
@@ -186,15 +186,15 @@ export function NotificationsContent() {
                             {/* Content */}
                             <div className="flex-1 min-w-0">
                                 <p className={`text-sm ${notification.is_read
-                                    ? 'text-primary-700 dark:text-sand-300'
-                                    : 'text-primary-900 dark:text-sand-100 font-semibold'
+                                    ? 'text-primary-700'
+                                    : 'text-primary-900 font-semibold'
                                     }`}>
                                     {notification.title}
                                 </p>
-                                <p className="text-sm text-primary-500 dark:text-sand-400 mt-0.5 line-clamp-2">
+                                <p className="text-sm text-primary-500 mt-0.5 line-clamp-2">
                                     {notification.message}
                                 </p>
-                                <p className="text-xs text-primary-400 dark:text-sand-500 mt-1.5 flex items-center gap-1">
+                                <p className="text-xs text-primary-400 mt-1.5 flex items-center gap-1">
                                     <Clock className="w-3 h-3" />
                                     {formatTimeAgo(notification.created_at)}
                                 </p>

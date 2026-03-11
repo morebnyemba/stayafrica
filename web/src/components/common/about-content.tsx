@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/Button';
 
 export function AboutContent() {
   return (
-    <div className="bg-sand-100 dark:bg-primary-900">
+    <div className="bg-sand-100">
       {/* Hero Section */}
       <div className="bg-gradient-to-br from-primary-900 via-primary-800 to-primary-700 text-sand-50 py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -22,14 +22,14 @@ export function AboutContent() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid md:grid-cols-2 gap-12 items-center mb-20">
           <div>
-            <h2 className="text-3xl font-bold text-primary-900 dark:text-sand-50 mb-6">
+            <h2 className="text-3xl font-bold text-primary-900 mb-6">
               Our Mission
             </h2>
-            <p className="text-lg text-primary-700 dark:text-sand-200 mb-4">
+            <p className="text-lg text-primary-700 mb-4">
               StayAfrica is dedicated to making travel across Africa accessible, authentic, and unforgettable. 
               We believe in the power of hospitality to bridge cultures and create lasting memories.
             </p>
-            <p className="text-lg text-primary-700 dark:text-sand-200">
+            <p className="text-lg text-primary-700">
               Whether you&apos;re seeking a luxury safari lodge, a coastal villa, or a city apartment, 
               we connect you with verified hosts who are passionate about sharing their corner of Africa with the world.
             </p>
@@ -38,19 +38,19 @@ export function AboutContent() {
             <div className="grid grid-cols-2 gap-6">
               <div className="text-center">
                 <div className="text-4xl font-bold text-secondary-600 mb-2">500+</div>
-                <div className="text-sm text-primary-600 dark:text-sand-300">Properties</div>
+                <div className="text-sm text-primary-600">Properties</div>
               </div>
               <div className="text-center">
                 <div className="text-4xl font-bold text-secondary-600 mb-2">15</div>
-                <div className="text-sm text-primary-600 dark:text-sand-300">Countries</div>
+                <div className="text-sm text-primary-600">Countries</div>
               </div>
               <div className="text-center">
                 <div className="text-4xl font-bold text-secondary-600 mb-2">10K+</div>
-                <div className="text-sm text-primary-600 dark:text-sand-300">Happy Guests</div>
+                <div className="text-sm text-primary-600">Happy Guests</div>
               </div>
               <div className="text-center">
                 <div className="text-4xl font-bold text-secondary-600 mb-2">4.8★</div>
-                <div className="text-sm text-primary-600 dark:text-sand-300">Avg Rating</div>
+                <div className="text-sm text-primary-600">Avg Rating</div>
               </div>
             </div>
           </div>
@@ -58,51 +58,51 @@ export function AboutContent() {
 
         {/* Values Section */}
         <div className="mb-20">
-          <h2 className="text-3xl font-bold text-primary-900 dark:text-sand-50 mb-12 text-center">
+          <h2 className="text-3xl font-bold text-primary-900 mb-12 text-center">
             Our Values
           </h2>
           <div className="grid md:grid-cols-4 gap-8">
             <div className="card p-6 text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-secondary-100 dark:bg-secondary-900 rounded-full mb-4">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-secondary-100 rounded-full mb-4">
                 <Globe className="w-8 h-8 text-secondary-600" />
               </div>
-              <h3 className="text-xl font-semibold text-primary-900 dark:text-sand-50 mb-3">
+              <h3 className="text-xl font-semibold text-primary-900 mb-3">
                 Authentic Experiences
               </h3>
-              <p className="text-primary-600 dark:text-sand-300">
+              <p className="text-primary-600">
                 We showcase the real Africa through genuine local connections and unique stays.
               </p>
             </div>
             <div className="card p-6 text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-secondary-100 dark:bg-secondary-900 rounded-full mb-4">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-secondary-100 rounded-full mb-4">
                 <Shield className="w-8 h-8 text-secondary-600" />
               </div>
-              <h3 className="text-xl font-semibold text-primary-900 dark:text-sand-50 mb-3">
+              <h3 className="text-xl font-semibold text-primary-900 mb-3">
                 Trust & Safety
               </h3>
-              <p className="text-primary-600 dark:text-sand-300">
+              <p className="text-primary-600">
                 All properties are verified, and secure payment processing ensures peace of mind.
               </p>
             </div>
             <div className="card p-6 text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-secondary-100 dark:bg-secondary-900 rounded-full mb-4">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-secondary-100 rounded-full mb-4">
                 <Heart className="w-8 h-8 text-secondary-600" />
               </div>
-              <h3 className="text-xl font-semibold text-primary-900 dark:text-sand-50 mb-3">
+              <h3 className="text-xl font-semibold text-primary-900 mb-3">
                 Community First
               </h3>
-              <p className="text-primary-600 dark:text-sand-300">
+              <p className="text-primary-600">
                 We support local economies by empowering hosts and promoting sustainable tourism.
               </p>
             </div>
             <div className="card p-6 text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-secondary-100 dark:bg-secondary-900 rounded-full mb-4">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-secondary-100 rounded-full mb-4">
                 <Award className="w-8 h-8 text-secondary-600" />
               </div>
-              <h3 className="text-xl font-semibold text-primary-900 dark:text-sand-50 mb-3">
+              <h3 className="text-xl font-semibold text-primary-900 mb-3">
                 Excellence
               </h3>
-              <p className="text-primary-600 dark:text-sand-300">
+              <p className="text-primary-600">
                 We maintain high standards for all listings and provide exceptional customer service.
               </p>
             </div>

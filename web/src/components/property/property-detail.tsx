@@ -90,7 +90,7 @@ export function PropertyDetailContent({ propertyId, useHostEndpoint = false }: P
     return (
       <div className="max-w-7xl mx-auto px-4 py-12">
         <div className="text-center">
-          <p className="text-primary-900 dark:text-sand-100 mb-4">Property not found</p>
+          <p className="text-primary-900 mb-4">Property not found</p>
           <Link href="/explore" className="text-secondary-600 hover:text-secondary-700">
             Back to explore
           </Link>
@@ -103,7 +103,7 @@ export function PropertyDetailContent({ propertyId, useHostEndpoint = false }: P
     return (
       <div className="max-w-7xl mx-auto px-4 py-12">
         <div className="text-center">
-          <p className="text-red-600 dark:text-red-400 mb-4">Error loading property</p>
+          <p className="text-red-600 mb-4">Error loading property</p>
           <Button
             onClick={() => window.location.reload()}
             className="mb-4"
@@ -145,7 +145,7 @@ export function PropertyDetailContent({ propertyId, useHostEndpoint = false }: P
       {/* Back button */}
       <button
         onClick={() => router.back()}
-        className="flex items-center gap-1 text-primary-600 dark:text-sand-300 hover:text-primary-900 dark:hover:text-sand-50 mb-6 text-sm"
+        className="flex items-center gap-1 text-primary-600 hover:text-primary-900 mb-6 text-sm"
       >
         <ArrowLeft className="w-4 h-4" />
         Back
@@ -165,10 +165,10 @@ export function PropertyDetailContent({ propertyId, useHostEndpoint = false }: P
           <div>
             <div className="flex items-start justify-between mb-4">
               <div className="flex-1">
-                <h1 className="text-4xl font-bold text-primary-900 dark:text-sand-50 mb-2">
+                <h1 className="text-4xl font-bold text-primary-900 mb-2">
                   {property?.title}
                 </h1>
-                <div className="flex items-center space-x-4 text-sm text-primary-600 dark:text-sand-300">
+                <div className="flex items-center space-x-4 text-sm text-primary-600">
                   <div className="flex items-center space-x-1">
                     <MapPin className="w-4 h-4" />
                     <span>{property?.city}, {property?.country}</span>
@@ -190,15 +190,15 @@ export function PropertyDetailContent({ propertyId, useHostEndpoint = false }: P
                   }}
                   className={`p-3 rounded-lg border transition ${
                     isSaved
-                      ? 'border-secondary-300 bg-secondary-50 dark:bg-secondary-900/30'
-                      : 'border-primary-200 dark:border-primary-700 hover:bg-primary-50 dark:hover:bg-primary-800'
+                      ? 'border-secondary-300 bg-secondary-50'
+                      : 'border-primary-200 hover:bg-primary-50'
                   } ${checkingSaved ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   <Heart className={`w-5 h-5 ${isSaved ? 'fill-secondary-500 text-secondary-500' : 'text-primary-600'}`} />
                 </button>
                 <button
                   onClick={handleShare}
-                  className="p-3 rounded-lg border border-primary-200 dark:border-primary-700 hover:bg-primary-50 dark:hover:bg-primary-800 transition"
+                  className="p-3 rounded-lg border border-primary-200 hover:bg-primary-50 transition"
                 >
                   <Share2 className="w-5 h-5 text-primary-600" />
                 </button>
@@ -208,42 +208,42 @@ export function PropertyDetailContent({ propertyId, useHostEndpoint = false }: P
 
           {/* Description */}
           <div>
-            <h2 className="text-2xl font-semibold text-primary-900 dark:text-sand-50 mb-4">
+            <h2 className="text-2xl font-semibold text-primary-900 mb-4">
               About this property
             </h2>
-            <p className="text-primary-700 dark:text-sand-200 leading-relaxed whitespace-pre-line">
+            <p className="text-primary-700 leading-relaxed whitespace-pre-line">
               {property?.description}
             </p>
           </div>
 
           {/* Property type & capacity */}
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-            <div className="bg-white dark:bg-primary-800 p-4 rounded-lg border border-primary-200 dark:border-primary-700">
-              <p className="text-sm text-primary-600 dark:text-sand-400">Type</p>
-              <p className="text-lg font-semibold text-primary-900 dark:text-sand-50 capitalize">
+            <div className="bg-white p-4 rounded-lg border border-primary-200">
+              <p className="text-sm text-primary-600">Type</p>
+              <p className="text-lg font-semibold text-primary-900 capitalize">
                 {property?.property_type}
               </p>
             </div>
             {property?.bedrooms && (
-              <div className="bg-white dark:bg-primary-800 p-4 rounded-lg border border-primary-200 dark:border-primary-700">
-                <p className="text-sm text-primary-600 dark:text-sand-400">Bedrooms</p>
-                <p className="text-lg font-semibold text-primary-900 dark:text-sand-50">
+              <div className="bg-white p-4 rounded-lg border border-primary-200">
+                <p className="text-sm text-primary-600">Bedrooms</p>
+                <p className="text-lg font-semibold text-primary-900">
                   {property?.bedrooms}
                 </p>
               </div>
             )}
             {property?.bathrooms && (
-              <div className="bg-white dark:bg-primary-800 p-4 rounded-lg border border-primary-200 dark:border-primary-700">
-                <p className="text-sm text-primary-600 dark:text-sand-400">Bathrooms</p>
-                <p className="text-lg font-semibold text-primary-900 dark:text-sand-50">
+              <div className="bg-white p-4 rounded-lg border border-primary-200">
+                <p className="text-sm text-primary-600">Bathrooms</p>
+                <p className="text-lg font-semibold text-primary-900">
                   {property?.bathrooms}
                 </p>
               </div>
             )}
             {property?.max_guests && (
-              <div className="bg-white dark:bg-primary-800 p-4 rounded-lg border border-primary-200 dark:border-primary-700">
-                <p className="text-sm text-primary-600 dark:text-sand-400">Guests</p>
-                <p className="text-lg font-semibold text-primary-900 dark:text-sand-50">
+              <div className="bg-white p-4 rounded-lg border border-primary-200">
+                <p className="text-sm text-primary-600">Guests</p>
+                <p className="text-lg font-semibold text-primary-900">
                   {property?.max_guests}
                 </p>
               </div>
@@ -260,7 +260,7 @@ export function PropertyDetailContent({ propertyId, useHostEndpoint = false }: P
 
           {/* Reviews section */}
           <div>
-            <h2 className="text-2xl font-semibold text-primary-900 dark:text-sand-50 mb-6">
+            <h2 className="text-2xl font-semibold text-primary-900 mb-6">
               Guest Reviews
             </h2>
             <ReviewList

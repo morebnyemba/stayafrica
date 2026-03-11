@@ -71,29 +71,29 @@ export default function POIMapDisplay({
   return (
     <div className="relative">
       {/* Fallback Static Map */}
-      <div className="bg-gradient-to-br from-primary-100 to-sand-100 dark:from-primary-800 dark:to-primary-700 rounded-xl overflow-hidden h-96 relative">
+      <div className="bg-gradient-to-br from-primary-100 to-sand-100 rounded-xl overflow-hidden h-96 relative">
         <div ref={mapRef} className="w-full h-full" />
 
         {/* Static representation when Mapbox not loaded */}
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-center p-8 bg-white/90 dark:bg-primary-800/90 backdrop-blur-sm rounded-xl shadow-lg max-w-md">
+          <div className="text-center p-8 bg-white/90 backdrop-blur-sm rounded-xl shadow-lg max-w-md">
             <MapPin className="w-16 h-16 text-primary-600 mx-auto mb-4" />
-            <h3 className="text-xl font-bold text-primary-900 dark:text-sand-50 mb-2">Location Map</h3>
-            <p className="text-primary-600 dark:text-sand-400 mb-4">
+            <h3 className="text-xl font-bold text-primary-900 mb-2">Location Map</h3>
+            <p className="text-primary-600 mb-4">
               {pois.length} nearby points of interest within walking distance
             </p>
             <div className="grid grid-cols-2 gap-3 text-sm">
-              <div className="bg-primary-50 dark:bg-primary-700 p-3 rounded-lg">
-                <div className="font-semibold text-primary-900 dark:text-sand-50">
+              <div className="bg-primary-50 p-3 rounded-lg">
+                <div className="font-semibold text-primary-900">
                   {pois.filter(p => p.distance_meters < 1000).length}
                 </div>
-                <div className="text-primary-700 dark:text-sand-300">Within 1km</div>
+                <div className="text-primary-700">Within 1km</div>
               </div>
-              <div className="bg-secondary-50 dark:bg-secondary-900/30 p-3 rounded-lg">
-                <div className="font-semibold text-secondary-900 dark:text-secondary-200">
+              <div className="bg-secondary-50 p-3 rounded-lg">
+                <div className="font-semibold text-secondary-900">
                   {pois.filter(p => p.walking_time_minutes && p.walking_time_minutes < 15).length}
                 </div>
-                <div className="text-secondary-700 dark:text-secondary-300">15 min walk</div>
+                <div className="text-secondary-700">15 min walk</div>
               </div>
             </div>
           </div>
@@ -101,10 +101,10 @@ export default function POIMapDisplay({
       </div>
 
       {/* Legend */}
-      <div className="mt-4 p-4 bg-white dark:bg-primary-800 rounded-lg border dark:border-primary-700">
+      <div className="mt-4 p-4 bg-white rounded-lg border">
         <div className="flex items-center gap-2 mb-3">
-          <Navigation className="w-5 h-5 text-primary-600 dark:text-sand-400" />
-          <h4 className="font-semibold text-primary-900 dark:text-sand-50">Map Legend</h4>
+          <Navigation className="w-5 h-5 text-primary-600" />
+          <h4 className="font-semibold text-primary-900">Map Legend</h4>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
           {Array.from(new Set(pois.map(p => p.poi.poi_type))).map((type) => (
@@ -113,7 +113,7 @@ export default function POIMapDisplay({
                 className="w-3 h-3 rounded-full"
                 style={{ backgroundColor: getCategoryColor(type) }}
               />
-              <span className="text-sm text-primary-700 dark:text-sand-300 capitalize">
+              <span className="text-sm text-primary-700 capitalize">
                 {type.replace(/_/g, ' ')}
               </span>
             </div>
@@ -123,23 +123,23 @@ export default function POIMapDisplay({
 
       {/* Distance Circles Info */}
       <div className="mt-4 grid grid-cols-3 gap-3">
-        <div className="bg-primary-50 dark:bg-primary-700 rounded-lg p-3 text-center">
-          <div className="text-2xl font-bold text-primary-900 dark:text-sand-50">
+        <div className="bg-primary-50 rounded-lg p-3 text-center">
+          <div className="text-2xl font-bold text-primary-900">
             {pois.filter(p => p.distance_meters <= 500).length}
           </div>
-          <div className="text-sm text-primary-700 dark:text-sand-300">Within 500m</div>
+          <div className="text-sm text-primary-700">Within 500m</div>
         </div>
-        <div className="bg-secondary-50 dark:bg-secondary-900/30 rounded-lg p-3 text-center">
-          <div className="text-2xl font-bold text-secondary-900 dark:text-secondary-200">
+        <div className="bg-secondary-50 rounded-lg p-3 text-center">
+          <div className="text-2xl font-bold text-secondary-900">
             {pois.filter(p => p.distance_meters <= 1000).length}
           </div>
-          <div className="text-sm text-secondary-700 dark:text-secondary-300">Within 1km</div>
+          <div className="text-sm text-secondary-700">Within 1km</div>
         </div>
-        <div className="bg-sand-100 dark:bg-primary-700 rounded-lg p-3 text-center">
-          <div className="text-2xl font-bold text-primary-900 dark:text-sand-50">
+        <div className="bg-sand-100 rounded-lg p-3 text-center">
+          <div className="text-2xl font-bold text-primary-900">
             {pois.filter(p => p.distance_meters <= 5000).length}
           </div>
-          <div className="text-sm text-primary-700 dark:text-sand-300">Within 5km</div>
+          <div className="text-sm text-primary-700">Within 5km</div>
         </div>
       </div>
     </div>

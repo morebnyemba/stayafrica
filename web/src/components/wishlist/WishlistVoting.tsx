@@ -37,11 +37,11 @@ export default function WishlistVoting({
   const getVoteColor = () => {
     if (voteCount > 0) return 'text-green-600';
     if (voteCount < 0) return 'text-red-600';
-    return 'text-primary-500 dark:text-sand-400';
+    return 'text-primary-500';
   };
 
   return (
-    <div className="flex items-center gap-2 bg-sand-50 dark:bg-primary-900 rounded-lg p-3">
+    <div className="flex items-center gap-2 bg-sand-50 rounded-lg p-3">
       <button
         onClick={() => handleVote(1)}
         disabled={voteMutation.isPending}
@@ -49,7 +49,7 @@ export default function WishlistVoting({
           p-2 rounded-lg transition
           ${userVote === 1
             ? 'bg-green-100 text-green-600'
-            : 'bg-white dark:bg-primary-800/40 text-primary-500 dark:text-sand-400 hover:bg-green-50 hover:text-green-600'
+            : 'bg-white text-primary-500 hover:bg-green-50 hover:text-green-600'
           }
           disabled:opacity-50 disabled:cursor-not-allowed
         `}
@@ -62,7 +62,7 @@ export default function WishlistVoting({
         <div className={`text-2xl font-bold ${getVoteColor()}`}>
           {voteCount > 0 ? '+' : ''}{voteCount}
         </div>
-        <div className="text-xs text-primary-500 dark:text-sand-400">votes</div>
+        <div className="text-xs text-primary-500">votes</div>
       </div>
 
       <button
@@ -72,7 +72,7 @@ export default function WishlistVoting({
           p-2 rounded-lg transition
           ${userVote === -1
             ? 'bg-red-100 text-red-600'
-            : 'bg-white dark:bg-primary-800/40 text-primary-500 dark:text-sand-400 hover:bg-red-50 hover:text-red-600'
+            : 'bg-white text-primary-500 hover:bg-red-50 hover:text-red-600'
           }
           disabled:opacity-50 disabled:cursor-not-allowed
         `}

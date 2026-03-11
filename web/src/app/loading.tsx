@@ -2,7 +2,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Loading() {
   return (
-    <div className="bg-sand-100 dark:bg-primary-900">
+    <div className="bg-sand-100">
       {/* Hero Skeleton */}
       <div className="bg-gradient-to-br from-primary-900 via-primary-800 to-primary-700 py-16 md:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

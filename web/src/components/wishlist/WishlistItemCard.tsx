@@ -18,7 +18,7 @@ export default function WishlistItemCard({ item, wishlistId, canEdit: _canEdit }
   const [showComments, setShowComments] = useState(false);
 
   return (
-    <div className="bg-white dark:bg-primary-800/40 rounded-xl shadow hover:shadow-lg transition overflow-hidden">
+    <div className="bg-white rounded-xl shadow hover:shadow-lg transition overflow-hidden">
       {/* Property Image */}
       <Link href={`/property/${item.property.id}`} className="block relative h-48">
         <Image
@@ -34,17 +34,17 @@ export default function WishlistItemCard({ item, wishlistId, canEdit: _canEdit }
         <div>
           <Link
             href={`/property/${item.property.id}`}
-            className="font-semibold text-primary-900 dark:text-sand-50 hover:text-primary-600 transition line-clamp-2"
+            className="font-semibold text-primary-900 hover:text-primary-600 transition line-clamp-2"
           >
             {item.property.name}
           </Link>
-          <div className="flex items-center gap-1 text-sm text-primary-500 dark:text-sand-400 mt-1">
+          <div className="flex items-center gap-1 text-sm text-primary-500 mt-1">
             <MapPin className="w-3 h-3" />
             <span className="line-clamp-1">{item.property.location}</span>
           </div>
-          <div className="text-lg font-bold text-primary-900 dark:text-sand-50 mt-2">
+          <div className="text-lg font-bold text-primary-900 mt-2">
             ${item.property.base_price}
-            <span className="text-sm font-normal text-primary-500 dark:text-sand-400"> / night</span>
+            <span className="text-sm font-normal text-primary-500"> / night</span>
           </div>
         </div>
 
@@ -85,7 +85,7 @@ export default function WishlistItemCard({ item, wishlistId, canEdit: _canEdit }
         {/* Comments Toggle */}
         <button
           onClick={() => setShowComments(!showComments)}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg hover:bg-sand-50 dark:hover:bg-primary-800 transition text-sm font-medium text-primary-700 dark:text-sand-200"
+          className="w-full flex items-center justify-center gap-2 px-4 py-2 border border-primary-300 rounded-lg hover:bg-sand-50 transition text-sm font-medium text-primary-700"
         >
           <MessageSquare className="w-4 h-4" />
           <span>
@@ -103,7 +103,7 @@ export default function WishlistItemCard({ item, wishlistId, canEdit: _canEdit }
         )}
 
         {/* Added By */}
-        <div className="text-xs text-primary-400 dark:text-sand-500 pt-3 border-t">
+        <div className="text-xs text-primary-400 pt-3 border-t">
           Added by {item.added_by.name} • {new Date(item.added_at).toLocaleDateString()}
         </div>
       </div>

@@ -78,11 +78,11 @@ export const MessageInput = ({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="border-t bg-white dark:bg-primary-800/40 p-4">
+    <form onSubmit={handleSubmit} className="border-t bg-white p-4">
       <div className="flex items-end gap-2">
         <button
           type="button"
-          className="flex-shrink-0 p-2 text-primary-300 dark:text-primary-500 hover:text-primary-500 dark:hover:text-sand-400 transition-colors"
+          className="flex-shrink-0 p-2 text-primary-300 hover:text-primary-500 transition-colors"
           aria-label="Add attachment"
           disabled={disabled}
         >
@@ -97,7 +97,7 @@ export const MessageInput = ({
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
             disabled={disabled || isSending}
-            className="w-full px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:border-transparent disabled:bg-sand-50 dark:disabled:bg-primary-900 disabled:cursor-not-allowed"
+            className="w-full px-4 py-2 border border-primary-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:border-transparent disabled:bg-sand-50 disabled:cursor-not-allowed"
             rows={1}
             maxLength={2000}
             aria-label="Message input"
@@ -106,7 +106,7 @@ export const MessageInput = ({
 
         <button
           type="button"
-          className="flex-shrink-0 p-2 text-primary-300 dark:text-primary-500 hover:text-primary-500 dark:hover:text-sand-400 transition-colors"
+          className="flex-shrink-0 p-2 text-primary-300 hover:text-primary-500 transition-colors"
           aria-label="Add emoji"
           disabled={disabled}
         >
@@ -128,7 +128,7 @@ export const MessageInput = ({
       </div>
 
       {content.length > 1900 && (
-        <p className="text-xs text-primary-400 dark:text-sand-500 mt-1 text-right">
+        <p className="text-xs text-primary-400 mt-1 text-right">
           {2000 - content.length} characters remaining
         </p>
       )}

@@ -53,12 +53,12 @@ export const BookingTimelineChart: React.FC<BookingTimelineChartProps> = ({
       const data = payload[0]?.payload;
       if (!data) return null;
       return (
-        <div className="bg-white dark:bg-primary-800 p-4 rounded-lg shadow-lg border border-sand-200 dark:border-primary-700">
-          <p className="text-sm font-medium text-primary-900 dark:text-sand-50 mb-2">
+        <div className="bg-white p-4 rounded-lg shadow-lg border border-sand-200">
+          <p className="text-sm font-medium text-primary-900 mb-2">
             {formatDate(label || '')}
           </p>
           <div className="space-y-1">
-            <p className="text-sm text-primary-500 dark:text-sand-300">
+            <p className="text-sm text-primary-500">
               Total: <span className="font-semibold">{data.count ?? 0}</span>
             </p>
             <p className="text-sm text-green-600">
@@ -78,18 +78,18 @@ export const BookingTimelineChart: React.FC<BookingTimelineChartProps> = ({
   };
 
   return (
-    <div className={`bg-white dark:bg-primary-800/40 rounded-xl p-6 ${className}`}>
+    <div className={`bg-white rounded-xl p-6 ${className}`}>
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center space-x-3">
-          <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
-            <CalendarCheck className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+          <div className="p-2 bg-purple-100 rounded-lg">
+            <CalendarCheck className="h-5 w-5 text-purple-600" />
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-primary-900 dark:text-sand-50">Booking Timeline</h3>
-            <div className="flex items-center space-x-3 text-sm text-primary-500 dark:text-sand-400">
+            <h3 className="text-lg font-semibold text-primary-900">Booking Timeline</h3>
+            <div className="flex items-center space-x-3 text-sm text-primary-500">
               <span>
-                Total: <span className="font-semibold text-primary-900 dark:text-sand-50">{totalBookings}</span>
+                Total: <span className="font-semibold text-primary-900">{totalBookings}</span>
               </span>
               <span>•</span>
               <span>
@@ -107,7 +107,7 @@ export const BookingTimelineChart: React.FC<BookingTimelineChartProps> = ({
         </div>
       ) : !data || data.length === 0 ? (
         <div className="flex items-center justify-center" style={{ height }}>
-          <div className="text-center text-primary-400 dark:text-sand-500">
+          <div className="text-center text-primary-400">
             <CalendarCheck className="h-12 w-12 mx-auto mb-2 opacity-50" />
             <p>No booking data available for this period</p>
           </div>

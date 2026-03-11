@@ -66,11 +66,11 @@ export const MetricCard: React.FC<MetricCardProps> = ({ data, className = '' }) 
   const getTrendColor = () => {
     switch (trend) {
       case 'up':
-        return 'text-green-600 dark:text-green-400';
+        return 'text-green-600';
       case 'down':
-        return 'text-red-600 dark:text-red-400';
+        return 'text-red-600';
       default:
-        return 'text-primary-400 dark:text-sand-500';
+        return 'text-primary-400';
     }
   };
 
@@ -82,25 +82,25 @@ export const MetricCard: React.FC<MetricCardProps> = ({ data, className = '' }) 
 
   if (loading) {
     return (
-      <div className={`bg-white dark:bg-primary-800/40 rounded-lg p-6 shadow-sm border border-sand-200/50 dark:border-primary-700/50 ${className}`}>
+      <div className={`bg-white rounded-lg p-6 shadow-sm border border-sand-200/50 ${className}`}>
         <div className="animate-pulse">
-          <div className="h-4 bg-primary-200 dark:bg-primary-700 rounded w-24 mb-4"></div>
-          <div className="h-8 bg-primary-200 dark:bg-primary-700 rounded w-32 mb-2"></div>
-          <div className="h-3 bg-primary-200 dark:bg-primary-700 rounded w-16"></div>
+          <div className="h-4 bg-primary-200 rounded w-24 mb-4"></div>
+          <div className="h-8 bg-primary-200 rounded w-32 mb-2"></div>
+          <div className="h-3 bg-primary-200 rounded w-16"></div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className={`bg-white dark:bg-primary-800/40 rounded-lg p-6 shadow-sm border border-sand-200/50 dark:border-primary-700/50 transition-all hover:shadow-md ${className}`}>
+    <div className={`bg-white rounded-lg p-6 shadow-sm border border-sand-200/50 transition-all hover:shadow-md ${className}`}>
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-medium text-primary-500 dark:text-sand-400">
+        <h3 className="text-sm font-medium text-primary-500">
           {title}
         </h3>
         {icon && (
-          <div className="p-2 bg-primary-100 dark:bg-primary-800 rounded-lg text-primary-500 dark:text-sand-400">
+          <div className="p-2 bg-primary-100 rounded-lg text-primary-500">
             {getIconComponent()}
           </div>
         )}
@@ -108,7 +108,7 @@ export const MetricCard: React.FC<MetricCardProps> = ({ data, className = '' }) 
 
       {/* Value */}
       <div className="mb-2">
-        <p className="text-3xl font-bold text-primary-900 dark:text-sand-50">
+        <p className="text-3xl font-bold text-primary-900">
           {formatValue(value)}
         </p>
       </div>
@@ -124,7 +124,7 @@ export const MetricCard: React.FC<MetricCardProps> = ({ data, className = '' }) 
           </div>
         )}
         {subtitle && (
-          <p className="text-xs text-primary-400 dark:text-sand-500">
+          <p className="text-xs text-primary-400">
             {subtitle}
           </p>
         )}

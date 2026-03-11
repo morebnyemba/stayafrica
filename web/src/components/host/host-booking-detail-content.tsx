@@ -108,7 +108,7 @@ export function HostBookingDetailContent({ params }: { params: Promise<{ id: str
     if (!bookingId || isLoading) {
         return (
             <ProtectedRoute>
-                <div className="min-h-screen bg-sand-50 dark:bg-primary-900 flex items-center justify-center">
+                <div className="min-h-screen bg-sand-50 flex items-center justify-center">
                     <Loader2 className="w-8 h-8 animate-spin text-secondary-500" />
                 </div>
             </ProtectedRoute>
@@ -118,7 +118,7 @@ export function HostBookingDetailContent({ params }: { params: Promise<{ id: str
     if (error || !bookingData) {
         return (
             <ProtectedRoute>
-                <div className="min-h-screen bg-sand-50 dark:bg-primary-900 p-8 flex flex-col items-center justify-center text-center">
+                <div className="min-h-screen bg-sand-50 p-8 flex flex-col items-center justify-center text-center">
                     <p className="text-red-500 font-semibold text-lg mb-4">Error loading booking details</p>
                     <Button onClick={() => router.push('/host/bookings')} variant="outline">
                         Return to Bookings
@@ -140,27 +140,27 @@ export function HostBookingDetailContent({ params }: { params: Promise<{ id: str
 
     return (
         <ProtectedRoute>
-            <div className="min-h-screen bg-sand-50 dark:bg-primary-900 pt-24 pb-12">
+            <div className="min-h-screen bg-sand-50 pt-24 pb-12">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
 
                     {/* Header */}
                     <div className="mb-8">
-                        <Link href="/host/bookings" className="inline-flex items-center text-sm font-medium text-primary-600 hover:text-primary-900 dark:text-sand-400 dark:hover:text-sand-100 transition mb-4">
+                        <Link href="/host/bookings" className="inline-flex items-center text-sm font-medium text-primary-600 hover:text-primary-900 transition mb-4">
                             <ArrowLeft className="w-4 h-4 mr-1" />
                             Back to Bookings
                         </Link>
                         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                             <div>
                                 <div className="flex items-center gap-3 mb-2">
-                                    <h1 className="text-2xl sm:text-3xl font-bold text-primary-900 dark:text-sand-50">
+                                    <h1 className="text-2xl sm:text-3xl font-bold text-primary-900">
                                         Booking Detail
                                     </h1>
                                     <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${statusColor.bg} ${statusColor.text}`}>
                                         {booking.status.toUpperCase()}
                                     </span>
                                 </div>
-                                <p className="text-primary-600 dark:text-sand-400 font-mono text-sm inline-flex items-center gap-2">
-                                    Ref: <span className="bg-primary-200 dark:bg-primary-800 px-2 py-0.5 rounded">{booking.booking_ref}</span>
+                                <p className="text-primary-600 font-mono text-sm inline-flex items-center gap-2">
+                                    Ref: <span className="bg-primary-200 px-2 py-0.5 rounded">{booking.booking_ref}</span>
                                 </p>
                             </div>
 
@@ -237,44 +237,44 @@ export function HostBookingDetailContent({ params }: { params: Promise<{ id: str
                         <div className="lg:col-span-2 space-y-6">
 
                             {/* Trip Information */}
-                            <div className="card p-6 border border-primary-200 dark:border-primary-700 rounded-xl bg-white dark:bg-primary-800">
-                                <h2 className="text-xl font-bold text-primary-900 dark:text-sand-50 mb-4 inline-flex items-center gap-2">
+                            <div className="card p-6 border border-primary-200 rounded-xl bg-white">
+                                <h2 className="text-xl font-bold text-primary-900 mb-4 inline-flex items-center gap-2">
                                     <Calendar className="w-5 h-5 text-secondary-500" />
                                     Trip Details
                                 </h2>
 
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                     <div>
-                                        <p className="text-sm font-medium text-primary-500 dark:text-sand-400">Check-In</p>
-                                        <p className="text-lg font-semibold text-primary-900 dark:text-sand-50">{formatDate(booking.check_in)}</p>
+                                        <p className="text-sm font-medium text-primary-500">Check-In</p>
+                                        <p className="text-lg font-semibold text-primary-900">{formatDate(booking.check_in)}</p>
                                     </div>
                                     <div>
-                                        <p className="text-sm font-medium text-primary-500 dark:text-sand-400">Check-Out</p>
-                                        <p className="text-lg font-semibold text-primary-900 dark:text-sand-50">{formatDate(booking.check_out)}</p>
+                                        <p className="text-sm font-medium text-primary-500">Check-Out</p>
+                                        <p className="text-lg font-semibold text-primary-900">{formatDate(booking.check_out)}</p>
                                     </div>
                                     <div>
-                                        <p className="text-sm font-medium text-primary-500 dark:text-sand-400">Length of stay</p>
-                                        <p className="text-primary-900 dark:text-sand-50">{booking.nights} nights</p>
+                                        <p className="text-sm font-medium text-primary-500">Length of stay</p>
+                                        <p className="text-primary-900">{booking.nights} nights</p>
                                     </div>
                                     <div>
-                                        <p className="text-sm font-medium text-primary-500 dark:text-sand-400">Guests</p>
-                                        <p className="text-primary-900 dark:text-sand-50">{booking.number_of_guests} {booking.number_of_guests === 1 ? 'guest' : 'guests'}</p>
+                                        <p className="text-sm font-medium text-primary-500">Guests</p>
+                                        <p className="text-primary-900">{booking.number_of_guests} {booking.number_of_guests === 1 ? 'guest' : 'guests'}</p>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Guest Information */}
-                            <div className="card p-6 border border-primary-200 dark:border-primary-700 rounded-xl bg-white dark:bg-primary-800">
-                                <h2 className="text-xl font-bold text-primary-900 dark:text-sand-50 mb-4 inline-flex items-center gap-2">
+                            <div className="card p-6 border border-primary-200 rounded-xl bg-white">
+                                <h2 className="text-xl font-bold text-primary-900 mb-4 inline-flex items-center gap-2">
                                     <User className="w-5 h-5 text-secondary-500" />
                                     Guest Information
                                 </h2>
-                                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border border-primary-100 dark:border-primary-700 p-4 rounded-lg">
+                                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border border-primary-100 p-4 rounded-lg">
                                     <div>
-                                        <p className="text-lg font-semibold text-primary-900 dark:text-sand-50">
+                                        <p className="text-lg font-semibold text-primary-900">
                                             {booking.guest_first_name} {booking.guest_last_name}
                                         </p>
-                                        <p className="text-primary-600 dark:text-sand-300">
+                                        <p className="text-primary-600">
                                             {booking.guest_email || 'Email unavailable'}
                                         </p>
                                     </div>
@@ -290,15 +290,15 @@ export function HostBookingDetailContent({ params }: { params: Promise<{ id: str
                             </div>
 
                             {/* Property Snapshot */}
-                            <div className="card p-6 border border-primary-200 dark:border-primary-700 rounded-xl bg-white dark:bg-primary-800">
-                                <h2 className="text-xl font-bold text-primary-900 dark:text-sand-50 mb-4 inline-flex items-center gap-2">
+                            <div className="card p-6 border border-primary-200 rounded-xl bg-white">
+                                <h2 className="text-xl font-bold text-primary-900 mb-4 inline-flex items-center gap-2">
                                     <MapPin className="w-5 h-5 text-secondary-500" />
                                     Property
                                 </h2>
 
                                 <Link href={`/property/${booking.rental_property || booking.property?.id}`} className="block group">
-                                    <div className="flex items-start gap-4 p-3 rounded-lg hover:bg-sand-100 dark:hover:bg-primary-700 transition">
-                                        <div className="w-16 h-16 rounded overflow-hidden bg-primary-200 dark:bg-primary-600 flex-shrink-0">
+                                    <div className="flex items-start gap-4 p-3 rounded-lg hover:bg-sand-100 transition">
+                                        <div className="w-16 h-16 rounded overflow-hidden bg-primary-200 flex-shrink-0">
                                             {(booking.property?.images?.[0]?.image_url || booking.property?.main_image_url || booking.property?.main_image) ? (
                                                 <img
                                                     src={booking.property?.images?.[0]?.image_url || booking.property?.main_image_url || booking.property?.main_image}
@@ -310,10 +310,10 @@ export function HostBookingDetailContent({ params }: { params: Promise<{ id: str
                                             )}
                                         </div>
                                         <div>
-                                            <h3 className="font-semibold text-lg text-primary-900 dark:text-sand-50 group-hover:text-secondary-600 transition">
+                                            <h3 className="font-semibold text-lg text-primary-900 group-hover:text-secondary-600 transition">
                                                 {booking.property_title || booking.property?.title}
                                             </h3>
-                                            <p className="text-sm text-primary-600 dark:text-sand-400">
+                                            <p className="text-sm text-primary-600">
                                                 {booking.property?.city}, {booking.property?.country}
                                             </p>
                                         </div>
@@ -325,44 +325,44 @@ export function HostBookingDetailContent({ params }: { params: Promise<{ id: str
 
                         {/* Right Column (Financials) */}
                         <div className="lg:col-span-1">
-                            <div className="card p-6 border border-primary-200 dark:border-primary-700 rounded-xl bg-white dark:bg-primary-800 sticky top-24">
-                                <h2 className="text-xl font-bold text-primary-900 dark:text-sand-50 mb-6">
+                            <div className="card p-6 border border-primary-200 rounded-xl bg-white sticky top-24">
+                                <h2 className="text-xl font-bold text-primary-900 mb-6">
                                     Financial Details
                                 </h2>
 
-                                <div className="space-y-4 text-sm text-primary-700 dark:text-sand-200">
-                                    <div className="flex justify-between items-center pb-3 border-b border-primary-100 dark:border-primary-700">
-                                        <span className="font-medium text-primary-900 dark:text-sand-50">Base Price ({booking.nights} nights)</span>
+                                <div className="space-y-4 text-sm text-primary-700">
+                                    <div className="flex justify-between items-center pb-3 border-b border-primary-100">
+                                        <span className="font-medium text-primary-900">Base Price ({booking.nights} nights)</span>
                                         <span className="font-semibold">{booking.currency} {parseFloat(booking.nightly_total || 0).toFixed(2)}</span>
                                     </div>
 
                                     {parseFloat(booking.cleaning_fee || 0) > 0 && (
-                                        <div className="flex justify-between items-center pb-3 border-b border-primary-100 dark:border-primary-700">
+                                        <div className="flex justify-between items-center pb-3 border-b border-primary-100">
                                             <span>Cleaning Fee</span>
                                             <span>{booking.currency} {parseFloat(booking.cleaning_fee || 0).toFixed(2)}</span>
                                         </div>
                                     )}
 
-                                    <div className="flex justify-between items-center pb-3 border-b border-primary-100 dark:border-primary-700 text-red-600 dark:text-red-400">
+                                    <div className="flex justify-between items-center pb-3 border-b border-primary-100 text-red-600">
                                         <span>StayAfrica Commission</span>
                                         <span>-{booking.currency} {parseFloat(booking.commission_fee || 0).toFixed(2)}</span>
                                     </div>
 
-                                    <div className="pt-2 text-lg font-bold flex justify-between items-center text-green-600 dark:text-green-500">
+                                    <div className="pt-2 text-lg font-bold flex justify-between items-center text-green-600">
                                         <span>Your Earnings</span>
                                         <span>{booking.currency} {earnings.toFixed(2)}</span>
                                     </div>
                                 </div>
 
-                                <div className="mt-8 p-4 bg-sand-100 dark:bg-primary-900 rounded-lg text-xs text-primary-600 dark:text-sand-400">
+                                <div className="mt-8 p-4 bg-sand-100 rounded-lg text-xs text-primary-600">
                                     <div className="flex items-start gap-2 mb-2">
                                         <Clock className="w-4 h-4 text-primary-400 flex-shrink-0" />
                                         <div>
-                                            <p className="font-semibold text-primary-900 dark:text-sand-50 mb-0.5">Payment Status</p>
+                                            <p className="font-semibold text-primary-900 mb-0.5">Payment Status</p>
                                             <p>{booking.payment_status || 'Pending'}</p>
                                         </div>
                                     </div>
-                                    <p className="mt-2 pt-2 border-t border-primary-200 dark:border-primary-700">
+                                    <p className="mt-2 pt-2 border-t border-primary-200">
                                         Earnings are typically released to your wallet 24 hours after a guest checks in. Let our support team know if you have any questions.
                                     </p>
                                 </div>

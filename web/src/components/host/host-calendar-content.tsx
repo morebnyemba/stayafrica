@@ -21,10 +21,10 @@ interface Property {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-    confirmed: 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800',
-    pending: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800',
-    completed: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800',
-    cancelled: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800',
+    confirmed: 'bg-green-100 text-green-700 border-green-200',
+    pending: 'bg-yellow-100 text-yellow-700 border-yellow-200',
+    completed: 'bg-blue-100 text-blue-700 border-blue-200',
+    cancelled: 'bg-red-100 text-red-700 border-red-200',
 };
 
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -115,8 +115,8 @@ export function HostCalendarContent() {
             {/* Header */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
                 <div>
-                    <h1 className="text-2xl sm:text-3xl font-bold text-primary-900 dark:text-sand-50">Calendar</h1>
-                    <p className="text-sm text-primary-500 dark:text-sand-400 mt-1">
+                    <h1 className="text-2xl sm:text-3xl font-bold text-primary-900">Calendar</h1>
+                    <p className="text-sm text-primary-500 mt-1">
                         View bookings across {properties.length || 'your'} propert{properties.length === 1 ? 'y' : 'ies'}
                     </p>
                 </div>
@@ -125,7 +125,7 @@ export function HostCalendarContent() {
                 <select
                     value={selectedProperty}
                     onChange={e => setSelectedProperty(e.target.value)}
-                    className="px-4 py-2 rounded-lg border border-primary-200 dark:border-primary-700 bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-100 text-sm focus:outline-none focus:ring-2 focus:ring-secondary-500"
+                    className="px-4 py-2 rounded-lg border border-primary-200 bg-white text-primary-900 text-sm focus:outline-none focus:ring-2 focus:ring-secondary-500"
                 >
                     <option value="all">All Properties</option>
                     {properties.map(prop => (
@@ -137,18 +137,18 @@ export function HostCalendarContent() {
             {loading ? (
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
                     <div className="lg:col-span-2 card p-4 sm:p-6 animate-pulse">
-                        <div className="h-8 w-48 bg-primary-200 dark:bg-primary-700 rounded mx-auto mb-6" />
+                        <div className="h-8 w-48 bg-primary-200 rounded mx-auto mb-6" />
                         <div className="grid grid-cols-7 gap-1">
                             {Array.from({ length: 35 }).map((_, i) => (
-                                <div key={i} className="h-10 sm:h-14 bg-primary-100 dark:bg-primary-700/50 rounded-lg" />
+                                <div key={i} className="h-10 sm:h-14 bg-primary-100 rounded-lg" />
                             ))}
                         </div>
                     </div>
                     <div className="card p-6 animate-pulse">
-                        <div className="h-6 w-32 bg-primary-200 dark:bg-primary-700 rounded mb-4" />
+                        <div className="h-6 w-32 bg-primary-200 rounded mb-4" />
                         <div className="space-y-3">
-                            <div className="h-20 bg-primary-100 dark:bg-primary-700/50 rounded-lg" />
-                            <div className="h-20 bg-primary-100 dark:bg-primary-700/50 rounded-lg" />
+                            <div className="h-20 bg-primary-100 rounded-lg" />
+                            <div className="h-20 bg-primary-100 rounded-lg" />
                         </div>
                     </div>
                 </div>
@@ -158,21 +158,21 @@ export function HostCalendarContent() {
                 <div className="lg:col-span-2 card p-4 sm:p-6">
                     {/* Month Navigation */}
                     <div className="flex items-center justify-between mb-4 sm:mb-6">
-                        <button onClick={() => navigateMonth(-1)} className="p-2.5 hover:bg-sand-100 dark:hover:bg-primary-700 rounded-lg transition-colors">
-                            <ChevronLeft className="w-5 h-5 text-primary-600 dark:text-sand-300" />
+                        <button onClick={() => navigateMonth(-1)} className="p-2.5 hover:bg-sand-100 rounded-lg transition-colors">
+                            <ChevronLeft className="w-5 h-5 text-primary-600" />
                         </button>
-                        <h2 className="text-base sm:text-lg font-semibold text-primary-900 dark:text-sand-100">
+                        <h2 className="text-base sm:text-lg font-semibold text-primary-900">
                             {MONTHS[month]} {year}
                         </h2>
-                        <button onClick={() => navigateMonth(1)} className="p-2.5 hover:bg-sand-100 dark:hover:bg-primary-700 rounded-lg transition-colors">
-                            <ChevronRight className="w-5 h-5 text-primary-600 dark:text-sand-300" />
+                        <button onClick={() => navigateMonth(1)} className="p-2.5 hover:bg-sand-100 rounded-lg transition-colors">
+                            <ChevronRight className="w-5 h-5 text-primary-600" />
                         </button>
                     </div>
 
                     {/* Day Headers */}
                     <div className="grid grid-cols-7 mb-2">
                         {DAYS.map(day => (
-                            <div key={day} className="text-center text-xs font-medium text-primary-400 dark:text-sand-500 py-2">
+                            <div key={day} className="text-center text-xs font-medium text-primary-400 py-2">
                                 {day}
                             </div>
                         ))}
@@ -196,15 +196,15 @@ export function HostCalendarContent() {
                                     key={day}
                                     onClick={() => setSelectedDay(day)}
                                     className={`h-10 sm:h-14 rounded-lg flex flex-col items-center justify-start pt-1 transition-all relative ${isSelected
-                                        ? 'bg-accent-100 dark:bg-accent-900/30 ring-2 ring-accent-500'
+                                        ? 'bg-accent-100 ring-2 ring-accent-500'
                                         : isToday
-                                            ? 'bg-accent-50 dark:bg-accent-900/10'
-                                            : 'hover:bg-sand-50 dark:hover:bg-primary-700/50'
+                                            ? 'bg-accent-50'
+                                            : 'hover:bg-sand-50'
                                         }`}
                                 >
                                     <span className={`text-sm ${isToday
-                                        ? 'font-bold text-accent-600 dark:text-accent-400'
-                                        : 'text-primary-700 dark:text-sand-300'
+                                        ? 'font-bold text-accent-600'
+                                        : 'text-primary-700'
                                         }`}>
                                         {day}
                                     </span>
@@ -228,7 +228,7 @@ export function HostCalendarContent() {
                     </div>
 
                     {/* Legend */}
-                    <div className="flex flex-wrap gap-4 mt-4 pt-4 border-t border-sand-200 dark:border-primary-700">
+                    <div className="flex flex-wrap gap-4 mt-4 pt-4 border-t border-sand-200">
                         {['confirmed', 'pending', 'completed', 'cancelled'].map(status => (
                             <div key={status} className="flex items-center gap-1.5">
                                 <div className={`w-2.5 h-2.5 rounded-full ${status === 'confirmed' ? 'bg-green-500'
@@ -236,7 +236,7 @@ export function HostCalendarContent() {
                                         : status === 'completed' ? 'bg-blue-500'
                                             : 'bg-red-500'
                                     }`} />
-                                <span className="text-xs text-primary-500 dark:text-sand-400 capitalize">{status}</span>
+                                <span className="text-xs text-primary-500 capitalize">{status}</span>
                             </div>
                         ))}
                     </div>
@@ -244,7 +244,7 @@ export function HostCalendarContent() {
 
                 {/* Selected Day Details */}
                 <div className="card p-4 sm:p-6">
-                    <h3 className="text-lg font-semibold text-primary-900 dark:text-sand-50 mb-4">
+                    <h3 className="text-lg font-semibold text-primary-900 mb-4">
                         {selectedDay
                             ? `${MONTHS[month]} ${selectedDay}, ${year}`
                             : 'Select a day'}
@@ -252,31 +252,31 @@ export function HostCalendarContent() {
 
                     {!selectedDay ? (
                         <div className="text-center py-12">
-                            <div className="w-14 h-14 rounded-full bg-secondary-100 dark:bg-secondary-900/20 flex items-center justify-center mx-auto mb-3">
-                                <CalendarIcon className="w-7 h-7 text-secondary-600 dark:text-secondary-400" />
+                            <div className="w-14 h-14 rounded-full bg-secondary-100 flex items-center justify-center mx-auto mb-3">
+                                <CalendarIcon className="w-7 h-7 text-secondary-600" />
                             </div>
-                            <p className="text-sm font-medium text-primary-700 dark:text-sand-300 mb-1">
+                            <p className="text-sm font-medium text-primary-700 mb-1">
                                 No day selected
                             </p>
-                            <p className="text-xs text-primary-500 dark:text-sand-400">
+                            <p className="text-xs text-primary-500">
                                 Click on a calendar day to view its bookings
                             </p>
                         </div>
                     ) : selectedDayEvents.length === 0 ? (
                         <div className="text-center py-12">
-                            <div className="w-14 h-14 rounded-full bg-sand-100 dark:bg-primary-700/50 flex items-center justify-center mx-auto mb-3">
-                                <Building2 className="w-7 h-7 text-primary-400 dark:text-sand-500" />
+                            <div className="w-14 h-14 rounded-full bg-sand-100 flex items-center justify-center mx-auto mb-3">
+                                <Building2 className="w-7 h-7 text-primary-400" />
                             </div>
-                            <p className="text-sm font-medium text-primary-700 dark:text-sand-300 mb-1">
+                            <p className="text-sm font-medium text-primary-700 mb-1">
                                 No bookings
                             </p>
-                            <p className="text-xs text-primary-500 dark:text-sand-400">
+                            <p className="text-xs text-primary-500">
                                 This day is free across all properties
                             </p>
                         </div>
                     ) : (
                         <div className="space-y-3">
-                            <p className="text-xs text-primary-500 dark:text-sand-400 mb-2">
+                            <p className="text-xs text-primary-500 mb-2">
                                 {selectedDayEvents.length} booking{selectedDayEvents.length > 1 ? 's' : ''}
                             </p>
                             {selectedDayEvents.map(event => (
@@ -285,13 +285,13 @@ export function HostCalendarContent() {
                                     className={`p-4 rounded-xl border ${STATUS_COLORS[event.status] || STATUS_COLORS.pending}`}
                                 >
                                     <div className="flex items-center gap-3 mb-2">
-                                        <div className="w-8 h-8 rounded-full bg-white/50 dark:bg-black/20 flex items-center justify-center text-xs font-semibold">
+                                        <div className="w-8 h-8 rounded-full bg-white/50 flex items-center justify-center text-xs font-semibold">
                                             {(event.guest_name || 'G').charAt(0).toUpperCase()}
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <span className="text-sm font-medium block truncate">{event.guest_name || 'Guest'}</span>
                                         </div>
-                                        <span className="text-xs capitalize px-2 py-0.5 rounded-full bg-white/50 dark:bg-black/20 font-medium">
+                                        <span className="text-xs capitalize px-2 py-0.5 rounded-full bg-white/50 font-medium">
                                             {event.status}
                                         </span>
                                     </div>

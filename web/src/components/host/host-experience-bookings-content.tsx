@@ -21,10 +21,10 @@ import { toast } from 'react-hot-toast';
 import type { ExperienceBooking, ExperienceBookingStatus } from '@/types';
 
 const statusConfig: Record<ExperienceBookingStatus, { label: string; color: string; icon: typeof Clock }> = {
-  pending: { label: 'Pending', color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300', icon: Clock },
-  confirmed: { label: 'Confirmed', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300', icon: CheckCircle2 },
-  completed: { label: 'Completed', color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300', icon: CheckCircle2 },
-  cancelled: { label: 'Cancelled', color: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300', icon: XCircle },
+  pending: { label: 'Pending', color: 'bg-yellow-100 text-yellow-800', icon: Clock },
+  confirmed: { label: 'Confirmed', color: 'bg-blue-100 text-blue-800', icon: CheckCircle2 },
+  completed: { label: 'Completed', color: 'bg-green-100 text-green-800', icon: CheckCircle2 },
+  cancelled: { label: 'Cancelled', color: 'bg-red-100 text-red-800', icon: XCircle },
 };
 
 const statusFilters: { value: string; label: string }[] = [
@@ -99,15 +99,15 @@ export function HostExperienceBookingsContent() {
   };
 
   return (
-    <div className="min-h-screen bg-sand-100 dark:bg-primary-900">
+    <div className="min-h-screen bg-sand-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-3xl md:text-4xl font-bold text-primary-900 dark:text-sand-50">
+            <h1 className="text-3xl md:text-4xl font-bold text-primary-900">
               Experience Bookings
             </h1>
-            <p className="text-primary-600 dark:text-sand-300 mt-1">
+            <p className="text-primary-600 mt-1">
               Manage bookings for your experiences
             </p>
           </div>
@@ -122,20 +122,20 @@ export function HostExperienceBookingsContent() {
         {/* Stats */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
           <div className="card-gradient p-4 text-center">
-            <p className="text-2xl font-bold text-primary-900 dark:text-sand-50">{stats.total}</p>
-            <p className="text-sm text-primary-600 dark:text-sand-300">Total</p>
+            <p className="text-2xl font-bold text-primary-900">{stats.total}</p>
+            <p className="text-sm text-primary-600">Total</p>
           </div>
           <div className="card-gradient p-4 text-center">
-            <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{stats.pending}</p>
-            <p className="text-sm text-primary-600 dark:text-sand-300">Pending</p>
+            <p className="text-2xl font-bold text-yellow-600">{stats.pending}</p>
+            <p className="text-sm text-primary-600">Pending</p>
           </div>
           <div className="card-gradient p-4 text-center">
-            <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{stats.confirmed}</p>
-            <p className="text-sm text-primary-600 dark:text-sand-300">Confirmed</p>
+            <p className="text-2xl font-bold text-blue-600">{stats.confirmed}</p>
+            <p className="text-sm text-primary-600">Confirmed</p>
           </div>
           <div className="card-gradient p-4 text-center">
-            <p className="text-2xl font-bold text-green-600 dark:text-green-400">{stats.completed}</p>
-            <p className="text-sm text-primary-600 dark:text-sand-300">Completed</p>
+            <p className="text-2xl font-bold text-green-600">{stats.completed}</p>
+            <p className="text-sm text-primary-600">Completed</p>
           </div>
         </div>
 
@@ -148,7 +148,7 @@ export function HostExperienceBookingsContent() {
               placeholder="Search by experience or guest name..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-primary-200 dark:border-primary-700 bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-50 focus:ring-2 focus:ring-secondary-500"
+              className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-primary-200 bg-white text-primary-900 focus:ring-2 focus:ring-secondary-500"
             />
           </div>
           <div className="flex gap-2 flex-wrap">
@@ -159,7 +159,7 @@ export function HostExperienceBookingsContent() {
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                   statusFilter === sf.value
                     ? 'bg-secondary-500 text-white'
-                    : 'bg-white dark:bg-primary-800 text-primary-700 dark:text-sand-300 border border-primary-200 dark:border-primary-700'
+                    : 'bg-white text-primary-700 border border-primary-200'
                 }`}
               >
                 {sf.label}
@@ -174,11 +174,11 @@ export function HostExperienceBookingsContent() {
             {[1, 2, 3].map((i) => (
               <div key={i} className="card-gradient p-6 animate-pulse">
                 <div className="flex gap-4">
-                  <div className="h-12 w-12 bg-primary-200 dark:bg-primary-700 rounded-full" />
+                  <div className="h-12 w-12 bg-primary-200 rounded-full" />
                   <div className="flex-1 space-y-2">
-                    <div className="h-5 bg-primary-200 dark:bg-primary-700 rounded w-1/3" />
-                    <div className="h-4 bg-primary-200 dark:bg-primary-700 rounded w-2/3" />
-                    <div className="h-4 bg-primary-200 dark:bg-primary-700 rounded w-1/4" />
+                    <div className="h-5 bg-primary-200 rounded w-1/3" />
+                    <div className="h-4 bg-primary-200 rounded w-2/3" />
+                    <div className="h-4 bg-primary-200 rounded w-1/4" />
                   </div>
                 </div>
               </div>
@@ -186,11 +186,11 @@ export function HostExperienceBookingsContent() {
           </div>
         ) : filteredBookings.length === 0 ? (
           <div className="card-gradient p-12 text-center">
-            <Calendar className="w-16 h-16 text-primary-300 dark:text-primary-700 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-primary-900 dark:text-sand-50 mb-2">
+            <Calendar className="w-16 h-16 text-primary-300 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-primary-900 mb-2">
               {statusFilter ? 'No bookings match your filter' : 'No experience bookings yet'}
             </h3>
-            <p className="text-primary-600 dark:text-sand-300 mb-6">
+            <p className="text-primary-600 mb-6">
               {statusFilter
                 ? 'Try changing the filter to see bookings.'
                 : 'Once guests book your experiences, they will appear here.'}
@@ -216,8 +216,8 @@ export function HostExperienceBookingsContent() {
                     {/* Booking Info */}
                     <div className="flex-1 space-y-3">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-secondary-100 dark:bg-secondary-900/30 flex items-center justify-center flex-shrink-0">
-                          <span className="text-sm font-semibold text-secondary-700 dark:text-secondary-300">
+                        <div className="w-10 h-10 rounded-full bg-secondary-100 flex items-center justify-center flex-shrink-0">
+                          <span className="text-sm font-semibold text-secondary-700">
                             {(booking.guest_name || 'G').charAt(0).toUpperCase()}
                           </span>
                         </div>
@@ -225,16 +225,16 @@ export function HostExperienceBookingsContent() {
                           <StatusIcon className="w-3.5 h-3.5" />
                           {config.label}
                         </span>
-                        <span className="text-xs text-primary-500 dark:text-sand-400">
+                        <span className="text-xs text-primary-500">
                           #{booking.id}
                         </span>
                       </div>
 
-                      <h3 className="text-lg font-semibold text-primary-900 dark:text-sand-50">
+                      <h3 className="text-lg font-semibold text-primary-900">
                         {booking.experience_title || `Experience #${booking.experience}`}
                       </h3>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-3 text-sm text-primary-600 dark:text-sand-300">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-3 text-sm text-primary-600">
                         <div className="flex items-center gap-2">
                           <User className="w-4 h-4 text-primary-400" />
                           <span>{booking.guest_name || 'Guest'}</span>
@@ -251,16 +251,16 @@ export function HostExperienceBookingsContent() {
 
                       <div className="flex flex-wrap items-center gap-2 text-sm font-medium">
                         <DollarSign className="w-4 h-4 text-green-500" />
-                        <span className="text-primary-900 dark:text-sand-50">
+                        <span className="text-primary-900">
                           {booking.currency || 'USD'} {booking.total_amount?.toFixed(2) || ((booking.price_per_person || 0) * (booking.num_participants || 1)).toFixed(2)}
                         </span>
-                        <span className="text-primary-400 dark:text-sand-500">
+                        <span className="text-primary-400">
                           ({booking.currency || 'USD'} {booking.price_per_person?.toFixed(2)} × {booking.num_participants})
                         </span>
                       </div>
 
                       {booking.special_requests && (
-                        <p className="text-sm text-primary-500 dark:text-sand-400 italic">
+                        <p className="text-sm text-primary-500 italic">
                           Note: {booking.special_requests}
                         </p>
                       )}

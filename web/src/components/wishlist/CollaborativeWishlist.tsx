@@ -46,9 +46,9 @@ export default function CollaborativeWishlist({
 
   if (!wishlist) {
     return (
-      <div className="bg-white dark:bg-primary-800/40 rounded-xl shadow p-12 text-center">
-        <Heart className="w-16 h-16 text-primary-300 dark:text-primary-500 mx-auto mb-4" />
-        <h3 className="text-xl font-semibold text-primary-900 dark:text-sand-50 mb-2">Wishlist not found</h3>
+      <div className="bg-white rounded-xl shadow p-12 text-center">
+        <Heart className="w-16 h-16 text-primary-300 mx-auto mb-4" />
+        <h3 className="text-xl font-semibold text-primary-900 mb-2">Wishlist not found</h3>
       </div>
     );
   }
@@ -69,17 +69,17 @@ export default function CollaborativeWishlist({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-white dark:bg-primary-800/40 rounded-xl shadow p-6">
+      <div className="bg-white rounded-xl shadow p-6">
         <div className="flex items-start justify-between flex-wrap gap-4">
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
               <Heart className="w-8 h-8 text-red-500 fill-red-500" />
-              <h1 className="text-3xl font-bold text-primary-900 dark:text-sand-50">{wishlist.name}</h1>
+              <h1 className="text-3xl font-bold text-primary-900">{wishlist.name}</h1>
             </div>
             {wishlist.description && (
-              <p className="text-primary-500 dark:text-sand-400 mt-2">{wishlist.description}</p>
+              <p className="text-primary-500 mt-2">{wishlist.description}</p>
             )}
-            <div className="flex items-center gap-4 mt-4 text-sm text-primary-500 dark:text-sand-400">
+            <div className="flex items-center gap-4 mt-4 text-sm text-primary-500">
               <span>Created by {wishlist.owner.name}</span>
               <span>•</span>
               <span>{wishlist.items.length} {wishlist.items.length === 1 ? 'property' : 'properties'}</span>
@@ -96,7 +96,7 @@ export default function CollaborativeWishlist({
           <div className="flex items-center gap-2">
             {/* Privacy Toggle */}
             {isOwner && (
-              <div className="flex bg-primary-100 dark:bg-primary-800 rounded-lg p-1">
+              <div className="flex bg-primary-100 rounded-lg p-1">
                 {(['private', 'shared', 'public'] as const).map((privacy) => (
                   <button
                     key={privacy}
@@ -105,8 +105,8 @@ export default function CollaborativeWishlist({
                     className={`
                       flex items-center gap-1 px-3 py-2 rounded-md text-sm font-medium transition
                       ${wishlist.privacy === privacy
-                        ? 'bg-white dark:bg-primary-800/40 shadow text-primary-600'
-                        : 'text-primary-500 dark:text-sand-400 hover:text-primary-900 dark:hover:text-sand-50'
+                        ? 'bg-white shadow text-primary-600'
+                        : 'text-primary-500 hover:text-primary-900'
                       }
                     `}
                   >
@@ -121,7 +121,7 @@ export default function CollaborativeWishlist({
             {(isOwner || wishlist.collaborators.length > 0) && (
               <button
                 onClick={() => setShowCollaborators(true)}
-                className="flex items-center gap-2 px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg hover:bg-sand-50 dark:hover:bg-primary-800 transition"
+                className="flex items-center gap-2 px-4 py-2 border border-primary-300 rounded-lg hover:bg-sand-50 transition"
               >
                 <UserPlus className="w-5 h-5" />
                 <span>Collaborators</span>
@@ -142,10 +142,10 @@ export default function CollaborativeWishlist({
 
       {/* Items Grid */}
       {wishlist.items.length === 0 ? (
-        <div className="bg-white dark:bg-primary-800/40 rounded-xl shadow p-12 text-center">
-          <Heart className="w-16 h-16 text-primary-300 dark:text-primary-500 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-primary-900 dark:text-sand-50 mb-2">No properties yet</h3>
-          <p className="text-primary-500 dark:text-sand-400">Start adding properties to your wishlist</p>
+        <div className="bg-white rounded-xl shadow p-12 text-center">
+          <Heart className="w-16 h-16 text-primary-300 mx-auto mb-4" />
+          <h3 className="text-xl font-semibold text-primary-900 mb-2">No properties yet</h3>
+          <p className="text-primary-500">Start adding properties to your wishlist</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

@@ -25,10 +25,10 @@ export function PropertyImageCarousel({ images, title, mainImage }: PropertyImag
 
   if (!processedImages || processedImages.length === 0) {
     return (
-      <div className="w-full aspect-[16/9] bg-gradient-to-br from-primary-100 to-sand-100 dark:from-primary-800 dark:to-primary-700 rounded-xl flex items-center justify-center">
+      <div className="w-full aspect-[16/9] bg-gradient-to-br from-primary-100 to-sand-100 rounded-xl flex items-center justify-center">
         <div className="text-center">
-          <p className="text-primary-600 dark:text-sand-400 text-lg mb-2">No images available</p>
-          <p className="text-primary-500 dark:text-sand-500 text-sm">Property images will appear here</p>
+          <p className="text-primary-600 text-lg mb-2">No images available</p>
+          <p className="text-primary-500 text-sm">Property images will appear here</p>
         </div>
       </div>
     );
@@ -65,8 +65,8 @@ export function PropertyImageCarousel({ images, title, mainImage }: PropertyImag
     const url = getImageUrl(idx);
     if (!url || imageError.has(idx)) {
       return (
-        <div className={`bg-gradient-to-br from-primary-100 to-sand-100 dark:from-primary-800 dark:to-primary-700 flex items-center justify-center ${className || ''}`}>
-          <p className="text-primary-500 dark:text-sand-500 text-sm">No image</p>
+        <div className={`bg-gradient-to-br from-primary-100 to-sand-100 flex items-center justify-center ${className || ''}`}>
+          <p className="text-primary-500 text-sm">No image</p>
         </div>
       );
     }
@@ -179,7 +179,7 @@ export function PropertyImageCarousel({ images, title, mainImage }: PropertyImag
                 e.stopPropagation();
                 setShowGallery(true);
               }}
-              className="absolute bottom-4 right-4 flex items-center gap-2 bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-50 px-4 py-2 rounded-lg text-sm font-medium shadow-md hover:shadow-lg transition border border-primary-200 dark:border-primary-600"
+              className="absolute bottom-4 right-4 flex items-center gap-2 bg-white text-primary-900 px-4 py-2 rounded-lg text-sm font-medium shadow-md hover:shadow-lg transition border border-primary-200"
             >
               <Grid2X2 className="w-4 h-4" />
               Show all photos
@@ -190,7 +190,7 @@ export function PropertyImageCarousel({ images, title, mainImage }: PropertyImag
 
       {/* Mobile: Swipeable Carousel */}
       <div className="md:hidden">
-        <div className="relative w-full aspect-[4/3] rounded-xl overflow-hidden group bg-primary-100 dark:bg-primary-800">
+        <div className="relative w-full aspect-[4/3] rounded-xl overflow-hidden group bg-primary-100">
           <ImageOrFallback idx={currentIndex} />
 
           {hasMultiple && (
@@ -198,16 +198,16 @@ export function PropertyImageCarousel({ images, title, mainImage }: PropertyImag
               <button
                 onClick={handlePrev}
                 aria-label="Previous image"
-                className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/90 dark:bg-primary-800/90 p-2 rounded-full shadow-md opacity-0 group-hover:opacity-100 active:opacity-100 transition-opacity z-10"
+                className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/90 p-2 rounded-full shadow-md opacity-0 group-hover:opacity-100 active:opacity-100 transition-opacity z-10"
               >
-                <ChevronLeft className="w-5 h-5 text-primary-900 dark:text-sand-50" />
+                <ChevronLeft className="w-5 h-5 text-primary-900" />
               </button>
               <button
                 onClick={handleNext}
                 aria-label="Next image"
-                className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/90 dark:bg-primary-800/90 p-2 rounded-full shadow-md opacity-0 group-hover:opacity-100 active:opacity-100 transition-opacity z-10"
+                className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/90 p-2 rounded-full shadow-md opacity-0 group-hover:opacity-100 active:opacity-100 transition-opacity z-10"
               >
-                <ChevronRight className="w-5 h-5 text-primary-900 dark:text-sand-50" />
+                <ChevronRight className="w-5 h-5 text-primary-900" />
               </button>
 
               {/* Dot indicators */}
@@ -232,7 +232,7 @@ export function PropertyImageCarousel({ images, title, mainImage }: PropertyImag
           {/* Tap to open gallery */}
           <button
             onClick={() => setShowGallery(true)}
-            className="absolute bottom-3 right-3 flex items-center gap-1.5 bg-white/90 dark:bg-primary-800/90 text-primary-900 dark:text-sand-50 px-3 py-1.5 rounded-full text-xs font-medium shadow-md z-10"
+            className="absolute bottom-3 right-3 flex items-center gap-1.5 bg-white/90 text-primary-900 px-3 py-1.5 rounded-full text-xs font-medium shadow-md z-10"
           >
             <Grid2X2 className="w-3.5 h-3.5" />
             {processedImages.length} photos

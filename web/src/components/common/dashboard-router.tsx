@@ -25,10 +25,10 @@ export function DashboardRouter() {
   // Show loading state while checking auth
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-sand-100 dark:bg-primary-900 flex items-center justify-center">
+      <div className="min-h-screen bg-sand-100 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-secondary-600 mx-auto mb-4"></div>
-          <p className="text-primary-600 dark:text-sand-300">Loading...</p>
+          <p className="text-primary-600">Loading...</p>
         </div>
       </div>
     );

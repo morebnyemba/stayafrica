@@ -108,24 +108,24 @@ export function SearchFilters({ onFilterChange, onSearch }: SearchFiltersProps) 
     <div className="space-y-4">
       {/* Search bar */}
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-primary-400 dark:text-sand-400" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-primary-400" />
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => handleSearchChange(e.target.value)}
           placeholder="Search by location, property name..."
-          className="w-full pl-10 pr-4 py-3 border border-primary-200 dark:border-primary-600 rounded-lg bg-sand-50 dark:bg-primary-700 text-primary-900 dark:text-sand-100 placeholder-primary-400 dark:placeholder-sand-400 focus:ring-2 focus:ring-secondary-500 focus:border-transparent"
+          className="w-full pl-10 pr-4 py-3 border border-primary-200 rounded-lg bg-sand-50 text-primary-900 placeholder-primary-400 focus:ring-2 focus:ring-secondary-500 focus:border-transparent"
         />
       </div>
 
       {/* Filter toggle button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-primary-800 border border-primary-200 dark:border-primary-700 rounded-lg hover:bg-sand-50 dark:hover:bg-primary-700 transition"
+        className="w-full flex items-center justify-between px-4 py-3 bg-white border border-primary-200 rounded-lg hover:bg-sand-50 transition"
       >
         <div className="flex items-center space-x-2">
-          <Filter className="w-5 h-5 text-primary-600 dark:text-sand-300" />
-          <span className="font-medium text-primary-900 dark:text-sand-50">Filters</span>
+          <Filter className="w-5 h-5 text-primary-600" />
+          <span className="font-medium text-primary-900">Filters</span>
           {activeFiltersCount > 0 && (
             <span className="bg-secondary-600 text-white text-xs rounded-full px-2 py-1">
               {activeFiltersCount}
@@ -137,10 +137,10 @@ export function SearchFilters({ onFilterChange, onSearch }: SearchFiltersProps) 
 
       {/* Filters panel */}
       {isOpen && (
-        <div className="bg-white dark:bg-primary-800 border border-primary-200 dark:border-primary-700 rounded-lg p-6 space-y-6">
+        <div className="bg-white border border-primary-200 rounded-lg p-6 space-y-6">
           {/* Price range */}
           <div>
-            <label className="block text-sm font-semibold text-primary-900 dark:text-sand-50 mb-4">
+            <label className="block text-sm font-semibold text-primary-900 mb-4">
               Price Range
             </label>
             <div className="space-y-3">
@@ -155,9 +155,9 @@ export function SearchFilters({ onFilterChange, onSearch }: SearchFiltersProps) 
                     })
                   }
                   placeholder="Min"
-                  className="w-1/2 px-3 py-2 border border-primary-200 dark:border-primary-600 rounded-lg bg-sand-50 dark:bg-primary-700 text-primary-900 dark:text-sand-100"
+                  className="w-1/2 px-3 py-2 border border-primary-200 rounded-lg bg-sand-50 text-primary-900"
                 />
-                <span className="text-primary-600 dark:text-sand-400">−</span>
+                <span className="text-primary-600">−</span>
                 <input
                   type="number"
                   value={filters.priceMax || 1000}
@@ -168,7 +168,7 @@ export function SearchFilters({ onFilterChange, onSearch }: SearchFiltersProps) 
                     })
                   }
                   placeholder="Max"
-                  className="w-1/2 px-3 py-2 border border-primary-200 dark:border-primary-600 rounded-lg bg-sand-50 dark:bg-primary-700 text-primary-900 dark:text-sand-100"
+                  className="w-1/2 px-3 py-2 border border-primary-200 rounded-lg bg-sand-50 text-primary-900"
                 />
               </div>
             </div>
@@ -176,7 +176,7 @@ export function SearchFilters({ onFilterChange, onSearch }: SearchFiltersProps) 
 
           {/* Property type */}
           <div>
-            <label className="block text-sm font-semibold text-primary-900 dark:text-sand-50 mb-3">
+            <label className="block text-sm font-semibold text-primary-900 mb-3">
               Property Type
             </label>
             <select
@@ -187,7 +187,7 @@ export function SearchFilters({ onFilterChange, onSearch }: SearchFiltersProps) 
                   propertyType: e.target.value,
                 })
               }
-              className="w-full px-3 py-2 border border-primary-200 dark:border-primary-600 rounded-lg bg-sand-50 dark:bg-primary-700 text-primary-900 dark:text-sand-100 focus:ring-2 focus:ring-secondary-500"
+              className="w-full px-3 py-2 border border-primary-200 rounded-lg bg-sand-50 text-primary-900 focus:ring-2 focus:ring-secondary-500"
             >
               <option value="">All types</option>
               {PROPERTY_TYPES.map((type) => (
@@ -200,11 +200,11 @@ export function SearchFilters({ onFilterChange, onSearch }: SearchFiltersProps) 
 
           {/* Amenities */}
           <div>
-            <label className="block text-sm font-semibold text-primary-900 dark:text-sand-50 mb-3">
+            <label className="block text-sm font-semibold text-primary-900 mb-3">
               Amenities
             </label>
             {amenities.length === 0 ? (
-              <p className="text-sm text-primary-600 dark:text-sand-400">Loading amenities...</p>
+              <p className="text-sm text-primary-600">Loading amenities...</p>
             ) : (
               <div className="grid grid-cols-2 gap-2">
                 {amenities.map((amenity: any) => (
@@ -215,7 +215,7 @@ export function SearchFilters({ onFilterChange, onSearch }: SearchFiltersProps) 
                       onChange={() => handleAmenityToggle(String(amenity.id))}
                       className="rounded border-primary-300 text-secondary-600 focus:ring-secondary-500"
                     />
-                    <span className="text-sm text-primary-700 dark:text-sand-200">
+                    <span className="text-sm text-primary-700">
                       {amenity.name}
                     </span>
                   </label>
@@ -226,7 +226,7 @@ export function SearchFilters({ onFilterChange, onSearch }: SearchFiltersProps) 
 
           {/* Minimum rating */}
           <div>
-            <label className="block text-sm font-semibold text-primary-900 dark:text-sand-50 mb-3">
+            <label className="block text-sm font-semibold text-primary-900 mb-3">
               Minimum Rating
             </label>
             <select
@@ -237,7 +237,7 @@ export function SearchFilters({ onFilterChange, onSearch }: SearchFiltersProps) 
                   minRating: parseFloat(e.target.value),
                 })
               }
-              className="w-full px-3 py-2 border border-primary-200 dark:border-primary-600 rounded-lg bg-sand-50 dark:bg-primary-700 text-primary-900 dark:text-sand-100 focus:ring-2 focus:ring-secondary-500"
+              className="w-full px-3 py-2 border border-primary-200 rounded-lg bg-sand-50 text-primary-900 focus:ring-2 focus:ring-secondary-500"
             >
               <option value="0">Any rating</option>
               <option value="3.5">3.5+</option>
@@ -248,7 +248,7 @@ export function SearchFilters({ onFilterChange, onSearch }: SearchFiltersProps) 
 
           {/* Guests */}
           <div>
-            <label className="block text-sm font-semibold text-primary-900 dark:text-sand-50 mb-3">
+            <label className="block text-sm font-semibold text-primary-900 mb-3">
               Number of Guests
             </label>
             <select
@@ -259,7 +259,7 @@ export function SearchFilters({ onFilterChange, onSearch }: SearchFiltersProps) 
                   guests: parseInt(e.target.value),
                 })
               }
-              className="w-full px-3 py-2 border border-primary-200 dark:border-primary-600 rounded-lg bg-sand-50 dark:bg-primary-700 text-primary-900 dark:text-sand-100 focus:ring-2 focus:ring-secondary-500"
+              className="w-full px-3 py-2 border border-primary-200 rounded-lg bg-sand-50 text-primary-900 focus:ring-2 focus:ring-secondary-500"
             >
               {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
                 <option key={num} value={num}>
@@ -273,7 +273,7 @@ export function SearchFilters({ onFilterChange, onSearch }: SearchFiltersProps) 
           {activeFiltersCount > 0 && (
             <button
               onClick={handleClearFilters}
-              className="w-full flex items-center justify-center space-x-2 text-primary-600 dark:text-sand-300 hover:text-primary-900 dark:hover:text-sand-50 transition"
+              className="w-full flex items-center justify-center space-x-2 text-primary-600 hover:text-primary-900 transition"
             >
               <X className="w-4 h-4" />
               <span>Clear all filters</span>

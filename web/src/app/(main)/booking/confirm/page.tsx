@@ -129,10 +129,10 @@ export default function BookingConfirmPage() {
   if (loadingProperty || loadingFees) {
     return (
       <ProtectedRoute>
-        <div className="min-h-screen bg-sand-100 dark:bg-primary-900 flex items-center justify-center">
+        <div className="min-h-screen bg-sand-100 flex items-center justify-center">
           <div className="text-center">
-            <Loader2 className="w-12 h-12 text-secondary-600 dark:text-secondary-400 animate-spin mx-auto mb-4" />
-            <p className="text-primary-700 dark:text-sand-200">Loading booking details...</p>
+            <Loader2 className="w-12 h-12 text-secondary-600 animate-spin mx-auto mb-4" />
+            <p className="text-primary-700">Loading booking details...</p>
           </div>
         </div>
       </ProtectedRoute>
@@ -143,12 +143,12 @@ export default function BookingConfirmPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-sand-100 dark:bg-primary-900">
+      <div className="min-h-screen bg-sand-100">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Back button */}
           <Link
             href={`/property/${propertyId}`}
-            className="inline-flex items-center gap-2 text-primary-700 dark:text-sand-300 hover:text-secondary-600 dark:hover:text-secondary-400 mb-6 transition"
+            className="inline-flex items-center gap-2 text-primary-700 hover:text-secondary-600 mb-6 transition"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to property
@@ -161,25 +161,25 @@ export default function BookingConfirmPage() {
                 <div className="flex items-center gap-2">
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${i === 0
                     ? 'bg-secondary-600 text-white'
-                    : 'bg-primary-200 dark:bg-primary-700 text-primary-500 dark:text-sand-400'
+                    : 'bg-primary-200 text-primary-500'
                     }`}>
                     {i + 1}
                   </div>
                   <span className={`text-sm font-medium ${i === 0
-                    ? 'text-primary-900 dark:text-sand-50'
-                    : 'text-primary-400 dark:text-sand-500'
+                    ? 'text-primary-900'
+                    : 'text-primary-400'
                     }`}>
                     {step}
                   </span>
                 </div>
                 {i < 2 && (
-                  <div className="w-8 sm:w-16 h-px bg-primary-200 dark:bg-primary-700" />
+                  <div className="w-8 sm:w-16 h-px bg-primary-200" />
                 )}
               </div>
             ))}
           </div>
 
-          <h1 className="text-2xl sm:text-3xl font-bold text-primary-900 dark:text-sand-50 mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-primary-900 mb-8">
             Confirm and pay
           </h1>
 
@@ -217,35 +217,35 @@ export default function BookingConfirmPage() {
                   </div>
                 )}
                 <div className="p-5">
-                  <div className="flex flex-wrap items-center gap-4 text-sm text-primary-600 dark:text-sand-300">
+                  <div className="flex flex-wrap items-center gap-4 text-sm text-primary-600">
                     {property?.property_type && (
                       <span className="flex items-center gap-1.5">
-                        <Home className="w-4 h-4 text-secondary-600 dark:text-secondary-400" />
+                        <Home className="w-4 h-4 text-secondary-600" />
                         {property.property_type}
                       </span>
                     )}
                     {property?.bedrooms > 0 && (
                       <span className="flex items-center gap-1.5">
-                        <Bed className="w-4 h-4 text-secondary-600 dark:text-secondary-400" />
+                        <Bed className="w-4 h-4 text-secondary-600" />
                         {property.bedrooms} bedroom{property.bedrooms !== 1 ? 's' : ''}
                       </span>
                     )}
                     {property?.bathrooms > 0 && (
                       <span className="flex items-center gap-1.5">
-                        <Bath className="w-4 h-4 text-secondary-600 dark:text-secondary-400" />
+                        <Bath className="w-4 h-4 text-secondary-600" />
                         {property.bathrooms} bathroom{property.bathrooms !== 1 ? 's' : ''}
                       </span>
                     )}
                     {property?.max_guests > 0 && (
                       <span className="flex items-center gap-1.5">
-                        <Users className="w-4 h-4 text-secondary-600 dark:text-secondary-400" />
+                        <Users className="w-4 h-4 text-secondary-600" />
                         Up to {property.max_guests} guest{property.max_guests !== 1 ? 's' : ''}
                       </span>
                     )}
                   </div>
                   {/* Host info row */}
                   {property?.host && (
-                    <div className="flex items-center justify-between mt-4 pt-4 border-t border-primary-200 dark:border-primary-700">
+                    <div className="flex items-center justify-between mt-4 pt-4 border-t border-primary-200">
                       <div className="flex items-center gap-3">
                         {property.host.profile_picture ? (
                           <img
@@ -254,18 +254,18 @@ export default function BookingConfirmPage() {
                             className="w-10 h-10 rounded-full object-cover"
                           />
                         ) : (
-                          <div className="w-10 h-10 rounded-full bg-primary-700 dark:bg-primary-600 flex items-center justify-center">
+                          <div className="w-10 h-10 rounded-full bg-primary-700 flex items-center justify-center">
                             <span className="text-white text-sm font-semibold">
                               {property.host.first_name?.[0] || 'H'}
                             </span>
                           </div>
                         )}
                         <div>
-                          <p className="text-sm font-medium text-primary-900 dark:text-sand-50">
+                          <p className="text-sm font-medium text-primary-900">
                             Hosted by {property.host.first_name}
                           </p>
                           {property.host.is_verified && (
-                            <p className="text-xs text-primary-500 dark:text-sand-400 flex items-center gap-1">
+                            <p className="text-xs text-primary-500 flex items-center gap-1">
                               <CheckCircle2 className="w-3 h-3 text-primary-500" />
                               Verified host
                             </p>
@@ -275,7 +275,7 @@ export default function BookingConfirmPage() {
                       <button
                         onClick={contactHost}
                         disabled={contactingHost}
-                        className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg border border-primary-300 dark:border-primary-600 text-primary-700 dark:text-sand-200 hover:bg-sand-50 dark:hover:bg-primary-800 transition disabled:opacity-50"
+                        className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg border border-primary-300 text-primary-700 hover:bg-sand-50 transition disabled:opacity-50"
                       >
                         {contactingHost ? (
                           <Loader2 className="w-4 h-4 animate-spin" />
@@ -291,38 +291,38 @@ export default function BookingConfirmPage() {
 
               {/* Trip details */}
               <section className="card p-6">
-                <h2 className="text-lg font-semibold text-primary-900 dark:text-sand-50 mb-5">
+                <h2 className="text-lg font-semibold text-primary-900 mb-5">
                   Your trip
                 </h2>
                 <div className="grid sm:grid-cols-2 gap-5">
-                  <div className="flex items-start gap-3 p-4 rounded-xl bg-sand-50 dark:bg-primary-800">
-                    <Calendar className="w-5 h-5 text-secondary-600 dark:text-secondary-400 mt-0.5 flex-shrink-0" />
+                  <div className="flex items-start gap-3 p-4 rounded-xl bg-sand-50">
+                    <Calendar className="w-5 h-5 text-secondary-600 mt-0.5 flex-shrink-0" />
                     <div>
-                      <div className="text-xs uppercase tracking-wider font-semibold text-primary-500 dark:text-sand-400 mb-1">Check-in</div>
-                      <div className="font-medium text-primary-900 dark:text-sand-50 text-sm">
+                      <div className="text-xs uppercase tracking-wider font-semibold text-primary-500 mb-1">Check-in</div>
+                      <div className="font-medium text-primary-900 text-sm">
                         {formatDate(checkIn)}
                       </div>
-                      <div className="text-xs text-primary-500 dark:text-sand-400 mt-0.5">From 2:00 PM</div>
+                      <div className="text-xs text-primary-500 mt-0.5">From 2:00 PM</div>
                     </div>
                   </div>
-                  <div className="flex items-start gap-3 p-4 rounded-xl bg-sand-50 dark:bg-primary-800">
-                    <Calendar className="w-5 h-5 text-secondary-600 dark:text-secondary-400 mt-0.5 flex-shrink-0" />
+                  <div className="flex items-start gap-3 p-4 rounded-xl bg-sand-50">
+                    <Calendar className="w-5 h-5 text-secondary-600 mt-0.5 flex-shrink-0" />
                     <div>
-                      <div className="text-xs uppercase tracking-wider font-semibold text-primary-500 dark:text-sand-400 mb-1">Check-out</div>
-                      <div className="font-medium text-primary-900 dark:text-sand-50 text-sm">
+                      <div className="text-xs uppercase tracking-wider font-semibold text-primary-500 mb-1">Check-out</div>
+                      <div className="font-medium text-primary-900 text-sm">
                         {formatDate(checkOut)}
                       </div>
-                      <div className="text-xs text-primary-500 dark:text-sand-400 mt-0.5">Before 11:00 AM</div>
+                      <div className="text-xs text-primary-500 mt-0.5">Before 11:00 AM</div>
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-6 mt-4 pt-4 border-t border-primary-100 dark:border-primary-700">
-                  <div className="flex items-center gap-2 text-sm text-primary-700 dark:text-sand-200">
-                    <Clock className="w-4 h-4 text-secondary-600 dark:text-secondary-400" />
+                <div className="flex items-center gap-6 mt-4 pt-4 border-t border-primary-100">
+                  <div className="flex items-center gap-2 text-sm text-primary-700">
+                    <Clock className="w-4 h-4 text-secondary-600" />
                     <span className="font-medium">{nights} night{nights !== 1 ? 's' : ''}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-primary-700 dark:text-sand-200">
-                    <Users className="w-4 h-4 text-secondary-600 dark:text-secondary-400" />
+                  <div className="flex items-center gap-2 text-sm text-primary-700">
+                    <Users className="w-4 h-4 text-secondary-600" />
                     <span className="font-medium">{guests} guest{guests !== 1 ? 's' : ''}</span>
                   </div>
                 </div>
@@ -330,26 +330,26 @@ export default function BookingConfirmPage() {
 
               {/* Guest info */}
               <section className="card p-6">
-                <h2 className="text-lg font-semibold text-primary-900 dark:text-sand-50 mb-4">
+                <h2 className="text-lg font-semibold text-primary-900 mb-4">
                   Guest information
                 </h2>
                 <div className="space-y-3 text-sm">
-                  <div className="flex justify-between py-2 border-b border-primary-100 dark:border-primary-800">
-                    <span className="text-primary-500 dark:text-sand-400">Name</span>
-                    <span className="font-medium text-primary-900 dark:text-sand-50">
+                  <div className="flex justify-between py-2 border-b border-primary-100">
+                    <span className="text-primary-500">Name</span>
+                    <span className="font-medium text-primary-900">
                       {user?.first_name} {user?.last_name}
                     </span>
                   </div>
-                  <div className="flex justify-between py-2 border-b border-primary-100 dark:border-primary-800">
-                    <span className="text-primary-500 dark:text-sand-400">Email</span>
-                    <span className="font-medium text-primary-900 dark:text-sand-50">
+                  <div className="flex justify-between py-2 border-b border-primary-100">
+                    <span className="text-primary-500">Email</span>
+                    <span className="font-medium text-primary-900">
                       {user?.email}
                     </span>
                   </div>
                   {user?.phone_number && (
                     <div className="flex justify-between py-2">
-                      <span className="text-primary-500 dark:text-sand-400">Phone</span>
-                      <span className="font-medium text-primary-900 dark:text-sand-50">
+                      <span className="text-primary-500">Phone</span>
+                      <span className="font-medium text-primary-900">
                         {user.phone_number}
                       </span>
                     </div>
@@ -364,15 +364,15 @@ export default function BookingConfirmPage() {
                     type="checkbox"
                     checked={agreedToTerms}
                     onChange={(e) => setAgreedToTerms(e.target.checked)}
-                    className="mt-0.5 w-5 h-5 rounded border-primary-300 dark:border-primary-600 text-secondary-600 focus:ring-secondary-500"
+                    className="mt-0.5 w-5 h-5 rounded border-primary-300 text-secondary-600 focus:ring-secondary-500"
                   />
-                  <span className="text-sm text-primary-700 dark:text-sand-200 group-hover:text-primary-900 dark:group-hover:text-sand-50 transition leading-relaxed">
+                  <span className="text-sm text-primary-700 group-hover:text-primary-900 transition leading-relaxed">
                     I agree to the{' '}
-                    <Link href="/terms" className="text-secondary-600 dark:text-secondary-400 hover:underline font-medium">
+                    <Link href="/terms" className="text-secondary-600 hover:underline font-medium">
                       Terms and Conditions
                     </Link>{' '}
                     and{' '}
-                    <Link href="/cancellation-policy" className="text-secondary-600 dark:text-secondary-400 hover:underline font-medium">
+                    <Link href="/cancellation-policy" className="text-secondary-600 hover:underline font-medium">
                       Cancellation Policy
                     </Link>
                   </span>
@@ -384,23 +384,23 @@ export default function BookingConfirmPage() {
             <div className="lg:col-span-2">
               <div className="card p-6 sticky top-24">
                 {/* Mini property recap */}
-                <div className="flex items-center gap-3 pb-5 mb-5 border-b border-primary-200 dark:border-primary-700">
+                <div className="flex items-center gap-3 pb-5 mb-5 border-b border-primary-200">
                   {mainImage && (
                     <img src={mainImage} alt="" className="w-16 h-16 rounded-lg object-cover flex-shrink-0" />
                   )}
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-primary-900 dark:text-sand-50 truncate">
+                    <p className="text-sm font-semibold text-primary-900 truncate">
                       {property?.title}
                     </p>
-                    <p className="text-xs text-primary-500 dark:text-sand-400">
+                    <p className="text-xs text-primary-500">
                       {property?.city}, {property?.country}
                     </p>
                     {property?.average_rating > 0 && (
-                      <p className="text-xs text-primary-600 dark:text-sand-300 flex items-center gap-1 mt-0.5">
+                      <p className="text-xs text-primary-600 flex items-center gap-1 mt-0.5">
                         <Star className="w-3 h-3 fill-secondary-500 text-secondary-500" />
                         {property.average_rating.toFixed(1)}
                         {property.review_count > 0 && (
-                          <span className="text-primary-400 dark:text-sand-500">
+                          <span className="text-primary-400">
                             ({property.review_count} review{property.review_count !== 1 ? 's' : ''})
                           </span>
                         )}
@@ -409,23 +409,23 @@ export default function BookingConfirmPage() {
                   </div>
                 </div>
 
-                <h2 className="text-lg font-semibold text-primary-900 dark:text-sand-50 mb-4">
+                <h2 className="text-lg font-semibold text-primary-900 mb-4">
                   Price details
                 </h2>
 
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-primary-600 dark:text-sand-300">
+                    <span className="text-primary-600">
                       {property?.currency} {property?.price_per_night} × {nights} night{nights !== 1 ? 's' : ''}
                     </span>
-                    <span className="font-medium text-primary-900 dark:text-sand-50">
+                    <span className="font-medium text-primary-900">
                       {property?.currency} {costs.basePrice.toFixed(2)}
                     </span>
                   </div>
                   {costs.serviceFee > 0 && (
                     <div className="flex justify-between">
-                      <span className="text-primary-600 dark:text-sand-300">Service fee</span>
-                      <span className="font-medium text-primary-900 dark:text-sand-50">
+                      <span className="text-primary-600">Service fee</span>
+                      <span className="font-medium text-primary-900">
                         {property?.currency} {costs.serviceFee.toFixed(2)}
                       </span>
                     </div>
@@ -433,27 +433,27 @@ export default function BookingConfirmPage() {
 
                   {costs.individualTaxes?.map((tax, idx) => (
                     <div key={idx} className="flex justify-between">
-                      <span className="text-primary-600 dark:text-sand-300">
+                      <span className="text-primary-600">
                         {tax.name}
                       </span>
-                      <span className="font-medium text-primary-900 dark:text-sand-50">
+                      <span className="font-medium text-primary-900">
                         {property?.currency} {tax.amount.toFixed(2)}
                       </span>
                     </div>
                   ))}
                   {costs.cleaningFee > 0 && (
                     <div className="flex justify-between">
-                      <span className="text-primary-600 dark:text-sand-300">Cleaning fee</span>
-                      <span className="font-medium text-primary-900 dark:text-sand-50">
+                      <span className="text-primary-600">Cleaning fee</span>
+                      <span className="font-medium text-primary-900">
                         {property?.currency} {costs.cleaningFee.toFixed(2)}
                       </span>
                     </div>
                   )}
                 </div>
 
-                <div className="flex justify-between text-lg font-bold mt-5 pt-5 border-t border-primary-200 dark:border-primary-700">
-                  <span className="text-primary-900 dark:text-sand-50">Total</span>
-                  <span className="text-secondary-700 dark:text-secondary-400">
+                <div className="flex justify-between text-lg font-bold mt-5 pt-5 border-t border-primary-200">
+                  <span className="text-primary-900">Total</span>
+                  <span className="text-secondary-700">
                     {property?.currency} {costs.total.toFixed(2)}
                   </span>
                 </div>
@@ -461,7 +461,7 @@ export default function BookingConfirmPage() {
                 <button
                   onClick={handleConfirmBooking}
                   disabled={!agreedToTerms || isCreatingBooking}
-                  className="w-full mt-6 bg-secondary-600 hover:bg-secondary-700 dark:bg-secondary-700 dark:hover:bg-secondary-600 text-white font-semibold py-3.5 px-4 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-base"
+                  className="w-full mt-6 bg-secondary-600 hover:bg-secondary-700 text-white font-semibold py-3.5 px-4 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-base"
                 >
                   {isCreatingBooking ? (
                     <><Loader2 className="w-5 h-5 animate-spin" /> {property?.instant_booking_enabled ? 'Creating booking...' : 'Sending request...'}</>
@@ -470,24 +470,24 @@ export default function BookingConfirmPage() {
                   )}
                 </button>
 
-                <p className="text-xs text-center text-primary-500 dark:text-sand-400 mt-3">
+                <p className="text-xs text-center text-primary-500 mt-3">
                   {property?.instant_booking_enabled
                     ? "You won't be charged yet. Payment is on the next step."
                     : "You won't be charged until the host accepts your request."}
                 </p>
 
                 {/* Trust signals */}
-                <div className="mt-5 pt-5 border-t border-primary-200 dark:border-primary-700 space-y-2.5">
-                  <div className="flex items-center gap-2 text-xs text-primary-600 dark:text-sand-300">
-                    <Shield className="w-4 h-4 text-primary-500 dark:text-sand-400 flex-shrink-0" />
+                <div className="mt-5 pt-5 border-t border-primary-200 space-y-2.5">
+                  <div className="flex items-center gap-2 text-xs text-primary-600">
+                    <Shield className="w-4 h-4 text-primary-500 flex-shrink-0" />
                     <span>Secure checkout — your data is encrypted</span>
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-primary-600 dark:text-sand-300">
-                    <CheckCircle2 className="w-4 h-4 text-primary-500 dark:text-sand-400 flex-shrink-0" />
+                  <div className="flex items-center gap-2 text-xs text-primary-600">
+                    <CheckCircle2 className="w-4 h-4 text-primary-500 flex-shrink-0" />
                     <span>Free cancellation within policy window</span>
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-primary-600 dark:text-sand-300">
-                    <Star className="w-4 h-4 text-primary-500 dark:text-sand-400 flex-shrink-0" />
+                  <div className="flex items-center gap-2 text-xs text-primary-600">
+                    <Star className="w-4 h-4 text-primary-500 flex-shrink-0" />
                     <span>24/7 support from StayAfrica</span>
                   </div>
                 </div>
@@ -497,19 +497,19 @@ export default function BookingConfirmPage() {
         </div>
 
         {/* Mobile sticky CTA */}
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 p-4 bg-white dark:bg-primary-900 border-t border-primary-200 dark:border-primary-700 shadow-[0_-4px_20px_rgba(0,0,0,0.1)] z-40">
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-primary-200 shadow-[0_-4px_20px_rgba(0,0,0,0.1)] z-40">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-bold text-primary-900 dark:text-sand-50">
+            <span className="text-sm font-bold text-primary-900">
               {property?.currency} {costs.total.toFixed(2)}
             </span>
-            <span className="text-xs text-primary-500 dark:text-sand-400">
+            <span className="text-xs text-primary-500">
               {nights} night{nights !== 1 ? 's' : ''}
             </span>
           </div>
           <button
             onClick={handleConfirmBooking}
             disabled={!agreedToTerms || isCreatingBooking}
-            className="w-full bg-secondary-600 hover:bg-secondary-700 dark:bg-secondary-700 dark:hover:bg-secondary-600 text-white font-semibold py-3 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="w-full bg-secondary-600 hover:bg-secondary-700 text-white font-semibold py-3 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             {isCreatingBooking ? (
               <><Loader2 className="w-5 h-5 animate-spin" /> Creating...</>

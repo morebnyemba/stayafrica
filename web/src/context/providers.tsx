@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { NextIntlClientProvider } from 'next-intl';
-import { ThemeProvider } from './theme-context';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '@/services/query-client';
 import { Toaster } from 'react-hot-toast';
@@ -19,7 +18,6 @@ export function Providers({
   return (
     <QueryClientProvider client={queryClient}>
       <NextIntlClientProvider locale={locale} messages={messages}>
-        <ThemeProvider>
         <Toaster
           position="top-center"
           toastOptions={{
@@ -38,7 +36,6 @@ export function Providers({
           }}
         />
         {children}
-      </ThemeProvider>
       </NextIntlClientProvider>
     </QueryClientProvider>
   );

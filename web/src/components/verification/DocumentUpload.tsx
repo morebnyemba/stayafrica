@@ -98,18 +98,18 @@ export const DocumentUpload = ({
   return (
     <div className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-primary-700 dark:text-sand-200 mb-2">
+        <label className="block text-sm font-medium text-primary-700 mb-2">
           {getDocumentLabel()} - Front Side *
         </label>
         
         {!frontPreview ? (
           <div
             onClick={() => frontInputRef.current?.click()}
-            className="border-2 border-dashed border-primary-300 dark:border-primary-600 rounded-lg p-8 text-center hover:border-secondary-500 transition-colors cursor-pointer"
+            className="border-2 border-dashed border-primary-300 rounded-lg p-8 text-center hover:border-secondary-500 transition-colors cursor-pointer"
           >
-            <Upload className="h-12 w-12 text-primary-300 dark:text-primary-500 mx-auto mb-2" />
-            <p className="text-sm text-primary-500 dark:text-sand-400">Click to upload front side</p>
-            <p className="text-xs text-primary-300 dark:text-primary-500 mt-1">PNG, JPG up to 10MB</p>
+            <Upload className="h-12 w-12 text-primary-300 mx-auto mb-2" />
+            <p className="text-sm text-primary-500">Click to upload front side</p>
+            <p className="text-xs text-primary-300 mt-1">PNG, JPG up to 10MB</p>
           </div>
         ) : (
           <div className="relative border rounded-lg overflow-hidden">
@@ -118,7 +118,7 @@ export const DocumentUpload = ({
               alt="Document front preview"
               width={400}
               height={300}
-              className="w-full h-64 object-contain bg-sand-50 dark:bg-primary-900"
+              className="w-full h-64 object-contain bg-sand-50"
             />
             <button
               onClick={clearFront}
@@ -146,18 +146,18 @@ export const DocumentUpload = ({
 
       {requiresBackImage && (
         <div>
-          <label className="block text-sm font-medium text-primary-700 dark:text-sand-200 mb-2">
+          <label className="block text-sm font-medium text-primary-700 mb-2">
             {getDocumentLabel()} - Back Side *
           </label>
           
           {!backPreview ? (
             <div
               onClick={() => backInputRef.current?.click()}
-              className="border-2 border-dashed border-primary-300 dark:border-primary-600 rounded-lg p-8 text-center hover:border-secondary-500 transition-colors cursor-pointer"
+              className="border-2 border-dashed border-primary-300 rounded-lg p-8 text-center hover:border-secondary-500 transition-colors cursor-pointer"
             >
-              <FileText className="h-12 w-12 text-primary-300 dark:text-primary-500 mx-auto mb-2" />
-              <p className="text-sm text-primary-500 dark:text-sand-400">Click to upload back side</p>
-              <p className="text-xs text-primary-300 dark:text-primary-500 mt-1">PNG, JPG up to 10MB</p>
+              <FileText className="h-12 w-12 text-primary-300 mx-auto mb-2" />
+              <p className="text-sm text-primary-500">Click to upload back side</p>
+              <p className="text-xs text-primary-300 mt-1">PNG, JPG up to 10MB</p>
             </div>
           ) : (
             <div className="relative border rounded-lg overflow-hidden">
@@ -166,7 +166,7 @@ export const DocumentUpload = ({
                 alt="Document back preview"
                 width={400}
                 height={300}
-                className="w-full h-64 object-contain bg-sand-50 dark:bg-primary-900"
+                className="w-full h-64 object-contain bg-sand-50"
               />
               <button
                 onClick={clearBack}

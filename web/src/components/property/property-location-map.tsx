@@ -142,10 +142,10 @@ export function PropertyLocationMap({ location, city, country, suburb }: Propert
   if (!lat || !lng) {
     return (
       <div>
-        <h2 className="text-xl font-semibold text-primary-900 dark:text-sand-50 mb-4">
+        <h2 className="text-xl font-semibold text-primary-900 mb-4">
           Where you&apos;ll be
         </h2>
-        <div className="flex items-center gap-2 text-primary-700 dark:text-sand-200">
+        <div className="flex items-center gap-2 text-primary-700">
           <MapPin className="w-5 h-5" />
           <span>{[suburb, city, country].filter(Boolean).join(', ') || 'Location details coming soon'}</span>
         </div>
@@ -157,10 +157,10 @@ export function PropertyLocationMap({ location, city, country, suburb }: Propert
     // Fallback: static location info without map
     return (
       <div>
-        <h2 className="text-xl font-semibold text-primary-900 dark:text-sand-50 mb-4">
+        <h2 className="text-xl font-semibold text-primary-900 mb-4">
           Where you&apos;ll be
         </h2>
-        <div className="flex items-center gap-2 text-primary-700 dark:text-sand-200">
+        <div className="flex items-center gap-2 text-primary-700">
           <MapPin className="w-5 h-5" />
           <span>{[suburb, city, country].filter(Boolean).join(', ')}</span>
         </div>
@@ -170,22 +170,22 @@ export function PropertyLocationMap({ location, city, country, suburb }: Propert
 
   return (
     <div>
-      <h2 className="text-xl font-semibold text-primary-900 dark:text-sand-50 mb-4">
+      <h2 className="text-xl font-semibold text-primary-900 mb-4">
         Where you&apos;ll be
       </h2>
-      <div className="relative rounded-xl overflow-hidden bg-sand-100 dark:bg-primary-800" style={{ height: 300 }}>
+      <div className="relative rounded-xl overflow-hidden bg-sand-100" style={{ height: 300 }}>
         {loading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-sand-100 dark:bg-primary-800 z-10">
+          <div className="absolute inset-0 flex items-center justify-center bg-sand-100 z-10">
             <Loader className="w-6 h-6 animate-spin text-primary-600" />
           </div>
         )}
         <div ref={mapContainer} className="w-full h-full" />
       </div>
-      <p className="mt-3 text-[15px] font-medium text-primary-900 dark:text-sand-50">
+      <p className="mt-3 text-[15px] font-medium text-primary-900">
         {[city, country].filter(Boolean).join(', ')}
       </p>
       {suburb && (
-        <p className="text-sm text-primary-600 dark:text-sand-400 mt-1">
+        <p className="text-sm text-primary-600 mt-1">
           {suburb}
         </p>
       )}

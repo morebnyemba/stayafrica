@@ -39,7 +39,7 @@ export function ProtectedRoute({ children, requireAuth = true, requiredRole }: P
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-sand-100 dark:bg-primary-900">
+      <div className="min-h-screen bg-sand-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="space-y-6">
             <Skeleton className="h-12 w-64" />

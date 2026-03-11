@@ -161,7 +161,7 @@ export function LoginContent({ loginMode = 'universal' }: LoginContentProps) {
   // Show 2FA verification screen when required
   if (showTwoFactor && twoFactorPending) {
     return (
-      <div className="min-h-screen flex items-center justify-center py-8 px-4 sm:py-12 bg-gradient-to-br from-sand-100 via-secondary-50 to-primary-50 dark:from-primary-900 dark:via-primary-800 dark:to-primary-900">
+      <div className="min-h-screen flex items-center justify-center py-8 px-4 sm:py-12 bg-gradient-to-br from-sand-100 via-secondary-50 to-primary-50">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <Link href="/" className="inline-flex items-center justify-center">
@@ -216,32 +216,32 @@ export function LoginContent({ loginMode = 'universal' }: LoginContentProps) {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center py-8 px-4 sm:py-12 bg-gradient-to-br from-sand-100 via-secondary-50 to-primary-50 dark:from-primary-900 dark:via-primary-800 dark:to-primary-900">
+    <div className="min-h-screen flex items-center justify-center py-8 px-4 sm:py-12 bg-gradient-to-br from-sand-100 via-secondary-50 to-primary-50">
       <div className="w-full max-w-md">
         {/* Logo/Branding */}
         <div className="text-center mb-6 sm:mb-8">
           <Link href="/" className="inline-flex items-center justify-center">
             <img src="/logo.png" alt="StayAfrica" className="h-20 sm:h-28 w-auto" />
           </Link>
-          <p className="text-primary-600 dark:text-sand-300 mt-2 text-sm sm:text-base">
+          <p className="text-primary-600 mt-2 text-sm sm:text-base">
             {config.subtitle}
           </p>
         </div>
 
-        <div className="bg-white dark:bg-primary-800 rounded-2xl shadow-elevated p-6 sm:p-8 border border-primary-100 dark:border-primary-700">
+        <div className="bg-white rounded-2xl shadow-elevated p-6 sm:p-8 border border-primary-100">
           <div className="flex items-center justify-center gap-2 mb-6">
             {config.icon}
-            <h1 className="text-2xl sm:text-3xl font-bold text-center text-primary-900 dark:text-sand-50">
+            <h1 className="text-2xl sm:text-3xl font-bold text-center text-primary-900">
               {config.heading}
             </h1>
           </div>
 
           {/* Host login notice */}
           {loginMode === 'host' && (
-            <div className="mb-5 px-4 py-3 rounded-xl bg-secondary-50 dark:bg-secondary-900/20 border border-secondary-200 dark:border-secondary-700/40">
-              <p className="text-xs text-secondary-700 dark:text-secondary-300 text-center">
+            <div className="mb-5 px-4 py-3 rounded-xl bg-secondary-50 border border-secondary-200">
+              <p className="text-xs text-secondary-700 text-center">
                 This portal is exclusively for registered hosts. Not a host?{' '}
-                <Link href="/login/guest" className="font-semibold underline hover:text-secondary-900 dark:hover:text-secondary-200">
+                <Link href="/login/guest" className="font-semibold underline hover:text-secondary-900">
                   Log in as a traveler
                 </Link>
               </p>
@@ -280,13 +280,13 @@ export function LoginContent({ loginMode = 'universal' }: LoginContentProps) {
               <label className="flex items-center">
                 <input
                   type="checkbox"
-                  className="w-4 h-4 text-secondary-500 bg-sand-50 dark:bg-primary-700 border-primary-300 dark:border-primary-600 rounded focus:ring-secondary-500"
+                  className="w-4 h-4 text-secondary-500 bg-sand-50 border-primary-300 rounded focus:ring-secondary-500"
                 />
-                <span className="ml-2 text-sm text-primary-700 dark:text-sand-200">Remember me</span>
+                <span className="ml-2 text-sm text-primary-700">Remember me</span>
               </label>
               <Link
                 href="/forgot-password"
-                className="text-sm text-secondary-600 dark:text-secondary-400 hover:text-secondary-700 dark:hover:text-secondary-300 font-medium"
+                className="text-sm text-secondary-600 hover:text-secondary-700 font-medium"
               >
                 Forgot password?
               </Link>
@@ -312,10 +312,10 @@ export function LoginContent({ loginMode = 'universal' }: LoginContentProps) {
 
           {/* Sign Up Link */}
           <div className="mt-6 text-center">
-            <p className="text-sm text-primary-600 dark:text-sand-400 mb-3">{config.registerHint}</p>
+            <p className="text-sm text-primary-600 mb-3">{config.registerHint}</p>
             <Link
               href={redirectUrl !== config.defaultRedirect ? `${registerUrl}${registerUrl.includes('?') ? '&' : '?'}redirect=${encodeURIComponent(redirectUrl)}` : registerUrl}
-              className="inline-flex w-full items-center justify-center rounded-lg border-2 border-secondary-500 dark:border-secondary-600 px-6 py-2.5 text-base font-semibold text-secondary-700 dark:text-secondary-400 hover:bg-secondary-50 dark:hover:bg-secondary-900/20 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-secondary-500"
+              className="inline-flex w-full items-center justify-center rounded-lg border-2 border-secondary-500 px-6 py-2.5 text-base font-semibold text-secondary-700 hover:bg-secondary-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-secondary-500"
             >
               {config.registerLabel}
             </Link>
@@ -326,7 +326,7 @@ export function LoginContent({ loginMode = 'universal' }: LoginContentProps) {
             <div className="mt-4 text-center">
               <Link
                 href="/login"
-                className="text-xs text-primary-400 dark:text-sand-500 hover:text-primary-600 dark:hover:text-sand-300 transition"
+                className="text-xs text-primary-400 hover:text-primary-600 transition"
               >
                 Use universal login instead
               </Link>

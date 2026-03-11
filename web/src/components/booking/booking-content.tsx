@@ -84,33 +84,33 @@ export function BookingContent() {
     const s = status.toLowerCase();
     switch (s) {
       case 'requested':
-        return 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200 border border-amber-200 dark:border-amber-800';
+        return 'bg-amber-100 text-amber-800 border border-amber-200';
       case 'confirmed':
-        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+        return 'bg-green-100 text-green-800';
       case 'pending':
-        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 border border-yellow-200 dark:border-yellow-800';
+        return 'bg-yellow-100 text-yellow-800 border border-yellow-200';
       case 'cancelled':
-        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+        return 'bg-red-100 text-red-800';
       case 'completed':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+        return 'bg-blue-100 text-blue-800';
       case 'checked_in':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+        return 'bg-blue-100 text-blue-800';
       case 'checked_out':
-        return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
+        return 'bg-purple-100 text-purple-800';
       default:
-        return 'bg-primary-100 text-primary-800 dark:bg-primary-700 dark:text-sand-200';
+        return 'bg-primary-100 text-primary-800';
     }
   };
 
   if (!isAuthenticated) {
     return (
-      <div className="bg-sand-100 dark:bg-primary-900 min-h-screen">
+      <div className="bg-sand-100 min-h-screen">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="card p-12 text-center">
-            <h2 className="text-2xl font-bold text-primary-900 dark:text-sand-50 mb-4">
+            <h2 className="text-2xl font-bold text-primary-900 mb-4">
               Sign In Required
             </h2>
-            <p className="text-primary-600 dark:text-sand-300 mb-8">
+            <p className="text-primary-600 mb-8">
               Please sign in to view your bookings.
             </p>
             <a href="/login" className="inline-block">
@@ -126,14 +126,14 @@ export function BookingContent() {
   const currentError = activeTab === 'properties' ? error : expError;
 
   return (
-    <div className="bg-sand-100 dark:bg-primary-900 min-h-screen">
+    <div className="bg-sand-100 min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-primary-900 dark:text-sand-50 mb-2">
+          <h1 className="text-3xl md:text-4xl font-bold text-primary-900 mb-2">
             My Bookings
           </h1>
-          <p className="text-lg text-primary-600 dark:text-sand-200">
+          <p className="text-lg text-primary-600">
             View and manage your reservations
           </p>
         </div>
@@ -144,8 +144,8 @@ export function BookingContent() {
             <button
               onClick={() => { setActiveTab('properties'); setStatusFilter(''); }}
               className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold transition-all ${activeTab === 'properties'
-                  ? 'bg-primary-900 text-sand-50 dark:bg-sand-50 dark:text-primary-900 shadow-md'
-                  : 'text-primary-600 dark:text-sand-400 hover:bg-primary-100 dark:hover:bg-primary-800'
+                  ? 'bg-primary-900 text-sand-50 shadow-md'
+                  : 'text-primary-600 hover:bg-primary-100'
                 }`}
             >
               <Home className="w-4 h-4" />
@@ -154,8 +154,8 @@ export function BookingContent() {
             <button
               onClick={() => { setActiveTab('experiences'); setStatusFilter(''); }}
               className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold transition-all ${activeTab === 'experiences'
-                  ? 'bg-primary-900 text-sand-50 dark:bg-sand-50 dark:text-primary-900 shadow-md'
-                  : 'text-primary-600 dark:text-sand-400 hover:bg-primary-100 dark:hover:bg-primary-800'
+                  ? 'bg-primary-900 text-sand-50 shadow-md'
+                  : 'text-primary-600 hover:bg-primary-100'
                 }`}
             >
               <Compass className="w-4 h-4" />
@@ -217,18 +217,18 @@ export function BookingContent() {
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
               <div key={i} className="card p-6 animate-pulse">
-                <div className="h-6 bg-primary-200 dark:bg-primary-700 rounded mb-4 w-1/2"></div>
-                <div className="h-4 bg-primary-200 dark:bg-primary-700 rounded mb-2"></div>
-                <div className="h-4 bg-primary-200 dark:bg-primary-700 rounded w-3/4"></div>
+                <div className="h-6 bg-primary-200 rounded mb-4 w-1/2"></div>
+                <div className="h-4 bg-primary-200 rounded mb-2"></div>
+                <div className="h-4 bg-primary-200 rounded w-3/4"></div>
               </div>
             ))}
           </div>
         ) : currentError ? (
           <div className="card p-12 text-center">
-            <p className="text-primary-600 dark:text-sand-300 mb-4">
+            <p className="text-primary-600 mb-4">
               Unable to load bookings. Please try again later.
             </p>
-            <p className="text-sm text-primary-500 dark:text-sand-400">
+            <p className="text-sm text-primary-500">
               Error: {currentError instanceof Error ? currentError.message : 'Unknown error'}
             </p>
           </div>
@@ -236,11 +236,11 @@ export function BookingContent() {
           /* ── Property Bookings ── */
           bookings.length === 0 ? (
             <div className="card p-12 text-center">
-              <Calendar className="w-16 h-16 text-primary-400 dark:text-sand-500 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-primary-900 dark:text-sand-50 mb-2">
+              <Calendar className="w-16 h-16 text-primary-400 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-primary-900 mb-2">
                 No Stays Found
               </h3>
-              <p className="text-primary-600 dark:text-sand-300 mb-8">
+              <p className="text-primary-600 mb-8">
                 You haven&apos;t booked any stays yet. Start exploring properties!
               </p>
               <a href="/explore" className="inline-block">
@@ -250,7 +250,7 @@ export function BookingContent() {
           ) : (
             <div className="space-y-4">
               {/* Booking count */}
-              <p className="text-sm text-primary-500 dark:text-sand-400">
+              <p className="text-sm text-primary-500">
                 Showing {bookings.length} {bookings.length === 1 ? 'stay' : 'stays'}
                 {statusFilter ? ` · ${statusFilter}` : ''}
               </p>
@@ -263,12 +263,12 @@ export function BookingContent() {
                   <article key={booking.id} className="card overflow-hidden">
                     <div className="flex flex-col sm:flex-row">
                       {/* Property thumbnail */}
-                      <div className="sm:w-48 h-40 sm:h-auto flex-shrink-0 bg-primary-200 dark:bg-primary-700 relative">
+                      <div className="sm:w-48 h-40 sm:h-auto flex-shrink-0 bg-primary-200 relative">
                         {img ? (
                           <img src={img} alt={booking.property?.title || ''} className="w-full h-full object-cover" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
-                            <ImageIcon className="w-10 h-10 text-primary-400 dark:text-primary-600" />
+                            <ImageIcon className="w-10 h-10 text-primary-400" />
                           </div>
                         )}
                         <span className={`absolute top-2 left-2 px-2.5 py-1 rounded-full text-xs font-semibold ${getStatusColor(booking.status)}`}>
@@ -281,51 +281,51 @@ export function BookingContent() {
                         <div className="flex flex-col md:flex-row md:items-start justify-between mb-3">
                           <div className="flex-1 mb-3 md:mb-0">
                             <div className="flex items-center gap-2 mb-1">
-                              <span className="inline-flex items-center gap-1 text-xs font-medium text-primary-500 dark:text-sand-400 bg-primary-100 dark:bg-primary-800 px-2 py-0.5 rounded">
+                              <span className="inline-flex items-center gap-1 text-xs font-medium text-primary-500 bg-primary-100 px-2 py-0.5 rounded">
                                 <Home className="w-3 h-3" /> Stay
                               </span>
                             </div>
-                            <h3 className="text-lg font-semibold text-primary-900 dark:text-sand-50 mb-1">
+                            <h3 className="text-lg font-semibold text-primary-900 mb-1">
                               {booking.property?.title || booking.property_title || 'Property'}
                             </h3>
-                            <div className="flex items-center gap-1.5 text-primary-500 dark:text-sand-400 text-sm">
+                            <div className="flex items-center gap-1.5 text-primary-500 text-sm">
                               <MapPin className="w-3.5 h-3.5" />
                               <span>{booking.property?.city || 'Unknown'}, {booking.property?.country || 'Unknown'}</span>
                             </div>
                           </div>
                           <div className="text-right">
-                            <div className="text-xl sm:text-2xl font-bold text-primary-900 dark:text-sand-50">
+                            <div className="text-xl sm:text-2xl font-bold text-primary-900">
                               ${booking.grand_total}
                             </div>
-                            <div className="text-xs text-primary-500 dark:text-sand-400">
+                            <div className="text-xs text-primary-500">
                               Total Amount
                             </div>
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 py-3 border-t border-primary-200 dark:border-primary-700">
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 py-3 border-t border-primary-200">
                           <div>
-                            <div className="text-xs text-primary-500 dark:text-sand-400 mb-0.5">Check-in</div>
-                            <div className="text-sm font-semibold text-primary-900 dark:text-sand-50">
+                            <div className="text-xs text-primary-500 mb-0.5">Check-in</div>
+                            <div className="text-sm font-semibold text-primary-900">
                               {fmtDate(checkIn)}
                             </div>
                           </div>
                           <div>
-                            <div className="text-xs text-primary-500 dark:text-sand-400 mb-0.5">Check-out</div>
-                            <div className="text-sm font-semibold text-primary-900 dark:text-sand-50">
+                            <div className="text-xs text-primary-500 mb-0.5">Check-out</div>
+                            <div className="text-sm font-semibold text-primary-900">
                               {fmtDate(checkOut)}
                             </div>
                           </div>
                           <div>
-                            <div className="text-xs text-primary-500 dark:text-sand-400 mb-0.5">Nights</div>
-                            <div className="text-sm font-semibold text-primary-900 dark:text-sand-50">
+                            <div className="text-xs text-primary-500 mb-0.5">Nights</div>
+                            <div className="text-sm font-semibold text-primary-900">
                               {booking.nights}
                             </div>
                           </div>
                           {booking.booking_ref && (
                             <div>
-                              <div className="text-xs text-primary-500 dark:text-sand-400 mb-0.5">Ref</div>
-                              <div className="text-sm font-semibold text-primary-900 dark:text-sand-50 font-mono">
+                              <div className="text-xs text-primary-500 mb-0.5">Ref</div>
+                              <div className="text-sm font-semibold text-primary-900 font-mono">
                                 {booking.booking_ref}
                               </div>
                             </div>
@@ -379,11 +379,11 @@ export function BookingContent() {
           /* ── Experience Bookings ── */
           expBookings.length === 0 ? (
             <div className="card p-12 text-center">
-              <Compass className="w-16 h-16 text-primary-400 dark:text-sand-500 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-primary-900 dark:text-sand-50 mb-2">
+              <Compass className="w-16 h-16 text-primary-400 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-primary-900 mb-2">
                 No Experiences Found
               </h3>
-              <p className="text-primary-600 dark:text-sand-300 mb-8">
+              <p className="text-primary-600 mb-8">
                 You haven&apos;t booked any experiences yet. Discover exciting activities!
               </p>
               <a href="/experiences" className="inline-block">
@@ -398,10 +398,10 @@ export function BookingContent() {
                     <div className="flex flex-col md:flex-row md:items-start justify-between mb-4">
                       <div className="flex-1 mb-4 md:mb-0">
                         <div className="flex items-center gap-3 mb-2">
-                          <span className="inline-flex items-center gap-1 text-xs font-medium text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/30 px-2 py-0.5 rounded">
+                          <span className="inline-flex items-center gap-1 text-xs font-medium text-amber-700 bg-amber-50 px-2 py-0.5 rounded">
                             <Compass className="w-3 h-3" /> Experience
                           </span>
-                          <h3 className="text-xl font-semibold text-primary-900 dark:text-sand-50">
+                          <h3 className="text-xl font-semibold text-primary-900">
                             {booking.experience_title || booking.experience?.title || 'Experience'}
                           </h3>
                           <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(booking.status)}`}>
@@ -410,39 +410,39 @@ export function BookingContent() {
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="text-2xl font-bold text-primary-900 dark:text-sand-50">
+                        <div className="text-2xl font-bold text-primary-900">
                           ${booking.total_amount}
                         </div>
-                        <div className="text-sm text-primary-600 dark:text-sand-300">
+                        <div className="text-sm text-primary-600">
                           Total Amount
                         </div>
                       </div>
                     </div>
 
-                    <div className="grid md:grid-cols-3 gap-4 py-4 border-t border-primary-200 dark:border-primary-700">
+                    <div className="grid md:grid-cols-3 gap-4 py-4 border-t border-primary-200">
                       <div>
-                        <div className="text-sm text-primary-600 dark:text-sand-400 mb-1 flex items-center gap-1">
+                        <div className="text-sm text-primary-600 mb-1 flex items-center gap-1">
                           <Calendar className="w-3.5 h-3.5" /> Date
                         </div>
-                        <div className="font-semibold text-primary-900 dark:text-sand-50">
+                        <div className="font-semibold text-primary-900">
                           {new Date(booking.booking_date).toLocaleDateString()}
                         </div>
                       </div>
                       {booking.booking_time && (
                         <div>
-                          <div className="text-sm text-primary-600 dark:text-sand-400 mb-1 flex items-center gap-1">
+                          <div className="text-sm text-primary-600 mb-1 flex items-center gap-1">
                             <Clock className="w-3.5 h-3.5" /> Time
                           </div>
-                          <div className="font-semibold text-primary-900 dark:text-sand-50">
+                          <div className="font-semibold text-primary-900">
                             {booking.booking_time}
                           </div>
                         </div>
                       )}
                       <div>
-                        <div className="text-sm text-primary-600 dark:text-sand-400 mb-1 flex items-center gap-1">
+                        <div className="text-sm text-primary-600 mb-1 flex items-center gap-1">
                           <Users className="w-3.5 h-3.5" /> Participants
                         </div>
-                        <div className="font-semibold text-primary-900 dark:text-sand-50">
+                        <div className="font-semibold text-primary-900">
                           {booking.num_participants}
                         </div>
                       </div>

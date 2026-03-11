@@ -48,7 +48,7 @@ export default function InstantBookButton({
         disabled
         className={`
           flex items-center justify-center gap-2 px-6 py-3 
-          bg-primary-100 dark:bg-primary-800 text-primary-300 dark:text-primary-500 font-semibold rounded-lg cursor-not-allowed
+          bg-primary-100 text-primary-300 font-semibold rounded-lg cursor-not-allowed
           ${className}
         `}
       >
@@ -63,7 +63,7 @@ export default function InstantBookButton({
       <div className={className}>
         <button
           disabled
-          className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-primary-100 dark:bg-primary-800 text-primary-400 dark:text-sand-500 font-semibold rounded-lg cursor-not-allowed"
+          className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-primary-100 text-primary-400 font-semibold rounded-lg cursor-not-allowed"
         >
           <XCircle className="w-5 h-5" />
           Instant Book Not Available
@@ -126,7 +126,7 @@ export default function InstantBookButton({
         </div>
       )}
 
-      <p className="text-xs text-primary-400 dark:text-sand-500 mt-3 text-center">
+      <p className="text-xs text-primary-400 mt-3 text-center">
         <CheckCircle className="w-4 h-4 inline mr-1 text-green-600" />
         Confirmed immediately, no waiting for host approval
       </p>

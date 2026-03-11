@@ -20,7 +20,7 @@ export default function FlexibilityToggle({
         flex items-center gap-2 px-4 py-2.5 rounded-lg border-2 font-medium transition
         ${isFlexible 
           ? 'border-primary-600 bg-primary-50 text-primary-700' 
-          : 'border-primary-300 dark:border-primary-600 bg-white dark:bg-primary-800/40 text-primary-700 dark:text-sand-200 hover:border-primary-400 dark:hover:border-primary-500'
+          : 'border-primary-300 bg-white text-primary-700 hover:border-primary-400'
         }
         ${className}
       `}

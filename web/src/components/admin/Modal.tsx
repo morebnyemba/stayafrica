@@ -30,13 +30,13 @@ export default function Modal({ isOpen, onClose, title, children, size = 'md' }:
         />
         
         {/* Modal */}
-        <div className={`relative w-full ${sizeClasses[size]} bg-white dark:bg-primary-800/40 rounded-lg shadow-xl transform transition-all`}>
+        <div className={`relative w-full ${sizeClasses[size]} bg-white rounded-lg shadow-xl transform transition-all`}>
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-sand-200/50 dark:border-primary-700/50">
+          <div className="flex items-center justify-between p-6 border-b border-sand-200/50">
             <h3 className="text-xl font-bold text-[#122F26]">{title}</h3>
             <button
               onClick={onClose}
-              className="text-primary-300 dark:text-primary-500 hover:text-primary-500 dark:hover:text-sand-400 transition-colors"
+              className="text-primary-300 hover:text-primary-500 transition-colors"
             >
               <X className="w-6 h-6" />
             </button>

@@ -6,7 +6,7 @@ export default function OfflinePage() {
         <h1 className="mb-4 text-3xl font-bold text-primary-900">
           You&apos;re Offline
         </h1>
-        <p className="mb-8 text-lg text-primary-500 dark:text-sand-400">
+        <p className="mb-8 text-lg text-primary-500">
           It looks like you&apos;ve lost your internet connection. Please check
           your connection and try again.
         </p>

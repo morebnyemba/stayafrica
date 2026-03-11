@@ -91,7 +91,7 @@ export function MapDirections({ destination, className = '' }: MapDirectionsProp
         new mapboxgl.Popup().setHTML(
           `<div class="p-2">
             <h3 class="font-semibold">${destination.name || 'Destination'}</h3>
-            ${destination.address ? `<p class="text-sm text-primary-500 dark:text-sand-400">${destination.address}</p>` : ''}
+            ${destination.address ? `<p class="text-sm text-primary-500">${destination.address}</p>` : ''}
           </div>`
         )
       )
@@ -184,7 +184,7 @@ export function MapDirections({ destination, className = '' }: MapDirectionsProp
 
   if (!mapboxToken) {
     return (
-      <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 text-red-800 dark:text-red-200">
+      <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-800">
         <p className="font-medium">Map Configuration Error</p>
         <p className="text-sm">Mapbox token is not configured.</p>
       </div>
@@ -198,20 +198,20 @@ export function MapDirections({ destination, className = '' }: MapDirectionsProp
         <div className="card p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-primary-600 dark:text-sand-400 mb-1">
+              <p className="text-sm text-primary-600 mb-1">
                 Route Information
               </p>
               <div className="flex items-center gap-4">
                 {distance && (
                   <div className="flex items-center gap-2">
                     <Navigation className="w-4 h-4 text-secondary-600" />
-                    <span className="font-semibold text-primary-900 dark:text-sand-50">
+                    <span className="font-semibold text-primary-900">
                       {distance}
                     </span>
                   </div>
                 )}
                 {duration && (
-                  <div className="text-primary-700 dark:text-sand-300">
+                  <div className="text-primary-700">
                     ~{duration}
                   </div>
                 )}
@@ -225,17 +225,17 @@ export function MapDirections({ destination, className = '' }: MapDirectionsProp
       )}
 
       {/* Map Container */}
-      <div className="relative bg-primary-100 dark:bg-primary-800 rounded-lg overflow-hidden border border-primary-300 dark:border-primary-600">
+      <div className="relative bg-primary-100 rounded-lg overflow-hidden border border-primary-300">
         {loading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-white/80 dark:bg-primary-900/80 z-10">
+          <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
             <div className="flex flex-col items-center gap-2">
               <Loader className="w-6 h-6 animate-spin text-primary-600" />
-              <p className="text-sm text-primary-600 dark:text-sand-400">Loading map...</p>
+              <p className="text-sm text-primary-600">Loading map...</p>
             </div>
           </div>
         )}
         {error && (
-          <div className="absolute inset-0 flex items-center justify-center bg-white/80 dark:bg-primary-900/80 z-10">
+          <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
             <div className="flex flex-col items-center gap-2 text-red-600">
               <AlertCircle className="w-6 h-6" />
               <p className="text-sm">{error}</p>
@@ -246,7 +246,7 @@ export function MapDirections({ destination, className = '' }: MapDirectionsProp
       </div>
 
       {/* Instructions */}
-      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 text-sm text-blue-800 dark:text-blue-200">
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-800">
         <p className="font-medium mb-2 flex items-center gap-2">
           <Navigation className="w-4 h-4" />
           Getting Directions

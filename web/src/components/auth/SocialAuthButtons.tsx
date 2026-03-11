@@ -98,7 +98,7 @@ export default function SocialAuthButtons({ mode: _mode = 'signin', onSuccess: _
         {/* Google */}
         <button
           onClick={handleGoogleAuth}
-          className="flex w-full items-center justify-center gap-3 rounded-md bg-white dark:bg-primary-800/40 px-3 py-2 text-sm font-semibold text-primary-900 dark:text-sand-50 shadow-sm ring-1 ring-inset ring-primary-300 dark:ring-primary-600 hover:bg-sand-50 dark:hover:bg-primary-800"
+          className="flex w-full items-center justify-center gap-3 rounded-md bg-white px-3 py-2 text-sm font-semibold text-primary-900 shadow-sm ring-1 ring-inset ring-primary-300 hover:bg-sand-50"
         >
           <svg className="h-5 w-5" viewBox="0 0 24 24">
             <path

@@ -18,15 +18,15 @@ export const PerformanceIndicator: React.FC<PerformanceIndicatorProps> = ({
   const getStatusColor = () => {
     switch (status) {
       case 'excellent':
-        return 'text-green-600 bg-green-100 dark:bg-green-900/30';
+        return 'text-green-600 bg-green-100';
       case 'good':
-        return 'text-blue-600 bg-blue-100 dark:bg-blue-900/30';
+        return 'text-blue-600 bg-blue-100';
       case 'average':
-        return 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/30';
+        return 'text-yellow-600 bg-yellow-100';
       case 'poor':
-        return 'text-red-600 bg-red-100 dark:bg-red-900/30';
+        return 'text-red-600 bg-red-100';
       default:
-        return 'text-primary-500 bg-primary-100 dark:bg-primary-800';
+        return 'text-primary-500 bg-primary-100';
     }
   };
 
@@ -46,16 +46,16 @@ export const PerformanceIndicator: React.FC<PerformanceIndicatorProps> = ({
   };
 
   const getTrendColor = () => {
-    if (!change) return 'text-primary-500 dark:text-sand-400';
+    if (!change) return 'text-primary-500';
     if (change > 0) return 'text-green-600';
     return 'text-red-600';
   };
 
   return (
-    <div className={`bg-white dark:bg-primary-800/40 rounded-xl p-4 border border-sand-200/50 dark:border-primary-700/50 ${className}`}>
+    <div className={`bg-white rounded-xl p-4 border border-sand-200/50 ${className}`}>
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
-        <h4 className="text-sm font-medium text-primary-600 dark:text-sand-300">
+        <h4 className="text-sm font-medium text-primary-600">
           {label}
         </h4>
         <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor()}`}>
@@ -65,11 +65,11 @@ export const PerformanceIndicator: React.FC<PerformanceIndicatorProps> = ({
 
       {/* Value */}
       <div className="flex items-baseline space-x-2 mb-3">
-        <span className="text-2xl font-bold text-primary-900 dark:text-sand-50">
+        <span className="text-2xl font-bold text-primary-900">
           {value.toFixed(1)}
         </span>
         {target && (
-          <span className="text-sm text-primary-500 dark:text-sand-400">
+          <span className="text-sm text-primary-500">
             / {target}
           </span>
         )}
@@ -83,7 +83,7 @@ export const PerformanceIndicator: React.FC<PerformanceIndicatorProps> = ({
 
       {/* Progress Bar */}
       {target && (
-        <div className="w-full bg-primary-200 dark:bg-primary-700 rounded-full h-2">
+        <div className="w-full bg-primary-200 rounded-full h-2">
           <div
             className={`h-2 rounded-full transition-all ${
               status === 'excellent' ? 'bg-green-600' :

@@ -105,13 +105,13 @@ const settingsSections = [
 
 export default function SettingsPage() {
   return (
-    <div className="min-h-screen bg-sand-100 dark:bg-primary-900">
+    <div className="min-h-screen bg-sand-100">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-primary-900 dark:text-sand-50 mb-2">
+          <h1 className="text-3xl md:text-4xl font-bold text-primary-900 mb-2">
             Settings
           </h1>
-          <p className="text-lg text-primary-600 dark:text-sand-300">
+          <p className="text-lg text-primary-600">
             Manage your account and preferences
           </p>
         </div>
@@ -119,30 +119,30 @@ export default function SettingsPage() {
         <div className="space-y-8">
           {settingsSections.map((section) => (
             <div key={section.title}>
-              <h2 className="text-xl font-semibold text-primary-900 dark:text-sand-50 mb-4">
+              <h2 className="text-xl font-semibold text-primary-900 mb-4">
                 {section.title}
               </h2>
-              <div className="bg-white dark:bg-primary-800 rounded-lg shadow-sm border border-primary-200 dark:border-primary-700 divide-y divide-primary-200 dark:divide-primary-700">
+              <div className="bg-white rounded-lg shadow-sm border border-primary-200 divide-y divide-primary-200">
                 {section.items.map((item) => (
                   <Link
                     key={item.title}
                     href={item.link}
-                    className="flex items-center justify-between p-4 hover:bg-primary-50 dark:hover:bg-primary-700/50 transition-colors"
+                    className="flex items-center justify-between p-4 hover:bg-primary-50 transition-colors"
                   >
                     <div className="flex items-center gap-4">
-                      <div className="p-2 bg-primary-100 dark:bg-primary-700 rounded-lg">
-                        <item.icon className="w-5 h-5 text-primary-600 dark:text-sand-300" />
+                      <div className="p-2 bg-primary-100 rounded-lg">
+                        <item.icon className="w-5 h-5 text-primary-600" />
                       </div>
                       <div>
-                        <h3 className="font-medium text-primary-900 dark:text-sand-50">
+                        <h3 className="font-medium text-primary-900">
                           {item.title}
                         </h3>
-                        <p className="text-sm text-primary-600 dark:text-sand-400">
+                        <p className="text-sm text-primary-600">
                           {item.description}
                         </p>
                       </div>
                     </div>
-                    <ChevronRight className="w-5 h-5 text-primary-400 dark:text-sand-500" />
+                    <ChevronRight className="w-5 h-5 text-primary-400" />
                   </Link>
                 ))}
               </div>

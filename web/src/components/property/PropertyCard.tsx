@@ -106,7 +106,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
   return (
     <Link href={`/property/${property.id}`} className="group block">
       {/* Image Container */}
-      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl bg-sand-100 dark:bg-primary-800">
+      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl bg-sand-100">
         {totalImages > 0 ? (
           <Image
             src={property.images[currentImageIndex]}
@@ -116,8 +116,8 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
           />
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center bg-sand-200 dark:bg-primary-700">
-            <span className="text-sm text-primary-400 dark:text-sand-500">No image</span>
+          <div className="absolute inset-0 flex items-center justify-center bg-sand-200">
+            <span className="text-sm text-primary-400">No image</span>
           </div>
         )}
 
@@ -148,17 +148,17 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
           <>
             <button
               onClick={handlePrevImage}
-              className="absolute left-2 top-1/2 -translate-y-1/2 z-10 rounded-full bg-white/90 dark:bg-primary-800/90 p-1.5 shadow-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white dark:hover:bg-primary-700 hover:scale-105"
+              className="absolute left-2 top-1/2 -translate-y-1/2 z-10 rounded-full bg-white/90 p-1.5 shadow-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white hover:scale-105"
               aria-label="Previous image"
             >
-              <ChevronLeft className="h-4 w-4 text-primary-900 dark:text-sand-50" />
+              <ChevronLeft className="h-4 w-4 text-primary-900" />
             </button>
             <button
               onClick={handleNextImage}
-              className="absolute right-2 top-1/2 -translate-y-1/2 z-10 rounded-full bg-white/90 dark:bg-primary-800/90 p-1.5 shadow-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white dark:hover:bg-primary-700 hover:scale-105"
+              className="absolute right-2 top-1/2 -translate-y-1/2 z-10 rounded-full bg-white/90 p-1.5 shadow-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white hover:scale-105"
               aria-label="Next image"
             >
-              <ChevronRight className="h-4 w-4 text-primary-900 dark:text-sand-50" />
+              <ChevronRight className="h-4 w-4 text-primary-900" />
             </button>
           </>
         )}
@@ -187,13 +187,13 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
       <div className="mt-3 space-y-0.5">
         {/* Location + Rating */}
         <div className="flex items-center justify-between">
-          <p className="font-semibold text-[15px] text-primary-900 dark:text-sand-50 line-clamp-1">
+          <p className="font-semibold text-[15px] text-primary-900 line-clamp-1">
             {property.location}
           </p>
           {property.rating > 0 && (
             <div className="flex items-center gap-1 flex-shrink-0 ml-2">
-              <Star className="h-3.5 w-3.5 fill-primary-900 dark:fill-sand-50 text-primary-900 dark:text-sand-50" />
-              <span className="text-sm text-primary-900 dark:text-sand-50">
+              <Star className="h-3.5 w-3.5 fill-primary-900 text-primary-900" />
+              <span className="text-sm text-primary-900">
                 {property.rating.toFixed(1)}
               </span>
             </div>
@@ -201,21 +201,21 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
         </div>
 
         {/* Title */}
-        <p className="text-sm text-primary-500 dark:text-sand-400 line-clamp-1">
+        <p className="text-sm text-primary-500 line-clamp-1">
           {property.title}
         </p>
 
         {/* Beds · Baths · Guests */}
-        <p className="text-sm text-primary-500 dark:text-sand-400">
+        <p className="text-sm text-primary-500">
           {property.beds} bed{property.beds !== 1 ? 's' : ''} · {property.baths} bath{property.baths !== 1 ? 's' : ''} · {property.guests} guest{property.guests !== 1 ? 's' : ''}
         </p>
 
         {/* Price */}
         <p className="pt-1">
-          <span className="font-semibold text-[15px] text-primary-900 dark:text-sand-50">
+          <span className="font-semibold text-[15px] text-primary-900">
             ${property.price}
           </span>
-          <span className="text-sm text-primary-500 dark:text-sand-400"> night</span>
+          <span className="text-sm text-primary-500"> night</span>
         </p>
       </div>
     </Link>

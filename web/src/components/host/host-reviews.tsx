@@ -69,27 +69,27 @@ export function HostReviews() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-sand-100 dark:bg-primary-900 py-8">
+      <div className="min-h-screen bg-sand-100 py-8">
         <div className="max-w-6xl mx-auto px-4">
           <div className="mb-8">
-            <div className="h-9 w-52 bg-primary-200 dark:bg-primary-700 rounded animate-pulse mb-2" />
-            <div className="h-5 w-72 bg-primary-200 dark:bg-primary-700 rounded animate-pulse" />
+            <div className="h-9 w-52 bg-primary-200 rounded animate-pulse mb-2" />
+            <div className="h-5 w-72 bg-primary-200 rounded animate-pulse" />
           </div>
           {/* Stats skeleton */}
           <div className="card p-4 sm:p-6 mb-6 animate-pulse">
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 sm:gap-8">
               <div className="text-center">
-                <div className="h-14 w-16 bg-primary-200 dark:bg-primary-700 rounded mx-auto mb-2" />
+                <div className="h-14 w-16 bg-primary-200 rounded mx-auto mb-2" />
                 <div className="flex gap-1 mb-2 justify-center">
-                  {[1,2,3,4,5].map(s => <div key={s} className="w-5 h-5 bg-primary-200 dark:bg-primary-700 rounded" />)}
+                  {[1,2,3,4,5].map(s => <div key={s} className="w-5 h-5 bg-primary-200 rounded" />)}
                 </div>
               </div>
               <div className="flex-1 space-y-3">
                 {[1,2,3,4,5].map(r => (
                   <div key={r} className="flex items-center gap-3">
-                    <div className="w-8 h-4 bg-primary-200 dark:bg-primary-700 rounded" />
-                    <div className="flex-1 h-2 bg-primary-200 dark:bg-primary-700 rounded-full" />
-                    <div className="w-8 h-4 bg-primary-200 dark:bg-primary-700 rounded" />
+                    <div className="w-8 h-4 bg-primary-200 rounded" />
+                    <div className="flex-1 h-2 bg-primary-200 rounded-full" />
+                    <div className="w-8 h-4 bg-primary-200 rounded" />
                   </div>
                 ))}
               </div>
@@ -100,15 +100,15 @@ export function HostReviews() {
             {[1,2,3].map(i => (
               <div key={i} className="card p-6 animate-pulse">
                 <div className="flex items-start gap-4 mb-4">
-                  <div className="w-12 h-12 bg-primary-200 dark:bg-primary-700 rounded-full" />
+                  <div className="w-12 h-12 bg-primary-200 rounded-full" />
                   <div className="flex-1 space-y-2">
-                    <div className="h-5 w-32 bg-primary-200 dark:bg-primary-700 rounded" />
-                    <div className="h-4 w-48 bg-primary-200 dark:bg-primary-700 rounded" />
+                    <div className="h-5 w-32 bg-primary-200 rounded" />
+                    <div className="h-4 w-48 bg-primary-200 rounded" />
                   </div>
-                  <div className="flex gap-1">{[1,2,3,4,5].map(s => <div key={s} className="w-4 h-4 bg-primary-200 dark:bg-primary-700 rounded" />)}</div>
+                  <div className="flex gap-1">{[1,2,3,4,5].map(s => <div key={s} className="w-4 h-4 bg-primary-200 rounded" />)}</div>
                 </div>
-                <div className="h-4 w-full bg-primary-200 dark:bg-primary-700 rounded mb-2" />
-                <div className="h-4 w-3/4 bg-primary-200 dark:bg-primary-700 rounded" />
+                <div className="h-4 w-full bg-primary-200 rounded mb-2" />
+                <div className="h-4 w-3/4 bg-primary-200 rounded" />
               </div>
             ))}
           </div>
@@ -118,12 +118,12 @@ export function HostReviews() {
   }
 
   return (
-    <div className="min-h-screen bg-sand-100 dark:bg-primary-900 py-8">
+    <div className="min-h-screen bg-sand-100 py-8">
       <div className="max-w-6xl mx-auto px-4">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-primary-900 dark:text-sand-50 mb-2">Guest Reviews</h1>
-          <p className="text-primary-500 dark:text-sand-400">See what guests say about your properties</p>
+          <h1 className="text-3xl font-bold text-primary-900 mb-2">Guest Reviews</h1>
+          <p className="text-primary-500">See what guests say about your properties</p>
         </div>
 
         {/* Stats Card */}
@@ -131,7 +131,7 @@ export function HostReviews() {
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 sm:gap-8">
             {/* Average Rating */}
             <div className="text-center">
-              <div className="text-5xl font-bold text-primary-900 dark:text-sand-50 mb-2">
+              <div className="text-5xl font-bold text-primary-900 mb-2">
                 {averageRating.toFixed(1)}
               </div>
               <div className="flex gap-1 mb-2">
@@ -141,12 +141,12 @@ export function HostReviews() {
                     className={`w-5 h-5 ${
                       star <= Math.round(averageRating)
                         ? 'fill-secondary-500 text-secondary-500'
-                        : 'text-primary-200 dark:text-primary-600'
+                        : 'text-primary-200'
                     }`}
                   />
                 ))}
               </div>
-              <p className="text-sm text-primary-500 dark:text-sand-400">
+              <p className="text-sm text-primary-500">
                 {totalReviews} {totalReviews === 1 ? 'review' : 'reviews'}
               </p>
             </div>
@@ -155,15 +155,15 @@ export function HostReviews() {
             <div className="flex-1">
               {ratingDistribution.map(({ rating, count, percentage }) => (
                 <div key={rating} className="flex items-center gap-3 mb-2">
-                  <span className="text-sm text-primary-500 dark:text-sand-400 w-8">{rating}</span>
+                  <span className="text-sm text-primary-500 w-8">{rating}</span>
                   <Star className="w-4 h-4 text-secondary-500 fill-secondary-500" />
-                  <div className="flex-1 h-2 bg-primary-200 dark:bg-primary-700 rounded-full overflow-hidden">
+                  <div className="flex-1 h-2 bg-primary-200 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-secondary-500 rounded-full"
                       style={{ width: `${percentage}%` }}
                     />
                   </div>
-                  <span className="text-sm text-primary-500 dark:text-sand-400 w-8 text-right">{count}</span>
+                  <span className="text-sm text-primary-500 w-8 text-right">{count}</span>
                 </div>
               ))}
             </div>
@@ -176,7 +176,7 @@ export function HostReviews() {
             <select
               value={selectedProperty}
               onChange={(e) => setSelectedProperty(e.target.value)}
-              className="w-full px-4 py-3 bg-white dark:bg-primary-800/40 border border-primary-300 dark:border-primary-600 rounded-xl focus:ring-2 focus:ring-secondary-500 focus:border-transparent text-sm"
+              className="w-full px-4 py-3 bg-white border border-primary-300 rounded-xl focus:ring-2 focus:ring-secondary-500 focus:border-transparent text-sm"
             >
               <option value="all">All Properties</option>
               {properties.map((property: any) => (
@@ -190,7 +190,7 @@ export function HostReviews() {
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as 'recent' | 'rating')}
-            className="px-4 py-3 bg-white dark:bg-primary-800/40 border border-primary-300 dark:border-primary-600 rounded-xl focus:ring-2 focus:ring-secondary-500 focus:border-transparent text-sm"
+            className="px-4 py-3 bg-white border border-primary-300 rounded-xl focus:ring-2 focus:ring-secondary-500 focus:border-transparent text-sm"
           >
             <option value="recent">Most Recent</option>
             <option value="rating">Highest Rating</option>
@@ -201,11 +201,11 @@ export function HostReviews() {
         <div className="space-y-4">
           {reviews.length === 0 ? (
             <div className="card p-12 text-center">
-              <div className="w-16 h-16 bg-primary-100 dark:bg-primary-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Star className="w-8 h-8 text-primary-300 dark:text-primary-600" />
+              <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Star className="w-8 h-8 text-primary-300" />
               </div>
-              <h3 className="text-xl font-semibold text-primary-900 dark:text-sand-50 mb-2">No Reviews Yet</h3>
-              <p className="text-primary-500 dark:text-sand-400">
+              <h3 className="text-xl font-semibold text-primary-900 mb-2">No Reviews Yet</h3>
+              <p className="text-primary-500">
                 Reviews from your guests will appear here after their stay
               </p>
             </div>
@@ -218,18 +218,18 @@ export function HostReviews() {
                 {/* Review Header */}
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
                   <div className="flex items-center gap-3 sm:gap-4">
-                    <div className="w-12 h-12 bg-secondary-100 dark:bg-secondary-900/30 rounded-full flex items-center justify-center">
-                      <span className="text-lg font-semibold text-secondary-700 dark:text-secondary-300">
+                    <div className="w-12 h-12 bg-secondary-100 rounded-full flex items-center justify-center">
+                      <span className="text-lg font-semibold text-secondary-700">
                         {review.guest.first_name[0]}
                       </span>
                     </div>
                     <div>
-                      <h3 className="font-semibold text-primary-900 dark:text-sand-50">
+                      <h3 className="font-semibold text-primary-900">
                         {review.guest.first_name} {review.guest.last_name}
                       </h3>
                       <Link
                         href={`/host/properties/${review.property.id}`}
-                        className="text-sm text-primary-500 dark:text-sand-400 hover:text-secondary-600 dark:hover:text-secondary-400"
+                        className="text-sm text-primary-500 hover:text-secondary-600"
                       >
                         {review.property.title}
                       </Link>
@@ -244,22 +244,22 @@ export function HostReviews() {
                           className={`w-4 h-4 ${
                             star <= review.rating
                               ? 'fill-secondary-500 text-secondary-500'
-                              : 'text-primary-200 dark:text-primary-600'
+                              : 'text-primary-200'
                           }`}
                         />
                       ))}
                     </div>
-                    <span className="text-sm font-semibold text-primary-900 dark:text-sand-50">
+                    <span className="text-sm font-semibold text-primary-900">
                       {review.rating.toFixed(1)}
                     </span>
                   </div>
                 </div>
 
                 {/* Review Text */}
-                <p className="text-primary-700 dark:text-sand-200 mb-3">{review.text}</p>
+                <p className="text-primary-700 mb-3">{review.text}</p>
 
                 {/* Review Date */}
-                <p className="text-sm text-primary-400 dark:text-sand-500 mb-4">
+                <p className="text-sm text-primary-400 mb-4">
                   {new Date(review.created_at).toLocaleDateString('en-US', {
                     year: 'numeric',
                     month: 'long',
@@ -269,18 +269,18 @@ export function HostReviews() {
 
                 {/* Host Response */}
                 {review.host_response ? (
-                  <div className="bg-sand-50 dark:bg-primary-800 rounded-xl p-4 border-l-4 border-secondary-600">
+                  <div className="bg-sand-50 rounded-xl p-4 border-l-4 border-secondary-600">
                     <div className="flex items-center gap-2 mb-2">
-                      <MessageCircle className="w-4 h-4 text-secondary-600 dark:text-secondary-400" />
-                      <span className="text-sm font-semibold text-primary-900 dark:text-sand-50">Your Response</span>
-                      <span className="text-xs text-primary-400 dark:text-sand-500">
+                      <MessageCircle className="w-4 h-4 text-secondary-600" />
+                      <span className="text-sm font-semibold text-primary-900">Your Response</span>
+                      <span className="text-xs text-primary-400">
                         {new Date(review.host_response_date!).toLocaleDateString()}
                       </span>
                     </div>
-                    <p className="text-primary-700 dark:text-sand-200">{review.host_response}</p>
+                    <p className="text-primary-700">{review.host_response}</p>
                   </div>
                 ) : (
-                  <button className="text-secondary-600 dark:text-secondary-400 hover:text-secondary-700 dark:hover:text-secondary-300 font-medium text-sm flex items-center gap-2">
+                  <button className="text-secondary-600 hover:text-secondary-700 font-medium text-sm flex items-center gap-2">
                     <MessageCircle className="w-4 h-4" />
                     Respond to review
                   </button>

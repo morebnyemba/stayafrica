@@ -48,13 +48,13 @@ export default function WishlistCollaborators({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="bg-white dark:bg-primary-800/40 rounded-xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="sticky top-0 bg-white dark:bg-primary-800/40 border-b px-6 py-4 flex items-center justify-between">
-          <h2 className="text-xl font-bold text-primary-900 dark:text-sand-50">Collaborators</h2>
+        <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
+          <h2 className="text-xl font-bold text-primary-900">Collaborators</h2>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-primary-100 dark:hover:bg-primary-800 rounded-full transition"
+            className="p-2 hover:bg-primary-100 rounded-full transition"
           >
             <X className="w-5 h-5" />
           </button>
@@ -64,7 +64,7 @@ export default function WishlistCollaborators({
           {/* Add Collaborator Form */}
           {isOwner && (
             <div>
-              <h3 className="font-semibold text-primary-900 dark:text-sand-50 mb-3">Add Collaborator</h3>
+              <h3 className="font-semibold text-primary-900 mb-3">Add Collaborator</h3>
               <form onSubmit={handleAdd} className="flex gap-2">
                 <input
                   type="email"
@@ -72,7 +72,7 @@ export default function WishlistCollaborators({
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter email address"
                   disabled={addMutation.isPending}
-                  className="flex-1 px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-primary-100 dark:disabled:bg-primary-800 disabled:cursor-not-allowed"
+                  className="flex-1 px-4 py-2 border border-primary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-primary-100 disabled:cursor-not-allowed"
                 />
                 <button
                   type="submit"
@@ -96,12 +96,12 @@ export default function WishlistCollaborators({
 
           {/* Collaborators List */}
           <div>
-            <h3 className="font-semibold text-primary-900 dark:text-sand-50 mb-3">
+            <h3 className="font-semibold text-primary-900 mb-3">
               Current Collaborators ({collaborators.length})
             </h3>
             {collaborators.length === 0 ? (
-              <div className="text-center py-8 text-primary-400 dark:text-sand-500">
-                <UserPlus className="w-12 h-12 mx-auto mb-3 text-primary-300 dark:text-primary-500" />
+              <div className="text-center py-8 text-primary-400">
+                <UserPlus className="w-12 h-12 mx-auto mb-3 text-primary-300" />
                 <p>No collaborators yet</p>
                 <p className="text-sm mt-1">Add someone to share this wishlist with</p>
               </div>
@@ -110,7 +110,7 @@ export default function WishlistCollaborators({
                 {collaborators.map((collaborator) => (
                   <div
                     key={collaborator.id}
-                    className="flex items-center justify-between p-4 bg-sand-50 dark:bg-primary-900 rounded-lg"
+                    className="flex items-center justify-between p-4 bg-sand-50 rounded-lg"
                   >
                     <div className="flex items-center gap-3">
                       {collaborator.user.avatar ? (
@@ -127,14 +127,14 @@ export default function WishlistCollaborators({
                         </div>
                       )}
                       <div>
-                        <div className="font-medium text-primary-900 dark:text-sand-50">
+                        <div className="font-medium text-primary-900">
                           {collaborator.user.name}
                         </div>
-                        <div className="flex items-center gap-1 text-sm text-primary-500 dark:text-sand-400">
+                        <div className="flex items-center gap-1 text-sm text-primary-500">
                           <Mail className="w-3 h-3" />
                           {collaborator.user.email}
                         </div>
-                        <div className="text-xs text-primary-400 dark:text-sand-500 mt-0.5">
+                        <div className="text-xs text-primary-400 mt-0.5">
                           Added {new Date(collaborator.added_at).toLocaleDateString()}
                         </div>
                       </div>

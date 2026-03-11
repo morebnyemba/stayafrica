@@ -53,7 +53,7 @@ export default function UserModal({ isOpen, onClose, onSave, user }: UserModalPr
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-primary-700 dark:text-sand-200 mb-1">
+            <label className="block text-sm font-medium text-primary-700 mb-1">
               First Name <span className="text-red-500">*</span>
             </label>
             <input
@@ -61,11 +61,11 @@ export default function UserModal({ isOpen, onClose, onSave, user }: UserModalPr
               required
               value={formData.first_name}
               onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
-              className="w-full px-3 py-2 border border-primary-300 dark:border-primary-600 rounded-lg focus:ring-2 focus:ring-[#D9B168] focus:border-transparent"
+              className="w-full px-3 py-2 border border-primary-300 rounded-lg focus:ring-2 focus:ring-[#D9B168] focus:border-transparent"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-primary-700 dark:text-sand-200 mb-1">
+            <label className="block text-sm font-medium text-primary-700 mb-1">
               Last Name <span className="text-red-500">*</span>
             </label>
             <input
@@ -73,13 +73,13 @@ export default function UserModal({ isOpen, onClose, onSave, user }: UserModalPr
               required
               value={formData.last_name}
               onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
-              className="w-full px-3 py-2 border border-primary-300 dark:border-primary-600 rounded-lg focus:ring-2 focus:ring-[#D9B168] focus:border-transparent"
+              className="w-full px-3 py-2 border border-primary-300 rounded-lg focus:ring-2 focus:ring-[#D9B168] focus:border-transparent"
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-primary-700 dark:text-sand-200 mb-1">
+          <label className="block text-sm font-medium text-primary-700 mb-1">
             Email <span className="text-red-500">*</span>
           </label>
           <input
@@ -87,14 +87,14 @@ export default function UserModal({ isOpen, onClose, onSave, user }: UserModalPr
             required
             value={formData.email}
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            className="w-full px-3 py-2 border border-primary-300 dark:border-primary-600 rounded-lg focus:ring-2 focus:ring-[#D9B168] focus:border-transparent"
+            className="w-full px-3 py-2 border border-primary-300 rounded-lg focus:ring-2 focus:ring-[#D9B168] focus:border-transparent"
             disabled={!!user}
           />
         </div>
 
         {!user && (
           <div>
-            <label className="block text-sm font-medium text-primary-700 dark:text-sand-200 mb-1">
+            <label className="block text-sm font-medium text-primary-700 mb-1">
               Password <span className="text-red-500">*</span>
             </label>
             <input
@@ -102,7 +102,7 @@ export default function UserModal({ isOpen, onClose, onSave, user }: UserModalPr
               required={!user}
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              className="w-full px-3 py-2 border border-primary-300 dark:border-primary-600 rounded-lg focus:ring-2 focus:ring-[#D9B168] focus:border-transparent"
+              className="w-full px-3 py-2 border border-primary-300 rounded-lg focus:ring-2 focus:ring-[#D9B168] focus:border-transparent"
               minLength={8}
               placeholder="Minimum 8 characters"
             />
@@ -111,50 +111,50 @@ export default function UserModal({ isOpen, onClose, onSave, user }: UserModalPr
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-primary-700 dark:text-sand-200 mb-1">
+            <label className="block text-sm font-medium text-primary-700 mb-1">
               Country of Residence
             </label>
             <input
               type="text"
               value={formData.country_of_residence}
               onChange={(e) => setFormData({ ...formData, country_of_residence: e.target.value })}
-              className="w-full px-3 py-2 border border-primary-300 dark:border-primary-600 rounded-lg focus:ring-2 focus:ring-[#D9B168] focus:border-transparent"
+              className="w-full px-3 py-2 border border-primary-300 rounded-lg focus:ring-2 focus:ring-[#D9B168] focus:border-transparent"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-primary-700 dark:text-sand-200 mb-1">
+            <label className="block text-sm font-medium text-primary-700 mb-1">
               Phone Number
             </label>
             <input
               type="tel"
               value={formData.phone_number}
               onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
-              className="w-full px-3 py-2 border border-primary-300 dark:border-primary-600 rounded-lg focus:ring-2 focus:ring-[#D9B168] focus:border-transparent"
+              className="w-full px-3 py-2 border border-primary-300 rounded-lg focus:ring-2 focus:ring-[#D9B168] focus:border-transparent"
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-primary-700 dark:text-sand-200 mb-1">
+          <label className="block text-sm font-medium text-primary-700 mb-1">
             Bio
           </label>
           <textarea
             rows={3}
             value={formData.bio}
             onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-            className="w-full px-3 py-2 border border-primary-300 dark:border-primary-600 rounded-lg focus:ring-2 focus:ring-[#D9B168] focus:border-transparent"
+            className="w-full px-3 py-2 border border-primary-300 rounded-lg focus:ring-2 focus:ring-[#D9B168] focus:border-transparent"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-primary-700 dark:text-sand-200 mb-1">
+          <label className="block text-sm font-medium text-primary-700 mb-1">
             Role <span className="text-red-500">*</span>
           </label>
           <select
             required
             value={formData.role}
             onChange={(e) => setFormData({ ...formData, role: e.target.value as 'admin' | 'guest' | 'host' })}
-            className="w-full px-3 py-2 border border-primary-300 dark:border-primary-600 rounded-lg focus:ring-2 focus:ring-[#D9B168] focus:border-transparent"
+            className="w-full px-3 py-2 border border-primary-300 rounded-lg focus:ring-2 focus:ring-[#D9B168] focus:border-transparent"
           >
             <option value="guest">Guest</option>
             <option value="host">Host</option>
@@ -169,9 +169,9 @@ export default function UserModal({ isOpen, onClose, onSave, user }: UserModalPr
               id="is_active"
               checked={formData.is_active}
               onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-              className="w-4 h-4 text-[#D9B168] border-primary-300 dark:border-primary-600 rounded focus:ring-[#D9B168]"
+              className="w-4 h-4 text-[#D9B168] border-primary-300 rounded focus:ring-[#D9B168]"
             />
-            <label htmlFor="is_active" className="ml-2 text-sm text-primary-700 dark:text-sand-200">
+            <label htmlFor="is_active" className="ml-2 text-sm text-primary-700">
               Active Account
             </label>
           </div>
@@ -181,9 +181,9 @@ export default function UserModal({ isOpen, onClose, onSave, user }: UserModalPr
               id="is_verified"
               checked={formData.is_verified}
               onChange={(e) => setFormData({ ...formData, is_verified: e.target.checked })}
-              className="w-4 h-4 text-[#D9B168] border-primary-300 dark:border-primary-600 rounded focus:ring-[#D9B168]"
+              className="w-4 h-4 text-[#D9B168] border-primary-300 rounded focus:ring-[#D9B168]"
             />
-            <label htmlFor="is_verified" className="ml-2 text-sm text-primary-700 dark:text-sand-200">
+            <label htmlFor="is_verified" className="ml-2 text-sm text-primary-700">
               Verified User
             </label>
           </div>
@@ -193,9 +193,9 @@ export default function UserModal({ isOpen, onClose, onSave, user }: UserModalPr
               id="is_staff"
               checked={formData.is_staff}
               onChange={(e) => setFormData({ ...formData, is_staff: e.target.checked })}
-              className="w-4 h-4 text-[#D9B168] border-primary-300 dark:border-primary-600 rounded focus:ring-[#D9B168]"
+              className="w-4 h-4 text-[#D9B168] border-primary-300 rounded focus:ring-[#D9B168]"
             />
-            <label htmlFor="is_staff" className="ml-2 text-sm text-primary-700 dark:text-sand-200">
+            <label htmlFor="is_staff" className="ml-2 text-sm text-primary-700">
               Staff Status
             </label>
           </div>
@@ -205,9 +205,9 @@ export default function UserModal({ isOpen, onClose, onSave, user }: UserModalPr
               id="is_superuser"
               checked={formData.is_superuser}
               onChange={(e) => setFormData({ ...formData, is_superuser: e.target.checked })}
-              className="w-4 h-4 text-[#D9B168] border-primary-300 dark:border-primary-600 rounded focus:ring-[#D9B168]"
+              className="w-4 h-4 text-[#D9B168] border-primary-300 rounded focus:ring-[#D9B168]"
             />
-            <label htmlFor="is_superuser" className="ml-2 text-sm text-primary-700 dark:text-sand-200">
+            <label htmlFor="is_superuser" className="ml-2 text-sm text-primary-700">
               Superuser Status
             </label>
           </div>
@@ -217,7 +217,7 @@ export default function UserModal({ isOpen, onClose, onSave, user }: UserModalPr
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 border border-primary-300 dark:border-primary-600 text-primary-700 dark:text-sand-200 rounded-lg hover:bg-sand-50 dark:hover:bg-primary-800 transition-colors"
+            className="px-4 py-2 border border-primary-300 text-primary-700 rounded-lg hover:bg-sand-50 transition-colors"
             disabled={loading}
           >
             Cancel

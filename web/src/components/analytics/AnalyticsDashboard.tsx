@@ -34,9 +34,9 @@ class ChartErrorBoundary extends React.Component<
   render() {
     if (this.state.hasError) {
       return (
-        <div className="bg-white dark:bg-primary-800/40 rounded-xl p-6 border border-sand-200/50 dark:border-primary-700/50 text-center">
+        <div className="bg-white rounded-xl p-6 border border-sand-200/50 text-center">
           <BarChart3 className="h-10 w-10 mx-auto mb-2 text-primary-400" />
-          <p className="text-primary-500 dark:text-sand-400 text-sm">
+          <p className="text-primary-500 text-sm">
             {this.props.name ?? 'Chart'} could not be loaded. Please refresh the page.
           </p>
         </div>
@@ -85,9 +85,9 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ classNam
     return (
       <div className={`p-6 ${className}`}>
         <div className="max-w-7xl mx-auto">
-          <div className="bg-white dark:bg-primary-800/40 rounded-xl p-12 text-center">
+          <div className="bg-white rounded-xl p-12 text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-secondary-600 mx-auto mb-4"></div>
-            <p className="text-primary-500 dark:text-sand-400">Loading analytics...</p>
+            <p className="text-primary-500">Loading analytics...</p>
           </div>
         </div>
       </div>
@@ -99,11 +99,11 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ classNam
     return (
       <div className={`p-6 ${className}`}>
         <div className="max-w-7xl mx-auto">
-          <div className="bg-white dark:bg-primary-800/40 rounded-xl p-12 text-center">
-            <div className="text-yellow-600 dark:text-yellow-400 mb-4">
+          <div className="bg-white rounded-xl p-12 text-center">
+            <div className="text-yellow-600 mb-4">
               <AlertCircle className="h-16 w-16 mx-auto mb-4 opacity-50" />
               <h3 className="text-xl font-semibold mb-2">Access Required</h3>
-              <p className="text-primary-500 dark:text-sand-400">
+              <p className="text-primary-500">
                 Please log in as a host to view analytics.
               </p>
             </div>
@@ -117,11 +117,11 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ classNam
     return (
       <div className={`p-6 ${className}`}>
         <div className="max-w-7xl mx-auto">
-          <div className="bg-white dark:bg-primary-800/40 rounded-xl p-12 text-center">
-            <div className="text-red-600 dark:text-red-400 mb-4">
+          <div className="bg-white rounded-xl p-12 text-center">
+            <div className="text-red-600 mb-4">
               <BarChart3 className="h-16 w-16 mx-auto mb-4 opacity-50" />
               <h3 className="text-xl font-semibold mb-2">Failed to Load Analytics</h3>
-              <p className="text-primary-500 dark:text-sand-400">
+              <p className="text-primary-500">
                 {error.message || 'An error occurred while loading analytics data'}
               </p>
             </div>
@@ -141,13 +141,13 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ classNam
     <div className={`p-6 ${className}`}>
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
-        <div className="bg-white dark:bg-primary-800/40 rounded-xl p-6 shadow-sm border border-sand-200/50 dark:border-primary-700/50">
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-sand-200/50">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-primary-900 dark:text-sand-50 mb-2">
+              <h1 className="text-3xl font-bold text-primary-900 mb-2">
                 Analytics Dashboard
               </h1>
-              <p className="text-primary-500 dark:text-sand-400">
+              <p className="text-primary-500">
                 Comprehensive insights into your property performance
               </p>
             </div>
@@ -155,15 +155,15 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ classNam
             {/* Controls */}
             <div className="flex flex-wrap items-center gap-3">
               {/* Period Selector */}
-              <div className="flex space-x-1 bg-primary-100 dark:bg-primary-800 rounded-lg p-1">
+              <div className="flex space-x-1 bg-primary-100 rounded-lg p-1">
                 {periods.map((p) => (
                   <button
                     key={p.value}
                     onClick={() => handlePeriodChange(p.value)}
                     className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
                       filters.period === p.value
-                        ? 'bg-white dark:bg-primary-600 text-primary-900 dark:text-sand-50 shadow-sm'
-                        : 'text-primary-500 dark:text-sand-300 hover:text-primary-900 dark:hover:text-sand-50'
+                        ? 'bg-white text-primary-900 shadow-sm'
+                        : 'text-primary-500 hover:text-primary-900'
                     }`}
                   >
                     {p.label}
@@ -182,10 +182,10 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ classNam
               <button
                 onClick={() => refetch()}
                 disabled={isLoading}
-                className="p-2 bg-primary-100 dark:bg-primary-800 hover:bg-primary-200 dark:hover:bg-primary-700 rounded-lg transition-colors"
+                className="p-2 bg-primary-100 hover:bg-primary-200 rounded-lg transition-colors"
                 title="Refresh data"
               >
-                <RefreshCw className={`h-5 w-5 text-primary-500 dark:text-sand-400 ${isLoading ? 'animate-spin' : ''}`} />
+                <RefreshCw className={`h-5 w-5 text-primary-500 ${isLoading ? 'animate-spin' : ''}`} />
               </button>
 
               {/* Export */}
@@ -225,7 +225,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ classNam
         </div>
 
         {/* Footer */}
-        <div className="text-center text-sm text-primary-400 dark:text-sand-500 py-4">
+        <div className="text-center text-sm text-primary-400 py-4">
           <p>Analytics data updates every 5 minutes</p>
         </div>
       </div>

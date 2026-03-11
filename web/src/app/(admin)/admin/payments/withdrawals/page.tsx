@@ -85,7 +85,7 @@ export default function WithdrawalsManagement() {
             completed: { color: 'bg-green-100 text-green-800', text: 'Completed' },
             failed: { color: 'bg-red-100 text-red-800', text: 'Failed' },
         };
-        return badges[status] || { color: 'bg-primary-100 dark:bg-primary-800 text-primary-800 dark:text-sand-100', text: status };
+        return badges[status] || { color: 'bg-primary-100 text-primary-800', text: status };
     };
 
     return (
@@ -153,8 +153,8 @@ export default function WithdrawalsManagement() {
                 ) : (
                     <>
                         <div className="overflow-x-auto">
-                            <table className="min-w-full divide-y divide-primary-200 dark:divide-primary-700">
-                                <thead className="bg-sand-50 dark:bg-primary-900">
+                            <table className="min-w-full divide-y divide-primary-200">
+                                <thead className="bg-sand-50">
                                     <tr>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-[#3A5C50] uppercase tracking-wider">
                                             Reference
@@ -179,12 +179,12 @@ export default function WithdrawalsManagement() {
                                         </th>
                                     </tr>
                                 </thead>
-                                <tbody className="bg-white divide-y divide-primary-200 dark:divide-primary-700">
+                                <tbody className="bg-white divide-y divide-primary-200">
                                     {withdrawals.map((item) => {
                                         const statusBadge = getStatusBadge(item.status);
                                         const userEmail = item.wallet?.user?.email || `User #${item.wallet?.user_id}`;
                                         return (
-                                            <tr key={item.id} className="hover:bg-sand-50 dark:hover:bg-primary-800">
+                                            <tr key={item.id} className="hover:bg-sand-50">
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-[#122F26]">
                                                     {item.reference}
                                                 </td>
@@ -261,7 +261,7 @@ export default function WithdrawalsManagement() {
 
                         {/* Pagination */}
                         {totalCount > 0 && (
-                            <div className="bg-sand-50 dark:bg-primary-900 px-6 py-4 flex items-center justify-between border-t">
+                            <div className="bg-sand-50 px-6 py-4 flex items-center justify-between border-t">
                                 <div className="text-sm text-[#122F26]">
                                     Showing {(page - 1) * ITEMS_PER_PAGE + 1} to {Math.min(page * ITEMS_PER_PAGE, totalCount)} of {totalCount} requests
                                 </div>
@@ -269,14 +269,14 @@ export default function WithdrawalsManagement() {
                                     <button
                                         onClick={() => setPage(p => Math.max(1, p - 1))}
                                         disabled={page === 1}
-                                        className="px-4 py-2 border border-[#3A5C50] rounded-lg text-sm font-medium text-[#122F26] hover:bg-sand-50 dark:hover:bg-primary-800 disabled:opacity-50 disabled:cursor-not-allowed hidden sm:block"
+                                        className="px-4 py-2 border border-[#3A5C50] rounded-lg text-sm font-medium text-[#122F26] hover:bg-sand-50 disabled:opacity-50 disabled:cursor-not-allowed hidden sm:block"
                                     >
                                         Previous
                                     </button>
                                     <button
                                         onClick={() => setPage(p => p + 1)}
                                         disabled={page * ITEMS_PER_PAGE >= totalCount}
-                                        className="px-4 py-2 border border-[#3A5C50] rounded-lg text-sm font-medium text-[#122F26] hover:bg-sand-50 dark:hover:bg-primary-800 disabled:opacity-50 disabled:cursor-not-allowed hidden sm:block"
+                                        className="px-4 py-2 border border-[#3A5C50] rounded-lg text-sm font-medium text-[#122F26] hover:bg-sand-50 disabled:opacity-50 disabled:cursor-not-allowed hidden sm:block"
                                     >
                                         Next
                                     </button>

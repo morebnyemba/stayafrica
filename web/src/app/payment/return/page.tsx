@@ -193,13 +193,13 @@ export default function PaymentReturnPage() {
 
   if (!pendingPayment) {
     return (
-      <div className="min-h-screen bg-sand-100 dark:bg-primary-900 flex items-center justify-center py-12 px-4">
+      <div className="min-h-screen bg-sand-100 flex items-center justify-center py-12 px-4">
         <div className="max-w-md w-full text-center">
-          <Loader2 className="w-16 h-16 text-secondary-600 dark:text-secondary-400 animate-spin mx-auto mb-6" />
-          <h1 className="text-2xl font-bold text-primary-900 dark:text-sand-50 mb-3">
+          <Loader2 className="w-16 h-16 text-secondary-600 animate-spin mx-auto mb-6" />
+          <h1 className="text-2xl font-bold text-primary-900 mb-3">
             Processing Payment
           </h1>
-          <p className="text-primary-600 dark:text-sand-300 mb-6">
+          <p className="text-primary-600 mb-6">
             Please wait while we confirm your payment...
           </p>
           {!isMobileSource && (
@@ -213,15 +213,15 @@ export default function PaymentReturnPage() {
   }
 
   return (
-    <div className="min-h-screen bg-sand-100 dark:bg-primary-900 flex items-center justify-center py-12 px-4">
+    <div className="min-h-screen bg-sand-100 flex items-center justify-center py-12 px-4">
       <div className="max-w-md w-full text-center">
         {isProcessing ? (
           <>
-            <Loader2 className="w-16 h-16 text-secondary-600 dark:text-secondary-400 animate-spin mx-auto mb-6" />
-            <h1 className="text-2xl font-bold text-primary-900 dark:text-sand-50 mb-3">
+            <Loader2 className="w-16 h-16 text-secondary-600 animate-spin mx-auto mb-6" />
+            <h1 className="text-2xl font-bold text-primary-900 mb-3">
               {captureStatus === 'capturing' ? 'Capturing Payment' : 'Processing Payment'}
             </h1>
-            <p className="text-primary-600 dark:text-sand-300 mb-6">
+            <p className="text-primary-600 mb-6">
               {captureStatus === 'capturing'
                 ? 'Finalizing your payment with PayPal...'
                 : 'Please wait while we confirm your payment...'}
@@ -229,13 +229,13 @@ export default function PaymentReturnPage() {
           </>
         ) : isSuccess ? (
           <>
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full mb-6">
-              <CheckCircle className="w-12 h-12 text-green-600 dark:text-green-400" />
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-green-100 rounded-full mb-6">
+              <CheckCircle className="w-12 h-12 text-green-600" />
             </div>
-            <h1 className="text-2xl font-bold text-primary-900 dark:text-sand-50 mb-3">
+            <h1 className="text-2xl font-bold text-primary-900 mb-3">
               Payment Successful!
             </h1>
-            <p className="text-primary-600 dark:text-sand-300 mb-6">
+            <p className="text-primary-600 mb-6">
               {isMobileSource
                 ? 'Redirecting you back to the app...'
                 : 'Redirecting to your booking confirmation...'}
@@ -257,13 +257,13 @@ export default function PaymentReturnPage() {
           </>
         ) : isFailed ? (
           <>
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-red-100 dark:bg-red-900/30 rounded-full mb-6">
-              <XCircle className="w-12 h-12 text-red-600 dark:text-red-400" />
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-red-100 rounded-full mb-6">
+              <XCircle className="w-12 h-12 text-red-600" />
             </div>
-            <h1 className="text-2xl font-bold text-primary-900 dark:text-sand-50 mb-3">
+            <h1 className="text-2xl font-bold text-primary-900 mb-3">
               Payment Failed
             </h1>
-            <p className="text-primary-600 dark:text-sand-300 mb-6">
+            <p className="text-primary-600 mb-6">
               {captureError || 'Your payment could not be processed. Please try again.'}
             </p>
             <div className="space-y-3">
@@ -310,7 +310,7 @@ export default function PaymentReturnPage() {
 
         {pollError && (
           <div className="mt-6">
-            <p className="text-red-600 dark:text-red-400 mb-4">
+            <p className="text-red-600 mb-4">
               Unable to check payment status. Please check your bookings.
             </p>
             {isMobileSource ? (

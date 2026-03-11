@@ -142,32 +142,32 @@ export function DashboardContent() {
       title: 'Upcoming Trips',
       value: upcomingBookings?.length || 0,
       icon: Calendar,
-      color: 'text-blue-600 dark:text-blue-400',
-      bgColor: 'bg-blue-100 dark:bg-blue-900/30',
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-100',
       link: '/bookings',
     },
     {
       title: 'Saved Places',
       value: savedPropertiesData?.length || 0,
       icon: Heart,
-      color: 'text-red-600 dark:text-red-400',
-      bgColor: 'bg-red-100 dark:bg-red-900/30',
+      color: 'text-red-600',
+      bgColor: 'bg-red-100',
       link: '/wishlist',
     },
     {
       title: 'Total Bookings',
       value: totalBookingsData?.count || totalBookingsData?.results?.length || 0,
       icon: CheckCircle,
-      color: 'text-green-600 dark:text-green-400',
-      bgColor: 'bg-green-100 dark:bg-green-900/30',
+      color: 'text-green-600',
+      bgColor: 'bg-green-100',
       link: '/bookings',
     },
     {
       title: 'Messages',
       value: unreadMessages || 0,
       icon: MessageSquare,
-      color: 'text-purple-600 dark:text-purple-400',
-      bgColor: 'bg-purple-100 dark:bg-purple-900/30',
+      color: 'text-purple-600',
+      bgColor: 'bg-purple-100',
       link: '/messages',
       badge: unreadMessages && unreadMessages > 0,
     },
@@ -189,14 +189,14 @@ export function DashboardContent() {
   const getActivityColor = (activity: any) => {
     if (activity.type === 'booking') {
       return activity.status === 'CONFIRMED'
-        ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400'
+        ? 'bg-green-100 text-green-600'
         : activity.status === 'PENDING'
-        ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400'
-        : 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400';
+        ? 'bg-yellow-100 text-yellow-600'
+        : 'bg-red-100 text-red-600';
     }
-    if (activity.type === 'review') return 'bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400';
-    if (activity.type === 'payment') return 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400';
-    return 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400';
+    if (activity.type === 'review') return 'bg-pink-100 text-pink-600';
+    if (activity.type === 'payment') return 'bg-blue-100 text-blue-600';
+    return 'bg-purple-100 text-purple-600';
   };
 
   const getActivityLabel = (activity: any) => {
@@ -215,15 +215,15 @@ export function DashboardContent() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-sand-100 dark:bg-primary-900">
+      <div className="min-h-screen bg-sand-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
 
           {/* Welcome */}
           <div className="dashboard-header">
-            <h1 className="text-2xl sm:text-3xl font-bold text-primary-900 dark:text-sand-50 mb-1">
+            <h1 className="text-2xl sm:text-3xl font-bold text-primary-900 mb-1">
               Welcome back, {user?.first_name || 'Traveler'}! 👋
             </h1>
-            <p className="text-primary-600 dark:text-sand-300">
+            <p className="text-primary-600">
               Here&apos;s what&apos;s happening with your travels
             </p>
           </div>
@@ -239,8 +239,8 @@ export function DashboardContent() {
               <Link key={i} href={stat.link} className="stats-card group relative">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-xs sm:text-sm text-primary-500 dark:text-sand-400">{stat.title}</p>
-                    <p className="text-2xl sm:text-3xl font-bold text-primary-900 dark:text-sand-50 mt-1">{stat.value}</p>
+                    <p className="text-xs sm:text-sm text-primary-500">{stat.title}</p>
+                    <p className="text-2xl sm:text-3xl font-bold text-primary-900 mt-1">{stat.value}</p>
                   </div>
                   <div className={`${stat.bgColor} ${stat.color} p-2.5 sm:p-3 rounded-xl group-hover:scale-110 transition-transform`}>
                     <stat.icon className="w-5 h-5 sm:w-6 sm:h-6" />
@@ -259,10 +259,10 @@ export function DashboardContent() {
             {/* Upcoming trips — wider column */}
             <div className="lg:col-span-2 card-gradient p-5 sm:p-6">
               <div className="flex items-center justify-between mb-5">
-                <h2 className="text-lg sm:text-xl font-bold text-primary-900 dark:text-sand-50">
+                <h2 className="text-lg sm:text-xl font-bold text-primary-900">
                   Upcoming Trips
                 </h2>
-                <Link href="/bookings" className="text-secondary-600 dark:text-secondary-400 hover:underline text-sm font-medium flex items-center gap-1">
+                <Link href="/bookings" className="text-secondary-600 hover:underline text-sm font-medium flex items-center gap-1">
                   View all <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </div>
@@ -270,7 +270,7 @@ export function DashboardContent() {
               {loadingBookings ? (
                 <div className="space-y-3">
                   {[1, 2].map((i) => (
-                    <div key={i} className="animate-pulse h-24 bg-primary-200 dark:bg-primary-700 rounded-xl" />
+                    <div key={i} className="animate-pulse h-24 bg-primary-200 rounded-xl" />
                   ))}
                 </div>
               ) : upcomingBookings && upcomingBookings.length > 0 ? (
@@ -281,34 +281,34 @@ export function DashboardContent() {
                       <Link
                         key={booking.id}
                         href="/bookings"
-                        className="flex gap-4 p-3 rounded-xl border border-primary-200 dark:border-primary-700 hover:border-secondary-500 dark:hover:border-secondary-600 transition group"
+                        className="flex gap-4 p-3 rounded-xl border border-primary-200 hover:border-secondary-500 transition group"
                       >
                         {/* Property thumbnail */}
-                        <div className="w-20 h-20 sm:w-24 sm:h-20 rounded-lg overflow-hidden flex-shrink-0 bg-primary-200 dark:bg-primary-700">
+                        <div className="w-20 h-20 sm:w-24 sm:h-20 rounded-lg overflow-hidden flex-shrink-0 bg-primary-200">
                           {img ? (
                             <img src={img} alt="" className="w-full h-full object-cover" />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center">
-                              <Home className="w-6 h-6 text-primary-400 dark:text-primary-600" />
+                              <Home className="w-6 h-6 text-primary-400" />
                             </div>
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-sm sm:text-base text-primary-900 dark:text-sand-50 truncate group-hover:text-secondary-700 dark:group-hover:text-secondary-400 transition">
+                          <h3 className="font-semibold text-sm sm:text-base text-primary-900 truncate group-hover:text-secondary-700 transition">
                             {booking.property?.title || booking.property_title || 'Property'}
                           </h3>
-                          <p className="text-xs sm:text-sm text-primary-500 dark:text-sand-400 flex items-center gap-1 mt-0.5">
+                          <p className="text-xs sm:text-sm text-primary-500 flex items-center gap-1 mt-0.5">
                             <MapPin className="w-3 h-3 flex-shrink-0" />
                             <span className="truncate">{booking.property?.city || 'Unknown'}, {booking.property?.country || ''}</span>
                           </p>
-                          <div className="flex items-center gap-3 mt-2 text-xs text-primary-600 dark:text-sand-300">
+                          <div className="flex items-center gap-3 mt-2 text-xs text-primary-600">
                             <span className="flex items-center gap-1">
                               <Calendar className="w-3 h-3" />
                               {formatDate(booking.check_in)}
                             </span>
                             <span className="text-primary-400">→</span>
                             <span>{formatDate(booking.check_out)}</span>
-                            <span className="ml-auto px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs font-medium rounded-full">
+                            <span className="ml-auto px-2 py-0.5 bg-green-100 text-green-700 text-xs font-medium rounded-full">
                               Confirmed
                             </span>
                           </div>
@@ -319,11 +319,11 @@ export function DashboardContent() {
                 </div>
               ) : (
                 <div className="text-center py-10">
-                  <div className="w-16 h-16 mx-auto rounded-full bg-primary-100 dark:bg-primary-800 flex items-center justify-center mb-4">
-                    <Compass className="w-8 h-8 text-primary-400 dark:text-primary-600" />
+                  <div className="w-16 h-16 mx-auto rounded-full bg-primary-100 flex items-center justify-center mb-4">
+                    <Compass className="w-8 h-8 text-primary-400" />
                   </div>
-                  <h3 className="font-semibold text-primary-900 dark:text-sand-50 mb-1">No upcoming trips</h3>
-                  <p className="text-sm text-primary-500 dark:text-sand-400 mb-4">Time to plan your next adventure!</p>
+                  <h3 className="font-semibold text-primary-900 mb-1">No upcoming trips</h3>
+                  <p className="text-sm text-primary-500 mb-4">Time to plan your next adventure!</p>
                   <Link
                     href="/explore"
                     className="inline-flex items-center gap-2 bg-secondary-600 hover:bg-secondary-700 text-white font-semibold text-sm py-2.5 px-5 rounded-lg transition"
@@ -338,7 +338,7 @@ export function DashboardContent() {
             <div className="space-y-6">
               {/* Quick links — compact */}
               <div className="card-gradient p-5">
-                <h2 className="text-lg font-bold text-primary-900 dark:text-sand-50 mb-4">Quick Links</h2>
+                <h2 className="text-lg font-bold text-primary-900 mb-4">Quick Links</h2>
                 <div className="grid grid-cols-2 gap-2">
                   {[
                     { title: 'Explore', icon: Compass, link: '/explore', color: 'bg-secondary-500' },
@@ -351,12 +351,12 @@ export function DashboardContent() {
                     <Link
                       key={i}
                       href={item.link}
-                      className="flex items-center gap-2.5 p-2.5 rounded-lg border border-primary-100 dark:border-primary-700/50 hover:border-secondary-500 dark:hover:border-secondary-600 transition group"
+                      className="flex items-center gap-2.5 p-2.5 rounded-lg border border-primary-100 hover:border-secondary-500 transition group"
                     >
                       <div className={`${item.color} p-1.5 rounded-md text-white group-hover:scale-110 transition-transform`}>
                         <item.icon className="w-3.5 h-3.5" />
                       </div>
-                      <span className="text-sm font-medium text-primary-800 dark:text-sand-100 truncate">{item.title}</span>
+                      <span className="text-sm font-medium text-primary-800 truncate">{item.title}</span>
                     </Link>
                   ))}
                 </div>
@@ -364,7 +364,7 @@ export function DashboardContent() {
 
               {/* Recent activity */}
               <div className="card-gradient p-5">
-                <h2 className="text-lg font-bold text-primary-900 dark:text-sand-50 mb-4">Recent Activity</h2>
+                <h2 className="text-lg font-bold text-primary-900 mb-4">Recent Activity</h2>
                 {allActivities.length > 0 ? (
                   <div className="space-y-2.5">
                     {allActivities.map((activity: any) => {
@@ -373,16 +373,16 @@ export function DashboardContent() {
                         <Link
                           key={activity.type + '-' + activity.id}
                           href={getActivityLink(activity)}
-                          className="flex items-center gap-3 p-2 rounded-lg hover:bg-sand-50 dark:hover:bg-primary-800/50 transition -mx-2"
+                          className="flex items-center gap-3 p-2 rounded-lg hover:bg-sand-50 transition -mx-2"
                         >
                           <div className={`p-1.5 rounded-full flex-shrink-0 ${getActivityColor(activity)}`}>
                             <Icon className="w-3.5 h-3.5" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm text-primary-800 dark:text-sand-100 truncate">
+                            <p className="text-sm text-primary-800 truncate">
                               {getActivityLabel(activity)}
                             </p>
-                            <p className="text-xs text-primary-500 dark:text-sand-400">
+                            <p className="text-xs text-primary-500">
                               {formatDate(activity.created_at)}
                             </p>
                           </div>
@@ -391,7 +391,7 @@ export function DashboardContent() {
                     })}
                   </div>
                 ) : (
-                  <p className="text-sm text-primary-500 dark:text-sand-400 text-center py-4">
+                  <p className="text-sm text-primary-500 text-center py-4">
                     No recent activity
                   </p>
                 )}

@@ -101,14 +101,14 @@ export default function TwoFactorSettings() {
   }
 
   return (
-    <div className="bg-white dark:bg-primary-800/40 shadow sm:rounded-lg">
+    <div className="bg-white shadow sm:rounded-lg">
       <div className="px-4 py-5 sm:p-6">
         <div className="sm:flex sm:items-start sm:justify-between">
           <div>
-            <h3 className="text-lg font-medium leading-6 text-primary-900 dark:text-sand-50">
+            <h3 className="text-lg font-medium leading-6 text-primary-900">
               Two-Factor Authentication
             </h3>
-            <div className="mt-2 max-w-xl text-sm text-primary-400 dark:text-sand-500">
+            <div className="mt-2 max-w-xl text-sm text-primary-400">
               <p>
                 Add an extra layer of security to your account. When enabled, you'll need to enter a code
                 from your authenticator app in addition to your password.
@@ -117,7 +117,7 @@ export default function TwoFactorSettings() {
             <div className="mt-3">
               <span
                 className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                  isEnabled ? 'bg-green-100 text-green-800' : 'bg-primary-100 dark:bg-primary-800 text-primary-800 dark:text-sand-100'
+                  isEnabled ? 'bg-green-100 text-green-800' : 'bg-primary-100 text-primary-800'
                 }`}
               >
                 {isEnabled ? 'Enabled' : 'Disabled'}
@@ -137,7 +137,7 @@ export default function TwoFactorSettings() {
                 <button
                   type="button"
                   onClick={() => setShowRegenerateConfirm(true)}
-                  className="inline-flex w-full items-center justify-center rounded-md bg-primary-600 dark:bg-primary-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-500 dark:hover:bg-primary-400"
+                  className="inline-flex w-full items-center justify-center rounded-md bg-primary-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-500"
                 >
                   Regenerate Backup Codes
                 </button>
@@ -169,12 +169,12 @@ export default function TwoFactorSettings() {
       {showDisableConfirm && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-            <div className="fixed inset-0 bg-primary-500 dark:bg-primary-900 bg-opacity-75 transition-opacity" onClick={() => setShowDisableConfirm(false)} />
-            <div className="relative transform overflow-hidden rounded-lg bg-white dark:bg-primary-800/40 px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
-              <h3 className="text-lg font-semibold leading-6 text-primary-900 dark:text-sand-50 mb-4">
+            <div className="fixed inset-0 bg-primary-500 bg-opacity-75 transition-opacity" onClick={() => setShowDisableConfirm(false)} />
+            <div className="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
+              <h3 className="text-lg font-semibold leading-6 text-primary-900 mb-4">
                 Disable Two-Factor Authentication
               </h3>
-              <p className="text-sm text-primary-400 dark:text-sand-500 mb-4">
+              <p className="text-sm text-primary-400 mb-4">
                 Enter your password to confirm disabling 2FA
               </p>
               <form onSubmit={handleDisable2FA}>
@@ -183,7 +183,7 @@ export default function TwoFactorSettings() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Password"
-                  className="w-full rounded-md border border-primary-300 dark:border-primary-600 px-3 py-2 mb-4"
+                  className="w-full rounded-md border border-primary-300 px-3 py-2 mb-4"
                   required
                 />
                 <div className="flex gap-3">
@@ -193,7 +193,7 @@ export default function TwoFactorSettings() {
                       setShowDisableConfirm(false);
                       setPassword('');
                     }}
-                    className="flex-1 rounded-md bg-white dark:bg-primary-800/40 px-3 py-2 text-sm font-semibold text-primary-900 dark:text-sand-50 shadow-sm ring-1 ring-inset ring-primary-300 dark:ring-primary-600 hover:bg-sand-50 dark:hover:bg-primary-800"
+                    className="flex-1 rounded-md bg-white px-3 py-2 text-sm font-semibold text-primary-900 shadow-sm ring-1 ring-inset ring-primary-300 hover:bg-sand-50"
                   >
                     Cancel
                   </button>
@@ -215,12 +215,12 @@ export default function TwoFactorSettings() {
       {showRegenerateConfirm && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-            <div className="fixed inset-0 bg-primary-500 dark:bg-primary-900 bg-opacity-75 transition-opacity" onClick={() => setShowRegenerateConfirm(false)} />
-            <div className="relative transform overflow-hidden rounded-lg bg-white dark:bg-primary-800/40 px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
-              <h3 className="text-lg font-semibold leading-6 text-primary-900 dark:text-sand-50 mb-4">
+            <div className="fixed inset-0 bg-primary-500 bg-opacity-75 transition-opacity" onClick={() => setShowRegenerateConfirm(false)} />
+            <div className="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
+              <h3 className="text-lg font-semibold leading-6 text-primary-900 mb-4">
                 Regenerate Backup Codes
               </h3>
-              <p className="text-sm text-primary-400 dark:text-sand-500 mb-4">
+              <p className="text-sm text-primary-400 mb-4">
                 This will invalidate your old backup codes. Enter your password to confirm.
               </p>
               <form onSubmit={handleRegenerateBackupCodes}>
@@ -229,7 +229,7 @@ export default function TwoFactorSettings() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Password"
-                  className="w-full rounded-md border border-primary-300 dark:border-primary-600 px-3 py-2 mb-4"
+                  className="w-full rounded-md border border-primary-300 px-3 py-2 mb-4"
                   required
                 />
                 <div className="flex gap-3">
@@ -239,7 +239,7 @@ export default function TwoFactorSettings() {
                       setShowRegenerateConfirm(false);
                       setPassword('');
                     }}
-                    className="flex-1 rounded-md bg-white dark:bg-primary-800/40 px-3 py-2 text-sm font-semibold text-primary-900 dark:text-sand-50 shadow-sm ring-1 ring-inset ring-primary-300 dark:ring-primary-600 hover:bg-sand-50 dark:hover:bg-primary-800"
+                    className="flex-1 rounded-md bg-white px-3 py-2 text-sm font-semibold text-primary-900 shadow-sm ring-1 ring-inset ring-primary-300 hover:bg-sand-50"
                   >
                     Cancel
                   </button>

@@ -58,16 +58,16 @@ export function WalletDashboard() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-sand-100 dark:bg-primary-900">
+      <div className="min-h-screen bg-sand-100">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Header */}
           <header className="mb-8">
-            <h1 className="text-3xl font-bold text-primary-900 dark:text-sand-50 mb-2">My Wallet</h1>
-            <p className="text-primary-600 dark:text-sand-300">Manage your funds, transactions, and withdrawals</p>
+            <h1 className="text-3xl font-bold text-primary-900 mb-2">My Wallet</h1>
+            <p className="text-primary-600">Manage your funds, transactions, and withdrawals</p>
           </header>
 
           {/* Wallet Balance Card */}
-          <div className="bg-gradient-to-br from-primary-600 to-primary-800 dark:from-primary-700 dark:to-primary-900 rounded-xl p-6 sm:p-8 mb-8 text-white shadow-lg">
+          <div className="bg-gradient-to-br from-primary-600 to-primary-800 rounded-xl p-6 sm:p-8 mb-8 text-white shadow-lg">
             <div className="flex items-center gap-3 mb-4">
               <Wallet className="w-8 h-8" />
               <h2 className="text-lg font-semibold">Available Balance</h2>
@@ -108,7 +108,7 @@ export function WalletDashboard() {
 
           {/* Tabs */}
           <div className="mb-6">
-            <nav className="flex sm:inline-flex rounded-xl bg-white dark:bg-primary-800 p-1.5 border border-primary-200 dark:border-primary-700 overflow-x-auto">
+            <nav className="flex sm:inline-flex rounded-xl bg-white p-1.5 border border-primary-200 overflow-x-auto">
               {[
                 { key: 'transactions' as const, label: 'Transactions', icon: ArrowDownLeft },
                 { key: 'withdrawals' as const, label: 'Withdrawals', icon: ArrowUpRight },
@@ -121,7 +121,7 @@ export function WalletDashboard() {
                   className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
                     activeTab === key
                       ? 'bg-secondary-500 text-white shadow-sm'
-                      : 'text-primary-600 dark:text-sand-400 hover:bg-primary-50 dark:hover:bg-primary-700'
+                      : 'text-primary-600 hover:bg-primary-50'
                   }`}
                 >
                   <Icon className="w-4 h-4" />
@@ -171,7 +171,7 @@ function TransactionsList({ transactions, loading }: { transactions: any[]; load
     return (
       <div className="space-y-3">
         {[1, 2, 3].map(i => (
-          <div key={i} className="animate-pulse h-20 bg-white dark:bg-primary-800 rounded-lg"></div>
+          <div key={i} className="animate-pulse h-20 bg-white rounded-lg"></div>
         ))}
       </div>
     );
@@ -180,11 +180,11 @@ function TransactionsList({ transactions, loading }: { transactions: any[]; load
   if (transactions.length === 0) {
     return (
       <div className="card p-10 text-center">
-        <div className="w-16 h-16 rounded-full bg-primary-100 dark:bg-primary-800 mx-auto mb-4 flex items-center justify-center">
-          <ArrowDownLeft className="w-8 h-8 text-primary-300 dark:text-primary-600" />
+        <div className="w-16 h-16 rounded-full bg-primary-100 mx-auto mb-4 flex items-center justify-center">
+          <ArrowDownLeft className="w-8 h-8 text-primary-300" />
         </div>
-        <h3 className="text-lg font-semibold text-primary-900 dark:text-sand-50 mb-1">No transactions yet</h3>
-        <p className="text-sm text-primary-500 dark:text-sand-400">Your transaction history will appear here</p>
+        <h3 className="text-lg font-semibold text-primary-900 mb-1">No transactions yet</h3>
+        <p className="text-sm text-primary-500">Your transaction history will appear here</p>
       </div>
     );
   }
@@ -209,9 +209,9 @@ function TransactionsList({ transactions, loading }: { transactions: any[]; load
               )}
             </div>
             <div>
-              <div className="font-semibold text-primary-900 dark:text-sand-50 capitalize">{txn.txn_type}</div>
-              <div className="text-sm text-primary-600 dark:text-sand-400">{txn.reference}</div>
-              <div className="text-xs text-primary-500 dark:text-sand-500">
+              <div className="font-semibold text-primary-900 capitalize">{txn.txn_type}</div>
+              <div className="text-sm text-primary-600">{txn.reference}</div>
+              <div className="text-xs text-primary-500">
                 {new Date(txn.created_at).toLocaleDateString()} {new Date(txn.created_at).toLocaleTimeString()}
               </div>
             </div>
@@ -233,7 +233,7 @@ function TransactionsList({ transactions, loading }: { transactions: any[]; load
               ) : (
                 <XCircle className="w-4 h-4 text-red-500" />
               )}
-              <span className="text-xs text-primary-600 dark:text-sand-400 capitalize">{txn.status}</span>
+              <span className="text-xs text-primary-600 capitalize">{txn.status}</span>
             </div>
           </div>
         </div>
@@ -247,7 +247,7 @@ function WithdrawalsList({ withdrawals, loading }: { withdrawals: any[]; loading
     return (
       <div className="space-y-3">
         {[1, 2, 3].map(i => (
-          <div key={i} className="animate-pulse h-20 bg-white dark:bg-primary-800 rounded-lg"></div>
+          <div key={i} className="animate-pulse h-20 bg-white rounded-lg"></div>
         ))}
       </div>
     );
@@ -256,11 +256,11 @@ function WithdrawalsList({ withdrawals, loading }: { withdrawals: any[]; loading
   if (withdrawals.length === 0) {
     return (
       <div className="card p-10 text-center">
-        <div className="w-16 h-16 rounded-full bg-primary-100 dark:bg-primary-800 mx-auto mb-4 flex items-center justify-center">
-          <ArrowUpRight className="w-8 h-8 text-primary-300 dark:text-primary-600" />
+        <div className="w-16 h-16 rounded-full bg-primary-100 mx-auto mb-4 flex items-center justify-center">
+          <ArrowUpRight className="w-8 h-8 text-primary-300" />
         </div>
-        <h3 className="text-lg font-semibold text-primary-900 dark:text-sand-50 mb-1">No withdrawals yet</h3>
-        <p className="text-sm text-primary-500 dark:text-sand-400">When you withdraw funds, they&apos;ll appear here</p>
+        <h3 className="text-lg font-semibold text-primary-900 mb-1">No withdrawals yet</h3>
+        <p className="text-sm text-primary-500">When you withdraw funds, they&apos;ll appear here</p>
       </div>
     );
   }
@@ -274,16 +274,16 @@ function WithdrawalsList({ withdrawals, loading }: { withdrawals: any[]; loading
         >
           <div className="flex items-start justify-between">
             <div>
-              <div className="font-semibold text-primary-900 dark:text-sand-50">
+              <div className="font-semibold text-primary-900">
                 {withdrawal.currency} {parseFloat(withdrawal.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
               </div>
-              <div className="text-sm text-primary-600 dark:text-sand-400 mt-1">
+              <div className="text-sm text-primary-600 mt-1">
                 To: {withdrawal.bank_account_details?.bank_name} •••• {withdrawal.bank_account_details?.account_number?.slice(-4)}
               </div>
-              <div className="text-xs text-primary-500 dark:text-sand-500 mt-1">
+              <div className="text-xs text-primary-500 mt-1">
                 {withdrawal.reference}
               </div>
-              <div className="text-xs text-primary-500 dark:text-sand-500">
+              <div className="text-xs text-primary-500">
                 {new Date(withdrawal.created_at).toLocaleDateString()} {new Date(withdrawal.created_at).toLocaleTimeString()}
               </div>
             </div>
@@ -308,7 +308,7 @@ function WithdrawalsList({ withdrawals, loading }: { withdrawals: any[]; loading
             </div>
           </div>
           {withdrawal.notes && (
-            <div className="mt-2 text-sm text-primary-600 dark:text-sand-400 bg-primary-50 dark:bg-primary-900/50 p-2 rounded">
+            <div className="mt-2 text-sm text-primary-600 bg-primary-50 p-2 rounded">
               {withdrawal.notes}
             </div>
           )}
@@ -348,7 +348,7 @@ function BankAccountsList({ bankAccounts, loading, onAddNew }: { bankAccounts: a
     toast((t) => (
       <div className="flex flex-col gap-2">
         <p className="font-medium">Delete this bank account?</p>
-        <p className="text-sm text-primary-400 dark:text-sand-500">This action cannot be undone.</p>
+        <p className="text-sm text-primary-400">This action cannot be undone.</p>
         <div className="flex gap-2 mt-2">
           <button
             onClick={() => {
@@ -361,7 +361,7 @@ function BankAccountsList({ bankAccounts, loading, onAddNew }: { bankAccounts: a
           </button>
           <button
             onClick={() => toast.dismiss(t.id)}
-            className="px-3 py-1 bg-primary-200 dark:bg-primary-700 text-primary-800 dark:text-sand-100 text-sm rounded hover:bg-primary-300 dark:hover:bg-primary-600"
+            className="px-3 py-1 bg-primary-200 text-primary-800 text-sm rounded hover:bg-primary-300"
           >
             Cancel
           </button>
@@ -374,7 +374,7 @@ function BankAccountsList({ bankAccounts, loading, onAddNew }: { bankAccounts: a
     return (
       <div className="space-y-3" role="status" aria-busy="true" aria-label="Loading bank accounts">
         {[1, 2].map(i => (
-          <div key={i} className="animate-pulse h-24 bg-white dark:bg-primary-800 rounded-lg"></div>
+          <div key={i} className="animate-pulse h-24 bg-white rounded-lg"></div>
         ))}
         <span className="sr-only">Loading bank accounts</span>
       </div>
@@ -385,7 +385,7 @@ function BankAccountsList({ bankAccounts, loading, onAddNew }: { bankAccounts: a
     <div className="space-y-3">
       <button
         onClick={onAddNew}
-        className="w-full bg-white dark:bg-primary-800 rounded-lg p-4 border-2 border-dashed border-primary-300 dark:border-primary-600 hover:border-primary-500 dark:hover:border-primary-500 transition flex items-center justify-center gap-2 text-primary-700 dark:text-sand-300 font-semibold"
+        className="w-full bg-white rounded-lg p-4 border-2 border-dashed border-primary-300 hover:border-primary-500 transition flex items-center justify-center gap-2 text-primary-700 font-semibold"
         aria-label="Add a new bank account"
       >
         <Plus className="w-5 h-5" aria-hidden="true" />
@@ -399,13 +399,13 @@ function BankAccountsList({ bankAccounts, loading, onAddNew }: { bankAccounts: a
         >
           <div className="flex items-start justify-between">
             <div className="flex items-start gap-3">
-              <div className="p-2 bg-primary-100 dark:bg-primary-700 rounded">
-                <Building className="w-5 h-5 text-primary-600 dark:text-sand-400" aria-hidden="true" />
+              <div className="p-2 bg-primary-100 rounded">
+                <Building className="w-5 h-5 text-primary-600" aria-hidden="true" />
               </div>
               <div>
-                <div className="font-semibold text-primary-900 dark:text-sand-50">{account.bank_name}</div>
-                <div className="text-sm text-primary-600 dark:text-sand-400">{account.account_name}</div>
-                <div className="text-sm text-primary-600 dark:text-sand-400">•••• {account.account_number?.slice(-4)}</div>
+                <div className="font-semibold text-primary-900">{account.bank_name}</div>
+                <div className="text-sm text-primary-600">{account.account_name}</div>
+                <div className="text-sm text-primary-600">•••• {account.account_number?.slice(-4)}</div>
                 {account.is_primary && (
                   <span className="inline-block mt-2 px-2 py-1 bg-secondary-500 text-white text-xs rounded-full font-medium">
                     ✓ Primary
@@ -419,7 +419,7 @@ function BankAccountsList({ bankAccounts, loading, onAddNew }: { bankAccounts: a
                   onClick={() => setPrimaryMutation.mutate(account.id)}
                   disabled={setPrimaryMutation.isPending}
                   aria-busy={setPrimaryMutation.isPending}
-                  className="px-3 py-1 text-sm bg-primary-100 dark:bg-primary-700 text-primary-700 dark:text-sand-300 rounded hover:bg-primary-200 dark:hover:bg-primary-600 transition disabled:opacity-50"
+                  className="px-3 py-1 text-sm bg-primary-100 text-primary-700 rounded hover:bg-primary-200 transition disabled:opacity-50"
                 >
                   Set Primary
                 </button>
@@ -480,7 +480,7 @@ function PaymentMethodsList() {
     toast((t) => (
       <div className="flex flex-col gap-2">
         <p className="font-medium">Delete this payment method?</p>
-        <p className="text-sm text-primary-400 dark:text-sand-500">This action cannot be undone.</p>
+        <p className="text-sm text-primary-400">This action cannot be undone.</p>
         <div className="flex gap-2 mt-2">
           <button
             onClick={() => {
@@ -493,7 +493,7 @@ function PaymentMethodsList() {
           </button>
           <button
             onClick={() => toast.dismiss(t.id)}
-            className="px-3 py-1 bg-primary-200 dark:bg-primary-700 text-primary-800 dark:text-sand-100 text-sm rounded hover:bg-primary-300 dark:hover:bg-primary-600"
+            className="px-3 py-1 bg-primary-200 text-primary-800 text-sm rounded hover:bg-primary-300"
           >
             Cancel
           </button>
@@ -520,15 +520,15 @@ function PaymentMethodsList() {
   const getProviderColor = (provider: string) => {
     switch (provider) {
       case 'stripe':
-        return 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400';
+        return 'bg-purple-100 text-purple-700';
       case 'paynow':
-        return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400';
+        return 'bg-blue-100 text-blue-700';
       case 'flutterwave':
-        return 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400';
+        return 'bg-orange-100 text-orange-700';
       case 'paystack':
-        return 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400';
+        return 'bg-cyan-100 text-cyan-700';
       default:
-        return 'bg-primary-100 text-primary-700 dark:bg-primary-800 dark:text-sand-200';
+        return 'bg-primary-100 text-primary-700';
     }
   };
 
@@ -536,7 +536,7 @@ function PaymentMethodsList() {
     return (
       <div className="space-y-3" role="status" aria-busy="true" aria-label="Loading payment methods">
         {[1, 2].map(i => (
-          <div key={i} className="animate-pulse h-24 bg-white dark:bg-primary-800 rounded-lg"></div>
+          <div key={i} className="animate-pulse h-24 bg-white rounded-lg"></div>
         ))}
         <span className="sr-only">Loading payment methods</span>
       </div>
@@ -547,7 +547,7 @@ function PaymentMethodsList() {
     <div className="space-y-3">
       <a
         href="/wallet/add-payment-method"
-        className="w-full bg-white dark:bg-primary-800 rounded-lg p-4 border-2 border-dashed border-primary-300 dark:border-primary-600 hover:border-primary-500 dark:hover:border-primary-500 transition flex items-center justify-center gap-2 text-primary-700 dark:text-sand-300 font-semibold"
+        className="w-full bg-white rounded-lg p-4 border-2 border-dashed border-primary-300 hover:border-primary-500 transition flex items-center justify-center gap-2 text-primary-700 font-semibold"
         aria-label="Add a new payment method"
       >
         <Plus className="w-5 h-5" aria-hidden="true" />
@@ -556,11 +556,11 @@ function PaymentMethodsList() {
 
       {paymentMethods.length === 0 && (
         <div className="card p-10 text-center">
-          <div className="w-16 h-16 rounded-full bg-primary-100 dark:bg-primary-800 mx-auto mb-4 flex items-center justify-center">
-            <CreditCard className="w-8 h-8 text-primary-300 dark:text-primary-600" />
+          <div className="w-16 h-16 rounded-full bg-primary-100 mx-auto mb-4 flex items-center justify-center">
+            <CreditCard className="w-8 h-8 text-primary-300" />
           </div>
-          <h3 className="text-lg font-semibold text-primary-900 dark:text-sand-50 mb-1">No payment methods yet</h3>
-          <p className="text-sm text-primary-500 dark:text-sand-400">
+          <h3 className="text-lg font-semibold text-primary-900 mb-1">No payment methods yet</h3>
+          <p className="text-sm text-primary-500">
             Add a payment method to make bookings easier
           </p>
         </div>
@@ -577,10 +577,10 @@ function PaymentMethodsList() {
                 {getMethodIcon(method.method_type)}
               </div>
               <div>
-                <div className="font-semibold text-primary-900 dark:text-sand-50">
+                <div className="font-semibold text-primary-900">
                   {method.name || `${method.method_type} payment`}
                 </div>
-                <div className="text-sm text-primary-600 dark:text-sand-400 capitalize">
+                <div className="text-sm text-primary-600 capitalize">
                   {method.method_type}
                   {method.last_four && ` •••• ${method.last_four}`}
                   {method.phone_number && ` • ${method.phone_number}`}
@@ -603,7 +603,7 @@ function PaymentMethodsList() {
                   onClick={() => setDefaultMutation.mutate(method.id)}
                   disabled={setDefaultMutation.isPending}
                   aria-busy={setDefaultMutation.isPending}
-                  className="px-3 py-1 text-sm bg-primary-100 dark:bg-primary-700 text-primary-700 dark:text-sand-300 rounded hover:bg-primary-200 dark:hover:bg-primary-600 transition disabled:opacity-50"
+                  className="px-3 py-1 text-sm bg-primary-100 text-primary-700 rounded hover:bg-primary-200 transition disabled:opacity-50"
                 >
                   Set Default
                 </button>
@@ -675,12 +675,12 @@ function WithdrawModal({ wallet, bankAccounts, onClose }: { wallet: any; bankAcc
       aria-modal="true"
       aria-labelledby="withdraw-modal-title"
     >
-      <div className="bg-white dark:bg-primary-800 rounded-xl p-6 max-w-md w-full" onClick={(e) => e.stopPropagation()}>
-        <h2 id="withdraw-modal-title" className="text-2xl font-bold text-primary-900 dark:text-sand-50 mb-4">Withdraw Funds</h2>
+      <div className="bg-white rounded-xl p-6 max-w-md w-full" onClick={(e) => e.stopPropagation()}>
+        <h2 id="withdraw-modal-title" className="text-2xl font-bold text-primary-900 mb-4">Withdraw Funds</h2>
         
         {bankAccounts.length === 0 ? (
           <div className="text-center py-4">
-            <p className="text-primary-600 dark:text-sand-400 mb-4">You need to add a bank account first</p>
+            <p className="text-primary-600 mb-4">You need to add a bank account first</p>
             <Button onClick={onClose} variant="primary" size="sm">
               Close
             </Button>
@@ -688,7 +688,7 @@ function WithdrawModal({ wallet, bankAccounts, onClose }: { wallet: any; bankAcc
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="withdraw-amount" className="block text-sm font-medium text-primary-900 dark:text-sand-50 mb-1">
+              <label htmlFor="withdraw-amount" className="block text-sm font-medium text-primary-900 mb-1">
                 Amount ({wallet.currency})
               </label>
               <input
@@ -701,16 +701,16 @@ function WithdrawModal({ wallet, bankAccounts, onClose }: { wallet: any; bankAcc
                 onChange={(e) => setAmount(e.target.value)}
                 required
                 aria-describedby="withdraw-amount-hint"
-                className="w-full px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-white dark:bg-primary-900 text-primary-900 dark:text-sand-50 focus:ring-2 focus:ring-secondary-500 focus:border-primary-500"
+                className="w-full px-4 py-2 border border-primary-300 rounded-lg bg-white text-primary-900 focus:ring-2 focus:ring-secondary-500 focus:border-primary-500"
                 placeholder="Min 10.00"
               />
-              <p id="withdraw-amount-hint" className="text-xs text-primary-600 dark:text-sand-400 mt-1">
+              <p id="withdraw-amount-hint" className="text-xs text-primary-600 mt-1">
                 Available: {wallet.currency} {parseFloat(wallet.balance).toLocaleString(undefined, { minimumFractionDigits: 2 })}
               </p>
             </div>
 
             <div>
-              <label htmlFor="withdraw-bank" className="block text-sm font-medium text-primary-900 dark:text-sand-50 mb-1">
+              <label htmlFor="withdraw-bank" className="block text-sm font-medium text-primary-900 mb-1">
                 Bank Account
               </label>
               <select
@@ -718,7 +718,7 @@ function WithdrawModal({ wallet, bankAccounts, onClose }: { wallet: any; bankAcc
                 value={selectedBank}
                 onChange={(e) => setSelectedBank(e.target.value)}
                 required
-                className="w-full px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-white dark:bg-primary-900 text-primary-900 dark:text-sand-50 focus:ring-2 focus:ring-secondary-500 focus:border-primary-500"
+                className="w-full px-4 py-2 border border-primary-300 rounded-lg bg-white text-primary-900 focus:ring-2 focus:ring-secondary-500 focus:border-primary-500"
               >
                 <option value="">Select bank account</option>
                 {bankAccounts.map((account: any) => (
@@ -731,21 +731,21 @@ function WithdrawModal({ wallet, bankAccounts, onClose }: { wallet: any; bankAcc
             </div>
 
             <div>
-              <label htmlFor="withdraw-notes" className="block text-sm font-medium text-primary-900 dark:text-sand-50 mb-1">
+              <label htmlFor="withdraw-notes" className="block text-sm font-medium text-primary-900 mb-1">
                 Notes (Optional)
               </label>
               <textarea
                 id="withdraw-notes"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                className="w-full px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-white dark:bg-primary-900 text-primary-900 dark:text-sand-50 focus:ring-2 focus:ring-secondary-500 focus:border-primary-500"
+                className="w-full px-4 py-2 border border-primary-300 rounded-lg bg-white text-primary-900 focus:ring-2 focus:ring-secondary-500 focus:border-primary-500"
                 rows={3}
                 placeholder="Any additional notes..."
               />
             </div>
 
             {withdrawMutation.isError && (
-              <div className="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 p-3 rounded-lg text-sm" role="alert">
+              <div className="bg-red-100 text-red-700 p-3 rounded-lg text-sm" role="alert">
                 {(withdrawMutation.error as any)?.response?.data?.error || 'Failed to initiate withdrawal'}
               </div>
             )}
@@ -754,7 +754,7 @@ function WithdrawModal({ wallet, bankAccounts, onClose }: { wallet: any; bankAcc
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg text-primary-700 dark:text-sand-300 font-semibold hover:bg-primary-50 dark:hover:bg-primary-700 transition"
+                className="flex-1 px-4 py-2 border border-primary-300 rounded-lg text-primary-700 font-semibold hover:bg-primary-50 transition"
               >
                 Cancel
               </button>
@@ -818,12 +818,12 @@ function BankAccountModal({ onClose }: { onClose: () => void }) {
       aria-modal="true"
       aria-labelledby="bank-modal-title"
     >
-      <div className="bg-white dark:bg-primary-800 rounded-xl p-6 max-w-md w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-        <h2 id="bank-modal-title" className="text-2xl font-bold text-primary-900 dark:text-sand-50 mb-4">Add Bank Account</h2>
+      <div className="bg-white rounded-xl p-6 max-w-md w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+        <h2 id="bank-modal-title" className="text-2xl font-bold text-primary-900 mb-4">Add Bank Account</h2>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="bank-name" className="block text-sm font-medium text-primary-900 dark:text-sand-50 mb-1">
+            <label htmlFor="bank-name" className="block text-sm font-medium text-primary-900 mb-1">
               Bank Name *
             </label>
             <input
@@ -832,13 +832,13 @@ function BankAccountModal({ onClose }: { onClose: () => void }) {
               value={formData.bank_name}
               onChange={(e) => setFormData({ ...formData, bank_name: e.target.value })}
               required
-              className="w-full px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-white dark:bg-primary-900 text-primary-900 dark:text-sand-50 focus:ring-2 focus:ring-secondary-500 focus:border-primary-500"
+              className="w-full px-4 py-2 border border-primary-300 rounded-lg bg-white text-primary-900 focus:ring-2 focus:ring-secondary-500 focus:border-primary-500"
               placeholder="e.g., Standard Bank"
             />
           </div>
 
           <div>
-            <label htmlFor="account-name" className="block text-sm font-medium text-primary-900 dark:text-sand-50 mb-1">
+            <label htmlFor="account-name" className="block text-sm font-medium text-primary-900 mb-1">
               Account Name *
             </label>
             <input
@@ -847,13 +847,13 @@ function BankAccountModal({ onClose }: { onClose: () => void }) {
               value={formData.account_name}
               onChange={(e) => setFormData({ ...formData, account_name: e.target.value })}
               required
-              className="w-full px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-white dark:bg-primary-900 text-primary-900 dark:text-sand-50 focus:ring-2 focus:ring-secondary-500 focus:border-primary-500"
+              className="w-full px-4 py-2 border border-primary-300 rounded-lg bg-white text-primary-900 focus:ring-2 focus:ring-secondary-500 focus:border-primary-500"
               placeholder="Account holder name"
             />
           </div>
 
           <div>
-            <label htmlFor="account-number" className="block text-sm font-medium text-primary-900 dark:text-sand-50 mb-1">
+            <label htmlFor="account-number" className="block text-sm font-medium text-primary-900 mb-1">
               Account Number *
             </label>
             <input
@@ -862,13 +862,13 @@ function BankAccountModal({ onClose }: { onClose: () => void }) {
               value={formData.account_number}
               onChange={(e) => setFormData({ ...formData, account_number: e.target.value })}
               required
-              className="w-full px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-white dark:bg-primary-900 text-primary-900 dark:text-sand-50 focus:ring-2 focus:ring-secondary-500 focus:border-primary-500"
+              className="w-full px-4 py-2 border border-primary-300 rounded-lg bg-white text-primary-900 focus:ring-2 focus:ring-secondary-500 focus:border-primary-500"
               placeholder="1234567890"
             />
           </div>
 
           <div>
-            <label htmlFor="branch-code" className="block text-sm font-medium text-primary-900 dark:text-sand-50 mb-1">
+            <label htmlFor="branch-code" className="block text-sm font-medium text-primary-900 mb-1">
               Branch Code
             </label>
             <input
@@ -876,13 +876,13 @@ function BankAccountModal({ onClose }: { onClose: () => void }) {
               type="text"
               value={formData.branch_code}
               onChange={(e) => setFormData({ ...formData, branch_code: e.target.value })}
-              className="w-full px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-white dark:bg-primary-900 text-primary-900 dark:text-sand-50 focus:ring-2 focus:ring-secondary-500 focus:border-primary-500"
+              className="w-full px-4 py-2 border border-primary-300 rounded-lg bg-white text-primary-900 focus:ring-2 focus:ring-secondary-500 focus:border-primary-500"
               placeholder="Optional"
             />
           </div>
 
           <div>
-            <label htmlFor="country" className="block text-sm font-medium text-primary-900 dark:text-sand-50 mb-1">
+            <label htmlFor="country" className="block text-sm font-medium text-primary-900 mb-1">
               Country
             </label>
             <input
@@ -890,7 +890,7 @@ function BankAccountModal({ onClose }: { onClose: () => void }) {
               type="text"
               value={formData.country}
               onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-              className="w-full px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-white dark:bg-primary-900 text-primary-900 dark:text-sand-50 focus:ring-2 focus:ring-secondary-500 focus:border-primary-500"
+              className="w-full px-4 py-2 border border-primary-300 rounded-lg bg-white text-primary-900 focus:ring-2 focus:ring-secondary-500 focus:border-primary-500"
               placeholder="e.g., Zimbabwe"
             />
           </div>
@@ -901,15 +901,15 @@ function BankAccountModal({ onClose }: { onClose: () => void }) {
               id="is_primary"
               checked={formData.is_primary}
               onChange={(e) => setFormData({ ...formData, is_primary: e.target.checked })}
-              className="w-4 h-4 text-primary-600 border-primary-300 dark:border-primary-600 rounded focus:ring-secondary-500"
+              className="w-4 h-4 text-primary-600 border-primary-300 rounded focus:ring-secondary-500"
             />
-            <label htmlFor="is_primary" className="text-sm text-primary-900 dark:text-sand-50">
+            <label htmlFor="is_primary" className="text-sm text-primary-900">
               Set as primary account
             </label>
           </div>
 
           {createMutation.isError && (
-            <div className="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 p-3 rounded-lg text-sm" role="alert">
+            <div className="bg-red-100 text-red-700 p-3 rounded-lg text-sm" role="alert">
               {(createMutation.error as any)?.response?.data?.error || 'Failed to add bank account'}
             </div>
           )}
@@ -918,7 +918,7 @@ function BankAccountModal({ onClose }: { onClose: () => void }) {
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg text-primary-700 dark:text-sand-300 font-semibold hover:bg-primary-50 dark:hover:bg-primary-700 transition"
+              className="flex-1 px-4 py-2 border border-primary-300 rounded-lg text-primary-700 font-semibold hover:bg-primary-50 transition"
             >
               Cancel
             </button>

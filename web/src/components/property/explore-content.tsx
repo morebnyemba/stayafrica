@@ -169,16 +169,16 @@ export function ExploreContent() {
   });
 
   return (
-    <div className="bg-sand-100 dark:bg-primary-900 min-h-screen">
+    <div className="bg-sand-100 min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         {/* Header */}
         <div className="mb-8 animate-fade-in">
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
             <div>
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-primary-900 dark:text-sand-50 mb-2">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-primary-900 mb-2">
                 Explore Properties
               </h1>
-              <p className="text-base sm:text-lg text-primary-600 dark:text-sand-200">
+              <p className="text-base sm:text-lg text-primary-600">
                 {userLocation ? 'Showing properties near you' : 'Discover unique accommodations across Africa'}
               </p>
             </div>
@@ -233,7 +233,7 @@ export function ExploreContent() {
                 {featuredSections.map((section) => (
                   <div key={section.id}>
                     <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg sm:text-xl font-semibold text-primary-900 dark:text-sand-50">
+                      <h3 className="text-lg sm:text-xl font-semibold text-primary-900">
                         {section.title}
                       </h3>
                       <Link
@@ -250,7 +250,7 @@ export function ExploreContent() {
                           href={`/property/${property.id}`}
                           className="min-w-[220px] sm:min-w-[260px] group"
                         >
-                          <div className="bg-white dark:bg-primary-800 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition border border-primary-100 dark:border-primary-700">
+                          <div className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition border border-primary-100">
                             <div className="relative h-36 sm:h-40 overflow-hidden">
                               <img
                                 src={property.images?.[0]?.image_url || property.main_image || 'https://images.unsplash.com/photo-1512917774080-9991f1c52e1d'}
@@ -259,15 +259,15 @@ export function ExploreContent() {
                               />
                             </div>
                             <div className="p-3">
-                              <p className="text-sm font-semibold text-primary-900 dark:text-sand-50 line-clamp-1">
+                              <p className="text-sm font-semibold text-primary-900 line-clamp-1">
                                 {property.title}
                               </p>
-                              <p className="text-xs text-primary-600 dark:text-sand-300 line-clamp-1">
+                              <p className="text-xs text-primary-600 line-clamp-1">
                                 {property.city}, {property.country}
                               </p>
-                              <div className="mt-2 text-sm font-semibold text-primary-900 dark:text-sand-50">
+                              <div className="mt-2 text-sm font-semibold text-primary-900">
                                 ${property.price_per_night}
-                                <span className="text-xs font-normal text-primary-500 dark:text-sand-400"> / night</span>
+                                <span className="text-xs font-normal text-primary-500"> / night</span>
                               </div>
                             </div>
                           </div>
@@ -282,21 +282,21 @@ export function ExploreContent() {
             {isLoading ? (
               <PropertyListSkeleton count={9} />
             ) : error ? (
-              <div className="bg-white dark:bg-primary-800 p-12 rounded-lg text-center border border-primary-200 dark:border-primary-700">
-                <p className="text-primary-600 dark:text-sand-300 mb-4">
+              <div className="bg-white p-12 rounded-lg text-center border border-primary-200">
+                <p className="text-primary-600 mb-4">
                   Unable to load properties. Please try again later.
                 </p>
-                <p className="text-sm text-primary-500 dark:text-sand-400">
+                <p className="text-sm text-primary-500">
                   Error: {error instanceof Error ? error.message : 'Unknown error'}
                 </p>
               </div>
             ) : properties.length === 0 ? (
-              <div className="bg-white dark:bg-primary-800 p-12 rounded-lg text-center border border-primary-200 dark:border-primary-700">
-                <Filter className="w-16 h-16 text-primary-400 dark:text-sand-500 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-primary-900 dark:text-sand-50 mb-2">
+              <div className="bg-white p-12 rounded-lg text-center border border-primary-200">
+                <Filter className="w-16 h-16 text-primary-400 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-primary-900 mb-2">
                   No Properties Found
                 </h3>
-            <p className="text-primary-600 dark:text-sand-300">
+            <p className="text-primary-600">
               Try adjusting your search filters to find more results.
             </p>
           </div>
@@ -308,7 +308,7 @@ export function ExploreContent() {
                 href={`/property/${property.id}`}
                 className="group cursor-pointer"
               >
-                <div className="bg-white dark:bg-primary-800 rounded-xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 border border-primary-100 dark:border-primary-700">
+                <div className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 border border-primary-100">
                   {/* Image Container - Matching home page style */}
                   <div className="relative h-48 sm:h-52 md:h-60 overflow-hidden">
                     <img
@@ -318,11 +318,11 @@ export function ExploreContent() {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     {property.average_rating && (
-                      <div className="absolute top-3 right-3 flex items-center gap-1 bg-white/98 dark:bg-primary-900/98 backdrop-blur-sm px-2.5 py-1.5 rounded-lg shadow-lg">
+                      <div className="absolute top-3 right-3 flex items-center gap-1 bg-white/98 backdrop-blur-sm px-2.5 py-1.5 rounded-lg shadow-lg">
                         <svg className="w-3.5 h-3.5 text-secondary-500" fill="currentColor" viewBox="0 0 20 20">
                           <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                         </svg>
-                        <span className="text-sm font-bold text-primary-900 dark:text-sand-50">{property.average_rating.toFixed(1)}</span>
+                        <span className="text-sm font-bold text-primary-900">{property.average_rating.toFixed(1)}</span>
                       </div>
                     )}
                   </div>
@@ -330,17 +330,17 @@ export function ExploreContent() {
                   {/* Content - Matching home page style */}
                   <div className="p-4">
                     <div className="mb-2">
-                      <h3 className="font-bold text-base text-primary-900 dark:text-sand-50 group-hover:text-secondary-600 dark:group-hover:text-secondary-400 transition line-clamp-1 mb-1">
+                      <h3 className="font-bold text-base text-primary-900 group-hover:text-secondary-600 transition line-clamp-1 mb-1">
                         {property.city}, {property.country}
                       </h3>
-                      <p className="text-sm text-primary-600 dark:text-sand-300 line-clamp-1">
+                      <p className="text-sm text-primary-600 line-clamp-1">
                         {property.title}
                       </p>
                     </div>
                     
                     {/* Property details */}
                     {(property.bedrooms || property.max_guests) && (
-                      <div className="flex items-center gap-3 text-xs text-primary-500 dark:text-sand-400 mb-3">
+                      <div className="flex items-center gap-3 text-xs text-primary-500 mb-3">
                         {property.bedrooms && <span>{property.bedrooms} bed{property.bedrooms > 1 ? 's' : ''}</span>}
                         {property.bedrooms && property.max_guests && <span>•</span>}
                         {property.max_guests && <span>{property.max_guests} guest{property.max_guests > 1 ? 's' : ''}</span>}
@@ -349,10 +349,10 @@ export function ExploreContent() {
                     
                     <div className="flex items-baseline justify-between">
                       <div>
-                        <span className="font-bold text-lg text-primary-900 dark:text-sand-50">
+                        <span className="font-bold text-lg text-primary-900">
                           ${property.price_per_night}
                         </span>
-                        <span className="text-sm text-primary-600 dark:text-sand-300 ml-1">/ night</span>
+                        <span className="text-sm text-primary-600 ml-1">/ night</span>
                       </div>
                     </div>
                   </div>
@@ -365,7 +365,7 @@ export function ExploreContent() {
         {/* Pagination Info */}
         {properties.length > 0 && !isFlexible && (
           <div className="mt-8 text-center">
-            <p className="text-primary-600 dark:text-sand-300">
+            <p className="text-primary-600">
               Showing {properties.length} properties {userLocation && '(sorted by distance)'}
             </p>
           </div>

@@ -49,14 +49,14 @@ export function ExperiencesContent() {
   };
 
   return (
-    <div className="bg-sand-100 dark:bg-primary-900 min-h-screen">
+    <div className="bg-sand-100 min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-primary-900 dark:text-sand-50 mb-4">
+          <h1 className="text-3xl md:text-4xl font-bold text-primary-900 mb-4">
             Experiences
           </h1>
-          <p className="text-lg text-primary-600 dark:text-sand-200">
+          <p className="text-lg text-primary-600">
             Discover unique activities and adventures across Africa
           </p>
         </div>
@@ -71,7 +71,7 @@ export function ExperiencesContent() {
                 placeholder="Search experiences..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-primary-200 dark:border-primary-600 rounded-lg bg-sand-50 dark:bg-primary-700 text-primary-900 dark:text-sand-100 focus:ring-2 focus:ring-secondary-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 border border-primary-200 rounded-lg bg-sand-50 text-primary-900 focus:ring-2 focus:ring-secondary-500 focus:border-transparent"
               />
             </div>
             <Button
@@ -87,17 +87,17 @@ export function ExperiencesContent() {
 
           {/* Filters */}
           {showFilters && (
-            <div className="mt-4 pt-4 border-t border-primary-200 dark:border-primary-700">
+            <div className="mt-4 pt-4 border-t border-primary-200">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Category Filter */}
                 <div>
-                  <label className="block text-sm font-medium text-primary-900 dark:text-sand-50 mb-2">
+                  <label className="block text-sm font-medium text-primary-900 mb-2">
                     Category
                   </label>
                   <select
                     value={selectedCategory}
                     onChange={(e) => setSelectedCategory(e.target.value)}
-                    className="w-full px-3 py-2 border border-primary-200 dark:border-primary-600 rounded-lg bg-sand-50 dark:bg-primary-700 text-primary-900 dark:text-sand-100 focus:ring-2 focus:ring-secondary-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-primary-200 rounded-lg bg-sand-50 text-primary-900 focus:ring-2 focus:ring-secondary-500 focus:border-transparent"
                   >
                     <option value="">All Categories</option>
                     {categories.map((category: any) => (
@@ -110,13 +110,13 @@ export function ExperiencesContent() {
 
                 {/* Difficulty Filter */}
                 <div>
-                  <label className="block text-sm font-medium text-primary-900 dark:text-sand-50 mb-2">
+                  <label className="block text-sm font-medium text-primary-900 mb-2">
                     Difficulty
                   </label>
                   <select
                     value={selectedDifficulty}
                     onChange={(e) => setSelectedDifficulty(e.target.value)}
-                    className="w-full px-3 py-2 border border-primary-200 dark:border-primary-600 rounded-lg bg-sand-50 dark:bg-primary-700 text-primary-900 dark:text-sand-100 focus:ring-2 focus:ring-secondary-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-primary-200 rounded-lg bg-sand-50 text-primary-900 focus:ring-2 focus:ring-secondary-500 focus:border-transparent"
                   >
                     <option value="">All Difficulties</option>
                     <option value="easy">Easy</option>
@@ -152,28 +152,28 @@ export function ExperiencesContent() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2, 3, 4, 5, 6].map((i) => (
               <div key={i} className="card p-6 animate-pulse">
-                <div className="h-48 bg-primary-200 dark:bg-primary-700 rounded mb-4"></div>
-                <div className="h-6 bg-primary-200 dark:bg-primary-700 rounded mb-2 w-3/4"></div>
-                <div className="h-4 bg-primary-200 dark:bg-primary-700 rounded mb-2"></div>
-                <div className="h-4 bg-primary-200 dark:bg-primary-700 rounded w-5/6"></div>
+                <div className="h-48 bg-primary-200 rounded mb-4"></div>
+                <div className="h-6 bg-primary-200 rounded mb-2 w-3/4"></div>
+                <div className="h-4 bg-primary-200 rounded mb-2"></div>
+                <div className="h-4 bg-primary-200 rounded w-5/6"></div>
               </div>
             ))}
           </div>
         ) : error ? (
           <div className="card p-12 text-center">
-            <p className="text-primary-600 dark:text-sand-300 mb-4">
+            <p className="text-primary-600 mb-4">
               Unable to load experiences. Please try again later.
             </p>
-            <p className="text-sm text-primary-500 dark:text-sand-400">
+            <p className="text-sm text-primary-500">
               Error: {error instanceof Error ? error.message : 'Unknown error'}
             </p>
           </div>
         ) : experiences.length === 0 ? (
           <div className="card p-12 text-center">
-            <h3 className="text-xl font-semibold text-primary-900 dark:text-sand-50 mb-2">
+            <h3 className="text-xl font-semibold text-primary-900 mb-2">
               No Experiences Found
             </h3>
-            <p className="text-primary-600 dark:text-sand-300 mb-4">
+            <p className="text-primary-600 mb-4">
               {searchTerm || selectedCategory || selectedDifficulty
                 ? 'Try adjusting your filters or search terms.'
                 : 'Experiences will be available soon. Check back later!'}
@@ -200,7 +200,7 @@ export function ExperiencesContent() {
 
         {/* Results Count */}
         {!isLoading && experiences.length > 0 && (
-          <div className="mt-8 text-center text-sm text-primary-600 dark:text-sand-400">
+          <div className="mt-8 text-center text-sm text-primary-600">
             Showing {experiences.length} {experiences.length === 1 ? 'experience' : 'experiences'}
           </div>
         )}

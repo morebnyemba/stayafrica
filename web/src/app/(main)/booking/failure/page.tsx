@@ -34,31 +34,31 @@ export default function BookingFailurePage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-sand-100 dark:bg-primary-900 py-12 px-4">
+      <div className="min-h-screen bg-sand-100 py-12 px-4">
         <div className="max-w-lg mx-auto">
 
           {/* Error header */}
           <div className="text-center mb-8">
-            <div className="w-20 h-20 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-5">
-              <XCircle className="w-12 h-12 text-red-600 dark:text-red-400" />
+            <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-5">
+              <XCircle className="w-12 h-12 text-red-600" />
             </div>
-            <h1 className="text-3xl font-bold text-primary-900 dark:text-sand-50 mb-2">
+            <h1 className="text-3xl font-bold text-primary-900 mb-2">
               Payment didn&apos;t go through
             </h1>
-            <p className="text-primary-600 dark:text-sand-300">
+            <p className="text-primary-600">
               Don&apos;t worry — your booking is still reserved. You can try again.
             </p>
           </div>
 
           {/* Error detail */}
-          <div className="card p-5 mb-5 border-l-4 border-red-400 dark:border-red-500">
+          <div className="card p-5 mb-5 border-l-4 border-red-400">
             <div className="flex items-start gap-3">
-              <AlertTriangle className="w-5 h-5 text-red-500 dark:text-red-400 mt-0.5 flex-shrink-0" />
+              <AlertTriangle className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
               <div>
-                <p className="text-sm font-medium text-primary-900 dark:text-sand-50 mb-1">Error details</p>
-                <p className="text-sm text-primary-700 dark:text-sand-200">{error}</p>
+                <p className="text-sm font-medium text-primary-900 mb-1">Error details</p>
+                <p className="text-sm text-primary-700">{error}</p>
                 {(bookingId || provider) && (
-                  <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-xs text-primary-500 dark:text-sand-400">
+                  <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-xs text-primary-500">
                     {bookingId && <span>Ref: <span className="font-mono">{bookingId}</span></span>}
                     {provider && <span>Via: <span className="capitalize">{provider.replace(/_/g, ' ')}</span></span>}
                   </div>
@@ -69,16 +69,16 @@ export default function BookingFailurePage() {
 
           {/* Common reasons */}
           <div className="card p-5 mb-5">
-            <h2 className="text-sm font-semibold text-primary-900 dark:text-sand-50 uppercase tracking-wider mb-3">
+            <h2 className="text-sm font-semibold text-primary-900 uppercase tracking-wider mb-3">
               This can happen when
             </h2>
             <div className="space-y-2.5">
               {reasons.map((r, i) => (
                 <div key={i} className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-sand-50 dark:bg-primary-800 flex items-center justify-center flex-shrink-0">
-                    <r.icon className="w-4 h-4 text-primary-500 dark:text-sand-400" />
+                  <div className="w-8 h-8 rounded-full bg-sand-50 flex items-center justify-center flex-shrink-0">
+                    <r.icon className="w-4 h-4 text-primary-500" />
                   </div>
-                  <span className="text-sm text-primary-700 dark:text-sand-200">{r.label}</span>
+                  <span className="text-sm text-primary-700">{r.label}</span>
                 </div>
               ))}
             </div>
@@ -86,7 +86,7 @@ export default function BookingFailurePage() {
 
           {/* What to do */}
           <div className="card p-5 mb-6">
-            <h2 className="text-sm font-semibold text-primary-900 dark:text-sand-50 uppercase tracking-wider mb-3">
+            <h2 className="text-sm font-semibold text-primary-900 uppercase tracking-wider mb-3">
               What you can do
             </h2>
             <ol className="space-y-2">
@@ -97,10 +97,10 @@ export default function BookingFailurePage() {
                 'Reach out to our support team if issues persist',
               ].map((step, i) => (
                 <li key={i} className="flex items-start gap-2.5">
-                  <span className="w-5 h-5 rounded-full bg-secondary-100 dark:bg-secondary-900/40 flex items-center justify-center flex-shrink-0 mt-0.5 text-[11px] font-bold text-secondary-700 dark:text-secondary-400">
+                  <span className="w-5 h-5 rounded-full bg-secondary-100 flex items-center justify-center flex-shrink-0 mt-0.5 text-[11px] font-bold text-secondary-700">
                     {i + 1}
                   </span>
-                  <span className="text-sm text-primary-700 dark:text-sand-200">{step}</span>
+                  <span className="text-sm text-primary-700">{step}</span>
                 </li>
               ))}
             </ol>
@@ -109,7 +109,7 @@ export default function BookingFailurePage() {
           {/* Primary CTA */}
           <button
             onClick={handleRetry}
-            className="w-full flex items-center justify-center gap-2 bg-secondary-600 hover:bg-secondary-700 dark:bg-secondary-700 dark:hover:bg-secondary-600 text-white font-semibold py-3.5 rounded-lg transition mb-3"
+            className="w-full flex items-center justify-center gap-2 bg-secondary-600 hover:bg-secondary-700 text-white font-semibold py-3.5 rounded-lg transition mb-3"
           >
             <RefreshCcw className="w-5 h-5" />
             {bookingId ? 'Try a different payment method' : 'Try again'}
@@ -118,7 +118,7 @@ export default function BookingFailurePage() {
           {/* Secondary CTA */}
           <Link
             href="/"
-            className="w-full flex items-center justify-center gap-2 border border-primary-300 dark:border-primary-600 text-primary-700 dark:text-sand-200 font-semibold py-3 rounded-lg hover:bg-sand-50 dark:hover:bg-primary-800 transition"
+            className="w-full flex items-center justify-center gap-2 border border-primary-300 text-primary-700 font-semibold py-3 rounded-lg hover:bg-sand-50 transition"
           >
             <Home className="w-5 h-5" />
             Back to home
@@ -126,10 +126,10 @@ export default function BookingFailurePage() {
 
           {/* Support footer */}
           <div className="mt-8 text-center">
-            <div className="inline-flex items-center gap-2 text-sm text-primary-500 dark:text-sand-400">
+            <div className="inline-flex items-center gap-2 text-sm text-primary-500">
               <Headphones className="w-4 h-4" />
               Need help?
-              <Link href="/contact" className="text-secondary-600 dark:text-secondary-400 hover:underline font-medium inline-flex items-center gap-0.5">
+              <Link href="/contact" className="text-secondary-600 hover:underline font-medium inline-flex items-center gap-0.5">
                 Contact support <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>

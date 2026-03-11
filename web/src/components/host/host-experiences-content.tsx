@@ -24,9 +24,9 @@ import { toast } from 'react-hot-toast';
 import type { Experience, ExperienceStatus } from '@/types';
 
 const statusColors: Record<ExperienceStatus, string> = {
-  active: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
-  inactive: 'bg-primary-100 text-primary-800 dark:bg-primary-700 dark:text-primary-300',
-  pending_approval: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
+  active: 'bg-green-100 text-green-800',
+  inactive: 'bg-primary-100 text-primary-800',
+  pending_approval: 'bg-yellow-100 text-yellow-800',
 };
 
 const statusLabels: Record<ExperienceStatus, string> = {
@@ -96,15 +96,15 @@ export function HostExperiencesContent() {
   };
 
   return (
-    <div className="min-h-screen bg-sand-100 dark:bg-primary-900">
+    <div className="min-h-screen bg-sand-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-primary-900 dark:text-sand-50">
+            <h1 className="text-2xl sm:text-3xl font-bold text-primary-900">
               My Experiences
             </h1>
-            <p className="text-primary-600 dark:text-sand-300 mt-1">
+            <p className="text-primary-600 mt-1">
               Manage your activities and adventures
             </p>
           </div>
@@ -119,14 +119,14 @@ export function HostExperiencesContent() {
         {/* Stats */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
           {[
-            { label: 'Total', value: stats.total, color: 'text-primary-900 dark:text-sand-50' },
-            { label: 'Active', value: stats.active, color: 'text-green-600 dark:text-green-400' },
-            { label: 'Pending', value: stats.pending, color: 'text-yellow-600 dark:text-yellow-400' },
-            { label: 'Inactive', value: stats.inactive, color: 'text-primary-500 dark:text-sand-400' },
+            { label: 'Total', value: stats.total, color: 'text-primary-900' },
+            { label: 'Active', value: stats.active, color: 'text-green-600' },
+            { label: 'Pending', value: stats.pending, color: 'text-yellow-600' },
+            { label: 'Inactive', value: stats.inactive, color: 'text-primary-500' },
           ].map((stat) => (
             <div key={stat.label} className="card p-4 text-center">
               <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>
-              <p className="text-sm text-primary-600 dark:text-sand-400">{stat.label}</p>
+              <p className="text-sm text-primary-600">{stat.label}</p>
             </div>
           ))}
         </div>
@@ -141,7 +141,7 @@ export function HostExperiencesContent() {
                 placeholder="Search your experiences..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-primary-200 dark:border-primary-600 rounded-lg bg-sand-50 dark:bg-primary-700 text-primary-900 dark:text-sand-100 focus:ring-2 focus:ring-secondary-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 border border-primary-200 rounded-lg bg-sand-50 text-primary-900 focus:ring-2 focus:ring-secondary-500 focus:border-transparent"
               />
             </div>
             <Button variant="outline" onClick={() => setShowFilters(!showFilters)}>
@@ -151,7 +151,7 @@ export function HostExperiencesContent() {
           </div>
 
           {showFilters && (
-            <div className="mt-4 pt-4 border-t border-primary-200 dark:border-primary-700">
+            <div className="mt-4 pt-4 border-t border-primary-200">
               <div className="flex flex-wrap gap-2">
                 {(['', 'active', 'pending_approval', 'inactive'] as const).map((s) => (
                   <button
@@ -160,7 +160,7 @@ export function HostExperiencesContent() {
                     className={`px-3 py-1.5 rounded-full text-sm font-medium transition ${
                       statusFilter === s
                         ? 'bg-secondary-500 text-neutral-900'
-                        : 'bg-primary-100 dark:bg-primary-700 text-primary-700 dark:text-sand-200 hover:bg-primary-200 dark:hover:bg-primary-600'
+                        : 'bg-primary-100 text-primary-700 hover:bg-primary-200'
                     }`}
                   >
                     {s ? statusLabels[s] : 'All'}
@@ -177,11 +177,11 @@ export function HostExperiencesContent() {
             {[1, 2, 3].map((i) => (
               <div key={i} className="card p-6 animate-pulse">
                 <div className="flex gap-4">
-                  <div className="w-32 h-24 bg-primary-200 dark:bg-primary-700 rounded-lg" />
+                  <div className="w-32 h-24 bg-primary-200 rounded-lg" />
                   <div className="flex-1 space-y-3">
-                    <div className="h-5 bg-primary-200 dark:bg-primary-700 rounded w-1/3" />
-                    <div className="h-4 bg-primary-200 dark:bg-primary-700 rounded w-1/2" />
-                    <div className="h-4 bg-primary-200 dark:bg-primary-700 rounded w-1/4" />
+                    <div className="h-5 bg-primary-200 rounded w-1/3" />
+                    <div className="h-4 bg-primary-200 rounded w-1/2" />
+                    <div className="h-4 bg-primary-200 rounded w-1/4" />
                   </div>
                 </div>
               </div>
@@ -189,19 +189,19 @@ export function HostExperiencesContent() {
           </div>
         ) : error ? (
           <div className="card p-12 text-center">
-            <p className="text-primary-600 dark:text-sand-300">
+            <p className="text-primary-600">
               Failed to load experiences. Please try again.
             </p>
           </div>
         ) : experiences.length === 0 ? (
           <div className="card p-12 text-center">
             <div className="flex justify-center mb-4">
-              <MapPin className="w-16 h-16 text-primary-300 dark:text-primary-600" />
+              <MapPin className="w-16 h-16 text-primary-300" />
             </div>
-            <h3 className="text-xl font-semibold text-primary-900 dark:text-sand-50 mb-2">
+            <h3 className="text-xl font-semibold text-primary-900 mb-2">
               {allExperiences.length === 0 ? 'No Experiences Yet' : 'No Matching Experiences'}
             </h3>
-            <p className="text-primary-600 dark:text-sand-300 mb-6">
+            <p className="text-primary-600 mb-6">
               {allExperiences.length === 0
                 ? 'Create your first experience to offer guests unique activities and adventures.'
                 : 'Try adjusting your search or filters.'}
@@ -224,7 +224,7 @@ export function HostExperiencesContent() {
               >
                 <div className="flex flex-col sm:flex-row gap-4">
                   {/* Image */}
-                  <div className="relative w-full sm:w-40 h-32 sm:h-28 rounded-lg overflow-hidden bg-primary-200 dark:bg-primary-700 flex-shrink-0">
+                  <div className="relative w-full sm:w-40 h-32 sm:h-28 rounded-lg overflow-hidden bg-primary-200 flex-shrink-0">
                     {exp.main_image ? (
                       <Image
                         src={exp.main_image}
@@ -243,10 +243,10 @@ export function HostExperiencesContent() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2">
                       <div>
-                        <h3 className="text-lg font-semibold text-primary-900 dark:text-sand-50 truncate">
+                        <h3 className="text-lg font-semibold text-primary-900 truncate">
                           {exp.title}
                         </h3>
-                        <div className="flex items-center gap-1 text-sm text-primary-600 dark:text-sand-300 mt-1">
+                        <div className="flex items-center gap-1 text-sm text-primary-600 mt-1">
                           <MapPin className="w-4 h-4" />
                           <span>{exp.city}, {exp.country}</span>
                         </div>
@@ -256,11 +256,11 @@ export function HostExperiencesContent() {
                       </span>
                     </div>
 
-                    <p className="text-sm text-primary-700 dark:text-sand-300 mt-2 line-clamp-1">
+                    <p className="text-sm text-primary-700 mt-2 line-clamp-1">
                       {exp.description}
                     </p>
 
-                    <div className="flex flex-wrap items-center gap-4 mt-3 text-sm text-primary-600 dark:text-sand-400">
+                    <div className="flex flex-wrap items-center gap-4 mt-3 text-sm text-primary-600">
                       <span className="flex items-center gap-1">
                         <DollarSign className="w-4 h-4" />
                         {exp.currency} {exp.price_per_person}/person
@@ -309,10 +309,10 @@ export function HostExperiencesContent() {
                         <MoreVertical className="w-4 h-4" />
                       </Button>
                       {menuOpen === exp.id && (
-                        <div className="absolute right-0 top-full mt-1 bg-white dark:bg-primary-800 rounded-lg shadow-lg border border-primary-200 dark:border-primary-700 z-10 min-w-[140px]">
+                        <div className="absolute right-0 top-full mt-1 bg-white rounded-lg shadow-lg border border-primary-200 z-10 min-w-[140px]">
                           <Link
                             href={`/experiences/${exp.id}`}
-                            className="block px-4 py-2 text-sm text-primary-700 dark:text-sand-200 hover:bg-primary-50 dark:hover:bg-primary-700 rounded-t-lg"
+                            className="block px-4 py-2 text-sm text-primary-700 hover:bg-primary-50 rounded-t-lg"
                             onClick={() => setMenuOpen(null)}
                           >
                             View Public Page
@@ -324,7 +324,7 @@ export function HostExperiencesContent() {
                               }
                               setMenuOpen(null);
                             }}
-                            className="block w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-b-lg"
+                            className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-b-lg"
                           >
                             Delete
                           </button>

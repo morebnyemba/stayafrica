@@ -67,7 +67,7 @@ export default async function RootLayout({
   const messages = await getMessages();
 
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html lang={locale}>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="manifest" href="/manifest.json" />
@@ -77,13 +77,8 @@ export default async function RootLayout({
         <meta name="apple-mobile-web-app-title" content="StayAfrica" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme:dark)').matches)){document.documentElement.classList.add('dark')}}catch(e){}})()`,
-          }}
-        />
       </head>
-      <body className="antialiased bg-sand-100 dark:bg-primary-900 text-primary-900 dark:text-sand-100">
+      <body className="antialiased bg-sand-100 text-primary-900">
         <ErrorBoundary>
           <Providers locale={locale} messages={messages as Record<string, unknown>}>
             <ServiceWorkerRegistrar />

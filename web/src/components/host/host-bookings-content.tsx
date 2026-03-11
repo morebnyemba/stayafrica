@@ -141,13 +141,13 @@ export function HostBookingsContent() {
   }), [allBookings]);
 
   const statusConfig: Record<string, { color: string; bg: string; icon: any; dotColor: string }> = {
-    requested: { color: 'text-amber-700 dark:text-amber-300', bg: 'bg-amber-50 dark:bg-amber-900/40 border border-amber-200 dark:border-amber-800', icon: Clock, dotColor: 'bg-amber-500' },
-    pending: { color: 'text-yellow-700 dark:text-yellow-300', bg: 'bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800', icon: Clock, dotColor: 'bg-yellow-500' },
-    confirmed: { color: 'text-green-700 dark:text-green-300', bg: 'bg-green-50 dark:bg-green-900/20', icon: CheckCircle, dotColor: 'bg-green-500' },
-    checked_in: { color: 'text-blue-700 dark:text-blue-300', bg: 'bg-blue-50 dark:bg-blue-900/20', icon: LogIn, dotColor: 'bg-blue-500' },
-    checked_out: { color: 'text-purple-700 dark:text-purple-300', bg: 'bg-purple-50 dark:bg-purple-900/20', icon: LogOut, dotColor: 'bg-purple-500' },
-    cancelled: { color: 'text-red-700 dark:text-red-300', bg: 'bg-red-50 dark:bg-red-900/20', icon: XCircle, dotColor: 'bg-red-500' },
-    completed: { color: 'text-blue-700 dark:text-blue-300', bg: 'bg-blue-50 dark:bg-blue-900/20', icon: CheckCircle, dotColor: 'bg-blue-500' },
+    requested: { color: 'text-amber-700', bg: 'bg-amber-50 border border-amber-200', icon: Clock, dotColor: 'bg-amber-500' },
+    pending: { color: 'text-yellow-700', bg: 'bg-yellow-50 border border-yellow-200', icon: Clock, dotColor: 'bg-yellow-500' },
+    confirmed: { color: 'text-green-700', bg: 'bg-green-50', icon: CheckCircle, dotColor: 'bg-green-500' },
+    checked_in: { color: 'text-blue-700', bg: 'bg-blue-50', icon: LogIn, dotColor: 'bg-blue-500' },
+    checked_out: { color: 'text-purple-700', bg: 'bg-purple-50', icon: LogOut, dotColor: 'bg-purple-500' },
+    cancelled: { color: 'text-red-700', bg: 'bg-red-50', icon: XCircle, dotColor: 'bg-red-500' },
+    completed: { color: 'text-blue-700', bg: 'bg-blue-50', icon: CheckCircle, dotColor: 'bg-blue-500' },
   };
 
   const filterCounts: Record<string, number> = {
@@ -185,26 +185,26 @@ export function HostBookingsContent() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-sand-100 dark:bg-primary-900">
+      <div className="min-h-screen bg-sand-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Header */}
           <header className="mb-8">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-primary-900 dark:text-sand-50">
+                <h1 className="text-2xl sm:text-3xl font-bold text-primary-900">
                   Manage Bookings
                 </h1>
-                <p className="text-primary-600 dark:text-sand-300 mt-1">
+                <p className="text-primary-600 mt-1">
                   {stats.total} total booking{stats.total !== 1 ? 's' : ''} · {allBookings[0]?.currency || 'USD'} {stats.totalEarnings.toFixed(0)} earned
                 </p>
               </div>
 
               <div className="flex items-center gap-2">
                 {/* View Toggle */}
-                <div className="inline-flex rounded-lg border border-primary-200 dark:border-primary-700 bg-white dark:bg-primary-800 p-1">
+                <div className="inline-flex rounded-lg border border-primary-200 bg-white p-1">
                   <button
                     onClick={() => setViewMode('list')}
-                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5 ${viewMode === 'list' ? 'bg-secondary-500 text-white' : 'text-primary-600 dark:text-sand-300'
+                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5 ${viewMode === 'list' ? 'bg-secondary-500 text-white' : 'text-primary-600'
                       }`}
                   >
                     <List className="w-4 h-4" />
@@ -212,7 +212,7 @@ export function HostBookingsContent() {
                   </button>
                   <button
                     onClick={() => setViewMode('calendar')}
-                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5 ${viewMode === 'calendar' ? 'bg-secondary-500 text-white' : 'text-primary-600 dark:text-sand-300'
+                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5 ${viewMode === 'calendar' ? 'bg-secondary-500 text-white' : 'text-primary-600'
                       }`}
                   >
                     <Calendar className="w-4 h-4" />
@@ -226,18 +226,18 @@ export function HostBookingsContent() {
           {/* Stats Row */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
             {[
-              { label: 'Requests', value: stats.requested, icon: Clock, color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-900/20' },
-              { label: 'Pending', value: stats.pending, icon: Clock, color: 'text-yellow-600 dark:text-yellow-400', bg: 'bg-yellow-50 dark:bg-yellow-900/20' },
-              { label: 'Confirmed', value: stats.confirmed, icon: CheckCircle, color: 'text-green-600 dark:text-green-400', bg: 'bg-green-50 dark:bg-green-900/20' },
-              { label: 'Revenue', value: `${allBookings[0]?.currency || 'USD'} ${stats.totalEarnings.toFixed(0)}`, icon: TrendingUp, color: 'text-secondary-600 dark:text-secondary-400', bg: 'bg-secondary-50 dark:bg-secondary-900/20' },
+              { label: 'Requests', value: stats.requested, icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50' },
+              { label: 'Pending', value: stats.pending, icon: Clock, color: 'text-yellow-600', bg: 'bg-yellow-50' },
+              { label: 'Confirmed', value: stats.confirmed, icon: CheckCircle, color: 'text-green-600', bg: 'bg-green-50' },
+              { label: 'Revenue', value: `${allBookings[0]?.currency || 'USD'} ${stats.totalEarnings.toFixed(0)}`, icon: TrendingUp, color: 'text-secondary-600', bg: 'bg-secondary-50' },
             ].map((stat) => (
               <div key={stat.label} className="card p-4 flex items-center gap-3">
                 <div className={`p-2 rounded-lg ${stat.bg}`}>
                   <stat.icon className={`w-5 h-5 ${stat.color}`} />
                 </div>
                 <div>
-                  <p className="text-lg sm:text-xl font-bold text-primary-900 dark:text-sand-50">{stat.value}</p>
-                  <p className="text-xs text-primary-500 dark:text-sand-400">{stat.label}</p>
+                  <p className="text-lg sm:text-xl font-bold text-primary-900">{stat.value}</p>
+                  <p className="text-xs text-primary-500">{stat.label}</p>
                 </div>
               </div>
             ))}
@@ -252,7 +252,7 @@ export function HostBookingsContent() {
                 placeholder="Search by property, guest, or ref..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-primary-200 dark:border-primary-700 bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-50 text-sm focus:ring-2 focus:ring-secondary-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-primary-200 bg-white text-primary-900 text-sm focus:ring-2 focus:ring-secondary-500 focus:border-transparent"
               />
             </div>
             <div className="flex gap-2 overflow-x-auto pb-1">
@@ -264,7 +264,7 @@ export function HostBookingsContent() {
                     onClick={() => setFilter(status)}
                     className={`px-3 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${filter === status
                       ? 'bg-secondary-500 text-white'
-                      : 'bg-white dark:bg-primary-800 text-primary-600 dark:text-sand-300 border border-primary-200 dark:border-primary-700 hover:border-secondary-300'
+                      : 'bg-white text-primary-600 border border-primary-200 hover:border-secondary-300'
                       }`}
                   >
                     {label}
@@ -278,12 +278,12 @@ export function HostBookingsContent() {
           {/* Calendar View */}
           {viewMode === 'calendar' && (
             <section className="card p-4 sm:p-6 mb-8">
-              <h2 className="text-lg font-bold text-primary-900 dark:text-sand-50 mb-4">
+              <h2 className="text-lg font-bold text-primary-900 mb-4">
                 Bookings Calendar
               </h2>
               <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-3">
                 {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
-                  <div key={day} className="text-center text-xs font-semibold text-primary-500 dark:text-sand-400 py-2">
+                  <div key={day} className="text-center text-xs font-semibold text-primary-500 py-2">
                     {day}
                   </div>
                 ))}
@@ -305,8 +305,8 @@ export function HostBookingsContent() {
                       className={`aspect-square rounded-lg text-xs sm:text-sm font-medium transition-colors flex flex-col items-center justify-center gap-0.5 ${isToday
                         ? 'bg-secondary-500 text-white ring-2 ring-secondary-300'
                         : dayBookings.length > 0
-                          ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800'
-                          : 'bg-white dark:bg-primary-800 text-primary-600 dark:text-sand-300'
+                          ? 'bg-green-50 text-green-700 border border-green-200'
+                          : 'bg-white text-primary-600'
                         }`}
                     >
                       {date.getDate()}
@@ -317,13 +317,13 @@ export function HostBookingsContent() {
                   );
                 })}
               </div>
-              <div className="mt-4 flex flex-wrap items-center gap-4 text-xs text-primary-500 dark:text-sand-400">
+              <div className="mt-4 flex flex-wrap items-center gap-4 text-xs text-primary-500">
                 <div className="flex items-center gap-1.5">
                   <div className="w-3 h-3 rounded bg-secondary-500" />
                   Today
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <div className="w-3 h-3 rounded bg-green-100 dark:bg-green-900/30 border border-green-300 dark:border-green-700" />
+                  <div className="w-3 h-3 rounded bg-green-100 border border-green-300" />
                   Booked
                 </div>
               </div>
@@ -338,11 +338,11 @@ export function HostBookingsContent() {
                   {[1, 2, 3].map((i) => (
                     <div key={i} className="card overflow-hidden animate-pulse">
                       <div className="flex">
-                        <div className="hidden sm:block w-32 h-32 bg-primary-200 dark:bg-primary-700" />
+                        <div className="hidden sm:block w-32 h-32 bg-primary-200" />
                         <div className="flex-1 p-5 space-y-3">
-                          <div className="h-5 w-2/5 bg-primary-200 dark:bg-primary-700 rounded" />
-                          <div className="h-4 w-3/5 bg-primary-200 dark:bg-primary-700 rounded" />
-                          <div className="h-4 w-1/4 bg-primary-200 dark:bg-primary-700 rounded" />
+                          <div className="h-5 w-2/5 bg-primary-200 rounded" />
+                          <div className="h-4 w-3/5 bg-primary-200 rounded" />
+                          <div className="h-4 w-1/4 bg-primary-200 rounded" />
                         </div>
                       </div>
                     </div>
@@ -369,7 +369,7 @@ export function HostBookingsContent() {
                       >
                         <div className="flex flex-col sm:flex-row">
                           {/* Property Thumbnail */}
-                          <div className="relative sm:w-40 lg:w-48 h-40 sm:h-auto bg-primary-100 dark:bg-primary-800 flex-shrink-0">
+                          <div className="relative sm:w-40 lg:w-48 h-40 sm:h-auto bg-primary-100 flex-shrink-0">
                             {propertyImage ? (
                               <img
                                 src={propertyImage}
@@ -378,7 +378,7 @@ export function HostBookingsContent() {
                               />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center min-h-[120px]">
-                                <Building2 className="w-10 h-10 text-primary-300 dark:text-primary-600" />
+                                <Building2 className="w-10 h-10 text-primary-300" />
                               </div>
                             )}
                             {/* Status overlay on image */}
@@ -399,15 +399,15 @@ export function HostBookingsContent() {
                           <div className="flex-1 p-4 sm:p-5 flex flex-col">
                             <div className="flex items-start justify-between gap-3 mb-3">
                               <div className="min-w-0">
-                                <h3 className="text-base font-bold text-primary-900 dark:text-sand-50 truncate group-hover:text-secondary-600 transition-colors">
+                                <h3 className="text-base font-bold text-primary-900 truncate group-hover:text-secondary-600 transition-colors">
                                   {booking.property?.title || 'Property'}
                                 </h3>
-                                <p className="text-xs text-primary-500 dark:text-sand-400 flex items-center gap-1 mt-0.5">
+                                <p className="text-xs text-primary-500 flex items-center gap-1 mt-0.5">
                                   <MapPin className="w-3 h-3" />
                                   {booking.property?.city}, {booking.property?.country}
                                 </p>
                               </div>
-                              <p className={`text-lg font-bold whitespace-nowrap ${isCancelled ? 'text-red-400 line-through' : isRevenue ? 'text-green-600 dark:text-green-400' : 'text-primary-400 dark:text-sand-500'}`}>
+                              <p className={`text-lg font-bold whitespace-nowrap ${isCancelled ? 'text-red-400 line-through' : isRevenue ? 'text-green-600' : 'text-primary-400'}`}>
                                 {booking.currency || 'USD'} {earnings.toFixed(2)}
                               </p>
                             </div>
@@ -416,23 +416,23 @@ export function HostBookingsContent() {
                             <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-sm mb-3">
                               {/* Guest avatar */}
                               <div className="flex items-center gap-2">
-                                <div className="w-7 h-7 rounded-full bg-primary-200 dark:bg-primary-700 flex items-center justify-center text-xs font-bold text-primary-600 dark:text-sand-300">
+                                <div className="w-7 h-7 rounded-full bg-primary-200 flex items-center justify-center text-xs font-bold text-primary-600">
                                   {getInitials(booking.guest_first_name, booking.guest_last_name)}
                                 </div>
-                                <span className="text-primary-900 dark:text-sand-100 font-medium">
+                                <span className="text-primary-900 font-medium">
                                   {booking.guest_first_name} {booking.guest_last_name}
                                 </span>
                               </div>
-                              <span className="hidden sm:inline text-primary-300 dark:text-primary-600">|</span>
-                              <span className="text-primary-600 dark:text-sand-300 text-xs sm:text-sm">
+                              <span className="hidden sm:inline text-primary-300">|</span>
+                              <span className="text-primary-600 text-xs sm:text-sm">
                                 {formatDate(booking.check_in)} → {formatDate(booking.check_out)}
                               </span>
                             </div>
 
                             {/* Bottom row: ref + actions */}
-                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-auto pt-3 border-t border-primary-100 dark:border-primary-700/50">
-                              <div className="flex items-center gap-3 text-xs text-primary-500 dark:text-sand-400">
-                                <span className="font-mono bg-primary-50 dark:bg-primary-800 px-2 py-0.5 rounded">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-auto pt-3 border-t border-primary-100">
+                              <div className="flex items-center gap-3 text-xs text-primary-500">
+                                <span className="font-mono bg-primary-50 px-2 py-0.5 rounded">
                                   {booking.booking_ref}
                                 </span>
                                 {booking.guest_email && (
@@ -549,13 +549,13 @@ export function HostBookingsContent() {
                 </div>
               ) : (
                 <div className="card p-12 text-center">
-                  <div className="w-20 h-20 rounded-full bg-primary-100 dark:bg-primary-800 mx-auto mb-5 flex items-center justify-center">
-                    <Calendar className="w-10 h-10 text-primary-300 dark:text-primary-600" />
+                  <div className="w-20 h-20 rounded-full bg-primary-100 mx-auto mb-5 flex items-center justify-center">
+                    <Calendar className="w-10 h-10 text-primary-300" />
                   </div>
-                  <h2 className="text-xl font-bold text-primary-900 dark:text-sand-50 mb-2">
+                  <h2 className="text-xl font-bold text-primary-900 mb-2">
                     No Bookings Found
                   </h2>
-                  <p className="text-primary-600 dark:text-sand-300 max-w-sm mx-auto">
+                  <p className="text-primary-600 max-w-sm mx-auto">
                     {filter === 'all'
                       ? 'When guests book your properties, their reservations will appear here.'
                       : `No ${filter} bookings at the moment. Try a different filter.`}

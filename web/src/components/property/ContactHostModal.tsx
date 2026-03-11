@@ -133,15 +133,15 @@ export function ContactHostModal({ isOpen, onClose, host, propertyId, userId }: 
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="bg-white dark:bg-primary-900 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl relative">
+            <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl relative">
                 {/* Header */}
-                <div className="flex items-center justify-between p-5 border-b border-primary-100 dark:border-primary-800">
-                    <h2 className="text-xl font-bold text-primary-900 dark:text-sand-50">
+                <div className="flex items-center justify-between p-5 border-b border-primary-100">
+                    <h2 className="text-xl font-bold text-primary-900">
                         Contact {host.first_name}
                     </h2>
                     <button
                         onClick={onClose}
-                        className="p-2 -mr-2 text-primary-500 hover:text-primary-700 dark:text-sand-400 dark:hover:text-sand-200 rounded-full hover:bg-primary-50 dark:hover:bg-primary-800 transition"
+                        className="p-2 -mr-2 text-primary-500 hover:text-primary-700 rounded-full hover:bg-primary-50 transition"
                     >
                         <X className="w-5 h-5" />
                     </button>
@@ -149,7 +149,7 @@ export function ContactHostModal({ isOpen, onClose, host, propertyId, userId }: 
 
                 {/* Content */}
                 <form onSubmit={handleSubmit} className="p-5 space-y-5">
-                    <p className="text-sm text-primary-600 dark:text-sand-400">
+                    <p className="text-sm text-primary-600">
                         Tell {host.first_name} a bit about your trip so they can better help you.
                     </p>
 
@@ -157,7 +157,7 @@ export function ContactHostModal({ isOpen, onClose, host, propertyId, userId }: 
                         {/* Dates */}
                         <div className="grid grid-cols-2 gap-3">
                             <div>
-                                <label className="block text-xs font-semibold text-primary-700 dark:text-sand-300 uppercase tracking-wide mb-1.5">
+                                <label className="block text-xs font-semibold text-primary-700 uppercase tracking-wide mb-1.5">
                                     Check-in
                                 </label>
                                 <div className="relative">
@@ -170,13 +170,13 @@ export function ContactHostModal({ isOpen, onClose, host, propertyId, userId }: 
                                         dayClassName={getDayClassName}
                                         dateFormat="yyyy-MM-dd"
                                         placeholderText="Check-in"
-                                        className="w-full pl-9 pr-3 py-2.5 bg-primary-50 dark:bg-primary-800 border border-primary-200 dark:border-primary-700 rounded-lg text-sm focus:ring-2 focus:ring-secondary-500 text-primary-900 dark:text-sand-50"
+                                        className="w-full pl-9 pr-3 py-2.5 bg-primary-50 border border-primary-200 rounded-lg text-sm focus:ring-2 focus:ring-secondary-500 text-primary-900"
                                         required
                                     />
                                 </div>
                             </div>
                             <div>
-                                <label className="block text-xs font-semibold text-primary-700 dark:text-sand-300 uppercase tracking-wide mb-1.5">
+                                <label className="block text-xs font-semibold text-primary-700 uppercase tracking-wide mb-1.5">
                                     Check-out
                                 </label>
                                 <div className="relative">
@@ -190,7 +190,7 @@ export function ContactHostModal({ isOpen, onClose, host, propertyId, userId }: 
                                         dateFormat="yyyy-MM-dd"
                                         placeholderText="Check-out"
                                         disabled={!checkInDate}
-                                        className={`w-full pl-9 pr-3 py-2.5 bg-primary-50 dark:bg-primary-800 border border-primary-200 dark:border-primary-700 rounded-lg text-sm focus:ring-2 focus:ring-secondary-500 text-primary-900 dark:text-sand-50 ${!checkInDate ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                        className={`w-full pl-9 pr-3 py-2.5 bg-primary-50 border border-primary-200 rounded-lg text-sm focus:ring-2 focus:ring-secondary-500 text-primary-900 ${!checkInDate ? 'opacity-50 cursor-not-allowed' : ''}`}
                                         required
                                     />
                                 </div>
@@ -199,7 +199,7 @@ export function ContactHostModal({ isOpen, onClose, host, propertyId, userId }: 
 
                         {/* Guests */}
                         <div>
-                            <label className="block text-xs font-semibold text-primary-700 dark:text-sand-300 uppercase tracking-wide mb-1.5">
+                            <label className="block text-xs font-semibold text-primary-700 uppercase tracking-wide mb-1.5">
                                 Guests
                             </label>
                             <div className="relative">
@@ -211,14 +211,14 @@ export function ContactHostModal({ isOpen, onClose, host, propertyId, userId }: 
                                     required
                                     value={formData.guests}
                                     onChange={(e) => setFormData(p => ({ ...p, guests: parseInt(e.target.value) || 1 }))}
-                                    className="w-full pl-9 pr-3 py-2.5 bg-primary-50 dark:bg-primary-800 border border-primary-200 dark:border-primary-700 rounded-lg text-sm focus:ring-2 focus:ring-secondary-500 text-primary-900 dark:text-sand-50"
+                                    className="w-full pl-9 pr-3 py-2.5 bg-primary-50 border border-primary-200 rounded-lg text-sm focus:ring-2 focus:ring-secondary-500 text-primary-900"
                                 />
                             </div>
                         </div>
 
                         {/* Message */}
                         <div>
-                            <label className="block text-xs font-semibold text-primary-700 dark:text-sand-300 uppercase tracking-wide mb-1.5">
+                            <label className="block text-xs font-semibold text-primary-700 uppercase tracking-wide mb-1.5">
                                 Message
                             </label>
                             <div className="relative">
@@ -229,7 +229,7 @@ export function ContactHostModal({ isOpen, onClose, host, propertyId, userId }: 
                                     placeholder={`Hi ${host.first_name}, I'd like to ask about...`}
                                     value={formData.message}
                                     onChange={(e) => setFormData(p => ({ ...p, message: e.target.value }))}
-                                    className="w-full pl-9 pr-3 py-2.5 bg-primary-50 dark:bg-primary-800 border border-primary-200 dark:border-primary-700 rounded-lg text-sm focus:ring-2 focus:ring-secondary-500 text-primary-900 dark:text-sand-50 resize-none"
+                                    className="w-full pl-9 pr-3 py-2.5 bg-primary-50 border border-primary-200 rounded-lg text-sm focus:ring-2 focus:ring-secondary-500 text-primary-900 resize-none"
                                 />
                             </div>
                             <p className="text-xs text-primary-500 mt-2">

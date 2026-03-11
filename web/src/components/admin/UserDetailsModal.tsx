@@ -112,14 +112,14 @@ export default function UserDetailsModal({ isOpen, onClose, userId }: UserDetail
               <div className="flex items-start space-x-3">
                 <Mail className="w-5 h-5 text-[#3A5C50] mt-0.5" />
                 <div>
-                  <p className="text-sm text-primary-400 dark:text-sand-500">Email</p>
+                  <p className="text-sm text-primary-400">Email</p>
                   <p className="text-sm text-[#122F26] font-medium">{user.email}</p>
                 </div>
               </div>
               <div className="flex items-start space-x-3">
                 <Phone className="w-5 h-5 text-[#3A5C50] mt-0.5" />
                 <div>
-                  <p className="text-sm text-primary-400 dark:text-sand-500">Phone</p>
+                  <p className="text-sm text-primary-400">Phone</p>
                   <p className="text-sm text-[#122F26] font-medium">
                     {user.phone_number || 'Not provided'}
                   </p>
@@ -138,14 +138,14 @@ export default function UserDetailsModal({ isOpen, onClose, userId }: UserDetail
               <div className="flex items-start space-x-3">
                 <Shield className="w-5 h-5 text-[#3A5C50] mt-0.5" />
                 <div>
-                  <p className="text-sm text-primary-400 dark:text-sand-500">Role</p>
+                  <p className="text-sm text-primary-400">Role</p>
                   <p className="text-sm text-[#122F26] font-medium capitalize">{user.role}</p>
                 </div>
               </div>
               <div className="flex items-start space-x-3">
                 <MapPin className="w-5 h-5 text-[#3A5C50] mt-0.5" />
                 <div>
-                  <p className="text-sm text-primary-400 dark:text-sand-500">Country</p>
+                  <p className="text-sm text-primary-400">Country</p>
                   <p className="text-sm text-[#122F26] font-medium">
                     {user.country_of_residence || 'Not specified'}
                   </p>
@@ -170,7 +170,7 @@ export default function UserDetailsModal({ isOpen, onClose, userId }: UserDetail
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <p className="text-sm text-primary-400 dark:text-sand-500">Date Joined</p>
+                <p className="text-sm text-primary-400">Date Joined</p>
                 <p className="text-sm text-[#122F26] font-medium">
                   {new Date(user.created_at).toLocaleDateString('en-US', {
                     year: 'numeric',
@@ -181,7 +181,7 @@ export default function UserDetailsModal({ isOpen, onClose, userId }: UserDetail
               </div>
               {user.last_login && (
                 <div>
-                  <p className="text-sm text-primary-400 dark:text-sand-500">Last Login</p>
+                  <p className="text-sm text-primary-400">Last Login</p>
                   <p className="text-sm text-[#122F26] font-medium">
                     {new Date(user.last_login).toLocaleDateString('en-US', {
                       year: 'numeric',
@@ -203,25 +203,25 @@ export default function UserDetailsModal({ isOpen, onClose, userId }: UserDetail
               </h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-[#F4F1EA] p-4 rounded-lg">
                 <div>
-                  <p className="text-sm text-primary-400 dark:text-sand-500">Property Types</p>
+                  <p className="text-sm text-primary-400">Property Types</p>
                   <p className="text-sm text-[#122F26] font-medium">
                     {preferences.preferred_property_types?.length ? preferences.preferred_property_types.join(', ') : 'Any'}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-primary-400 dark:text-sand-500">Price Range</p>
+                  <p className="text-sm text-primary-400">Price Range</p>
                   <p className="text-sm text-[#122F26] font-medium">
                     {preferences.preferred_min_price || 0} - {preferences.preferred_max_price || 'Any'}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-primary-400 dark:text-sand-500">Usual Guest Count</p>
+                  <p className="text-sm text-primary-400">Usual Guest Count</p>
                   <p className="text-sm text-[#122F26] font-medium">
                     {preferences.usual_guest_count || 1}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-primary-400 dark:text-sand-500">Preferred Countries</p>
+                  <p className="text-sm text-primary-400">Preferred Countries</p>
                   <p className="text-sm text-[#122F26] font-medium">
                     {preferences.preferred_countries?.length ? preferences.preferred_countries.join(', ') : 'Any'}
                   </p>
@@ -253,14 +253,14 @@ export default function UserDetailsModal({ isOpen, onClose, userId }: UserDetail
           <div className="flex justify-end space-x-3 pt-4 border-t">
             <button
               onClick={onClose}
-              className="px-6 py-2 border border-primary-300 dark:border-primary-600 text-primary-700 dark:text-sand-200 rounded-lg hover:bg-sand-50 dark:hover:bg-primary-800 transition-colors"
+              className="px-6 py-2 border border-primary-300 text-primary-700 rounded-lg hover:bg-sand-50 transition-colors"
             >
               Close
             </button>
           </div>
         </div>
       ) : (
-        <div className="text-center py-8 text-primary-400 dark:text-sand-500">
+        <div className="text-center py-8 text-primary-400">
           User not found
         </div>
       )}

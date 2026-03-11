@@ -35,7 +35,7 @@ export const PROPERTY_TYPES: Record<PropertyType, PropertyTypeConfig> = {
     description: 'Entire houses and homes',
     icon: 'Home',
     color: 'text-blue-600',
-    bgColor: 'bg-blue-50 dark:bg-blue-900/30',
+    bgColor: 'bg-blue-50',
   },
   [PropertyType.APARTMENT]: {
     id: PropertyType.APARTMENT,
@@ -43,7 +43,7 @@ export const PROPERTY_TYPES: Record<PropertyType, PropertyTypeConfig> = {
     description: 'Modern apartments and flats',
     icon: 'Building2',
     color: 'text-purple-600',
-    bgColor: 'bg-purple-50 dark:bg-purple-900/30',
+    bgColor: 'bg-purple-50',
   },
   [PropertyType.HOTEL]: {
     id: PropertyType.HOTEL,
@@ -51,7 +51,7 @@ export const PROPERTY_TYPES: Record<PropertyType, PropertyTypeConfig> = {
     description: 'Hotels with full services',
     icon: 'Building',
     color: 'text-amber-600',
-    bgColor: 'bg-amber-50 dark:bg-amber-900/30',
+    bgColor: 'bg-amber-50',
   },
   [PropertyType.LODGE]: {
     id: PropertyType.LODGE,
@@ -59,7 +59,7 @@ export const PROPERTY_TYPES: Record<PropertyType, PropertyTypeConfig> = {
     description: 'Lodges and eco-resorts',
     icon: 'TreePine',
     color: 'text-green-600',
-    bgColor: 'bg-green-50 dark:bg-green-900/30',
+    bgColor: 'bg-green-50',
   },
   [PropertyType.VILLA]: {
     id: PropertyType.VILLA,
@@ -67,7 +67,7 @@ export const PROPERTY_TYPES: Record<PropertyType, PropertyTypeConfig> = {
     description: 'Luxury villas and estates',
     icon: 'Castle',
     color: 'text-rose-600',
-    bgColor: 'bg-rose-50 dark:bg-rose-900/30',
+    bgColor: 'bg-rose-50',
   },
   [PropertyType.BNB]: {
     id: PropertyType.BNB,
@@ -75,7 +75,7 @@ export const PROPERTY_TYPES: Record<PropertyType, PropertyTypeConfig> = {
     description: 'Bed & Breakfast properties',
     icon: 'Wind',
     color: 'text-orange-600',
-    bgColor: 'bg-orange-50 dark:bg-orange-900/30',
+    bgColor: 'bg-orange-50',
   },
   [PropertyType.HOSTEL]: {
     id: PropertyType.HOSTEL,
@@ -83,7 +83,7 @@ export const PROPERTY_TYPES: Record<PropertyType, PropertyTypeConfig> = {
     description: 'Budget hostels and dorms',
     icon: 'Users',
     color: 'text-cyan-600',
-    bgColor: 'bg-cyan-50 dark:bg-cyan-900/30',
+    bgColor: 'bg-cyan-50',
   },
   [PropertyType.GUESTHOUSE]: {
     id: PropertyType.GUESTHOUSE,
@@ -91,7 +91,7 @@ export const PROPERTY_TYPES: Record<PropertyType, PropertyTypeConfig> = {
     description: 'Cozy guesthouses',
     icon: 'Home',
     color: 'text-indigo-600',
-    bgColor: 'bg-indigo-50 dark:bg-indigo-900/30',
+    bgColor: 'bg-indigo-50',
   },
   [PropertyType.RESORT]: {
     id: PropertyType.RESORT,
@@ -99,7 +99,7 @@ export const PROPERTY_TYPES: Record<PropertyType, PropertyTypeConfig> = {
     description: 'All-inclusive resorts',
     icon: 'Palmtree',
     color: 'text-teal-600',
-    bgColor: 'bg-teal-50 dark:bg-teal-900/30',
+    bgColor: 'bg-teal-50',
   },
   [PropertyType.COTTAGE]: {
     id: PropertyType.COTTAGE,
@@ -107,7 +107,7 @@ export const PROPERTY_TYPES: Record<PropertyType, PropertyTypeConfig> = {
     description: 'Charming cottages',
     icon: 'Home',
     color: 'text-pink-600',
-    bgColor: 'bg-pink-50 dark:bg-pink-900/30',
+    bgColor: 'bg-pink-50',
   },
   [PropertyType.CAMPGROUND]: {
     id: PropertyType.CAMPGROUND,
@@ -115,7 +115,7 @@ export const PROPERTY_TYPES: Record<PropertyType, PropertyTypeConfig> = {
     description: 'Camping and glamping sites',
     icon: 'Tent',
     color: 'text-lime-600',
-    bgColor: 'bg-lime-50 dark:bg-lime-900/30',
+    bgColor: 'bg-lime-50',
   },
   [PropertyType.BOAT]: {
     id: PropertyType.BOAT,
@@ -123,7 +123,7 @@ export const PROPERTY_TYPES: Record<PropertyType, PropertyTypeConfig> = {
     description: 'Houseboats and sailboats',
     icon: 'Anchor',
     color: 'text-blue-700',
-    bgColor: 'bg-blue-50 dark:bg-blue-900/30',
+    bgColor: 'bg-blue-50',
   },
   [PropertyType.COSY_ROOM]: {
     id: PropertyType.COSY_ROOM,
@@ -131,7 +131,7 @@ export const PROPERTY_TYPES: Record<PropertyType, PropertyTypeConfig> = {
     description: 'Warm and intimate private rooms',
     icon: 'Sofa',
     color: 'text-amber-600',
-    bgColor: 'bg-amber-50 dark:bg-amber-900/30',
+    bgColor: 'bg-amber-50',
   },
 };
 

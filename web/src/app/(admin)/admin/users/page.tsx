@@ -199,12 +199,12 @@ export default function UsersManagement() {
       <div className="bg-white rounded-lg shadow p-6 mb-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-primary-700 dark:text-sand-200 mb-2">
+            <label className="block text-sm font-medium text-primary-700 mb-2">
               Search Users
             </label>
             <div className="flex space-x-2">
               <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-primary-300 dark:text-primary-500 w-5 h-5" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-primary-300 w-5 h-5" />
                 <input
                   type="text"
                   value={search}
@@ -223,7 +223,7 @@ export default function UsersManagement() {
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-primary-700 dark:text-sand-200 mb-2">
+            <label className="block text-sm font-medium text-primary-700 mb-2">
               Filter by Role
             </label>
             <select
@@ -257,40 +257,40 @@ export default function UsersManagement() {
                 <ChevronDown className="w-4 h-4" />
               </button>
               {showBulkActions && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-sand-200/50 dark:border-primary-700/50 z-10">
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-sand-200/50 z-10">
                   <button
                     onClick={() => handleBulkAction('activate')}
-                    className="w-full text-left px-4 py-2 text-sm text-primary-700 dark:text-sand-200 hover:bg-primary-100 dark:hover:bg-primary-800 first:rounded-t-lg"
+                    className="w-full text-left px-4 py-2 text-sm text-primary-700 hover:bg-primary-100 first:rounded-t-lg"
                   >
                     Activate Users
                   </button>
                   <button
                     onClick={() => handleBulkAction('deactivate')}
-                    className="w-full text-left px-4 py-2 text-sm text-primary-700 dark:text-sand-200 hover:bg-primary-100 dark:hover:bg-primary-800"
+                    className="w-full text-left px-4 py-2 text-sm text-primary-700 hover:bg-primary-100"
                   >
                     Deactivate Users
                   </button>
                   <button
                     onClick={() => handleBulkAction('verify')}
-                    className="w-full text-left px-4 py-2 text-sm text-primary-700 dark:text-sand-200 hover:bg-primary-100 dark:hover:bg-primary-800"
+                    className="w-full text-left px-4 py-2 text-sm text-primary-700 hover:bg-primary-100"
                   >
                     Verify Users
                   </button>
                   <button
                     onClick={() => handleBulkAction('unverify')}
-                    className="w-full text-left px-4 py-2 text-sm text-primary-700 dark:text-sand-200 hover:bg-primary-100 dark:hover:bg-primary-800"
+                    className="w-full text-left px-4 py-2 text-sm text-primary-700 hover:bg-primary-100"
                   >
                     Unverify Users
                   </button>
                   <button
                     onClick={() => handleBulkAction('ban')}
-                    className="w-full text-left px-4 py-2 text-sm text-primary-700 dark:text-sand-200 hover:bg-primary-100 dark:hover:bg-primary-800"
+                    className="w-full text-left px-4 py-2 text-sm text-primary-700 hover:bg-primary-100"
                   >
                     Ban Users
                   </button>
                   <button
                     onClick={() => handleBulkAction('identity_verify')}
-                    className="w-full text-left px-4 py-2 text-sm text-primary-700 dark:text-sand-200 hover:bg-primary-100 dark:hover:bg-primary-800 last:rounded-b-lg"
+                    className="w-full text-left px-4 py-2 text-sm text-primary-700 hover:bg-primary-100 last:rounded-b-lg"
                   >
                     Identity Verify Users
                   </button>
@@ -336,8 +336,8 @@ export default function UsersManagement() {
         ) : (
           <>
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-primary-200 dark:divide-primary-700">
-                <thead className="bg-sand-50 dark:bg-primary-900">
+              <table className="min-w-full divide-y divide-primary-200">
+                <thead className="bg-sand-50">
                   <tr>
                     <th className="px-6 py-3 text-left">
                       <input
@@ -350,38 +350,38 @@ export default function UsersManagement() {
                           }
                         }}
                         checked={selectedUsers.length === users.length && users.length > 0}
-                        className="rounded border-primary-300 dark:border-primary-600"
+                        className="rounded border-primary-300"
                       />
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-primary-400 dark:text-sand-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-primary-400 uppercase tracking-wider">
                       User
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-primary-400 dark:text-sand-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-primary-400 uppercase tracking-wider">
                       Contact
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-primary-400 dark:text-sand-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-primary-400 uppercase tracking-wider">
                       Role
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-primary-400 dark:text-sand-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-primary-400 uppercase tracking-wider">
                       Status
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-primary-400 dark:text-sand-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-primary-400 uppercase tracking-wider">
                       Joined
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-primary-400 dark:text-sand-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-primary-400 uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-primary-200 dark:divide-primary-700">
+                <tbody className="bg-white divide-y divide-primary-200">
                   {users.map((user) => (
-                    <tr key={user.id} className="hover:bg-sand-50 dark:hover:bg-primary-800">
+                    <tr key={user.id} className="hover:bg-sand-50">
                       <td className="px-6 py-4">
                         <input
                           type="checkbox"
                           checked={selectedUsers.includes(user.id)}
                           onChange={() => toggleSelectUser(user.id)}
-                          className="rounded border-primary-300 dark:border-primary-600"
+                          className="rounded border-primary-300"
                         />
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -392,16 +392,16 @@ export default function UsersManagement() {
                             </span>
                           </div>
                           <div className="ml-4">
-                            <div className="text-sm font-medium text-primary-900 dark:text-sand-50">
+                            <div className="text-sm font-medium text-primary-900">
                               {user.first_name} {user.last_name}
                             </div>
-                            <div className="text-sm text-primary-400 dark:text-sand-500">{user.id}</div>
+                            <div className="text-sm text-primary-400">{user.id}</div>
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-primary-900 dark:text-sand-50">{user.email}</div>
-                        <div className="text-sm text-primary-400 dark:text-sand-500">{user.phone_number || 'N/A'}</div>
+                        <div className="text-sm text-primary-900">{user.email}</div>
+                        <div className="text-sm text-primary-400">{user.phone_number || 'N/A'}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <select
@@ -427,14 +427,14 @@ export default function UsersManagement() {
                           </span>
                         )}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-primary-400 dark:text-sand-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-primary-400">
                         {new Date(user.created_at).toLocaleDateString()}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex items-center space-x-2">
                           <button
                             onClick={() => handleViewDetails(user.id)}
-                            className="p-1 text-secondary-600 dark:text-secondary-400 hover:text-secondary-700 transition-colors"
+                            className="p-1 text-secondary-600 hover:text-secondary-700 transition-colors"
                             title="View details"
                           >
                             <Eye className="w-4 h-4" />
@@ -477,22 +477,22 @@ export default function UsersManagement() {
             </div>
 
             {/* Pagination */}
-            <div className="bg-sand-50 dark:bg-primary-900 px-6 py-4 flex items-center justify-between border-t">
-              <div className="text-sm text-primary-700 dark:text-sand-200">
+            <div className="bg-sand-50 px-6 py-4 flex items-center justify-between border-t">
+              <div className="text-sm text-primary-700">
                 Showing {totalCount > 0 ? (page - 1) * ITEMS_PER_PAGE + 1 : 0} to {Math.min(page * ITEMS_PER_PAGE, totalCount)} of {totalCount} users
               </div>
               <div className="flex space-x-2">
                 <button
                   onClick={() => setPage(p => Math.max(1, p - 1))}
                   disabled={page === 1}
-                  className="px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg text-sm font-medium text-primary-700 dark:text-sand-200 hover:bg-sand-50 dark:hover:bg-primary-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 border border-primary-300 rounded-lg text-sm font-medium text-primary-700 hover:bg-sand-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Previous
                 </button>
                 <button
                   onClick={() => setPage(p => p + 1)}
                   disabled={page * ITEMS_PER_PAGE >= totalCount}
-                  className="px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg text-sm font-medium text-primary-700 dark:text-sand-200 hover:bg-sand-50 dark:hover:bg-primary-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 border border-primary-300 rounded-lg text-sm font-medium text-primary-700 hover:bg-sand-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Next
                 </button>

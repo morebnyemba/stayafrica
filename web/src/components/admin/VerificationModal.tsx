@@ -65,18 +65,18 @@ export default function VerificationModal({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-primary-800/40 rounded-lg shadow-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-lg shadow-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="sticky top-0 flex items-center justify-between p-6 border-b border-sand-200/50 dark:border-primary-700/50 bg-white dark:bg-primary-800/40 z-10">
+        <div className="sticky top-0 flex items-center justify-between p-6 border-b border-sand-200/50 bg-white z-10">
           <div>
-            <h2 className="text-2xl font-bold text-primary-900 dark:text-sand-50">
+            <h2 className="text-2xl font-bold text-primary-900">
               {verification.user.first_name} {verification.user.last_name}
             </h2>
-            <p className="text-sm text-primary-400 dark:text-sand-500">{verification.user.email}</p>
+            <p className="text-sm text-primary-400">{verification.user.email}</p>
           </div>
           <button
             onClick={onClose}
-            className="text-primary-300 dark:text-primary-500 hover:text-primary-500 dark:hover:text-sand-400 transition"
+            className="text-primary-300 hover:text-primary-500 transition"
           >
             <X className="w-6 h-6" />
           </button>
@@ -87,52 +87,52 @@ export default function VerificationModal({
           {/* Verification Info */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <p className="text-sm text-primary-400 dark:text-sand-500 mb-1">Document Type</p>
-              <p className="text-base font-medium text-primary-900 dark:text-sand-50 capitalize">
+              <p className="text-sm text-primary-400 mb-1">Document Type</p>
+              <p className="text-base font-medium text-primary-900 capitalize">
                 {verification.document_type.replace('_', ' ')}
               </p>
             </div>
             <div>
-              <p className="text-sm text-primary-400 dark:text-sand-500 mb-1">Document Number</p>
-              <p className="text-base font-medium text-primary-900 dark:text-sand-50">{verification.document_number}</p>
+              <p className="text-sm text-primary-400 mb-1">Document Number</p>
+              <p className="text-base font-medium text-primary-900">{verification.document_number}</p>
             </div>
             <div>
-              <p className="text-sm text-primary-400 dark:text-sand-500 mb-1">Document Country</p>
-              <p className="text-base font-medium text-primary-900 dark:text-sand-50">{verification.document_country}</p>
+              <p className="text-sm text-primary-400 mb-1">Document Country</p>
+              <p className="text-base font-medium text-primary-900">{verification.document_country}</p>
             </div>
             <div>
-              <p className="text-sm text-primary-400 dark:text-sand-500 mb-1">Expiry Date</p>
-              <p className="text-base font-medium text-primary-900 dark:text-sand-50">
+              <p className="text-sm text-primary-400 mb-1">Expiry Date</p>
+              <p className="text-base font-medium text-primary-900">
                 {verification.document_expiry_date ? formatDate(verification.document_expiry_date) : 'Not specified'}
               </p>
             </div>
             <div>
-              <p className="text-sm text-primary-400 dark:text-sand-500 mb-1">Submitted</p>
-              <p className="text-base font-medium text-primary-900 dark:text-sand-50">{formatDate(verification.submitted_at)}</p>
+              <p className="text-sm text-primary-400 mb-1">Submitted</p>
+              <p className="text-base font-medium text-primary-900">{formatDate(verification.submitted_at)}</p>
             </div>
             <div>
-              <p className="text-sm text-primary-400 dark:text-sand-500 mb-1">Verification Method</p>
-              <p className="text-base font-medium text-primary-900 dark:text-sand-50 capitalize">{verification.verification_method}</p>
+              <p className="text-sm text-primary-400 mb-1">Verification Method</p>
+              <p className="text-base font-medium text-primary-900 capitalize">{verification.verification_method}</p>
             </div>
           </div>
 
           {/* Status */}
           {verification.status !== 'pending' && verification.status !== 'under_review' && (
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <p className="text-sm text-primary-500 dark:text-sand-400 mb-2">
+              <p className="text-sm text-primary-500 mb-2">
                 <strong>Current Status:</strong>
               </p>
               <p className="text-base capitalize text-blue-900 font-medium">
                 {verification.status.replace('_', ' ')}
               </p>
               {verification.reviewed_at && (
-                <p className="text-xs text-primary-400 dark:text-sand-500 mt-2">
+                <p className="text-xs text-primary-400 mt-2">
                   Reviewed on {formatDate(verification.reviewed_at)}
                 </p>
               )}
               {verification.rejection_reason && (
                 <div className="mt-2">
-                  <p className="text-sm text-primary-500 dark:text-sand-400">
+                  <p className="text-sm text-primary-500">
                     <strong>Rejection Reason:</strong>
                   </p>
                   <p className="text-sm text-red-700">{verification.rejection_reason}</p>
@@ -140,10 +140,10 @@ export default function VerificationModal({
               )}
               {verification.admin_notes && (
                 <div className="mt-2">
-                  <p className="text-sm text-primary-500 dark:text-sand-400">
+                  <p className="text-sm text-primary-500">
                     <strong>Admin Notes:</strong>
                   </p>
-                  <p className="text-sm text-primary-700 dark:text-sand-200">{verification.admin_notes}</p>
+                  <p className="text-sm text-primary-700">{verification.admin_notes}</p>
                 </div>
               )}
             </div>
@@ -151,35 +151,35 @@ export default function VerificationModal({
 
           {/* Document Images */}
           <div>
-            <h3 className="text-lg font-semibold text-primary-900 dark:text-sand-50 mb-4">Document Images</h3>
+            <h3 className="text-lg font-semibold text-primary-900 mb-4">Document Images</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {verification.document_front_image && (
                 <div>
-                  <p className="text-sm text-primary-500 dark:text-sand-400 mb-2 font-medium">Front Side</p>
+                  <p className="text-sm text-primary-500 mb-2 font-medium">Front Side</p>
                   <img
                     src={verification.document_front_image}
                     alt="Document Front"
-                    className="w-full h-64 object-cover rounded-lg border border-sand-200/50 dark:border-primary-700/50"
+                    className="w-full h-64 object-cover rounded-lg border border-sand-200/50"
                   />
                 </div>
               )}
               {verification.document_back_image && (
                 <div>
-                  <p className="text-sm text-primary-500 dark:text-sand-400 mb-2 font-medium">Back Side</p>
+                  <p className="text-sm text-primary-500 mb-2 font-medium">Back Side</p>
                   <img
                     src={verification.document_back_image}
                     alt="Document Back"
-                    className="w-full h-64 object-cover rounded-lg border border-sand-200/50 dark:border-primary-700/50"
+                    className="w-full h-64 object-cover rounded-lg border border-sand-200/50"
                   />
                 </div>
               )}
               {verification.selfie_image && (
                 <div>
-                  <p className="text-sm text-primary-500 dark:text-sand-400 mb-2 font-medium">Selfie</p>
+                  <p className="text-sm text-primary-500 mb-2 font-medium">Selfie</p>
                   <img
                     src={verification.selfie_image}
                     alt="Selfie"
-                    className="w-full h-64 object-cover rounded-lg border border-sand-200/50 dark:border-primary-700/50"
+                    className="w-full h-64 object-cover rounded-lg border border-sand-200/50"
                   />
                 </div>
               )}
@@ -188,7 +188,7 @@ export default function VerificationModal({
 
           {/* Action Forms */}
           {(verification.status === 'pending' || verification.status === 'under_review') && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-sand-200/50 dark:border-primary-700/50">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-sand-200/50">
               {/* Approval Form */}
               <div className="bg-green-50 p-4 rounded-lg border border-green-200">
                 <div className="flex items-center gap-2 mb-4">
@@ -196,21 +196,21 @@ export default function VerificationModal({
                   <h4 className="font-semibold text-green-900">Approve</h4>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-primary-700 dark:text-sand-200 mb-2">
+                  <label className="block text-sm font-medium text-primary-700 mb-2">
                     Approval Notes
                   </label>
                   <textarea
                     value={approvalNotes}
                     onChange={(e) => setApprovalNotes(e.target.value)}
                     placeholder="Add notes about why you approved this verification..."
-                    className="w-full px-3 py-2 border border-primary-300 dark:border-primary-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                    className="w-full px-3 py-2 border border-primary-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
                     rows={4}
                   />
                 </div>
                 <button
                   onClick={handleApprove}
                   disabled={loading || processingApproval}
-                  className="mt-4 w-full bg-green-600 hover:bg-green-700 disabled:bg-primary-400 dark:disabled:bg-primary-600 disabled:cursor-not-allowed text-white font-medium py-2 px-4 rounded-lg transition"
+                  className="mt-4 w-full bg-green-600 hover:bg-green-700 disabled:bg-primary-400 disabled:cursor-not-allowed text-white font-medium py-2 px-4 rounded-lg transition"
                 >
                   {processingApproval ? 'Processing...' : 'Approve Verification'}
                 </button>
@@ -224,13 +224,13 @@ export default function VerificationModal({
                 </div>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-primary-700 dark:text-sand-200 mb-2">
+                    <label className="block text-sm font-medium text-primary-700 mb-2">
                       Rejection Reason *
                     </label>
                     <select
                       value={rejectionReason}
                       onChange={(e) => setRejectionReason(e.target.value)}
-                      className="w-full px-3 py-2 border border-primary-300 dark:border-primary-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+                      className="w-full px-3 py-2 border border-primary-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
                     >
                       <option value="">Select a reason...</option>
                       <option value="Document expired">Document expired</option>
@@ -242,14 +242,14 @@ export default function VerificationModal({
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-primary-700 dark:text-sand-200 mb-2">
+                    <label className="block text-sm font-medium text-primary-700 mb-2">
                       Additional Notes
                     </label>
                     <textarea
                       value={rejectionNotes}
                       onChange={(e) => setRejectionNotes(e.target.value)}
                       placeholder="Explain why this verification was rejected..."
-                      className="w-full px-3 py-2 border border-primary-300 dark:border-primary-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+                      className="w-full px-3 py-2 border border-primary-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
                       rows={4}
                     />
                   </div>
@@ -257,7 +257,7 @@ export default function VerificationModal({
                 <button
                   onClick={handleReject}
                   disabled={loading || processingRejection}
-                  className="mt-4 w-full bg-red-600 hover:bg-red-700 disabled:bg-primary-400 dark:disabled:bg-primary-600 disabled:cursor-not-allowed text-white font-medium py-2 px-4 rounded-lg transition"
+                  className="mt-4 w-full bg-red-600 hover:bg-red-700 disabled:bg-primary-400 disabled:cursor-not-allowed text-white font-medium py-2 px-4 rounded-lg transition"
                 >
                   {processingRejection ? 'Processing...' : 'Reject Verification'}
                 </button>
@@ -267,10 +267,10 @@ export default function VerificationModal({
         </div>
 
         {/* Footer */}
-        <div className="sticky bottom-0 border-t border-sand-200/50 dark:border-primary-700/50 bg-sand-50 dark:bg-primary-900 px-6 py-4 flex justify-end z-10">
+        <div className="sticky bottom-0 border-t border-sand-200/50 bg-sand-50 px-6 py-4 flex justify-end z-10">
           <button
             onClick={onClose}
-            className="px-6 py-2 border border-primary-300 dark:border-primary-600 rounded-lg text-primary-700 dark:text-sand-200 font-medium hover:bg-primary-100 dark:hover:bg-primary-800 transition"
+            className="px-6 py-2 border border-primary-300 rounded-lg text-primary-700 font-medium hover:bg-primary-100 transition"
           >
             Close
           </button>

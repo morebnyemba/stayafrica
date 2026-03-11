@@ -65,13 +65,13 @@ export default function WishlistShare({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="bg-white dark:bg-primary-800/40 rounded-xl shadow-2xl max-w-md w-full">
+      <div className="bg-white rounded-xl shadow-2xl max-w-md w-full">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
-          <h2 className="text-xl font-bold text-primary-900 dark:text-sand-50">Share Wishlist</h2>
+          <h2 className="text-xl font-bold text-primary-900">Share Wishlist</h2>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-primary-100 dark:hover:bg-primary-800 rounded-full transition"
+            className="p-2 hover:bg-primary-100 rounded-full transition"
           >
             <X className="w-5 h-5" />
           </button>
@@ -89,7 +89,7 @@ export default function WishlistShare({
 
           {/* Share URL */}
           <div>
-            <label className="block text-sm font-medium text-primary-700 dark:text-sand-200 mb-2">
+            <label className="block text-sm font-medium text-primary-700 mb-2">
               Share link
             </label>
             <div className="flex gap-2">
@@ -97,7 +97,7 @@ export default function WishlistShare({
                 type="text"
                 value={shareUrl}
                 readOnly
-                className="flex-1 px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-sand-50 dark:bg-primary-900 text-sm"
+                className="flex-1 px-4 py-2 border border-primary-300 rounded-lg bg-sand-50 text-sm"
               />
               <button
                 onClick={handleCopy}
@@ -127,37 +127,37 @@ export default function WishlistShare({
           {/* Share Buttons */}
           {privacy !== 'private' && (
             <div>
-              <label className="block text-sm font-medium text-primary-700 dark:text-sand-200 mb-3">
+              <label className="block text-sm font-medium text-primary-700 mb-3">
                 Share via
               </label>
               <div className="grid grid-cols-2 gap-3">
                 <button
                   onClick={shareViaEmail}
-                  className="flex items-center justify-center gap-2 px-4 py-3 border border-primary-300 dark:border-primary-600 rounded-lg hover:bg-sand-50 dark:hover:bg-primary-800 transition"
+                  className="flex items-center justify-center gap-2 px-4 py-3 border border-primary-300 rounded-lg hover:bg-sand-50 transition"
                 >
-                  <Mail className="w-5 h-5 text-primary-500 dark:text-sand-400" />
-                  <span className="font-medium text-primary-700 dark:text-sand-200">Email</span>
+                  <Mail className="w-5 h-5 text-primary-500" />
+                  <span className="font-medium text-primary-700">Email</span>
                 </button>
                 <button
                   onClick={shareViaFacebook}
-                  className="flex items-center justify-center gap-2 px-4 py-3 border border-primary-300 dark:border-primary-600 rounded-lg hover:bg-sand-50 dark:hover:bg-primary-800 transition"
+                  className="flex items-center justify-center gap-2 px-4 py-3 border border-primary-300 rounded-lg hover:bg-sand-50 transition"
                 >
                   <Facebook className="w-5 h-5 text-blue-600" />
-                  <span className="font-medium text-primary-700 dark:text-sand-200">Facebook</span>
+                  <span className="font-medium text-primary-700">Facebook</span>
                 </button>
                 <button
                   onClick={shareViaTwitter}
-                  className="flex items-center justify-center gap-2 px-4 py-3 border border-primary-300 dark:border-primary-600 rounded-lg hover:bg-sand-50 dark:hover:bg-primary-800 transition"
+                  className="flex items-center justify-center gap-2 px-4 py-3 border border-primary-300 rounded-lg hover:bg-sand-50 transition"
                 >
                   <Twitter className="w-5 h-5 text-blue-400" />
-                  <span className="font-medium text-primary-700 dark:text-sand-200">Twitter</span>
+                  <span className="font-medium text-primary-700">Twitter</span>
                 </button>
                 <button
                   onClick={handleCopy}
-                  className="flex items-center justify-center gap-2 px-4 py-3 border border-primary-300 dark:border-primary-600 rounded-lg hover:bg-sand-50 dark:hover:bg-primary-800 transition"
+                  className="flex items-center justify-center gap-2 px-4 py-3 border border-primary-300 rounded-lg hover:bg-sand-50 transition"
                 >
-                  <LinkIcon className="w-5 h-5 text-primary-500 dark:text-sand-400" />
-                  <span className="font-medium text-primary-700 dark:text-sand-200">Copy Link</span>
+                  <LinkIcon className="w-5 h-5 text-primary-500" />
+                  <span className="font-medium text-primary-700">Copy Link</span>
                 </button>
               </div>
             </div>

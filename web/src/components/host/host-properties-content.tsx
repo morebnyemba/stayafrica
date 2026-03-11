@@ -49,15 +49,15 @@ export function HostPropertiesContent() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-sand-100 dark:bg-primary-900">
+      <div className="min-h-screen bg-sand-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Header */}
           <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
             <div>
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary-900 dark:text-sand-50 mb-2">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary-900 mb-2">
                 My Properties
               </h1>
-              <p className="text-base sm:text-lg text-primary-600 dark:text-sand-300">
+              <p className="text-base sm:text-lg text-primary-600">
                 Manage your property listings
               </p>
             </div>
@@ -74,9 +74,9 @@ export function HostPropertiesContent() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="card p-6 animate-pulse">
-                  <div className="h-48 bg-primary-200 dark:bg-primary-700 rounded-lg mb-4"></div>
-                  <div className="h-6 bg-primary-200 dark:bg-primary-700 rounded mb-2"></div>
-                  <div className="h-4 bg-primary-200 dark:bg-primary-700 rounded"></div>
+                  <div className="h-48 bg-primary-200 rounded-lg mb-4"></div>
+                  <div className="h-6 bg-primary-200 rounded mb-2"></div>
+                  <div className="h-4 bg-primary-200 rounded"></div>
                 </div>
               ))}
             </div>
@@ -85,7 +85,7 @@ export function HostPropertiesContent() {
               {properties.map((property: any) => (
                 <article key={property.id} className="card overflow-hidden hover:shadow-lg transition-shadow" aria-label={`Property: ${property.title}`}>
                   {/* Property Image */}
-                  <div className="relative h-48 bg-primary-200 dark:bg-primary-700">
+                  <div className="relative h-48 bg-primary-200">
                     {property.main_image ? (
                       <img
                         src={property.main_image}
@@ -103,10 +103,10 @@ export function HostPropertiesContent() {
                       <span
                         className={`px-3 py-1 text-xs font-semibold rounded-full ${
                           property.status === 'active'
-                            ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
+                            ? 'bg-green-100 text-green-800'
                             : property.status === 'pending_approval'
-                            ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300'
-                            : 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300'
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : 'bg-primary-100 text-primary-700'
                         }`}
                         role="status"
                         aria-label={`Status: ${property.status.replace('_', ' ')}`}
@@ -117,17 +117,17 @@ export function HostPropertiesContent() {
                     
                     {/* Quick Stats Overlay */}
                     {property.status === 'active' && (
-                      <div className="absolute bottom-3 left-3 right-3 bg-white/95 dark:bg-primary-900/95 backdrop-blur-sm rounded-lg p-2">
+                      <div className="absolute bottom-3 left-3 right-3 bg-white/95 backdrop-blur-sm rounded-lg p-2">
                         <div className="flex items-center justify-around text-xs">
-                          <div className="flex items-center gap-1 text-primary-900 dark:text-sand-50">
+                          <div className="flex items-center gap-1 text-primary-900">
                             <Star className="w-3 h-3 text-yellow-500 fill-current" aria-hidden="true" />
                             <span className="font-semibold">{property.average_rating?.toFixed(1) || 'N/A'}</span>
                           </div>
-                          <div className="flex items-center gap-1 text-primary-900 dark:text-sand-50">
+                          <div className="flex items-center gap-1 text-primary-900">
                             <Calendar className="w-3 h-3" aria-hidden="true" />
                             <span className="font-semibold">{property.total_bookings || 0} bookings</span>
                           </div>
-                          <div className="flex items-center gap-1 text-green-600 dark:text-green-400">
+                          <div className="flex items-center gap-1 text-green-600">
                             <TrendingUp className="w-3 h-3" aria-hidden="true" />
                             <span className="font-semibold">${property.total_earnings?.toFixed(0) || 0}</span>
                           </div>
@@ -138,14 +138,14 @@ export function HostPropertiesContent() {
 
                   {/* Property Details */}
                   <div className="p-4">
-                    <h3 className="text-base sm:text-lg font-bold text-primary-900 dark:text-sand-50 mb-2 truncate">
+                    <h3 className="text-base sm:text-lg font-bold text-primary-900 mb-2 truncate">
                       {property.title}
                     </h3>
-                    <p className="text-xs sm:text-sm text-primary-600 dark:text-sand-300 mb-3 truncate">
+                    <p className="text-xs sm:text-sm text-primary-600 mb-3 truncate">
                       {property.city}, {property.country}
                     </p>
 
-                    <div className="flex items-center gap-4 text-sm text-primary-700 dark:text-sand-200 mb-4">
+                    <div className="flex items-center gap-4 text-sm text-primary-700 mb-4">
                       <span>{property.bedrooms} bed</span>
                       <span>•</span>
                       <span>{property.bathrooms} bath</span>
@@ -154,10 +154,10 @@ export function HostPropertiesContent() {
                     </div>
 
                     <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-1 text-secondary-600 dark:text-secondary-400 font-semibold">
+                      <div className="flex items-center gap-1 text-secondary-600 font-semibold">
                         <DollarSign className="w-4 h-4" />
                         <span>{property.price_per_night}</span>
-                        <span className="text-sm text-primary-600 dark:text-sand-400">/night</span>
+                        <span className="text-sm text-primary-600">/night</span>
                       </div>
                     </div>
 
@@ -191,10 +191,10 @@ export function HostPropertiesContent() {
                     </div>
 
                     {/* Additional Actions */}
-                    <div className="mt-3 pt-3 border-t border-primary-200 dark:border-primary-700">
+                    <div className="mt-3 pt-3 border-t border-primary-200">
                       <Link
                         href={`/host/properties/${property.id}/calendar`}
-                        className="w-full text-sm text-secondary-600 dark:text-secondary-400 hover:underline flex items-center justify-center gap-1"
+                        className="w-full text-sm text-secondary-600 hover:underline flex items-center justify-center gap-1"
                       >
                         <Calendar className="w-4 h-4" />
                         Manage Calendar
@@ -206,11 +206,11 @@ export function HostPropertiesContent() {
             </div>
           ) : (
             <div className="card p-12 text-center">
-              <Building className="w-20 h-20 text-primary-300 dark:text-primary-700 mx-auto mb-4" />
-              <h2 className="text-2xl font-bold text-primary-900 dark:text-sand-50 mb-2">
+              <Building className="w-20 h-20 text-primary-300 mx-auto mb-4" />
+              <h2 className="text-2xl font-bold text-primary-900 mb-2">
                 No Properties Yet
               </h2>
-              <p className="text-primary-600 dark:text-sand-300 mb-6 max-w-md mx-auto">
+              <p className="text-primary-600 mb-6 max-w-md mx-auto">
                 Start earning by listing your first property on StayAfrica. It only takes a few minutes!
               </p>
               <Link href="/host/properties/new" className="inline-block">
@@ -226,26 +226,26 @@ export function HostPropertiesContent() {
           {properties.length > 0 && (
             <div className="mt-8 grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="card p-4">
-                <div className="text-sm text-primary-600 dark:text-sand-400 mb-1">Total Properties</div>
-                <div className="text-2xl font-bold text-primary-900 dark:text-sand-50">
+                <div className="text-sm text-primary-600 mb-1">Total Properties</div>
+                <div className="text-2xl font-bold text-primary-900">
                   {properties.length}
                 </div>
               </div>
               <div className="card p-4">
-                <div className="text-sm text-primary-600 dark:text-sand-400 mb-1">Active</div>
+                <div className="text-sm text-primary-600 mb-1">Active</div>
                 <div className="text-2xl font-bold text-green-600">
                   {properties.filter((p: any) => p.status === 'active').length}
                 </div>
               </div>
               <div className="card p-4">
-                <div className="text-sm text-primary-600 dark:text-sand-400 mb-1">Pending Approval</div>
+                <div className="text-sm text-primary-600 mb-1">Pending Approval</div>
                 <div className="text-2xl font-bold text-yellow-600">
                   {properties.filter((p: any) => p.status === 'pending_approval').length}
                 </div>
               </div>
               <div className="card p-4">
-                <div className="text-sm text-primary-600 dark:text-sand-400 mb-1">Inactive</div>
-                <div className="text-2xl font-bold text-primary-500 dark:text-sand-400">
+                <div className="text-sm text-primary-600 mb-1">Inactive</div>
+                <div className="text-2xl font-bold text-primary-500">
                   {properties.filter((p: any) => p.status === 'inactive').length}
                 </div>
               </div>

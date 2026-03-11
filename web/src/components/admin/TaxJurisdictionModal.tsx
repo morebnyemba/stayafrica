@@ -68,7 +68,7 @@ export default function TaxJurisdictionModal({ isOpen, onClose, onSave, jurisdic
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-primary-700 dark:text-sand-200 mb-1">
+          <label className="block text-sm font-medium text-primary-700 mb-1">
             Name <span className="text-red-500">*</span>
           </label>
           <input
@@ -77,20 +77,20 @@ export default function TaxJurisdictionModal({ isOpen, onClose, onSave, jurisdic
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             placeholder="e.g., California"
-            className="w-full px-3 py-2 border border-primary-300 dark:border-primary-600 rounded-lg focus:ring-2 focus:ring-[#D9B168] focus:border-transparent"
+            className="w-full px-3 py-2 border border-primary-300 rounded-lg focus:ring-2 focus:ring-[#D9B168] focus:border-transparent"
           />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-primary-700 dark:text-sand-200 mb-1">
+            <label className="block text-sm font-medium text-primary-700 mb-1">
               Type <span className="text-red-500">*</span>
             </label>
             <select
               required
               value={formData.jurisdiction_type}
               onChange={(e) => setFormData({ ...formData, jurisdiction_type: e.target.value })}
-              className="w-full px-3 py-2 border border-primary-300 dark:border-primary-600 rounded-lg focus:ring-2 focus:ring-[#D9B168] focus:border-transparent"
+              className="w-full px-3 py-2 border border-primary-300 rounded-lg focus:ring-2 focus:ring-[#D9B168] focus:border-transparent"
             >
               <option value="country">Country</option>
               <option value="state">State/Province</option>
@@ -100,7 +100,7 @@ export default function TaxJurisdictionModal({ isOpen, onClose, onSave, jurisdic
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-primary-700 dark:text-sand-200 mb-1">
+            <label className="block text-sm font-medium text-primary-700 mb-1">
               Code <span className="text-red-500">*</span>
             </label>
             <input
@@ -109,14 +109,14 @@ export default function TaxJurisdictionModal({ isOpen, onClose, onSave, jurisdic
               value={formData.code}
               onChange={(e) => setFormData({ ...formData, code: e.target.value })}
               placeholder="e.g., US-CA"
-              className="w-full px-3 py-2 border border-primary-300 dark:border-primary-600 rounded-lg focus:ring-2 focus:ring-[#D9B168] focus:border-transparent"
+              className="w-full px-3 py-2 border border-primary-300 rounded-lg focus:ring-2 focus:ring-[#D9B168] focus:border-transparent"
             />
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-primary-700 dark:text-sand-200 mb-1">
+            <label className="block text-sm font-medium text-primary-700 mb-1">
               Country Code <span className="text-red-500">*</span>
             </label>
             <input
@@ -126,12 +126,12 @@ export default function TaxJurisdictionModal({ isOpen, onClose, onSave, jurisdic
               value={formData.country_code}
               onChange={(e) => setFormData({ ...formData, country_code: e.target.value.toUpperCase() })}
               placeholder="e.g., US"
-              className="w-full px-3 py-2 border border-primary-300 dark:border-primary-600 rounded-lg focus:ring-2 focus:ring-[#D9B168] focus:border-transparent"
+              className="w-full px-3 py-2 border border-primary-300 rounded-lg focus:ring-2 focus:ring-[#D9B168] focus:border-transparent"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-primary-700 dark:text-sand-200 mb-1">
+            <label className="block text-sm font-medium text-primary-700 mb-1">
               State/Province Code
             </label>
             <input
@@ -139,13 +139,13 @@ export default function TaxJurisdictionModal({ isOpen, onClose, onSave, jurisdic
               value={formData.state_province_code}
               onChange={(e) => setFormData({ ...formData, state_province_code: e.target.value })}
               placeholder="e.g., CA"
-              className="w-full px-3 py-2 border border-primary-300 dark:border-primary-600 rounded-lg focus:ring-2 focus:ring-[#D9B168] focus:border-transparent"
+              className="w-full px-3 py-2 border border-primary-300 rounded-lg focus:ring-2 focus:ring-[#D9B168] focus:border-transparent"
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-primary-700 dark:text-sand-200 mb-1">
+          <label className="block text-sm font-medium text-primary-700 mb-1">
             City Name
           </label>
           <input
@@ -153,7 +153,7 @@ export default function TaxJurisdictionModal({ isOpen, onClose, onSave, jurisdic
             value={formData.city_name}
             onChange={(e) => setFormData({ ...formData, city_name: e.target.value })}
             placeholder="e.g., San Francisco"
-            className="w-full px-3 py-2 border border-primary-300 dark:border-primary-600 rounded-lg focus:ring-2 focus:ring-[#D9B168] focus:border-transparent"
+            className="w-full px-3 py-2 border border-primary-300 rounded-lg focus:ring-2 focus:ring-[#D9B168] focus:border-transparent"
           />
         </div>
 
@@ -163,9 +163,9 @@ export default function TaxJurisdictionModal({ isOpen, onClose, onSave, jurisdic
             id="is_active"
             checked={formData.is_active}
             onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-            className="w-4 h-4 text-[#D9B168] border-primary-300 dark:border-primary-600 rounded focus:ring-[#D9B168]"
+            className="w-4 h-4 text-[#D9B168] border-primary-300 rounded focus:ring-[#D9B168]"
           />
-          <label htmlFor="is_active" className="ml-2 text-sm text-primary-700 dark:text-sand-200">
+          <label htmlFor="is_active" className="ml-2 text-sm text-primary-700">
             Active
           </label>
         </div>
@@ -175,7 +175,7 @@ export default function TaxJurisdictionModal({ isOpen, onClose, onSave, jurisdic
             type="button"
             onClick={onClose}
             disabled={loading}
-            className="px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg text-primary-700 dark:text-sand-200 hover:bg-sand-50 dark:hover:bg-primary-800 transition-colors disabled:opacity-50"
+            className="px-4 py-2 border border-primary-300 rounded-lg text-primary-700 hover:bg-sand-50 transition-colors disabled:opacity-50"
           >
             Cancel
           </button>

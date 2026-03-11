@@ -80,14 +80,14 @@ export const RevenueChart: React.FC<RevenueChartProps> = ({
       const data = payload[0]?.payload;
       if (!data) return null;
       return (
-        <div className="bg-white dark:bg-primary-800 p-4 rounded-lg shadow-lg border border-sand-200 dark:border-primary-700">
-          <p className="text-sm font-medium text-primary-900 dark:text-sand-50 mb-2">
+        <div className="bg-white p-4 rounded-lg shadow-lg border border-sand-200">
+          <p className="text-sm font-medium text-primary-900 mb-2">
             {formatDate(data.date || '')}
           </p>
-          <p className="text-sm text-primary-500 dark:text-sand-300">
+          <p className="text-sm text-primary-500">
             Revenue: <span className="font-semibold text-green-600">{formatCurrency(data.revenue ?? 0)}</span>
           </p>
-          <p className="text-sm text-primary-500 dark:text-sand-300">
+          <p className="text-sm text-primary-500">
             Bookings: <span className="font-semibold">{data.bookings ?? 0}</span>
           </p>
         </div>
@@ -98,8 +98,8 @@ export const RevenueChart: React.FC<RevenueChartProps> = ({
 
   if (error) {
     return (
-      <div className={`bg-white dark:bg-primary-800/40 rounded-xl p-6 ${className}`}>
-        <div className="text-center text-red-600 dark:text-red-400">
+      <div className={`bg-white rounded-xl p-6 ${className}`}>
+        <div className="text-center text-red-600">
           <p>Failed to load revenue data</p>
         </div>
       </div>
@@ -107,15 +107,15 @@ export const RevenueChart: React.FC<RevenueChartProps> = ({
   }
 
   return (
-    <div className={`bg-white dark:bg-primary-800/40 rounded-xl p-6 ${className}`}>
+    <div className={`bg-white rounded-xl p-6 ${className}`}>
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center space-x-3">
-          <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
-            <DollarSign className="h-5 w-5 text-green-600 dark:text-green-400" />
+          <div className="p-2 bg-green-100 rounded-lg">
+            <DollarSign className="h-5 w-5 text-green-600" />
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-primary-900 dark:text-sand-50">Revenue Overview</h3>
+            <h3 className="text-lg font-semibold text-primary-900">Revenue Overview</h3>
             {trend && (
               <div className="flex items-center space-x-1 text-sm">
                 {trend.isPositive ? (
@@ -132,15 +132,15 @@ export const RevenueChart: React.FC<RevenueChartProps> = ({
         </div>
 
         {/* Period Selector */}
-        <div className="flex space-x-1 bg-primary-100 dark:bg-primary-800 rounded-lg p-1">
+        <div className="flex space-x-1 bg-primary-100 rounded-lg p-1">
           {periods.map((p) => (
             <button
               key={p.value}
               onClick={() => setSelectedPeriod(p.value)}
               className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
                 selectedPeriod === p.value
-                  ? 'bg-white dark:bg-primary-600 text-primary-900 dark:text-sand-50 shadow-sm'
-                  : 'text-primary-500 dark:text-sand-300 hover:text-primary-900 dark:hover:text-sand-50'
+                  ? 'bg-white text-primary-900 shadow-sm'
+                  : 'text-primary-500 hover:text-primary-900'
               }`}
             >
               {p.label}
@@ -156,7 +156,7 @@ export const RevenueChart: React.FC<RevenueChartProps> = ({
         </div>
       ) : !data || data.length === 0 ? (
         <div className="flex items-center justify-center" style={{ height }}>
-          <div className="text-center text-primary-400 dark:text-sand-500">
+          <div className="text-center text-primary-400">
             <DollarSign className="h-12 w-12 mx-auto mb-2 opacity-50" />
             <p>No revenue data available for this period</p>
           </div>

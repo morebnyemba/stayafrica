@@ -10,7 +10,7 @@ export const VerificationStatus = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8" role="status" aria-busy="true" aria-label="Loading verification status">
-        <Loader2 className="h-8 w-8 animate-spin text-primary-300 dark:text-primary-500" aria-hidden="true" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary-300" aria-hidden="true" />
         <span className="sr-only">Loading verification status...</span>
       </div>
     );
@@ -18,12 +18,12 @@ export const VerificationStatus = () => {
 
   if (!status) {
     return (
-      <div className="bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-700 rounded-lg p-6">
+      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
         <div className="flex items-start gap-3">
-          <AlertCircle className="h-6 w-6 text-yellow-600 dark:text-yellow-400 flex-shrink-0 mt-0.5" aria-hidden="true" />
+          <AlertCircle className="h-6 w-6 text-yellow-600 flex-shrink-0 mt-0.5" aria-hidden="true" />
           <div>
-            <h3 className="text-lg font-medium text-yellow-900 dark:text-yellow-100">Verification Not Started</h3>
-            <p className="text-sm text-yellow-800 dark:text-yellow-200 mt-1">
+            <h3 className="text-lg font-medium text-yellow-900">Verification Not Started</h3>
+            <p className="text-sm text-yellow-800 mt-1">
               Complete the verification process to unlock all platform features.
             </p>
           </div>
@@ -35,26 +35,26 @@ export const VerificationStatus = () => {
   const getStatusIcon = () => {
     switch (status.status) {
       case 'APPROVED':
-        return <CheckCircle className="h-8 w-8 text-green-600 dark:text-green-400" aria-hidden="true" />;
+        return <CheckCircle className="h-8 w-8 text-green-600" aria-hidden="true" />;
       case 'REJECTED':
-        return <XCircle className="h-8 w-8 text-red-600 dark:text-red-400" aria-hidden="true" />;
+        return <XCircle className="h-8 w-8 text-red-600" aria-hidden="true" />;
       case 'UNDER_REVIEW':
-        return <Clock className="h-8 w-8 text-blue-600 dark:text-blue-400" aria-hidden="true" />;
+        return <Clock className="h-8 w-8 text-blue-600" aria-hidden="true" />;
       case 'PENDING':
-        return <AlertCircle className="h-8 w-8 text-yellow-600 dark:text-yellow-400" aria-hidden="true" />;
+        return <AlertCircle className="h-8 w-8 text-yellow-600" aria-hidden="true" />;
     }
   };
 
   const getStatusColor = () => {
     switch (status.status) {
       case 'APPROVED':
-        return 'bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-700';
+        return 'bg-green-50 border-green-200';
       case 'REJECTED':
-        return 'bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-700';
+        return 'bg-red-50 border-red-200';
       case 'UNDER_REVIEW':
-        return 'bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-700';
+        return 'bg-blue-50 border-blue-200';
       case 'PENDING':
-        return 'bg-yellow-50 dark:bg-yellow-900/30 border-yellow-200 dark:border-yellow-700';
+        return 'bg-yellow-50 border-yellow-200';
     }
   };
 
@@ -91,37 +91,37 @@ export const VerificationStatus = () => {
         
         <div className="flex-1">
           <div className="flex items-center justify-between">
-            <h3 className="text-xl font-semibold text-primary-900 dark:text-sand-50">
+            <h3 className="text-xl font-semibold text-primary-900">
               {getStatusText()}
             </h3>
             
             {status.updated_at && (
-              <span className="text-sm text-primary-500 dark:text-sand-400">
+              <span className="text-sm text-primary-500">
                 {formatDistanceToNow(new Date(status.updated_at), { addSuffix: true })}
               </span>
             )}
           </div>
           
-          <p className="text-sm text-primary-700 dark:text-sand-200 mt-2">
+          <p className="text-sm text-primary-700 mt-2">
             {getStatusDescription()}
           </p>
 
           {status.status === 'REJECTED' && status.rejection_reason && (
-            <div className="mt-4 p-4 bg-white dark:bg-primary-800/40 border border-red-200 dark:border-red-700 rounded-lg" role="alert">
-              <h4 className="text-sm font-medium text-red-900 dark:text-red-200 mb-1">Rejection Reason</h4>
-              <p className="text-sm text-red-800 dark:text-red-300">{status.rejection_reason}</p>
+            <div className="mt-4 p-4 bg-white border border-red-200 rounded-lg" role="alert">
+              <h4 className="text-sm font-medium text-red-900 mb-1">Rejection Reason</h4>
+              <p className="text-sm text-red-800">{status.rejection_reason}</p>
             </div>
           )}
 
           {status.admin_notes && (
-            <div className="mt-4 p-4 bg-white dark:bg-primary-800/40 border border-sand-200/50 dark:border-primary-700/50 rounded-lg">
-              <h4 className="text-sm font-medium text-primary-900 dark:text-sand-50 mb-1">Admin Notes</h4>
-              <p className="text-sm text-primary-700 dark:text-sand-200">{status.admin_notes}</p>
+            <div className="mt-4 p-4 bg-white border border-sand-200/50 rounded-lg">
+              <h4 className="text-sm font-medium text-primary-900 mb-1">Admin Notes</h4>
+              <p className="text-sm text-primary-700">{status.admin_notes}</p>
             </div>
           )}
 
           {status.verified_at && (
-            <p className="text-xs text-primary-400 dark:text-sand-500 mt-4">
+            <p className="text-xs text-primary-400 mt-4">
               Verified on {new Date(status.verified_at).toLocaleDateString()}
             </p>
           )}

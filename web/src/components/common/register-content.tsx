@@ -237,7 +237,7 @@ export function RegisterContent() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sand-100 via-secondary-50 to-primary-50 dark:from-primary-900 dark:via-primary-800 dark:to-primary-900 py-8 px-4 sm:py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-sand-100 via-secondary-50 to-primary-50 py-8 px-4 sm:py-12 sm:px-6 lg:px-8">
       <div className="max-w-lg mx-auto">
         {/* Logo */}
         <div className="text-center mb-6">
@@ -246,7 +246,7 @@ export function RegisterContent() {
           </Link>
         </div>
 
-        <div className="bg-white dark:bg-primary-800 rounded-2xl shadow-elevated border border-primary-100 dark:border-primary-700 p-5 sm:p-8">
+        <div className="bg-white rounded-2xl shadow-elevated border border-primary-100 p-5 sm:p-8">
           {/* Step indicator */}
           <div className="flex items-center justify-center gap-2 mb-4">
             {[1, 2, 3].map((step) => (
@@ -255,8 +255,8 @@ export function RegisterContent() {
                   className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full border-2 flex items-center justify-center text-sm font-semibold transition ${currentStep > step
                       ? 'border-secondary-500 bg-secondary-500 text-white'
                       : currentStep === step
-                        ? 'border-secondary-500 bg-secondary-50 dark:bg-secondary-900/20 text-secondary-700 dark:text-secondary-400'
-                        : 'border-primary-200 dark:border-primary-700 text-primary-400 dark:text-primary-500'
+                        ? 'border-secondary-500 bg-secondary-50 text-secondary-700'
+                        : 'border-primary-200 text-primary-400'
                     }`}
                   aria-label={`Step ${step}`}
                 >
@@ -264,7 +264,7 @@ export function RegisterContent() {
                 </div>
                 {step < 3 && (
                   <div
-                    className={`w-8 sm:w-12 h-0.5 mx-1.5 sm:mx-2 rounded-full transition ${currentStep > step ? 'bg-secondary-500' : 'bg-primary-200 dark:bg-primary-700'
+                    className={`w-8 sm:w-12 h-0.5 mx-1.5 sm:mx-2 rounded-full transition ${currentStep > step ? 'bg-secondary-500' : 'bg-primary-200'
                       }`}
                   />
                 )}
@@ -272,10 +272,10 @@ export function RegisterContent() {
             ))}
           </div>
 
-          <h1 className="text-2xl sm:text-3xl font-bold mb-1 text-center text-primary-900 dark:text-sand-50">
+          <h1 className="text-2xl sm:text-3xl font-bold mb-1 text-center text-primary-900">
             Create Your Account
           </h1>
-          <p className="text-center text-sm text-primary-500 dark:text-sand-400 mb-6">
+          <p className="text-center text-sm text-primary-500 mb-6">
             Step {currentStep} of 3 &middot; {
               currentStep === 1 ? 'Personal Information' :
                 currentStep === 2 ? 'Account Credentials' :
@@ -390,7 +390,7 @@ export function RegisterContent() {
                 />
 
                 <div>
-                  <label className="block text-sm font-medium text-primary-900 dark:text-sand-100 mb-3">
+                  <label className="block text-sm font-medium text-primary-900 mb-3">
                     I want to
                   </label>
                   <div className="grid grid-cols-2 gap-3">
@@ -398,32 +398,32 @@ export function RegisterContent() {
                       type="button"
                       onClick={() => setFormData({ ...formData, role: 'guest' })}
                       className={`p-3 sm:p-4 border-2 rounded-xl transition-all ${formData.role === 'guest'
-                          ? 'border-secondary-500 bg-secondary-50 dark:bg-secondary-900/20 shadow-sm'
-                          : 'border-primary-200 dark:border-primary-700 hover:border-primary-300 dark:hover:border-primary-600'
+                          ? 'border-secondary-500 bg-secondary-50 shadow-sm'
+                          : 'border-primary-200 hover:border-primary-300'
                         }`}
                     >
                       <div className="text-center">
                         <div className="flex justify-center mb-2">
-                          <Luggage className="w-7 h-7 sm:w-8 sm:h-8 text-secondary-600 dark:text-secondary-400" />
+                          <Luggage className="w-7 h-7 sm:w-8 sm:h-8 text-secondary-600" />
                         </div>
-                        <div className="font-semibold text-sm sm:text-base text-primary-900 dark:text-sand-100">Book Stays</div>
-                        <div className="text-xs sm:text-sm text-primary-500 dark:text-sand-400 mt-0.5">Find places to stay</div>
+                        <div className="font-semibold text-sm sm:text-base text-primary-900">Book Stays</div>
+                        <div className="text-xs sm:text-sm text-primary-500 mt-0.5">Find places to stay</div>
                       </div>
                     </button>
                     <button
                       type="button"
                       onClick={() => setFormData({ ...formData, role: 'host' })}
                       className={`p-3 sm:p-4 border-2 rounded-xl transition-all ${formData.role === 'host'
-                          ? 'border-secondary-500 bg-secondary-50 dark:bg-secondary-900/20 shadow-sm'
-                          : 'border-primary-200 dark:border-primary-700 hover:border-primary-300 dark:hover:border-primary-600'
+                          ? 'border-secondary-500 bg-secondary-50 shadow-sm'
+                          : 'border-primary-200 hover:border-primary-300'
                         }`}
                     >
                       <div className="text-center">
                         <div className="flex justify-center mb-2">
-                          <Home className="w-7 h-7 sm:w-8 sm:h-8 text-secondary-600 dark:text-secondary-400" />
+                          <Home className="w-7 h-7 sm:w-8 sm:h-8 text-secondary-600" />
                         </div>
-                        <div className="font-semibold text-sm sm:text-base text-primary-900 dark:text-sand-100">Host Properties</div>
-                        <div className="text-xs sm:text-sm text-primary-500 dark:text-sand-400 mt-0.5">List my property</div>
+                        <div className="font-semibold text-sm sm:text-base text-primary-900">Host Properties</div>
+                        <div className="text-xs sm:text-sm text-primary-500 mt-0.5">List my property</div>
                       </div>
                     </button>
                   </div>
@@ -470,9 +470,9 @@ export function RegisterContent() {
 
           {/* Sign In Link */}
           <div className="mt-6 text-center">
-            <p className="text-sm text-primary-500 dark:text-sand-400">
+            <p className="text-sm text-primary-500">
               Already have an account?{' '}
-              <Link href={redirectUrl !== '/dashboard' ? `/login?redirect=${encodeURIComponent(redirectUrl)}` : '/login'} className="text-secondary-600 dark:text-secondary-400 hover:text-secondary-700 font-semibold">
+              <Link href={redirectUrl !== '/dashboard' ? `/login?redirect=${encodeURIComponent(redirectUrl)}` : '/login'} className="text-secondary-600 hover:text-secondary-700 font-semibold">
                 Sign In
               </Link>
             </p>

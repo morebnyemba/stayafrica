@@ -63,7 +63,7 @@ export const PushNotificationSetup = () => {
 
   if (permission === 'denied') {
     return (
-      <div className="flex items-center gap-2 text-sm text-primary-400 dark:text-sand-500">
+      <div className="flex items-center gap-2 text-sm text-primary-400">
         <BellOff className="h-4 w-4" />
         <span>Notifications blocked</span>
       </div>

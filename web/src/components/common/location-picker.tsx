@@ -121,24 +121,24 @@ export function LocationPicker({ onLocationSelect, showMap = false, className = 
       )}
 
       {location && !error && (
-        <div className="mt-3 p-3 bg-success-50 dark:bg-success-900/20 rounded-lg border border-success-200 dark:border-success-800">
+        <div className="mt-3 p-3 bg-success-50 rounded-lg border border-success-200">
           <div className="flex items-start gap-2 text-sm">
-            <MapPin className="w-4 h-4 mt-0.5 text-success-600 dark:text-success-400 flex-shrink-0" />
+            <MapPin className="w-4 h-4 mt-0.5 text-success-600 flex-shrink-0" />
             <div className="flex-1">
-              <p className="font-medium text-success-900 dark:text-success-100 mb-1">
+              <p className="font-medium text-success-900 mb-1">
                 Location detected
               </p>
-              <p className="text-success-700 dark:text-success-300 text-xs break-words">
+              <p className="text-success-700 text-xs break-words">
                 {location.address}
               </p>
-              <p className="text-success-600 dark:text-success-400 text-xs mt-1">
+              <p className="text-success-600 text-xs mt-1">
                 {location.lat.toFixed(6)}, {location.lng.toFixed(6)}
               </p>
             </div>
           </div>
           
           {showMap && (
-            <div className="mt-3 rounded-lg overflow-hidden border border-success-200 dark:border-success-800">
+            <div className="mt-3 rounded-lg overflow-hidden border border-success-200">
               <iframe
                 width="100%"
                 height="200"
@@ -150,12 +150,12 @@ export function LocationPicker({ onLocationSelect, showMap = false, className = 
                 style={{ border: 0 }}
                 title="Location Map"
               />
-              <div className="bg-white dark:bg-primary-800 px-3 py-2">
+              <div className="bg-white px-3 py-2">
                 <a
                   href={`https://www.openstreetmap.org/?mlat=${location.lat}&mlon=${location.lng}#map=15/${location.lat}/${location.lng}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-xs text-primary-600 dark:text-secondary-400 hover:underline"
+                  className="text-xs text-primary-600 hover:underline"
                 >
                   View on OpenStreetMap →
                 </a>

@@ -79,17 +79,17 @@ export const ExportButton: React.FC<ExportButtonProps> = ({
           ></div>
 
           {/* Menu */}
-          <div className="absolute right-0 mt-2 z-50 w-48 bg-white dark:bg-primary-800 rounded-lg shadow-xl border border-sand-200/50 dark:border-primary-700/50 py-2">
+          <div className="absolute right-0 mt-2 z-50 w-48 bg-white rounded-lg shadow-xl border border-sand-200/50 py-2">
             <button
               onClick={() => handleExport('csv')}
-              className="w-full flex items-center space-x-3 px-4 py-2 hover:bg-sand-50 dark:hover:bg-primary-700 transition-colors"
+              className="w-full flex items-center space-x-3 px-4 py-2 hover:bg-sand-50 transition-colors"
             >
               <FileSpreadsheet className="h-4 w-4 text-green-600" />
               <div className="text-left">
-                <p className="text-sm font-medium text-primary-900 dark:text-sand-50">
+                <p className="text-sm font-medium text-primary-900">
                   Export as CSV
                 </p>
-                <p className="text-xs text-primary-400 dark:text-sand-500">
+                <p className="text-xs text-primary-400">
                   Spreadsheet format
                 </p>
               </div>
@@ -97,14 +97,14 @@ export const ExportButton: React.FC<ExportButtonProps> = ({
 
             <button
               onClick={() => handleExport('pdf')}
-              className="w-full flex items-center space-x-3 px-4 py-2 hover:bg-sand-50 dark:hover:bg-primary-700 transition-colors"
+              className="w-full flex items-center space-x-3 px-4 py-2 hover:bg-sand-50 transition-colors"
             >
               <FileText className="h-4 w-4 text-red-600" />
               <div className="text-left">
-                <p className="text-sm font-medium text-primary-900 dark:text-sand-50">
+                <p className="text-sm font-medium text-primary-900">
                   Export as PDF
                 </p>
-                <p className="text-xs text-primary-400 dark:text-sand-500">
+                <p className="text-xs text-primary-400">
                   Printable report
                 </p>
               </div>

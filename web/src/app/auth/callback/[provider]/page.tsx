@@ -120,7 +120,7 @@ export default function OAuthCallbackPage() {
   const providerName = provider.charAt(0).toUpperCase() + provider.slice(1);
 
   return (
-    <div className="min-h-screen flex items-center justify-center py-12 px-4 bg-gradient-to-br from-sand-100 via-secondary-50 to-primary-50 dark:from-primary-900 dark:via-primary-800 dark:to-primary-900">
+    <div className="min-h-screen flex items-center justify-center py-12 px-4 bg-gradient-to-br from-sand-100 via-secondary-50 to-primary-50">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center justify-center">
@@ -128,14 +128,14 @@ export default function OAuthCallbackPage() {
           </Link>
         </div>
 
-        <div className="bg-white dark:bg-primary-800 rounded-2xl shadow-elevated p-8 border border-primary-100 dark:border-primary-700 text-center">
+        <div className="bg-white rounded-2xl shadow-elevated p-8 border border-primary-100 text-center">
           {status === 'loading' && (
             <>
               <Loader2 className="w-12 h-12 text-secondary-500 mx-auto mb-4 animate-spin" />
-              <h2 className="text-xl font-bold text-primary-900 dark:text-sand-50 mb-2">
+              <h2 className="text-xl font-bold text-primary-900 mb-2">
                 Signing in with {providerName}
               </h2>
-              <p className="text-primary-600 dark:text-sand-300">
+              <p className="text-primary-600">
                 Please wait while we complete your authentication...
               </p>
             </>
@@ -144,10 +144,10 @@ export default function OAuthCallbackPage() {
           {status === 'success' && (
             <>
               <CheckCircle2 className="w-12 h-12 text-green-500 mx-auto mb-4" />
-              <h2 className="text-xl font-bold text-primary-900 dark:text-sand-50 mb-2">
+              <h2 className="text-xl font-bold text-primary-900 mb-2">
                 Successfully signed in!
               </h2>
-              <p className="text-primary-600 dark:text-sand-300">
+              <p className="text-primary-600">
                 Redirecting to your dashboard...
               </p>
             </>
@@ -156,10 +156,10 @@ export default function OAuthCallbackPage() {
           {status === 'error' && (
             <>
               <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-              <h2 className="text-xl font-bold text-primary-900 dark:text-sand-50 mb-2">
+              <h2 className="text-xl font-bold text-primary-900 mb-2">
                 Authentication Failed
               </h2>
-              <p className="text-primary-600 dark:text-sand-300 mb-6">
+              <p className="text-primary-600 mb-6">
                 {errorMessage}
               </p>
               <div className="space-y-3">
@@ -171,7 +171,7 @@ export default function OAuthCallbackPage() {
                 </Link>
                 <Link
                   href="/register"
-                  className="inline-flex w-full items-center justify-center rounded-lg border border-primary-300 dark:border-primary-600 px-6 py-3 text-base font-medium text-primary-700 dark:text-sand-200 hover:bg-sand-50 dark:hover:bg-primary-700"
+                  className="inline-flex w-full items-center justify-center rounded-lg border border-primary-300 px-6 py-3 text-base font-medium text-primary-700 hover:bg-sand-50"
                 >
                   Create Account
                 </Link>

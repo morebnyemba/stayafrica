@@ -58,14 +58,14 @@ export function PropertyHostCard({ host, propertyId }: PropertyHostCardProps) {
               className="w-16 h-16 rounded-full object-cover"
             />
           ) : (
-            <div className="w-16 h-16 rounded-full bg-primary-800 dark:bg-primary-600 flex items-center justify-center">
+            <div className="w-16 h-16 rounded-full bg-primary-800 flex items-center justify-center">
               <span className="text-white text-xl font-semibold">
                 {host.first_name?.[0] || 'H'}
               </span>
             </div>
           )}
           {host.is_verified && (
-            <div className="absolute -bottom-1 -right-1 bg-white dark:bg-primary-900 rounded-full p-0.5">
+            <div className="absolute -bottom-1 -right-1 bg-white rounded-full p-0.5">
               <CheckCircle className="w-5 h-5 text-rose-500" />
             </div>
           )}
@@ -73,12 +73,12 @@ export function PropertyHostCard({ host, propertyId }: PropertyHostCardProps) {
 
         {/* Info */}
         <div className="flex-1 min-w-0">
-          <h2 className="text-xl font-semibold text-primary-900 dark:text-sand-50">
+          <h2 className="text-xl font-semibold text-primary-900">
             Hosted by {host.first_name}
           </h2>
-          <p className="text-sm text-primary-500 dark:text-sand-400 mt-0.5">
+          <p className="text-sm text-primary-500 mt-0.5">
             {host.is_online ? (
-              <span className="text-green-600 dark:text-green-400">Online now</span>
+              <span className="text-green-600">Online now</span>
             ) : host.last_seen ? (
               `Active ${formatDistanceToNow(new Date(host.last_seen), { addSuffix: true })}`
             ) : (
@@ -92,29 +92,29 @@ export function PropertyHostCard({ host, propertyId }: PropertyHostCardProps) {
       <div className="flex items-center gap-6 mt-4 mb-4">
         {host.average_rating !== undefined && host.average_rating > 0 && (
           <div className="flex items-center gap-1.5">
-            <Star className="w-4 h-4 fill-primary-900 dark:fill-sand-50 text-primary-900 dark:text-sand-50" />
-            <span className="font-semibold text-sm text-primary-900 dark:text-sand-50">
+            <Star className="w-4 h-4 fill-primary-900 text-primary-900" />
+            <span className="font-semibold text-sm text-primary-900">
               {host.average_rating.toFixed(1)}
             </span>
-            <span className="text-sm text-primary-500 dark:text-sand-400">rating</span>
+            <span className="text-sm text-primary-500">rating</span>
           </div>
         )}
         {host.total_listings !== undefined && host.total_listings > 0 && (
           <div className="text-sm">
-            <span className="font-semibold text-primary-900 dark:text-sand-50">{host.total_listings}</span>
-            <span className="text-primary-500 dark:text-sand-400"> listing{host.total_listings !== 1 ? 's' : ''}</span>
+            <span className="font-semibold text-primary-900">{host.total_listings}</span>
+            <span className="text-primary-500"> listing{host.total_listings !== 1 ? 's' : ''}</span>
           </div>
         )}
         {host.response_rate !== undefined && (
           <div className="text-sm">
-            <span className="font-semibold text-primary-900 dark:text-sand-50">{host.response_rate}%</span>
-            <span className="text-primary-500 dark:text-sand-400"> response rate</span>
+            <span className="font-semibold text-primary-900">{host.response_rate}%</span>
+            <span className="text-primary-500"> response rate</span>
           </div>
         )}
       </div>
 
       {host.response_time && (
-        <p className="text-sm text-primary-600 dark:text-sand-300 mb-4">
+        <p className="text-sm text-primary-600 mb-4">
           Typically responds within {host.response_time}
         </p>
       )}
@@ -122,16 +122,16 @@ export function PropertyHostCard({ host, propertyId }: PropertyHostCardProps) {
       {/* Contact Button */}
       <button
         onClick={handleContactClick}
-        className="inline-flex items-center justify-center gap-2 px-6 py-3 border border-primary-900 dark:border-sand-50 rounded-lg text-primary-900 dark:text-sand-50 font-semibold text-sm hover:bg-sand-50 dark:hover:bg-primary-800 transition"
+        className="inline-flex items-center justify-center gap-2 px-6 py-3 border border-primary-900 rounded-lg text-primary-900 font-semibold text-sm hover:bg-sand-50 transition"
       >
         <MessageCircle className="w-4 h-4" />
         Contact Host
       </button>
 
       {/* Safety note */}
-      <div className="flex items-start gap-3 mt-5 pt-4 border-t border-primary-200 dark:border-primary-700">
-        <Shield className="w-5 h-5 text-primary-500 dark:text-sand-400 flex-shrink-0 mt-0.5" />
-        <p className="text-xs text-primary-500 dark:text-sand-400 leading-relaxed">
+      <div className="flex items-start gap-3 mt-5 pt-4 border-t border-primary-200">
+        <Shield className="w-5 h-5 text-primary-500 flex-shrink-0 mt-0.5" />
+        <p className="text-xs text-primary-500 leading-relaxed">
           To protect your payment, never transfer money or communicate outside of the StayAfrica website or app.
         </p>
       </div>

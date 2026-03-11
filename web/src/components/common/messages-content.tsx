@@ -169,28 +169,28 @@ export function MessagesContent() {
 
   return (
     <ProtectedRoute>
-      <div className="h-[100dvh] bg-sand-100 dark:bg-primary-900 flex flex-col">
+      <div className="h-[100dvh] bg-sand-100 flex flex-col">
         <div className="flex-1 flex overflow-hidden">
           {/* Conversations List */}
-          <div className={`${selectedConversation ? 'hidden md:flex' : 'flex'} w-full md:w-80 lg:w-96 bg-white dark:bg-primary-800 border-r border-primary-200 dark:border-primary-700 flex-col`}>
+          <div className={`${selectedConversation ? 'hidden md:flex' : 'flex'} w-full md:w-80 lg:w-96 bg-white border-r border-primary-200 flex-col`}>
             {/* Header */}
-            <div className="p-4 border-b border-primary-200 dark:border-primary-700">
-              <h1 className="text-2xl font-bold text-primary-900 dark:text-sand-50 mb-3">Messages</h1>
+            <div className="p-4 border-b border-primary-200">
+              <h1 className="text-2xl font-bold text-primary-900 mb-3">Messages</h1>
               {unreadData?.unread_count > 0 && (
-                <div className="mb-3 px-3 py-2 bg-primary-100 dark:bg-primary-700 rounded-lg text-sm">
-                  <span className="font-semibold text-primary-900 dark:text-sand-50">
+                <div className="mb-3 px-3 py-2 bg-primary-100 rounded-lg text-sm">
+                  <span className="font-semibold text-primary-900">
                     {unreadData.unread_count} unread {unreadData.unread_count === 1 ? 'message' : 'messages'}
                   </span>
                 </div>
               )}
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-primary-400 dark:text-sand-500" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-primary-400" />
                 <input
                   type="text"
                   placeholder="Search conversations..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-white dark:bg-primary-900 text-primary-900 dark:text-sand-50 focus:ring-2 focus:ring-secondary-500 focus:border-secondary-500"
+                  className="w-full pl-10 pr-4 py-2 border border-primary-300 rounded-lg bg-white text-primary-900 focus:ring-2 focus:ring-secondary-500 focus:border-secondary-500"
                 />
               </div>
             </div>
@@ -200,13 +200,13 @@ export function MessagesContent() {
               {conversationsLoading ? (
                 <div className="p-4 space-y-3">
                   {[1, 2, 3].map(i => (
-                    <div key={i} className="animate-pulse h-20 bg-primary-100 dark:bg-primary-700 rounded-lg"></div>
+                    <div key={i} className="animate-pulse h-20 bg-primary-100 rounded-lg"></div>
                   ))}
                 </div>
               ) : filteredConversations.length === 0 ? (
                 <div className="p-8 text-center">
-                  <MessageSquare className="w-12 h-12 text-primary-400 dark:text-sand-500 mx-auto mb-3" />
-                  <p className="text-primary-600 dark:text-sand-400">
+                  <MessageSquare className="w-12 h-12 text-primary-400 mx-auto mb-3" />
+                  <p className="text-primary-600">
                     {searchQuery ? 'No conversations found' : 'No messages yet'}
                   </p>
                 </div>
@@ -217,8 +217,8 @@ export function MessagesContent() {
                       key={conv.id}
                       onClick={() => setSelectedConversation(conv)}
                       className={`w-full p-3 rounded-lg mb-2 text-left transition ${selectedConversation?.id === conv.id
-                        ? 'bg-primary-100 dark:bg-primary-700'
-                        : 'hover:bg-primary-50 dark:hover:bg-primary-800'
+                        ? 'bg-primary-100'
+                        : 'hover:bg-primary-50'
                         }`}
                     >
                       <div className="flex items-start gap-3">
@@ -227,7 +227,7 @@ export function MessagesContent() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between mb-1">
-                            <span className="font-semibold text-primary-900 dark:text-sand-50 truncate">
+                            <span className="font-semibold text-primary-900 truncate">
                               {conv.other_participant?.name || 'Unknown'}
                             </span>
                             {conv.unread_count > 0 && (
@@ -237,14 +237,14 @@ export function MessagesContent() {
                             )}
                           </div>
                           {conv.subject && (
-                            <div className="text-sm text-primary-600 dark:text-sand-400 mb-1 truncate">
+                            <div className="text-sm text-primary-600 mb-1 truncate">
                               {conv.subject}
                             </div>
                           )}
-                          <div className="text-sm text-primary-500 dark:text-sand-500 truncate">
+                          <div className="text-sm text-primary-500 truncate">
                             {conv.last_message?.text || 'No messages yet'}
                           </div>
-                          <div className="text-xs text-primary-400 dark:text-sand-600 mt-1">
+                          <div className="text-xs text-primary-400 mt-1">
                             {conv.updated_at && new Date(conv.updated_at).toLocaleDateString()}
                           </div>
                         </div>
@@ -257,29 +257,29 @@ export function MessagesContent() {
           </div>
 
           {/* Messages Panel */}
-          <div className={`${selectedConversation ? 'flex' : 'hidden md:flex'} flex-1 flex-col bg-white dark:bg-primary-800`}>
+          <div className={`${selectedConversation ? 'flex' : 'hidden md:flex'} flex-1 flex-col bg-white`}>
             {selectedConversation ? (
               <>
                 {/* Conversation Header */}
-                <div className="p-4 border-b border-primary-200 dark:border-primary-700 flex items-center justify-between">
+                <div className="p-4 border-b border-primary-200 flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     {/* Back button for mobile */}
                     <button
                       onClick={() => setSelectedConversation(null)}
-                      className="md:hidden p-2 hover:bg-primary-100 dark:hover:bg-primary-700 rounded-lg transition"
+                      className="md:hidden p-2 hover:bg-primary-100 rounded-lg transition"
                       title="Back to conversations"
                     >
-                      <ArrowLeft className="w-5 h-5 text-primary-600 dark:text-sand-400" />
+                      <ArrowLeft className="w-5 h-5 text-primary-600" />
                     </button>
                     <div className="w-10 h-10 rounded-full bg-secondary-500 text-white flex items-center justify-center font-semibold">
                       {selectedConversation.other_participant?.name?.[0]?.toUpperCase() || '?'}
                     </div>
                     <div>
-                      <h2 className="font-semibold text-primary-900 dark:text-sand-50">
+                      <h2 className="font-semibold text-primary-900">
                         {selectedConversation.other_participant?.name || 'Unknown'}
                       </h2>
                       {selectedConversation.subject && (
-                        <p className="text-sm text-primary-600 dark:text-sand-400">
+                        <p className="text-sm text-primary-600">
                           {selectedConversation.subject}
                         </p>
                       )}
@@ -334,38 +334,38 @@ export function MessagesContent() {
                     })()}
                     <button
                       onClick={() => archiveMutation.mutate(selectedConversation.id)}
-                      className="p-2 hover:bg-primary-100 dark:hover:bg-primary-700 rounded-lg transition"
+                      className="p-2 hover:bg-primary-100 rounded-lg transition"
                       title="Archive conversation"
                     >
-                      <Archive className="w-5 h-5 text-primary-600 dark:text-sand-400" />
+                      <Archive className="w-5 h-5 text-primary-600" />
                     </button>
                     {/* Action Menu */}
                     <div className="relative">
                       <button
                         onClick={() => setShowActionMenu(!showActionMenu)}
-                        className="p-2 hover:bg-primary-100 dark:hover:bg-primary-700 rounded-lg transition"
+                        className="p-2 hover:bg-primary-100 rounded-lg transition"
                         title="More actions"
                       >
-                        <MoreVertical className="w-5 h-5 text-primary-600 dark:text-sand-400" />
+                        <MoreVertical className="w-5 h-5 text-primary-600" />
                       </button>
                       {showActionMenu && (
-                        <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-primary-800 rounded-lg shadow-lg border border-primary-200 dark:border-primary-700 z-50">
+                        <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-primary-200 z-50">
                           <div className="py-1">
                             <button
                               onClick={() => { setShowActionMenu(false); toast.success('User reported to moderation team.'); }}
-                              className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-primary-50 dark:hover:bg-primary-700 flex items-center gap-2"
+                              className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-primary-50 flex items-center gap-2"
                             >
                               <Flag className="w-4 h-4" /> Report user
                             </button>
                             <button
                               onClick={() => { setShowActionMenu(false); toast.success('User blocked successfully.'); }}
-                              className="w-full text-left px-4 py-2 text-sm text-primary-700 dark:text-sand-300 hover:bg-primary-50 dark:hover:bg-primary-700 flex items-center gap-2"
+                              className="w-full text-left px-4 py-2 text-sm text-primary-700 hover:bg-primary-50 flex items-center gap-2"
                             >
                               <Ban className="w-4 h-4" /> Block user
                             </button>
                             <button
                               onClick={() => { setShowActionMenu(false); toast.success('Conversation muted.'); }}
-                              className="w-full text-left px-4 py-2 text-sm text-primary-700 dark:text-sand-300 hover:bg-primary-50 dark:hover:bg-primary-700 flex items-center gap-2"
+                              className="w-full text-left px-4 py-2 text-sm text-primary-700 hover:bg-primary-50 flex items-center gap-2"
                             >
                               <BellOff className="w-4 h-4" /> Mute conversation
                             </button>
@@ -377,25 +377,25 @@ export function MessagesContent() {
                 </div>
 
                 {/* Safety Banner */}
-                <div className="bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-800 p-3 flex items-start gap-3">
-                  <ShieldAlert className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
-                  <p className="text-sm text-amber-800 dark:text-amber-300 leading-relaxed">
+                <div className="bg-amber-50 border-b border-amber-200 p-3 flex items-start gap-3">
+                  <ShieldAlert className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                  <p className="text-sm text-amber-800 leading-relaxed">
                     <strong>For your safety</strong>, please keep all communication and payments directly on the StayAfrica platform. Be wary of requests to pay via alternative methods.
                   </p>
                 </div>
 
                 {/* Messages */}
-                <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gradient-to-b from-primary-50 to-white dark:from-primary-900 dark:to-primary-800">
+                <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gradient-to-b from-primary-50 to-white">
                   {messagesLoading ? (
                     <div className="space-y-3">
                       {[1, 2, 3].map(i => (
-                        <div key={i} className="animate-pulse h-16 bg-primary-100 dark:bg-primary-700 rounded-lg max-w-md"></div>
+                        <div key={i} className="animate-pulse h-16 bg-primary-100 rounded-lg max-w-md"></div>
                       ))}
                     </div>
                   ) : messages.length === 0 ? (
                     <div className="text-center py-12">
-                      <MessageSquare className="w-12 h-12 text-primary-400 dark:text-sand-500 mx-auto mb-3" />
-                      <p className="text-primary-600 dark:text-sand-400">No messages yet. Start the conversation!</p>
+                      <MessageSquare className="w-12 h-12 text-primary-400 mx-auto mb-3" />
+                      <p className="text-primary-600">No messages yet. Start the conversation!</p>
                     </div>
                   ) : (
                     <>
@@ -421,7 +421,7 @@ export function MessagesContent() {
                           <div key={message.id}>
                             {isNewDay && (
                               <div className="flex justify-center my-4">
-                                <span className="text-xs text-primary-500 dark:text-sand-600 bg-white dark:bg-primary-700 px-3 py-1 rounded-full">
+                                <span className="text-xs text-primary-500 bg-white px-3 py-1 rounded-full">
                                   {messageTime.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' })}
                                 </span>
                               </div>
@@ -443,8 +443,8 @@ export function MessagesContent() {
                                 {/* Sender name - shown when conversation starts or user changes */}
                                 {showSenderInfo && (
                                   <span className={`text-xs font-semibold mb-1 ${isOwnMessage
-                                    ? 'text-primary-700 dark:text-sand-300'
-                                    : 'text-primary-600 dark:text-sand-400'
+                                    ? 'text-primary-700'
+                                    : 'text-primary-600'
                                     }`}>
                                     {senderName}
                                   </span>
@@ -455,7 +455,7 @@ export function MessagesContent() {
                                   <div className={`mb-2 p-2.5 rounded-lg text-xs w-full shadow-sm border ${
                                     isOwnMessage 
                                       ? 'bg-secondary-700 text-white border-secondary-600' 
-                                      : 'bg-white dark:bg-primary-800 text-primary-700 dark:text-sand-300 border-primary-200 dark:border-primary-700'
+                                      : 'bg-white text-primary-700 border-primary-200'
                                   }`}>
                                     <div className="flex items-center gap-2 mb-1.5 font-medium border-b border-white/20 pb-1.5">
                                       <Calendar className="w-3.5 h-3.5" />
@@ -480,18 +480,18 @@ export function MessagesContent() {
 
                                 {/* Message Bubble */}
                                 {isEditing ? (
-                                  <div className="bg-white dark:bg-primary-900 border-2 border-secondary-500 rounded-2xl p-3 w-full">
+                                  <div className="bg-white border-2 border-secondary-500 rounded-2xl p-3 w-full">
                                     <textarea
                                       value={editText}
                                       onChange={(e) => setEditText(e.target.value)}
-                                      className="w-full px-3 py-2 border border-primary-300 dark:border-primary-600 rounded bg-white dark:bg-primary-800 text-primary-900 dark:text-sand-50 focus:ring-2 focus:ring-secondary-500 focus:border-secondary-500 resize-none"
+                                      className="w-full px-3 py-2 border border-primary-300 rounded bg-white text-primary-900 focus:ring-2 focus:ring-secondary-500 focus:border-secondary-500 resize-none"
                                       rows={2}
                                       autoFocus
                                     />
                                     <div className="flex gap-2 mt-2 justify-end">
                                       <button
                                         onClick={handleCancelEdit}
-                                        className="p-2 hover:bg-primary-100 dark:hover:bg-primary-700 rounded transition"
+                                        className="p-2 hover:bg-primary-100 rounded transition"
                                       >
                                         <X className="w-4 h-4" />
                                       </button>
@@ -509,7 +509,7 @@ export function MessagesContent() {
                                     <div
                                       className={`px-4 py-2 rounded-2xl shadow-sm transition-shadow ${isOwnMessage
                                         ? 'bg-secondary-600 text-white rounded-br-sm'
-                                        : 'bg-primary-100 dark:bg-primary-700 text-primary-900 dark:text-sand-50 rounded-bl-sm'
+                                        : 'bg-primary-100 text-primary-900 rounded-bl-sm'
                                         }`}
                                     >
                                       <p className="whitespace-pre-wrap break-words">{message.text}</p>
@@ -520,8 +520,8 @@ export function MessagesContent() {
 
                                     {/* Time and Actions */}
                                     <div className={`flex items-center gap-2 mt-1.5 text-xs ${isOwnMessage
-                                      ? 'text-primary-600 dark:text-sand-500 flex-row-reverse'
-                                      : 'text-primary-500 dark:text-sand-600'
+                                      ? 'text-primary-600 flex-row-reverse'
+                                      : 'text-primary-500'
                                       }`}>
                                       <span>
                                         {messageTime.toLocaleTimeString([], {
@@ -565,14 +565,14 @@ export function MessagesContent() {
                 </div>
 
                 {/* Message Input */}
-                <form onSubmit={handleSendMessage} className="p-3 sm:p-4 border-t border-primary-200 dark:border-primary-700">
+                <form onSubmit={handleSendMessage} className="p-3 sm:p-4 border-t border-primary-200">
                   <div className="flex gap-2">
                     <input
                       type="text"
                       value={messageText}
                       onChange={(e) => setMessageText(e.target.value)}
                       placeholder="Type a message..."
-                      className="flex-1 px-3 sm:px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg bg-white dark:bg-primary-900 text-primary-900 dark:text-sand-50 focus:ring-2 focus:ring-secondary-500 focus:border-secondary-500 text-sm sm:text-base"
+                      className="flex-1 px-3 sm:px-4 py-2 border border-primary-300 rounded-lg bg-white text-primary-900 focus:ring-2 focus:ring-secondary-500 focus:border-secondary-500 text-sm sm:text-base"
                     />
                     <button
                       type="submit"
@@ -588,11 +588,11 @@ export function MessagesContent() {
             ) : (
               <div className="flex-1 flex items-center justify-center">
                 <div className="text-center">
-                  <MessageSquare className="w-16 h-16 text-primary-400 dark:text-sand-500 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-primary-900 dark:text-sand-50 mb-2">
+                  <MessageSquare className="w-16 h-16 text-primary-400 mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold text-primary-900 mb-2">
                     Select a conversation
                   </h3>
-                  <p className="text-primary-600 dark:text-sand-400">
+                  <p className="text-primary-600">
                     Choose a conversation from the list to start messaging
                   </p>
                 </div>

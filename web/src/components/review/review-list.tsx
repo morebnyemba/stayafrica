@@ -86,7 +86,7 @@ export function ReviewList({ propertyId, reviews, averageRating, totalReviews }:
             className={`w-4 h-4 ${
               star <= rating
                 ? 'fill-secondary-500 text-secondary-500'
-                : 'text-primary-300 dark:text-primary-600'
+                : 'text-primary-300'
             }`}
           />
         ))}
@@ -101,18 +101,18 @@ export function ReviewList({ propertyId, reviews, averageRating, totalReviews }:
         <div className="card p-6 mb-6">
           <div className="flex items-center gap-4">
             <div className="text-center">
-              <div className="text-4xl font-bold text-primary-900 dark:text-sand-50">
+              <div className="text-4xl font-bold text-primary-900">
                 {averageRating.toFixed(1)}
               </div>
               <div className="flex items-center gap-1 mt-2">
                 {renderStars(Math.round(averageRating))}
               </div>
             </div>
-            <div className="flex-1 border-l border-primary-200 dark:border-primary-700 pl-4">
-              <p className="text-lg font-semibold text-primary-900 dark:text-sand-50">
+            <div className="flex-1 border-l border-primary-200 pl-4">
+              <p className="text-lg font-semibold text-primary-900">
                 {totalReviews} {totalReviews === 1 ? 'Review' : 'Reviews'}
               </p>
-              <p className="text-sm text-primary-600 dark:text-sand-400">
+              <p className="text-sm text-primary-600">
                 Based on verified bookings
               </p>
             </div>
@@ -123,11 +123,11 @@ export function ReviewList({ propertyId, reviews, averageRating, totalReviews }:
       {/* Reviews list */}
       {reviews.length === 0 ? (
         <div className="card p-12 text-center">
-          <MessageSquare className="w-12 h-12 text-primary-400 dark:text-sand-500 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-primary-900 dark:text-sand-50 mb-2">
+          <MessageSquare className="w-12 h-12 text-primary-400 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-primary-900 mb-2">
             No Reviews Yet
           </h3>
-          <p className="text-primary-600 dark:text-sand-300">
+          <p className="text-primary-600">
             Be the first to book and leave a review!
           </p>
         </div>
@@ -139,12 +139,12 @@ export function ReviewList({ propertyId, reviews, averageRating, totalReviews }:
               <div className="flex items-start justify-between mb-3">
                 <div>
                   <div className="flex items-center gap-3 mb-2">
-                    <span className="font-semibold text-primary-900 dark:text-sand-50">
+                    <span className="font-semibold text-primary-900">
                       {review.guest_name}
                     </span>
                     {renderStars(review.rating)}
                   </div>
-                  <time className="text-sm text-primary-600 dark:text-sand-400">
+                  <time className="text-sm text-primary-600">
                     {new Date(review.created_at).toLocaleDateString('en-US', {
                       year: 'numeric',
                       month: 'long',
@@ -155,19 +155,19 @@ export function ReviewList({ propertyId, reviews, averageRating, totalReviews }:
               </div>
 
               {/* Review text */}
-              <p className="text-primary-900 dark:text-sand-100 mb-4">{review.text}</p>
+              <p className="text-primary-900 mb-4">{review.text}</p>
 
               {/* Host response */}
               {review.host_response && (
-                <div className="mt-4 pl-4 border-l-2 border-secondary-500 bg-sand-50 dark:bg-primary-800 p-4 rounded-r">
-                  <p className="text-sm font-semibold text-primary-900 dark:text-sand-50 mb-1">
+                <div className="mt-4 pl-4 border-l-2 border-secondary-500 bg-sand-50 p-4 rounded-r">
+                  <p className="text-sm font-semibold text-primary-900 mb-1">
                     Response from host
                   </p>
-                  <p className="text-sm text-primary-700 dark:text-sand-300 mb-2">
+                  <p className="text-sm text-primary-700 mb-2">
                     {review.host_response}
                   </p>
                   {review.host_response_date && (
-                    <time className="text-xs text-primary-600 dark:text-sand-400">
+                    <time className="text-xs text-primary-600">
                       {new Date(review.host_response_date).toLocaleDateString()}
                     </time>
                   )}
@@ -175,11 +175,11 @@ export function ReviewList({ propertyId, reviews, averageRating, totalReviews }:
               )}
 
               {/* Actions */}
-              <div className="mt-4 flex items-center gap-4 pt-4 border-t border-primary-200 dark:border-primary-700">
+              <div className="mt-4 flex items-center gap-4 pt-4 border-t border-primary-200">
                 <button
                   onClick={() => handleVote(review.id)}
                   disabled={voteMutation.isPending || !isAuthenticated}
-                  className="flex items-center gap-2 text-sm text-primary-600 dark:text-sand-400 hover:text-primary-900 dark:hover:text-sand-50 transition-colors disabled:opacity-50"
+                  className="flex items-center gap-2 text-sm text-primary-600 hover:text-primary-900 transition-colors disabled:opacity-50"
                 >
                   <ThumbsUp className="w-4 h-4" />
                   <span>Helpful ({review.helpful_count})</span>
@@ -189,7 +189,7 @@ export function ReviewList({ propertyId, reviews, averageRating, totalReviews }:
                 {isAuthenticated && user?.role === 'host' && !review.host_response && (
                   <button
                     onClick={() => setRespondingTo(respondingTo === review.id ? null : review.id)}
-                    className="flex items-center gap-2 text-sm text-primary-600 dark:text-sand-400 hover:text-primary-900 dark:hover:text-sand-50 transition-colors"
+                    className="flex items-center gap-2 text-sm text-primary-600 hover:text-primary-900 transition-colors"
                   >
                     <MessageSquare className="w-4 h-4" />
                     <span>Respond</span>
@@ -205,7 +205,7 @@ export function ReviewList({ propertyId, reviews, averageRating, totalReviews }:
                     onChange={(e) => setResponseText(e.target.value)}
                     placeholder="Write your response..."
                     rows={3}
-                    className="w-full px-3 py-2 border border-primary-200 dark:border-primary-600 rounded-lg bg-sand-50 dark:bg-primary-700 text-primary-900 dark:text-sand-100 focus:ring-2 focus:ring-secondary-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-primary-200 rounded-lg bg-sand-50 text-primary-900 focus:ring-2 focus:ring-secondary-500 focus:border-transparent"
                   />
                   <div className="flex gap-2">
                     <Button

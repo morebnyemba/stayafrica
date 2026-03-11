@@ -90,18 +90,18 @@ export const QuickRepliesManager = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <Loader2 className="h-8 w-8 animate-spin text-primary-300 dark:text-primary-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary-300" />
       </div>
     );
   }
 
   return (
-    <div className="bg-white dark:bg-primary-800/40 rounded-lg shadow-sm border">
+    <div className="bg-white rounded-lg shadow-sm border">
       <div className="p-6 border-b">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-semibold text-primary-900 dark:text-sand-50">Quick Replies</h2>
-            <p className="text-sm text-primary-500 dark:text-sand-400 mt-1">
+            <h2 className="text-xl font-semibold text-primary-900">Quick Replies</h2>
+            <p className="text-sm text-primary-500 mt-1">
               Create shortcut responses for faster guest communication
             </p>
           </div>
@@ -120,10 +120,10 @@ export const QuickRepliesManager = () => {
 
       <div className="p-6 space-y-4">
         {isAdding && (
-          <form onSubmit={handleSubmit} className="border rounded-lg p-4 bg-sand-50 dark:bg-primary-900 space-y-4">
+          <form onSubmit={handleSubmit} className="border rounded-lg p-4 bg-sand-50 space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-primary-700 dark:text-sand-200 mb-2">
+                <label className="block text-sm font-medium text-primary-700 mb-2">
                   Shortcut *
                 </label>
                 <input
@@ -131,16 +131,16 @@ export const QuickRepliesManager = () => {
                   value={formData.shortcut}
                   onChange={(e) => setFormData(prev => ({ ...prev, shortcut: e.target.value }))}
                   placeholder="e.g., /welcome or /wifi"
-                  className="w-full px-3 py-2 border border-primary-300 dark:border-primary-600 rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-primary-300 rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent"
                   required
                 />
-                <p className="text-xs text-primary-400 dark:text-sand-500 mt-1">
+                <p className="text-xs text-primary-400 mt-1">
                   Type this shortcut in chat to insert the message
                 </p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-primary-700 dark:text-sand-200 mb-2">
+                <label className="block text-sm font-medium text-primary-700 mb-2">
                   Category (Optional)
                 </label>
                 <input
@@ -148,13 +148,13 @@ export const QuickRepliesManager = () => {
                   value={formData.category}
                   onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
                   placeholder="e.g., Booking, Support"
-                  className="w-full px-3 py-2 border border-primary-300 dark:border-primary-600 rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-primary-300 rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-primary-700 dark:text-sand-200 mb-2">
+              <label className="block text-sm font-medium text-primary-700 mb-2">
                 Message *
               </label>
               <textarea
@@ -162,7 +162,7 @@ export const QuickRepliesManager = () => {
                 onChange={(e) => setFormData(prev => ({ ...prev, message_text: e.target.value }))}
                 placeholder="Enter your quick reply message..."
                 rows={4}
-                className="w-full px-3 py-2 border border-primary-300 dark:border-primary-600 rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-primary-300 rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent"
                 required
               />
             </div>
@@ -189,7 +189,7 @@ export const QuickRepliesManager = () => {
               <button
                 type="button"
                 onClick={resetForm}
-                className="inline-flex items-center gap-2 px-4 py-2 border border-primary-300 dark:border-primary-600 rounded-lg hover:bg-sand-50 dark:hover:bg-primary-800 transition-colors"
+                className="inline-flex items-center gap-2 px-4 py-2 border border-primary-300 rounded-lg hover:bg-sand-50 transition-colors"
               >
                 <X className="h-4 w-4" />
                 <span>Cancel</span>
@@ -199,13 +199,13 @@ export const QuickRepliesManager = () => {
         )}
 
         {quickReplies.length === 0 ? (
-          <div className="text-center py-12 text-primary-400 dark:text-sand-500">
+          <div className="text-center py-12 text-primary-400">
             <p>No quick replies yet. Create your first one to get started!</p>
           </div>
         ) : (
           <div className="space-y-3">
             {quickReplies.map((reply) => (
-              <div key={reply.id} className="border rounded-lg p-4 hover:bg-sand-50 dark:hover:bg-primary-800 transition-colors">
+              <div key={reply.id} className="border rounded-lg p-4 hover:bg-sand-50 transition-colors">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
@@ -213,17 +213,17 @@ export const QuickRepliesManager = () => {
                         {reply.shortcut}
                       </span>
                       {reply.category && (
-                        <span className="px-2 py-0.5 bg-primary-100 dark:bg-primary-800 text-primary-500 dark:text-sand-400 text-xs rounded">
+                        <span className="px-2 py-0.5 bg-primary-100 text-primary-500 text-xs rounded">
                           {reply.category}
                         </span>
                       )}
                       {reply.use_count > 0 && (
-                        <span className="text-xs text-primary-300 dark:text-primary-500">
+                        <span className="text-xs text-primary-300">
                           Used {reply.use_count} times
                         </span>
                       )}
                     </div>
-                    <p className="text-sm text-primary-500 dark:text-sand-400 whitespace-pre-wrap">
+                    <p className="text-sm text-primary-500 whitespace-pre-wrap">
                       {reply.message_text}
                     </p>
                   </div>

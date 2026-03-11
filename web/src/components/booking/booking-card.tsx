@@ -120,35 +120,35 @@ export function BookingCard({ property }: BookingCardProps) {
   };
 
   return (
-    <div className="bg-white dark:bg-primary-800 rounded-lg border border-primary-200 dark:border-primary-700 p-6 sticky top-24 h-fit">
+    <div className="bg-white rounded-lg border border-primary-200 p-6 sticky top-24 h-fit">
       {/* Price */}
       <div className="mb-6">
         <div className="flex items-baseline space-x-2">
-          <span className="text-3xl font-bold text-primary-900 dark:text-sand-50">
+          <span className="text-3xl font-bold text-primary-900">
             {property.currency} {property.price_per_night}
           </span>
-          <span className="text-primary-600 dark:text-sand-400">per night</span>
+          <span className="text-primary-600">per night</span>
         </div>
       </div>
 
       {/* Rating */}
       {property.average_rating !== undefined && property.average_rating > 0 && (
-        <div className="flex items-center space-x-1 mb-6 pb-6 border-b border-primary-200 dark:border-primary-700">
+        <div className="flex items-center space-x-1 mb-6 pb-6 border-b border-primary-200">
           <Star className="w-4 h-4 fill-secondary-500 text-secondary-500" />
-          <span className="font-semibold text-primary-900 dark:text-sand-50">
+          <span className="font-semibold text-primary-900">
             {property.average_rating.toFixed(1)}
           </span>
         </div>
       )}
 
       {/* Date inputs */}
-      <div className="mb-6 pb-6 border-b border-primary-200 dark:border-primary-700 space-y-3">
+      <div className="mb-6 pb-6 border-b border-primary-200 space-y-3">
         <div>
-          <label className="block text-sm font-medium text-primary-900 dark:text-sand-50 mb-2">
+          <label className="block text-sm font-medium text-primary-900 mb-2">
             Check-in
           </label>
           <div className="relative">
-            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary-400 dark:text-sand-500 z-10 pointer-events-none" />
+            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary-400 z-10 pointer-events-none" />
             <DatePicker
               selected={checkInDate}
               onChange={(date: Date | null) => {
@@ -162,16 +162,16 @@ export function BookingCard({ property }: BookingCardProps) {
               dayClassName={getDayClassName}
               dateFormat="MMM dd, yyyy"
               placeholderText="Add date"
-              className="w-full px-3 py-2 pl-10 border border-primary-200 dark:border-primary-600 rounded-lg bg-sand-50 dark:bg-primary-700 text-primary-900 dark:text-sand-100 focus:ring-2 focus:ring-secondary-500 focus:border-transparent text-sm"
+              className="w-full px-3 py-2 pl-10 border border-primary-200 rounded-lg bg-sand-50 text-primary-900 focus:ring-2 focus:ring-secondary-500 focus:border-transparent text-sm"
             />
           </div>
         </div>
         <div>
-          <label className="block text-sm font-medium text-primary-900 dark:text-sand-50 mb-2">
+          <label className="block text-sm font-medium text-primary-900 mb-2">
             Check-out
           </label>
           <div className="relative">
-            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary-400 dark:text-sand-500 z-10 pointer-events-none" />
+            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary-400 z-10 pointer-events-none" />
             <DatePicker
               selected={checkOutDate}
               onChange={(date: Date | null) => setCheckOutDate(date)}
@@ -181,29 +181,29 @@ export function BookingCard({ property }: BookingCardProps) {
               dateFormat="MMM dd, yyyy"
               placeholderText="Add date"
               disabled={!checkInDate}
-              className={`w-full px-3 py-2 pl-10 border border-primary-200 dark:border-primary-600 rounded-lg bg-sand-50 dark:bg-primary-700 text-primary-900 dark:text-sand-100 focus:ring-2 focus:ring-secondary-500 focus:border-transparent text-sm ${!checkInDate ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`w-full px-3 py-2 pl-10 border border-primary-200 rounded-lg bg-sand-50 text-primary-900 focus:ring-2 focus:ring-secondary-500 focus:border-transparent text-sm ${!checkInDate ? 'opacity-50 cursor-not-allowed' : ''}`}
             />
           </div>
         </div>
         {hasDateConflict && (
-          <p className="text-sm text-red-600 dark:text-red-400">
+          <p className="text-sm text-red-600">
             Some dates in your selection are already booked. Please choose different dates.
           </p>
         )}
         {unavailableDates.size > 0 && (
-          <div className="flex items-center gap-2 text-xs text-primary-500 dark:text-sand-400">
+          <div className="flex items-center gap-2 text-xs text-primary-500">
             <span className="inline-block w-3 h-3 rounded-full bg-red-100 border border-red-300" />
             <span>Already booked</span>
           </div>
         )}
         <div>
-          <label className="block text-sm font-medium text-primary-900 dark:text-sand-50 mb-2">
+          <label className="block text-sm font-medium text-primary-900 mb-2">
             Guests
           </label>
           <select
             value={guests}
             onChange={(e) => setGuests(parseInt(e.target.value))}
-            className="w-full px-3 py-2 border border-primary-200 dark:border-primary-600 rounded-lg bg-sand-50 dark:bg-primary-700 text-primary-900 dark:text-sand-100 focus:ring-2 focus:ring-secondary-500 focus:border-transparent"
+            className="w-full px-3 py-2 border border-primary-200 rounded-lg bg-sand-50 text-primary-900 focus:ring-2 focus:ring-secondary-500 focus:border-transparent"
           >
             {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
               <option key={num} value={num}>
@@ -216,33 +216,33 @@ export function BookingCard({ property }: BookingCardProps) {
 
       {/* Cost breakdown */}
       {nights > 0 && feeConfig && (
-        <div className="mb-6 pb-6 border-b border-primary-200 dark:border-primary-700 space-y-2 text-sm">
-          <div className="flex justify-between text-primary-700 dark:text-sand-200">
+        <div className="mb-6 pb-6 border-b border-primary-200 space-y-2 text-sm">
+          <div className="flex justify-between text-primary-700">
             <span>
               {property.currency} {property.price_per_night} × {nights} {nights === 1 ? 'night' : 'nights'}
             </span>
             <span>{property.currency} {costs.basePrice.toFixed(2)}</span>
           </div>
           {costs.serviceFee > 0 && (
-            <div className="flex justify-between text-primary-700 dark:text-sand-200">
+            <div className="flex justify-between text-primary-700">
               <span>Service fee</span>
               <span>{property.currency} {costs.serviceFee.toFixed(2)}</span>
             </div>
           )}
 
           {costs.individualTaxes?.map((tax, idx) => (
-            <div key={idx} className="flex justify-between text-primary-700 dark:text-sand-200">
+            <div key={idx} className="flex justify-between text-primary-700">
               <span>{tax.name}</span>
               <span>{property.currency} {tax.amount.toFixed(2)}</span>
             </div>
           ))}
           {costs.cleaningFee > 0 && (
-            <div className="flex justify-between text-primary-700 dark:text-sand-200">
+            <div className="flex justify-between text-primary-700">
               <span>Cleaning fee</span>
               <span>{property.currency} {costs.cleaningFee.toFixed(2)}</span>
             </div>
           )}
-          <div className="flex justify-between font-semibold text-primary-900 dark:text-sand-50 pt-2">
+          <div className="flex justify-between font-semibold text-primary-900 pt-2">
             <span>Total</span>
             <span>{property.currency} {costs.total.toFixed(2)}</span>
           </div>
@@ -252,13 +252,13 @@ export function BookingCard({ property }: BookingCardProps) {
       {/* Booking button */}
       <button
         onClick={handleBooking}
-        className="w-full bg-secondary-600 hover:bg-secondary-700 dark:bg-secondary-700 dark:hover:bg-secondary-600 text-white font-medium py-3 px-4 rounded-lg transition mb-4"
+        className="w-full bg-secondary-600 hover:bg-secondary-700 text-white font-medium py-3 px-4 rounded-lg transition mb-4"
       >
         Reserve
       </button>
 
       {/* Info message */}
-      <div className="flex items-start space-x-2 text-xs text-primary-600 dark:text-sand-400">
+      <div className="flex items-start space-x-2 text-xs text-primary-600">
         <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
         <p>You won't be charged yet</p>
       </div>

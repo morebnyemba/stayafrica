@@ -84,11 +84,11 @@ export default function POICategoryFilter({
   };
 
   return (
-    <div className="bg-white dark:bg-primary-800 rounded-lg border dark:border-primary-700 p-4">
+    <div className="bg-white rounded-lg border p-4">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <Filter className="w-5 h-5 text-primary-600 dark:text-sand-400" />
-          <span className="font-semibold text-primary-900 dark:text-sand-50">Filter by category</span>
+          <Filter className="w-5 h-5 text-primary-600" />
+          <span className="font-semibold text-primary-900">Filter by category</span>
         </div>
         {selectedCategories.length > 0 && (
           <button
@@ -111,7 +111,7 @@ export default function POICategoryFilter({
                 px-3 py-1.5 rounded-full text-sm font-medium transition
                 ${isSelected
                   ? 'bg-primary-600 text-white'
-                  : 'bg-sand-100 dark:bg-primary-700 text-primary-700 dark:text-sand-300 hover:bg-sand-200 dark:hover:bg-primary-600'
+                  : 'bg-sand-100 text-primary-700 hover:bg-sand-200'
                 }
               `}
             >
@@ -122,7 +122,7 @@ export default function POICategoryFilter({
       </div>
 
       {selectedCategories.length > 0 && (
-        <p className="text-xs text-primary-600 dark:text-sand-400 mt-3">
+        <p className="text-xs text-primary-600 mt-3">
           Showing {selectedCategories.length} {selectedCategories.length === 1 ? 'category' : 'categories'}
         </p>
       )}

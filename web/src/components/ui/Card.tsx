@@ -16,10 +16,10 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
     <div
       ref={ref}
       className={cn(
-        'rounded-xl bg-white dark:bg-primary-900 transition-all duration-200',
+        'rounded-xl bg-white transition-all duration-200',
         variant === 'default' && 'shadow-card',
-        variant === 'elevated' && 'shadow-lg border border-primary-200 dark:border-primary-700',
-        variant === 'outline' && 'border border-primary-200 dark:border-primary-700 shadow-sm',
+        variant === 'elevated' && 'shadow-lg border border-primary-200',
+        variant === 'outline' && 'border border-primary-200 shadow-sm',
         hoverable && 'cursor-pointer hover:shadow-hover hover:scale-[1.02]',
         className
       )}
@@ -31,7 +31,7 @@ Card.displayName = 'Card';
 
 export const CardHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
-    <div ref={ref} className={cn('border-b border-primary-200 dark:border-primary-700 px-6 py-4', className)} {...props} />
+    <div ref={ref} className={cn('border-b border-primary-200 px-6 py-4', className)} {...props} />
   )
 );
 CardHeader.displayName = 'CardHeader';
@@ -45,7 +45,7 @@ CardBody.displayName = 'CardBody';
 
 export const CardFooter = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
-    <div ref={ref} className={cn('border-t border-primary-200 dark:border-primary-700 px-6 py-4', className)} {...props} />
+    <div ref={ref} className={cn('border-t border-primary-200 px-6 py-4', className)} {...props} />
   )
 );
 CardFooter.displayName = 'CardFooter';

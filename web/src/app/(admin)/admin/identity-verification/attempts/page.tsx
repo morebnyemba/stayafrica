@@ -94,9 +94,9 @@ export default function VerificationAttempts() {
             case 'approved': return 'text-green-600 bg-green-50';
             case 'rejected': return 'text-red-600 bg-red-50';
             case 'pending': return 'text-yellow-600 bg-yellow-50';
-            case 'under_review': return 'text-secondary-600 dark:text-secondary-400 bg-blue-50';
-            case 'expired': return 'text-primary-500 dark:text-sand-400 bg-sand-50 dark:bg-primary-900';
-            default: return 'text-primary-500 dark:text-sand-400 bg-sand-50 dark:bg-primary-900';
+            case 'under_review': return 'text-secondary-600 bg-blue-50';
+            case 'expired': return 'text-primary-500 bg-sand-50';
+            default: return 'text-primary-500 bg-sand-50';
         }
     };
 
@@ -134,7 +134,7 @@ export default function VerificationAttempts() {
 
             <div className="bg-white rounded-lg shadow p-6 mb-6">
                 <div className="w-full relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-primary-300 dark:text-primary-500 w-5 h-5" />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-primary-300 w-5 h-5" />
                     <input
                         type="text"
                         value={search}
@@ -158,7 +158,7 @@ export default function VerificationAttempts() {
                                 <th className="px-6 py-3 text-left text-xs font-medium text-[#122F26] uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-primary-200 dark:divide-primary-700">
+                        <tbody className="divide-y divide-primary-200">
                             {loading ? (
                                 <tr><td colSpan={5} className="px-6 py-4 text-center">Loading...</td></tr>
                             ) : verifications.length === 0 ? (

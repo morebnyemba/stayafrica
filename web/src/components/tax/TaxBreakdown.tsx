@@ -50,7 +50,7 @@ export const TaxBreakdown = ({
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-4">
-        <Loader2 className="h-6 w-6 animate-spin text-primary-300 dark:text-primary-500" />
+        <Loader2 className="h-6 w-6 animate-spin text-primary-300" />
       </div>
     );
   }
@@ -85,50 +85,50 @@ export const TaxBreakdown = ({
 
       <div className="space-y-3">
         <div className="flex justify-between text-base">
-          <span className="text-primary-700 dark:text-sand-200">Subtotal</span>
-          <span className="font-medium text-primary-900 dark:text-sand-50">
+          <span className="text-primary-700">Subtotal</span>
+          <span className="font-medium text-primary-900">
             ${taxData.subtotal.toFixed(2)}
           </span>
         </div>
 
         {taxData.taxes && taxData.taxes.length > 0 && (
           <div className="pt-3 border-t space-y-2">
-            <h4 className="text-sm font-medium text-primary-900 dark:text-sand-50">Taxes & Fees</h4>
+            <h4 className="text-sm font-medium text-primary-900">Taxes & Fees</h4>
             
             {taxData.taxes.map((tax, index) => (
               <div key={index} className="flex justify-between text-sm">
                 <div className="flex flex-col">
-                  <span className="text-primary-700 dark:text-sand-200">
+                  <span className="text-primary-700">
                     {tax.tax_type}
                   </span>
-                  <span className="text-xs text-primary-400 dark:text-sand-500">
+                  <span className="text-xs text-primary-400">
                     {tax.jurisdiction} • {(tax.rate * 100).toFixed(2)}%
                   </span>
                 </div>
-                <span className="text-primary-900 dark:text-sand-50">
+                <span className="text-primary-900">
                   ${tax.amount.toFixed(2)}
                 </span>
               </div>
             ))}
             
             <div className="flex justify-between text-sm pt-2 border-t">
-              <span className="font-medium text-primary-700 dark:text-sand-200">Total Taxes</span>
-              <span className="font-medium text-primary-900 dark:text-sand-50">
+              <span className="font-medium text-primary-700">Total Taxes</span>
+              <span className="font-medium text-primary-900">
                 ${taxData.total_tax.toFixed(2)}
               </span>
             </div>
           </div>
         )}
 
-        <div className="flex justify-between text-lg font-semibold pt-3 border-t-2 border-primary-300 dark:border-primary-600">
-          <span className="text-primary-900 dark:text-sand-50">Total</span>
-          <span className="text-primary-900 dark:text-sand-50">
+        <div className="flex justify-between text-lg font-semibold pt-3 border-t-2 border-primary-300">
+          <span className="text-primary-900">Total</span>
+          <span className="text-primary-900">
             ${taxData.grand_total.toFixed(2)}
           </span>
         </div>
       </div>
 
-      <div className="text-xs text-primary-400 dark:text-sand-500 pt-2">
+      <div className="text-xs text-primary-400 pt-2">
         <p>
           All prices are in USD. Exchange rates and taxes may vary.
         </p>

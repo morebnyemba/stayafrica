@@ -32,52 +32,52 @@ export const InsightsPanel: React.FC<InsightsPanelProps> = ({
     switch (type) {
       case 'success':
         return {
-          bg: 'bg-green-50 dark:bg-green-900/20',
-          border: 'border-green-200 dark:border-green-800',
-          title: 'text-green-900 dark:text-green-100',
-          text: 'text-green-700 dark:text-green-300',
+          bg: 'bg-green-50',
+          border: 'border-green-200',
+          title: 'text-green-900',
+          text: 'text-green-700',
         };
       case 'warning':
         return {
-          bg: 'bg-yellow-50 dark:bg-yellow-900/20',
-          border: 'border-yellow-200 dark:border-yellow-800',
-          title: 'text-yellow-900 dark:text-yellow-100',
-          text: 'text-yellow-700 dark:text-yellow-300',
+          bg: 'bg-yellow-50',
+          border: 'border-yellow-200',
+          title: 'text-yellow-900',
+          text: 'text-yellow-700',
         };
       case 'danger':
         return {
-          bg: 'bg-red-50 dark:bg-red-900/20',
-          border: 'border-red-200 dark:border-red-800',
-          title: 'text-red-900 dark:text-red-100',
-          text: 'text-red-700 dark:text-red-300',
+          bg: 'bg-red-50',
+          border: 'border-red-200',
+          title: 'text-red-900',
+          text: 'text-red-700',
         };
       default:
         return {
-          bg: 'bg-blue-50 dark:bg-blue-900/20',
-          border: 'border-blue-200 dark:border-blue-800',
-          title: 'text-blue-900 dark:text-blue-100',
-          text: 'text-blue-700 dark:text-blue-300',
+          bg: 'bg-blue-50',
+          border: 'border-blue-200',
+          title: 'text-blue-900',
+          text: 'text-blue-700',
         };
     }
   };
 
   if (isLoading) {
     return (
-      <div className={`bg-white dark:bg-primary-800/40 rounded-lg shadow-sm border border-sand-200/50 dark:border-primary-700/50 ${className}`}>
-        <div className="px-6 py-4 border-b border-sand-200/50 dark:border-primary-700/50">
+      <div className={`bg-white rounded-lg shadow-sm border border-sand-200/50 ${className}`}>
+        <div className="px-6 py-4 border-b border-sand-200/50">
           <div className="flex items-center space-x-3">
-            <div className="p-2 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg">
-              <Lightbulb className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
+            <div className="p-2 bg-yellow-100 rounded-lg">
+              <Lightbulb className="h-5 w-5 text-yellow-600" />
             </div>
-            <h3 className="text-lg font-semibold text-primary-900 dark:text-sand-50">Insights & Recommendations</h3>
+            <h3 className="text-lg font-semibold text-primary-900">Insights & Recommendations</h3>
           </div>
         </div>
         <div className="p-6">
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
               <div key={i} className="animate-pulse">
-                <div className="h-4 bg-primary-200 dark:bg-primary-700 rounded w-3/4 mb-2"></div>
-                <div className="h-3 bg-primary-200 dark:bg-primary-700 rounded w-full"></div>
+                <div className="h-4 bg-primary-200 rounded w-3/4 mb-2"></div>
+                <div className="h-3 bg-primary-200 rounded w-full"></div>
               </div>
             ))}
           </div>
@@ -87,16 +87,16 @@ export const InsightsPanel: React.FC<InsightsPanelProps> = ({
   }
 
   return (
-    <div className={`bg-white dark:bg-primary-800/40 rounded-lg shadow-sm border border-sand-200/50 dark:border-primary-700/50 ${className}`}>
+    <div className={`bg-white rounded-lg shadow-sm border border-sand-200/50 ${className}`}>
       {/* Header */}
-      <div className="px-6 py-4 border-b border-sand-200/50 dark:border-primary-700/50">
+      <div className="px-6 py-4 border-b border-sand-200/50">
         <div className="flex items-center space-x-3">
-          <div className="p-2 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg">
-            <Lightbulb className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
+          <div className="p-2 bg-yellow-100 rounded-lg">
+            <Lightbulb className="h-5 w-5 text-yellow-600" />
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-primary-900 dark:text-sand-50">Insights & Recommendations</h3>
-            <p className="text-sm text-primary-500 dark:text-sand-400">
+            <h3 className="text-lg font-semibold text-primary-900">Insights & Recommendations</h3>
+            <p className="text-sm text-primary-500">
               AI-powered insights to improve your performance
             </p>
           </div>
@@ -106,7 +106,7 @@ export const InsightsPanel: React.FC<InsightsPanelProps> = ({
       {/* Content */}
       <div className="p-6">
         {!insights || insights.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12 text-primary-400 dark:text-sand-500">
+          <div className="flex flex-col items-center justify-center py-12 text-primary-400">
             <Lightbulb className="h-12 w-12 mb-3 opacity-50" />
             <p>No insights available at this time</p>
             <p className="text-sm mt-1">Check back after more data is collected</p>
@@ -145,7 +145,7 @@ export const InsightsPanel: React.FC<InsightsPanelProps> = ({
 
                       {/* Recommendation */}
                       {insight.recommendation && (
-                        <div className={`mt-3 p-3 rounded-md bg-white/50 dark:bg-black/20`}>
+                        <div className={`mt-3 p-3 rounded-md bg-white/50`}>
                           <p className={`text-sm font-medium mb-1 flex items-center gap-1.5 ${styles.title}`}>
                             <Lightbulb className="h-4 w-4" /> Recommendation
                           </p>
