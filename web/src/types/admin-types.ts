@@ -11,12 +11,10 @@ export interface AdminStats {
 
 export interface AuditLog {
   id: string;
-  user: {
-    id: string;
-    email: string;
-    first_name: string;
-    last_name: string;
-  } | null;
+  user: number | null;
+  user_email: string | null;
+  user_first_name: string;
+  user_last_name: string;
   action: string;
   content_type: string | null;
   object_id: number | null;

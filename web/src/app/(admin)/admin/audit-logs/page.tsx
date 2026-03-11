@@ -105,9 +105,13 @@ export default function AuditLogsPage() {
                         {log.user ? (
                           <div>
                             <div className="text-sm font-medium text-[#122F26]">
-                              {log.user.first_name} {log.user.last_name}
+                              {log.user_first_name || log.user_last_name
+                                ? `${log.user_first_name} ${log.user_last_name}`.trim()
+                                : log.user_email || `User #${log.user}`}
                             </div>
-                            <div className="text-sm text-primary-400 dark:text-sand-500">{log.user.email}</div>
+                            {log.user_email && (
+                              <div className="text-sm text-primary-400 dark:text-sand-500">{log.user_email}</div>
+                            )}
                           </div>
                         ) : (
                           <span className="text-sm text-primary-400 dark:text-sand-500">System</span>

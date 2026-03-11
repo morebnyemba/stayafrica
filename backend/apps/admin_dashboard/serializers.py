@@ -2,11 +2,13 @@ from rest_framework import serializers
 from apps.admin_dashboard.models import AuditLog, AdminStats, SystemConfiguration
 
 class AuditLogSerializer(serializers.ModelSerializer):
-    user_email = serializers.CharField(source='user.email', read_only=True)
+    user_email = serializers.CharField(source='user.email', read_only=True, default=None)
+    user_first_name = serializers.CharField(source='user.first_name', read_only=True, default='')
+    user_last_name = serializers.CharField(source='user.last_name', read_only=True, default='')
     
     class Meta:
         model = AuditLog
-        fields = ['id', 'user', 'user_email', 'action', 'object_id', 'changes', 'timestamp']
+        fields = ['id', 'user', 'user_email', 'user_first_name', 'user_last_name', 'action', 'object_id', 'changes', 'timestamp']
         read_only_fields = ['id', 'timestamp']
 
 class AdminStatsSerializer(serializers.ModelSerializer):

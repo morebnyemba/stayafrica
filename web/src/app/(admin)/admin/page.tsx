@@ -286,7 +286,9 @@ export default function AdminDashboard() {
                       {log.action?.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}
                     </p>
                     <p className="text-xs text-[#3A5C50]">
-                      {log.user ? `${log.user.first_name} ${log.user.last_name}` : 'System'} • {timeAgo(log.timestamp)}
+                      {log.user_first_name || log.user_last_name
+                        ? `${log.user_first_name} ${log.user_last_name}`.trim()
+                        : log.user_email || 'System'} • {timeAgo(log.timestamp)}
                     </p>
                   </div>
                 </div>
