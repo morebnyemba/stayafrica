@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
 import { adminApi } from '@/lib/admin-api';
 import { IdentityVerification, VerificationStats } from '@/types/admin-types';
 import { CheckCircle, XCircle, Clock, AlertCircle, Eye, Search } from 'lucide-react';
@@ -10,8 +9,6 @@ import VerificationModal from '@/components/admin/VerificationModal';
 import Link from 'next/link';
 
 export default function VerificationAttempts() {
-    const searchParams = useSearchParams();
-    const userIdFilter = searchParams.get('user');
 
     const [verifications, setVerifications] = useState<IdentityVerification[]>([]);
     const [loading, setLoading] = useState(true);
