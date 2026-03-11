@@ -143,6 +143,65 @@ class BookingViewSet(viewsets.ModelViewSet):
         
         logger.info(f"Booking created: {booking.booking_ref} (instant_confirmed={instant_confirmed})")
     
+    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
+    def calculate_total(self, request):
+        """Preview booking price with dynamic pricing rules applied.
+        POST /api/v1/bookings/calculate_total/
+        Body: { rental_property, check_in, check_out, number_of_guests }
+        """
+        from apps.properties.models import Property
+        from services.pricing_service import PricingService
+
+        property_id = request.data.get('rental_property')
+        check_in = request.data.get('check_in')
+        check_out = request.data.get('check_out')
+        guests = request.data.get('number_of_guests', 1)
+
+        if not property_id or not check_in or not check_out:
+            return Response(
+                {'error': 'rental_property, check_in, and check_out are required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            property_obj = Property.objects.get(id=property_id)
+        except Property.DoesNotExist:
+            return Response({'error': 'Property not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            nights = calculate_nights(check_in, check_out)
+            if nights <= 0:
+                return Response({'error': 'Check-out must be after check-in'}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Get dynamic pricing breakdown
+            dynamic = PricingService.calculate_price_for_booking(property_obj, check_in, check_out)
+
+            # Also get the full booking total (with service fee, commission)
+            totals = calculate_booking_total(
+                property_obj.price_per_night, nights,
+                cleaning_fee=getattr(property_obj, 'cleaning_fee', 0) or 0,
+                property_obj=property_obj,
+                check_in=check_in, check_out=check_out
+            )
+
+            return Response({
+                'base_price_per_night': dynamic['base_price_per_night'],
+                'adjusted_price_per_night': dynamic['adjusted_price_per_night'],
+                'nights': nights,
+                'nightly_total': float(totals['nightly_total']),
+                'service_fee': float(totals['service_fee']),
+                'cleaning_fee': float(totals['cleaning_fee']),
+                'taxes': float(totals['taxes']),
+                'grand_total': float(totals['grand_total']),
+                'applied_rules': dynamic['applied_rules'],
+                'fee_breakdown': dynamic.get('fee_breakdown', []),
+                'tax_breakdown': dynamic.get('tax_breakdown', []),
+                'currency': property_obj.currency,
+            })
+        except Exception as e:
+            logger.error(f"Error calculating booking total: {e}")
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
     @action(detail=True, methods=['post'])
     @log_action('approve_booking')
     def approve(self, request, pk=None):

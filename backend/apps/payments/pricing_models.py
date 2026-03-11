@@ -80,11 +80,21 @@ class PricingRule(models.Model):
         return True
     
     def calculate_adjustment(self, base_price):
-        """Calculate the adjusted price"""
+        """Calculate the price adjustment amount.
+        
+        Returns negative values for discount types, positive for surcharges.
+        """
+        DISCOUNT_TYPES = ('length_discount', 'early_bird', 'last_minute')
+        
         if self.adjustment_type == 'percentage':
-            return base_price * (Decimal(str(self.adjustment_value)) / Decimal('100'))
+            adjustment = base_price * (Decimal(str(abs(self.adjustment_value))) / Decimal('100'))
         else:
-            return Decimal(str(self.adjustment_value))
+            adjustment = Decimal(str(abs(self.adjustment_value)))
+        
+        # Discounts subtract from price; surcharges add to price
+        if self.rule_type in DISCOUNT_TYPES:
+            return -adjustment
+        return adjustment
 
 
 class PropertyFee(models.Model):

@@ -146,7 +146,7 @@ export default function DynamicPricingPage() {
     e.preventDefault();
     if (!form.property) { toast.error('Select a property'); return; }
     if (!form.name.trim()) { toast.error('Enter a rule name'); return; }
-    if (!form.adjustment_value || form.adjustment_value <= 0) { toast.error('Adjustment value must be positive'); return; }
+    if (!form.adjustment_value || form.adjustment_value === 0) { toast.error('Adjustment value cannot be zero'); return; }
 
     const payload = { ...form };
     // Clean conditional fields
@@ -268,8 +268,8 @@ export default function DynamicPricingPage() {
                           {rt?.label || rule.rule_type}
                           {' • '}
                           {rule.adjustment_type === 'percentage'
-                            ? `${rule.adjustment_value > 0 ? '+' : ''}${rule.adjustment_value}%`
-                            : `${rule.adjustment_value > 0 ? '+' : ''}$${rule.adjustment_value}`}
+                            ? (['length_discount', 'early_bird', 'last_minute'].includes(rule.rule_type) ? `-${rule.adjustment_value}%` : `+${rule.adjustment_value}%`)
+                            : (['length_discount', 'early_bird', 'last_minute'].includes(rule.rule_type) ? `-$${rule.adjustment_value}` : `+$${rule.adjustment_value}`)}
                           {rule.start_date && rule.end_date && ` • ${rule.start_date} → ${rule.end_date}`}
                           {rule.min_nights && ` • ${rule.min_nights}${rule.max_nights ? `–${rule.max_nights}` : '+'} nights`}
                           {rule.min_days_advance != null && ` • ${rule.min_days_advance}${rule.max_days_advance != null ? `–${rule.max_days_advance}` : '+'} days advance`}
@@ -441,17 +441,23 @@ export default function DynamicPricingPage() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-primary-700 mb-1">
-                    Value {form.adjustment_type === 'percentage' ? '(%)' : '($)'} *
+                    {['length_discount', 'early_bird', 'last_minute'].includes(form.rule_type) ? 'Discount' : 'Increase'}{' '}
+                    {form.adjustment_type === 'percentage' ? '(%)' : '($)'} *
                   </label>
                   <input
                     type="number"
                     step="0.01"
+                    min="0.01"
                     value={form.adjustment_value}
                     onChange={(e) => setForm({ ...form, adjustment_value: parseFloat(e.target.value) || 0 })}
                     className="w-full px-3 py-2 border border-primary-300 rounded-lg text-sm"
                     required
                   />
-                  <p className="text-xs text-primary-500 mt-1">Positive = increase, negative = discount</p>
+                  <p className="text-xs text-primary-500 mt-1">
+                    {['length_discount', 'early_bird', 'last_minute'].includes(form.rule_type)
+                      ? 'Enter the discount amount (e.g. 10 = 10% off)'
+                      : 'Enter the surcharge amount (e.g. 20 = 20% more)'}
+                  </p>
                 </div>
               </div>
 
