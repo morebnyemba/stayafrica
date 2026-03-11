@@ -109,7 +109,7 @@ export function HostDashboard() {
     },
     {
       title: 'Total Earnings',
-      value: `$${analytics?.total_earnings?.toFixed(2) || '0.00'}`,
+      value: new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(analytics?.total_earnings || 0),
       icon: DollarSign,
       color: 'text-green-600',
       bgColor: 'bg-green-100',

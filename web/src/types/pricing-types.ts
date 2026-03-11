@@ -1,34 +1,67 @@
 // Pricing Types for Dynamic Pricing Integration
 
+export type PricingRuleType = 'seasonal' | 'weekend' | 'length_discount' | 'early_bird' | 'last_minute';
+
 export interface PricingRule {
-  id: string;
+  id: number;
+  property: number | string;
   name: string;
-  rule_type: 'seasonal' | 'weekend' | 'length_of_stay' | 'early_bird' | 'last_minute';
+  rule_type: PricingRuleType;
+  is_active: boolean;
+  priority: number;
+  start_date?: string | null;
+  end_date?: string | null;
   adjustment_type: 'percentage' | 'fixed';
   adjustment_value: number;
-  start_date?: string;
-  end_date?: string;
-  min_nights?: number;
-  max_nights?: number;
-  days_before_checkin?: number;
+  min_nights?: number | null;
+  max_nights?: number | null;
+  min_days_advance?: number | null;
+  max_days_advance?: number | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface PricingRuleFormData {
+  property: number | string;
+  name: string;
+  rule_type: PricingRuleType;
   is_active: boolean;
+  priority: number;
+  start_date?: string | null;
+  end_date?: string | null;
+  adjustment_type: 'percentage' | 'fixed';
+  adjustment_value: number;
+  min_nights?: number | null;
+  max_nights?: number | null;
+  min_days_advance?: number | null;
+  max_days_advance?: number | null;
 }
 
 export interface PropertyFee {
-  id: string;
+  id: number;
+  property: number | string;
+  fee_type: 'cleaning' | 'service' | 'pet' | 'extra_guest' | 'resort' | 'parking' | 'linen';
   name: string;
-  fee_type: 'cleaning' | 'service' | 'pet' | 'extra_guest' | 'other';
   amount: number;
-  is_percentage: boolean;
+  charge_type: 'per_booking' | 'per_night' | 'per_guest';
+  is_mandatory: boolean;
   is_active: boolean;
+  applies_after_guests?: number | null;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface PropertyTax {
-  id: string;
+  id: number;
+  property: number | string;
+  tax_type: 'vat' | 'occupancy' | 'tourism' | 'city';
   name: string;
   rate: number;
-  tax_type: 'vat' | 'occupancy' | 'tourism' | 'local';
   is_active: boolean;
+  applies_to_base_price: boolean;
+  applies_to_fees: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface AppliedPricingRule {
