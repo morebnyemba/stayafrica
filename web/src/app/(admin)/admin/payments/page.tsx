@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { adminApi } from '@/lib/admin-api';
 import { Payment } from '@/types';
-import { Eye, RotateCcw } from 'lucide-react';
+import { Eye, RotateCcw, Check, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function PaymentsManagement() {
@@ -24,8 +24,8 @@ export default function PaymentsManagement() {
   const loadPayments = async () => {
     try {
       setLoading(true);
-      const data = await adminApi.getPayments({ 
-        page, 
+      const data = await adminApi.getPayments({
+        page,
         status: statusFilter || undefined,
         per_page: ITEMS_PER_PAGE,
       });
@@ -78,6 +78,28 @@ export default function PaymentsManagement() {
     } catch (err: any) {
       toast.error(err?.response?.data?.detail || 'Failed to process refund');
       console.error(err);
+    }
+  };
+
+  const handleMarkSuccess = async (id: string) => {
+    if (!window.confirm('Manually mark this payment as successful?')) return;
+    try {
+      await adminApi.markPaymentSuccess(id);
+      toast.success('Payment marked as successful');
+      loadPayments();
+    } catch (err: any) {
+      toast.error(err?.response?.data?.detail || 'Failed to mark success');
+    }
+  };
+
+  const handleMarkFailed = async (id: string) => {
+    if (!window.confirm('Manually mark this payment as failed?')) return;
+    try {
+      await adminApi.markPaymentFailed(id);
+      toast.success('Payment marked as failed');
+      loadPayments();
+    } catch (err: any) {
+      toast.error(err?.response?.data?.detail || 'Failed to mark failed');
     }
   };
 
@@ -221,6 +243,24 @@ export default function PaymentsManagement() {
                             >
                               <RotateCcw className="w-5 h-5" />
                             </button>
+                          )}
+                          {payment.status !== 'success' && payment.status !== 'failed' && (
+                            <>
+                              <button
+                                onClick={() => handleMarkSuccess(payment.id)}
+                                className="text-green-600 hover:text-green-900"
+                                title="Mark as Success"
+                              >
+                                <Check className="w-5 h-5" />
+                              </button>
+                              <button
+                                onClick={() => handleMarkFailed(payment.id)}
+                                className="text-orange-600 hover:text-orange-900"
+                                title="Mark as Failed"
+                              >
+                                <X className="w-5 h-5" />
+                              </button>
+                            </>
                           )}
                         </div>
                       </td>

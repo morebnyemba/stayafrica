@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import Modal from './Modal';
-import { User } from '@/types';
+import { User, UserPreference } from '@/types';
 import { adminApi } from '@/lib/admin-api';
-import { 
-  Mail, Phone, MapPin, Calendar, CheckCircle, XCircle, 
-  Shield, User as UserIcon, Briefcase 
+import {
+  Mail, Phone, MapPin, Calendar, CheckCircle, XCircle,
+  Shield, User as UserIcon, Briefcase
 } from 'lucide-react';
 
 interface UserDetailsModalProps {
@@ -17,6 +17,7 @@ interface UserDetailsModalProps {
 
 export default function UserDetailsModal({ isOpen, onClose, userId }: UserDetailsModalProps) {
   const [user, setUser] = useState<User | null>(null);
+  const [preferences, setPreferences] = useState<UserPreference | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -28,8 +29,12 @@ export default function UserDetailsModal({ isOpen, onClose, userId }: UserDetail
   const loadUserDetails = async () => {
     try {
       setLoading(true);
-      const data = await adminApi.getUserById(userId);
+      const [data, prefsData] = await Promise.all([
+        adminApi.getUserById(userId),
+        adminApi.getUserPreferences(userId).catch(() => null)
+      ]);
       setUser(data);
+      setPreferences(prefsData);
     } catch (error) {
       console.error('Error loading user details:', error);
     } finally {
@@ -188,6 +193,42 @@ export default function UserDetailsModal({ isOpen, onClose, userId }: UserDetail
               )}
             </div>
           </div>
+
+          {/* User Preferences */}
+          {preferences && (
+            <div>
+              <h4 className="text-lg font-semibold text-[#122F26] mb-3 flex items-center">
+                <MapPin className="w-5 h-5 mr-2" />
+                User Preferences
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-[#F4F1EA] p-4 rounded-lg">
+                <div>
+                  <p className="text-sm text-primary-400 dark:text-sand-500">Property Types</p>
+                  <p className="text-sm text-[#122F26] font-medium">
+                    {preferences.preferred_property_types?.length ? preferences.preferred_property_types.join(', ') : 'Any'}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-primary-400 dark:text-sand-500">Price Range</p>
+                  <p className="text-sm text-[#122F26] font-medium">
+                    {preferences.preferred_min_price || 0} - {preferences.preferred_max_price || 'Any'}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-primary-400 dark:text-sand-500">Usual Guest Count</p>
+                  <p className="text-sm text-[#122F26] font-medium">
+                    {preferences.usual_guest_count || 1}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-primary-400 dark:text-sand-500">Preferred Countries</p>
+                  <p className="text-sm text-[#122F26] font-medium">
+                    {preferences.preferred_countries?.length ? preferences.preferred_countries.join(', ') : 'Any'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Permissions */}
           {(user.is_staff || user.is_superuser) && (

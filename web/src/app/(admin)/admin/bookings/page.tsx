@@ -5,6 +5,7 @@ import { adminApi } from '@/lib/admin-api';
 import { Booking } from '@/types';
 import { Search, Eye, Calendar, CheckCircle, XCircle, ChevronDown, CheckCheck } from 'lucide-react';
 import toast from 'react-hot-toast';
+import Link from 'next/link';
 import ConfirmDialog from '@/components/admin/ConfirmDialog';
 
 export default function BookingsManagement() {
@@ -384,9 +385,9 @@ export default function BookingsManagement() {
                               <XCircle className="w-5 h-5" />
                             </button>
                           )}
-                          <button className="text-[#D9B168] hover:text-[#c9a158]" title="View details">
+                          <Link href={`/admin/bookings/${booking.id}`} className="text-[#D9B168] hover:text-[#c9a158]" title="View details">
                             <Eye className="w-5 h-5" />
-                          </button>
+                          </Link>
                         </div>
                       </td>
                     </tr>

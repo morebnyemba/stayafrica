@@ -173,8 +173,28 @@ class MessageTemplateViewSet(viewsets.ModelViewSet):
     queryset = MessageTemplate.objects.all()
     
     def get_queryset(self):
-        """Return all active templates"""
+        """Return all active templates or all for admin"""
+        if getattr(self.request.user, 'is_admin_user', False):
+            return MessageTemplate.objects.all()
         return MessageTemplate.objects.filter(is_active=True)
+
+    @action(detail=True, methods=['post'])
+    def activate(self, request, pk=None):
+        if not getattr(request.user, 'is_admin_user', False):
+            return Response({'error': 'Admin only'}, status=status.HTTP_403_FORBIDDEN)
+        template = self.get_object()
+        template.is_active = True
+        template.save()
+        return Response(self.get_serializer(template).data)
+        
+    @action(detail=True, methods=['post'])
+    def deactivate(self, request, pk=None):
+        if not getattr(request.user, 'is_admin_user', False):
+            return Response({'error': 'Admin only'}, status=status.HTTP_403_FORBIDDEN)
+        template = self.get_object()
+        template.is_active = False
+        template.save()
+        return Response(self.get_serializer(template).data)
 
     @action(detail=True, methods=['post'])
     def render(self, request, pk=None):

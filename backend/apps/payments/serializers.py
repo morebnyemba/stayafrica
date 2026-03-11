@@ -1,8 +1,49 @@
 from rest_framework import serializers
 from apps.payments.models import Payment, Wallet, WalletTransaction, Withdrawal, BankAccount, PaymentMethod
+from apps.payments.pricing_models import PricingRule, PropertyFee, PropertyTax, CurrencyExchangeRate
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
+
+class PricingRuleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PricingRule
+        fields = [
+            'id', 'property', 'name', 'rule_type', 'is_active', 'priority',
+            'start_date', 'end_date', 'adjustment_type', 'adjustment_value',
+            'min_nights', 'max_nights', 'min_days_advance', 'max_days_advance',
+            'created_at', 'updated_at'
+        ]
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+class PropertyFeeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PropertyFee
+        fields = [
+            'id', 'property', 'fee_type', 'name', 'amount', 'charge_type',
+            'is_mandatory', 'is_active', 'applies_after_guests',
+            'created_at', 'updated_at'
+        ]
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+class PropertyTaxSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PropertyTax
+        fields = [
+            'id', 'property', 'tax_type', 'name', 'rate', 'is_active',
+            'applies_to_base_price', 'applies_to_fees',
+            'created_at', 'updated_at'
+        ]
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+class CurrencyExchangeRateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CurrencyExchangeRate
+        fields = [
+            'id', 'from_currency', 'to_currency', 'rate', 'is_active', 'last_updated'
+        ]
+        read_only_fields = ['id', 'last_updated']
+
 
 
 class PaymentMethodSerializer(serializers.ModelSerializer):

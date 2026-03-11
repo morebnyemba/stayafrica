@@ -1,6 +1,6 @@
 import { apiClient } from '@/services/api-client';
-import { AdminStats, AuditLog, SystemConfig, IdentityVerification, VerificationStats } from '@/types/admin-types';
-import { User, Property, Booking, Payment } from '@/types';
+import { AdminStats, AuditLog, SystemConfig, IdentityVerification, VerificationStats, VerificationSettings, POICategory, PointOfInterest } from '@/types/admin-types';
+import { User, Property, Booking, Payment, UserPreference, Amenity, PropertyImage } from '@/types';
 
 export const adminApi = {
   // Dashboard Stats - uses actual backend endpoint
@@ -23,6 +23,11 @@ export const adminApi = {
 
   async getUserById(id: string): Promise<User> {
     const response = await apiClient.get(`/users/${id}/`);
+    return response.data;
+  },
+
+  async getUserPreferences(id: string): Promise<UserPreference> {
+    const response = await apiClient.get(`/users/${id}/preferences/`);
     return response.data;
   },
 
@@ -62,6 +67,16 @@ export const adminApi = {
     return response.data;
   },
 
+  async getPropertyById(id: string): Promise<Property> {
+    const response = await apiClient.get(`/properties/${id}/`);
+    return response.data;
+  },
+
+  async updateProperty(id: string, data: Partial<Property>): Promise<Property> {
+    const response = await apiClient.put(`/properties/${id}/`, data);
+    return response.data;
+  },
+
   async approveProperty(id: string): Promise<Property> {
     const response = await apiClient.post(`/properties/${id}/approve/`);
     return response.data;
@@ -84,6 +99,125 @@ export const adminApi = {
 
   async deleteProperty(id: string): Promise<void> {
     await apiClient.delete(`/properties/${id}/`);
+  },
+
+  // Amenities Management
+  async getAmenities(params?: {
+    search?: string;
+    page?: number;
+    per_page?: number;
+  }): Promise<{ results: Amenity[]; count: number }> {
+    // Backend router registers 'amenities' under properties app, which uses /api/v1/amenities/ endpoint
+    const response = await apiClient.get('/amenities/', { params });
+    return response.data;
+  },
+
+  async createAmenity(data: Partial<Amenity>): Promise<Amenity> {
+    const response = await apiClient.post('/amenities/', data);
+    return response.data;
+  },
+
+  async updateAmenity(id: string, data: Partial<Amenity>): Promise<Amenity> {
+    const response = await apiClient.put(`/amenities/${id}/`, data);
+    return response.data;
+  },
+
+  async deleteAmenity(id: string): Promise<void> {
+    await apiClient.delete(`/amenities/${id}/`);
+  },
+
+  // Property Images Global Management
+  async getAllPropertyImages(params?: {
+    property?: string;
+    page?: number;
+    per_page?: number;
+  }): Promise<{ results: PropertyImage[]; count: number }> {
+    const response = await apiClient.get('/property-images/', { params });
+    return response.data;
+  },
+
+  async deletePropertyImage(id: string): Promise<void> {
+    await apiClient.delete(`/property-images/${id}/`);
+  },
+
+  // Saved Properties / Wishlists Global Management
+  async getAllSavedProperties(params?: {
+    search?: string;
+    page?: number;
+    per_page?: number;
+  }): Promise<{ results: any[]; count: number }> {
+    const response = await apiClient.get('/saved-properties/', { params });
+    return response.data;
+  },
+
+  // Global Analytics
+  async getGlobalPropertyAnalytics(params?: {
+    page?: number;
+    per_page?: number;
+  }): Promise<{ results: any[]; count: number }> {
+    const response = await apiClient.get('/global-property-analytics/', { params });
+    return response.data;
+  },
+
+  async getGlobalHostAnalytics(params?: {
+    page?: number;
+    per_page?: number;
+  }): Promise<{ results: any[]; count: number }> {
+    const response = await apiClient.get('/global-host-analytics/', { params });
+    return response.data;
+  },
+
+  // Points of Interest (POIs)
+  async getPOICategories(params?: { search?: string }): Promise<{ results: POICategory[]; count: number }> {
+    const response = await apiClient.get('/poi-categories/', { params });
+    return response.data;
+  },
+
+  async createPOICategory(data: Partial<POICategory>): Promise<POICategory> {
+    const response = await apiClient.post('/poi-categories/', data);
+    return response.data;
+  },
+
+  async updatePOICategory(id: number, data: Partial<POICategory>): Promise<POICategory> {
+    const response = await apiClient.put(`/poi-categories/${id}/`, data);
+    return response.data;
+  },
+
+  async deletePOICategory(id: number): Promise<void> {
+    await apiClient.delete(`/poi-categories/${id}/`);
+  },
+
+  async getPOIs(params?: { search?: string; page?: number; per_page?: number }): Promise<{ results: PointOfInterest[]; count: number }> {
+    const response = await apiClient.get('/pois/', { params });
+    return response.data;
+  },
+
+  async createPOI(data: Partial<PointOfInterest>): Promise<PointOfInterest> {
+    const response = await apiClient.post('/pois/', data);
+    return response.data;
+  },
+
+  async updatePOI(id: string, data: Partial<PointOfInterest>): Promise<PointOfInterest> {
+    const response = await apiClient.put(`/pois/${id}/`, data);
+    return response.data;
+  },
+
+  async deletePOI(id: string): Promise<void> {
+    await apiClient.delete(`/pois/${id}/`);
+  },
+
+  async verifyPOI(id: string): Promise<any> {
+    const response = await apiClient.patch(`/pois/${id}/`, {
+      is_active: true
+    });
+    return response.data;
+  },
+
+  async unverifyPOI(id: string): Promise<any> {
+    const response = await apiClient.patch(`/pois/${id}/`, {
+      is_active: false
+    });
+    return response.data;
   },
 
   // Booking Management - uses regular bookings endpoint
@@ -133,10 +267,22 @@ export const adminApi = {
     return response.data;
   },
 
-  async refundPayment(id: string, amount?: number): Promise<Payment> {
+  async refundPayment(id: string, amount: number): Promise<any> {
     const response = await apiClient.post(`/payments/${id}/refund/`, { amount });
     return response.data;
   },
+
+  async markPaymentSuccess(id: string): Promise<any> {
+    const response = await apiClient.post(`/payments/${id}/mark_success/`);
+    return response.data;
+  },
+
+  async markPaymentFailed(id: string): Promise<any> {
+    const response = await apiClient.post(`/payments/${id}/mark_failed/`);
+    return response.data;
+  },
+
+
 
   // Audit Logs - uses actual backend endpoint
   async getAuditLogs(params?: {
@@ -189,6 +335,15 @@ export const adminApi = {
   },
 
   // Identity Verification / KYC Management
+  async getAllVerifications(params?: {
+    page?: number;
+    per_page?: number;
+    search?: string;
+  }): Promise<{ count: number; results: IdentityVerification[] }> {
+    const response = await apiClient.get('/users/verification/', { params });
+    return response.data;
+  },
+
   async getPendingVerifications(params?: {
     page?: number;
     per_page?: number;
@@ -210,17 +365,122 @@ export const adminApi = {
     return response.data.verification;
   },
 
-  async rejectVerification(id: string | number, reason: string, notes?: string): Promise<IdentityVerification> {
+  async rejectVerification(id: string | number, reason: string, notes: string): Promise<any> {
     const response = await apiClient.post(`/users/verification/${id}/review/`, {
       action: 'reject',
       reason,
-      notes: notes || '',
+      notes,
     });
-    return response.data.verification;
+    return response.data;
+  },
+
+  async getVerificationSettings(): Promise<VerificationSettings> {
+    const response = await apiClient.get('/users/verification-settings/');
+    return response.data;
+  },
+
+  async updateVerificationSettings(data: Partial<VerificationSettings>): Promise<VerificationSettings> {
+    const response = await apiClient.put('/users/verification-settings/1/', data); // PK is ignored by backend
+    return response.data;
   },
 
   async getVerificationStats(): Promise<VerificationStats> {
     const response = await apiClient.get('/users/verification/statistics/');
+    return response.data;
+  },
+
+  // Messaging Management
+  async getConversations(params?: {
+    search?: string;
+    page?: number;
+    per_page?: number;
+    archived?: string;
+  }): Promise<{ results: any[]; count: number }> {
+    const response = await apiClient.get('/messaging/conversations/', { params });
+    return response.data;
+  },
+
+  async getMessages(params?: {
+    search?: string;
+    page?: number;
+    per_page?: number;
+    conversation?: string;
+    message_type?: string;
+    unread?: string;
+  }): Promise<{ results: any[]; count: number }> {
+    const response = await apiClient.get('/messaging/messages/', { params });
+    return response.data;
+  },
+
+  async moderateMessage(id: string): Promise<any> {
+    const response = await apiClient.post(`/messaging/messages/${id}/moderate/`);
+    return response.data;
+  },
+
+  async getMessageTemplates(params?: {
+    search?: string;
+    page?: number;
+    per_page?: number;
+  }): Promise<{ results: any[]; count: number }> {
+    const response = await apiClient.get('/messaging/templates/', { params });
+    return response.data;
+  },
+
+  async createMessageTemplate(data: any): Promise<any> {
+    const response = await apiClient.post('/messaging/templates/', data);
+    return response.data;
+  },
+
+  async updateMessageTemplate(id: string, data: any): Promise<any> {
+    const response = await apiClient.patch(`/messaging/templates/${id}/`, data);
+    return response.data;
+  },
+
+  async deleteMessageTemplate(id: string): Promise<void> {
+    await apiClient.delete(`/messaging/templates/${id}/`);
+  },
+
+  async activateMessageTemplate(id: string): Promise<any> {
+    const response = await apiClient.post(`/messaging/templates/${id}/activate/`);
+    return response.data;
+  },
+
+  async deactivateMessageTemplate(id: string): Promise<any> {
+    const response = await apiClient.post(`/messaging/templates/${id}/deactivate/`);
+    return response.data;
+  },
+
+  // Notifications Management
+  async getNotifications(params?: {
+    search?: string;
+    page?: number;
+    per_page?: number;
+  }): Promise<{ results: any[]; count: number }> {
+    const response = await apiClient.get('/notifications/notifications/', { params });
+    return response.data;
+  },
+
+  async getPushTokens(params?: {
+    search?: string;
+    page?: number;
+    per_page?: number;
+  }): Promise<{ results: any[]; count: number }> {
+    const response = await apiClient.get('/notifications/tokens/', { params });
+    return response.data;
+  },
+
+  async getEmailConfigs(params?: {}): Promise<{ results: any[]; count: number }> {
+    const response = await apiClient.get('/notifications/email-config/', { params });
+    return response.data;
+  },
+
+  async updateEmailConfig(id: string, data: any): Promise<any> {
+    const response = await apiClient.patch(`/notifications/email-config/${id}/`, data);
+    return response.data;
+  },
+
+  async testEmailConnection(id: string): Promise<any> {
+    const response = await apiClient.post(`/notifications/email-config/${id}/test_connection/`);
     return response.data;
   },
 
@@ -297,26 +557,144 @@ export const adminApi = {
   },
 
   async markWithdrawalProcessing(id: string): Promise<any> {
-    const response = await apiClient.patch(`/withdrawals/${id}/`, {
-      status: 'processing'
-    });
+    const response = await apiClient.post(`/withdrawals/${id}/mark_processing/`);
     return response.data;
   },
 
   async markWithdrawalCompleted(id: string, notes?: string): Promise<any> {
-    const response = await apiClient.patch(`/withdrawals/${id}/`, {
-      status: 'completed',
-      admin_notes: notes
-    });
+    const response = await apiClient.post(`/withdrawals/${id}/complete/`, { notes });
     return response.data;
   },
 
   async markWithdrawalFailed(id: string, notes?: string): Promise<any> {
-    const response = await apiClient.patch(`/withdrawals/${id}/`, {
-      status: 'failed',
-      admin_notes: notes
-    });
+    const response = await apiClient.post(`/withdrawals/${id}/fail/`, { reason: notes });
     return response.data;
+  },
+
+  // Bank Accounts Management
+  async getBankAccounts(params?: {
+    search?: string;
+    page?: number;
+    per_page?: number;
+  }): Promise<{ results: any[]; count: number }> {
+    const response = await apiClient.get('/bank-accounts/', { params });
+    return response.data;
+  },
+
+  async markBankAccountPrimary(id: string): Promise<any> {
+    const response = await apiClient.post(`/bank-accounts/${id}/set_primary/`);
+    return response.data;
+  },
+
+  // Payment Methods Management
+  async getPaymentMethods(params?: {
+    search?: string;
+    page?: number;
+    per_page?: number;
+  }): Promise<{ results: any[]; count: number }> {
+    const response = await apiClient.get('/payment-methods/', { params });
+    return response.data;
+  },
+
+  async markPaymentMethodDefault(id: string): Promise<any> {
+    const response = await apiClient.patch(`/payment-methods/${id}/set_default/`);
+    return response.data;
+  },
+
+  // Pricing Rules Management
+  async getPricingRules(params?: {
+    search?: string;
+    page?: number;
+    per_page?: number;
+  }): Promise<{ results: any[]; count: number }> {
+    const response = await apiClient.get('/pricing-rules/', { params });
+    return response.data;
+  },
+
+  async createPricingRule(data: any): Promise<any> {
+    const response = await apiClient.post('/pricing-rules/', data);
+    return response.data;
+  },
+
+  async updatePricingRule(id: string, data: any): Promise<any> {
+    const response = await apiClient.patch(`/pricing-rules/${id}/`, data);
+    return response.data;
+  },
+
+  async deletePricingRule(id: string): Promise<void> {
+    await apiClient.delete(`/pricing-rules/${id}/`);
+  },
+
+  // Property Fees Management
+  async getPropertyFees(params?: {
+    search?: string;
+    page?: number;
+    per_page?: number;
+  }): Promise<{ results: any[]; count: number }> {
+    const response = await apiClient.get('/property-fees/', { params });
+    return response.data;
+  },
+
+  async createPropertyFee(data: any): Promise<any> {
+    const response = await apiClient.post('/property-fees/', data);
+    return response.data;
+  },
+
+  async updatePropertyFee(id: string, data: any): Promise<any> {
+    const response = await apiClient.patch(`/property-fees/${id}/`, data);
+    return response.data;
+  },
+
+  async deletePropertyFee(id: string): Promise<void> {
+    await apiClient.delete(`/property-fees/${id}/`);
+  },
+
+  // Property Taxes Management
+  async getPropertyTaxes(params?: {
+    search?: string;
+    page?: number;
+    per_page?: number;
+  }): Promise<{ results: any[]; count: number }> {
+    const response = await apiClient.get('/property-taxes/', { params });
+    return response.data;
+  },
+
+  async createPropertyTax(data: any): Promise<any> {
+    const response = await apiClient.post('/property-taxes/', data);
+    return response.data;
+  },
+
+  async updatePropertyTax(id: string, data: any): Promise<any> {
+    const response = await apiClient.patch(`/property-taxes/${id}/`, data);
+    return response.data;
+  },
+
+  async deletePropertyTax(id: string): Promise<void> {
+    await apiClient.delete(`/property-taxes/${id}/`);
+  },
+
+  // Currency Exchange Rates Management
+  async getExchangeRates(params?: {
+    search?: string;
+    page?: number;
+    per_page?: number;
+  }): Promise<{ results: any[]; count: number }> {
+    const response = await apiClient.get('/exchange-rates/', { params });
+    return response.data;
+  },
+
+  async createExchangeRate(data: any): Promise<any> {
+    const response = await apiClient.post('/exchange-rates/', data);
+    return response.data;
+  },
+
+  async updateExchangeRate(id: string, data: any): Promise<any> {
+    const response = await apiClient.patch(`/exchange-rates/${id}/`, data);
+    return response.data;
+  },
+
+  async deleteExchangeRate(id: string): Promise<void> {
+    await apiClient.delete(`/exchange-rates/${id}/`);
   },
 
   // Tax Configuration Management
@@ -326,6 +704,25 @@ export const adminApi = {
     per_page?: number;
   }): Promise<{ results: any[]; count: number }> {
     const response = await apiClient.get('/tax/jurisdictions/', { params });
+    return response.data;
+  },
+
+  async markTaxRemitted(id: string, data: any): Promise<any> {
+    const response = await apiClient.post(`/tax/remittances/${id}/mark_remitted/`, data);
+    return response.data;
+  },
+
+  async markTaxPending(id: string, data: any): Promise<any> {
+    const response = await apiClient.post(`/tax/remittances/${id}/mark_pending/`, data);
+    return response.data;
+  },
+
+  async getBookingTaxes(params?: {
+    search?: string;
+    page?: number;
+    per_page?: number;
+  }): Promise<{ results: any[]; count: number }> {
+    const response = await apiClient.get('/tax/booking-taxes/', { params });
     return response.data;
   },
 
@@ -385,37 +782,20 @@ export const adminApi = {
     return response.data;
   },
 
-  // POI Management
-  async getPOIs(params?: {
+
+
+  // Review Votes
+  async getReviewVotes(params?: {
     search?: string;
     page?: number;
     per_page?: number;
   }): Promise<{ results: any[]; count: number }> {
-    const response = await apiClient.get('/pois/', { params });
+    const response = await apiClient.get('/reviews/review-votes/', { params });
     return response.data;
   },
 
-  async getPOICategories(params?: {
-    search?: string;
-    page?: number;
-    per_page?: number;
-  }): Promise<{ results: any[]; count: number }> {
-    const response = await apiClient.get('/poi-categories/', { params });
-    return response.data;
-  },
-
-  async verifyPOI(id: string): Promise<any> {
-    const response = await apiClient.patch(`/pois/${id}/`, {
-      is_active: true
-    });
-    return response.data;
-  },
-
-  async unverifyPOI(id: string): Promise<any> {
-    const response = await apiClient.patch(`/pois/${id}/`, {
-      is_active: false
-    });
-    return response.data;
+  async deleteReviewVote(id: string): Promise<void> {
+    await apiClient.delete(`/reviews/review-votes/${id}/`);
   },
 
   // Messaging Automation
@@ -463,32 +843,4 @@ export const adminApi = {
     await apiClient.delete(`/messaging/quick-replies/${id}/`);
   },
 
-  // POI Management
-  async createPOI(data: any): Promise<any> {
-    const response = await apiClient.post('/pois/', data);
-    return response.data;
-  },
-
-  async updatePOI(id: string, data: any): Promise<any> {
-    const response = await apiClient.patch(`/pois/${id}/`, data);
-    return response.data;
-  },
-
-  async deletePOI(id: string): Promise<void> {
-    await apiClient.delete(`/pois/${id}/`);
-  },
-
-  async createPOICategory(data: any): Promise<any> {
-    const response = await apiClient.post('/poi-categories/', data);
-    return response.data;
-  },
-
-  async updatePOICategory(id: string, data: any): Promise<any> {
-    const response = await apiClient.patch(`/poi-categories/${id}/`, data);
-    return response.data;
-  },
-
-  async deletePOICategory(id: string): Promise<void> {
-    await apiClient.delete(`/poi-categories/${id}/`);
-  },
 };

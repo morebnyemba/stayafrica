@@ -28,13 +28,17 @@ class ConversationViewSet(viewsets.ModelViewSet):
         return ConversationSerializer
     
     def get_queryset(self):
-        """Get conversations for the current user only"""
         user = self.request.user
         
-        # Filter conversations where current user is a participant
-        queryset = Conversation.objects.filter(
-            participants__id=user.id
-        ).prefetch_related(
+        # Filter conversations
+        if getattr(user, 'is_admin_user', False):
+            queryset = Conversation.objects.all()
+        else:
+            queryset = Conversation.objects.filter(
+                participants__id=user.id
+            )
+            
+        queryset = queryset.prefetch_related(
             'participants',
             'property',
             'booking',
@@ -42,15 +46,15 @@ class ConversationViewSet(viewsets.ModelViewSet):
         ).distinct()
         
         # Filter out archived conversations unless explicitly requested
-        if self.request.query_params.get('archived') != 'true':
+        if self.request.query_params.get('archived') != 'true' and not getattr(user, 'is_admin_user', False):
             queryset = queryset.exclude(archived_by__id=user.id)
         
         return queryset.order_by('-updated_at')
     
     def retrieve(self, request, *args, **kwargs):
-        """Retrieve a conversation - ensure user is a participant"""
+        """Retrieve a conversation - ensure user is a participant or admin"""
         conversation = self.get_object()
-        if request.user not in conversation.participants.all():
+        if not getattr(request.user, 'is_admin_user', False) and request.user not in conversation.participants.all():
             raise PermissionDenied("You are not a participant in this conversation")
         return super().retrieve(request, *args, **kwargs)
     
@@ -223,14 +227,19 @@ class MessageViewSet(viewsets.ModelViewSet):
         return MessageSerializer
     
     def get_queryset(self):
-        """Get messages for the current user"""
+        """Get messages for the current user or all if admin"""
         user = self.request.user
-        queryset = Message.objects.filter(
-            Q(sender=user) | Q(receiver=user)
-        ).filter(
-            deleted_by_sender__isnull=True,
-            deleted_by_receiver__isnull=True
-        ).select_related('sender', 'receiver', 'conversation')
+        if getattr(user, 'is_admin_user', False):
+            queryset = Message.objects.all()
+        else:
+            queryset = Message.objects.filter(
+                Q(sender=user) | Q(receiver=user)
+            ).filter(
+                deleted_by_sender__isnull=True,
+                deleted_by_receiver__isnull=True
+            )
+            
+        queryset = queryset.select_related('sender', 'receiver', 'conversation')
         
         # Filter by conversation
         conversation_id = self.request.query_params.get('conversation')
@@ -347,12 +356,31 @@ class MessageViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def unread(self, request):
         """Get count of unread messages"""
-        count = Message.objects.filter(
-            receiver=request.user,
-            is_read=False,
-            deleted_by_receiver__isnull=True
-        ).count()
+        if getattr(request.user, 'is_admin_user', False):
+            count = Message.objects.filter(is_read=False).count()
+        else:
+            count = Message.objects.filter(
+                receiver=request.user,
+                is_read=False,
+                deleted_by_receiver__isnull=True
+            ).count()
         return Response({'unread_count': count})
+        
+    @action(detail=True, methods=['post'])
+    def moderate(self, request, pk=None):
+        """Moderate a message (admin only)"""
+        if not getattr(request.user, 'is_admin_user', False):
+            return Response({'error': 'Admin only'}, status=status.HTTP_403_FORBIDDEN)
+        
+        message = self.get_object()
+        message.text = "[Message hidden by moderator for policy violation]"
+        message.edited_at = timezone.now()
+        message.save()
+        
+        return Response(self.get_serializer(message).data)
+
+class MessageTemplateViewSet(viewsets.ModelViewSet):
+    pass
 
 
 from rest_framework.decorators import api_view, permission_classes

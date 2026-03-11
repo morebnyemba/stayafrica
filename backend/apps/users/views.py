@@ -391,6 +391,20 @@ class UserViewSet(viewsets.ModelViewSet):
         
         return Response({'status': 'Account already verified'})
 
+    @action(detail=True, methods=['get'], permission_classes=[IsAuthenticated])
+    def preferences(self, request, pk=None):
+        """Admin or Self action to get a user's preferences"""
+        user = self.get_object()
+        if request.user != user and not request.user.is_staff:
+            return Response(
+                {'error': 'You do not have permission to view these preferences.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+            
+        prefs, _ = UserPreference.objects.get_or_create(user=user)
+        serializer = UserPreferenceSerializer(prefs)
+        return Response(serializer.data)
+
     @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
     @log_action('upgrade_to_host')
     def upgrade_to_host(self, request):

@@ -828,6 +828,43 @@ class PaymentViewSet(viewsets.ModelViewSet):
         
         serializer = self.get_serializer(payment)
         return Response(serializer.data)
+        
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    def mark_success(self, request, pk=None):
+        """Admin action to manually mark payment as success"""
+        if not request.user.is_staff:
+            return Response({'error': 'Only admin users can do this'}, status=status.HTTP_403_FORBIDDEN)
+            
+        payment = self.get_object()
+        if payment.status == 'success':
+            return Response({'error': 'Payment is already successful'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        with transaction.atomic():
+            payment.status = 'success'
+            payment.save()
+            payment.booking.status = 'confirmed'
+            payment.booking.save()
+            
+            # Optionally log, send receipt etc here.
+            serializer = self.get_serializer(payment)
+            return Response(serializer.data)
+
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    def mark_failed(self, request, pk=None):
+        """Admin action to manually mark payment as failed"""
+        if not request.user.is_staff:
+            return Response({'error': 'Only admin users can do this'}, status=status.HTTP_403_FORBIDDEN)
+            
+        payment = self.get_object()
+        if payment.status in ['failed', 'success']:
+            return Response({'error': f'Cannot fail a payment that is {payment.status}'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        with transaction.atomic():
+            payment.status = 'failed'
+            payment.save()
+            
+            serializer = self.get_serializer(payment)
+            return Response(serializer.data)
 
 
 class WalletViewSet(viewsets.ModelViewSet):
@@ -892,6 +929,34 @@ class WalletViewSet(viewsets.ModelViewSet):
         serializer = WalletTransactionSerializer(page, many=True)
         return paginator.get_paginated_response(serializer.data)
 
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    def activate(self, request, pk=None):
+        if not request.user.is_staff:
+            return Response({'error': 'Only admins can perform this action'}, status=status.HTTP_403_FORBIDDEN)
+        wallet = self.get_object()
+        wallet.status = 'active'
+        wallet.save()
+        return Response(self.get_serializer(wallet).data)
+
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    def suspend(self, request, pk=None):
+        if not request.user.is_staff:
+            return Response({'error': 'Only admins can perform this action'}, status=status.HTTP_403_FORBIDDEN)
+        wallet = self.get_object()
+        wallet.status = 'suspended'
+        wallet.save()
+        return Response(self.get_serializer(wallet).data)
+
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    def close(self, request, pk=None):
+        if not request.user.is_staff:
+            return Response({'error': 'Only admins can perform this action'}, status=status.HTTP_403_FORBIDDEN)
+        wallet = self.get_object()
+        wallet.status = 'closed'
+        wallet.save()
+        return Response(self.get_serializer(wallet).data)
+
+
 
 class WalletTransactionViewSet(viewsets.ReadOnlyModelViewSet):
     """ViewSet for viewing wallet transactions"""
@@ -919,8 +984,10 @@ class BankAccountViewSet(viewsets.ModelViewSet):
         return BankAccountSerializer
     
     def get_queryset(self):
-        """Return bank accounts for current user"""
+        """Return bank accounts for current user or all if admin"""
         from apps.payments.models import BankAccount
+        if self.request.user.is_admin_user:
+            return BankAccount.objects.all().select_related('user')
         return BankAccount.objects.filter(user=self.request.user)
     
     def perform_create(self, serializer):
@@ -1018,6 +1085,43 @@ class WithdrawalViewSet(viewsets.ModelViewSet):
                 {'error': str(e)},
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    @log_action('processing_withdrawal')
+    def mark_processing(self, request, pk=None):
+        """Mark a withdrawal as processing (admin only)"""
+        if not request.user.is_admin_user:
+            return Response(
+                {'error': 'Only admins can mark withdrawals processing'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        withdrawal = self.get_object()
+        if withdrawal.status != 'pending':
+            return Response(
+                {'error': 'Only pending withdrawals can be marked processing'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            
+        with transaction.atomic():
+            withdrawal.status = 'processing'
+            withdrawal.save()
+            
+            # Log the action
+            from django.contrib.contenttypes.models import ContentType
+            from services.audit_logger import AuditLoggerService
+            content_type = ContentType.objects.get_for_model(withdrawal.__class__)
+            AuditLoggerService.log_action(
+                user=request.user,
+                action='mark_processing',
+                content_type=content_type,
+                object_id=withdrawal.id,
+                changes={
+                    'status': 'processing'
+                }
+            )
+            
+        return Response(self.get_serializer(withdrawal).data)
     
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
     @log_action('complete_withdrawal')
@@ -1083,8 +1187,12 @@ class PaymentMethodViewSet(viewsets.ModelViewSet):
         return PaymentMethodSerializer
     
     def get_queryset(self):
-        """Return only active payment methods for current user"""
+        """Return only active payment methods for current user or all if admin"""
         from apps.payments.models import PaymentMethod
+        if self.request.user.is_admin_user:
+            return PaymentMethod.objects.filter(
+                deleted_at__isnull=True
+            ).select_related('user').order_by('-created_at')
         return PaymentMethod.objects.filter(
             user=self.request.user,
             deleted_at__isnull=True
@@ -1374,3 +1482,58 @@ class PaymentMethodViewSet(viewsets.ModelViewSet):
         serializer.save()
         
         return Response(serializer.data)
+
+class PricingRuleViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing property pricing rules"""
+    permission_classes = [IsAuthenticated]
+    
+    def get_serializer_class(self):
+        from apps.payments.serializers import PricingRuleSerializer
+        return PricingRuleSerializer
+    
+    def get_queryset(self):
+        from apps.payments.pricing_models import PricingRule
+        if self.request.user.is_admin_user:
+            return PricingRule.objects.all().select_related('property')
+        return PricingRule.objects.filter(property__host=self.request.user)
+
+class PropertyFeeViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing property fees"""
+    permission_classes = [IsAuthenticated]
+    
+    def get_serializer_class(self):
+        from apps.payments.serializers import PropertyFeeSerializer
+        return PropertyFeeSerializer
+    
+    def get_queryset(self):
+        from apps.payments.pricing_models import PropertyFee
+        if self.request.user.is_admin_user:
+            return PropertyFee.objects.all().select_related('property')
+        return PropertyFee.objects.filter(property__host=self.request.user)
+
+class PropertyTaxViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing property taxes"""
+    permission_classes = [IsAuthenticated]
+    
+    def get_serializer_class(self):
+        from apps.payments.serializers import PropertyTaxSerializer
+        return PropertyTaxSerializer
+    
+    def get_queryset(self):
+        from apps.payments.pricing_models import PropertyTax
+        if self.request.user.is_admin_user:
+            return PropertyTax.objects.all().select_related('property')
+        return PropertyTax.objects.filter(property__host=self.request.user)
+
+class CurrencyExchangeRateViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing currency exchange rates"""
+    permission_classes = [IsAuthenticated, IsAdminUserOrReadOnly]
+    
+    def get_serializer_class(self):
+        from apps.payments.serializers import CurrencyExchangeRateSerializer
+        return CurrencyExchangeRateSerializer
+    
+    def get_queryset(self):
+        from apps.payments.pricing_models import CurrencyExchangeRate
+        return CurrencyExchangeRate.objects.all()
+

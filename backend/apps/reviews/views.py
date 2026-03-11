@@ -14,6 +14,9 @@ from utils.helpers import sanitize_input
 from services.audit_logger import AuditLoggerService
 from datetime import date, timedelta
 import logging
+from apps.reviews.models import ReviewVote
+from apps.reviews.serializers import ReviewSerializer, ReviewVoteSerializer
+from utils.permissions import IsAdminUserOrReadOnly
 
 logger = logging.getLogger(__name__)
 
@@ -362,3 +365,24 @@ class ReviewViewSet(viewsets.ModelViewSet):
         
         serializer = self.get_serializer(review)
         return Response(serializer.data)
+
+class AdminReviewVoteViewSet(viewsets.ModelViewSet):
+    """Admin only endpoint to manage and track review votes."""
+    queryset = ReviewVote.objects.all().select_related('user', 'review')
+    serializer_class = ReviewVoteSerializer
+    permission_classes = [IsAdminUserOrReadOnly]
+    
+    def get_queryset(self):
+        qs = super().get_queryset()
+        user_id = self.request.query_params.get('user_id')
+        review_id = self.request.query_params.get('review_id')
+        vote_type = self.request.query_params.get('vote_type')
+        
+        if user_id:
+            qs = qs.filter(user_id=user_id)
+        if review_id:
+            qs = qs.filter(review_id=review_id)
+        if vote_type:
+            qs = qs.filter(vote_type=vote_type)
+            
+        return qs

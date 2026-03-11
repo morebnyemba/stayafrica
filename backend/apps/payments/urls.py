@@ -2,7 +2,9 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from apps.payments.views import (
     PaymentViewSet, WalletViewSet, WalletTransactionViewSet, 
-    BankAccountViewSet, WithdrawalViewSet, PaymentMethodViewSet
+    BankAccountViewSet, WithdrawalViewSet, PaymentMethodViewSet,
+    PricingRuleViewSet, PropertyFeeViewSet, PropertyTaxViewSet,
+    CurrencyExchangeRateViewSet
 )
 from apps.payments.tax_views import (
     TaxJurisdictionViewSet,
@@ -22,6 +24,10 @@ router.register(r'wallets', WalletViewSet, basename='wallet')
 router.register(r'transactions', WalletTransactionViewSet, basename='transaction')
 router.register(r'bank-accounts', BankAccountViewSet, basename='bank-account')
 router.register(r'withdrawals', WithdrawalViewSet, basename='withdrawal')
+router.register(r'pricing-rules', PricingRuleViewSet, basename='pricing-rule')
+router.register(r'property-fees', PropertyFeeViewSet, basename='property-fee')
+router.register(r'property-taxes', PropertyTaxViewSet, basename='property-tax')
+router.register(r'exchange-rates', CurrencyExchangeRateViewSet, basename='exchange-rate')
 router.register(r'tax/jurisdictions', TaxJurisdictionViewSet, basename='tax-jurisdiction')
 router.register(r'tax/rates', TaxRateViewSet, basename='tax-rate')
 router.register(r'tax/booking-taxes', BookingTaxViewSet, basename='booking-tax')

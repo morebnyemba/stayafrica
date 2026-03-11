@@ -20,6 +20,11 @@ export default function UserModal({ isOpen, onClose, onSave, user }: UserModalPr
     phone_number: user?.phone_number || '',
     role: user?.role || 'guest',
     is_verified: user?.is_verified || false,
+    is_active: user?.is_active ?? true,
+    is_staff: user?.is_staff || false,
+    is_superuser: user?.is_superuser || false,
+    bio: user?.bio || '',
+    country_of_residence: user?.country_of_residence || '',
     password: '',
   });
 
@@ -104,14 +109,39 @@ export default function UserModal({ isOpen, onClose, onSave, user }: UserModalPr
           </div>
         )}
 
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-primary-700 dark:text-sand-200 mb-1">
+              Country of Residence
+            </label>
+            <input
+              type="text"
+              value={formData.country_of_residence}
+              onChange={(e) => setFormData({ ...formData, country_of_residence: e.target.value })}
+              className="w-full px-3 py-2 border border-primary-300 dark:border-primary-600 rounded-lg focus:ring-2 focus:ring-[#D9B168] focus:border-transparent"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-primary-700 dark:text-sand-200 mb-1">
+              Phone Number
+            </label>
+            <input
+              type="tel"
+              value={formData.phone_number}
+              onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
+              className="w-full px-3 py-2 border border-primary-300 dark:border-primary-600 rounded-lg focus:ring-2 focus:ring-[#D9B168] focus:border-transparent"
+            />
+          </div>
+        </div>
+
         <div>
           <label className="block text-sm font-medium text-primary-700 dark:text-sand-200 mb-1">
-            Phone Number
+            Bio
           </label>
-          <input
-            type="tel"
-            value={formData.phone_number}
-            onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
+          <textarea
+            rows={3}
+            value={formData.bio}
+            onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
             className="w-full px-3 py-2 border border-primary-300 dark:border-primary-600 rounded-lg focus:ring-2 focus:ring-[#D9B168] focus:border-transparent"
           />
         </div>
@@ -132,17 +162,55 @@ export default function UserModal({ isOpen, onClose, onSave, user }: UserModalPr
           </select>
         </div>
 
-        <div className="flex items-center">
-          <input
-            type="checkbox"
-            id="is_verified"
-            checked={formData.is_verified}
-            onChange={(e) => setFormData({ ...formData, is_verified: e.target.checked })}
-            className="w-4 h-4 text-[#D9B168] border-primary-300 dark:border-primary-600 rounded focus:ring-[#D9B168]"
-          />
-          <label htmlFor="is_verified" className="ml-2 text-sm text-primary-700 dark:text-sand-200">
-            Verified User
-          </label>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="is_active"
+              checked={formData.is_active}
+              onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
+              className="w-4 h-4 text-[#D9B168] border-primary-300 dark:border-primary-600 rounded focus:ring-[#D9B168]"
+            />
+            <label htmlFor="is_active" className="ml-2 text-sm text-primary-700 dark:text-sand-200">
+              Active Account
+            </label>
+          </div>
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="is_verified"
+              checked={formData.is_verified}
+              onChange={(e) => setFormData({ ...formData, is_verified: e.target.checked })}
+              className="w-4 h-4 text-[#D9B168] border-primary-300 dark:border-primary-600 rounded focus:ring-[#D9B168]"
+            />
+            <label htmlFor="is_verified" className="ml-2 text-sm text-primary-700 dark:text-sand-200">
+              Verified User
+            </label>
+          </div>
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="is_staff"
+              checked={formData.is_staff}
+              onChange={(e) => setFormData({ ...formData, is_staff: e.target.checked })}
+              className="w-4 h-4 text-[#D9B168] border-primary-300 dark:border-primary-600 rounded focus:ring-[#D9B168]"
+            />
+            <label htmlFor="is_staff" className="ml-2 text-sm text-primary-700 dark:text-sand-200">
+              Staff Status
+            </label>
+          </div>
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="is_superuser"
+              checked={formData.is_superuser}
+              onChange={(e) => setFormData({ ...formData, is_superuser: e.target.checked })}
+              className="w-4 h-4 text-[#D9B168] border-primary-300 dark:border-primary-600 rounded focus:ring-[#D9B168]"
+            />
+            <label htmlFor="is_superuser" className="ml-2 text-sm text-primary-700 dark:text-sand-200">
+              Superuser Status
+            </label>
+          </div>
         </div>
 
         <div className="flex justify-end space-x-3 pt-4 border-t">

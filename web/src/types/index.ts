@@ -25,6 +25,21 @@ export interface AuthTokens {
   refresh: string;
 }
 
+export interface UserPreference {
+  id: number;
+  preferred_property_types: string[] | null;
+  preferred_min_price: number | null;
+  preferred_max_price: number | null;
+  preferred_countries: string[] | null;
+  preferred_cities: string[] | null;
+  usual_guest_count: number;
+  preferred_amenities: string[] | null;
+  last_latitude: number | null;
+  last_longitude: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
 // Property Types
 export interface Property {
   id: string;

@@ -10,10 +10,11 @@ class AmenitySerializer(serializers.ModelSerializer):
 
 class PropertyImageSerializer(serializers.ModelSerializer):
     image_url = serializers.SerializerMethodField()
+    property_id = serializers.CharField(source='property.id', read_only=True)
 
     class Meta:
         model = PropertyImage
-        fields = ['id', 'image', 'image_url', 'caption', 'order']
+        fields = ['id', 'property_id', 'image', 'image_url', 'caption', 'order']
 
     def get_image_url(self, obj):
         if not obj.image:
@@ -207,10 +208,12 @@ class HostPropertyListSerializer(PropertyListSerializer):
 class SavedPropertySerializer(serializers.ModelSerializer):
     property = PropertyListSerializer(read_only=True)
     property_id = serializers.CharField(max_length=10, write_only=True)
+    user_email = serializers.CharField(source='user.email', read_only=True)
+    user_name = serializers.CharField(source='user.get_full_name', read_only=True)
     
     class Meta:
         model = SavedProperty
-        fields = ['id', 'user', 'property', 'property_id', 'created_at']
+        fields = ['id', 'user', 'user_email', 'user_name', 'property', 'property_id', 'created_at']
         read_only_fields = ['id', 'user', 'created_at']
     
     def create(self, validated_data):

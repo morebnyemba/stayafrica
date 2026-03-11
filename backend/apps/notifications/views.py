@@ -20,6 +20,8 @@ class PushTokenViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     
     def get_queryset(self):
+        if getattr(self.request.user, 'is_admin_user', False):
+            return PushToken.objects.all()
         return PushToken.objects.filter(user=self.request.user)
     
     def create(self, request, *args, **kwargs):
@@ -90,6 +92,8 @@ class NotificationViewSet(DestroyModelMixin, viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAuthenticated]
     
     def get_queryset(self):
+        if getattr(self.request.user, 'is_admin_user', False):
+            return Notification.objects.all()
         return Notification.objects.filter(user=self.request.user)
     
     @action(detail=False, methods=['get'])
@@ -124,3 +128,36 @@ class NotificationViewSet(DestroyModelMixin, viewsets.ReadOnlyModelViewSet):
         """Delete all notifications for the user"""
         count, _ = Notification.objects.filter(user=request.user).delete()
         return Response({'deleted': count})
+
+
+from rest_framework import serializers
+from apps.notifications.models import EmailConfiguration
+
+
+class EmailConfigurationSerializer(serializers.ModelSerializer):
+    """Serializer for email configuration singleton"""
+    class Meta:
+        model = EmailConfiguration
+        fields = '__all__'
+        extra_kwargs = {'password': {'write_only': True}}
+
+
+class EmailConfigurationViewSet(viewsets.ModelViewSet):
+    """Manage email configurations"""
+    permission_classes = [IsAuthenticated]
+    serializer_class = EmailConfigurationSerializer
+    
+    def get_queryset(self):
+        if getattr(self.request.user, 'is_admin_user', False):
+            # Ensure at least one config exists before listing
+            EmailConfiguration.get_config()
+            return EmailConfiguration.objects.all()
+        return EmailConfiguration.objects.none()
+        
+    @action(detail=True, methods=['post'])
+    def test_connection(self, request, pk=None):
+        if not getattr(request.user, 'is_admin_user', False):
+            return Response({'error': 'Admin only'}, status=status.HTTP_403_FORBIDDEN)
+        config = self.get_object()
+        success, message = config.test_connection()
+        return Response({'success': success, 'message': message})

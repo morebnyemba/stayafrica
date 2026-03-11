@@ -22,20 +22,31 @@ import {
   Receipt,
   MapPin,
   MessageSquare,
+  Bell,
+  Wifi,
+  Banknote,
+  RefreshCcw,
+  Files
 } from 'lucide-react';
 
 const adminNavItems = [
   { label: 'Dashboard', href: '/admin', icon: LayoutDashboard },
   { label: 'Users', href: '/admin/users', icon: Users },
+  { label: 'Identity Verification', href: '/admin/identity-verification', icon: Shield },
   { label: 'Properties', href: '/admin/properties', icon: Home },
+  { label: 'Amenities', href: '/admin/properties/amenities', icon: Wifi },
+  { label: 'POI Management', href: '/admin/poi-management', icon: MapPin },
   { label: 'Bookings', href: '/admin/bookings', icon: Calendar },
   { label: 'Reviews', href: '/admin/reviews', icon: Star },
   { label: 'Payments', href: '/admin/payments', icon: CreditCard },
+  { label: 'Exchange Rates', href: '/admin/payments/exchange-rates', icon: RefreshCcw },
   { label: 'Wallets', href: '/admin/wallets', icon: Wallet },
+  { label: 'Withdrawals', href: '/admin/payments/withdrawals', icon: Banknote },
   { label: 'Tax Config', href: '/admin/tax-config', icon: Receipt },
-  { label: 'POI Management', href: '/admin/poi-management', icon: MapPin },
   { label: 'Messaging', href: '/admin/messaging-automation', icon: MessageSquare },
-  { label: 'Identity Verification', href: '/admin/identity-verification', icon: Shield },
+  { label: 'Conversations', href: '/admin/messaging/conversations', icon: MessageSquare },
+  { label: 'Templates', href: '/admin/messaging/templates', icon: Files },
+  { label: 'Notifications', href: '/admin/notifications', icon: Bell },
   { label: 'Audit Logs', href: '/admin/audit-logs', icon: FileText },
   { label: 'Settings', href: '/admin/settings', icon: Settings },
 ];
@@ -58,10 +69,10 @@ export default function AdminLayout({
       // lg breakpoint is 1024px in Tailwind
       setSidebarOpen(window.innerWidth >= 1024);
     };
-    
+
     // Set initial state
     handleResize();
-    
+
     // Listen for window resize
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);

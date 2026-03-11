@@ -35,8 +35,8 @@ export default function UsersManagement() {
   const loadUsers = async () => {
     try {
       setLoading(true);
-      const data = await adminApi.getUsers({ 
-        page, 
+      const data = await adminApi.getUsers({
+        page,
         role: roleFilter || undefined,
         search: search.trim() || undefined,
         per_page: ITEMS_PER_PAGE,
@@ -127,8 +127,8 @@ export default function UsersManagement() {
   };
 
   const toggleSelectUser = (userId: string) => {
-    setSelectedUsers(prev => 
-      prev.includes(userId) 
+    setSelectedUsers(prev =>
+      prev.includes(userId)
         ? prev.filter(id => id !== userId)
         : [...prev, userId]
     );
@@ -158,6 +158,14 @@ export default function UsersManagement() {
           await Promise.all(selectedUsers.map(id => adminApi.updateUser(id, { is_verified: false })));
           toast.success(`${selectedUsers.length} users unverified`);
           break;
+        case 'ban':
+          await Promise.all(selectedUsers.map(id => adminApi.updateUser(id, { is_active: false })));
+          toast.success(`${selectedUsers.length} users banned`);
+          break;
+        case 'identity_verify':
+          await Promise.all(selectedUsers.map(id => adminApi.updateUser(id, { is_verified: true })));
+          toast.success(`${selectedUsers.length} users identity verified`);
+          break;
         default:
           toast.error('Unknown action');
           return;
@@ -176,7 +184,7 @@ export default function UsersManagement() {
       <div className="mb-8 flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-[#122F26]">User Management</h1>
-        <p className="text-[#3A5C50] mt-2">Manage and monitor all platform users</p>
+          <p className="text-[#3A5C50] mt-2">Manage and monitor all platform users</p>
         </div>
         <button
           onClick={() => handleOpenUserModal()}
@@ -270,9 +278,21 @@ export default function UsersManagement() {
                   </button>
                   <button
                     onClick={() => handleBulkAction('unverify')}
-                    className="w-full text-left px-4 py-2 text-sm text-primary-700 dark:text-sand-200 hover:bg-primary-100 dark:hover:bg-primary-800 last:rounded-b-lg"
+                    className="w-full text-left px-4 py-2 text-sm text-primary-700 dark:text-sand-200 hover:bg-primary-100 dark:hover:bg-primary-800"
                   >
                     Unverify Users
+                  </button>
+                  <button
+                    onClick={() => handleBulkAction('ban')}
+                    className="w-full text-left px-4 py-2 text-sm text-primary-700 dark:text-sand-200 hover:bg-primary-100 dark:hover:bg-primary-800"
+                  >
+                    Ban Users
+                  </button>
+                  <button
+                    onClick={() => handleBulkAction('identity_verify')}
+                    className="w-full text-left px-4 py-2 text-sm text-primary-700 dark:text-sand-200 hover:bg-primary-100 dark:hover:bg-primary-800 last:rounded-b-lg"
+                  >
+                    Identity Verify Users
                   </button>
                 </div>
               )}
@@ -489,13 +509,13 @@ export default function UsersManagement() {
         onSave={handleSaveUser}
         user={selectedUser}
       />
-      
+
       <UserDetailsModal
         isOpen={showUserDetailsModal}
         onClose={() => setShowUserDetailsModal(false)}
         userId={selectedUserId || ''}
       />
-      
+
       <ConfirmDialog
         isOpen={showConfirmDialog}
         onClose={() => setShowConfirmDialog(false)}

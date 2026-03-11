@@ -53,10 +53,66 @@ class IsHostOrReadOnly(BasePermission):
         # Only the property host can modify
         return obj.host == request.user
 
-class AmenityViewSet(viewsets.ReadOnlyModelViewSet):
+from rest_framework.permissions import SAFE_METHODS
+
+class IsAdminUserOrReadOnly(BasePermission):
+    def has_permission(self, request, view):
+        if request.method in SAFE_METHODS:
+            return True
+        return request.user and request.user.is_staff
+
+class AmenityViewSet(viewsets.ModelViewSet):
     queryset = Amenity.objects.all()
     serializer_class = AmenitySerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAdminUserOrReadOnly]
+
+class PropertyImageViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for global management of Property Images by admins.
+    """
+    queryset = PropertyImage.objects.select_related('property').all()
+    serializer_class = PropertyImageSerializer
+    permission_classes = [IsAdminUserOrReadOnly]
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
+    filterset_fields = ['property']
+    ordering_fields = ['created_at', 'order']
+    ordering = ['-order']
+
+class SavedPropertyViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    ViewSet for global viewing of Saved Properties (Wishlists) by admins.
+    """
+    queryset = SavedProperty.objects.select_related('user', 'property').all()
+    serializer_class = SavedPropertySerializer
+    permission_classes = [IsAdminUserOrReadOnly]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['property', 'user']
+    search_fields = ['user__email', 'user__first_name', 'user__last_name', 'property__title']
+    ordering_fields = ['created_at']
+    ordering = ['-created_at']
+
+from apps.properties.analytics_models import PropertyAnalytics, HostAnalyticsSummary
+from apps.properties.analytics_serializers import PropertyAnalyticsSerializer, HostAnalyticsSummarySerializer
+
+class GlobalPropertyAnalyticsViewSet(viewsets.ReadOnlyModelViewSet):
+    """Admin-only ViewSet to read all property analytics globally."""
+    queryset = PropertyAnalytics.objects.select_related('property').all()
+    serializer_class = PropertyAnalyticsSerializer
+    permission_classes = [IsAdminUserOrReadOnly]
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
+    filterset_fields = ['property', 'date']
+    ordering_fields = ['date', 'total_revenue', 'occupancy_rate']
+    ordering = ['-date']
+
+class GlobalHostAnalyticsSummaryViewSet(viewsets.ReadOnlyModelViewSet):
+    """Admin-only ViewSet to read all host analytics globally."""
+    queryset = HostAnalyticsSummary.objects.select_related('host').all()
+    serializer_class = HostAnalyticsSummarySerializer
+    permission_classes = [IsAdminUserOrReadOnly]
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
+    filterset_fields = ['host', 'period']
+    ordering_fields = ['start_date', 'total_revenue', 'avg_occupancy_rate']
+    ordering = ['-start_date']
 
 @method_decorator(cache_page(60 * 5, key_prefix='property_list'), name='list')
 @method_decorator(vary_on_headers('Authorization', 'Cookie'), name='list')

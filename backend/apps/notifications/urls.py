@@ -6,7 +6,8 @@ from rest_framework.routers import DefaultRouter
 from apps.notifications.views import (
     PushTokenViewSet,
     NotificationPreferenceViewSet,
-    NotificationViewSet
+    NotificationViewSet,
+    EmailConfigurationViewSet
 )
 
 app_name = 'notifications'
@@ -14,6 +15,7 @@ app_name = 'notifications'
 router = DefaultRouter()
 router.register('tokens', PushTokenViewSet, basename='push-token')
 router.register('notifications', NotificationViewSet, basename='notification')
+router.register('email-config', EmailConfigurationViewSet, basename='email-config')
 
 urlpatterns = [
     path('', include(router.urls)),

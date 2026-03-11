@@ -134,3 +134,50 @@ export interface VerificationStats {
   approval_rate: number;
   pending_review: number;
 }
+
+export interface VerificationSettings {
+  max_attempts_per_day: number;
+  max_attempts_per_month: number;
+  require_document_back: boolean;
+  require_selfie: boolean;
+  min_image_width: number;
+  min_image_height: number;
+  max_image_size_mb: number;
+  verification_valid_years: number;
+  require_verification_for_hosting: boolean;
+  require_verification_for_booking: boolean;
+  use_third_party_service: boolean;
+  updated_at: string;
+}
+
+export interface POICategory {
+  id: number;
+  name: string;
+  icon: string;
+  color: string;
+  description: string;
+  display_order: number;
+}
+
+export interface PointOfInterest {
+  id: string;
+  name: string;
+  category: number | POICategory;
+  poi_type: string;
+  description: string;
+  location: any;
+  address: string;
+  city: string;
+  country: string;
+  phone: string;
+  website: string;
+  rating: number;
+  review_count: number;
+  price_level: number;
+  opening_hours: any;
+  image_url: string;
+  source: string;
+  external_id: string;
+  is_active: boolean;
+  created_at?: string;
+}
