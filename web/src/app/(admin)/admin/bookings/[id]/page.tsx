@@ -5,7 +5,7 @@ import { adminApi } from '@/lib/admin-api';
 import { Booking } from '@/types';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
-import { ArrowLeft, Save, Calendar, User, Building, CreditCard, Clock, Activity, FileText } from 'lucide-react';
+import { ArrowLeft, Save, Calendar, User, CreditCard, Clock, Activity, FileText } from 'lucide-react';
 
 export default function BookingDetails({ params }: { params: { id: string } }) {
     const router = useRouter();
