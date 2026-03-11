@@ -55,11 +55,7 @@ class IsHostOrReadOnly(BasePermission):
 
 from rest_framework.permissions import SAFE_METHODS
 
-class IsAdminUserOrReadOnly(BasePermission):
-    def has_permission(self, request, view):
-        if request.method in SAFE_METHODS:
-            return True
-        return request.user and request.user.is_staff
+from utils.permissions import IsAdminUserOrReadOnly
 
 class AmenityViewSet(viewsets.ModelViewSet):
     queryset = Amenity.objects.all()
