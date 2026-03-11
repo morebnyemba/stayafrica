@@ -6,26 +6,7 @@ import { Search, MapPin, Tag, CheckCircle, XCircle, Trash2 } from 'lucide-react'
 import toast from 'react-hot-toast';
 import ConfirmDialog from '@/components/admin/ConfirmDialog';
 
-type POICategory = {
-  id: string;
-  name: string;
-  icon?: string;
-  description?: string;
-};
-
-type PointOfInterest = {
-  id: string;
-  name: string;
-  category: POICategory;
-  poi_type: string;
-  city?: string;
-  country: string;
-  address?: string;
-  latitude?: number;
-  longitude?: number;
-  is_active: boolean;
-  created_at: string;
-};
+import { PointOfInterest, POICategory } from '@/types/admin-types';
 
 export default function POIManagement() {
   const [activeTab, setActiveTab] = useState<'pois' | 'categories'>('pois');
@@ -39,7 +20,7 @@ export default function POIManagement() {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [confirmAction, setConfirmAction] = useState<{ type: string; ids: string[] } | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [deleteTarget, setDeleteTarget] = useState<{ type: 'poi' | 'category'; id: string } | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{ type: 'poi' | 'category'; id: string | number } | null>(null);
   const ITEMS_PER_PAGE = 20;
 
   useEffect(() => {
@@ -53,8 +34,8 @@ export default function POIManagement() {
   const loadPOIs = async () => {
     try {
       setLoading(true);
-      const data = await adminApi.getPOIs({ 
-        page, 
+      const data = await adminApi.getPOIs({
+        page,
         search: search.trim() || undefined,
         per_page: ITEMS_PER_PAGE,
       });
@@ -72,10 +53,8 @@ export default function POIManagement() {
   const loadCategories = async () => {
     try {
       setLoading(true);
-      const data = await adminApi.getPOICategories({ 
-        page, 
-        search: search.trim() || undefined,
-        per_page: ITEMS_PER_PAGE,
+      const data = await adminApi.getPOICategories({
+        search: search.trim() || undefined
       });
       setCategories(data.results || []);
       setTotalCount(data.count || 0);
@@ -96,11 +75,11 @@ export default function POIManagement() {
     if (!deleteTarget) return;
     try {
       if (deleteTarget.type === 'poi') {
-        await adminApi.deletePOI(deleteTarget.id);
+        await adminApi.deletePOI(deleteTarget.id as string);
         toast.success('POI deleted');
         loadPOIs();
       } else {
-        await adminApi.deletePOICategory(deleteTarget.id);
+        await adminApi.deletePOICategory(deleteTarget.id as number);
         toast.success('Category deleted');
         loadCategories();
       }
@@ -111,8 +90,8 @@ export default function POIManagement() {
   };
 
   const toggleSelectPOI = (poiId: string) => {
-    setSelectedPOIs(prev => 
-      prev.includes(poiId) 
+    setSelectedPOIs(prev =>
+      prev.includes(poiId)
         ? prev.filter(id => id !== poiId)
         : [...prev, poiId]
     );
@@ -182,11 +161,10 @@ export default function POIManagement() {
               setActiveTab('pois');
               setPage(1);
             }}
-            className={`pb-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-              activeTab === 'pois'
-                ? 'border-[#D9B168] text-[#D9B168]'
-                : 'border-transparent text-primary-400 dark:text-sand-500 hover:text-primary-700 dark:hover:text-sand-200'
-            }`}
+            className={`pb-4 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === 'pois'
+              ? 'border-[#D9B168] text-[#D9B168]'
+              : 'border-transparent text-primary-400 dark:text-sand-500 hover:text-primary-700 dark:hover:text-sand-200'
+              }`}
           >
             <div className="flex items-center space-x-2">
               <MapPin className="w-4 h-4" />
@@ -198,11 +176,10 @@ export default function POIManagement() {
               setActiveTab('categories');
               setPage(1);
             }}
-            className={`pb-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-              activeTab === 'categories'
-                ? 'border-[#D9B168] text-[#D9B168]'
-                : 'border-transparent text-primary-400 dark:text-sand-500 hover:text-primary-700 dark:hover:text-sand-200'
-            }`}
+            className={`pb-4 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === 'categories'
+              ? 'border-[#D9B168] text-[#D9B168]'
+              : 'border-transparent text-primary-400 dark:text-sand-500 hover:text-primary-700 dark:hover:text-sand-200'
+              }`}
           >
             <div className="flex items-center space-x-2">
               <Tag className="w-4 h-4" />
@@ -330,7 +307,7 @@ export default function POIManagement() {
                           )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-[#122F26]">
-                          {poi.category.name}
+                          {typeof poi.category === 'object' && poi.category !== null ? poi.category.name : poi.category}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPOITypeBadge(poi.poi_type)}`}>
@@ -344,9 +321,8 @@ export default function POIManagement() {
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            poi.is_active ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                          }`}>
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${poi.is_active ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                            }`}>
                             {poi.is_active ? (
                               <>
                                 <CheckCircle className="w-3 h-3 mr-1" />
@@ -361,7 +337,7 @@ export default function POIManagement() {
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-[#3A5C50]">
-                          {new Date(poi.created_at).toLocaleDateString()}
+                          {poi.created_at ? new Date(poi.created_at).toLocaleDateString() : '-'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                           <button
@@ -453,11 +429,12 @@ export default function POIManagement() {
               </div>
             </div>
           </>
-        )}
-      </div>
+        )
+        }
+      </div >
 
       {/* Verify Confirm Dialog */}
-      <ConfirmDialog
+      < ConfirmDialog
         isOpen={showConfirmDialog}
         onClose={() => setShowConfirmDialog(false)}
         onConfirm={handleConfirm}
@@ -477,6 +454,6 @@ export default function POIManagement() {
         variant="danger"
         confirmText="Delete"
       />
-    </div>
+    </div >
   );
 }

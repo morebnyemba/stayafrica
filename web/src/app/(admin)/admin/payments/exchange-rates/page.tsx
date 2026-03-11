@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { adminApi } from '@/lib/admin-api';
-import { Search, Plus, Edit2, Trash2, CheckCircle, XCircle } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ConfirmDialog from '@/components/admin/ConfirmDialog';
 
@@ -10,8 +10,7 @@ export default function ExchangeRatesManagement() {
     const [rates, setRates] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
-    const [page, setPage] = useState(1);
-    const [totalCount, setTotalCount] = useState(0);
+    const page = 1;
     const ITEMS_PER_PAGE = 20;
 
     const [showConfirm, setShowConfirm] = useState(false);
@@ -29,7 +28,6 @@ export default function ExchangeRatesManagement() {
             setLoading(true);
             const data = await adminApi.getExchangeRates({ page, search: search.trim() || undefined, per_page: ITEMS_PER_PAGE });
             setRates(data.results || []);
-            setTotalCount(data.count || 0);
         } catch (err: any) {
             toast.error(err?.response?.data?.detail || 'Failed to load exchange rates');
         } finally {

@@ -5,8 +5,6 @@ import { adminApi } from '@/lib/admin-api';
 import { PropertyImage } from '@/types';
 import toast from 'react-hot-toast';
 import { Trash2, ExternalLink, Image as ImageIcon, RefreshCcw } from 'lucide-react';
-import Link from 'next/link';
-import Image from 'next/image';
 
 export default function PropertyImagesManagement() {
     const [images, setImages] = useState<PropertyImage[]>([]);

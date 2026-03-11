@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { adminApi } from '@/lib/admin-api';
 import { Search, CreditCard, Smartphone, CheckCircle, Star } from 'lucide-react';
 import toast from 'react-hot-toast';
-import ConfirmDialog from '@/components/admin/ConfirmDialog';
 
 export default function PaymentMethodsManagement() {
     const [methods, setMethods] = useState<any[]>([]);
@@ -190,7 +189,7 @@ export default function PaymentMethodsManagement() {
                                                             </button>
                                                         )}
                                                         {item.is_default && (
-                                                            <CheckCircle className="w-5 h-5 text-green-500" title="Default Method" />
+                                                            <CheckCircle className="w-5 h-5 text-green-500" />
                                                         )}
                                                     </div>
                                                 </td>

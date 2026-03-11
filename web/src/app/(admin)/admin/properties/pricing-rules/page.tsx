@@ -11,13 +11,9 @@ export default function PricingRulesManagement() {
 
     // Rules state
     const [rules, setRules] = useState<any[]>([]);
-    const [rulesLoading, setRulesLoading] = useState(false);
-    const [rulesTotal, setRulesTotal] = useState(0);
 
     // Fees state
     const [fees, setFees] = useState<any[]>([]);
-    const [feesLoading, setFeesLoading] = useState(false);
-    const [feesTotal, setFeesTotal] = useState(0);
 
     // Shared state
     const [search, setSearch] = useState('');
@@ -43,27 +39,19 @@ export default function PricingRulesManagement() {
 
     const loadRules = async () => {
         try {
-            setRulesLoading(true);
             const data = await adminApi.getPricingRules({ page, search: search.trim() || undefined, per_page: ITEMS_PER_PAGE });
             setRules(data.results || []);
-            setRulesTotal(data.count || 0);
         } catch (err: any) {
             toast.error(err?.response?.data?.detail || 'Failed to load pricing rules');
-        } finally {
-            setRulesLoading(false);
         }
     };
 
     const loadFees = async () => {
         try {
-            setFeesLoading(true);
             const data = await adminApi.getPropertyFees({ page, search: search.trim() || undefined, per_page: ITEMS_PER_PAGE });
             setFees(data.results || []);
-            setFeesTotal(data.count || 0);
         } catch (err: any) {
             toast.error(err?.response?.data?.detail || 'Failed to load property fees');
-        } finally {
-            setFeesLoading(false);
         }
     };
 
@@ -168,8 +156,8 @@ export default function PricingRulesManagement() {
             <div className="flex space-x-4 mb-6 border-b border-primary-200">
                 <button
                     className={`pb-4 px-4 text-sm font-medium transition-colors border-b-2 ${activeTab === 'rules'
-                            ? 'border-[#D9B168] text-[#122F26]'
-                            : 'border-transparent text-[#3A5C50] hover:text-[#122F26]'
+                        ? 'border-[#D9B168] text-[#122F26]'
+                        : 'border-transparent text-[#3A5C50] hover:text-[#122F26]'
                         }`}
                     onClick={() => { setActiveTab('rules'); setPage(1); }}
                 >
@@ -177,8 +165,8 @@ export default function PricingRulesManagement() {
                 </button>
                 <button
                     className={`pb-4 px-4 text-sm font-medium transition-colors border-b-2 ${activeTab === 'fees'
-                            ? 'border-[#D9B168] text-[#122F26]'
-                            : 'border-transparent text-[#3A5C50] hover:text-[#122F26]'
+                        ? 'border-[#D9B168] text-[#122F26]'
+                        : 'border-transparent text-[#3A5C50] hover:text-[#122F26]'
                         }`}
                     onClick={() => { setActiveTab('fees'); setPage(1); }}
                 >

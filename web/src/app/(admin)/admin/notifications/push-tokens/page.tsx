@@ -9,8 +9,7 @@ export default function PushTokensManagement() {
     const [tokens, setTokens] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
-    const [page, setPage] = useState(1);
-    const [totalCount, setTotalCount] = useState(0);
+    const page = 1;
     const ITEMS_PER_PAGE = 20;
 
     useEffect(() => {
@@ -22,7 +21,6 @@ export default function PushTokensManagement() {
             setLoading(true);
             const data = await adminApi.getPushTokens({ page, search: search.trim() || undefined, per_page: ITEMS_PER_PAGE });
             setTokens(data.results || []);
-            setTotalCount(data.count || 0);
         } catch (err: any) {
             toast.error('Failed to load push tokens');
         } finally {

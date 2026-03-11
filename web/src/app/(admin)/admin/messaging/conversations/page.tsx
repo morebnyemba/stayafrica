@@ -2,15 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import { adminApi } from '@/lib/admin-api';
-import { Search, Eye, MessageSquare } from 'lucide-react';
+import { Search, Eye } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function ConversationsManagement() {
     const [conversations, setConversations] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
-    const [page, setPage] = useState(1);
-    const [totalCount, setTotalCount] = useState(0);
+    const page = 1;
     const ITEMS_PER_PAGE = 20;
 
     const [selectedConversation, setSelectedConversation] = useState<any | null>(null);
@@ -26,7 +25,6 @@ export default function ConversationsManagement() {
             setLoading(true);
             const data = await adminApi.getConversations({ page, search: search.trim() || undefined, per_page: ITEMS_PER_PAGE });
             setConversations(data.results || []);
-            setTotalCount(data.count || 0);
         } catch (err: any) {
             toast.error('Failed to load conversations');
         } finally {

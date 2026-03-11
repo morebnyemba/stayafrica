@@ -2,15 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import { adminApi } from '@/lib/admin-api';
-import { Search, Bell, CheckCircle, XCircle } from 'lucide-react';
+import { Search, Bell } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function NotificationsManagement() {
     const [notifications, setNotifications] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
-    const [page, setPage] = useState(1);
-    const [totalCount, setTotalCount] = useState(0);
+    const page = 1;
     const ITEMS_PER_PAGE = 20;
 
     useEffect(() => {
@@ -22,7 +21,6 @@ export default function NotificationsManagement() {
             setLoading(true);
             const data = await adminApi.getNotifications({ page, search: search.trim() || undefined, per_page: ITEMS_PER_PAGE });
             setNotifications(data.results || []);
-            setTotalCount(data.count || 0);
         } catch (err: any) {
             toast.error('Failed to load notifications');
         } finally {

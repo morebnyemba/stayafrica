@@ -10,8 +10,7 @@ export default function MessagesManagement() {
     const [messages, setMessages] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
-    const [page, setPage] = useState(1);
-    const [totalCount, setTotalCount] = useState(0);
+    const page = 1;
     const ITEMS_PER_PAGE = 20;
 
     const [showConfirm, setShowConfirm] = useState(false);
@@ -26,7 +25,6 @@ export default function MessagesManagement() {
             setLoading(true);
             const data = await adminApi.getMessages({ page, search: search.trim() || undefined, per_page: ITEMS_PER_PAGE });
             setMessages(data.results || []);
-            setTotalCount(data.count || 0);
         } catch (err: any) {
             toast.error('Failed to load messages');
         } finally {

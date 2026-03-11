@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { adminApi } from '@/lib/admin-api';
 import { Search, CheckCircle, Star } from 'lucide-react';
 import toast from 'react-hot-toast';
-import ConfirmDialog from '@/components/admin/ConfirmDialog';
 
 export default function BankAccountsManagement() {
     const [bankAccounts, setBankAccounts] = useState<any[]>([]);
@@ -172,7 +171,7 @@ export default function BankAccountsManagement() {
                                                             </button>
                                                         )}
                                                         {item.is_primary && (
-                                                            <CheckCircle className="w-5 h-5 text-green-500" title="Primary Account" />
+                                                            <CheckCircle className="w-5 h-5 text-green-500" />
                                                         )}
                                                     </div>
                                                 </td>

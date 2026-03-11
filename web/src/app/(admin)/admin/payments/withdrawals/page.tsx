@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { adminApi } from '@/lib/admin-api';
 import { Search, Loader, CheckCircle, XCircle, Clock } from 'lucide-react';
 import toast from 'react-hot-toast';
-import ConfirmDialog from '@/components/admin/ConfirmDialog';
 
 export default function WithdrawalsManagement() {
     const [withdrawals, setWithdrawals] = useState<any[]>([]);
@@ -242,8 +241,8 @@ export default function WithdrawalsManagement() {
                                                                 </button>
                                                             </>
                                                         )}
-                                                        {item.status === 'completed' && <Clock className="w-4 h-4 text-gray-400" title="Completed" />}
-                                                        {item.status === 'failed' && <Clock className="w-4 h-4 text-gray-400" title="Failed" />}
+                                                        {item.status === 'completed' && <Clock className="w-4 h-4 text-gray-400" />}
+                                                        {item.status === 'failed' && <Clock className="w-4 h-4 text-gray-400" />}
                                                     </div>
                                                 </td>
                                             </tr>
@@ -331,8 +330,8 @@ export default function WithdrawalsManagement() {
                                 onClick={handleConfirm}
                                 disabled={confirmAction.type === 'failed' && !adminNotes.trim()}
                                 className={`px-4 py-2 rounded-lg text-white ${confirmAction.type === 'processing' ? 'bg-blue-600 hover:bg-blue-700' :
-                                        confirmAction.type === 'completed' ? 'bg-green-600 hover:bg-green-700' :
-                                            'bg-red-600 hover:bg-red-700'
+                                    confirmAction.type === 'completed' ? 'bg-green-600 hover:bg-green-700' :
+                                        'bg-red-600 hover:bg-red-700'
                                     } disabled:opacity-50`}
                             >
                                 Confirm

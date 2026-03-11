@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { adminApi } from '@/lib/admin-api';
-import { Search, Plus, Edit2, Trash2, CheckCircle, XCircle } from 'lucide-react';
+import { Search, CheckCircle, XCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ConfirmDialog from '@/components/admin/ConfirmDialog';
 
@@ -13,7 +13,7 @@ export default function TaxConfigurationManagement() {
 
     const [data, setData] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
-    const [totalCount, setTotalCount] = useState(0);
+
 
     const [search, setSearch] = useState('');
     const [page, setPage] = useState(1);
@@ -51,7 +51,6 @@ export default function TaxConfigurationManagement() {
             }
 
             setData(res?.results || []);
-            setTotalCount(res?.count || 0);
         } catch (err: any) {
             toast.error('Failed to load data');
         } finally {
@@ -94,8 +93,8 @@ export default function TaxConfigurationManagement() {
                     <button
                         key={tab}
                         className={`pb-4 px-4 text-sm font-medium transition-colors border-b-2 whitespace-nowrap ${activeTab === tab
-                                ? 'border-[#D9B168] text-[#122F26]'
-                                : 'border-transparent text-[#3A5C50] hover:text-[#122F26]'
+                            ? 'border-[#D9B168] text-[#122F26]'
+                            : 'border-transparent text-[#3A5C50] hover:text-[#122F26]'
                             }`}
                         onClick={() => { setActiveTab(tab); setPage(1); }}
                     >
@@ -248,7 +247,7 @@ export default function TaxConfigurationManagement() {
                 message="Are you sure you want to proceed with this action?"
                 onConfirm={handleAction}
                 onClose={() => setShowConfirm(false)}
-                variant="primary"
+                variant="danger"
                 confirmText="Confirm"
             />
         </div>

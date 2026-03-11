@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { adminApi } from '@/lib/admin-api';
-import { IdentityVerification, VerificationStats } from '@/types/admin-types';
+import { IdentityVerification } from '@/types/admin-types';
 import { CheckCircle, XCircle, Clock, AlertCircle, Eye, Search } from 'lucide-react';
 import toast from 'react-hot-toast';
 import VerificationModal from '@/components/admin/VerificationModal';
@@ -14,7 +14,6 @@ export default function VerificationAttempts() {
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
     const [totalCount, setTotalCount] = useState(0);
-    const [stats, setStats] = useState<VerificationStats | null>(null);
     const [selectedVerification, setSelectedVerification] = useState<IdentityVerification | null>(null);
     const [showModal, setShowModal] = useState(false);
     const [search, setSearch] = useState('');
@@ -22,7 +21,6 @@ export default function VerificationAttempts() {
 
     useEffect(() => {
         loadVerifications();
-        loadStats();
     }, [page, search]);
 
     const loadVerifications = async () => {
@@ -41,15 +39,6 @@ export default function VerificationAttempts() {
             console.error('Verifications loading error:', err);
         } finally {
             setLoading(false);
-        }
-    };
-
-    const loadStats = async () => {
-        try {
-            const statsData = await adminApi.getVerificationStats();
-            setStats(statsData);
-        } catch (err: any) {
-            console.error('Stats load error:', err);
         }
     };
 
@@ -78,7 +67,6 @@ export default function VerificationAttempts() {
             toast.success('Verification approved');
             setShowModal(false);
             loadVerifications();
-            loadStats();
         } catch (err: any) {
             toast.error(err?.response?.data?.detail || 'Approval failed');
         } finally {
@@ -94,7 +82,6 @@ export default function VerificationAttempts() {
             toast.success('Verification rejected');
             setShowModal(false);
             loadVerifications();
-            loadStats();
         } catch (err: any) {
             toast.error(err?.response?.data?.detail || 'Rejection failed');
         } finally {
