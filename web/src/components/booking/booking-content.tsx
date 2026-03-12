@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
 import { Button } from '@/components/ui';
-import { Calendar, MapPin, Home, Image as ImageIcon } from 'lucide-react';
+import { Calendar, MapPin, Image as ImageIcon } from 'lucide-react';
 import { useAuth } from '@/store/auth-store';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
