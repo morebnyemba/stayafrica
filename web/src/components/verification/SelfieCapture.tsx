@@ -80,6 +80,18 @@ export const SelfieCapture = ({ onCaptureComplete }: SelfieCaptureProps) => {
   }, []);
 
   const startCamera = async () => {
+    // Check if we're in a secure context (HTTPS or localhost) — required for getUserMedia
+    if (typeof window !== 'undefined' && !window.isSecureContext) {
+      alert('Camera access requires a secure connection (HTTPS). Please access this site over HTTPS or upload a photo instead.');
+      return;
+    }
+
+    // Check if getUserMedia is available
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      alert('Camera is not supported in this browser. Please upload a photo instead.');
+      return;
+    }
+
     try {
       const mediaStream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } },
@@ -101,7 +113,43 @@ export const SelfieCapture = ({ onCaptureComplete }: SelfieCaptureProps) => {
       }
     } catch (error) {
       console.error('Camera error:', error);
-      alert('Unable to access camera. Please check permissions or upload a photo instead.');
+      if (error instanceof DOMException) {
+        switch (error.name) {
+          case 'NotAllowedError':
+            alert('Camera permission was denied. Please allow camera access in your browser settings (click the lock/camera icon in the address bar) and try again, or upload a photo instead.');
+            break;
+          case 'NotFoundError':
+            alert('No camera found on this device. Please upload a photo instead.');
+            break;
+          case 'NotReadableError':
+            alert('Camera is in use by another application. Please close other apps using the camera and try again.');
+            break;
+          case 'OverconstrainedError':
+            // Retry without constraints
+            try {
+              const fallbackStream = await navigator.mediaDevices.getUserMedia({ video: true });
+              if (videoRef.current) {
+                videoRef.current.srcObject = fallbackStream;
+              }
+              setStream(fallbackStream);
+              setIsCameraActive(true);
+              setLivenessStatus('no-face');
+              faceStableSinceRef.current = null;
+              if (livenessSupported && window.FaceDetector) {
+                detectorRef.current = new window.FaceDetector({ maxDetectedFaces: 1, fastMode: true });
+                rafRef.current = requestAnimationFrame(runDetectionLoop);
+              }
+              return;
+            } catch {
+              alert('Unable to access camera. Please upload a photo instead.');
+            }
+            break;
+          default:
+            alert('Unable to access camera. Please check permissions or upload a photo instead.');
+        }
+      } else {
+        alert('Unable to access camera. Please check permissions or upload a photo instead.');
+      }
     }
   };
 
