@@ -101,6 +101,14 @@ export function BookingCard({ property }: BookingCardProps) {
   const adjustedPerNight = dynamicPricing?.adjusted_price_per_night;
   const hasDiscount = adjustedPerNight && adjustedPerNight < property.price_per_night;
 
+  // Detailed breakdowns from dynamic pricing
+  const taxBreakdown: { name: string; type?: string; rate?: number; amount: number }[] =
+    hasDynamic && dynamicPricing.tax_breakdown?.length
+      ? dynamicPricing.tax_breakdown
+      : staticCosts?.individualTaxes?.filter((t: { name: string; amount: number }) => t.amount > 0) || [];
+  const feeBreakdown: { name: string; type?: string; amount: number }[] =
+    hasDynamic && dynamicPricing.fee_breakdown?.length ? dynamicPricing.fee_breakdown : [];
+
   const hasDateConflict = checkInDate && checkOutDate && hasUnavailableDatesInRange(checkInDate, checkOutDate);
 
   const handleBooking = () => {
@@ -255,18 +263,34 @@ export function BookingCard({ property }: BookingCardProps) {
                   <span>{property.currency} {displayServiceFee.toFixed(2)}</span>
                 </div>
               )}
-              {displayCleaningFee > 0 && (
+              {/* Individual fees from dynamic pricing */}
+              {feeBreakdown.length > 0 ? (
+                feeBreakdown.map((fee: any, idx: number) => (
+                  <div key={`fee-${idx}`} className="flex justify-between text-primary-700">
+                    <span>{fee.name}</span>
+                    <span>{property.currency} {Number(fee.amount).toFixed(2)}</span>
+                  </div>
+                ))
+              ) : displayCleaningFee > 0 ? (
                 <div className="flex justify-between text-primary-700">
                   <span>Cleaning fee</span>
                   <span>{property.currency} {displayCleaningFee.toFixed(2)}</span>
                 </div>
-              )}
-              {displayTaxes > 0 && (
+              ) : null}
+              {/* Individual taxes */}
+              {taxBreakdown.length > 0 ? (
+                taxBreakdown.map((tax: any, idx: number) => (
+                  <div key={`tax-${idx}`} className="flex justify-between text-primary-700">
+                    <span>{tax.name}{tax.rate ? ` (${tax.rate}%)` : ''}</span>
+                    <span>{property.currency} {Number(tax.amount).toFixed(2)}</span>
+                  </div>
+                ))
+              ) : displayTaxes > 0 ? (
                 <div className="flex justify-between text-primary-700">
                   <span>Taxes</span>
                   <span>{property.currency} {displayTaxes.toFixed(2)}</span>
                 </div>
-              )}
+              ) : null}
               {appliedRules.length > 0 && (
                 <div className="pt-1 text-xs text-green-700 font-medium">
                   💡 {appliedRules.map((r: any) => r.name).join(', ')}

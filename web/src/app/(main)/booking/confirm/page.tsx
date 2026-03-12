@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
+import { pricingApi } from '@/services/pricing-api';
 import { useAuth } from '@/store/auth-store';
 import { useFeeConfiguration, useTaxEstimate, calculateBookingCost } from '@/hooks/use-fees';
 import dynamic from 'next/dynamic';
@@ -11,7 +12,7 @@ const ProtectedRoute = dynamic(() => import('@/components/auth/protected-route')
 import {
   MapPin, Calendar, Users, ArrowLeft, Loader2,
   Star, Shield, MessageCircle, Clock, CheckCircle2,
-  Bed, Bath, Home,
+  Bed, Bath, Home, TrendingDown,
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import Link from 'next/link';
@@ -60,10 +61,38 @@ export default function BookingConfirmPage() {
 
   const { data: taxEstimate } = useTaxEstimate(property?.country);
 
-  let costs = { basePrice: 0, serviceFee: 0, commissionFee: 0, commissionRate: 0, cleaningFee: 0, taxes: 0, taxRate: 0, individualTaxes: [{ name: '', amount: 0 }], total: 0 };
+  // Fetch dynamic pricing from backend (includes pricing rules, property fees & taxes)
+  const { data: dynamicPricing, isLoading: dynamicLoading } = useQuery({
+    queryKey: ['dynamic-pricing-confirm', propertyId, checkIn, checkOut, guests],
+    queryFn: () => pricingApi.calculateBookingTotal(propertyId!, checkIn!, checkOut!, guests),
+    enabled: !!propertyId && !!checkIn && !!checkOut && nights > 0,
+    retry: false,
+  });
+
+  // Static fallback
+  let costs = { basePrice: 0, serviceFee: 0, commissionFee: 0, commissionRate: 0, cleaningFee: 0, taxes: 0, taxRate: 0, individualTaxes: [] as { name: string; amount: number }[], total: 0 };
   if (property && feeConfig && nights > 0) {
     costs = calculateBookingCost(property.price_per_night, nights, feeConfig, property.cleaning_fee, taxEstimate || null);
   }
+
+  // Prefer dynamic pricing over static
+  const hasDynamic = !!dynamicPricing && !dynamicLoading;
+  const displayTotal = hasDynamic ? dynamicPricing.grand_total : costs.total;
+  const displayNightly = hasDynamic ? dynamicPricing.nightly_total : costs.basePrice;
+  const displayServiceFee = hasDynamic ? dynamicPricing.service_fee : costs.serviceFee;
+  const displayCleaningFee = hasDynamic ? (dynamicPricing.cleaning_fee || 0) : costs.cleaningFee;
+  const displayTaxes = hasDynamic ? (dynamicPricing.taxes || 0) : costs.taxes;
+  const appliedRules: any[] = dynamicPricing?.applied_rules || [];
+  const adjustedPerNight = dynamicPricing?.adjusted_price_per_night;
+  const hasDiscount = adjustedPerNight && adjustedPerNight < (property?.price_per_night || 0);
+
+  // Detailed breakdowns from dynamic pricing
+  const taxBreakdown: { name: string; type?: string; rate?: number; amount: number }[] =
+    hasDynamic && dynamicPricing.tax_breakdown?.length
+      ? dynamicPricing.tax_breakdown
+      : costs.individualTaxes?.filter((t: { name: string; amount: number }) => t.amount > 0) || [];
+  const feeBreakdown: { name: string; type?: string; amount: number }[] =
+    hasDynamic && dynamicPricing.fee_breakdown?.length ? dynamicPricing.fee_breakdown : [];
 
   const [contactingHost, setContactingHost] = useState(false);
   const contactHost = async () => {
@@ -413,48 +442,99 @@ export default function BookingConfirmPage() {
                   Price details
                 </h2>
 
+                {dynamicLoading ? (
+                  <div className="animate-pulse space-y-3">
+                    <div className="h-4 bg-primary-100 rounded w-3/4" />
+                    <div className="h-4 bg-primary-100 rounded w-1/2" />
+                    <div className="h-4 bg-primary-100 rounded w-2/3" />
+                  </div>
+                ) : (
                 <div className="space-y-3 text-sm">
+                  {/* Nightly rate with dynamic pricing adjustment */}
                   <div className="flex justify-between">
                     <span className="text-primary-600">
-                      {property?.currency} {property?.price_per_night} × {nights} night{nights !== 1 ? 's' : ''}
+                      {hasDiscount ? (
+                        <>
+                          {property?.currency}{' '}
+                          <span className="line-through text-primary-400">{property?.price_per_night}</span>{' '}
+                          {adjustedPerNight.toFixed(2)} × {nights} night{nights !== 1 ? 's' : ''}
+                        </>
+                      ) : (
+                        <>
+                          {property?.currency} {property?.price_per_night} × {nights} night{nights !== 1 ? 's' : ''}
+                        </>
+                      )}
                     </span>
                     <span className="font-medium text-primary-900">
-                      {property?.currency} {costs.basePrice.toFixed(2)}
+                      {property?.currency} {displayNightly.toFixed(2)}
                     </span>
                   </div>
-                  {costs.serviceFee > 0 && (
-                    <div className="flex justify-between">
-                      <span className="text-primary-600">Service fee</span>
-                      <span className="font-medium text-primary-900">
-                        {property?.currency} {costs.serviceFee.toFixed(2)}
+
+                  {/* Applied pricing rules */}
+                  {appliedRules.length > 0 && (
+                    <div className="flex items-center gap-1 py-1">
+                      <TrendingDown className="w-3.5 h-3.5 text-green-600" />
+                      <span className="text-xs text-green-700 font-medium">
+                        {appliedRules.map((r: any) => r.name).join(', ')} applied
                       </span>
                     </div>
                   )}
 
-                  {costs.individualTaxes?.map((tax, idx) => (
-                    <div key={idx} className="flex justify-between">
-                      <span className="text-primary-600">
-                        {tax.name}
-                      </span>
-                      <span className="font-medium text-primary-900">
-                        {property?.currency} {tax.amount.toFixed(2)}
-                      </span>
-                    </div>
-                  ))}
-                  {costs.cleaningFee > 0 && (
+                  {displayServiceFee > 0 && (
                     <div className="flex justify-between">
-                      <span className="text-primary-600">Cleaning fee</span>
+                      <span className="text-primary-600">Service fee</span>
                       <span className="font-medium text-primary-900">
-                        {property?.currency} {costs.cleaningFee.toFixed(2)}
+                        {property?.currency} {displayServiceFee.toFixed(2)}
                       </span>
                     </div>
                   )}
+
+                  {/* Individual fees from dynamic pricing */}
+                  {feeBreakdown.length > 0 ? (
+                    feeBreakdown.map((fee: any, idx: number) => (
+                      <div key={`fee-${idx}`} className="flex justify-between">
+                        <span className="text-primary-600">{fee.name}</span>
+                        <span className="font-medium text-primary-900">
+                          {property?.currency} {Number(fee.amount).toFixed(2)}
+                        </span>
+                      </div>
+                    ))
+                  ) : displayCleaningFee > 0 ? (
+                    <div className="flex justify-between">
+                      <span className="text-primary-600">Cleaning fee</span>
+                      <span className="font-medium text-primary-900">
+                        {property?.currency} {displayCleaningFee.toFixed(2)}
+                      </span>
+                    </div>
+                  ) : null}
+
+                  {/* Individual taxes */}
+                  {taxBreakdown.length > 0 ? (
+                    taxBreakdown.map((tax: any, idx: number) => (
+                      <div key={`tax-${idx}`} className="flex justify-between">
+                        <span className="text-primary-600">
+                          {tax.name}{tax.rate ? ` (${tax.rate}%)` : ''}
+                        </span>
+                        <span className="font-medium text-primary-900">
+                          {property?.currency} {Number(tax.amount).toFixed(2)}
+                        </span>
+                      </div>
+                    ))
+                  ) : displayTaxes > 0 ? (
+                    <div className="flex justify-between">
+                      <span className="text-primary-600">Taxes</span>
+                      <span className="font-medium text-primary-900">
+                        {property?.currency} {displayTaxes.toFixed(2)}
+                      </span>
+                    </div>
+                  ) : null}
                 </div>
+                )}
 
                 <div className="flex justify-between text-lg font-bold mt-5 pt-5 border-t border-primary-200">
                   <span className="text-primary-900">Total</span>
                   <span className="text-secondary-700">
-                    {property?.currency} {costs.total.toFixed(2)}
+                    {property?.currency} {displayTotal.toFixed(2)}
                   </span>
                 </div>
 
@@ -500,7 +580,7 @@ export default function BookingConfirmPage() {
         <div className="lg:hidden fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-primary-200 shadow-[0_-4px_20px_rgba(0,0,0,0.1)] z-40">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-bold text-primary-900">
-              {property?.currency} {costs.total.toFixed(2)}
+              {property?.currency} {displayTotal.toFixed(2)}
             </span>
             <span className="text-xs text-primary-500">
               {nights} night{nights !== 1 ? 's' : ''}
