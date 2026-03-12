@@ -92,16 +92,17 @@ export function BookingCard({ property }: BookingCardProps) {
 
   // Use dynamic pricing if available, otherwise fall back to static
   const hasDynamic = !!dynamicPricing && !dynamicLoading;
-  const displayTotal = hasDynamic ? dynamicPricing.grand_total : (staticCosts?.total || 0);
-  const displayNightly = hasDynamic ? dynamicPricing.nightly_total : (staticCosts?.basePrice || 0);
-  const displayServiceFee = hasDynamic ? dynamicPricing.service_fee : (staticCosts?.serviceFee || 0);
-  const displayCleaningFee = hasDynamic ? (dynamicPricing.cleaning_fee || 0) : (staticCosts?.cleaningFee || 0);
-  const displayTaxes = hasDynamic ? (dynamicPricing.taxes || 0) : (staticCosts?.taxes || 0);
   const appliedRules = dynamicPricing?.applied_rules || [];
   const adjustedPerNight = dynamicPricing?.adjusted_price_per_night;
   const hasDiscount = adjustedPerNight && adjustedPerNight < property.price_per_night;
 
-  // Detailed breakdowns from dynamic pricing
+  const displayNightly = hasDynamic ? dynamicPricing.nightly_total : (staticCosts?.basePrice || 0);
+  const displayServiceFee = hasDynamic ? dynamicPricing.service_fee : (staticCosts?.serviceFee || 0);
+  const displayCleaningFee = hasDynamic ? (dynamicPricing.cleaning_fee || 0) : (staticCosts?.cleaningFee || 0);
+  const displayTaxes = hasDynamic ? (dynamicPricing.taxes || 0) : (staticCosts?.taxes || 0);
+  const displayTotal = hasDynamic ? dynamicPricing.grand_total : (staticCosts?.total || 0);
+
+  // Detailed breakdowns
   const taxBreakdown: { name: string; type?: string; rate?: number; amount: number }[] =
     hasDynamic && dynamicPricing.tax_breakdown?.length
       ? dynamicPricing.tax_breakdown

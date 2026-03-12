@@ -90,16 +90,55 @@ class PricingService:
         tax_breakdown = []
         
         taxes = PropertyTax.objects.filter(property=property_obj, is_active=True)
-        for tax in taxes:
-            tax_amount = tax.calculate_tax(nightly_total, total_fees)
-            total_taxes += tax_amount
-            if tax_amount > 0:
-                tax_breakdown.append({
-                    'name': tax.name,
-                    'type': tax.tax_type,
-                    'rate': float(tax.rate),
-                    'amount': float(tax_amount)
-                })
+        if taxes.exists():
+            for tax in taxes:
+                tax_amount = tax.calculate_tax(nightly_total, total_fees)
+                total_taxes += tax_amount
+                if tax_amount > 0:
+                    tax_breakdown.append({
+                        'name': tax.name,
+                        'type': tax.tax_type,
+                        'rate': float(tax.rate),
+                        'amount': float(tax_amount)
+                    })
+        else:
+            # Fall back to jurisdiction-level TaxRate by property country
+            try:
+                from apps.payments.tax_models import TaxRate, TaxJurisdiction
+                from django.db.models import Q
+
+                country = getattr(property_obj, 'country', '') or ''
+                country_code = getattr(property_obj, 'country_code', '') or ''
+                if country or country_code:
+                    today = date.today()
+                    jurisdictions = TaxJurisdiction.objects.filter(is_active=True).filter(
+                        Q(name__iexact=country) | Q(country_code__iexact=country_code[:2] if country_code else country[:2])
+                    )
+                    if jurisdictions.exists():
+                        rates = TaxRate.objects.filter(
+                            jurisdiction__in=jurisdictions,
+                            is_active=True,
+                            effective_from__lte=today,
+                        ).filter(Q(effective_to__isnull=True) | Q(effective_to__gte=today))
+
+                        for rate in rates:
+                            taxable = Decimal('0')
+                            if rate.applies_to_base_price:
+                                taxable += nightly_total
+                            if getattr(rate, 'applies_to_fees', False) or getattr(rate, 'applies_to_cleaning_fee', False):
+                                taxable += total_fees
+                            tax_amount = (taxable * rate.rate_percentage / Decimal('100')) + rate.flat_fee
+                            tax_amount = tax_amount.quantize(Decimal('0.01'))
+                            if tax_amount > 0:
+                                total_taxes += tax_amount
+                                tax_breakdown.append({
+                                    'name': rate.name,
+                                    'type': rate.tax_type,
+                                    'rate': float(rate.rate_percentage),
+                                    'amount': float(tax_amount)
+                                })
+            except Exception as e:
+                logger.warning(f"Jurisdiction tax fallback failed for property {property_obj.id}: {e}")
         
         return {
             'base_price_per_night': float(base_price_per_night),

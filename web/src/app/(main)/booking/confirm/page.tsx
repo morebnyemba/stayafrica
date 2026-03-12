@@ -77,16 +77,17 @@ export default function BookingConfirmPage() {
 
   // Prefer dynamic pricing over static
   const hasDynamic = !!dynamicPricing && !dynamicLoading;
-  const displayTotal = hasDynamic ? dynamicPricing.grand_total : costs.total;
-  const displayNightly = hasDynamic ? dynamicPricing.nightly_total : costs.basePrice;
-  const displayServiceFee = hasDynamic ? dynamicPricing.service_fee : costs.serviceFee;
-  const displayCleaningFee = hasDynamic ? (dynamicPricing.cleaning_fee || 0) : costs.cleaningFee;
-  const displayTaxes = hasDynamic ? (dynamicPricing.taxes || 0) : costs.taxes;
   const appliedRules: any[] = dynamicPricing?.applied_rules || [];
   const adjustedPerNight = dynamicPricing?.adjusted_price_per_night;
   const hasDiscount = adjustedPerNight && adjustedPerNight < (property?.price_per_night || 0);
 
-  // Detailed breakdowns from dynamic pricing
+  const displayNightly = hasDynamic ? dynamicPricing.nightly_total : costs.basePrice;
+  const displayServiceFee = hasDynamic ? dynamicPricing.service_fee : costs.serviceFee;
+  const displayCleaningFee = hasDynamic ? (dynamicPricing.cleaning_fee || 0) : costs.cleaningFee;
+  const displayTaxes = hasDynamic ? (dynamicPricing.taxes || 0) : costs.taxes;
+  const displayTotal = hasDynamic ? dynamicPricing.grand_total : costs.total;
+
+  // Detailed breakdowns
   const taxBreakdown: { name: string; type?: string; rate?: number; amount: number }[] =
     hasDynamic && dynamicPricing.tax_breakdown?.length
       ? dynamicPricing.tax_breakdown
