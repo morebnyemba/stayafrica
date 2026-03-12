@@ -588,9 +588,9 @@ export default function BookingDetailScreen() {
                   <TouchableOpacity
                     onPress={() => {
                       const prop = booking.property as any;
-                      const lat = prop?.location?.latitude || prop?.latitude;
-                      const lng = prop?.location?.longitude || prop?.longitude;
-                      const address = prop?.location?.address || prop?.address || '';
+                      const lat = prop?.latitude || prop?.location?.coordinates?.[1];
+                      const lng = prop?.longitude || prop?.location?.coordinates?.[0];
+                      const address = prop?.address || '';
                       
                       if (lat && lng) {
                         const url = Platform.select({
