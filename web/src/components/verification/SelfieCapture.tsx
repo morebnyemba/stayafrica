@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Camera, X, RefreshCw, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 import { useDocumentUpload } from './useDocumentUpload';
-import Image from 'next/image';
+import toast from 'react-hot-toast';
 
 interface SelfieCaptureProps {
   onCaptureComplete: (imageUrl: string) => void;
@@ -173,6 +173,12 @@ export const SelfieCapture = ({ onCaptureComplete }: SelfieCaptureProps) => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
 
+    // Guard: if the video hasn't started playing, dimensions will be 0
+    if (video.videoWidth === 0 || video.videoHeight === 0) {
+      toast.error('Camera feed is not ready yet. Please wait a moment and try again.');
+      return;
+    }
+
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
 
@@ -210,6 +216,8 @@ export const SelfieCapture = ({ onCaptureComplete }: SelfieCaptureProps) => {
       onCaptureComplete(url);
     } catch (error) {
       console.error('Upload failed:', error);
+      toast.error('Failed to upload selfie. Please try again.');
+      setPreview(null);
     } finally {
       setIsUploading(false);
     }
@@ -284,6 +292,7 @@ export const SelfieCapture = ({ onCaptureComplete }: SelfieCaptureProps) => {
                   ref={videoRef}
                   autoPlay
                   playsInline
+                  muted
                   className="w-full rounded-lg border"
                 />
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -350,11 +359,10 @@ export const SelfieCapture = ({ onCaptureComplete }: SelfieCaptureProps) => {
         </div>
       ) : (
         <div className="relative border rounded-lg overflow-hidden">
-          <Image
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
             src={preview}
             alt="Selfie preview"
-            width={400}
-            height={400}
             className="w-full h-96 object-contain bg-sand-50"
           />
           <div className="absolute top-2 right-2 flex gap-2">
