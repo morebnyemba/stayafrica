@@ -4,17 +4,14 @@ import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
 import { Button } from '@/components/ui';
-import { Calendar, MapPin, Home, Compass, Users, Clock, Image as ImageIcon } from 'lucide-react';
+import { Calendar, MapPin, Home, Image as ImageIcon } from 'lucide-react';
 import { useAuth } from '@/store/auth-store';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 
-type BookingTab = 'properties' | 'experiences';
-
 export function BookingContent() {
   const { isAuthenticated, user } = useAuth();
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<BookingTab>('properties');
   const [statusFilter, setStatusFilter] = useState('');
   const [contactingHost, setContactingHost] = useState<string | null>(null);
 
@@ -30,21 +27,7 @@ export function BookingContent() {
     enabled: isAuthenticated,
   });
 
-  // Experience bookings
-  const { data: expBookingsData, isLoading: expLoading, error: expError } = useQuery({
-    queryKey: ['experience-bookings', statusFilter],
-    queryFn: async () => {
-      const response = await apiClient.getExperienceBookings({
-        status: statusFilter || undefined,
-      });
-      const data = response.data;
-      return Array.isArray(data) ? data : data?.results ?? [];
-    },
-    enabled: isAuthenticated && activeTab === 'experiences',
-  });
-
   const bookings = bookingsData?.results || [];
-  const expBookings = expBookingsData || [];
 
   const contactHostMutation = useMutation({
     mutationFn: async (booking: any) => {
@@ -122,9 +105,6 @@ export function BookingContent() {
     );
   }
 
-  const currentLoading = activeTab === 'properties' ? isLoading : expLoading;
-  const currentError = activeTab === 'properties' ? error : expError;
-
   return (
     <div className="bg-sand-100 min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -136,32 +116,6 @@ export function BookingContent() {
           <p className="text-lg text-primary-600">
             View and manage your reservations
           </p>
-        </div>
-
-        {/* Tab Toggle */}
-        <div className="card p-2 mb-6">
-          <div className="flex">
-            <button
-              onClick={() => { setActiveTab('properties'); setStatusFilter(''); }}
-              className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold transition-all ${activeTab === 'properties'
-                  ? 'bg-primary-900 text-sand-50 shadow-md'
-                  : 'text-primary-600 hover:bg-primary-100'
-                }`}
-            >
-              <Home className="w-4 h-4" />
-              Stays
-            </button>
-            <button
-              onClick={() => { setActiveTab('experiences'); setStatusFilter(''); }}
-              className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold transition-all ${activeTab === 'experiences'
-                  ? 'bg-primary-900 text-sand-50 shadow-md'
-                  : 'text-primary-600 hover:bg-primary-100'
-                }`}
-            >
-              <Compass className="w-4 h-4" />
-              Experiences
-            </button>
-          </div>
         </div>
 
         {/* Status Filters */}
@@ -213,7 +167,7 @@ export function BookingContent() {
         </div>
 
         {/* Loading State */}
-        {currentLoading ? (
+        {isLoading ? (
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
               <div key={i} className="card p-6 animate-pulse">
@@ -223,141 +177,120 @@ export function BookingContent() {
               </div>
             ))}
           </div>
-        ) : currentError ? (
+        ) : error ? (
           <div className="card p-12 text-center">
             <p className="text-primary-600 mb-4">
               Unable to load bookings. Please try again later.
             </p>
             <p className="text-sm text-primary-500">
-              Error: {currentError instanceof Error ? currentError.message : 'Unknown error'}
+              Error: {error instanceof Error ? error.message : 'Unknown error'}
             </p>
           </div>
-        ) : activeTab === 'properties' ? (
-          /* ── Property Bookings ── */
-          bookings.length === 0 ? (
-            <div className="card p-12 text-center">
-              <Calendar className="w-16 h-16 text-primary-400 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-primary-900 mb-2">
-                No Stays Found
-              </h3>
-              <p className="text-primary-600 mb-8">
-                You haven&apos;t booked any stays yet. Start exploring properties!
-              </p>
-              <a href="/explore" className="inline-block">
-                <Button>Explore Properties</Button>
-              </a>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {/* Booking count */}
-              <p className="text-sm text-primary-500">
-                Showing {bookings.length} {bookings.length === 1 ? 'stay' : 'stays'}
-                {statusFilter ? ` · ${statusFilter}` : ''}
-              </p>
-              {bookings.map((booking: any) => {
-                const img = booking.property?.images?.[0]?.image || booking.property?.images?.[0]?.image_url || booking.property?.main_image_url;
-                const checkIn = new Date(booking.check_in);
-                const checkOut = new Date(booking.check_out);
-                const fmtDate = (d: Date) => d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-                return (
-                  <article key={booking.id} className="card overflow-hidden">
-                    <div className="flex flex-col sm:flex-row">
-                      {/* Property thumbnail */}
-                      <div className="sm:w-48 h-40 sm:h-auto flex-shrink-0 bg-primary-200 relative">
-                        {img ? (
-                          <img src={img} alt={booking.property?.title || ''} className="w-full h-full object-cover" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <ImageIcon className="w-10 h-10 text-primary-400" />
+        ) : bookings.length === 0 ? (
+          <div className="card p-12 text-center">
+            <Calendar className="w-16 h-16 text-primary-400 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-primary-900 mb-2">
+              No Bookings Found
+            </h3>
+            <p className="text-primary-600 mb-8">
+              You haven&apos;t booked any stays yet. Start exploring properties!
+            </p>
+            <a href="/explore" className="inline-block">
+              <Button>Explore Properties</Button>
+            </a>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {/* Booking count */}
+            <p className="text-sm text-primary-500">
+              Showing {bookings.length} {bookings.length === 1 ? 'booking' : 'bookings'}
+              {statusFilter ? ` · ${statusFilter}` : ''}
+            </p>
+            {bookings.map((booking: any) => {
+              const img = booking.property?.images?.[0]?.image || booking.property?.images?.[0]?.image_url || booking.property?.main_image_url;
+              const checkIn = new Date(booking.check_in);
+              const checkOut = new Date(booking.check_out);
+              const fmtDate = (d: Date) => d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+              return (
+                <article key={booking.id} className="card overflow-hidden">
+                  <div className="flex flex-col sm:flex-row">
+                    {/* Property thumbnail */}
+                    <div className="sm:w-48 h-40 sm:h-auto flex-shrink-0 bg-primary-200 relative">
+                      {img ? (
+                        <img src={img} alt={booking.property?.title || ''} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <ImageIcon className="w-10 h-10 text-primary-400" />
+                        </div>
+                      )}
+                      <span className={`absolute top-2 left-2 px-2.5 py-1 rounded-full text-xs font-semibold ${getStatusColor(booking.status)}`}>
+                        {booking.status === 'requested' ? 'Awaiting Host Approval' : booking.status === 'pending' ? 'Awaiting Payment' : booking.status}
+                      </span>
+                    </div>
+
+                    {/* Card body */}
+                    <div className="flex-1 p-4 sm:p-5">
+                      <div className="flex flex-col md:flex-row md:items-start justify-between mb-3">
+                        <div className="flex-1 mb-3 md:mb-0">
+                          <h3 className="text-lg font-semibold text-primary-900 mb-1">
+                            {booking.property?.title || booking.property_title || 'Property'}
+                          </h3>
+                          <div className="flex items-center gap-1.5 text-primary-500 text-sm">
+                            <MapPin className="w-3.5 h-3.5" />
+                            <span>{booking.property?.city || 'Unknown'}, {booking.property?.country || 'Unknown'}</span>
                           </div>
-                        )}
-                        <span className={`absolute top-2 left-2 px-2.5 py-1 rounded-full text-xs font-semibold ${getStatusColor(booking.status)}`}>
-                          {booking.status === 'requested' ? 'Awaiting Host Approval' : booking.status === 'pending' ? 'Awaiting Payment' : booking.status}
-                        </span>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-xl sm:text-2xl font-bold text-primary-900">
+                            ${booking.grand_total}
+                          </div>
+                          <div className="text-xs text-primary-500">
+                            Total Amount
+                          </div>
+                        </div>
                       </div>
 
-                      {/* Card body */}
-                      <div className="flex-1 p-4 sm:p-5">
-                        <div className="flex flex-col md:flex-row md:items-start justify-between mb-3">
-                          <div className="flex-1 mb-3 md:mb-0">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="inline-flex items-center gap-1 text-xs font-medium text-primary-500 bg-primary-100 px-2 py-0.5 rounded">
-                                <Home className="w-3 h-3" /> Stay
-                              </span>
-                            </div>
-                            <h3 className="text-lg font-semibold text-primary-900 mb-1">
-                              {booking.property?.title || booking.property_title || 'Property'}
-                            </h3>
-                            <div className="flex items-center gap-1.5 text-primary-500 text-sm">
-                              <MapPin className="w-3.5 h-3.5" />
-                              <span>{booking.property?.city || 'Unknown'}, {booking.property?.country || 'Unknown'}</span>
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <div className="text-xl sm:text-2xl font-bold text-primary-900">
-                              ${booking.grand_total}
-                            </div>
-                            <div className="text-xs text-primary-500">
-                              Total Amount
-                            </div>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 py-3 border-t border-primary-200">
+                        <div>
+                          <div className="text-xs text-primary-500 mb-0.5">Check-in</div>
+                          <div className="text-sm font-semibold text-primary-900">
+                            {fmtDate(checkIn)}
                           </div>
                         </div>
-
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 py-3 border-t border-primary-200">
-                          <div>
-                            <div className="text-xs text-primary-500 mb-0.5">Check-in</div>
-                            <div className="text-sm font-semibold text-primary-900">
-                              {fmtDate(checkIn)}
-                            </div>
+                        <div>
+                          <div className="text-xs text-primary-500 mb-0.5">Check-out</div>
+                          <div className="text-sm font-semibold text-primary-900">
+                            {fmtDate(checkOut)}
                           </div>
-                          <div>
-                            <div className="text-xs text-primary-500 mb-0.5">Check-out</div>
-                            <div className="text-sm font-semibold text-primary-900">
-                              {fmtDate(checkOut)}
-                            </div>
-                          </div>
-                          <div>
-                            <div className="text-xs text-primary-500 mb-0.5">Nights</div>
-                            <div className="text-sm font-semibold text-primary-900">
-                              {booking.nights}
-                            </div>
-                          </div>
-                          {booking.booking_ref && (
-                            <div>
-                              <div className="text-xs text-primary-500 mb-0.5">Ref</div>
-                              <div className="text-sm font-semibold text-primary-900 font-mono">
-                                {booking.booking_ref}
-                              </div>
-                            </div>
-                          )}
                         </div>
+                        <div>
+                          <div className="text-xs text-primary-500 mb-0.5">Nights</div>
+                          <div className="text-sm font-semibold text-primary-900">
+                            {booking.nights}
+                          </div>
+                        </div>
+                        {booking.booking_ref && (
+                          <div>
+                            <div className="text-xs text-primary-500 mb-0.5">Ref</div>
+                            <div className="text-sm font-semibold text-primary-900 font-mono">
+                              {booking.booking_ref}
+                            </div>
+                          </div>
+                        )}
+                      </div>
 
-                        <div className="flex flex-wrap gap-2 mt-3">
-                          <a href={`/bookings/${booking.id}`} className="inline-block">
-                            <Button variant="secondary" size="sm">View Details</Button>
-                          </a>
-                          {['pending', 'confirmed', 'PENDING', 'CONFIRMED'].includes(booking.status) &&
-                            booking.payment_status !== 'success' && (
-                              <a href={`/booking/payment?bookingId=${booking.id}`} className="inline-block">
-                                <Button size="sm">Pay Now</Button>
-                              </a>
-                            )}
-                          {(booking.status === 'CONFIRMED' || booking.status === 'confirmed') && (
-                            <>
-                              <Button
-                                onClick={() => handleContactHost(booking)}
-                                disabled={contactingHost === booking.id}
-                                variant="outline"
-                                size="sm"
-                              >
-                                {contactingHost === booking.id ? 'Starting...' : 'Contact Host'}
-                              </Button>
-                              <a href={`/bookings/${booking.id}/directions`} className="inline-block">
-                                <Button variant="outline" size="sm">Get Directions</Button>
-                              </a>
-                            </>
+                      <div className="flex flex-wrap gap-2 mt-3">
+                        <a href={`/bookings/${booking.id}`} className="inline-block">
+                          <Button variant="secondary" size="sm">View Details</Button>
+                        </a>
+                        {['pending', 'confirmed', 'PENDING', 'CONFIRMED'].includes(booking.status) &&
+                          booking.payment_status !== 'success' && (
+                            <a href={`/booking/payment?bookingId=${booking.id}`} className="inline-block">
+                              <Button size="sm">Pay Now</Button>
+                            </a>
                           )}
-                          {(booking.status === 'pending' || booking.status === 'PENDING') && (
+                        {(booking.status === 'CONFIRMED' || booking.status === 'confirmed') && (
+                          <>
                             <Button
                               onClick={() => handleContactHost(booking)}
                               disabled={contactingHost === booking.id}
@@ -366,100 +299,31 @@ export function BookingContent() {
                             >
                               {contactingHost === booking.id ? 'Starting...' : 'Contact Host'}
                             </Button>
-                          )}
-                        </div>
+                            <a href={`/bookings/${booking.id}/directions`} className="inline-block">
+                              <Button variant="outline" size="sm">Get Directions</Button>
+                            </a>
+                          </>
+                        )}
+                        {(booking.status === 'pending' || booking.status === 'PENDING') && (
+                          <Button
+                            onClick={() => handleContactHost(booking)}
+                            disabled={contactingHost === booking.id}
+                            variant="outline"
+                            size="sm"
+                          >
+                            {contactingHost === booking.id ? 'Starting...' : 'Contact Host'}
+                          </Button>
+                        )}
                       </div>
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
-          )
-        ) : (
-          /* ── Experience Bookings ── */
-          expBookings.length === 0 ? (
-            <div className="card p-12 text-center">
-              <Compass className="w-16 h-16 text-primary-400 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-primary-900 mb-2">
-                No Experiences Found
-              </h3>
-              <p className="text-primary-600 mb-8">
-                You haven&apos;t booked any experiences yet. Discover exciting activities!
-              </p>
-              <a href="/experiences" className="inline-block">
-                <Button>Explore Experiences</Button>
-              </a>
-            </div>
-          ) : (
-            <div className="space-y-6">
-              {expBookings.map((booking: any) => (
-                <article key={booking.id} className="card overflow-hidden">
-                  <div className="p-6">
-                    <div className="flex flex-col md:flex-row md:items-start justify-between mb-4">
-                      <div className="flex-1 mb-4 md:mb-0">
-                        <div className="flex items-center gap-3 mb-2">
-                          <span className="inline-flex items-center gap-1 text-xs font-medium text-amber-700 bg-amber-50 px-2 py-0.5 rounded">
-                            <Compass className="w-3 h-3" /> Experience
-                          </span>
-                          <h3 className="text-xl font-semibold text-primary-900">
-                            {booking.experience_title || booking.experience?.title || 'Experience'}
-                          </h3>
-                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(booking.status)}`}>
-                            {booking.status}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-2xl font-bold text-primary-900">
-                          ${booking.total_amount}
-                        </div>
-                        <div className="text-sm text-primary-600">
-                          Total Amount
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="grid md:grid-cols-3 gap-4 py-4 border-t border-primary-200">
-                      <div>
-                        <div className="text-sm text-primary-600 mb-1 flex items-center gap-1">
-                          <Calendar className="w-3.5 h-3.5" /> Date
-                        </div>
-                        <div className="font-semibold text-primary-900">
-                          {new Date(booking.booking_date).toLocaleDateString()}
-                        </div>
-                      </div>
-                      {booking.booking_time && (
-                        <div>
-                          <div className="text-sm text-primary-600 mb-1 flex items-center gap-1">
-                            <Clock className="w-3.5 h-3.5" /> Time
-                          </div>
-                          <div className="font-semibold text-primary-900">
-                            {booking.booking_time}
-                          </div>
-                        </div>
-                      )}
-                      <div>
-                        <div className="text-sm text-primary-600 mb-1 flex items-center gap-1">
-                          <Users className="w-3.5 h-3.5" /> Participants
-                        </div>
-                        <div className="font-semibold text-primary-900">
-                          {booking.num_participants}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex flex-wrap gap-3 mt-4">
-                      {(booking.status === 'confirmed' || booking.status === 'CONFIRMED') && (
-                        <Button variant="secondary" size="sm">Contact Host</Button>
-                      )}
                     </div>
                   </div>
                 </article>
-              ))}
-            </div>
-          )
+              );
+            })}
+          </div>
         )}
       </div>
     </div>
   );
 }
+
