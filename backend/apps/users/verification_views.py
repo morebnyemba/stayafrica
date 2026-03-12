@@ -102,7 +102,7 @@ class IdentityVerificationViewSet(viewsets.ModelViewSet):
         # Check if expired
         verification.check_and_expire()
         
-        serializer = IdentityVerificationSerializer(verification)
+        serializer = IdentityVerificationSerializer(verification, context={'request': request})
         return Response({
             'has_verification': True,
             'is_verified': request.user.is_verified,
@@ -218,7 +218,7 @@ class IdentityVerificationViewSet(viewsets.ModelViewSet):
             
             return Response({
                 'message': 'Verification approved successfully',
-                'verification': IdentityVerificationSerializer(verification).data
+                'verification': IdentityVerificationSerializer(verification, context={'request': request}).data
             })
         
         elif action_type == 'reject':
@@ -247,7 +247,7 @@ class IdentityVerificationViewSet(viewsets.ModelViewSet):
             
             return Response({
                 'message': 'Verification rejected',
-                'verification': IdentityVerificationSerializer(verification).data
+                'verification': IdentityVerificationSerializer(verification, context={'request': request}).data
             })
     
     @action(detail=False, methods=['get'], permission_classes=[IsAdminUser])
@@ -257,7 +257,7 @@ class IdentityVerificationViewSet(viewsets.ModelViewSet):
             status__in=['pending', 'under_review']
         ).select_related('user').order_by('submitted_at')
         
-        serializer = IdentityVerificationSerializer(pending, many=True)
+        serializer = IdentityVerificationSerializer(pending, many=True, context={'request': request})
         return Response({
             'count': pending.count(),
             'results': serializer.data

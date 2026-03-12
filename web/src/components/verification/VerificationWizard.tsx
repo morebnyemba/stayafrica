@@ -85,42 +85,57 @@ function StatusBadge({ status }: { status: string }) {
 /* ────────────────────────────────────────── */
 function ImagePreview({ src, alt }: { src?: string; alt: string }) {
   const [revealed, setRevealed] = useState(false);
+  const [loadError, setLoadError] = useState(false);
 
   if (!src) return null;
 
   const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
-  const imgSrc = src.startsWith('http') ? src : `${apiBase}/media/${src}`;
+  // Build image URL: full URL as-is, leading slash as absolute path, or prepend /media/
+  const imgSrc = src.startsWith('http')
+    ? src
+    : src.startsWith('/')
+      ? `${apiBase}${src}`
+      : `${apiBase}/media/${src}`;
 
   return (
     <div className="relative group rounded-lg overflow-hidden border border-sand-200/50 bg-primary-100">
       <div className="aspect-[4/3] relative">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={imgSrc}
-          alt={alt}
-          className={`w-full h-full object-cover transition-all duration-300 ${
-            revealed ? '' : 'blur-lg scale-105'
-          }`}
-        />
-        {!revealed && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/10">
-            <button
-              onClick={() => setRevealed(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-white/90 rounded-lg shadow-sm text-sm font-medium text-primary-700 hover:bg-white transition-colors"
-            >
-              <Eye className="h-4 w-4" />
-              Show preview
-            </button>
+        {loadError ? (
+          <div className="w-full h-full flex items-center justify-center text-xs text-primary-400">
+            Image unavailable
           </div>
-        )}
-        {revealed && (
-          <button
-            onClick={() => setRevealed(false)}
-            className="absolute top-2 right-2 p-1.5 bg-black/50 rounded-full text-white hover:bg-black/70 transition-colors"
-            aria-label="Hide preview"
-          >
-            <EyeOff className="h-3.5 w-3.5" />
-          </button>
+        ) : (
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={imgSrc}
+              alt={alt}
+              onError={() => setLoadError(true)}
+              className={`w-full h-full object-cover transition-all duration-300 ${
+                revealed ? '' : 'blur-lg scale-105'
+              }`}
+            />
+            {!revealed && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/10">
+                <button
+                  onClick={() => setRevealed(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-white/90 rounded-lg shadow-sm text-sm font-medium text-primary-700 hover:bg-white transition-colors"
+                >
+                  <Eye className="h-4 w-4" />
+                  Show preview
+                </button>
+              </div>
+            )}
+            {revealed && (
+              <button
+                onClick={() => setRevealed(false)}
+                className="absolute top-2 right-2 p-1.5 bg-black/50 rounded-full text-white hover:bg-black/70 transition-colors"
+                aria-label="Hide preview"
+              >
+                <EyeOff className="h-3.5 w-3.5" />
+              </button>
+            )}
+          </>
         )}
       </div>
       <p className="text-xs text-center py-1.5 text-primary-400">{alt}</p>
