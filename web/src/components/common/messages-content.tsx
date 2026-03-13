@@ -382,6 +382,59 @@ export function MessagesContent() {
                           );
                         }
                       }
+                      
+                      // Support Ticket Actions
+                      if (selectedConversation.conversation_type === 'support' && selectedConversation.ticket_id) {
+                        const status = selectedConversation.ticket_status;
+                        const isClosedOrResolved = status === 'closed' || status === 'resolved';
+
+                        return (
+                          <div className="flex items-center gap-3">
+                            <span className={`px-2.5 py-1 text-xs font-semibold rounded-full border ${
+                              isClosedOrResolved 
+                                ? 'bg-gray-100 text-gray-700 border-gray-200' 
+                                : 'bg-green-100 text-green-700 border-green-200'
+                            }`}>
+                              {status ? status.replace('_', ' ').toUpperCase() : 'UNKNOWN'}
+                            </span>
+
+                            {isClosedOrResolved ? (
+                              <button
+                                onClick={async () => {
+                                  try {
+                                    await apiClient.changeSupportTicketStatus(selectedConversation.ticket_id, 'open');
+                                    queryClient.invalidateQueries({ queryKey: ['conversations'] });
+                                    toast.success('Ticket reopened');
+                                  } catch (e) {
+                                    toast.error('Could not reopen ticket');
+                                  }
+                                }}
+                                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-white text-secondary-600 border border-secondary-600 hover:bg-secondary-50 font-medium rounded-lg text-sm transition"
+                              >
+                                Reopen Ticket
+                              </button>
+                            ) : (
+                              <button
+                                onClick={async () => {
+                                  if (confirm('Are you sure you want to close this ticket?')) {
+                                    try {
+                                      await apiClient.changeSupportTicketStatus(selectedConversation.ticket_id, 'closed');
+                                      queryClient.invalidateQueries({ queryKey: ['conversations'] });
+                                      toast.success('Ticket closed');
+                                    } catch (e) {
+                                      toast.error('Could not close ticket');
+                                    }
+                                  }
+                                }}
+                                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-white text-gray-600 border border-gray-300 hover:bg-gray-50 font-medium rounded-lg text-sm transition"
+                              >
+                                Close Ticket
+                              </button>
+                            )}
+                          </div>
+                        );
+                      }
+
                       return null;
                     })()}
                     <button
