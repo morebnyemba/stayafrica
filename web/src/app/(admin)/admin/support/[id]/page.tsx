@@ -219,36 +219,80 @@ export default function TicketDetailView() {
       <Card className="md:col-span-2 flex flex-col h-[700px]">
         <CardHeader className="border-b bg-muted/20">
           <div className="text-xl font-semibold">{ticket.subject}</div>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            Conversation with <span className="font-medium text-foreground">{ticket.requester_name}</span>
+          </p>
         </CardHeader>
         
         <ScrollArea className="flex-1 p-4">
           <div className="space-y-4">
             {messages.length === 0 ? (
               <div className="text-center text-muted-foreground py-8">
-                No messages loaded. Wait for WebSocket connection.
+                No messages yet. Start the conversation with the customer.
               </div>
             ) : (
-              messages.map((msg, idx) => (
-                <div 
-                  key={msg.id || idx} 
-                  className={`flex flex-col max-w-[80%] ${msg.isOwn ? 'ml-auto' : 'mr-auto'}`}
-                >
-                  {!msg.isOwn && (
-                    <span className="text-xs text-muted-foreground ml-1 mb-1">
-                      {msg.sender_name}
-                    </span>
-                  )}
+              messages.map((msg, idx) => {
+                const isCustomer = !msg.isOwn && msg.sender_id === ticket.requester;
+                const initial = (msg.sender_name || '?').charAt(0).toUpperCase();
+                const roleLabel = msg.isOwn ? 'You · Agent' : isCustomer ? 'Customer' : 'Agent';
+
+                return (
                   <div 
-                    className={`p-3 rounded-lg text-sm ${
-                      msg.isOwn 
-                        ? 'bg-primary text-primary-foreground' 
-                        : 'bg-muted'
-                    }`}
+                    key={msg.id || idx} 
+                    className={`flex gap-2.5 max-w-[85%] ${msg.isOwn ? 'ml-auto flex-row-reverse' : 'mr-auto'}`}
                   >
-                    {msg.text}
+                    {/* Avatar */}
+                    <div 
+                      className={`h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5 ${
+                        msg.isOwn 
+                          ? 'bg-primary text-primary-foreground' 
+                          : isCustomer 
+                            ? 'bg-orange-100 text-orange-700' 
+                            : 'bg-blue-100 text-blue-700'
+                      }`}
+                    >
+                      {initial}
+                    </div>
+
+                    {/* Message content */}
+                    <div className={`flex flex-col ${msg.isOwn ? 'items-end' : 'items-start'}`}>
+                      {/* Sender name + role badge */}
+                      <div className={`flex items-center gap-1.5 mb-1 ${msg.isOwn ? 'flex-row-reverse' : ''}`}>
+                        <span className="text-xs font-medium text-foreground">
+                          {msg.sender_name || 'Unknown'}
+                        </span>
+                        <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
+                          msg.isOwn 
+                            ? 'bg-primary/10 text-primary' 
+                            : isCustomer 
+                              ? 'bg-orange-100 text-orange-700' 
+                              : 'bg-blue-100 text-blue-700'
+                        }`}>
+                          {roleLabel}
+                        </span>
+                      </div>
+
+                      {/* Bubble */}
+                      <div 
+                        className={`p-3 rounded-lg text-sm ${
+                          msg.isOwn 
+                            ? 'bg-primary text-primary-foreground rounded-tr-sm' 
+                            : isCustomer
+                              ? 'bg-orange-50 border border-orange-200 text-foreground rounded-tl-sm'
+                              : 'bg-muted text-foreground rounded-tl-sm'
+                        }`}
+                      >
+                        {msg.text}
+                      </div>
+
+                      {/* Timestamp */}
+                      <span className="text-[10px] text-muted-foreground mt-1 px-1">
+                        {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              ))
+                );
+              })
             )}
             <div ref={messagesEndRef} />
           </div>
