@@ -4,10 +4,11 @@ const API_BASE = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1`;
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const token = req.headers.get('authorization') || '';
-  const res = await fetch(`${API_BASE}/support/tickets/${params.id}/`, {
+  const res = await fetch(`${API_BASE}/support/tickets/${id}/`, {
     headers: { Authorization: token }
   });
   const data = await res.json();
