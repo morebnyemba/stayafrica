@@ -105,10 +105,6 @@ INSTALLED_APPS = [
     'dj_rest_auth.registration',
     
     # Local apps
-    'apps.search',
-    'apps.locations',
-    'apps.events',
-    'apps.dashboard',
     'apps.support',
     'apps.users',
     'apps.properties',
