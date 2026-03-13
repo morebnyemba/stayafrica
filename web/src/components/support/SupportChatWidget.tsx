@@ -38,7 +38,10 @@ export const SupportChatWidget = () => {
     if (step === 'chat' && conversationId && isAuthenticated && typeof window !== 'undefined') {
       const accessToken = localStorage.getItem('access_token');
       if (!accessToken) return;
-      const socket = new WebSocket(`${process.env.NEXT_PUBLIC_WS_URL}/ws/chat/?token=${accessToken}`);
+      const wsBase = process.env.NEXT_PUBLIC_WS_URL ||
+        `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}`;
+      const socket = new WebSocket(`${wsBase}/ws/chat/?token=${accessToken}`);
+
       socket.onopen = () => socket.send(JSON.stringify({ type: 'join_conversation', conversation_id: conversationId }));
       socket.onmessage = (event) => {
         const data = JSON.parse(event.data);

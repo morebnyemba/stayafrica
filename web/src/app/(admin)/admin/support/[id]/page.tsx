@@ -61,9 +61,10 @@ export default function TicketDetailView() {
       const accessToken = localStorage.getItem('access_token');
       if (!accessToken) return;
 
-      const socket = new WebSocket(
-        `${process.env.NEXT_PUBLIC_WS_URL}/ws/support/?token=${accessToken}`
-      );
+      const wsBase = process.env.NEXT_PUBLIC_WS_URL ||
+        `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}`;
+      const socket = new WebSocket(`${wsBase}/ws/support/?token=${accessToken}`);
+
 
       socket.onopen = () => {
         // Technically this is connected to the SupportConsumer which auto-listens
