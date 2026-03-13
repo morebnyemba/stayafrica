@@ -40,7 +40,11 @@ export default function TicketDetailView() {
     if (!accessToken) return;
     
     try {
-      const res = await fetch(`/api/support/tickets/${id}/`, {
+      const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || 
+        (typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.host}` : '');
+      const baseUrl = apiBase.replace(/\/api\/v1\/?$/, '') + '/api/v1';
+
+      const res = await fetch(`${baseUrl}/support/tickets/${id}/`, {
         headers: { 'Authorization': `Bearer ${accessToken}` }
       });
       if (!res.ok) throw new Error('Failed to fetch ticket');
@@ -49,7 +53,7 @@ export default function TicketDetailView() {
       
       // Fetch existing messages if there's a conversation
       if (data.conversation) {
-        const msgRes = await fetch(`/api/messaging/conversations/${data.conversation}/`, {
+        const msgRes = await fetch(`${baseUrl}/messaging/conversations/${data.conversation}/`, {
           headers: { 'Authorization': `Bearer ${accessToken}` }
         });
         if (msgRes.ok) {
