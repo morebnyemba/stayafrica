@@ -90,37 +90,77 @@ class ChatConsumer(AsyncWebsocketConsumer):
             }))
     
     async def handle_chat_message(self, data):
-        """Handle sending a chat message"""
+        """Handle sending a chat message.
+        
+        If receiver_id is provided → direct user-to-user message.
+        If receiver_id is None/missing → support-ticket mode:
+            message is saved and broadcast to the conversation group so all
+            participants (user + assigned agent) receive it in real time.
+        """
         conversation_id = data.get('conversation_id')
-        receiver_id = data.get('receiver_id')
+        receiver_id = data.get('receiver_id')  # May be None for support chats
         text = data.get('text', '').strip()
-        
-        if not conversation_id or not receiver_id or not text:
+
+        if not conversation_id or not text:
             await self.send(text_data=json.dumps({
                 'type': 'error',
-                'message': 'Missing required fields: conversation_id, receiver_id, text'
+                'message': 'Missing required fields: conversation_id, text'
             }))
             return
-        
-        # Save message to database
-        message = await self.save_message(
-            conversation_id=conversation_id,
-            sender_id=self.user.id,
-            receiver_id=receiver_id,
-            text=text
-        )
-        
-        if not message:
+
+        if receiver_id:
+            # ── Normal DM flow ──────────────────────────────────────────────
+            message = await self.save_message(
+                conversation_id=conversation_id,
+                sender_id=self.user.id,
+                receiver_id=receiver_id,
+                text=text
+            )
+            if not message:
+                await self.send(text_data=json.dumps({'type': 'error', 'message': 'Failed to save message'}))
+                return
+
+            await self.channel_layer.group_send(
+                f"user_{receiver_id}",
+                {
+                    'type': 'chat_message_handler',
+                    'message_id': message['id'],
+                    'conversation_id': conversation_id,
+                    'sender_id': self.user.id,
+                    'sender_name': message['sender_name'],
+                    'text': text,
+                    'created_at': message['created_at'],
+                }
+            )
+
             await self.send(text_data=json.dumps({
-                'type': 'error',
-                'message': 'Failed to save message'
+                'type': 'message_sent',
+                'message_id': message['id'],
+                'conversation_id': conversation_id,
+                'created_at': message['created_at'],
+                'status': 'delivered'
             }))
-            return
-        
-        # Send message to receiver's channel
-        await self.channel_layer.group_send(
-            f"user_{receiver_id}",
-            {
+
+            try:
+                from services.notification_service import NotificationService
+                from apps.messaging.models import Message
+                message_obj = await database_sync_to_async(Message.objects.get)(id=message['id'])
+                await database_sync_to_async(NotificationService.send_new_message)(message_obj)
+            except Exception as e:
+                logger.warning(f"Failed to send push notification: {e}")
+
+        else:
+            # ── Support-ticket / conversation-group flow ────────────────────
+            message = await self.save_support_message(
+                conversation_id=conversation_id,
+                sender_id=self.user.id,
+                text=text
+            )
+            if not message:
+                await self.send(text_data=json.dumps({'type': 'error', 'message': 'Failed to save message'}))
+                return
+
+            payload = {
                 'type': 'chat_message_handler',
                 'message_id': message['id'],
                 'conversation_id': conversation_id,
@@ -129,25 +169,20 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 'text': text,
                 'created_at': message['created_at'],
             }
-        )
-        
-        # Send confirmation to sender
-        await self.send(text_data=json.dumps({
-            'type': 'message_sent',
-            'message_id': message['id'],
-            'conversation_id': conversation_id,
-            'created_at': message['created_at'],
-            'status': 'delivered'
-        }))
-        
-        # Send push notification to receiver
-        try:
-            from services.notification_service import NotificationService
-            from apps.messaging.models import Message
-            message_obj = await database_sync_to_async(Message.objects.get)(id=message['id'])
-            await database_sync_to_async(NotificationService.send_new_message)(message_obj)
-        except Exception as e:
-            logger.warning(f"Failed to send push notification: {e}")
+
+            # Broadcast to everyone joined to this conversation room
+            await self.channel_layer.group_send(
+                f"conversation_{conversation_id}",
+                payload
+            )
+
+            await self.send(text_data=json.dumps({
+                'type': 'message_sent',
+                'message_id': message['id'],
+                'conversation_id': conversation_id,
+                'created_at': message['created_at'],
+                'status': 'delivered'
+            }))
     
     async def handle_typing_indicator(self, data):
         """Handle typing indicator"""
@@ -371,7 +406,37 @@ class ChatConsumer(AsyncWebsocketConsumer):
         except Exception as e:
             logger.error(f"Error saving message: {e}")
             return None
-    
+
+    @database_sync_to_async
+    def save_support_message(self, conversation_id, sender_id, text):
+        """Save a support-chat message (no explicit receiver — support ticket mode)."""
+        try:
+            from apps.messaging.models import Message, Conversation
+            from apps.users.models import User
+
+            conversation = Conversation.objects.get(id=conversation_id)
+            sender = User.objects.get(id=sender_id)
+
+            message = Message.objects.create(
+                conversation=conversation,
+                sender=sender,
+                receiver=None,  # Support messages have no single receiver
+                text=text,
+                message_type='support_request' if not sender.is_support_agent else 'support_response'
+            )
+
+            conversation.updated_at = timezone.now()
+            conversation.save(update_fields=['updated_at'])
+
+            return {
+                'id': message.id,
+                'sender_name': sender.get_full_name() or sender.email,
+                'created_at': message.created_at.isoformat(),
+            }
+        except Exception as e:
+            logger.error(f"Error saving support message: {e}")
+            return None
+
     @database_sync_to_async
     def mark_messages_as_read(self, message_ids, user_id):
         """Mark messages as read"""

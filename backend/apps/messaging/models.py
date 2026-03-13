@@ -92,7 +92,7 @@ class Message(models.Model):
         help_text='Conversation this message belongs to'
     )
     sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='messages_sent')
-    receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='messages_received')
+    receiver = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='messages_received')
     text = models.TextField()
     message_type = models.CharField(max_length=30, choices=MESSAGE_TYPES, default='text')
     is_read = models.BooleanField(default=False)
