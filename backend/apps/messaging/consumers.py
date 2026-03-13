@@ -69,6 +69,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 await self.handle_join_conversation(data)
             elif message_type == 'leave_conversation':
                 await self.handle_leave_conversation(data)
+            elif message_type == 'support_request':
+                await self.handle_support_request(data)
+            elif message_type == 'support_agent_join':
+                await self.handle_agent_join(data)
             else:
                 logger.warning(f"Unknown message type: {message_type}")
                 
@@ -238,6 +242,52 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'conversation_id': conversation_id
         }))
     
+    async def handle_support_request(self, data):
+        """Handle incoming support requests from users"""
+        text = data.get('text', '').strip()
+        category = data.get('category', 'other')
+        
+        if not text:
+            await self.send(text_data=json.dumps({
+                'type': 'error',
+                'message': 'Message text is required for support requests'
+            }))
+            return
+            
+        # Broadcast the new request to the global support agents group
+        # Real logic for creating the SupportTicket will happen via a REST API, 
+        # but this allows real-time UI updates for actively connected agents.
+        await self.channel_layer.group_send(
+            "support_agents",
+            {
+                'type': 'new_support_request_handler',
+                'user_id': self.user.id,
+                'user_name': self.user.get_full_name() or self.user.email,
+                'text': text,
+                'category': category
+            }
+        )
+        
+    async def handle_agent_join(self, data):
+        """Handle support agent joining a user's support ticket"""
+        conversation_id = data.get('conversation_id')
+        user_id = data.get('user_id')  # The guest/host who made the request
+        
+        if not conversation_id or not user_id:
+            return
+            
+        # Notify the specific user that an agent has joined
+        await self.channel_layer.group_send(
+            f"user_{user_id}",
+            {
+                'type': 'support_agent_joined_handler',
+                'conversation_id': conversation_id,
+                'agent_id': self.user.id,
+                'agent_name': self.user.get_full_name() or self.user.email,
+            }
+        )
+
+    
     # Handler methods called by channel layer
     async def chat_message_handler(self, event):
         """Send chat message to WebSocket"""
@@ -268,6 +318,25 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'message_ids': event['message_ids'],
             'read_by_id': event['read_by_id'],
             'read_at': event['read_at'],
+        }))
+        
+    async def new_support_request_handler(self, event):
+        """Send new support request notification to agents"""
+        await self.send(text_data=json.dumps({
+            'type': 'new_support_request',
+            'user_id': event['user_id'],
+            'user_name': event['user_name'],
+            'text': event['text'],
+            'category': event['category']
+        }))
+        
+    async def support_agent_joined_handler(self, event):
+        """Send agent join notification to user"""
+        await self.send(text_data=json.dumps({
+            'type': 'support_agent_joined',
+            'conversation_id': event['conversation_id'],
+            'agent_id': event['agent_id'],
+            'agent_name': event['agent_name']
         }))
     
     # Database operations

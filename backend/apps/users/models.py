@@ -7,6 +7,7 @@ class User(AbstractUser):
         ('guest', 'Guest'),
         ('host', 'Host'),
         ('admin', 'Admin'),
+        ('support_agent', 'Support Agent'),
     ]
     
     PROFILE_CHOICES = [
@@ -89,6 +90,10 @@ class User(AbstractUser):
     @property
     def is_admin_user(self):
         return self.role == 'admin' or self.is_staff
+
+    @property
+    def is_support_agent(self):
+        return self.role == 'support_agent' or self.is_admin_user
 
 
 class UserPreference(models.Model):

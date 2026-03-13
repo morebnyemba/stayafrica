@@ -29,6 +29,7 @@ urlpatterns = [
     path('api/v1/', include('apps.experiences.urls')),
     path('api/v1/', include('apps.notifications.urls')),
     path('api/v1/messaging/', include('apps.messaging.urls')),
+    path('api/v1/support/', include('apps.support.urls')),
     path('api/v1/admin/', include('apps.admin_dashboard.urls')),
     
     # Social Authentication

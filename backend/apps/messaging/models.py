@@ -10,6 +10,14 @@ class Conversation(models.Model):
     Conversation thread between users
     Can be related to a specific property or booking
     """
+    CONVERSATION_TYPES = [
+        ('direct', 'Direct Message'),
+        ('support', 'Support Ticket'),
+    ]
+
+    conversation_type = models.CharField(
+        max_length=20, choices=CONVERSATION_TYPES, default='direct'
+    )
     participants = models.ManyToManyField(User, related_name='conversations')
     property = models.ForeignKey(
         Property,
@@ -72,6 +80,9 @@ class Message(models.Model):
         ('booking_request', 'Booking Request'),
         ('booking_confirmation', 'Booking Confirmation'),
         ('review_reminder', 'Review Reminder'),
+        ('support_request', 'Support Request'),
+        ('support_response', 'Support Response'),
+        ('bug_report', 'Bug Report'),
     ]
     
     conversation = models.ForeignKey(
