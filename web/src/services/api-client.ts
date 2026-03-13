@@ -231,6 +231,11 @@ class ApiClient {
     return this.client.post(`/messaging/conversations/${safeId}/mark_as_read/`);
   }
 
+  async changeSupportTicketStatus(ticketId: string | number, status: string) {
+    const safeId = this.assertId(ticketId?.toString(), 'Ticket ID');
+    return this.client.post(`/support/tickets/${safeId}/change_status/`, { status });
+  }
+
   async preApproveConversation(conversationId: string) {
     const safeId = this.assertId(conversationId, 'Conversation ID');
     return this.client.post(`/messaging/conversations/${safeId}/pre_approve/`);

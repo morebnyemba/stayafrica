@@ -43,15 +43,30 @@ class ConversationSerializer(serializers.ModelSerializer):
     property_title = serializers.CharField(source='property.title', read_only=True)
     booking_id = serializers.CharField(source='booking.id', read_only=True)
     
+    # Support ticket extensions
+    ticket_id = serializers.SerializerMethodField()
+    ticket_status = serializers.SerializerMethodField()
+    
     class Meta:
         model = Conversation
         fields = [
             'id', 'participants', 'other_participant', 'property', 'property_title',
             'booking', 'booking_id', 'subject', 'last_message', 'unread_count',
+            'conversation_type', 'ticket_id', 'ticket_status',
             'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
     
+    def get_ticket_id(self, obj):
+        if obj.conversation_type == 'support' and hasattr(obj, 'support_ticket'):
+            return obj.support_ticket.id
+        return None
+
+    def get_ticket_status(self, obj):
+        if obj.conversation_type == 'support' and hasattr(obj, 'support_ticket'):
+            return obj.support_ticket.status
+        return None
+
     def get_participants(self, obj):
         return [
             {

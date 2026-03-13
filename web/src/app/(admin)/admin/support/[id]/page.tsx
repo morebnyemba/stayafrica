@@ -46,8 +46,27 @@ export default function TicketDetailView() {
       if (!res.ok) throw new Error('Failed to fetch ticket');
       const data = await res.json();
       setTicket(data);
+      
+      // Fetch existing messages if there's a conversation
+      if (data.conversation) {
+        const msgRes = await fetch(`/api/messaging/conversations/${data.conversation}/`, {
+          headers: { 'Authorization': `Bearer ${accessToken}` }
+        });
+        if (msgRes.ok) {
+          const msgData = await msgRes.json();
+          const history = (msgData.messages || []).map((m: any) => ({
+            id: m.id,
+            text: m.text,
+            sender_id: m.sender.id,
+            sender_name: m.sender.name,
+            created_at: m.created_at,
+            isOwn: m.is_own_message
+          }));
+          setMessages(history.reverse()); // Reverse to show oldest first if API returns newest first
+        }
+      }
     } catch (error) {
-      toast.error('Could not load ticket details');
+      toast.error('Could not load ticket details or messages');
     }
   };
 
