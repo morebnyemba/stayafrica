@@ -233,11 +233,12 @@ class MessageViewSet(viewsets.ModelViewSet):
             queryset = Message.objects.all()
         else:
             queryset = Message.objects.filter(
-                Q(sender=user) | Q(receiver=user)
+                Q(sender=user) | Q(receiver=user) |
+                Q(conversation__participants=user, receiver__isnull=True)
             ).filter(
                 deleted_by_sender__isnull=True,
                 deleted_by_receiver__isnull=True
-            )
+            ).distinct()
             
         queryset = queryset.select_related('sender', 'receiver', 'conversation')
         

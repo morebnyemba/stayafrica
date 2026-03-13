@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Message, WebSocketMessage } from '@/types/messaging-types';
+import { Message } from '@/types/messaging-types';
 
 interface UseWebSocketChatProps {
   conversationId: string;
@@ -32,7 +32,7 @@ export const useWebSocketChat = ({
 
     try {
       const token = localStorage.getItem('access_token');
-      const wsUrl = `${WS_BASE_URL}/ws/chat/${conversationId}/?token=${token}`;
+      const wsUrl = `${WS_BASE_URL}/ws/chat/?token=${token}`;
       
       const ws = new WebSocket(wsUrl);
       wsRef.current = ws;
@@ -41,6 +41,12 @@ export const useWebSocketChat = ({
         setIsConnected(true);
         setError(null);
         reconnectAttempts.current = 0;
+
+        // Join the conversation room
+        ws.send(JSON.stringify({
+          type: 'join_conversation',
+          conversation_id: conversationId
+        }));
         
         // Send queued messages
         while (messageQueueRef.current.length > 0) {
@@ -53,17 +59,23 @@ export const useWebSocketChat = ({
 
       ws.onmessage = (event) => {
         try {
-          const data: WebSocketMessage = JSON.parse(event.data);
+          const data = JSON.parse(event.data);
           
-          if (data.type === 'message' && 'id' in data.data) {
-            const message = data.data as Message;
+          if (data.type === 'new_message') {
+            const message = {
+              id: data.message_id,
+              conversation: data.conversation_id,
+              sender: data.sender_id,
+              sender_name: data.sender_name,
+              text: data.text,
+              created_at: data.created_at,
+            } as unknown as Message;
             setMessages(prev => [...prev, message]);
             onMessage?.(message);
-          } else if (data.type === 'typing' && 'user_id' in data.data) {
-            const typingData = data.data as { user_id: string; is_typing: boolean };
-            onTyping?.(typingData.user_id, typingData.is_typing);
+          } else if (data.type === 'typing_indicator') {
+            onTyping?.(data.user_id, data.is_typing);
           } else if (data.type === 'error') {
-            setError('error' in data.data ? data.data.error : 'Unknown error');
+            setError(data.message || 'Unknown error');
           }
         } catch (err) {
           console.error('Error parsing WebSocket message:', err);
@@ -110,9 +122,9 @@ export const useWebSocketChat = ({
 
   const sendMessage = useCallback((content: string) => {
     const messageData = JSON.stringify({
-      type: 'message',
-      content,
-      sender: userId,
+      type: 'chat_message',
+      conversation_id: conversationId,
+      text: content,
     });
 
     if (wsRef.current?.readyState === WebSocket.OPEN) {

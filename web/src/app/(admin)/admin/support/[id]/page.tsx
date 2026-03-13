@@ -101,14 +101,14 @@ export default function TicketDetailView() {
 
       socket.onmessage = (event) => {
         const data = JSON.parse(event.data);
-        if (data.type === 'new_message' && data.conversation_id === ticket.conversation) {
+        if (data.type === 'new_message' && data.conversation_id === ticket.conversation && data.sender_id !== user?.id) {
           setMessages(prev => [...prev, {
             id: data.message_id,
             text: data.text,
             sender_id: data.sender_id,
             sender_name: data.sender_name,
             created_at: data.created_at,
-            isOwn: data.sender_id === user?.id
+            isOwn: false
           }]);
         }
       };
@@ -125,9 +125,18 @@ export default function TicketDetailView() {
     ws.send(JSON.stringify({
       type: 'chat_message',
       conversation_id: ticket?.conversation,
-      receiver_id: ticket?.requester, // Send back to requester
       text: chatInput
     }));
+
+    // Optimistically add the agent's own message to the UI
+    setMessages(prev => [...prev, {
+      id: 'local-' + Date.now(),
+      text: chatInput,
+      sender_id: user?.id as unknown as number,
+      sender_name: user?.first_name ? `${user.first_name} ${user.last_name}` : 'Agent',
+      created_at: new Date().toISOString(),
+      isOwn: true
+    }]);
 
     setChatInput('');
   };

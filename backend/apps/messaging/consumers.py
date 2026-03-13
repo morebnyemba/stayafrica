@@ -177,6 +177,16 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 payload
             )
 
+            # Also notify all other participants via their personal user groups
+            # as a fallback (they may not have joined the conversation room)
+            participant_ids = await self.get_conversation_participant_ids(conversation_id)
+            for pid in participant_ids:
+                if pid != self.user.id:
+                    await self.channel_layer.group_send(
+                        f"user_{pid}",
+                        payload
+                    )
+
             await self.send(text_data=json.dumps({
                 'type': 'message_sent',
                 'message_id': message['id'],
@@ -326,7 +336,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
     
     # Handler methods called by channel layer
     async def chat_message_handler(self, event):
-        """Send chat message to WebSocket"""
+        """Send chat message to WebSocket — skip self-echo to avoid duplicates"""
+        if event.get('sender_id') == self.user.id:
+            return
+
         await self.send(text_data=json.dumps({
             'type': 'new_message',
             'message_id': event['message_id'],
@@ -440,14 +453,17 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def mark_messages_as_read(self, message_ids, user_id):
-        """Mark messages as read"""
+        """Mark messages as read — handles both DM and support messages"""
         try:
             from apps.messaging.models import Message
+            from django.db.models import Q
             Message.objects.filter(
                 id__in=message_ids,
-                receiver_id=user_id,
                 is_read=False
-            ).update(is_read=True, read_at=timezone.now())
+            ).filter(
+                Q(receiver_id=user_id) |
+                Q(receiver__isnull=True, conversation__participants__id=user_id)
+            ).exclude(sender_id=user_id).update(is_read=True, read_at=timezone.now())
         except Exception as e:
             logger.error(f"Error marking messages as read: {e}")
     
@@ -475,3 +491,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
         except Exception as e:
             logger.error(f"Error verifying participant: {e}")
             return False
+
+    @database_sync_to_async
+    def get_conversation_participant_ids(self, conversation_id):
+        """Get all participant IDs for a conversation"""
+        try:
+            from apps.messaging.models import Conversation
+            conversation = Conversation.objects.get(id=conversation_id)
+            return list(conversation.participants.values_list('id', flat=True))
+        except Exception as e:
+            logger.error(f"Error getting conversation participants: {e}")
+            return []

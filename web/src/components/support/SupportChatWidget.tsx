@@ -38,6 +38,34 @@ export const SupportChatWidget = () => {
     if (step === 'chat' && conversationId && isAuthenticated && typeof window !== 'undefined') {
       const accessToken = localStorage.getItem('access_token');
       if (!accessToken) return;
+
+      // Fetch existing message history so returning users see past messages
+      const fetchHistory = async () => {
+        try {
+          const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL ||
+            `${window.location.protocol}//${window.location.host}`;
+          const baseUrl = apiBase.replace(/\/api\/v1\/?$/, '') + '/api/v1';
+          const res = await fetch(`${baseUrl}/messaging/conversations/${conversationId}/`, {
+            headers: { 'Authorization': `Bearer ${accessToken}` }
+          });
+          if (res.ok) {
+            const data = await res.json();
+            const history = (data.messages || []).map((m: any) => ({
+              id: String(m.id),
+              text: m.text,
+              sender_id: m.sender?.id ?? m.sender,
+              sender_name: m.sender?.name ?? m.sender_name ?? 'Unknown',
+              created_at: m.created_at,
+              isOwn: (m.sender?.id ?? m.sender) === user?.id
+            }));
+            setMessages(history);
+          }
+        } catch {
+          // History fetch failed — WebSocket will still work for new messages
+        }
+      };
+      fetchHistory();
+
       const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL ||
         `${window.location.protocol}//${window.location.host}`;
       const wsBase = apiBase.replace(/^http/, 'ws');
@@ -46,12 +74,17 @@ export const SupportChatWidget = () => {
       socket.onopen = () => socket.send(JSON.stringify({ type: 'join_conversation', conversation_id: conversationId }));
       socket.onmessage = (event) => {
         const data = JSON.parse(event.data);
-        if (data.type === 'new_message' && data.conversation_id === conversationId) {
-          setMessages(prev => [...prev, {
-            id: data.message_id, text: data.text, sender_id: data.sender_id,
-            sender_name: data.sender_name, created_at: data.created_at,
-            isOwn: data.sender_id === user?.id
-          }]);
+        // Only handle messages for this conversation, skip self-echo
+        if (data.type === 'new_message' && data.conversation_id === conversationId && data.sender_id !== user?.id) {
+          setMessages(prev => {
+            // Avoid duplicates by checking message_id
+            if (prev.some(m => String(m.id) === String(data.message_id))) return prev;
+            return [...prev, {
+              id: String(data.message_id), text: data.text, sender_id: data.sender_id,
+              sender_name: data.sender_name, created_at: data.created_at,
+              isOwn: false
+            }];
+          });
         }
       };
       setWs(socket);
@@ -92,6 +125,17 @@ export const SupportChatWidget = () => {
     e.preventDefault();
     if (!chatInput.trim() || !ws || ws.readyState !== WebSocket.OPEN) return;
     ws.send(JSON.stringify({ type: 'chat_message', conversation_id: conversationId, receiver_id: null, text: chatInput }));
+
+    // Optimistically add the user's own message to the UI
+    setMessages(prev => [...prev, {
+      id: 'local-' + Date.now(),
+      text: chatInput,
+      sender_id: user?.id as unknown as number,
+      sender_name: user?.first_name ? `${user.first_name} ${user.last_name}` : 'You',
+      created_at: new Date().toISOString(),
+      isOwn: true
+    }]);
+
     setChatInput('');
   };
 

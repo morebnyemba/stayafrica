@@ -24,6 +24,8 @@ class MessageSerializer(serializers.ModelSerializer):
         return name if name else obj.sender.email.split('@')[0]
     
     def get_receiver_name(self, obj):
+        if obj.receiver is None:
+            return 'Support Team'
         name = obj.receiver.first_name.strip()
         return name if name else obj.receiver.email.split('@')[0]
     
@@ -139,11 +141,14 @@ class MessageCreateSerializer(serializers.ModelSerializer):
             participants = conversation.participants.all()
             if sender not in participants:
                 raise serializers.ValidationError({"conversation": "Sender must be a participant in the conversation."})
-            if not receiver:
+            # Support conversations don't require a receiver
+            if conversation.conversation_type == 'support':
+                pass  # receiver can be None
+            elif not receiver:
                 raise serializers.ValidationError({"receiver": "Receiver is required."})
-            if receiver not in participants:
+            elif receiver not in participants:
                 raise serializers.ValidationError({"receiver": "Receiver must be a participant in the conversation."})
-            if receiver == sender:
+            elif receiver == sender:
                 raise serializers.ValidationError({"receiver": "You cannot send a message to yourself."})
         else:
             raise serializers.ValidationError({"conversation": "Conversation is required."})
