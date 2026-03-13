@@ -6,6 +6,8 @@ import { Providers } from '@/context/providers';
 import { AppShell } from '@/components/common/AppShell';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import { ServiceWorkerRegistrar } from '@/components/common/ServiceWorkerRegistrar';
+import { SupportChatWidget } from '@/components/support/SupportChatWidget';
+import { BugReportButton } from '@/components/bugs/BugReportButton';
 import { getLocale, getMessages } from 'next-intl/server';
 
 export const metadata: Metadata = {
@@ -83,6 +85,8 @@ export default async function RootLayout({
           <Providers locale={locale} messages={messages as Record<string, unknown>}>
             <ServiceWorkerRegistrar />
             <AppShell>{children}</AppShell>
+            <SupportChatWidget />
+            <BugReportButton />
           </Providers>
         </ErrorBoundary>
       </body>
