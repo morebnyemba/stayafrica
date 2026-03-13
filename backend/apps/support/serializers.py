@@ -14,7 +14,7 @@ class SupportTicketEventSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'created_at']
         
     def get_actor_name(self, obj):
-        return obj.actor.get_full_name() or obj.actor.email.split('@')[0]
+        return obj.actor.get_full_name() or obj.actor.email
 
 
 class SupportTicketSerializer(serializers.ModelSerializer):
@@ -34,11 +34,11 @@ class SupportTicketSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'created_at', 'updated_at', 'requester', 'conversation']
 
     def get_requester_name(self, obj):
-        return obj.requester.get_full_name() or obj.requester.email.split('@')[0]
+        return obj.requester.get_full_name() or obj.requester.email
 
     def get_assigned_agent_name(self, obj):
         if obj.assigned_agent:
-            return obj.assigned_agent.get_full_name() or obj.assigned_agent.email.split('@')[0]
+            return obj.assigned_agent.get_full_name() or obj.assigned_agent.email
         return None
 
 
@@ -63,9 +63,9 @@ class BugReportSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'reporter', 'created_at', 'updated_at']
 
     def get_reporter_name(self, obj):
-        return obj.reporter.get_full_name() or obj.reporter.email.split('@')[0]
+        return obj.reporter.get_full_name() or obj.reporter.email
         
     def get_assigned_name(self, obj):
         if obj.assigned_to:
-            return obj.assigned_to.get_full_name() or obj.assigned_to.email.split('@')[0]
+            return obj.assigned_to.get_full_name() or obj.assigned_to.email
         return None

@@ -244,7 +244,9 @@ export const SupportChatWidget = () => {
             <>
               <div className="flex-1 overflow-y-auto p-4 space-y-3" style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(212,177,88,0.2) transparent' }}>
                 <p className="text-center text-xs" style={{ color: 'rgba(212,177,88,0.6)' }}>
-                  Ticket #{ticketId} — An agent will reply shortly
+                  Ticket #{ticketId} — An agent will reply shortly. 
+                  <br/>
+                  <span className="opacity-75">You can safely close this widget and continue the conversation from your Messages dashboard at any time.</span>
                 </p>
                 {messages.map((msg, idx) => (
                   <div key={msg.id || idx} className={`flex flex-col max-w-[82%] ${msg.isOwn ? 'ml-auto items-end' : 'mr-auto items-start'}`}>
