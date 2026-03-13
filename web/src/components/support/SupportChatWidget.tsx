@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/context/auth-context';
-import { Button, Card, CardHeader, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, ScrollArea, CardBody, CardFooter } from '@/components/ui';
 import { MessageCircle, X, AlertCircle, Send } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -21,13 +20,11 @@ export const SupportChatWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [step, setStep] = useState<'form' | 'chat'>('form');
 
-  // Form State
   const [category, setCategory] = useState('');
   const [subject, setSubject] = useState('');
   const [initialMessage, setInitialMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Chat State
   const [ticketId, setTicketId] = useState<number | null>(null);
   const [conversationId, setConversationId] = useState<number | null>(null);
   const [messages, setMessages] = useState<SupportMessage[]>([]);
@@ -36,12 +33,10 @@ export const SupportChatWidget = () => {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll chat
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // WebSocket connection when ticket is active
   useEffect(() => {
     if (step === 'chat' && conversationId && isAuthenticated && typeof window !== 'undefined') {
       const accessToken = localStorage.getItem('access_token');
@@ -52,10 +47,7 @@ export const SupportChatWidget = () => {
       );
 
       socket.onopen = () => {
-        socket.send(JSON.stringify({
-          type: 'join_conversation',
-          conversation_id: conversationId
-        }));
+        socket.send(JSON.stringify({ type: 'join_conversation', conversation_id: conversationId }));
       };
 
       socket.onmessage = (event) => {
@@ -73,41 +65,25 @@ export const SupportChatWidget = () => {
       };
 
       setWs(socket);
-
-      return () => {
-        socket.close();
-      };
+      return () => socket.close();
     }
   }, [step, conversationId, isAuthenticated]);
 
   const handleSubmitTicket = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!category || !subject || !initialMessage) return;
-
     setIsSubmitting(true);
     try {
-      const accessToken = typeof window !== 'undefined' ? localStorage.getItem('access_token') : '';
-      const response = await fetch('/api/support/tickets/', {
+      const accessToken = localStorage.getItem('access_token') || '';
+      const res = await fetch('/api/support/tickets/', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`
-        },
-        body: JSON.stringify({
-          category,
-          subject,
-          initial_message: initialMessage,
-          priority: 'medium'
-        })
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${accessToken}` },
+        body: JSON.stringify({ category, subject, initial_message: initialMessage, priority: 'medium' })
       });
-
-      if (!response.ok) throw new Error('Failed to create ticket');
-
-      const data = await response.json();
+      if (!res.ok) throw new Error();
+      const data = await res.json();
       setTicketId(data.id);
       setConversationId(data.conversation);
-
-      // Add local initial message
       setMessages([{
         id: 'local-' + Date.now(),
         text: initialMessage,
@@ -116,9 +92,8 @@ export const SupportChatWidget = () => {
         created_at: new Date().toISOString(),
         isOwn: true
       }]);
-
       setStep('chat');
-    } catch (error) {
+    } catch {
       toast.error('Failed to create support ticket. Please try again.');
     } finally {
       setIsSubmitting(false);
@@ -128,155 +103,146 @@ export const SupportChatWidget = () => {
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
     if (!chatInput.trim() || !ws || ws.readyState !== WebSocket.OPEN) return;
-
-    ws.send(JSON.stringify({
-      type: 'chat_message',
-      conversation_id: conversationId,
-      receiver_id: null,
-      text: chatInput
-    }));
-
+    ws.send(JSON.stringify({ type: 'chat_message', conversation_id: conversationId, receiver_id: null, text: chatInput }));
     setChatInput('');
   };
 
-  // Don't render anything while auth is loading or if not logged in
   if (isLoading || !isAuthenticated) return null;
 
   return (
     <div className="fixed bottom-6 right-6 z-50" id="support-widget-container">
-      {/* Floating Button */}
+      {/* Floating Toggle Button */}
       {!isOpen && (
-        <Button
+        <button
           onClick={() => setIsOpen(true)}
-          className="h-14 w-14 rounded-full shadow-xl bg-primary hover:bg-primary/90 flex items-center justify-center transition-transform hover:scale-105"
+          className="h-14 w-14 rounded-full shadow-xl bg-primary hover:bg-primary/90 flex items-center justify-center transition-transform hover:scale-105 text-white"
+          aria-label="Open support chat"
         >
-          <MessageCircle className="h-6 w-6 text-white" />
-        </Button>
+          <MessageCircle className="h-6 w-6" />
+        </button>
       )}
 
-      {/* Chat Widget Panel */}
+      {/* Chat Panel */}
       {isOpen && (
-        <Card className="w-[350px] shadow-2xl border flex flex-col transition-all duration-300 transform scale-100 origin-bottom-right h-[500px]">
-          <CardHeader className="bg-primary text-primary-foreground p-4 flex flex-row items-center justify-between space-y-0 rounded-t-xl">
-            <h3 className="text-md font-semibold flex items-center gap-2">
-              <MessageCircle className="h-5 w-5" />
+        <div className="flex flex-col w-[360px] h-[520px] rounded-xl shadow-2xl border border-border bg-card overflow-hidden">
+          {/* Header */}
+          <div className="flex items-center justify-between px-4 py-3 bg-primary text-white rounded-t-xl shrink-0">
+            <span className="font-semibold flex items-center gap-2 text-sm">
+              <MessageCircle className="h-4 w-4" />
               StayAfrica Support
-            </h3>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 text-white hover:bg-primary/80 rounded-full"
+            </span>
+            <button
+              type="button"
               onClick={() => setIsOpen(false)}
+              className="p-1 rounded-full hover:bg-white/20 transition-colors"
+              aria-label="Close"
             >
               <X className="h-5 w-5" />
-            </Button>
-          </CardHeader>
+            </button>
+          </div>
 
           {step === 'form' ? (
-            <CardBody className="p-4 flex-1 overflow-y-auto">
-              <div className="mb-4 text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg flex items-start gap-2">
+            /* Ticket Form */
+            <div className="flex-1 overflow-y-auto p-4">
+              <div className="mb-4 text-xs text-muted-foreground bg-muted/50 p-3 rounded-lg flex items-start gap-2">
                 <AlertCircle className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                <p>How can we help you today? Please provide some details so we can route you to the right agent.</p>
+                <p>How can we help? Fill in the details below and we'll connect you with an agent.</p>
               </div>
 
-              <form onSubmit={handleSubmitTicket} className="space-y-4">
-                <div className="space-y-1">
-                  <label className="text-xs font-medium">Issue Category</label>
-                  <Select onValueChange={setCategory} required>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="booking">Booking &amp; Reservations</SelectItem>
-                      <SelectItem value="payment">Payments &amp; Refunds</SelectItem>
-                      <SelectItem value="property">Property Issue</SelectItem>
-                      <SelectItem value="account">Account &amp; Profile</SelectItem>
-                      <SelectItem value="technical">Technical Bug</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
-                    </SelectContent>
-                  </Select>
+              <form onSubmit={handleSubmitTicket} className="space-y-3">
+                <div>
+                  <label className="text-xs font-medium block mb-1">Issue Category</label>
+                  <select
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    required
+                    className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                  >
+                    <option value="" disabled>Select a category</option>
+                    <option value="booking">Booking &amp; Reservations</option>
+                    <option value="payment">Payments &amp; Refunds</option>
+                    <option value="property">Property Issue</option>
+                    <option value="account">Account &amp; Profile</option>
+                    <option value="technical">Technical Bug</option>
+                    <option value="other">Other</option>
+                  </select>
                 </div>
 
-                <div className="space-y-1">
-                  <label className="text-xs font-medium">Subject</label>
-                  <Input
+                <div>
+                  <label className="text-xs font-medium block mb-1">Subject</label>
+                  <input
+                    type="text"
                     placeholder="Brief description"
                     value={subject}
                     onChange={(e) => setSubject(e.target.value)}
                     required
+                    className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                   />
                 </div>
 
-                <div className="space-y-1">
-                  <label className="text-xs font-medium">Message</label>
+                <div>
+                  <label className="text-xs font-medium block mb-1">Message</label>
                   <textarea
-                    className="flex min-h-[100px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                     placeholder="Describe your issue in detail..."
                     value={initialMessage}
                     onChange={(e) => setInitialMessage(e.target.value)}
                     required
+                    rows={4}
+                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none"
                   />
                 </div>
 
-                <Button type="submit" className="w-full" disabled={isSubmitting || !category || !subject || !initialMessage}>
+                <button
+                  type="submit"
+                  disabled={isSubmitting || !category || !subject || !initialMessage}
+                  className="w-full h-10 rounded-md bg-primary text-white text-sm font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
                   {isSubmitting ? 'Submitting...' : 'Start Chat'}
-                </Button>
+                </button>
               </form>
-            </CardBody>
+            </div>
           ) : (
+            /* Active Chat */
             <>
-              {/* Active Chat View */}
-              <ScrollArea className="flex-1 p-4 bg-muted/10">
-                <div className="space-y-4">
-                  <div className="text-center text-xs text-muted-foreground">
-                    Support Ticket #{ticketId} Created
-                  </div>
-
-                  {messages.map((msg, idx) => (
-                    <div
-                      key={msg.id || idx}
-                      className={`flex flex-col max-w-[85%] ${msg.isOwn ? 'ml-auto' : 'mr-auto'}`}
-                    >
-                      {!msg.isOwn && (
-                        <span className="text-[10px] text-muted-foreground ml-1 mb-1">
-                          {msg.sender_name} (Support)
-                        </span>
-                      )}
-                      <div
-                        className={`p-3 rounded-2xl text-sm ${
-                          msg.isOwn
-                            ? 'bg-primary text-primary-foreground rounded-br-sm'
-                            : 'bg-muted rounded-bl-sm'
-                        }`}
-                      >
-                        {msg.text}
-                      </div>
-                      <span className={`text-[10px] text-muted-foreground mt-1 ${msg.isOwn ? 'text-right mr-1' : 'ml-1'}`}>
-                        {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </span>
+              <div className="flex-1 overflow-y-auto p-4 bg-muted/10 space-y-3">
+                <p className="text-center text-xs text-muted-foreground">
+                  Support Ticket #{ticketId} — An agent will reply shortly.
+                </p>
+                {messages.map((msg, idx) => (
+                  <div key={msg.id || idx} className={`flex flex-col max-w-[85%] ${msg.isOwn ? 'ml-auto items-end' : 'mr-auto items-start'}`}>
+                    {!msg.isOwn && (
+                      <span className="text-[10px] text-muted-foreground mb-1">{msg.sender_name} (Support)</span>
+                    )}
+                    <div className={`px-3 py-2 rounded-2xl text-sm ${msg.isOwn ? 'bg-primary text-white rounded-br-sm' : 'bg-muted rounded-bl-sm'}`}>
+                      {msg.text}
                     </div>
-                  ))}
-                  <div ref={messagesEndRef} />
-                </div>
-              </ScrollArea>
+                    <span className="text-[10px] text-muted-foreground mt-1">
+                      {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                ))}
+                <div ref={messagesEndRef} />
+              </div>
 
-              <CardFooter className="p-3 border-t bg-background">
-                <form onSubmit={handleSendMessage} className="flex w-full items-center gap-2">
-                  <Input
-                    placeholder="Type a message..."
-                    className="flex-1 rounded-full bg-muted/50 border-transparent focus-visible:ring-primary/20"
-                    value={chatInput}
-                    onChange={(e) => setChatInput(e.target.value)}
-                  />
-                  <Button type="submit" size="icon" className="rounded-full shrink-0" disabled={!chatInput.trim()}>
-                    <Send className="h-4 w-4" />
-                    <span className="sr-only">Send</span>
-                  </Button>
-                </form>
-              </CardFooter>
+              <form onSubmit={handleSendMessage} className="shrink-0 flex items-center gap-2 p-3 border-t bg-background">
+                <input
+                  type="text"
+                  placeholder="Type a message..."
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value)}
+                  className="flex-1 h-9 rounded-full border border-input bg-muted/40 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                />
+                <button
+                  type="submit"
+                  disabled={!chatInput.trim()}
+                  className="h-9 w-9 rounded-full bg-primary text-white flex items-center justify-center disabled:opacity-40 shrink-0 hover:bg-primary/90 transition-colors"
+                >
+                  <Send className="h-4 w-4" />
+                </button>
+              </form>
             </>
           )}
-        </Card>
+        </div>
       )}
     </div>
   );
