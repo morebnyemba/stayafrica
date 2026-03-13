@@ -26,7 +26,9 @@ import {
   Wifi,
   Banknote,
   RefreshCcw,
-  Files
+  Files,
+  Headphones,
+  Bug
 } from 'lucide-react';
 
 const adminNavItems = [
@@ -47,6 +49,8 @@ const adminNavItems = [
   { label: 'Conversations', href: '/admin/messaging/conversations', icon: MessageSquare },
   { label: 'Templates', href: '/admin/messaging/templates', icon: Files },
   { label: 'Notifications', href: '/admin/notifications', icon: Bell },
+  { label: 'Support Desk', href: '/admin/support', icon: Headphones },
+  { label: 'Bug Triage', href: '/admin/bugs', icon: Bug },
   { label: 'Audit Logs', href: '/admin/audit-logs', icon: FileText },
   { label: 'Settings', href: '/admin/settings', icon: Settings },
 ];

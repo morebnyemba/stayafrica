@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import { useAuth } from '@/context/auth-context';
 import { SupportTicket } from '@/types/support-types';
 import { Card, CardHeader, CardBody, CardFooter, Badge, Button, Input, ScrollArea, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui';
-import { useToast } from '@/hooks/use-toast';
+import toast from 'react-hot-toast';
 import { Send } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -21,7 +21,6 @@ interface SupportMessage {
 export default function TicketDetailView() {
   const { id } = useParams();
   const { user, isAuthenticated } = useAuth();
-  const { toast } = useToast();
   
   const [ticket, setTicket] = useState<SupportTicket | null>(null);
   const [messages, setMessages] = useState<SupportMessage[]>([]);
@@ -48,7 +47,7 @@ export default function TicketDetailView() {
       const data = await res.json();
       setTicket(data);
     } catch (error) {
-      toast({ title: 'Error', description: 'Could not load ticket details', variant: 'destructive' });
+      toast.error('Could not load ticket details');
     }
   };
 
@@ -120,10 +119,10 @@ export default function TicketDetailView() {
         body: JSON.stringify({ status: newStatus })
       });
       if (!res.ok) throw new Error('Failed to change status');
-      toast({ title: 'Success', description: 'Ticket status updated.' });
+      toast.success('Ticket status updated.');
       fetchTicketDetails();
     } catch (error) {
-      toast({ title: 'Error', description: 'Status update failed.', variant: 'destructive' });
+      toast.error('Status update failed.');
     }
   };
 

@@ -2,15 +2,16 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/auth-context';
+import { useRouter } from 'next/navigation';
 import { Card, CardBody, Button, Badge, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui';
 import { BugReport } from '@/types/support-types';
 import { AlertCircle, ExternalLink, ImageIcon } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import toast from 'react-hot-toast';
 import { formatDistanceToNow } from 'date-fns';
 
 export default function AdminBugDashboard() {
   const { isAuthenticated } = useAuth();
-  const { toast } = useToast();
+  const router = useRouter();
   
   const [bugs, setBugs] = useState<BugReport[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -38,7 +39,7 @@ export default function AdminBugDashboard() {
       const data = await res.json();
       setBugs(data);
     } catch (error) {
-      toast({ title: 'Error', description: 'Could not load bug reports', variant: 'destructive' });
+      toast.error('Could not load bug reports');
     } finally {
       setIsLoading(false);
     }
@@ -59,18 +60,11 @@ export default function AdminBugDashboard() {
       });
       
       if (!res.ok) throw new Error('Escalation failed');
-      
       const data = await res.json();
-      toast({ 
-        title: 'Escalated', 
-        description: `Bug escalated to Support Ticket #${data.ticket_id}` 
-      });
-      fetchBugs(); // Refresh
-      
-      // Optionally redirect to the new ticket
-      // window.location.href = `/admin/support/${data.ticket_id}`;
+      toast.success(`Bug escalated to Support Ticket #${data.ticket_id}`);
+      fetchBugs();
     } catch (error) {
-      toast({ title: 'Error', description: 'Could not escalate bug.', variant: 'destructive' });
+      toast.error('Could not escalate bug.');
     }
   };
 
@@ -222,11 +216,11 @@ export default function AdminBugDashboard() {
                             )}
                             
                             {bug.support_ticket && (
-                               <div className="pt-4 flex justify-end">
-                               <Button variant="outline" onClick={() => window.location.href = `/admin/support/${bug.support_ticket}`}>
-                                 View Associated Ticket
-                               </Button>
-                             </div>
+                              <div className="pt-4 flex justify-end">
+                                <Button variant="outline" onClick={() => router.push(`/admin/support/${bug.support_ticket}`)}>  
+                                  View Associated Ticket
+                                </Button>
+                              </div>
                             )}
                           </div>
                         </DialogContent>

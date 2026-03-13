@@ -2,14 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/auth-context';
+import { useRouter } from 'next/navigation';
 import { Card, CardBody, Button, Badge, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui';
 import { SupportTicket } from '@/types/support-types';
-import { useToast } from '@/hooks/use-toast';
+import toast from 'react-hot-toast';
 import { formatDistanceToNow } from 'date-fns';
 
 export default function AdminSupportDashboard() {
   const { isAuthenticated } = useAuth();
-  const { toast } = useToast();
+  const router = useRouter();
   
   const [tickets, setTickets] = useState<SupportTicket[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -42,7 +43,7 @@ export default function AdminSupportDashboard() {
       const data = await res.json();
       setTickets(data);
     } catch (error) {
-      toast({ title: 'Error', description: 'Could not load tickets', variant: 'destructive' });
+      toast.error('Could not load tickets');
     } finally {
       setIsLoading(false);
     }
@@ -64,11 +65,10 @@ export default function AdminSupportDashboard() {
       });
       
       if (!res.ok) throw new Error('Assignment failed');
-      
-      toast({ title: 'Success', description: 'Ticket assigned to you.' });
-      fetchTickets(); // Refresh
+      toast.success('Ticket assigned to you.');
+      fetchTickets();
     } catch (error) {
-      toast({ title: 'Error', description: 'Could not assign ticket.', variant: 'destructive' });
+      toast.error('Could not assign ticket.');
     }
   };
 
@@ -174,9 +174,7 @@ export default function AdminSupportDashboard() {
                           Claim
                         </Button>
                       )}
-                      <Button variant="outline" size="sm" onClick={() => {
-                        window.location.href = `/admin/support/${ticket.id}`;
-                      }}>
+                      <Button variant="outline" size="sm" onClick={() => router.push(`/admin/support/${ticket.id}`)}>  
                         View
                       </Button>
                     </TableCell>
