@@ -37,7 +37,7 @@ export default function AdminBugDashboard() {
       
       if (!res.ok) throw new Error('Failed to fetch bugs');
       const data = await res.json();
-      setBugs(data);
+      setBugs(Array.isArray(data) ? data : (data.results ?? []));
     } catch (error) {
       toast.error('Could not load bug reports');
     } finally {

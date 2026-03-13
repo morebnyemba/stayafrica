@@ -41,7 +41,7 @@ export default function AdminSupportDashboard() {
       
       if (!res.ok) throw new Error('Failed to fetch tickets');
       const data = await res.json();
-      setTickets(data);
+      setTickets(Array.isArray(data) ? data : (data.results ?? []));
     } catch (error) {
       toast.error('Could not load tickets');
     } finally {
