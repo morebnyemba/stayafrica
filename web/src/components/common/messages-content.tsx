@@ -222,13 +222,13 @@ export function MessagesContent() {
                         }`}
                     >
                       <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 rounded-full bg-secondary-500 text-white flex items-center justify-center font-semibold flex-shrink-0">
-                          {conv.other_participant?.name?.[0]?.toUpperCase() || '?'}
+                        <div className={`w-10 h-10 rounded-full text-white flex items-center justify-center font-semibold flex-shrink-0 ${conv.conversation_type === 'support' ? 'bg-blue-500' : 'bg-secondary-500'}`}>
+                          {conv.conversation_type === 'support' ? <ShieldAlert className="w-5 h-5 text-white" /> : (conv.other_participant?.name?.[0]?.toUpperCase() || '?')}
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between mb-1">
                             <span className="font-semibold text-primary-900 truncate">
-                              {conv.other_participant?.name || 'Unknown'}
+                              {conv.other_participant?.name || (conv.conversation_type === 'support' ? 'Support Agent' : 'Unknown')}
                             </span>
                             {conv.unread_count > 0 && (
                               <span className="ml-2 px-2 py-0.5 bg-secondary-500 text-white text-xs rounded-full flex-shrink-0">
@@ -237,8 +237,13 @@ export function MessagesContent() {
                             )}
                           </div>
                           {conv.subject && (
-                            <div className="text-sm text-primary-600 mb-1 truncate">
-                              {conv.subject}
+                            <div className="flex items-center gap-2 mb-1">
+                              {conv.conversation_type === 'support' && (
+                                <span className="px-1.5 py-0.5 bg-blue-100 text-blue-700 text-[10px] uppercase font-bold rounded">Support</span>
+                              )}
+                              <div className="text-sm text-primary-600 truncate">
+                                {conv.subject}
+                              </div>
                             </div>
                           )}
                           <div className="text-sm text-primary-500 truncate">
@@ -271,13 +276,18 @@ export function MessagesContent() {
                     >
                       <ArrowLeft className="w-5 h-5 text-primary-600" />
                     </button>
-                    <div className="w-10 h-10 rounded-full bg-secondary-500 text-white flex items-center justify-center font-semibold">
-                      {selectedConversation.other_participant?.name?.[0]?.toUpperCase() || '?'}
+                    <div className={`w-10 h-10 rounded-full text-white flex items-center justify-center font-semibold ${selectedConversation.conversation_type === 'support' ? 'bg-blue-500' : 'bg-secondary-500'}`}>
+                      {selectedConversation.conversation_type === 'support' ? <ShieldAlert className="w-5 h-5 text-white" /> : (selectedConversation.other_participant?.name?.[0]?.toUpperCase() || '?')}
                     </div>
                     <div>
-                      <h2 className="font-semibold text-primary-900">
-                        {selectedConversation.other_participant?.name || 'Unknown'}
-                      </h2>
+                      <div className="flex items-center gap-2">
+                        <h2 className="font-semibold text-primary-900">
+                          {selectedConversation.other_participant?.name || (selectedConversation.conversation_type === 'support' ? 'Support Agent' : 'Unknown')}
+                        </h2>
+                        {selectedConversation.conversation_type === 'support' && (
+                          <span className="px-1.5 py-0.5 bg-blue-100 text-blue-700 text-[10px] uppercase font-bold rounded">Support</span>
+                        )}
+                      </div>
                       {selectedConversation.subject && (
                         <p className="text-sm text-primary-600">
                           {selectedConversation.subject}
