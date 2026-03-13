@@ -27,7 +27,7 @@ class User(AbstractUser):
         blank=True,
         null=True
     )
-    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='guest')
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='guest')
     active_profile = models.CharField(
         max_length=10, 
         choices=PROFILE_CHOICES, 
