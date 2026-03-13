@@ -51,7 +51,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 self.channel_name
             )
         
-        logger.info(f"WebSocket disconnected for user {self.user.email if self.user else 'unknown'}")
+        user_identifier = self.user.email if self.user and self.user.is_authenticated else 'unknown'
+        logger.info(f"WebSocket disconnected for user {user_identifier}")
     
     async def receive(self, text_data):
         """Handle incoming WebSocket messages"""
