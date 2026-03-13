@@ -83,7 +83,7 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL
   ? `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1`
   : (typeof window !== 'undefined' && window.location.origin.includes('localhost')
     ? 'http://localhost:8000/api/v1'
-    : 'https://api.zimlegend.online/api/v1');
+    : 'https://api.stayafrica.app/api/v1');
 
 const setSession = async (access: string, refresh: string) => {
   if (typeof window === 'undefined') return;

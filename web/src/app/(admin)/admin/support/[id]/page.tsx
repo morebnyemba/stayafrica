@@ -61,8 +61,9 @@ export default function TicketDetailView() {
       const accessToken = localStorage.getItem('access_token');
       if (!accessToken) return;
 
-      const wsBase = process.env.NEXT_PUBLIC_WS_URL ||
-        `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}`;
+      const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL ||
+        `${window.location.protocol}//${window.location.host}`;
+      const wsBase = apiBase.replace(/^http/, 'ws');
       const socket = new WebSocket(`${wsBase}/ws/support/?token=${accessToken}`);
 
 
