@@ -119,7 +119,7 @@ export function SelectContent({ children, className }: { children: React.ReactNo
     <div 
       ref={ref}
       className={cn(
-        "absolute z-50 min-w-[8rem] overflow-hidden rounded-md border bg-white p-1 text-popover-foreground shadow-md animate-in fade-in-80 top-[calc(100%+4px)] left-0 w-full",
+        "absolute z-[9999] min-w-[8rem] overflow-hidden rounded-md border bg-white p-1 text-popover-foreground shadow-md animate-in fade-in-80 top-[calc(100%+4px)] left-0 w-full",
         className
       )}
     >

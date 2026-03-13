@@ -156,7 +156,7 @@ export const SupportChatWidget = () => {
 
       {/* Chat Widget Panel */}
       {isOpen && (
-        <Card className="w-[350px] shadow-2xl border flex flex-col overflow-hidden transition-all duration-300 transform scale-100 origin-bottom-right h-[500px]">
+        <Card className="w-[350px] shadow-2xl border flex flex-col transition-all duration-300 transform scale-100 origin-bottom-right h-[500px]">
           <CardHeader className="bg-primary text-primary-foreground p-4 flex flex-row items-center justify-between space-y-0 rounded-t-xl">
             <h3 className="text-md font-semibold flex items-center gap-2">
               <MessageCircle className="h-5 w-5" />
