@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
-import { useAuth } from '@/context/auth-context';
+import { useAuth } from '@/store/auth-store';
 import { MessageCircle, X, AlertCircle, Send, ChevronDown } from 'lucide-react';
 import toast from 'react-hot-toast';
 

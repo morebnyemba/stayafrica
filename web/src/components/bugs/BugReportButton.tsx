@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { useAuth } from '@/context/auth-context';
+import { useAuth } from '@/store/auth-store';
 import { Bug, X, Camera, AlertCircle, ChevronDown } from 'lucide-react';
 import toast from 'react-hot-toast';
 import html2canvas from 'html2canvas';
