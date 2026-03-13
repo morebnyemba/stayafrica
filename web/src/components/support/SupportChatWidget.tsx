@@ -3,8 +3,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/context/auth-context';
 import { Button, Card, CardHeader, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, ScrollArea, CardBody, CardFooter } from '@/components/ui';
-import { useToast } from '@/hooks/use-toast';
 import { MessageCircle, X, AlertCircle, Send } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 interface SupportMessage {
   id: string;
@@ -16,25 +16,24 @@ interface SupportMessage {
 }
 
 export const SupportChatWidget = () => {
-  const { user, isAuthenticated } = useAuth();
-  const { toast } = useToast();
-  
+  const { user, isAuthenticated, isLoading } = useAuth();
+
   const [isOpen, setIsOpen] = useState(false);
   const [step, setStep] = useState<'form' | 'chat'>('form');
-  
+
   // Form State
   const [category, setCategory] = useState('');
   const [subject, setSubject] = useState('');
   const [initialMessage, setInitialMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   // Chat State
   const [ticketId, setTicketId] = useState<number | null>(null);
   const [conversationId, setConversationId] = useState<number | null>(null);
   const [messages, setMessages] = useState<SupportMessage[]>([]);
   const [chatInput, setChatInput] = useState('');
   const [ws, setWs] = useState<WebSocket | null>(null);
-  
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll chat
@@ -84,14 +83,15 @@ export const SupportChatWidget = () => {
   const handleSubmitTicket = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!category || !subject || !initialMessage) return;
-    
+
     setIsSubmitting(true);
     try {
+      const accessToken = typeof window !== 'undefined' ? localStorage.getItem('access_token') : '';
       const response = await fetch('/api/support/tickets/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${typeof window !== 'undefined' ? localStorage.getItem('access_token') : ''}`
+          'Authorization': `Bearer ${accessToken}`
         },
         body: JSON.stringify({
           category,
@@ -102,11 +102,11 @@ export const SupportChatWidget = () => {
       });
 
       if (!response.ok) throw new Error('Failed to create ticket');
-      
+
       const data = await response.json();
       setTicketId(data.id);
       setConversationId(data.conversation);
-      
+
       // Add local initial message
       setMessages([{
         id: 'local-' + Date.now(),
@@ -116,14 +116,10 @@ export const SupportChatWidget = () => {
         created_at: new Date().toISOString(),
         isOwn: true
       }]);
-      
+
       setStep('chat');
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to create support ticket. Please try again.',
-        variant: 'destructive'
-      });
+      toast.error('Failed to create support ticket. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -136,20 +132,21 @@ export const SupportChatWidget = () => {
     ws.send(JSON.stringify({
       type: 'chat_message',
       conversation_id: conversationId,
-      receiver_id: null, // Broadcast to group
+      receiver_id: null,
       text: chatInput
     }));
 
     setChatInput('');
   };
 
-  if (!isAuthenticated) return null; // Only show for logged in users
+  // Don't render anything while auth is loading or if not logged in
+  if (isLoading || !isAuthenticated) return null;
 
   return (
-    <div className="fixed bottom-6 right-6 z-50">
+    <div className="fixed bottom-6 right-6 z-50" id="support-widget-container">
       {/* Floating Button */}
       {!isOpen && (
-        <Button 
+        <Button
           onClick={() => setIsOpen(true)}
           className="h-14 w-14 rounded-full shadow-xl bg-primary hover:bg-primary/90 flex items-center justify-center transition-transform hover:scale-105"
         >
@@ -165,9 +162,9 @@ export const SupportChatWidget = () => {
               <MessageCircle className="h-5 w-5" />
               StayAfrica Support
             </h3>
-            <Button 
-              variant="ghost" 
-              size="icon" 
+            <Button
+              variant="ghost"
+              size="icon"
               className="h-8 w-8 text-white hover:bg-primary/80 rounded-full"
               onClick={() => setIsOpen(false)}
             >
@@ -176,7 +173,7 @@ export const SupportChatWidget = () => {
           </CardHeader>
 
           {step === 'form' ? (
-            <CardBody className="p-4 flex-1">
+            <CardBody className="p-4 flex-1 overflow-y-auto">
               <div className="mb-4 text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg flex items-start gap-2">
                 <AlertCircle className="h-4 w-4 text-primary mt-0.5 shrink-0" />
                 <p>How can we help you today? Please provide some details so we can route you to the right agent.</p>
@@ -190,10 +187,10 @@ export const SupportChatWidget = () => {
                       <SelectValue placeholder="Select a category" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="booking">Booking & Reservations</SelectItem>
-                      <SelectItem value="payment">Payments & Refunds</SelectItem>
+                      <SelectItem value="booking">Booking &amp; Reservations</SelectItem>
+                      <SelectItem value="payment">Payments &amp; Refunds</SelectItem>
                       <SelectItem value="property">Property Issue</SelectItem>
-                      <SelectItem value="account">Account & Profile</SelectItem>
+                      <SelectItem value="account">Account &amp; Profile</SelectItem>
                       <SelectItem value="technical">Technical Bug</SelectItem>
                       <SelectItem value="other">Other</SelectItem>
                     </SelectContent>
@@ -202,8 +199,8 @@ export const SupportChatWidget = () => {
 
                 <div className="space-y-1">
                   <label className="text-xs font-medium">Subject</label>
-                  <Input 
-                    placeholder="Brief description" 
+                  <Input
+                    placeholder="Brief description"
                     value={subject}
                     onChange={(e) => setSubject(e.target.value)}
                     required
@@ -212,7 +209,7 @@ export const SupportChatWidget = () => {
 
                 <div className="space-y-1">
                   <label className="text-xs font-medium">Message</label>
-                  <textarea 
+                  <textarea
                     className="flex min-h-[100px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                     placeholder="Describe your issue in detail..."
                     value={initialMessage}
@@ -234,10 +231,10 @@ export const SupportChatWidget = () => {
                   <div className="text-center text-xs text-muted-foreground">
                     Support Ticket #{ticketId} Created
                   </div>
-                  
+
                   {messages.map((msg, idx) => (
-                    <div 
-                      key={msg.id || idx} 
+                    <div
+                      key={msg.id || idx}
                       className={`flex flex-col max-w-[85%] ${msg.isOwn ? 'ml-auto' : 'mr-auto'}`}
                     >
                       {!msg.isOwn && (
@@ -245,10 +242,10 @@ export const SupportChatWidget = () => {
                           {msg.sender_name} (Support)
                         </span>
                       )}
-                      <div 
+                      <div
                         className={`p-3 rounded-2xl text-sm ${
-                          msg.isOwn 
-                            ? 'bg-primary text-primary-foreground rounded-br-sm' 
+                          msg.isOwn
+                            ? 'bg-primary text-primary-foreground rounded-br-sm'
                             : 'bg-muted rounded-bl-sm'
                         }`}
                       >
@@ -262,11 +259,11 @@ export const SupportChatWidget = () => {
                   <div ref={messagesEndRef} />
                 </div>
               </ScrollArea>
-              
+
               <CardFooter className="p-3 border-t bg-background">
                 <form onSubmit={handleSendMessage} className="flex w-full items-center gap-2">
-                  <Input 
-                    placeholder="Type a message..." 
+                  <Input
+                    placeholder="Type a message..."
                     className="flex-1 rounded-full bg-muted/50 border-transparent focus-visible:ring-primary/20"
                     value={chatInput}
                     onChange={(e) => setChatInput(e.target.value)}

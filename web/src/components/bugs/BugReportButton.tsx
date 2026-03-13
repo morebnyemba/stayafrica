@@ -4,12 +4,11 @@ import React, { useState } from 'react';
 import { useAuth } from '@/context/auth-context';
 import { Bug, X, Camera, AlertCircle } from 'lucide-react';
 import { Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui';
-import { useToast } from '@/hooks/use-toast';
+import toast from 'react-hot-toast';
 import html2canvas from 'html2canvas';
 
 export const BugReportButton = () => {
-  const { isAuthenticated } = useAuth();
-  const { toast } = useToast();
+  const { isAuthenticated, isLoading } = useAuth();
   
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -41,11 +40,7 @@ export const BugReportButton = () => {
       setScreenshot(image);
       
     } catch (error) {
-      toast({
-        title: 'Screen Capture Failed',
-        description: 'We could not capture your screen. You can still submit the bug without it.',
-        variant: 'destructive',
-      });
+      toast.error('We could not capture your screen. You can still submit the bug without it.');
     } finally {
       setIsCapturing(false);
       setIsOpen(true);
@@ -95,10 +90,7 @@ export const BugReportButton = () => {
 
       if (!response.ok) throw new Error('Failed to submit bug report');
       
-      toast({
-        title: 'Bug Reported',
-        description: 'Thank you for your report! Our engineering team will review it.',
-      });
+      toast.success('Bug report submitted! Our engineering team will review it.');
       
       setIsOpen(false);
       // Reset form
@@ -108,17 +100,13 @@ export const BugReportButton = () => {
       setScreenshot(null);
       
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to submit the report. Please try again.',
-        variant: 'destructive'
-      });
+      toast.error('Failed to submit the report. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  if (!isAuthenticated) return null;
+  if (isLoading || !isAuthenticated) return null;
 
   return (
     <>
