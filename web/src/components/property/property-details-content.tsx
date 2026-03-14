@@ -25,6 +25,8 @@ type Review = {
   guest?: { first_name?: string; last_name?: string };
   rating: number;
   text: string;
+  host_response?: string;
+  host_response_date?: string;
   created_at: string;
 };
 
@@ -418,6 +420,23 @@ export function PropertyDetailsContent({ propertyId: propId }: PropertyDetailsCo
                         <p className="text-[15px] text-primary-700 line-clamp-4 leading-relaxed">
                           {review.text}
                         </p>
+                        
+                        {/* Host Response */}
+                        {review.host_response && (
+                          <div className="mt-3 pl-4 border-l-2 border-primary-200 bg-sand-50 p-3 rounded-r-lg">
+                            <p className="text-sm font-semibold text-primary-900 mb-1">
+                              Response from host
+                            </p>
+                            <p className="text-sm text-primary-700 mb-1 line-clamp-3">
+                              {review.host_response}
+                            </p>
+                            {review.host_response_date && (
+                              <p className="text-xs text-primary-500">
+                                {new Date(review.host_response_date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                              </p>
+                            )}
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>

@@ -196,7 +196,7 @@ class ApiClient {
     return this.client.get('/reviews/', { params });
   }
 
-  async createReview(data: any) {
+  async createReview(data: { booking_id: number; rating: number; text: string }) {
     return this.client.post('/reviews/', data);
   }
 

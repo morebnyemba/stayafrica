@@ -27,6 +27,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
         
         # Each user has a personal channel for receiving messages
         self.user_group_name = f"user_{self.user.id}"
+
+        # Track seen message IDs to deduplicate (user may be in both
+        # conversation_X and user_X groups and receive the same broadcast twice)
+        self._seen_message_ids = set()
         
         # Join user's personal group
         await self.channel_layer.group_add(
@@ -336,9 +340,18 @@ class ChatConsumer(AsyncWebsocketConsumer):
     
     # Handler methods called by channel layer
     async def chat_message_handler(self, event):
-        """Send chat message to WebSocket — skip self-echo to avoid duplicates"""
+        """Send chat message to WebSocket — skip self-echo and deduplicate"""
         if event.get('sender_id') == self.user.id:
             return
+
+        # Deduplicate: the same message may arrive via conversation_X and user_X groups
+        msg_id = event.get('message_id')
+        if msg_id in self._seen_message_ids:
+            return
+        self._seen_message_ids.add(msg_id)
+        # Keep set bounded (avoid memory leak on long-lived connections)
+        if len(self._seen_message_ids) > 500:
+            self._seen_message_ids = set(list(self._seen_message_ids)[-250:])
 
         await self.send(text_data=json.dumps({
             'type': 'new_message',

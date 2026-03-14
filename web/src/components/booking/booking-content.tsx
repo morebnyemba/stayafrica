@@ -4,16 +4,21 @@ import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
 import { Button } from '@/components/ui';
-import { Calendar, MapPin, Image as ImageIcon } from 'lucide-react';
+import { Calendar, MapPin, Image as ImageIcon, Star } from 'lucide-react';
 import { useAuth } from '@/store/auth-store';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
+import { ReviewModal } from '@/components/review/review-modal';
 
 export function BookingContent() {
   const { isAuthenticated, user } = useAuth();
   const router = useRouter();
   const [statusFilter, setStatusFilter] = useState('');
   const [contactingHost, setContactingHost] = useState<string | null>(null);
+  
+  // Review modal state
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [selectedBookingForReview, setSelectedBookingForReview] = useState<{ id: number; title: string } | null>(null);
 
   // Property bookings
   const { data: bookingsData, isLoading, error } = useQuery({
@@ -283,6 +288,27 @@ export function BookingContent() {
                         <a href={`/bookings/${booking.id}`} className="inline-block">
                           <Button variant="secondary" size="sm">View Details</Button>
                         </a>
+                        
+                        {/* Leave a Review Button (Completed/Checked out) */}
+                        {['completed', 'checked_out', 'COMPLETED', 'CHECKED_OUT'].includes(booking.status) && !booking.review && (
+                          <Button 
+                            variant="primary" 
+                            size="sm"
+                            className="bg-secondary-600 hover:bg-secondary-700 text-white"
+                            onClick={() => {
+                              setSelectedBookingForReview({
+                                id: booking.id,
+                                title: booking.property?.title || booking.property_title || 'Property'
+                              });
+                              setReviewModalOpen(true);
+                            }}
+                          >
+                            <Star className="w-4 h-4 mr-1.5" />
+                            Leave a Review
+                          </Button>
+                        )}
+                        
+                        {/* Pay Now Button */}
                         {['pending', 'confirmed', 'PENDING', 'CONFIRMED'].includes(booking.status) &&
                           booking.payment_status !== 'success' && (
                             <a href={`/booking/payment?bookingId=${booking.id}`} className="inline-block">
@@ -323,6 +349,16 @@ export function BookingContent() {
           </div>
         )}
       </div>
+
+      {/* Review Modal */}
+      {selectedBookingForReview && (
+        <ReviewModal
+          isOpen={reviewModalOpen}
+          onClose={() => setReviewModalOpen(false)}
+          bookingId={selectedBookingForReview.id}
+          propertyTitle={selectedBookingForReview.title}
+        />
+      )}
     </div>
   );
 }
