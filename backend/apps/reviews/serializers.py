@@ -34,7 +34,12 @@ class ReviewSerializer(serializers.ModelSerializer):
                 property_obj = Property.objects.get(id=obj.property_id)
                 return property_obj.title
             except Property.DoesNotExist:
-                return None
+                pass
+        
+        # Fallback to checking the booking
+        if hasattr(obj, 'booking') and obj.booking:
+            if hasattr(obj.booking, 'rental_property') and obj.booking.rental_property:
+                return obj.booking.rental_property.title
         return None
     
     def get_experience_title(self, obj):
@@ -44,5 +49,10 @@ class ReviewSerializer(serializers.ModelSerializer):
                 experience_obj = Experience.objects.get(id=obj.experience_id)
                 return experience_obj.title
             except Experience.DoesNotExist:
-                return None
+                pass
+        
+        # Fallback to checking the booking
+        if hasattr(obj, 'booking') and obj.booking:
+            if hasattr(obj.booking, 'experience') and obj.booking.experience:
+                return obj.booking.experience.title
         return None

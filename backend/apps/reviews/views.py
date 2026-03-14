@@ -57,9 +57,20 @@ class ReviewViewSet(viewsets.ModelViewSet):
             return Review.objects.filter(host_id=host_id).select_related('guest', 'booking')
         
         # Private: user's own reviews (given or received)
-        return Review.objects.filter(
+        qs = Review.objects.filter(
             Q(host=user) | Q(guest=user)
         ).select_related('guest', 'host', 'booking__rental_property')
+        
+        # Apply filters for written vs received
+        written_by_user = self.request.query_params.get('written_by_user', '').lower() == 'true'
+        received_by_user = self.request.query_params.get('received_by_user', '').lower() == 'true'
+        
+        if written_by_user:
+            qs = qs.filter(guest=user)
+        elif received_by_user:
+            qs = qs.filter(host=user)
+            
+        return qs
     
     def get_permissions(self):
         """Allow reading reviews without authentication"""
