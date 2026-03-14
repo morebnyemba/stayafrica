@@ -67,9 +67,13 @@ class ReviewViewSet(viewsets.ModelViewSet):
             return [AllowAny()]
         return super().get_permissions()
     
-    @transaction.atomic
     @api_ratelimit(rate='5/h')
     @log_action('create_review')
+    def create(self, request, *args, **kwargs):
+        """Create review endpoint with ratelimiting and logging"""
+        return super().create(request, *args, **kwargs)
+
+    @transaction.atomic
     def perform_create(self, serializer):
         """Create review after booking checkout with validation"""
         booking_id = self.request.data.get('booking_id')

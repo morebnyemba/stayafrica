@@ -61,8 +61,8 @@ export default function TicketDetailView() {
           const history = (msgData.messages || []).map((m: any) => ({
             id: m.id,
             text: m.text,
-            sender_id: m.sender.id,
-            sender_name: m.sender.name,
+            sender_id: m.sender,
+            sender_name: m.sender_name,
             created_at: m.created_at,
             isOwn: m.is_own_message
           }));
