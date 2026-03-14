@@ -41,6 +41,29 @@ export function ReviewsDashboard() {
   });  // Local state for reply fields
   const [replyFields, setReplyFields] = React.useState<Record<string, string>>({});
 
+  const [editingReviewId, setEditingReviewId] = React.useState<string | null>(null);
+  const [editRating, setEditRating] = React.useState<number>(0);
+  const [editText, setEditText] = React.useState<string>('');
+
+  const updateMutation = useMutation<any, Error, { reviewId: string; rating: number; text: string }>({
+    mutationFn: async (params) => {
+      return apiClient.updateReview(params.reviewId, { rating: params.rating, text: params.text });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['reviews', 'written'] });
+      setEditingReviewId(null);
+    },
+    onError: (error: any) => {
+      alert(error?.response?.data?.error || 'Failed to update review. It may be past the allowed edit window.');
+    }
+  });
+
+  const handleEditClick = (review: any) => {
+    setEditingReviewId(review.id);
+    setEditRating(review.rating);
+    setEditText(review.text);
+  };
+
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-sand-100">
@@ -70,12 +93,45 @@ export function ReviewsDashboard() {
               <div className="space-y-4">
                 {writtenReviews.map((review: any) => (
                   <article key={review.id} className="bg-white p-4 sm:p-6 rounded-lg border border-primary-100" aria-label={`Review: ${review.rating} out of 5 stars`}>
-                    <div className="flex items-center gap-2 mb-2">
-                      <Star className="w-5 h-5 text-yellow-500" aria-hidden="true" />
-                      <span className="font-semibold" aria-label={`Rating: ${review.rating} out of 5`}>{review.rating} / 5</span>
-                    </div>
-                    <p className="text-primary-900 mb-2">{review.text}</p>
-                    <time className="text-xs text-primary-500" dateTime={review.created_at}>{new Date(review.created_at).toLocaleDateString()}</time>
+                    {editingReviewId === review.id ? (
+                      <div className="space-y-3">
+                        <div className="flex gap-1">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <button
+                              key={star}
+                              type="button"
+                              onClick={() => setEditRating(star)}
+                              className="focus:outline-none"
+                            >
+                              <Star className={`w-6 h-6 ${star <= editRating ? 'text-yellow-500 fill-yellow-500' : 'text-gray-300'}`} />
+                            </button>
+                          ))}
+                        </div>
+                        <textarea
+                          className="w-full rounded-lg border border-primary-200 p-3 min-h-[100px] text-primary-900 focus:ring-2 focus:ring-secondary-500 focus:outline-none"
+                          value={editText}
+                          onChange={(e) => setEditText(e.target.value)}
+                        />
+                        <div className="flex gap-2">
+                          <Button variant="primary" size="sm" onClick={() => updateMutation.mutate({ reviewId: review.id, rating: editRating, text: editText })} disabled={updateMutation.isPending}>
+                            {updateMutation.isPending ? 'Saving...' : 'Save'}
+                          </Button>
+                          <Button variant="outline" size="sm" onClick={() => setEditingReviewId(null)}>Cancel</Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" aria-hidden="true" />
+                            <span className="font-semibold" aria-label={`Rating: ${review.rating} out of 5`}>{review.rating} / 5</span>
+                          </div>
+                          <Button variant="outline" size="sm" onClick={() => handleEditClick(review)}>Edit</Button>
+                        </div>
+                        <p className="text-primary-900 mb-2">{review.text}</p>
+                        <time className="text-xs text-primary-500" dateTime={review.created_at}>{new Date(review.created_at).toLocaleDateString()}</time>
+                      </>
+                    )}
                   </article>
                 ))}
               </div>

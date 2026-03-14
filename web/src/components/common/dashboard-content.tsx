@@ -344,6 +344,7 @@ export function DashboardContent() {
                     { title: 'Explore', icon: Compass, link: '/explore', color: 'bg-secondary-500' },
                     { title: 'Bookings', icon: Calendar, link: '/bookings', color: 'bg-blue-500' },
                     { title: 'Wishlist', icon: Heart, link: '/wishlist', color: 'bg-red-500' },
+                    { title: 'My Reviews', icon: Star, link: '/reviews', color: 'bg-pink-500' },
                     { title: 'Profile', icon: User, link: '/profile', color: 'bg-green-500' },
                     { title: 'Payments', icon: CreditCard, link: '/profile?tab=payments', color: 'bg-purple-500' },
                     { title: 'Verify ID', icon: ShieldCheck, link: '/profile/verification', color: 'bg-indigo-500' },

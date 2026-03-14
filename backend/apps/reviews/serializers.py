@@ -11,6 +11,8 @@ class ReviewVoteSerializer(serializers.ModelSerializer):
 
 class ReviewSerializer(serializers.ModelSerializer):
     guest_name = serializers.CharField(source='guest.username', read_only=True)
+    guest_first_name = serializers.CharField(source='guest.first_name', read_only=True)
+    guest_last_name = serializers.CharField(source='guest.last_name', read_only=True)
     booking_ref = serializers.CharField(source='booking.booking_ref', read_only=True)
     property_title = serializers.SerializerMethodField()
     experience_title = serializers.SerializerMethodField()
@@ -18,7 +20,7 @@ class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
         fields = [
-            'id', 'booking', 'booking_ref', 'guest', 'guest_name', 'host',
+            'id', 'booking', 'booking_ref', 'guest', 'guest_name', 'guest_first_name', 'guest_last_name', 'host',
             'review_type', 'property_id', 'property_title', 'experience_id', 'experience_title',
             'rating', 'text', 'host_response', 'host_response_date',
             'helpful_count', 'created_at', 'updated_at'

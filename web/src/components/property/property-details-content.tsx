@@ -22,7 +22,8 @@ import { toast } from 'react-hot-toast';
 
 type Review = {
   id: string;
-  guest?: { first_name?: string; last_name?: string };
+  guest_first_name?: string;
+  guest_last_name?: string;
   rating: number;
   text: string;
   host_response?: string;
@@ -393,12 +394,12 @@ export function PropertyDetailsContent({ propertyId: propId }: PropertyDetailsCo
                           {/* Avatar */}
                           <div className="w-10 h-10 rounded-full bg-primary-800 flex items-center justify-center flex-shrink-0">
                             <span className="text-white text-sm font-semibold">
-                              {review.guest?.first_name?.[0] || '?'}{review.guest?.last_name?.[0] || ''}
+                              {review.guest_first_name?.[0] || '?'}{review.guest_last_name?.[0] || ''}
                             </span>
                           </div>
                           <div>
                             <p className="font-semibold text-sm text-primary-900">
-                              {review.guest?.first_name} {review.guest?.last_name}
+                              {review.guest_first_name} {review.guest_last_name}
                             </p>
                             <p className="text-xs text-primary-500">
                               {new Date(review.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}

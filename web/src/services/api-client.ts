@@ -205,6 +205,11 @@ class ApiClient {
     return this.client.get(`/properties/${safeId}/reviews/`);
   }
 
+  async updateReview(reviewId: string, data: { rating?: number; text?: string }) {
+    const safeId = this.assertId(reviewId, 'Review ID');
+    return this.client.put(`/reviews/${safeId}/update_review/`, data);
+  }
+
   // Messages & Conversations
   async getConversations(params?: any) {
     return this.client.get('/messaging/conversations/', { params });
