@@ -143,6 +143,7 @@ export function HostDashboard() {
     { title: 'Add New', icon: Building, link: '/host/properties/new', color: 'bg-secondary-500' },
     { title: 'Bookings', icon: Calendar, link: '/host/bookings', color: 'bg-green-500' },
     { title: 'Messages', icon: MessageSquare, link: '/messages', color: 'bg-orange-500' },
+    { title: 'Reviews', icon: Star, link: '/host/reviews', color: 'bg-pink-500' },
   ];
 
   const financeLinks = [

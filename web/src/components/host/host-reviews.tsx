@@ -8,14 +8,12 @@ import Link from 'next/link';
 
 interface Review {
   id: string;
-  guest: {
-    first_name: string;
-    last_name: string;
-  };
-  property: {
-    id: string;
-    title: string;
-  };
+  guest_first_name?: string;
+  guest_last_name?: string;
+  property_id?: string;
+  property_title?: string;
+  experience_id?: string;
+  experience_title?: string;
   rating: number;
   text: string;
   created_at: string;
@@ -220,19 +218,23 @@ export function HostReviews() {
                   <div className="flex items-center gap-3 sm:gap-4">
                     <div className="w-12 h-12 bg-secondary-100 rounded-full flex items-center justify-center">
                       <span className="text-lg font-semibold text-secondary-700">
-                        {review.guest.first_name[0]}
+                        {review.guest_first_name?.[0] || '?'}
                       </span>
                     </div>
                     <div>
                       <h3 className="font-semibold text-primary-900">
-                        {review.guest.first_name} {review.guest.last_name}
+                        {review.guest_first_name} {review.guest_last_name}
                       </h3>
-                      <Link
-                        href={`/host/properties/${review.property.id}`}
-                        className="text-sm text-primary-500 hover:text-secondary-600"
-                      >
-                        {review.property.title}
-                      </Link>
+                      {review.property_id ? (
+                        <Link
+                          href={`/host/properties/${review.property_id}`}
+                          className="text-sm text-primary-500 hover:text-secondary-600"
+                        >
+                          {review.property_title}
+                        </Link>
+                      ) : (
+                        <span className="text-sm text-primary-500">{review.experience_title}</span>
+                      )}
                     </div>
                   </div>
 

@@ -26,21 +26,6 @@ export function ReviewsDashboard() {
     },
   });
 
-  // Reply mutation
-  const replyMutation = useMutation<
-    any,
-    Error,
-    { reviewId: string; reply: string }
-  >({
-    mutationFn: async (params: { reviewId: string; reply: string }) => {
-      return apiClient.replyToReview(params.reviewId, params.reply);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['reviews', 'received'] });
-    },
-  });  // Local state for reply fields
-  const [replyFields, setReplyFields] = React.useState<Record<string, string>>({});
-
   const [editingReviewId, setEditingReviewId] = React.useState<string | null>(null);
   const [editRating, setEditRating] = React.useState<number>(0);
   const [editText, setEditText] = React.useState<string>('');
@@ -128,6 +113,12 @@ export function ReviewsDashboard() {
                           </div>
                           <Button variant="outline" size="sm" onClick={() => handleEditClick(review)}>Edit</Button>
                         </div>
+                        {(review.property_title || review.experience_title) && (
+                          <p className="text-sm font-medium text-secondary-600 mb-2">
+                            {review.property_title || review.experience_title}
+                            {review.booking_ref && <span className="text-primary-400 font-normal ml-2">Ref: {review.booking_ref}</span>}
+                          </p>
+                        )}
                         <p className="text-primary-900 mb-2">{review.text}</p>
                         <time className="text-xs text-primary-500" dateTime={review.created_at}>{new Date(review.created_at).toLocaleDateString()}</time>
                       </>
@@ -163,35 +154,19 @@ export function ReviewsDashboard() {
                       <Star className="w-5 h-5 text-yellow-500" aria-hidden="true" />
                       <span className="font-semibold" aria-label={`Rating: ${review.rating} out of 5`}>{review.rating} / 5</span>
                     </div>
+                    {/* Add Context to Received Reviews */}
+                    {(review.property_title || review.experience_title) && (
+                      <p className="text-sm font-medium text-secondary-600 mb-2">
+                        {review.property_title || review.experience_title}
+                        {review.guest_first_name && (
+                          <span className="text-primary-500 font-normal ml-2">
+                            (Guest: {review.guest_first_name} {review.guest_last_name})
+                          </span>
+                        )}
+                      </p>
+                    )}
                     <p className="text-primary-900 mb-2">{review.text}</p>
                     <time className="text-xs text-primary-500 block mb-3" dateTime={review.created_at}>{new Date(review.created_at).toLocaleDateString()}</time>
-                    {/* Reply section */}
-                    <div className="mt-3 pt-3 border-t border-primary-100">
-                      <label htmlFor={`reply-${review.id}`} className="block text-sm font-medium text-primary-700 mb-2">Reply:</label>
-                      <textarea
-                        id={`reply-${review.id}`}
-                        className="w-full rounded-lg border border-primary-200 bg-sand-50 text-primary-900 p-3 mb-3 focus:ring-2 focus:ring-secondary-500 focus:outline-none min-h-[80px]"
-                        rows={3}
-                        value={replyFields[review.id] || ''}
-                        onChange={e => setReplyFields((f: Record<string, string>) => ({ ...f, [review.id]: e.target.value }))}
-                        aria-label={`Reply to review ${review.id}`}
-                        placeholder="Write your reply here..."
-                      />
-                      <Button
-                        variant="primary"
-                        size="md"
-                        disabled={replyMutation.isPending || !replyFields[review.id]?.trim()}
-                        onClick={() => replyMutation.mutate({ reviewId: review.id, reply: replyFields[review.id] })}
-                        aria-label={`Submit reply to review ${review.id}`}
-                      >
-                        {replyMutation.isPending ? 'Submitting...' : 'Submit Reply'}
-                      </Button>
-                      {review.reply && (
-                        <div className="mt-3 p-3 bg-primary-50 rounded-lg text-primary-600 text-sm">
-                          <span className="font-semibold">Your reply:</span> {review.reply}
-                        </div>
-                      )}
-                    </div>
                   </article>
                 ))}
               </div>
