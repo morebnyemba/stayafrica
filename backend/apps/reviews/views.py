@@ -91,7 +91,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
         sanitized_text = sanitize_input(text)
         
         try:
-            booking = Booking.objects.select_related('property__host').get(
+            booking = Booking.objects.select_related('rental_property__host').get(
                 id=booking_id,
                 guest=self.request.user
             )
