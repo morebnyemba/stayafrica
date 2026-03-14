@@ -224,72 +224,79 @@ export default function TicketDetailView() {
           </p>
         </CardHeader>
         
-        <ScrollArea className="flex-1 p-4">
-          <div className="space-y-4">
+        <ScrollArea className="flex-1">
+          <div className="p-4 space-y-3">
             {messages.length === 0 ? (
-              <div className="text-center text-muted-foreground py-8">
+              <div className="text-center text-muted-foreground py-12">
                 No messages yet. Start the conversation with the customer.
               </div>
             ) : (
               messages.map((msg, idx) => {
-                const isCustomer = !msg.isOwn && msg.sender_id === ticket.requester;
+                const isCustomer = !msg.isOwn && Number(msg.sender_id) === Number(ticket.requester);
+                const roleLabel = msg.isOwn ? 'You (Agent)' : isCustomer ? 'Customer' : 'Support Agent';
                 const initial = (msg.sender_name || '?').charAt(0).toUpperCase();
-                const roleLabel = msg.isOwn ? 'You · Agent' : isCustomer ? 'Customer' : 'Agent';
 
                 return (
-                  <div 
-                    key={msg.id || idx} 
-                    className={`flex gap-2.5 max-w-[85%] ${msg.isOwn ? 'ml-auto flex-row-reverse' : 'mr-auto'}`}
+                  <div
+                    key={msg.id || idx}
+                    className={`rounded-lg border-l-4 p-4 ${
+                      msg.isOwn
+                        ? 'bg-blue-50 border-l-blue-500'
+                        : isCustomer
+                          ? 'bg-amber-50 border-l-amber-500'
+                          : 'bg-emerald-50 border-l-emerald-500'
+                    }`}
                   >
-                    {/* Avatar */}
-                    <div 
-                      className={`h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5 ${
-                        msg.isOwn 
-                          ? 'bg-primary text-primary-foreground' 
-                          : isCustomer 
-                            ? 'bg-orange-100 text-orange-700' 
-                            : 'bg-blue-100 text-blue-700'
-                      }`}
-                    >
-                      {initial}
-                    </div>
-
-                    {/* Message content */}
-                    <div className={`flex flex-col ${msg.isOwn ? 'items-end' : 'items-start'}`}>
-                      {/* Sender name + role badge */}
-                      <div className={`flex items-center gap-1.5 mb-1 ${msg.isOwn ? 'flex-row-reverse' : ''}`}>
-                        <span className="text-xs font-medium text-foreground">
-                          {msg.sender_name || 'Unknown'}
-                        </span>
-                        <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
-                          msg.isOwn 
-                            ? 'bg-primary/10 text-primary' 
-                            : isCustomer 
-                              ? 'bg-orange-100 text-orange-700' 
-                              : 'bg-blue-100 text-blue-700'
-                        }`}>
-                          {roleLabel}
-                        </span>
-                      </div>
-
-                      {/* Bubble */}
-                      <div 
-                        className={`p-3 rounded-lg text-sm ${
-                          msg.isOwn 
-                            ? 'bg-primary text-primary-foreground rounded-tr-sm' 
+                    {/* Header: avatar + name + role + time */}
+                    <div className="flex items-center gap-2 mb-2">
+                      <div
+                        className={`h-7 w-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
+                          msg.isOwn
+                            ? 'bg-blue-600 text-white'
                             : isCustomer
-                              ? 'bg-orange-50 border border-orange-200 text-foreground rounded-tl-sm'
-                              : 'bg-muted text-foreground rounded-tl-sm'
+                              ? 'bg-amber-500 text-white'
+                              : 'bg-emerald-600 text-white'
                         }`}
                       >
-                        {msg.text}
+                        {initial}
                       </div>
-
-                      {/* Timestamp */}
-                      <span className="text-[10px] text-muted-foreground mt-1 px-1">
-                        {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      <span className={`text-sm font-semibold ${
+                        msg.isOwn
+                          ? 'text-blue-900'
+                          : isCustomer
+                            ? 'text-amber-900'
+                            : 'text-emerald-900'
+                      }`}>
+                        {msg.sender_name || 'Unknown'}
+                      </span>
+                      <span
+                        className={`text-[11px] px-2 py-0.5 rounded-full font-semibold ${
+                          msg.isOwn
+                            ? 'bg-blue-200 text-blue-800'
+                            : isCustomer
+                              ? 'bg-amber-200 text-amber-800'
+                              : 'bg-emerald-200 text-emerald-800'
+                        }`}
+                      >
+                        {roleLabel}
+                      </span>
+                      <span className="text-xs text-muted-foreground ml-auto shrink-0">
+                        {new Date(msg.created_at).toLocaleString([], {
+                          month: 'short', day: 'numeric',
+                          hour: '2-digit', minute: '2-digit'
+                        })}
                       </span>
                     </div>
+                    {/* Message body */}
+                    <p className={`text-sm whitespace-pre-wrap leading-relaxed pl-9 ${
+                      msg.isOwn
+                        ? 'text-blue-900'
+                        : isCustomer
+                          ? 'text-amber-900'
+                          : 'text-emerald-900'
+                    }`}>
+                      {msg.text}
+                    </p>
                   </div>
                 );
               })
