@@ -219,9 +219,8 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['post'], permission_classes=[AllowAny])
     def request_password_reset(self, request):
         """
-        Request password reset email
-        NOTE: Full implementation requires token storage (Redis/Database)
-        This is a placeholder that demonstrates the flow
+        Request password reset email.
+        Always returns a generic success response to prevent email enumeration.
         """
         email = request.data.get('email', '').lower().strip()
         
@@ -236,15 +235,11 @@ class UserViewSet(viewsets.ModelViewSet):
             
             # Generate reset token
             from utils.helpers import generate_verification_token
-            import hashlib
             reset_token = generate_verification_token()
-            
-            # Create secure user identifier
-            user_hash = hashlib.sha256(f"{user.id}{user.email}".encode()).hexdigest()[:16]
             
             # Store reset token in Redis with 1-hour expiry
             from django.core.cache import cache
-            cache.set(f'reset_{user_hash}', reset_token, timeout=3600)
+            cache.set(f'reset_token_{reset_token}', user.id, timeout=3600)
             
             from tasks.email_tasks import send_password_reset_email
             send_password_reset_email.delay(user.id, reset_token)
@@ -258,6 +253,71 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response({
             'status': 'If the email exists, a password reset link has been sent'
         })
+
+    @action(detail=False, methods=['post'], permission_classes=[AllowAny])
+    def confirm_password_reset(self, request):
+        """Confirm password reset using a one-time token from email."""
+        token = request.data.get('token', '').strip()
+        new_password = request.data.get('new_password', '')
+        confirm_password = request.data.get('confirm_password', '')
+
+        if not token or not new_password:
+            return Response(
+                {'error': 'token and new_password are required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if confirm_password and new_password != confirm_password:
+            return Response(
+                {'confirm_password': ['Passwords do not match']},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        from django.core.cache import cache
+        cache_key = f'reset_token_{token}'
+        user_id = cache.get(cache_key)
+
+        if not user_id:
+            return Response(
+                {'error': 'Password reset link has expired or is invalid.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            cache.delete(cache_key)
+            return Response(
+                {'error': 'Invalid password reset request.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Validate new password strength against Django password validators.
+        try:
+            validate_password(new_password, user)
+        except ValidationError as e:
+            return Response(
+                {'new_password': list(e.messages)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        with transaction.atomic():
+            user.set_password(new_password)
+            user.save(update_fields=['password'])
+
+            AuditLoggerService.log_action(
+                user=user,
+                action='password_reset',
+                model=User,
+                object_id=user.id,
+                changes={'action': 'password_reset_completed'}
+            )
+
+        # Single-use token: remove immediately after successful reset.
+        cache.delete(cache_key)
+
+        logger.info(f"Password reset completed for user {user.id}")
+        return Response({'status': 'Password has been reset successfully'})
     
     @action(detail=False, methods=['post'], permission_classes=[AllowAny])
     def verify_email(self, request):
@@ -330,7 +390,7 @@ class UserViewSet(viewsets.ModelViewSet):
             'status': 'Email verified successfully',
             'message': 'Your email has been verified. You can now log in.'
         })
-    
+
     @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
     def resend_verification(self, request):
         """Resend verification email to the current user"""

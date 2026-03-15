@@ -1,7 +1,7 @@
 import '../global.css';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { Stack } from 'expo-router';
-import { useRouter, SplashScreen } from 'expo-router';
+import { useRouter, SplashScreen, useSegments } from 'expo-router';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ActivityIndicator, View, Platform, StatusBar, Image } from 'react-native';
@@ -53,6 +53,7 @@ async function loadFontsWithFallback() {
 
 function RootLayoutContent() {
   const router = useRouter();
+  const segments = useSegments();
   const { isLoading, user } = useAuth();
   const [hasSeenOnboarding, setHasSeenOnboarding] = useState<boolean | null>(null);
   const [checkingOnboarding, setCheckingOnboarding] = useState(true);
@@ -147,6 +148,26 @@ function RootLayoutContent() {
       SplashScreen.hideAsync();
     }
   }, [isLoading, checkingOnboarding, fontsLoaded]);
+
+  // If a logged-in user is unverified, keep them on the verification screen
+  // until their email is verified.
+  useEffect(() => {
+    if (isLoading || checkingOnboarding || !fontsLoaded || !user) {
+      return;
+    }
+
+    if (user.is_verified) {
+      return;
+    }
+
+    const currentGroup = segments[0];
+    const currentScreen = segments[1];
+    const isOnVerifyEmailScreen = currentGroup === '(auth)' && currentScreen === 'verify-email';
+
+    if (!isOnVerifyEmailScreen) {
+      router.replace({ pathname: '/(auth)/verify-email', params: { email: user.email } } as any);
+    }
+  }, [isLoading, checkingOnboarding, fontsLoaded, user, segments, router]);
 
   // Navigate as soon as we know where to go. The BrandedSplash overlay is
   // still fully opaque at this point, so the user sees nothing. This ensures

@@ -13,12 +13,53 @@ export default function VerifyEmailPage() {
   const [code, setCode] = useState(['', '', '', '', '', '']);
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
+  const [checkingVerification, setCheckingVerification] = useState(false);
   const [error, setError] = useState('');
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  const checkVerificationStatus = async () => {
+    const accessToken = localStorage.getItem('access_token');
+    if (!accessToken) {
+      return;
+    }
+
+    setCheckingVerification(true);
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/users/profile/`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        return;
+      }
+
+      const profile = await response.json();
+      if (profile?.is_verified) {
+        router.push('/dashboard');
+      }
+    } catch {
+      // Ignore transient polling failures on this screen.
+    } finally {
+      setCheckingVerification(false);
+    }
+  };
 
   useEffect(() => {
     // Auto-focus first input on mount
     inputRefs.current[0]?.focus();
+  }, []);
+
+  useEffect(() => {
+    const accessToken = localStorage.getItem('access_token');
+    if (!accessToken) {
+      return;
+    }
+
+    checkVerificationStatus();
+    const interval = window.setInterval(checkVerificationStatus, 8000);
+    return () => window.clearInterval(interval);
   }, []);
 
   const handleChange = (index: number, value: string) => {
@@ -103,12 +144,17 @@ export default function VerifyEmailPage() {
     setResending(true);
     setError('');
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/auth/resend-verification/`, {
+      const accessToken = localStorage.getItem('access_token');
+      if (!accessToken) {
+        throw new Error('Please log in first to resend verification email.');
+      }
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/users/resend_verification/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify({ email }),
       });
 
       if (!response.ok) {
@@ -160,6 +206,25 @@ export default function VerifyEmailPage() {
               {error}
             </div>
           )}
+
+          <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 text-sm">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="font-semibold text-blue-900">Waiting for verification</p>
+                <p className="text-blue-700">
+                  This page checks automatically and will send you to your dashboard once your email is verified.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={checkVerificationStatus}
+                disabled={checkingVerification}
+                className="shrink-0 text-secondary-600 hover:text-secondary-700 font-semibold disabled:text-secondary-300"
+              >
+                {checkingVerification ? 'Checking...' : 'Check now'}
+              </button>
+            </div>
+          </div>
 
           {/* Code Input */}
           <div>

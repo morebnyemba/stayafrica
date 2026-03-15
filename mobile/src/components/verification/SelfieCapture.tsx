@@ -10,7 +10,6 @@ interface SelfieCaptureProps {
   onCaptureComplete: (imageUrl: string) => void;
   selfieUrl?: string;
 }
-
 type ChallengeStep = 'look-center' | 'turn-left' | 'turn-right' | 'done';
 
 const CHALLENGE_TIMEOUT_MS = 12000;

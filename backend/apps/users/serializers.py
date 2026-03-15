@@ -142,7 +142,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
                 attrs['username'] = user.username
             except User.DoesNotExist:
                 raise serializers.ValidationError('No user found with this email')
-        
+
         return super().validate(attrs)
     
     @classmethod

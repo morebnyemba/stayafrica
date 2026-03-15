@@ -44,6 +44,24 @@ function isUserAdmin(token: string): boolean {
   }
 }
 
+function getTokenPayload(token: string): Record<string, any> | null {
+  try {
+    return JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
+  } catch {
+    return null;
+  }
+}
+
+function isUserVerified(token: string): boolean {
+  const payload = getTokenPayload(token);
+  return payload?.is_verified === true;
+}
+
+function getUserEmail(token: string): string | null {
+  const payload = getTokenPayload(token);
+  return typeof payload?.email === 'string' ? payload.email : null;
+}
+
 // Helper: delete expired cookie on any response (including redirects)
 function withExpiredCookieCleanup(
   res: NextResponse,
@@ -63,11 +81,22 @@ export function middleware(request: NextRequest) {
   const token = request.cookies.get('access_token')?.value;
   const isAuthenticated = token ? isTokenValid(token) : false;
   const hasAdminAccess = token ? isUserAdmin(token) : false;
+  const isVerified = token ? isUserVerified(token) : false;
+  const tokenEmail = token ? getUserEmail(token) : null;
 
   // Check if the current route is protected or admin
   const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
   const isAdminRoute = adminRoutes.some(route => pathname.startsWith(route));
   const isAuthRoute = authRoutes.some(route => pathname.startsWith(route));
+
+  // If authenticated but not verified, block protected routes until email is verified.
+  if (isAuthenticated && !isVerified && isProtectedRoute) {
+    const url = new URL('/verify-email', request.url);
+    if (tokenEmail) {
+      url.searchParams.set('email', tokenEmail);
+    }
+    return NextResponse.redirect(url);
+  }
 
   // Redirect to login if accessing admin route without admin role
   if (isAdminRoute) {
@@ -95,6 +124,14 @@ export function middleware(request: NextRequest) {
 
   // Redirect to dashboard if accessing auth routes while authenticated
   if (isAuthRoute && isAuthenticated) {
+    if (!isVerified) {
+      const url = new URL('/verify-email', request.url);
+      if (tokenEmail) {
+        url.searchParams.set('email', tokenEmail);
+      }
+      return NextResponse.redirect(url);
+    }
+
     // If user was being redirected, honour that destination
     const redirect = request.nextUrl.searchParams.get('redirect');
     if (redirect && redirect.startsWith('/')) {

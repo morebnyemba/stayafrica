@@ -25,4 +25,19 @@ urlpatterns = [
     # Authentication endpoints
     path('auth/login/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('auth/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path(
+        'auth/password-reset/',
+        UserViewSet.as_view({'post': 'request_password_reset'}),
+        name='auth_password_reset'
+    ),
+    path(
+        'auth/password-reset/confirm/',
+        UserViewSet.as_view({'post': 'confirm_password_reset'}),
+        name='auth_password_reset_confirm'
+    ),
+    path(
+        'auth/verify-email/',
+        UserViewSet.as_view({'post': 'verify_email'}),
+        name='auth_verify_email'
+    ),
 ]

@@ -1,4 +1,8 @@
 from django.contrib import admin
+from django import forms
+from django.contrib import messages
+from django.template.response import TemplateResponse
+from django.urls import path, reverse
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 from unfold.admin import ModelAdmin as UnfoldModelAdmin, TabularInline as UnfoldTabularInline
@@ -6,9 +10,24 @@ from unfold.decorators import display
 from apps.properties.models import Property, Amenity, PropertyImage, SavedProperty
 
 
+class AmenityBulkAddForm(forms.Form):
+    amenities = forms.CharField(
+        label=_('Amenities'),
+        widget=forms.Textarea(
+            attrs={
+                'rows': 16,
+                'placeholder': 'WiFi\nPool\nAir Conditioning\nKitchen\nWasher',
+            }
+        ),
+        help_text=_('Enter one amenity per line. Commas and semicolons are also supported.'),
+    )
+
+
 @admin.register(Amenity)
 class AmenityAdmin(UnfoldModelAdmin):
     """Enhanced admin interface for Amenity management"""
+
+    change_list_template = 'admin/properties/amenity/change_list.html'
     
     list_display = ['name', 'icon', 'description_short']
     search_fields = ['name', 'description']
@@ -20,6 +39,77 @@ class AmenityAdmin(UnfoldModelAdmin):
             'fields': ('name', 'icon', 'description'),
         }),
     )
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path(
+                'bulk-add/',
+                self.admin_site.admin_view(self.bulk_add_view),
+                name='properties_amenity_bulk_add',
+            ),
+        ]
+        return custom_urls + urls
+
+    def bulk_add_view(self, request):
+        form = AmenityBulkAddForm(request.POST or None)
+
+        if request.method == 'POST' and form.is_valid():
+            raw_value = form.cleaned_data['amenities']
+            parsed_names = []
+            seen_names = set()
+
+            normalized_value = raw_value.replace(';', '\n').replace(',', '\n')
+            for line in normalized_value.splitlines():
+                name = line.strip()
+                if not name:
+                    continue
+
+                lookup_key = name.casefold()
+                if lookup_key in seen_names:
+                    continue
+
+                seen_names.add(lookup_key)
+                parsed_names.append(name)
+
+            created_count = 0
+            existing_count = 0
+
+            for name in parsed_names:
+                _, created = Amenity.objects.get_or_create(name=name)
+                if created:
+                    created_count += 1
+                else:
+                    existing_count += 1
+
+            if created_count:
+                self.message_user(
+                    request,
+                    _(f'{created_count} amenity(s) created successfully.'),
+                    level=messages.SUCCESS,
+                )
+
+            if existing_count:
+                self.message_user(
+                    request,
+                    _(f'{existing_count} amenity(s) already existed and were skipped.'),
+                    level=messages.INFO,
+                )
+
+            return admin.shortcuts.redirect(reverse('admin:properties_amenity_changelist'))
+
+        context = {
+            **self.admin_site.each_context(request),
+            'opts': self.model._meta,
+            'title': _('Bulk add amenities'),
+            'form': form,
+        }
+        return TemplateResponse(request, 'admin/properties/amenity/bulk_add.html', context)
+
+    def changelist_view(self, request, extra_context=None):
+        extra_context = extra_context or {}
+        extra_context['bulk_add_url'] = reverse('admin:properties_amenity_bulk_add')
+        return super().changelist_view(request, extra_context=extra_context)
 
     @display(description=_('Description'))
     def description_short(self, obj):

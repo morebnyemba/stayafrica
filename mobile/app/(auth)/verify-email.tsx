@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -13,12 +13,47 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { apiClient } from '@/services/api-client';
+import { useAuth } from '@/context/auth-context';
 
 export default function VerifyEmailScreen() {
   const params = useLocalSearchParams();
   const email = params.email as string || '';
+  const { user, isAuthenticated, refreshUser } = useAuth();
   
   const [resending, setResending] = useState(false);
+  const [checkingVerification, setCheckingVerification] = useState(false);
+
+  const checkVerificationStatus = async () => {
+    if (!isAuthenticated) {
+      return;
+    }
+
+    setCheckingVerification(true);
+    try {
+      const profile = await apiClient.getUserProfile();
+      if (profile?.is_verified) {
+        await refreshUser();
+        Alert.alert('Email Verified', 'Your email is verified. Redirecting to dashboard...');
+        router.replace('/(tabs)/dashboard');
+      }
+    } catch (error: any) {
+      // Ignore transient polling failures to avoid noisy alerts while user is on this screen.
+      console.warn('Verification polling failed:', error?.message || error);
+    } finally {
+      setCheckingVerification(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!isAuthenticated || user?.is_verified) {
+      return;
+    }
+
+    // Run an immediate check, then poll every 8 seconds while on this screen.
+    checkVerificationStatus();
+    const interval = setInterval(checkVerificationStatus, 8000);
+    return () => clearInterval(interval);
+  }, [isAuthenticated, user?.is_verified]);
 
   const handleResendCode = async () => {
     if (!email) {
@@ -106,6 +141,32 @@ export default function VerifyEmailScreen() {
                 <Text className="text-emerald-700 text-sm">3. Click the verification link</Text>
                 <Text className="text-emerald-700 text-sm">4. Return here and sign in</Text>
               </View>
+            </View>
+
+            {/* Verification status */}
+            <View className="bg-blue-50 rounded-xl p-4 mb-6">
+              <View className="flex-row items-center justify-between">
+                <View className="flex-1 pr-3">
+                  <Text className="text-blue-900 font-semibold mb-1">
+                    Waiting for verification
+                  </Text>
+                  <Text className="text-blue-700 text-xs">
+                    This page checks automatically every few seconds and will open your dashboard once verified.
+                  </Text>
+                </View>
+                {checkingVerification ? (
+                  <ActivityIndicator size="small" color="#1d4ed8" />
+                ) : null}
+              </View>
+              <TouchableOpacity
+                onPress={checkVerificationStatus}
+                disabled={checkingVerification}
+                className="mt-3 self-start"
+              >
+                <Text className="text-blue-700 font-semibold text-sm">
+                  {checkingVerification ? 'Checking...' : 'Check Now'}
+                </Text>
+              </TouchableOpacity>
             </View>
 
             {/* Continue to Login */}
