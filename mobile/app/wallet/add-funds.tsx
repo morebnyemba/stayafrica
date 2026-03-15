@@ -1,10 +1,11 @@
-import { View, Text, ScrollView, TouchableOpacity, TextInput, Platform, Alert, KeyboardAvoidingView } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, TextInput, Platform, KeyboardAvoidingView } from 'react-native';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { apiClient } from '@/services/api-client';
+import { AppDialog, AppDialogAction } from '@/components/common/AppDialog';
 
 export default function AddFundsScreen() {
   const router = useRouter();
@@ -12,6 +13,16 @@ export default function AddFundsScreen() {
   const [amount, setAmount] = useState('');
   const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [dialog, setDialog] = useState<{ visible: boolean; title: string; message: string; primaryAction: AppDialogAction }>({
+    visible: false,
+    title: '',
+    message: '',
+    primaryAction: { label: 'OK' },
+  });
+
+  const openDialog = (title: string, message: string, primaryAction: AppDialogAction = { label: 'OK' }) => {
+    setDialog({ visible: true, title, message, primaryAction });
+  };
 
   const paymentMethods = [
     { id: 'card', name: 'Credit/Debit Card', icon: 'card', description: 'Visa, Mastercard' },
@@ -23,11 +34,11 @@ export default function AddFundsScreen() {
 
   const handleAddFunds = async () => {
     if (!amount || parseFloat(amount) <= 0) {
-      Alert.alert('Error', 'Please enter a valid amount');
+      openDialog('Error', 'Please enter a valid amount');
       return;
     }
     if (!selectedMethod) {
-      Alert.alert('Error', 'Please select a payment method');
+      openDialog('Error', 'Please select a payment method');
       return;
     }
 
@@ -46,23 +57,24 @@ export default function AddFundsScreen() {
       const errorMessage = error?.response?.data?.detail || 
                           error?.response?.data?.message || 
                           'Failed to process payment. Please try again.';
-      Alert.alert('Error', errorMessage);
+      openDialog('Error', errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <KeyboardAvoidingView 
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      className="flex-1"
-    >
-      <ScrollView 
-        className="flex-1 bg-sand-100" 
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
-        keyboardShouldPersistTaps="handled"
+    <>
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        className="flex-1"
       >
+        <ScrollView 
+          className="flex-1 bg-sand-100" 
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
+          keyboardShouldPersistTaps="handled"
+        >
       {/* Header */}
       <LinearGradient
         colors={['#122F26', '#1d392f']}
@@ -187,8 +199,16 @@ export default function AddFundsScreen() {
             </Text>
           </LinearGradient>
         </TouchableOpacity>
-      </View>
-    </ScrollView>
-    </KeyboardAvoidingView>
+        </View>
+      </ScrollView>
+      </KeyboardAvoidingView>
+      <AppDialog
+        visible={dialog.visible}
+        title={dialog.title}
+        message={dialog.message}
+        primaryAction={dialog.primaryAction}
+        onRequestClose={() => setDialog((prev) => ({ ...prev, visible: false }))}
+      />
+    </>
   );
 }

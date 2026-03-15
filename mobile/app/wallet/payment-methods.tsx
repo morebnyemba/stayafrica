@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, TouchableOpacity, Platform, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Platform, ActivityIndicator } from 'react-native';
 import { useState, useEffect } from 'react';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -6,6 +6,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { apiClient } from '@/services/api-client';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useCallback } from 'react';
+import { AppDialog, AppDialogAction } from '@/components/common/AppDialog';
 
 interface PaymentMethod {
   id: string;
@@ -22,6 +23,27 @@ export default function PaymentMethodsScreen() {
   const insets = useSafeAreaInsets();
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
   const [loading, setLoading] = useState(true);
+  const [dialog, setDialog] = useState<{
+    visible: boolean;
+    title: string;
+    message: string;
+    primaryAction: AppDialogAction;
+    secondaryAction?: AppDialogAction;
+  }>({
+    visible: false,
+    title: '',
+    message: '',
+    primaryAction: { label: 'OK' },
+  });
+
+  const openDialog = (
+    title: string,
+    message: string,
+    primaryAction: AppDialogAction = { label: 'OK' },
+    secondaryAction?: AppDialogAction
+  ) => {
+    setDialog({ visible: true, title, message, primaryAction, secondaryAction });
+  };
 
   useFocusEffect(
     useCallback(() => {
@@ -66,34 +88,32 @@ export default function PaymentMethodsScreen() {
       setPaymentMethods(methods => 
         methods.map(m => ({ ...m, is_default: m.id === id }))
       );
-      Alert.alert('Success', 'Default payment method updated');
+      openDialog('Success', 'Default payment method updated');
     } catch (error) {
       console.error('Error setting default:', error);
-      Alert.alert('Error', 'Failed to update default payment method');
+      openDialog('Error', 'Failed to update default payment method');
     }
   };
 
   const handleDelete = (id: string) => {
-    Alert.alert(
+    openDialog(
       'Delete Payment Method',
       'Are you sure you want to delete this payment method?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Delete', 
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await apiClient.delete(`/payment-methods/${id}/`);
-              setPaymentMethods(methods => methods.filter(m => m.id !== id));
-              Alert.alert('Success', 'Payment method deleted');
-            } catch (error) {
-              console.error('Error deleting:', error);
-              Alert.alert('Error', 'Failed to delete payment method');
-            }
+      {
+        label: 'Delete',
+        variant: 'destructive',
+        onPress: async () => {
+          try {
+            await apiClient.delete(`/payment-methods/${id}/`);
+            setPaymentMethods(methods => methods.filter(m => m.id !== id));
+            openDialog('Success', 'Payment method deleted');
+          } catch (error) {
+            console.error('Error deleting:', error);
+            openDialog('Error', 'Failed to delete payment method');
           }
-        },
-      ]
+        }
+      },
+      { label: 'Cancel' }
     );
   };
 
@@ -234,6 +254,14 @@ export default function PaymentMethodsScreen() {
           </View>
         </ScrollView>
       )}
+      <AppDialog
+        visible={dialog.visible}
+        title={dialog.title}
+        message={dialog.message}
+        primaryAction={dialog.primaryAction}
+        secondaryAction={dialog.secondaryAction}
+        onRequestClose={() => setDialog((prev) => ({ ...prev, visible: false }))}
+      />
     </SafeAreaView>
   );
 }

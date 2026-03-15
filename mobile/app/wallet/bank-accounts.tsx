@@ -1,10 +1,11 @@
-import { View, Text, ScrollView, TouchableOpacity, Platform, Alert, ActivityIndicator, Modal, TextInput } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Platform, ActivityIndicator, Modal, TextInput } from 'react-native';
 import { useState, useCallback } from 'react';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { apiClient } from '@/services/api-client';
+import { AppDialog, AppDialogAction } from '@/components/common/AppDialog';
 
 interface BankAccount {
   id: string;
@@ -30,6 +31,27 @@ export default function BankAccountsScreen() {
     branch_code: '',
     country: 'Zimbabwe',
   });
+  const [dialog, setDialog] = useState<{
+    visible: boolean;
+    title: string;
+    message: string;
+    primaryAction: AppDialogAction;
+    secondaryAction?: AppDialogAction;
+  }>({
+    visible: false,
+    title: '',
+    message: '',
+    primaryAction: { label: 'OK' },
+  });
+
+  const openDialog = (
+    title: string,
+    message: string,
+    primaryAction: AppDialogAction = { label: 'OK' },
+    secondaryAction?: AppDialogAction
+  ) => {
+    setDialog({ visible: true, title, message, primaryAction, secondaryAction });
+  };
 
   useFocusEffect(
     useCallback(() => {
@@ -55,40 +77,38 @@ export default function BankAccountsScreen() {
       setBankAccounts(accounts =>
         accounts.map(a => ({ ...a, is_primary: a.id === id }))
       );
-      Alert.alert('Success', 'Primary bank account updated');
+      openDialog('Success', 'Primary bank account updated');
     } catch (error) {
       console.error('Error setting primary:', error);
-      Alert.alert('Error', 'Failed to update primary bank account');
+      openDialog('Error', 'Failed to update primary bank account');
     }
   };
 
   const handleDelete = (id: string) => {
-    Alert.alert(
+    openDialog(
       'Delete Bank Account',
       'Are you sure you want to delete this bank account?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await apiClient.delete(`/bank-accounts/${id}/`);
-              setBankAccounts(accounts => accounts.filter(a => a.id !== id));
-              Alert.alert('Success', 'Bank account deleted');
-            } catch (error) {
-              console.error('Error deleting:', error);
-              Alert.alert('Error', 'Failed to delete bank account');
-            }
+      {
+        label: 'Delete',
+        variant: 'destructive',
+        onPress: async () => {
+          try {
+            await apiClient.delete(`/bank-accounts/${id}/`);
+            setBankAccounts(accounts => accounts.filter(a => a.id !== id));
+            openDialog('Success', 'Bank account deleted');
+          } catch (error) {
+            console.error('Error deleting:', error);
+            openDialog('Error', 'Failed to delete bank account');
           }
-        },
-      ]
+        }
+      },
+      { label: 'Cancel' }
     );
   };
 
   const handleAddAccount = async () => {
     if (!formData.bank_name || !formData.account_name || !formData.account_number) {
-      Alert.alert('Error', 'Please fill in all required fields');
+      openDialog('Error', 'Please fill in all required fields');
       return;
     }
 
@@ -107,10 +127,10 @@ export default function BankAccountsScreen() {
         branch_code: '',
         country: 'Zimbabwe',
       });
-      Alert.alert('Success', 'Bank account added successfully!');
+      openDialog('Success', 'Bank account added successfully!');
     } catch (error: any) {
       console.error('Error adding account:', error);
-      Alert.alert('Error', error.response?.data?.error || 'Failed to add bank account');
+      openDialog('Error', error.response?.data?.error || 'Failed to add bank account');
     }
   };
 
@@ -307,6 +327,14 @@ export default function BankAccountsScreen() {
           </View>
         </View>
       </Modal>
+      <AppDialog
+        visible={dialog.visible}
+        title={dialog.title}
+        message={dialog.message}
+        primaryAction={dialog.primaryAction}
+        secondaryAction={dialog.secondaryAction}
+        onRequestClose={() => setDialog((prev) => ({ ...prev, visible: false }))}
+      />
     </SafeAreaView>
   );
 }

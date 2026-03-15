@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, TouchableOpacity, TextInput, Platform, Alert, KeyboardAvoidingView, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, TextInput, Platform, KeyboardAvoidingView, ActivityIndicator } from 'react-native';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '@/context/auth-context';
 import { apiClient } from '@/services/api-client';
 import { logApiError } from '@/utils/logger';
+import { AppDialog, AppDialogAction } from '@/components/common/AppDialog';
 
 export default function WithdrawScreen() {
   const router = useRouter();
@@ -17,6 +18,16 @@ export default function WithdrawScreen() {
   const [loading, setLoading] = useState(false);
   const [balance, setBalance] = useState<number>(0);
   const [loadingBalance, setLoadingBalance] = useState(true);
+  const [dialog, setDialog] = useState<{ visible: boolean; title: string; message: string; primaryAction: AppDialogAction }>({
+    visible: false,
+    title: '',
+    message: '',
+    primaryAction: { label: 'OK' },
+  });
+
+  const openDialog = (title: string, message: string, primaryAction: AppDialogAction = { label: 'OK' }) => {
+    setDialog({ visible: true, title, message, primaryAction });
+  };
 
   useEffect(() => {
     fetchBalance();
@@ -43,15 +54,15 @@ export default function WithdrawScreen() {
 
   const handleWithdraw = async () => {
     if (!amount || parseFloat(amount) <= 0) {
-      Alert.alert('Error', 'Please enter a valid amount');
+      openDialog('Error', 'Please enter a valid amount');
       return;
     }
     if (!selectedMethod) {
-      Alert.alert('Error', 'Please select a withdrawal method');
+      openDialog('Error', 'Please select a withdrawal method');
       return;
     }
     if (parseFloat(amount) > balance) {
-      Alert.alert('Error', 'Insufficient balance');
+      openDialog('Error', 'Insufficient balance');
       return;
     }
 
@@ -61,17 +72,17 @@ export default function WithdrawScreen() {
         amount: parseFloat(amount),
         method: selectedMethod,
       });
-      
-      Alert.alert(
-        'Success', 
-        'Withdrawal request submitted successfully. You will receive your funds within the specified timeframe.', 
-        [{ text: 'OK', onPress: () => router.back() }]
+
+      openDialog(
+        'Success',
+        'Withdrawal request submitted successfully. You will receive your funds within the specified timeframe.',
+        { label: 'OK', onPress: () => router.back() }
       );
     } catch (error: any) {
       const errorMessage = error?.response?.data?.detail || 
                           error?.response?.data?.message || 
                           'Failed to process withdrawal. Please try again.';
-      Alert.alert('Error', errorMessage);
+      openDialog('Error', errorMessage);
     } finally {
       setLoading(false);
     }
@@ -193,5 +204,12 @@ export default function WithdrawScreen() {
       </View>
       </ScrollView>
     </KeyboardAvoidingView>
+    <AppDialog
+      visible={dialog.visible}
+      title={dialog.title}
+      message={dialog.message}
+      primaryAction={dialog.primaryAction}
+      onRequestClose={() => setDialog((prev) => ({ ...prev, visible: false }))}
+    />
   );
 }

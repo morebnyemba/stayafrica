@@ -4,7 +4,6 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
-  Alert,
   ActivityIndicator,
   Image,
   TextInput,
@@ -15,6 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import * as Clipboard from 'expo-clipboard';
 import { apiClient } from '@/services/api-client';
+import { AppDialog, AppDialogAction } from '@/components/common/AppDialog';
 
 type ScreenState = 'loading' | 'status' | 'setup' | 'verify' | 'backup-codes' | 'disable';
 
@@ -42,6 +42,27 @@ export default function SecurityScreen() {
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [dialog, setDialog] = useState<{
+    visible: boolean;
+    title: string;
+    message: string;
+    primaryAction: AppDialogAction;
+    secondaryAction?: AppDialogAction;
+  }>({
+    visible: false,
+    title: '',
+    message: '',
+    primaryAction: { label: 'OK' },
+  });
+
+  const openDialog = (
+    title: string,
+    message: string,
+    primaryAction: AppDialogAction = { label: 'OK' },
+    secondaryAction?: AppDialogAction
+  ) => {
+    setDialog({ visible: true, title, message, primaryAction, secondaryAction });
+  };
 
   // Load 2FA status on mount
   const loadStatus = useCallback(async () => {
@@ -106,7 +127,7 @@ export default function SecurityScreen() {
       setError('');
       await apiClient.disable2FA(password);
       setPassword('');
-      Alert.alert('Success', '2FA has been disabled');
+      openDialog('Success', '2FA has been disabled');
       loadStatus();
     } catch (err: any) {
       setError(err?.response?.data?.error || 'Invalid password');
@@ -139,7 +160,7 @@ export default function SecurityScreen() {
   const handleCopyBackupCodes = async () => {
     const text = backupCodes.join('\n');
     await Clipboard.setStringAsync(text);
-    Alert.alert('Copied', 'Backup codes copied to clipboard');
+    openDialog('Copied', 'Backup codes copied to clipboard');
   };
 
   // Share backup codes
@@ -152,13 +173,11 @@ export default function SecurityScreen() {
 
   // Confirm disable
   const confirmDisable = () => {
-    Alert.alert(
+    openDialog(
       'Disable 2FA',
       'This will make your account less secure. Are you sure?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Disable', style: 'destructive', onPress: () => setScreen('disable') },
-      ]
+      { label: 'Disable', variant: 'destructive', onPress: () => setScreen('disable') },
+      { label: 'Cancel' }
     );
   };
 
@@ -187,6 +206,17 @@ export default function SecurityScreen() {
     </View>
   );
 
+  const dialogNode = (
+    <AppDialog
+      visible={dialog.visible}
+      title={dialog.title}
+      message={dialog.message}
+      primaryAction={dialog.primaryAction}
+      secondaryAction={dialog.secondaryAction}
+      onRequestClose={() => setDialog((prev) => ({ ...prev, visible: false }))}
+    />
+  );
+
   // Loading
   if (screen === 'loading') {
     return (
@@ -196,6 +226,7 @@ export default function SecurityScreen() {
           <ActivityIndicator size="large" color="#D4A574" />
           <Text className="mt-4 text-gray-500">Loading security settings…</Text>
         </View>
+        {dialogNode}
       </SafeAreaView>
     );
   }
@@ -303,6 +334,7 @@ export default function SecurityScreen() {
             ))}
           </View>
         </ScrollView>
+        {dialogNode}
       </SafeAreaView>
     );
   }
@@ -346,7 +378,7 @@ export default function SecurityScreen() {
                 onPress={async () => {
                   if (setupData?.secret) {
                     await Clipboard.setStringAsync(setupData.secret);
-                    Alert.alert('Copied', 'Secret key copied to clipboard');
+                    openDialog('Copied', 'Secret key copied to clipboard');
                   }
                 }}
               >
@@ -386,6 +418,7 @@ export default function SecurityScreen() {
             </TouchableOpacity>
           </View>
         </ScrollView>
+        {dialogNode}
       </SafeAreaView>
     );
   }
@@ -451,6 +484,7 @@ export default function SecurityScreen() {
             </TouchableOpacity>
           </View>
         </ScrollView>
+        {dialogNode}
       </SafeAreaView>
     );
   }
@@ -536,6 +570,7 @@ export default function SecurityScreen() {
             </View>
           </View>
         </ScrollView>
+        {dialogNode}
       </SafeAreaView>
     );
   }

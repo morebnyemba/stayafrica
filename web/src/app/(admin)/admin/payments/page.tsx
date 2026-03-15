@@ -190,8 +190,6 @@ export default function PaymentsManagement() {
           </div>
         </div>
       ) : null;
-    }
-  };
 
   const totalRevenue = payments
     .filter(p => p.status === 'success')
