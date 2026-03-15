@@ -1,10 +1,11 @@
-import { View, Text, TouchableOpacity, ScrollView, TextInput, Alert, Platform, ActivityIndicator, KeyboardAvoidingView, Pressable } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, TextInput, Platform, ActivityIndicator, KeyboardAvoidingView, Pressable } from 'react-native';
 import { useState, useRef } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { apiClient } from '@/services/api-client';
+import { AppDialog, AppDialogAction } from '@/components/common/AppDialog';
 
 interface PasswordFieldProps {
   label: string;
@@ -80,6 +81,12 @@ export default function ChangePasswordScreen() {
   const [showOldPassword, setShowOldPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [dialog, setDialog] = useState<{ visible: boolean; title: string; message: string; primaryAction: AppDialogAction }>({
+    visible: false,
+    title: '',
+    message: '',
+    primaryAction: { label: 'OK' },
+  });
   
   const oldPasswordRef = useRef<TextInput>(null);
   const newPasswordRef = useRef<TextInput>(null);
@@ -91,20 +98,24 @@ export default function ChangePasswordScreen() {
     confirm_password: '',
   });
 
+  const openDialog = (title: string, message: string, primaryAction: AppDialogAction = { label: 'OK' }) => {
+    setDialog({ visible: true, title, message, primaryAction });
+  };
+
   const handleChangePassword = async () => {
     // Validation
     if (!formData.old_password || !formData.new_password || !formData.confirm_password) {
-      Alert.alert('Error', 'Please fill in all fields');
+      openDialog('Error', 'Please fill in all fields');
       return;
     }
 
     if (formData.new_password !== formData.confirm_password) {
-      Alert.alert('Error', 'New passwords do not match');
+      openDialog('Error', 'New passwords do not match');
       return;
     }
 
     if (formData.new_password.length < 8) {
-      Alert.alert('Error', 'Password must be at least 8 characters long');
+      openDialog('Error', 'Password must be at least 8 characters long');
       return;
     }
 
@@ -115,37 +126,39 @@ export default function ChangePasswordScreen() {
         old_password: formData.old_password,
         new_password: formData.new_password,
       });
-      
-      Alert.alert('Success', 'Password changed successfully!', [
-        { text: 'OK', onPress: () => router.back() }
-      ]);
+
+      openDialog('Success', 'Password changed successfully!', {
+        label: 'OK',
+        onPress: () => router.back(),
+      });
     } catch (error: any) {
       const message = error.response?.data?.old_password || 
                       error.response?.data?.new_password?.[0] ||
                       error.response?.data?.detail || 
                       'Failed to change password';
-      Alert.alert('Error', message);
+      openDialog('Error', message);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <KeyboardAvoidingView 
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      className="flex-1"
-      keyboardVerticalOffset={0}
-    >
-      <ScrollView 
-        className="flex-1 bg-sand-100" 
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{
-          flexGrow: 1,
-          paddingTop: insets.top + 20,
-          paddingBottom: insets.bottom + 40,
-        }}
+    <>
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        className="flex-1"
+        keyboardVerticalOffset={0}
       >
+        <ScrollView 
+          className="flex-1 bg-sand-100" 
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={{
+            flexGrow: 1,
+            paddingTop: insets.top + 20,
+            paddingBottom: insets.bottom + 40,
+          }}
+        >
       {/* Header */}
       <LinearGradient
         colors={['#122F26', '#1d392f', '#2d4a40']}
@@ -288,8 +301,16 @@ export default function ChangePasswordScreen() {
             <Text className="text-forest font-bold text-base">Cancel</Text>
           </View>
         </TouchableOpacity>
-      </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+        </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+      <AppDialog
+        visible={dialog.visible}
+        title={dialog.title}
+        message={dialog.message}
+        primaryAction={dialog.primaryAction}
+        onRequestClose={() => setDialog((prev) => ({ ...prev, visible: false }))}
+      />
+    </>
   );
 }

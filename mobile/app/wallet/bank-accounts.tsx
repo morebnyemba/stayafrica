@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, TouchableOpacity, Platform, ActivityIndicator, Modal, TextInput } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Modal, TextInput } from 'react-native';
 import { useState, useCallback } from 'react';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';

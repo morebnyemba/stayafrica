@@ -8,20 +8,17 @@ import {
   Image,
   Modal,
   Animated,
-  Dimensions,
   KeyboardAvoidingView,
   Platform,
-  Alert,
   ActivityIndicator
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/context/auth-context';
-import { Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-const { width, height } = Dimensions.get('window');
+import { AppDialog, AppDialogAction } from '@/components/common/AppDialog';
 
 type Step = 1 | 2 | 3;
 
@@ -111,6 +108,12 @@ const AnimatedStepIndicator = ({ currentStep, steps }: { currentStep: Step; step
 
 export default function RegisterScreen() {
   const [currentStep, setCurrentStep] = useState<Step>(1);
+  const [dialog, setDialog] = useState<{ visible: boolean; title: string; message: string; primaryAction: AppDialogAction }>({
+    visible: false,
+    title: '',
+    message: '',
+    primaryAction: { label: 'OK' },
+  });
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -164,6 +167,10 @@ export default function RegisterScreen() {
     setCurrentStep((prev) => (prev - 1) as Step);
   };
 
+  const openDialog = (title: string, message: string, primaryAction: AppDialogAction = { label: 'OK' }) => {
+    setDialog({ visible: true, title, message, primaryAction });
+  };
+
   const handleRegister = async () => {
     if (!validateStep(currentStep)) return;
 
@@ -201,7 +208,7 @@ export default function RegisterScreen() {
       const errorMessage = error?.response?.data?.email?.[0] || 
                           error?.response?.data?.detail ||
                           'Please check your details and try again.';
-      Alert.alert('Registration Failed', errorMessage);
+      openDialog('Registration Failed', errorMessage);
     } finally {
       setLoading(false);
     }
@@ -618,6 +625,13 @@ export default function RegisterScreen() {
           </View>
         </View>
       </Modal>
+      <AppDialog
+        visible={dialog.visible}
+        title={dialog.title}
+        message={dialog.message}
+        primaryAction={dialog.primaryAction}
+        onRequestClose={() => setDialog((prev) => ({ ...prev, visible: false }))}
+      />
     </View>
   );
 }

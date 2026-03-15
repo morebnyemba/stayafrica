@@ -1,10 +1,11 @@
-import { View, Text, ScrollView, TouchableOpacity, Platform, TextInput, Alert, ActivityIndicator, Modal } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, TextInput, ActivityIndicator } from 'react-native';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { apiClient } from '@/services/api-client';
+import { AppDialog, AppDialogAction } from '@/components/common/AppDialog';
 
 type PaymentStep = 'provider' | 'method' | 'details' | 'confirmation';
 type PaymentProvider = 'stripe' | 'paynow' | 'flutterwave' | 'paystack';
@@ -58,6 +59,16 @@ export default function AddPaymentMethodScreen() {
     provider: 'stripe',
     method: 'card',
   });
+  const [dialog, setDialog] = useState<{ visible: boolean; title: string; message: string; primaryAction: AppDialogAction }>({
+    visible: false,
+    title: '',
+    message: '',
+    primaryAction: { label: 'OK' },
+  });
+
+  const openDialog = (title: string, message: string, primaryAction: AppDialogAction = { label: 'OK' }) => {
+    setDialog({ visible: true, title, message, primaryAction });
+  };
 
   const handleProviderSelect = (provider: PaymentProvider) => {
     setPaymentData(prev => ({
@@ -82,7 +93,7 @@ export default function AddPaymentMethodScreen() {
     setLoading(true);
     try {
       // Call backend API to add payment method
-      const response = await apiClient.post('/payment-methods/', {
+      await apiClient.post('/payment-methods/', {
         provider: paymentData.provider,
         method_type: paymentData.method,
         name: paymentData.provider === 'stripe' ? 'Credit Card' : 
@@ -97,12 +108,13 @@ export default function AddPaymentMethodScreen() {
         is_default: false,
       });
 
-      Alert.alert('Success', 'Payment method added successfully!', [
-        { text: 'OK', onPress: () => router.replace('/wallet/payment-methods') }
-      ]);
+      openDialog('Success', 'Payment method added successfully!', {
+        label: 'OK',
+        onPress: () => router.replace('/wallet/payment-methods'),
+      });
     } catch (error) {
       console.error('Error adding payment method:', error);
-      Alert.alert('Error', 'Failed to add payment method. Please try again.');
+      openDialog('Error', 'Failed to add payment method. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -111,24 +123,24 @@ export default function AddPaymentMethodScreen() {
   const validatePaymentData = (): boolean => {
     if (paymentData.method === 'card') {
       if (!paymentData.cardNumber || paymentData.cardNumber.length < 13) {
-        Alert.alert('Error', 'Please enter a valid card number');
+        openDialog('Error', 'Please enter a valid card number');
         return false;
       }
       if (!paymentData.cardHolder || paymentData.cardHolder.trim().length === 0) {
-        Alert.alert('Error', 'Please enter the cardholder name');
+        openDialog('Error', 'Please enter the cardholder name');
         return false;
       }
       if (!paymentData.expiryMonth || !paymentData.expiryYear) {
-        Alert.alert('Error', 'Please enter the expiry date');
+        openDialog('Error', 'Please enter the expiry date');
         return false;
       }
       if (!paymentData.cvv || paymentData.cvv.length < 3) {
-        Alert.alert('Error', 'Please enter a valid CVV');
+        openDialog('Error', 'Please enter a valid CVV');
         return false;
       }
     } else if (paymentData.method === 'mobile_money') {
       if (!paymentData.phoneNumber || paymentData.phoneNumber.length < 10) {
-        Alert.alert('Error', 'Please enter a valid phone number');
+        openDialog('Error', 'Please enter a valid phone number');
         return false;
       }
     }
@@ -449,6 +461,13 @@ export default function AddPaymentMethodScreen() {
           </TouchableOpacity>
         </View>
       )}
+      <AppDialog
+        visible={dialog.visible}
+        title={dialog.title}
+        message={dialog.message}
+        primaryAction={dialog.primaryAction}
+        onRequestClose={() => setDialog((prev) => ({ ...prev, visible: false }))}
+      />
     </SafeAreaView>
   );
 }

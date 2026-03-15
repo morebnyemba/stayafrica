@@ -1,5 +1,5 @@
-import { View, Text, ScrollView, TouchableOpacity, Platform, ActivityIndicator } from 'react-native';
-import { useState, useEffect } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { useState } from 'react';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';

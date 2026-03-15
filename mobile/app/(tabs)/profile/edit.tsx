@@ -1,10 +1,11 @@
-import { View, Text, TouchableOpacity, ScrollView, TextInput, Alert, Platform, ActivityIndicator, KeyboardAvoidingView } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, TextInput, Platform, ActivityIndicator, KeyboardAvoidingView } from 'react-native';
 import { useState, useEffect } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '@/context/auth-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { AppDialog, AppDialogAction } from '@/components/common/AppDialog';
 
 // List of countries for the picker
 const COUNTRIES = [
@@ -66,6 +67,12 @@ export default function EditProfileScreen() {
   const insets = useSafeAreaInsets();
   const [isLoading, setIsLoading] = useState(false);
   const [showCountryPicker, setShowCountryPicker] = useState(false);
+  const [dialog, setDialog] = useState<{ visible: boolean; title: string; message: string; primaryAction: AppDialogAction }>({
+    visible: false,
+    title: '',
+    message: '',
+    primaryAction: { label: 'OK' },
+  });
 
   const [formData, setFormData] = useState({
     first_name: '',
@@ -74,6 +81,10 @@ export default function EditProfileScreen() {
     phone_number: '',
     country_of_residence: '',
   });
+
+  const openDialog = (title: string, message: string, primaryAction: AppDialogAction = { label: 'OK' }) => {
+    setDialog({ visible: true, title, message, primaryAction });
+  };
 
   // Sync form data when user data loads
   useEffect(() => {
@@ -101,7 +112,7 @@ export default function EditProfileScreen() {
       if (payload.phone_number) {
         const phoneRegex = /^\+?\d{9,15}$/;
         if (!phoneRegex.test(payload.phone_number)) {
-          Alert.alert('Invalid phone number', 'Use 9-15 digits, optionally starting with +.');
+          openDialog('Invalid phone number', 'Use 9-15 digits, optionally starting with +.');
           return;
         }
       }
@@ -109,40 +120,39 @@ export default function EditProfileScreen() {
         Object.entries(payload).filter(([, value]) => value !== '')
       );
       if (Object.keys(cleanedPayload).length === 0) {
-        Alert.alert('No changes', 'Update at least one field before saving.');
+        openDialog('No changes', 'Update at least one field before saving.');
         return;
       }
       await updateProfile(cleanedPayload);
-      Alert.alert('Success', 'Profile updated successfully!', [
-        { text: 'OK', onPress: () => router.back() }
-      ]);
+      openDialog('Success', 'Profile updated successfully!', { label: 'OK', onPress: () => router.back() });
     } catch (error: any) {
       const serverMessage =
         error?.response?.data?.detail ||
         error?.response?.data?.error ||
         error?.message ||
         'Failed to update profile';
-      Alert.alert('Error', serverMessage);
+      openDialog('Error', serverMessage);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <KeyboardAvoidingView 
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      className="flex-1"
-    >
-      <ScrollView 
-        className="flex-1 bg-sand-100" 
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{
-          flexGrow: 1,
-          paddingTop: insets.top + 20,
-          paddingBottom: insets.bottom + 40,
-        }}
+    <>
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        className="flex-1"
       >
+        <ScrollView 
+          className="flex-1 bg-sand-100" 
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={{
+            flexGrow: 1,
+            paddingTop: insets.top + 20,
+            paddingBottom: insets.bottom + 40,
+          }}
+        >
       {/* Header */}
       <LinearGradient
         colors={['#122F26', '#1d392f', '#2d4a40']}
@@ -307,8 +317,16 @@ export default function EditProfileScreen() {
             <Text className="text-forest font-bold text-base">Cancel</Text>
           </View>
         </TouchableOpacity>
-      </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+        </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+      <AppDialog
+        visible={dialog.visible}
+        title={dialog.title}
+        message={dialog.message}
+        primaryAction={dialog.primaryAction}
+        onRequestClose={() => setDialog((prev) => ({ ...prev, visible: false }))}
+      />
+    </>
   );
 }

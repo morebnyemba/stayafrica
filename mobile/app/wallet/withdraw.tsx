@@ -4,17 +4,17 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useAuth } from '@/context/auth-context';
 import { apiClient } from '@/services/api-client';
 import { logApiError } from '@/utils/logger';
 import { AppDialog, AppDialogAction } from '@/components/common/AppDialog';
 
+type WithdrawalMethod = 'bank' | 'mobile' | 'paypal';
+
 export default function WithdrawScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { user } = useAuth();
   const [amount, setAmount] = useState('');
-  const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
+  const [selectedMethod, setSelectedMethod] = useState<WithdrawalMethod | null>(null);
   const [loading, setLoading] = useState(false);
   const [balance, setBalance] = useState<number>(0);
   const [loadingBalance, setLoadingBalance] = useState(true);
@@ -89,16 +89,17 @@ export default function WithdrawScreen() {
   };
 
   return (
-    <KeyboardAvoidingView 
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      className="flex-1"
-    >
-      <ScrollView 
-        className="flex-1 bg-sand-100" 
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
-        keyboardShouldPersistTaps="handled"
+    <>
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        className="flex-1"
       >
+        <ScrollView 
+          className="flex-1 bg-sand-100" 
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
+          keyboardShouldPersistTaps="handled"
+        >
       {/* Header */}
       <LinearGradient
         colors={['#122F26', '#1d392f']}
@@ -158,7 +159,7 @@ export default function WithdrawScreen() {
             className={`bg-white rounded-2xl p-4 mb-3 flex-row items-center ${
               selectedMethod === method.id ? 'border-2 border-gold' : ''
             }`}
-            onPress={() => setSelectedMethod(method.id)}
+            onPress={() => setSelectedMethod(method.id as WithdrawalMethod)}
             style={{
               shadowColor: '#122F26',
               shadowOffset: { width: 0, height: 2 },
@@ -201,15 +202,16 @@ export default function WithdrawScreen() {
             </Text>
           </LinearGradient>
         </TouchableOpacity>
-      </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
-    <AppDialog
-      visible={dialog.visible}
-      title={dialog.title}
-      message={dialog.message}
-      primaryAction={dialog.primaryAction}
-      onRequestClose={() => setDialog((prev) => ({ ...prev, visible: false }))}
-    />
+        </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+      <AppDialog
+        visible={dialog.visible}
+        title={dialog.title}
+        message={dialog.message}
+        primaryAction={dialog.primaryAction}
+        onRequestClose={() => setDialog((prev) => ({ ...prev, visible: false }))}
+      />
+    </>
   );
 }
