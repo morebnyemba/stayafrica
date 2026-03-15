@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/store/auth-store';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
@@ -57,6 +57,7 @@ function parseBackendErrors(errorData: Record<string, unknown>): string[] {
 
 export function RegisterContent() {
   const { register } = useAuth();
+  const formRef = useRef<HTMLFormElement>(null);
   const searchParams = useSearchParams();
   const redirectUrl = getRedirectUrl(searchParams);
   const [isLoading, setIsLoading] = useState(false);
@@ -198,6 +199,9 @@ export function RegisterContent() {
     }
     if (isValid && currentStep < 3) {
       setCurrentStep((currentStep + 1) as Step);
+      requestAnimationFrame(() => {
+        formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
     }
   };
 
@@ -284,6 +288,7 @@ export function RegisterContent() {
           </p>
 
           <form
+            ref={formRef}
             onSubmit={(e) => {
               e.preventDefault();
               if (currentStep === 3) {
@@ -292,7 +297,7 @@ export function RegisterContent() {
                 handleNext();
               }
             }}
-            className="space-y-5"
+            className="space-y-5 scroll-mt-24"
           >
             {/* Step 1: Personal Info (was Step 2) */}
             {currentStep === 1 && (

@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '@/services/api-client';
 import { Input, Button } from '@/components/ui';
 import { MapPin, DollarSign, Home, Image as ImageIcon, X, Upload, ChevronRight, ChevronLeft } from 'lucide-react';
 import { MapboxLocationPicker } from '@/components/common/mapbox-location-picker';
+import { ConfirmActionModal } from '@/components/common/confirm-action-modal';
 
 interface PropertyFormProps {
   initialData?: any;
@@ -25,6 +26,7 @@ const STEPS: { id: FormStep; label: string; description: string }[] = [
 
 export function PropertyForm({ initialData, isEdit = false, propertyId, onSuccess }: PropertyFormProps) {
   const router = useRouter();
+  const formRef = useRef<HTMLFormElement>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [currentStep, setCurrentStep] = useState<FormStep>('basic');
@@ -59,6 +61,7 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [existingImages, setExistingImages] = useState<any[]>([]);
+  const [pendingDeleteImageId, setPendingDeleteImageId] = useState<number | null>(null);
 
   useEffect(() => {
     if (isEdit && initialData?.images && Array.isArray(initialData.images)) {
@@ -113,8 +116,6 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
   };
 
   const removeExistingImage = async (imageId: number) => {
-    if (!window.confirm('Are you sure you want to delete this image?')) return;
-
     try {
       const currentPropertyId = propertyId || initialData?.id;
       if (!currentPropertyId) {
@@ -127,6 +128,12 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
       console.error('Failed to delete image:', err);
       setError('Failed to delete image');
     }
+  };
+
+  const confirmDeleteExistingImage = async () => {
+    if (!pendingDeleteImageId) return;
+    await removeExistingImage(pendingDeleteImageId);
+    setPendingDeleteImageId(null);
   };
 
   const toggleAmenity = (amenityId: number) => {
@@ -236,6 +243,9 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
     const stepIndex = STEPS.findIndex(s => s.id === currentStep);
     if (stepIndex < STEPS.length - 1) {
       setCurrentStep(STEPS[stepIndex + 1].id);
+      requestAnimationFrame(() => {
+        formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
     }
   };
 
@@ -318,7 +328,7 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
   const isLastStep = currentStepIndex === STEPS.length - 1;
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form ref={formRef} onSubmit={handleSubmit} className="space-y-6 scroll-mt-24">
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-3 sm:p-4 text-xs sm:text-sm text-red-800">
           {error}
@@ -670,7 +680,7 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
                       )}
                       <button
                         type="button"
-                        onClick={() => removeExistingImage(image.id)}
+                        onClick={() => setPendingDeleteImageId(image.id)}
                         className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition"
                         title="Delete image"
                       >
@@ -790,6 +800,15 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
         )}
         </div>
       </div>
+      <ConfirmActionModal
+        isOpen={Boolean(pendingDeleteImageId)}
+        title="Delete Image"
+        message="Are you sure you want to delete this image?"
+        confirmText="Delete"
+        variant="danger"
+        onCancel={() => setPendingDeleteImageId(null)}
+        onConfirm={confirmDeleteExistingImage}
+      />
     </form>
   );
 }

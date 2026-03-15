@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { apiClient } from '@/services/api-client';
 import { Input, Button } from '@/components/ui';
 import { MapPin, DollarSign, Home, Image as ImageIcon, X, Upload, AlertTriangle, CheckCircle } from 'lucide-react';
+import { ConfirmActionModal } from '@/components/common/confirm-action-modal';
 
 interface PropertyFormProps {
   initialData?: any;
@@ -44,6 +45,7 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [existingImages, setExistingImages] = useState<any[]>([]);
+  const [pendingDeleteImageId, setPendingDeleteImageId] = useState<number | null>(null);
 
   // Load existing images when editing
   useEffect(() => {
@@ -86,8 +88,6 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
   };
 
   const removeExistingImage = async (imageId: number) => {
-    if (!window.confirm('Are you sure you want to delete this image?')) return;
-
     try {
       // You may need to implement this endpoint on the backend
       // await apiClient.deletePropertyImage(propertyId, imageId);
@@ -96,6 +96,12 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
       console.error('Failed to delete image:', err);
       setError('Failed to delete image');
     }
+  };
+
+  const confirmDeleteExistingImage = async () => {
+    if (!pendingDeleteImageId) return;
+    await removeExistingImage(pendingDeleteImageId);
+    setPendingDeleteImageId(null);
   };
 
   const handleLocationSearch = async (query: string) => {
@@ -660,7 +666,7 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
                     )}
                     <button
                       type="button"
-                      onClick={() => removeExistingImage(image.id)}
+                      onClick={() => setPendingDeleteImageId(image.id)}
                       className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition"
                       title="Delete image"
                     >
@@ -760,6 +766,15 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
           {loading ? 'Saving...' : isEdit ? 'Update Property' : 'Create Property'}
         </Button>
       </div>
+      <ConfirmActionModal
+        isOpen={Boolean(pendingDeleteImageId)}
+        title="Delete Image"
+        message="Are you sure you want to delete this image?"
+        confirmText="Delete"
+        variant="danger"
+        onCancel={() => setPendingDeleteImageId(null)}
+        onConfirm={confirmDeleteExistingImage}
+      />
     </form>
   );
 }

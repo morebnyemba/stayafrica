@@ -9,6 +9,7 @@ import {
   ArrowRight, TrendingUp, Eye, LogIn, LogOut,
 } from 'lucide-react';
 import { Button } from '@/components/ui';
+import { ConfirmActionModal } from '@/components/common/confirm-action-modal';
 import dynamic from 'next/dynamic';
 const ProtectedRoute = dynamic(() => import('@/components/auth/protected-route').then(m => m.ProtectedRoute), { ssr: false });
 import { useState, useMemo } from 'react';
@@ -26,12 +27,15 @@ const getNights = (checkIn: string, checkOut: string) =>
 const getInitials = (firstName?: string, lastName?: string) =>
   `${(firstName || '?')[0]}${(lastName || '')[0] || ''}`.toUpperCase();
 
+type BookingAction = 'approve' | 'cancel' | 'checkIn' | 'checkOut' | 'complete';
+
 export function HostBookingsContent() {
   const { user, isAuthenticated } = useAuth();
   const queryClient = useQueryClient();
   const [filter, setFilter] = useState<string>('all');
   const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
   const [searchTerm, setSearchTerm] = useState('');
+  const [pendingAction, setPendingAction] = useState<{ bookingId: string; action: BookingAction } | null>(null);
 
   const { data: bookingsData, isLoading } = useQuery({
     queryKey: ['host', 'bookings', filter],
@@ -81,34 +85,78 @@ export function HostBookingsContent() {
   });
 
   const handleApprove = (bookingId: string) => {
-    if (window.confirm('Are you sure you want to approve this booking request?')) {
-      approveMutation.mutate(bookingId);
-    }
+    setPendingAction({ bookingId, action: 'approve' });
   };
 
   const handleCancel = (bookingId: string) => {
-    if (window.confirm('Are you sure you want to cancel this booking? This action cannot be undone.')) {
-      cancelMutation.mutate(bookingId);
-    }
+    setPendingAction({ bookingId, action: 'cancel' });
   };
 
   const handleCheckIn = (bookingId: string) => {
-    if (window.confirm('Mark this guest as checked in?')) {
-      checkInMutation.mutate(bookingId);
-    }
+    setPendingAction({ bookingId, action: 'checkIn' });
   };
 
   const handleCheckOut = (bookingId: string) => {
-    if (window.confirm('Mark this guest as checked out?')) {
-      checkOutMutation.mutate(bookingId);
-    }
+    setPendingAction({ bookingId, action: 'checkOut' });
   };
 
   const handleComplete = (bookingId: string) => {
-    if (window.confirm('Mark this booking as completed?')) {
-      completeMutation.mutate(bookingId);
-    }
+    setPendingAction({ bookingId, action: 'complete' });
   };
+
+  const confirmPendingAction = () => {
+    if (!pendingAction) return;
+
+    const { bookingId, action } = pendingAction;
+    if (action === 'approve') approveMutation.mutate(bookingId);
+    if (action === 'cancel') cancelMutation.mutate(bookingId);
+    if (action === 'checkIn') checkInMutation.mutate(bookingId);
+    if (action === 'checkOut') checkOutMutation.mutate(bookingId);
+    if (action === 'complete') completeMutation.mutate(bookingId);
+
+    setPendingAction(null);
+  };
+
+  const modalConfigByAction: Record<BookingAction, { title: string; message: string; confirmText: string; variant: 'danger' | 'primary' }> = {
+    approve: {
+      title: 'Approve Booking',
+      message: 'Are you sure you want to approve this booking request?',
+      confirmText: 'Approve',
+      variant: 'primary',
+    },
+    cancel: {
+      title: 'Cancel Booking',
+      message: 'Are you sure you want to cancel this booking? This action cannot be undone.',
+      confirmText: 'Cancel Booking',
+      variant: 'danger',
+    },
+    checkIn: {
+      title: 'Check In Guest',
+      message: 'Mark this guest as checked in?',
+      confirmText: 'Check In',
+      variant: 'primary',
+    },
+    checkOut: {
+      title: 'Check Out Guest',
+      message: 'Mark this guest as checked out?',
+      confirmText: 'Check Out',
+      variant: 'primary',
+    },
+    complete: {
+      title: 'Complete Booking',
+      message: 'Mark this booking as completed?',
+      confirmText: 'Complete',
+      variant: 'primary',
+    },
+  };
+
+  const isPendingActionLoading = pendingAction
+    ? (pendingAction.action === 'approve' && approveMutation.isPending)
+      || (pendingAction.action === 'cancel' && cancelMutation.isPending)
+      || (pendingAction.action === 'checkIn' && checkInMutation.isPending)
+      || (pendingAction.action === 'checkOut' && checkOutMutation.isPending)
+      || (pendingAction.action === 'complete' && completeMutation.isPending)
+    : false;
 
   const allBookings = bookingsData?.results || [];
 
@@ -574,6 +622,18 @@ export function HostBookingsContent() {
           )}
         </div>
       </div>
+      {pendingAction && (
+        <ConfirmActionModal
+          isOpen={Boolean(pendingAction)}
+          title={modalConfigByAction[pendingAction.action].title}
+          message={modalConfigByAction[pendingAction.action].message}
+          confirmText={modalConfigByAction[pendingAction.action].confirmText}
+          variant={modalConfigByAction[pendingAction.action].variant}
+          isLoading={isPendingActionLoading}
+          onCancel={() => setPendingAction(null)}
+          onConfirm={confirmPendingAction}
+        />
+      )}
     </ProtectedRoute>
   );
 }

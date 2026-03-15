@@ -288,7 +288,8 @@ export function Navigation() {
 
       <nav
         className={cn(
-          'sticky top-[52px] md:top-0 z-40 transition-all duration-300',
+          'sticky z-40 transition-all duration-300',
+          shouldShowMobileSearch ? 'top-[52px] md:top-0' : 'top-0',
           scrolled
             ? 'bg-primary-800/95 backdrop-blur-md shadow-lg'
             : 'bg-primary-800 shadow-md'

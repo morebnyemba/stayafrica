@@ -9,10 +9,13 @@ import Link from 'next/link';
 import { Heart, MapPin, Star, Users, Bed, X } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { Button } from '@/components/ui/Button';
+import { useState } from 'react';
+import { ConfirmActionModal } from '@/components/common/confirm-action-modal';
 
 export function WishlistContent() {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const [pendingRemoveId, setPendingRemoveId] = useState<string | null>(null);
 
   const { data: savedPropertiesData, isLoading, error } = useQuery({
     queryKey: ['properties', 'saved'],
@@ -35,9 +38,13 @@ export function WishlistContent() {
 
   const removeFromWishlist = (propertyId: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
-    if (confirm('Remove this property from your wishlist?')) {
-      unsaveMutation.mutate(propertyId);
-    }
+    setPendingRemoveId(propertyId);
+  };
+
+  const confirmRemove = () => {
+    if (!pendingRemoveId) return;
+    unsaveMutation.mutate(pendingRemoveId);
+    setPendingRemoveId(null);
   };
 
   const handlePropertyClick = (propertyId: string) => {
@@ -205,6 +212,16 @@ export function WishlistContent() {
             </>
           )}
         </div>
+        <ConfirmActionModal
+          isOpen={Boolean(pendingRemoveId)}
+          title="Remove Saved Property"
+          message="Remove this property from your wishlist?"
+          confirmText="Remove"
+          variant="danger"
+          isLoading={unsaveMutation.isPending}
+          onCancel={() => setPendingRemoveId(null)}
+          onConfirm={confirmRemove}
+        />
       </div>
     </ProtectedRoute>
   );

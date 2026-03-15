@@ -6,6 +6,7 @@ import { apiClient } from '@/services/api-client';
 import Link from 'next/link';
 import { Building, Plus, Edit, Trash2, Eye, Calendar, DollarSign, Star, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui';
+import { ConfirmActionModal } from '@/components/common/confirm-action-modal';
 import dynamic from 'next/dynamic';
 const ProtectedRoute = dynamic(() => import('@/components/auth/protected-route').then(m => m.ProtectedRoute), { ssr: false });
 import { useState } from 'react';
@@ -14,6 +15,7 @@ export function HostPropertiesContent() {
   const { user, isAuthenticated } = useAuth();
   const queryClient = useQueryClient();
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
   // Fetch host properties
   const { data: propertiesData, isLoading } = useQuery({
@@ -39,10 +41,14 @@ export function HostPropertiesContent() {
   });
 
   const handleDelete = (propertyId: string) => {
-    if (window.confirm('Are you sure you want to delete this property? This action cannot be undone.')) {
-      setDeletingId(propertyId);
-      deleteMutation.mutate(propertyId);
-    }
+    setPendingDeleteId(propertyId);
+  };
+
+  const confirmDelete = () => {
+    if (!pendingDeleteId) return;
+    setDeletingId(pendingDeleteId);
+    deleteMutation.mutate(pendingDeleteId);
+    setPendingDeleteId(null);
   };
 
   const properties = (propertiesData?.results || []).filter((p: any) => p?.id);
@@ -253,6 +259,16 @@ export function HostPropertiesContent() {
           )}
         </div>
       </div>
+      <ConfirmActionModal
+        isOpen={Boolean(pendingDeleteId)}
+        title="Delete Property"
+        message="Are you sure you want to delete this property? This action cannot be undone."
+        confirmText="Delete"
+        variant="danger"
+        isLoading={Boolean(pendingDeleteId && deletingId === pendingDeleteId)}
+        onCancel={() => setPendingDeleteId(null)}
+        onConfirm={confirmDelete}
+      />
     </ProtectedRoute>
   );
 }

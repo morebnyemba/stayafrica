@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useId, useCallback } from 'react';
+import { useState, useId, useCallback, useRef } from 'react';
 import { DocumentUpload } from './DocumentUpload';
 import { SelfieCapture } from './SelfieCapture';
 import { useVerification } from './useVerification';
@@ -192,6 +192,7 @@ function StatusTimeline({ status }: { status: string }) {
 /* ════════════════════════════════════════════ */
 export const VerificationWizard = () => {
   const { status, isLoading, submitVerification, isSubmitting } = useVerification();
+  const wizardRef = useRef<HTMLDivElement>(null);
 
   /* ── wizard form state ── */
   const [currentStep, setCurrentStep] = useState<Step>('document');
@@ -222,8 +223,21 @@ export const VerificationWizard = () => {
   const canProceedFromSelfie = selfieUrl !== '';
 
   const handleNext = useCallback(() => {
-    if (currentStep === 'document' && canProceedFromDocument) setCurrentStep('selfie');
-    else if (currentStep === 'selfie' && canProceedFromSelfie) setCurrentStep('review');
+    let moved = false;
+
+    if (currentStep === 'document' && canProceedFromDocument) {
+      setCurrentStep('selfie');
+      moved = true;
+    } else if (currentStep === 'selfie' && canProceedFromSelfie) {
+      setCurrentStep('review');
+      moved = true;
+    }
+
+    if (moved) {
+      requestAnimationFrame(() => {
+        wizardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
   }, [currentStep, canProceedFromDocument, canProceedFromSelfie]);
 
   const handleBack = useCallback(() => {
@@ -517,7 +531,7 @@ export const VerificationWizard = () => {
   /* WIZARD FORM  (no status, or rejected+showForm) */
   /* ════════════════════════════════════════════ */
   return (
-    <div className="max-w-3xl mx-auto" role="region" aria-label="Verification wizard">
+    <div ref={wizardRef} className="max-w-3xl mx-auto scroll-mt-24" role="region" aria-label="Verification wizard">
       {/* Back to rejection card (if resubmitting) */}
       {status?.status === 'REJECTED' && showForm && (
         <button
