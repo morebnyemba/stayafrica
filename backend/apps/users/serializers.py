@@ -5,6 +5,7 @@ from django.core.validators import RegexValidator
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 class UserSerializer(serializers.ModelSerializer):
+    is_identity_verified = serializers.BooleanField(source='is_identity_verified', read_only=True)
     password = serializers.CharField(
         write_only=True,
         min_length=8,
@@ -63,7 +64,7 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'id', 'email', 'username', 'first_name', 'last_name', 'phone_number',
-            'role', 'active_profile', 'country_of_residence', 'is_verified', 'is_staff', 'profile_picture',
+            'role', 'active_profile', 'country_of_residence', 'is_verified', 'is_identity_verified', 'is_staff', 'profile_picture',
             'bio', 'password', 'is_online', 'last_seen', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at', 'is_verified', 'is_staff', 'is_online', 'last_seen']
@@ -97,6 +98,7 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 class UserProfileSerializer(serializers.ModelSerializer):
+    is_identity_verified = serializers.BooleanField(source='is_identity_verified', read_only=True)
     phone_number = serializers.CharField(
         required=False, 
         allow_blank=True,
@@ -112,7 +114,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'id', 'email', 'username', 'first_name', 'last_name', 'phone_number',
-            'role', 'active_profile', 'country_of_residence', 'is_verified', 'is_staff', 'profile_picture', 'bio',
+            'role', 'active_profile', 'country_of_residence', 'is_verified', 'is_identity_verified', 'is_staff', 'profile_picture', 'bio',
             'is_online', 'last_seen'
         ]
         read_only_fields = ['id', 'email', 'username', 'role', 'active_profile', 'is_verified', 'is_staff', 'is_online', 'last_seen']
@@ -152,6 +154,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         token['role'] = user.role
         token['active_profile'] = user.active_profile
         token['is_verified'] = user.is_verified
+        token['is_identity_verified'] = user.is_identity_verified
         token['is_staff'] = user.is_staff
         return token
 

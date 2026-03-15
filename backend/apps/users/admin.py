@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
+from django.utils import timezone
 from unfold.admin import ModelAdmin as UnfoldModelAdmin
 from unfold.decorators import display
 from apps.users.models import User, UserPreference, UserPropertyInteraction
@@ -12,7 +13,7 @@ class UserAdmin(UnfoldModelAdmin):
     
     list_display = [
         'email', 'username', 'full_name_display', 'role_badge', 
-        'verified_badge', 'active_badge', 'country_of_residence', 'date_joined'
+        'email_verified_badge', 'identity_verified_badge', 'active_badge', 'country_of_residence', 'date_joined'
     ]
     list_filter = [
         'role', 'is_verified', 'is_active', 'is_staff', 
@@ -25,7 +26,7 @@ class UserAdmin(UnfoldModelAdmin):
     
     actions = [
         'activate_users', 'deactivate_users', 'verify_users', 
-        'unverify_users', 'verify_identity', 'ban_user'
+        'unverify_users', 'ban_user'
     ]
     
     fieldsets = (
@@ -68,20 +69,15 @@ class UserAdmin(UnfoldModelAdmin):
         updated = queryset.update(is_active=False)
         self.message_user(request, f'{updated} user(s) deactivated.')
 
-    @admin.action(description=_('Mark selected users as verified'))
+    @admin.action(description=_('Mark selected users as email verified'))
     def verify_users(self, request, queryset):
         updated = queryset.update(is_verified=True)
-        self.message_user(request, f'{updated} user(s) verified.')
+        self.message_user(request, f'{updated} user(s) email-verified.')
 
-    @admin.action(description=_('Mark selected users as unverified'))
+    @admin.action(description=_('Mark selected users as email unverified'))
     def unverify_users(self, request, queryset):
         updated = queryset.update(is_verified=False)
-        self.message_user(request, f'{updated} user(s) unverified.')
-
-    @admin.action(description=_('Verify identity (KYC)'))
-    def verify_identity(self, request, queryset):
-        updated = queryset.update(is_verified=True)
-        self.message_user(request, f'{updated} user(s) identity verified.')
+        self.message_user(request, f'{updated} user(s) email-unverified.')
 
     @admin.action(description=_('Ban user (deactivate)'))
     def ban_user(self, request, queryset):
@@ -93,9 +89,13 @@ class UserAdmin(UnfoldModelAdmin):
     def role_badge(self, obj):
         return obj.get_role_display()
 
-    @display(description=_('Verified'), label={"Verified": "success", "Unverified": "warning"})
-    def verified_badge(self, obj):
+    @display(description=_('Email Verified'), label={"Verified": "success", "Unverified": "warning"})
+    def email_verified_badge(self, obj):
         return "Verified" if obj.is_verified else "Unverified"
+
+    @display(description=_('Identity Verified'), label={"Verified": "success", "Unverified": "warning"})
+    def identity_verified_badge(self, obj):
+        return "Verified" if obj.is_identity_verified else "Unverified"
 
     @display(description=_('Active'), label={"Active": "success", "Inactive": "danger"})
     def active_badge(self, obj):
@@ -157,7 +157,8 @@ class UserAdmin(UnfoldModelAdmin):
                     <strong>Role:</strong> {obj.get_role_display()}<br/>
                     <strong>Country:</strong> {obj.country_of_residence or 'Not specified'}<br/>
                     <strong>Phone:</strong> {obj.phone_number or 'Not provided'}<br/>
-                    <strong>Verified:</strong> {'✓ Yes' if obj.is_verified else '✗ No'}<br/>
+                    <strong>Email Verified:</strong> {'✓ Yes' if obj.is_verified else '✗ No'}<br/>
+                    <strong>Identity Verified:</strong> {'✓ Yes' if obj.is_identity_verified else '✗ No'}<br/>
                     <strong>Active:</strong> {'✓ Yes' if obj.is_active else '✗ No'}<br/>
                     <strong>Stats:</strong> {stats}
                 </div>

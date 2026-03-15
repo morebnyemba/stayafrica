@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import RegexValidator
+from django.utils import timezone
 
 class User(AbstractUser):
     ROLE_CHOICES = [
@@ -94,6 +95,20 @@ class User(AbstractUser):
     @property
     def is_support_agent(self):
         return self.role == 'support_agent' or self.is_admin_user
+
+    @property
+    def is_identity_verified(self):
+        """Identity/KYC verification status, separate from email verification."""
+        try:
+            from apps.users.verification_models import IdentityVerification
+            return IdentityVerification.objects.filter(
+                user=self,
+                status='approved'
+            ).filter(
+                models.Q(expires_at__isnull=True) | models.Q(expires_at__gt=timezone.now())
+            ).exists()
+        except Exception:
+            return False
 
 
 class UserPreference(models.Model):
