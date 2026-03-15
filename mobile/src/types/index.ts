@@ -245,19 +245,20 @@ export interface CreatePropertyRequest {
   title: string;
   description: string;
   property_type: string;
-  number_of_rooms: number;
-  number_of_beds: number;
-  number_of_bathrooms: number;
+  bedrooms: number;
+  bathrooms: number;
   max_guests: number;
   price_per_night: number;
   location: {
-    address: string;
-    city: string;
-    country: string;
-    latitude: number;
-    longitude: number;
+    type: 'Point';
+    coordinates: [number, number];
   };
-  amenities: string[];
+  address: string;
+  city: string;
+  suburb?: string;
+  country: string;
+  currency: string;
+  amenities_ids?: number[];
 }
 
 export interface UpdatePropertyRequest extends Partial<CreatePropertyRequest> { }

@@ -277,6 +277,30 @@ class APIClient {
     return (await this.client.get(`/properties/${id}/`)).data;
   }
 
+  async getHostPropertyById(id: string): Promise<Property> {
+    return (await this.client.get(`/properties/${id}/host_detail/`)).data;
+  }
+
+  async getAmenities(): Promise<any[]> {
+    const response = await this.client.get('/amenities/');
+    const payload = Array.isArray(response.data?.results) ? response.data.results : response.data;
+    return Array.isArray(payload) ? payload : [];
+  }
+
+  async uploadPropertyImages(propertyId: string, formData: FormData): Promise<any> {
+    return (
+      await this.client.post(`/properties/${propertyId}/upload_images/`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      })
+    ).data;
+  }
+
+  async deletePropertyImage(propertyId: string, imageId: number): Promise<any> {
+    return (await this.client.post(`/properties/${propertyId}/delete_image/`, { image_id: imageId })).data;
+  }
+
   // Bookings
   async getBookings(status?: string): Promise<ApiListResponse<Booking>> {
     return (

@@ -57,7 +57,9 @@ export default function EditPropertyScreen() {
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
   const [images, setImages] = useState<string[]>([]);
-  const [existingImages, setExistingImages] = useState<{id: number, image_url: string}[]>([]);
+  const [existingImages, setExistingImages] = useState<{id: number, image_url?: string, image?: string}[]>([]);
+  const [amenities, setAmenities] = useState<any[]>([]);
+  const [selectedAmenityIds, setSelectedAmenityIds] = useState<number[]>([]);
   
   const [formData, setFormData] = useState({
     title: '',
@@ -82,27 +84,47 @@ export default function EditPropertyScreen() {
     }
   }, [id]);
 
+  useEffect(() => {
+    const loadAmenities = async () => {
+      try {
+        const data = await apiClient.getAmenities();
+        setAmenities(data);
+      } catch (error) {
+        console.error('Failed to load amenities:', error);
+      }
+    };
+
+    loadAmenities();
+  }, []);
+
   const fetchProperty = async () => {
     try {
-      const response = await apiClient.get(`/properties/${id}/`);
-      const data = response.data;
+      const data: any = await apiClient.getHostPropertyById(String(id));
       
       setFormData({
         title: data.title || '',
         description: data.description || '',
         address: data.address || '',
-        city: data.location?.city || data.city || '',
-        suburb: data.location?.suburb || data.suburb || '',
-        country: data.location?.country || data.country || '',
+        city: data.city || '',
+        suburb: data.suburb || '',
+        country: data.country || '',
         price: data.price_per_night?.toString() || '',
         bedrooms: data.bedrooms?.toString() || '',
         bathrooms: data.bathrooms?.toString() || '',
         maxGuests: data.max_guests?.toString() || '',
         propertyType: data.property_type || 'house',
         currency: data.currency || 'USD',
-        latitude: data.location?.coordinates?.[1] || data.latitude || 0,
-        longitude: data.location?.coordinates?.[0] || data.longitude || 0,
+        latitude: data.location?.coordinates?.[1] || data.location?.latitude || 0,
+        longitude: data.location?.coordinates?.[0] || data.location?.longitude || 0,
       });
+
+      if (Array.isArray(data.amenities)) {
+        setSelectedAmenityIds(
+          data.amenities
+            .map((amenity: any) => Number(amenity?.id))
+            .filter((amenityId: number) => Number.isFinite(amenityId))
+        );
+      }
 
       if (data.images && Array.isArray(data.images)) {
         setExistingImages(data.images);
@@ -118,6 +140,22 @@ export default function EditPropertyScreen() {
 
   const handleChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const toggleAmenity = (amenityId: number) => {
+    setSelectedAmenityIds((prev) =>
+      prev.includes(amenityId) ? prev.filter((id) => id !== amenityId) : [...prev, amenityId]
+    );
+  };
+
+  const removeExistingImage = async (imageId: number) => {
+    try {
+      await apiClient.deletePropertyImage(String(id), imageId);
+      setExistingImages(prev => prev.filter((img) => img.id !== imageId));
+    } catch (error) {
+      console.error('Error deleting image:', error);
+      Alert.alert('Error', 'Failed to delete image');
+    }
   };
 
   const handleGeocode = async () => {
@@ -185,6 +223,7 @@ export default function EditPropertyScreen() {
         max_guests: parseInt(formData.maxGuests) || 1,
         property_type: formData.propertyType,
         currency: formData.currency,
+        amenities_ids: selectedAmenityIds,
         location: {
           type: 'Point',
           coordinates: [formData.longitude, formData.latitude]
@@ -192,6 +231,18 @@ export default function EditPropertyScreen() {
       };
 
       await apiClient.patch(`/properties/${id}/`, payload);
+
+      if (images.length > 0) {
+        const imageFormData = new FormData();
+        images.forEach((uri, index) => {
+          imageFormData.append('images', {
+            uri,
+            type: 'image/jpeg',
+            name: `property-update-${index}.jpg`,
+          } as any);
+        });
+        await apiClient.uploadPropertyImages(String(id), imageFormData);
+      }
       
       Alert.alert('Success', 'Property updated successfully!', [
         { text: 'OK', onPress: () => router.replace('/host/properties') }
@@ -324,6 +375,32 @@ export default function EditPropertyScreen() {
               keyboardType="number-pad"
             />
 
+            <View className="mb-4">
+              <Text className="text-base font-semibold text-forest mb-2">Amenities</Text>
+              <Text className="text-xs text-moss mb-3">Select available amenities ({selectedAmenityIds.length} selected)</Text>
+              <View className="flex-row flex-wrap gap-2">
+                {amenities.map((amenity) => {
+                  const amenityId = Number(amenity.id);
+                  const isSelected = selectedAmenityIds.includes(amenityId);
+                  return (
+                    <TouchableOpacity
+                      key={amenity.id}
+                      onPress={() => toggleAmenity(amenityId)}
+                      className="px-3 py-2 rounded-full border"
+                      style={{
+                        backgroundColor: isSelected ? '#D9B168' : '#FFFFFF',
+                        borderColor: isSelected ? '#D9B168' : '#D8D2C4',
+                      }}
+                    >
+                      <Text style={{ color: isSelected ? '#122F26' : '#3A5C50', fontWeight: '600', fontSize: 12 }}>
+                        {amenity.name}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            </View>
+
             <View className="h-px bg-sand-300 my-4" />
             <Text className="text-lg font-bold text-forest mb-4">Location</Text>
 
@@ -412,7 +489,13 @@ export default function EditPropertyScreen() {
               <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row">
                 {existingImages.map((img) => (
                   <View key={img.id} className="relative mr-2">
-                    <Image source={{ uri: img.image_url }} className="w-24 h-24 rounded-xl" />
+                    <Image source={{ uri: img.image_url || img.image }} className="w-24 h-24 rounded-xl" />
+                    <TouchableOpacity
+                      onPress={() => removeExistingImage(img.id)}
+                      className="absolute -top-2 -right-2 bg-red-500 rounded-full w-6 h-6 items-center justify-center"
+                    >
+                      <Ionicons name="close" size={14} color="white" />
+                    </TouchableOpacity>
                   </View>
                 ))}
                 {images.map((uri, index) => (

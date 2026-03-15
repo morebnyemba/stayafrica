@@ -1,5 +1,5 @@
 import { View, Text, ScrollView, TouchableOpacity, Platform, TextInput, Alert, KeyboardTypeOptions, KeyboardAvoidingView, Image, Modal, FlatList } from 'react-native';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -61,12 +61,6 @@ const COUNTRIES = [
   'Malawi', 'Lesotho', 'Eswatini', 'Tanzania', 'Kenya', 'Uganda', 'Rwanda'
 ];
 
-const BASIC_FIELDS = [
-  { label: 'Property Title', field: 'title', placeholder: 'e.g., Cozy Safari Lodge', required: true },
-  { label: 'Description', field: 'description', placeholder: 'Describe your property...', required: true, multiline: true },
-  { label: 'Max Guests', field: 'maxGuests', placeholder: '0', keyboardType: 'number-pad' as KeyboardTypeOptions },
-];
-
 const LOCATION_TEXT_FIELDS = [
   { label: 'Address', field: 'address', placeholder: 'Street address', required: true },
   { label: 'Suburb', field: 'suburb', placeholder: 'Suburb (Optional)' },
@@ -123,6 +117,8 @@ export default function NewPropertyScreen() {
   const [currentStep, setCurrentStep] = useState<FormStep>('basic');
   const [images, setImages] = useState<string[]>([]);
   const [showCountryPicker, setShowCountryPicker] = useState(false);
+  const [amenities, setAmenities] = useState<any[]>([]);
+  const [selectedAmenityIds, setSelectedAmenityIds] = useState<number[]>([]);
   const [formData, setFormData] = useState<FormData>({
     title: '',
     description: '',
@@ -140,8 +136,27 @@ export default function NewPropertyScreen() {
     currency: 'USD',
   });
 
+  useEffect(() => {
+    const loadAmenities = async () => {
+      try {
+        const data = await apiClient.getAmenities();
+        setAmenities(data);
+      } catch (error) {
+        console.error('Failed to load amenities:', error);
+      }
+    };
+
+    loadAmenities();
+  }, []);
+
   const handleChange = (field: keyof FormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const toggleAmenity = (amenityId: number) => {
+    setSelectedAmenityIds((prev) =>
+      prev.includes(amenityId) ? prev.filter((id) => id !== amenityId) : [...prev, amenityId]
+    );
   };
 
   const pickImages = useCallback(async () => {
@@ -261,38 +276,39 @@ export default function NewPropertyScreen() {
 
     setLoading(true);
     try {
-      const payload = new FormData();
-      payload.append('title', formData.title);
-      payload.append('description', formData.description);
-      payload.append('address', formData.address);
-      payload.append('city', formData.city);
-      payload.append('suburb', formData.suburb);
-      payload.append('country', formData.country);
-      payload.append('price_per_night', formData.price);
-      payload.append('bedrooms', formData.bedrooms);
-      payload.append('bathrooms', formData.bathrooms);
-      payload.append('max_guests', formData.maxGuests);
-      payload.append('property_type', formData.propertyType);
-      payload.append('currency', formData.currency);
-      payload.append('location', JSON.stringify({
-        type: 'Point',
-        coordinates: [formData.longitude, formData.latitude]
-      }));
-
-      // Add images
-      images.forEach((uri, index) => {
-        payload.append('images', {
-          uri,
-          type: 'image/jpeg',
-          name: `property-${index}.jpg`,
-        } as any);
-      });
-
-      await apiClient.post('/properties/', payload, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
+      const propertyPayload = {
+        title: formData.title,
+        description: formData.description,
+        address: formData.address,
+        city: formData.city,
+        suburb: formData.suburb,
+        country: formData.country,
+        price_per_night: parseFloat(formData.price),
+        bedrooms: parseInt(formData.bedrooms) || 1,
+        bathrooms: parseInt(formData.bathrooms) || 1,
+        max_guests: parseInt(formData.maxGuests) || 1,
+        property_type: formData.propertyType,
+        currency: formData.currency,
+        amenities_ids: selectedAmenityIds,
+        location: {
+          type: 'Point' as const,
+          coordinates: [formData.longitude || 0, formData.latitude || 0],
         },
-      });
+      };
+
+      const createdProperty = await apiClient.createProperty(propertyPayload as any);
+
+      if (images.length > 0 && createdProperty?.id) {
+        const imageFormData = new FormData();
+        images.forEach((uri, index) => {
+          imageFormData.append('images', {
+            uri,
+            type: 'image/jpeg',
+            name: `property-${index}.jpg`,
+          } as any);
+        });
+        await apiClient.uploadPropertyImages(createdProperty.id, imageFormData);
+      }
 
       Alert.alert('Success', 'Property created successfully!', [
         { text: 'OK', onPress: () => router.replace('/host/properties') }
@@ -495,6 +511,32 @@ export default function NewPropertyScreen() {
               keyboardType="number-pad"
               field="maxGuests"
             />
+
+            <View className="mb-4">
+              <Text className="text-base font-semibold text-forest mb-2">Amenities</Text>
+              <Text className="text-xs text-moss mb-3">Select what your guests will get ({selectedAmenityIds.length} selected)</Text>
+              <View className="flex-row flex-wrap gap-2">
+                {amenities.map((amenity) => {
+                  const amenityId = Number(amenity.id);
+                  const isSelected = selectedAmenityIds.includes(amenityId);
+                  return (
+                    <TouchableOpacity
+                      key={amenity.id}
+                      onPress={() => toggleAmenity(amenityId)}
+                      className="px-3 py-2 rounded-full border"
+                      style={{
+                        backgroundColor: isSelected ? '#D9B168' : '#FFFFFF',
+                        borderColor: isSelected ? '#D9B168' : '#D8D2C4',
+                      }}
+                    >
+                      <Text style={{ color: isSelected ? '#122F26' : '#3A5C50', fontWeight: '600', fontSize: 12 }}>
+                        {amenity.name}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            </View>
           </>
         )}
 

@@ -30,6 +30,14 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
   const [currentStep, setCurrentStep] = useState<FormStep>('basic');
   const [searchingLocation, setSearchingLocation] = useState(false);
   const [locationSuggestions, setLocationSuggestions] = useState<any[]>([]);
+  const [amenities, setAmenities] = useState<any[]>([]);
+  const [selectedAmenityIds, setSelectedAmenityIds] = useState<number[]>(
+    Array.isArray(initialData?.amenities)
+      ? initialData.amenities
+          .map((amenity: any) => Number(amenity?.id))
+          .filter((id: number) => Number.isFinite(id))
+      : []
+  );
 
   const [formData, setFormData] = useState({
     title: initialData?.title || '',
@@ -57,6 +65,20 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
       setExistingImages(initialData.images);
     }
   }, [isEdit, initialData]);
+
+  useEffect(() => {
+    const loadAmenities = async () => {
+      try {
+        const response = await apiClient.getAmenities();
+        const payload = Array.isArray(response.data?.results) ? response.data.results : response.data;
+        setAmenities(Array.isArray(payload) ? payload : []);
+      } catch (err) {
+        console.error('Failed to load amenities:', err);
+      }
+    };
+
+    loadAmenities();
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -94,11 +116,23 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
     if (!window.confirm('Are you sure you want to delete this image?')) return;
 
     try {
+      const currentPropertyId = propertyId || initialData?.id;
+      if (!currentPropertyId) {
+        setError('Property ID missing. Please refresh and try again.');
+        return;
+      }
+      await apiClient.deletePropertyImage(currentPropertyId, imageId);
       setExistingImages(prev => prev.filter(img => img.id !== imageId));
     } catch (err) {
       console.error('Failed to delete image:', err);
       setError('Failed to delete image');
     }
+  };
+
+  const toggleAmenity = (amenityId: number) => {
+    setSelectedAmenityIds((prev) =>
+      prev.includes(amenityId) ? prev.filter((id) => id !== amenityId) : [...prev, amenityId]
+    );
   };
 
   const handleLocationSearch = async (query: string) => {
@@ -240,6 +274,7 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
         bedrooms: Math.max(1, parseInt(String(formData.bedrooms)) || 1),
         bathrooms: Math.max(1, parseInt(String(formData.bathrooms)) || 1),
         max_guests: Math.max(1, parseInt(String(formData.max_guests)) || 1),
+        amenities_ids: selectedAmenityIds,
         status: 'pending_approval',
       };
 
@@ -360,6 +395,35 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
                 { value: 'cosy_room', label: 'Cosy Room' },
               ]}
             />
+
+            <div>
+              <label className="block text-sm font-medium text-primary-900 mb-2">
+                Amenities
+              </label>
+              <p className="text-xs sm:text-sm text-primary-600 mb-3">
+                Pick amenities guests can expect. Selected: {selectedAmenityIds.length}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {amenities.map((amenity) => {
+                  const amenityId = Number(amenity.id);
+                  const isSelected = selectedAmenityIds.includes(amenityId);
+                  return (
+                    <button
+                      key={amenity.id}
+                      type="button"
+                      onClick={() => toggleAmenity(amenityId)}
+                      className={`px-3 py-2 rounded-full text-xs sm:text-sm border transition ${
+                        isSelected
+                          ? 'bg-secondary-600 text-white border-secondary-600'
+                          : 'bg-white text-primary-800 border-primary-200 hover:border-secondary-400'
+                      }`}
+                    >
+                      {amenity.name}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Input

@@ -27,6 +27,13 @@ class PropertyImageSerializer(serializers.ModelSerializer):
 
 class PropertySerializer(serializers.ModelSerializer):
     amenities = AmenitySerializer(many=True, read_only=True)
+    amenities_ids = serializers.PrimaryKeyRelatedField(
+        queryset=Amenity.objects.all(),
+        many=True,
+        source='amenities',
+        required=False,
+        write_only=True,
+    )
     images = PropertyImageSerializer(many=True, read_only=True)
     host_email = serializers.CharField(source='host.email', read_only=True)
     main_image_url = serializers.SerializerMethodField()
@@ -36,7 +43,7 @@ class PropertySerializer(serializers.ModelSerializer):
         fields = [
             'id', 'host', 'host_email', 'title', 'description', 'property_type',
             'location', 'country', 'city', 'suburb', 'address', 'price_per_night',
-            'currency', 'amenities', 'status', 'main_image', 'main_image_url', 'max_guests',
+            'currency', 'amenities', 'amenities_ids', 'status', 'main_image', 'main_image_url', 'max_guests',
             'bedrooms', 'bathrooms', 'images', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'host', 'created_at', 'updated_at']

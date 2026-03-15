@@ -123,6 +123,11 @@ class ApiClient {
     });
   }
 
+  async deletePropertyImage(propertyId: string, imageId: number) {
+    const safeId = this.assertId(propertyId, 'Property ID');
+    return this.client.post(`/properties/${safeId}/delete_image/`, { image_id: imageId });
+  }
+
   async deleteProperty(id: string) {
     const safeId = this.assertId(id, 'Property ID');
     return this.client.delete(`/properties/${safeId}/`);

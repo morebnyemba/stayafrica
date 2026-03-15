@@ -159,7 +159,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
                     address = ', '.join(filter(None, [
                         property_instance.address,
                         property_instance.city,
-                        property_instance.state,
+                        property_instance.suburb,
                         property_instance.country,
                     ]))
                     if address:
@@ -186,7 +186,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
     # regardless of status (e.g. editing, managing images, calendars).
     HOST_DETAIL_ACTIONS = {
         'upload_images', 'host_detail', 'booking_calendar',
-        'toggle_instant_booking', 'discover_pois', 'approve', 'reject',
+        'toggle_instant_booking', 'discover_pois', 'approve', 'reject', 'delete_image',
     }
 
     # Detail actions visible to the public on active properties,
@@ -298,6 +298,34 @@ class PropertyViewSet(viewsets.ModelViewSet):
             return Response(
                 {'error': 'Error uploading images'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    def delete_image(self, request, pk=None):
+        """Delete an existing property image owned by the current host."""
+        property_obj = self.get_object()
+
+        if property_obj.host_id != request.user.id:
+            return Response(
+                {'error': 'You can only manage images for your own properties'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        image_id = request.data.get('image_id')
+        if not image_id:
+            return Response(
+                {'error': 'image_id is required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            image = PropertyImage.objects.get(id=image_id, property=property_obj)
+            image.delete()
+            return Response({'message': 'Image deleted successfully'})
+        except PropertyImage.DoesNotExist:
+            return Response(
+                {'error': 'Image not found for this property'},
+                status=status.HTTP_404_NOT_FOUND
             )
     
     @action(detail=False, methods=['get'], permission_classes=[AllowAny])
