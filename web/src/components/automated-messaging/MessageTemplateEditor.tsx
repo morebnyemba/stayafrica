@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
 import { MessageTemplate } from '@/types/automated-messaging-types';
 import { Plus, Edit2, Trash2, Loader2, Save, X, Eye } from 'lucide-react';
+import { ConfirmActionModal } from '@/components/common/confirm-action-modal';
 
 const TEMPLATE_TYPES = [
   { value: 'booking_inquiry', label: 'Booking Inquiry' },
@@ -25,6 +26,7 @@ export const MessageTemplateEditor = () => {
   const queryClient = useQueryClient();
   const [isCreating, setIsCreating] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
   const [previewMode, setPreviewMode] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -114,9 +116,13 @@ export const MessageTemplateEditor = () => {
   };
 
   const handleDelete = (id: number) => {
-    if (confirm('Are you sure you want to delete this template?')) {
-      deleteMutation.mutate(id);
-    }
+    setPendingDeleteId(id);
+  };
+
+  const confirmDelete = () => {
+    if (!pendingDeleteId) return;
+    deleteMutation.mutate(pendingDeleteId);
+    setPendingDeleteId(null);
   };
 
   const renderPreview = () => {
@@ -358,6 +364,16 @@ export const MessageTemplateEditor = () => {
           </div>
         )}
       </div>
+      <ConfirmActionModal
+        isOpen={Boolean(pendingDeleteId)}
+        title="Delete Template"
+        message="Are you sure you want to delete this template?"
+        confirmText="Delete"
+        variant="danger"
+        isLoading={deleteMutation.isPending}
+        onCancel={() => setPendingDeleteId(null)}
+        onConfirm={confirmDelete}
+      />
     </div>
   );
 };

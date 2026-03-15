@@ -20,6 +20,7 @@ import {
   MoreVertical,
 } from 'lucide-react';
 import { Button } from '@/components/ui';
+import { ConfirmActionModal } from '@/components/common/confirm-action-modal';
 import { toast } from 'react-hot-toast';
 import type { Experience, ExperienceStatus } from '@/types';
 
@@ -49,6 +50,7 @@ export function HostExperiencesContent() {
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [showFilters, setShowFilters] = useState(false);
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
+  const [pendingDeleteExperienceId, setPendingDeleteExperienceId] = useState<string | null>(null);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['host-experiences', searchTerm, statusFilter],
@@ -319,9 +321,7 @@ export function HostExperiencesContent() {
                           </Link>
                           <button
                             onClick={() => {
-                              if (confirm('Are you sure you want to delete this experience?')) {
-                                deleteMutation.mutate(exp.id);
-                              }
+                              setPendingDeleteExperienceId(exp.id);
                               setMenuOpen(null);
                             }}
                             className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-b-lg"
@@ -338,6 +338,20 @@ export function HostExperiencesContent() {
           </div>
         )}
       </div>
+      <ConfirmActionModal
+        isOpen={Boolean(pendingDeleteExperienceId)}
+        title="Delete Experience"
+        message="Are you sure you want to delete this experience?"
+        confirmText="Delete"
+        variant="danger"
+        isLoading={deleteMutation.isPending}
+        onCancel={() => setPendingDeleteExperienceId(null)}
+        onConfirm={() => {
+          if (!pendingDeleteExperienceId) return;
+          deleteMutation.mutate(pendingDeleteExperienceId);
+          setPendingDeleteExperienceId(null);
+        }}
+      />
     </div>
   );
 }

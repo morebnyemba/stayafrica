@@ -5,6 +5,7 @@ import { adminApi } from '@/lib/admin-api';
 import toast from 'react-hot-toast';
 import { Plus, Search, MapPin, Tag } from 'lucide-react';
 import { POICategory, PointOfInterest } from '@/types/admin-types';
+import { ConfirmActionModal } from '@/components/common/confirm-action-modal';
 
 export default function POIManagement() {
     const [activeTab, setActiveTab] = useState<'categories' | 'pois'>('categories');
@@ -21,9 +22,11 @@ export default function POIManagement() {
     // Forms
     const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState<Partial<POICategory> | null>(null);
+    const [pendingDeleteCategoryId, setPendingDeleteCategoryId] = useState<number | null>(null);
 
     const [isPOIModalOpen, setIsPOIModalOpen] = useState(false);
     const [selectedPOI, setSelectedPOI] = useState<Partial<PointOfInterest> | null>(null);
+    const [pendingDeletePOIId, setPendingDeletePOIId] = useState<string | null>(null);
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -88,10 +91,15 @@ export default function POIManagement() {
     };
 
     const handleDeleteCategory = async (id: number) => {
-        if (!window.confirm('Are you sure you want to delete this category? Features and POIs attached to it might be affected.')) return;
+        setPendingDeleteCategoryId(id);
+    };
+
+    const confirmDeleteCategory = async () => {
+        if (!pendingDeleteCategoryId) return;
         try {
-            await adminApi.deletePOICategory(id);
+            await adminApi.deletePOICategory(pendingDeleteCategoryId);
             toast.success('Category deleted');
+            setPendingDeleteCategoryId(null);
             loadCategories();
         } catch (err: any) {
             toast.error('Failed to delete category');
@@ -126,10 +134,15 @@ export default function POIManagement() {
     };
 
     const handleDeletePOI = async (id: string) => {
-        if (!window.confirm('Are you sure you want to delete this POI?')) return;
+        setPendingDeletePOIId(id);
+    };
+
+    const confirmDeletePOI = async () => {
+        if (!pendingDeletePOIId) return;
         try {
-            await adminApi.deletePOI(id);
+            await adminApi.deletePOI(pendingDeletePOIId);
             toast.success('POI deleted');
+            setPendingDeletePOIId(null);
             loadPOIs();
         } catch (err: any) {
             toast.error('Failed to delete POI');
@@ -529,6 +542,24 @@ export default function POIManagement() {
                     </div>
                 </div>
             )}
+            <ConfirmActionModal
+                isOpen={Boolean(pendingDeleteCategoryId)}
+                title="Delete Category"
+                message="Are you sure you want to delete this category? Features and POIs attached to it might be affected."
+                confirmText="Delete Category"
+                variant="danger"
+                onCancel={() => setPendingDeleteCategoryId(null)}
+                onConfirm={confirmDeleteCategory}
+            />
+            <ConfirmActionModal
+                isOpen={Boolean(pendingDeletePOIId)}
+                title="Delete POI"
+                message="Are you sure you want to delete this POI?"
+                confirmText="Delete POI"
+                variant="danger"
+                onCancel={() => setPendingDeletePOIId(null)}
+                onConfirm={confirmDeletePOI}
+            />
         </div>
     );
 }

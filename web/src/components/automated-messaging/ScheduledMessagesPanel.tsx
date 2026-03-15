@@ -6,10 +6,12 @@ import { apiClient } from '@/services/api-client';
 import { ScheduledMessage } from '@/types/automated-messaging-types';
 import { Calendar, Loader2, Plus, Trash2, X } from 'lucide-react';
 import { format } from 'date-fns';
+import { ConfirmActionModal } from '@/components/common/confirm-action-modal';
 
 export const ScheduledMessagesPanel = () => {
   const queryClient = useQueryClient();
   const [isScheduling, setIsScheduling] = useState(false);
+  const [pendingCancelId, setPendingCancelId] = useState<number | null>(null);
   const [formData, setFormData] = useState({
     conversation: '',
     message_text: '',
@@ -69,9 +71,13 @@ export const ScheduledMessagesPanel = () => {
   };
 
   const handleCancel = (id: number) => {
-    if (confirm('Are you sure you want to cancel this scheduled message?')) {
-      cancelMutation.mutate(id);
-    }
+    setPendingCancelId(id);
+  };
+
+  const confirmCancel = () => {
+    if (!pendingCancelId) return;
+    cancelMutation.mutate(pendingCancelId);
+    setPendingCancelId(null);
   };
 
   const getStatusColor = (status: ScheduledMessage['status']) => {
@@ -243,6 +249,16 @@ export const ScheduledMessagesPanel = () => {
           </div>
         )}
       </div>
+      <ConfirmActionModal
+        isOpen={Boolean(pendingCancelId)}
+        title="Cancel Scheduled Message"
+        message="Are you sure you want to cancel this scheduled message?"
+        confirmText="Cancel Message"
+        variant="danger"
+        isLoading={cancelMutation.isPending}
+        onCancel={() => setPendingCancelId(null)}
+        onConfirm={confirmCancel}
+      />
     </div>
   );
 };

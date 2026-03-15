@@ -7,13 +7,21 @@ import {
   ScrollView,
   Platform,
   ActivityIndicator,
-  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { apiClient } from '@/services/api-client';
 import { useAuth } from '@/context/auth-context';
+import { AppDialog, AppDialogAction } from '@/components/common/AppDialog';
+
+type DialogState = {
+  visible: boolean;
+  title: string;
+  message: string;
+  primaryAction: AppDialogAction;
+  secondaryAction?: AppDialogAction;
+};
 
 export default function VerifyEmailScreen() {
   const params = useLocalSearchParams();
@@ -22,6 +30,16 @@ export default function VerifyEmailScreen() {
   
   const [resending, setResending] = useState(false);
   const [checkingVerification, setCheckingVerification] = useState(false);
+  const [dialog, setDialog] = useState<DialogState>({
+    visible: false,
+    title: '',
+    message: '',
+    primaryAction: { label: 'OK' },
+  });
+
+  const openDialog = (next: Omit<DialogState, 'visible'>) => {
+    setDialog({ visible: true, ...next });
+  };
 
   const checkVerificationStatus = async () => {
     if (!isAuthenticated) {
@@ -33,8 +51,14 @@ export default function VerifyEmailScreen() {
       const profile = await apiClient.getUserProfile();
       if (profile?.is_verified) {
         await refreshUser();
-        Alert.alert('Email Verified', 'Your email is verified. Redirecting to dashboard...');
-        router.replace('/(tabs)/dashboard');
+        openDialog({
+          title: 'Email Verified',
+          message: 'Your email is verified. Redirecting to dashboard...',
+          primaryAction: {
+            label: 'Continue',
+            onPress: () => router.replace('/(tabs)/dashboard'),
+          },
+        });
       }
     } catch (error: any) {
       // Ignore transient polling failures to avoid noisy alerts while user is on this screen.
@@ -57,7 +81,11 @@ export default function VerifyEmailScreen() {
 
   const handleResendCode = async () => {
     if (!email) {
-      Alert.alert('Error', 'Email address is required');
+      openDialog({
+        title: 'Error',
+        message: 'Email address is required',
+        primaryAction: { label: 'OK' },
+      });
       return;
     }
 
@@ -65,23 +93,29 @@ export default function VerifyEmailScreen() {
     try {
       // resend_verification requires auth, try unauthenticated-friendly approach
       await apiClient.client.post('/users/resend_verification/', { email });
-      Alert.alert('Success', 'Verification email has been resent. Please check your inbox and spam folder.');
+      openDialog({
+        title: 'Success',
+        message: 'Verification email has been resent. Please check your inbox and spam folder.',
+        primaryAction: { label: 'OK' },
+      });
     } catch (error: any) {
       console.error('Resend error:', error);
       // If it fails due to auth, show a helpful message
       if (error.response?.status === 401) {
-        Alert.alert(
-          'Sign In Required',
-          'Please sign in first, then request a new verification email from your profile settings.',
-          [{ text: 'Sign In', onPress: () => router.replace('/(auth)/login') }]
-        );
+        openDialog({
+          title: 'Sign In Required',
+          message: 'Please sign in first, then request a new verification email from your profile settings.',
+          primaryAction: { label: 'Sign In', onPress: () => router.replace('/(auth)/login') },
+        });
       } else {
-        Alert.alert(
-          'Error',
-          error.response?.data?.detail ||
-          error.response?.data?.error ||
-          'Failed to resend email. Please try again.'
-        );
+        openDialog({
+          title: 'Error',
+          message:
+            error.response?.data?.detail ||
+            error.response?.data?.error ||
+            'Failed to resend email. Please try again.',
+          primaryAction: { label: 'OK' },
+        });
       }
     } finally {
       setResending(false);
@@ -213,6 +247,14 @@ export default function VerifyEmailScreen() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+      <AppDialog
+        visible={dialog.visible}
+        title={dialog.title}
+        message={dialog.message}
+        primaryAction={dialog.primaryAction}
+        secondaryAction={dialog.secondaryAction}
+        onRequestClose={() => setDialog((prev) => ({ ...prev, visible: false }))}
+      />
     </SafeAreaView>
   );
 }

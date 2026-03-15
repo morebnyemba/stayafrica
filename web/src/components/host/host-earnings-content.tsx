@@ -28,6 +28,7 @@ import { toast } from 'react-hot-toast';
 import { Button } from '@/components/ui';
 import { Input } from '@/components/ui/Input';
 import { HostTaxReport } from '@/components/tax/HostTaxReport';
+import { ConfirmActionModal } from '@/components/common/confirm-action-modal';
 
 type Period = 'week' | 'month' | 'year';
 
@@ -44,6 +45,7 @@ export function HostEarningsContent() {
   const [showBankAccountForm, setShowBankAccountForm] = useState(false);
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [editingAccount, setEditingAccount] = useState<any>(null);
+  const [pendingDeleteBankAccountId, setPendingDeleteBankAccountId] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
   const [bankFormData, setBankFormData] = useState({
@@ -212,9 +214,7 @@ export function HostEarningsContent() {
   };
 
   const handleDeleteBankAccount = (id: string) => {
-    if (confirm('Are you sure you want to delete this bank account?')) {
-      deleteBankAccountMutation.mutate(id);
-    }
+    setPendingDeleteBankAccountId(id);
   };
 
   return (
@@ -831,6 +831,20 @@ export function HostEarningsContent() {
           onClose={() => setShowWithdrawModal(false)}
         />
       )}
+      <ConfirmActionModal
+        isOpen={Boolean(pendingDeleteBankAccountId)}
+        title="Delete Bank Account"
+        message="Are you sure you want to delete this bank account?"
+        confirmText="Delete Account"
+        variant="danger"
+        isLoading={deleteBankAccountMutation.isPending}
+        onCancel={() => setPendingDeleteBankAccountId(null)}
+        onConfirm={() => {
+          if (!pendingDeleteBankAccountId) return;
+          deleteBankAccountMutation.mutate(pendingDeleteBankAccountId);
+          setPendingDeleteBankAccountId(null);
+        }}
+      />
     </ProtectedRoute>
   );
 }

@@ -5,11 +5,13 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
 import { QuickReply } from '@/types/automated-messaging-types';
 import { Plus, Edit2, Trash2, Loader2, Save, X } from 'lucide-react';
+import { ConfirmActionModal } from '@/components/common/confirm-action-modal';
 
 export const QuickRepliesManager = () => {
   const queryClient = useQueryClient();
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
   const [formData, setFormData] = useState({ shortcut: '', message_text: '', category: '' });
 
   const { data: quickReplies = [], isLoading } = useQuery<QuickReply[]>({
@@ -82,9 +84,13 @@ export const QuickRepliesManager = () => {
   };
 
   const handleDelete = (id: number) => {
-    if (confirm('Are you sure you want to delete this quick reply?')) {
-      deleteMutation.mutate(id);
-    }
+    setPendingDeleteId(id);
+  };
+
+  const confirmDelete = () => {
+    if (!pendingDeleteId) return;
+    deleteMutation.mutate(pendingDeleteId);
+    setPendingDeleteId(null);
   };
 
   if (isLoading) {
@@ -252,6 +258,16 @@ export const QuickRepliesManager = () => {
           </div>
         )}
       </div>
+      <ConfirmActionModal
+        isOpen={Boolean(pendingDeleteId)}
+        title="Delete Quick Reply"
+        message="Are you sure you want to delete this quick reply?"
+        confirmText="Delete"
+        variant="danger"
+        isLoading={deleteMutation.isPending}
+        onCancel={() => setPendingDeleteId(null)}
+        onConfirm={confirmDelete}
+      />
     </div>
   );
 };

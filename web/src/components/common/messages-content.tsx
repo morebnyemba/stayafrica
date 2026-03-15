@@ -7,6 +7,7 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useState, useEffect, useRef } from 'react';
 import { toast } from 'react-hot-toast';
+import { ConfirmActionModal } from '@/components/common/confirm-action-modal';
 const ProtectedRoute = dynamic(() => import('@/components/auth/protected-route').then(m => m.ProtectedRoute), { ssr: false });
 
 export function MessagesContent() {
@@ -16,6 +17,8 @@ export function MessagesContent() {
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
   const [editText, setEditText] = useState('');
   const [showActionMenu, setShowActionMenu] = useState(false);
+  const [pendingCloseTicketId, setPendingCloseTicketId] = useState<string | null>(null);
+  const [pendingDeleteMessageId, setPendingDeleteMessageId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
 
@@ -415,16 +418,8 @@ export function MessagesContent() {
                               </button>
                             ) : (
                               <button
-                                onClick={async () => {
-                                  if (confirm('Are you sure you want to close this ticket?')) {
-                                    try {
-                                      await apiClient.changeSupportTicketStatus(selectedConversation.ticket_id, 'closed');
-                                      queryClient.invalidateQueries({ queryKey: ['conversations'] });
-                                      toast.success('Ticket closed');
-                                    } catch (e) {
-                                      toast.error('Could not close ticket');
-                                    }
-                                  }
+                                onClick={() => {
+                                  setPendingCloseTicketId(selectedConversation.ticket_id);
                                 }}
                                 className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-white text-gray-600 border border-gray-300 hover:bg-gray-50 font-medium rounded-lg text-sm transition"
                               >
@@ -644,11 +639,7 @@ export function MessagesContent() {
                                             <Edit2 className="w-3 h-3" />
                                           </button>
                                           <button
-                                            onClick={() => {
-                                              if (confirm('Delete this message?')) {
-                                                deleteMessageMutation.mutate(message.id);
-                                              }
-                                            }}
+                                            onClick={() => setPendingDeleteMessageId(message.id)}
                                             className="p-1 hover:bg-red-500 hover:text-white rounded transition"
                                             title="Delete message"
                                           >
@@ -689,6 +680,40 @@ export function MessagesContent() {
                     </button>
                   </div>
                 </form>
+                <ConfirmActionModal
+                  isOpen={Boolean(pendingCloseTicketId)}
+                  title="Close Ticket"
+                  message="Are you sure you want to close this ticket?"
+                  confirmText="Close Ticket"
+                  variant="danger"
+                  onCancel={() => setPendingCloseTicketId(null)}
+                  onConfirm={async () => {
+                    if (!pendingCloseTicketId) return;
+                    try {
+                      await apiClient.changeSupportTicketStatus(pendingCloseTicketId, 'closed');
+                      queryClient.invalidateQueries({ queryKey: ['conversations'] });
+                      toast.success('Ticket closed');
+                    } catch (e) {
+                      toast.error('Could not close ticket');
+                    } finally {
+                      setPendingCloseTicketId(null);
+                    }
+                  }}
+                />
+                <ConfirmActionModal
+                  isOpen={Boolean(pendingDeleteMessageId)}
+                  title="Delete Message"
+                  message="Delete this message?"
+                  confirmText="Delete Message"
+                  variant="danger"
+                  isLoading={deleteMessageMutation.isPending}
+                  onCancel={() => setPendingDeleteMessageId(null)}
+                  onConfirm={() => {
+                    if (!pendingDeleteMessageId) return;
+                    deleteMessageMutation.mutate(pendingDeleteMessageId);
+                    setPendingDeleteMessageId(null);
+                  }}
+                />
               </>
             ) : (
               <div className="flex-1 flex items-center justify-center">

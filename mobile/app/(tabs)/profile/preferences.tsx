@@ -1,9 +1,10 @@
-import { View, Text, ScrollView, TouchableOpacity, TextInput, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, TextInput, ActivityIndicator } from 'react-native';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useUserPreferences, useUpdateUserPreferences } from '@/hooks/api-hooks';
+import { AppDialog, AppDialogAction } from '@/components/common/AppDialog';
 
 const PROPERTY_TYPES = ['apartment', 'house', 'villa', 'cottage', 'lodge', 'guesthouse', 'hotel', 'hostel'];
 const COMMON_AMENITIES = ['wifi', 'pool', 'parking', 'kitchen', 'ac', 'tv', 'washer', 'gym', 'security', 'garden', 'hot_water', 'electricity'];
@@ -23,6 +24,16 @@ export default function PreferencesScreen() {
     preferred_amenities: [] as string[],
   });
   const [cityInput, setCityInput] = useState('');
+  const [dialog, setDialog] = useState<{ visible: boolean; title: string; message: string; primaryAction: AppDialogAction }>({
+    visible: false,
+    title: '',
+    message: '',
+    primaryAction: { label: 'OK' },
+  });
+
+  const openDialog = (title: string, message: string) => {
+    setDialog({ visible: true, title, message, primaryAction: { label: 'OK' } });
+  };
 
   useEffect(() => {
     if (prefs) {
@@ -76,8 +87,8 @@ export default function PreferencesScreen() {
       usual_guest_count: form.usual_guest_count ? parseInt(form.usual_guest_count) : null,
       preferred_amenities: form.preferred_amenities,
     }, {
-      onSuccess: () => Alert.alert('Saved', 'Your travel preferences have been updated.'),
-      onError: () => Alert.alert('Error', 'Failed to save preferences.'),
+      onSuccess: () => openDialog('Saved', 'Your travel preferences have been updated.'),
+      onError: () => openDialog('Error', 'Failed to save preferences.'),
     });
   };
 
@@ -232,6 +243,13 @@ export default function PreferencesScreen() {
           )}
         </TouchableOpacity>
       </ScrollView>
+      <AppDialog
+        visible={dialog.visible}
+        title={dialog.title}
+        message={dialog.message}
+        primaryAction={dialog.primaryAction}
+        onRequestClose={() => setDialog((prev) => ({ ...prev, visible: false }))}
+      />
     </View>
   );
 }

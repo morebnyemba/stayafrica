@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, TouchableOpacity, Platform, TextInput, Alert, KeyboardTypeOptions, KeyboardAvoidingView, Image, Modal, FlatList } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Platform, TextInput, KeyboardTypeOptions, KeyboardAvoidingView, Image, Modal, FlatList } from 'react-native';
 import { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -9,6 +9,7 @@ import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { AppDialog, AppDialogAction } from '@/components/common/AppDialog';
 
 interface InputFieldProps {
   label: string;
@@ -119,6 +120,21 @@ export default function NewPropertyScreen() {
   const [showCountryPicker, setShowCountryPicker] = useState(false);
   const [amenities, setAmenities] = useState<any[]>([]);
   const [selectedAmenityIds, setSelectedAmenityIds] = useState<number[]>([]);
+  const [dialog, setDialog] = useState<{ visible: boolean; title: string; message: string; primaryAction: AppDialogAction; secondaryAction?: AppDialogAction }>({
+    visible: false,
+    title: '',
+    message: '',
+    primaryAction: { label: 'OK' },
+  });
+
+  const openDialog = (
+    title: string,
+    message: string,
+    primaryAction: AppDialogAction = { label: 'OK' },
+    secondaryAction?: AppDialogAction
+  ) => {
+    setDialog({ visible: true, title, message, primaryAction, secondaryAction });
+  };
   const [formData, setFormData] = useState<FormData>({
     title: '',
     description: '',
@@ -162,7 +178,7 @@ export default function NewPropertyScreen() {
   const pickImages = useCallback(async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('Permission Denied', 'Camera roll permission is required');
+      openDialog('Permission Denied', 'Camera roll permission is required');
       return;
     }
 
@@ -185,7 +201,7 @@ export default function NewPropertyScreen() {
   const getCurrentLocation = useCallback(async () => {
     const { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('Permission Denied', 'Location permission is required');
+      openDialog('Permission Denied', 'Location permission is required');
       return;
     }
 
@@ -199,7 +215,7 @@ export default function NewPropertyScreen() {
 
   const handleGeocode = useCallback(async () => {
     if (!formData.address || !formData.city || !formData.country) {
-      Alert.alert('Missing Info', 'Please enter address, city and country first');
+      openDialog('Missing Info', 'Please enter address, city and country first');
       return;
     }
 
@@ -211,12 +227,12 @@ export default function NewPropertyScreen() {
       if (result.length > 0) {
         const { latitude, longitude } = result[0];
         setFormData(prev => ({ ...prev, latitude, longitude }));
-        Alert.alert('Location Found', 'Coordinates updated successfully!');
+        openDialog('Location Found', 'Coordinates updated successfully!');
       } else {
-        Alert.alert('Not Found', 'Could not find coordinates for this address');
+        openDialog('Not Found', 'Could not find coordinates for this address');
       }
     } catch (error) {
-      Alert.alert('Error', 'Failed to find location coordinates');
+      openDialog('Error', 'Failed to find location coordinates');
     } finally {
       setLoading(false);
     }
@@ -226,25 +242,25 @@ export default function NewPropertyScreen() {
     switch (currentStep) {
       case 'basic':
         if (!formData.title || !formData.description || !formData.propertyType) {
-          Alert.alert('Error', 'Please fill in all required fields');
+          openDialog('Error', 'Please fill in all required fields');
           return false;
         }
         break;
       case 'location':
         if (!formData.address || !formData.city || !formData.latitude || !formData.longitude) {
-          Alert.alert('Error', 'Please provide complete location information');
+          openDialog('Error', 'Please provide complete location information');
           return false;
         }
         break;
       case 'images':
         if (images.length === 0) {
-          Alert.alert('Error', 'Please add at least one image');
+          openDialog('Error', 'Please add at least one image');
           return false;
         }
         break;
       case 'pricing':
         if (!formData.price || parseFloat(formData.price) <= 0) {
-          Alert.alert('Error', 'Please set a valid price');
+          openDialog('Error', 'Please set a valid price');
           return false;
         }
         break;
@@ -270,7 +286,7 @@ export default function NewPropertyScreen() {
 
   const handleCreate = async () => {
     if (!formData.title || !formData.price || !formData.city) {
-      Alert.alert('Error', 'Please fill in all required fields');
+      openDialog('Error', 'Please fill in all required fields');
       return;
     }
 
@@ -310,12 +326,13 @@ export default function NewPropertyScreen() {
         await apiClient.uploadPropertyImages(createdProperty.id, imageFormData);
       }
 
-      Alert.alert('Success', 'Property created successfully!', [
-        { text: 'OK', onPress: () => router.replace('/host/properties') }
-      ]);
+      openDialog('Success', 'Property created successfully!', {
+        label: 'OK',
+        onPress: () => router.replace('/host/properties'),
+      });
     } catch (error) {
       console.error('Create error:', error);
-      Alert.alert('Error', 'Failed to create property');
+      openDialog('Error', 'Failed to create property');
     } finally {
       setLoading(false);
     }
@@ -848,6 +865,14 @@ export default function NewPropertyScreen() {
       </Modal>
         </ScrollView>
       </KeyboardAvoidingView>
+      <AppDialog
+        visible={dialog.visible}
+        title={dialog.title}
+        message={dialog.message}
+        primaryAction={dialog.primaryAction}
+        secondaryAction={dialog.secondaryAction}
+        onRequestClose={() => setDialog((prev) => ({ ...prev, visible: false }))}
+      />
     </SafeAreaView>
   );
 }

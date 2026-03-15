@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, TouchableOpacity, Platform, TextInput, Alert, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, ActivityIndicator, Image } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Platform, TextInput, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, ActivityIndicator, Image } from 'react-native';
 import { useState, useEffect } from 'react';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -9,6 +9,7 @@ import * as Location from 'expo-location';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
+import { AppDialog, AppDialogAction } from '@/components/common/AppDialog';
 
 interface InputFieldProps {
   label: string;
@@ -60,6 +61,21 @@ export default function EditPropertyScreen() {
   const [existingImages, setExistingImages] = useState<{id: number, image_url?: string, image?: string}[]>([]);
   const [amenities, setAmenities] = useState<any[]>([]);
   const [selectedAmenityIds, setSelectedAmenityIds] = useState<number[]>([]);
+  const [dialog, setDialog] = useState<{ visible: boolean; title: string; message: string; primaryAction: AppDialogAction; secondaryAction?: AppDialogAction }>({
+    visible: false,
+    title: '',
+    message: '',
+    primaryAction: { label: 'OK' },
+  });
+
+  const openDialog = (
+    title: string,
+    message: string,
+    primaryAction: AppDialogAction = { label: 'OK' },
+    secondaryAction?: AppDialogAction
+  ) => {
+    setDialog({ visible: true, title, message, primaryAction, secondaryAction });
+  };
   
   const [formData, setFormData] = useState({
     title: '',
@@ -131,8 +147,10 @@ export default function EditPropertyScreen() {
       }
     } catch (error) {
       console.error('Error fetching property:', error);
-      Alert.alert('Error', 'Failed to load property details');
-      router.back();
+      openDialog('Error', 'Failed to load property details', {
+        label: 'Back',
+        onPress: () => router.back(),
+      });
     } finally {
       setInitialLoading(false);
     }
@@ -154,13 +172,13 @@ export default function EditPropertyScreen() {
       setExistingImages(prev => prev.filter((img) => img.id !== imageId));
     } catch (error) {
       console.error('Error deleting image:', error);
-      Alert.alert('Error', 'Failed to delete image');
+      openDialog('Error', 'Failed to delete image');
     }
   };
 
   const handleGeocode = async () => {
     if (!formData.address || !formData.city || !formData.country) {
-      Alert.alert('Missing Info', 'Please enter address, city and country first');
+      openDialog('Missing Info', 'Please enter address, city and country first');
       return;
     }
 
@@ -172,12 +190,12 @@ export default function EditPropertyScreen() {
       if (result.length > 0) {
         const { latitude, longitude } = result[0];
         setFormData(prev => ({ ...prev, latitude, longitude }));
-        Alert.alert('Location Found', 'Coordinates updated successfully!');
+        openDialog('Location Found', 'Coordinates updated successfully!');
       } else {
-        Alert.alert('Not Found', 'Could not find coordinates for this address');
+        openDialog('Not Found', 'Could not find coordinates for this address');
       }
     } catch (error) {
-      Alert.alert('Error', 'Failed to find location coordinates');
+      openDialog('Error', 'Failed to find location coordinates');
     } finally {
       setLoading(false);
     }
@@ -186,7 +204,7 @@ export default function EditPropertyScreen() {
   const pickImages = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('Permission Denied', 'Camera roll permission is required');
+      openDialog('Permission Denied', 'Camera roll permission is required');
       return;
     }
 
@@ -204,7 +222,7 @@ export default function EditPropertyScreen() {
 
   const handleUpdate = async () => {
     if (!formData.title || !formData.price || !formData.city) {
-      Alert.alert('Error', 'Please fill in all required fields');
+      openDialog('Error', 'Please fill in all required fields');
       return;
     }
 
@@ -244,12 +262,13 @@ export default function EditPropertyScreen() {
         await apiClient.uploadPropertyImages(String(id), imageFormData);
       }
       
-      Alert.alert('Success', 'Property updated successfully!', [
-        { text: 'OK', onPress: () => router.replace('/host/properties') }
-      ]);
+      openDialog('Success', 'Property updated successfully!', {
+        label: 'OK',
+        onPress: () => router.replace('/host/properties'),
+      });
     } catch (error) {
       console.error('Update error:', error);
-      Alert.alert('Error', 'Failed to update property');
+      openDialog('Error', 'Failed to update property');
     } finally {
       setLoading(false);
     }
@@ -580,6 +599,14 @@ export default function EditPropertyScreen() {
         </ScrollView>
       </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
+    <AppDialog
+      visible={dialog.visible}
+      title={dialog.title}
+      message={dialog.message}
+      primaryAction={dialog.primaryAction}
+      secondaryAction={dialog.secondaryAction}
+      onRequestClose={() => setDialog((prev) => ({ ...prev, visible: false }))}
+    />
   </SafeAreaView>
   );
 }

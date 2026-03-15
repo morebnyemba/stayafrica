@@ -7,6 +7,7 @@ import { Star, MessageSquare } from 'lucide-react';
 import dynamic from 'next/dynamic';
 const ProtectedRoute = dynamic(() => import('@/components/auth/protected-route').then(m => m.ProtectedRoute), { ssr: false });
 import { Button } from '@/components/ui/Button';
+import { NoticeModal } from '@/components/common/notice-modal';
 
 export function ReviewsDashboard() {
   const queryClient = useQueryClient();
@@ -29,6 +30,7 @@ export function ReviewsDashboard() {
   const [editingReviewId, setEditingReviewId] = React.useState<string | null>(null);
   const [editRating, setEditRating] = React.useState<number>(0);
   const [editText, setEditText] = React.useState<string>('');
+  const [noticeMessage, setNoticeMessage] = React.useState('');
 
   const updateMutation = useMutation<any, Error, { reviewId: string; rating: number; text: string }>({
     mutationFn: async (params) => {
@@ -39,7 +41,7 @@ export function ReviewsDashboard() {
       setEditingReviewId(null);
     },
     onError: (error: any) => {
-      alert(error?.response?.data?.error || 'Failed to update review. It may be past the allowed edit window.');
+      setNoticeMessage(error?.response?.data?.error || 'Failed to update review. It may be past the allowed edit window.');
     }
   });
 
@@ -174,6 +176,12 @@ export function ReviewsDashboard() {
           </section>
         </div>
       </div>
+      <NoticeModal
+        isOpen={Boolean(noticeMessage)}
+        title="Unable to Update Review"
+        message={noticeMessage}
+        onClose={() => setNoticeMessage('')}
+      />
     </ProtectedRoute>
   );
 }

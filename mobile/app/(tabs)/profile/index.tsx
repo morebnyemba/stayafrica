@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { useState } from 'react';
 import { useAuth } from '@/context/auth-context';
 import { useRouter } from 'expo-router';
@@ -9,6 +9,15 @@ import { Sidebar } from '@/components/common/Sidebar';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useBookings, useWishlist } from '@/hooks/api-hooks';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { AppDialog, AppDialogAction } from '@/components/common/AppDialog';
+
+type DialogState = {
+  visible: boolean;
+  title: string;
+  message: string;
+  primaryAction: AppDialogAction;
+  secondaryAction?: AppDialogAction;
+};
 
 export default function ProfileScreen() {
   const { user, logout, isAuthenticated, switchProfile } = useAuth();
@@ -16,6 +25,16 @@ export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [switchLoading, setSwitchLoading] = useState(false);
+  const [dialog, setDialog] = useState<DialogState>({
+    visible: false,
+    title: '',
+    message: '',
+    primaryAction: { label: 'OK' },
+  });
+
+  const openDialog = (next: Omit<DialogState, 'visible'>) => {
+    setDialog({ visible: true, ...next });
+  };
 
   const { data: bookingsData } = useBookings();
   const { data: wishlistData } = useWishlist();
@@ -35,7 +54,11 @@ export default function ProfileScreen() {
         router.push('/(tabs)/dashboard');
       }
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to switch profile');
+      openDialog({
+        title: 'Error',
+        message: error.message || 'Failed to switch profile',
+        primaryAction: { label: 'OK' },
+      });
     } finally {
       setSwitchLoading(false);
     }
@@ -104,17 +127,19 @@ export default function ProfileScreen() {
   }
 
   const handleLogout = () => {
-    Alert.alert('Logout', 'Are you sure you want to logout?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Logout',
-        style: 'destructive',
+    openDialog({
+      title: 'Logout',
+      message: 'Are you sure you want to logout?',
+      primaryAction: {
+        label: 'Logout',
+        variant: 'destructive',
         onPress: () => {
           logout();
           router.replace('/(auth)/login');
         },
       },
-    ]);
+      secondaryAction: { label: 'Cancel' },
+    });
   };
 
   // Compact settings row
@@ -362,6 +387,14 @@ export default function ProfileScreen() {
           </TouchableOpacity>
         </Animated.View>
       </ScrollView>
+      <AppDialog
+        visible={dialog.visible}
+        title={dialog.title}
+        message={dialog.message}
+        primaryAction={dialog.primaryAction}
+        secondaryAction={dialog.secondaryAction}
+        onRequestClose={() => setDialog((prev) => ({ ...prev, visible: false }))}
+      />
     </SafeAreaView>
   );
 }

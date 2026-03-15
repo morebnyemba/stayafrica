@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Mail, ArrowLeft } from 'lucide-react';
+import { NoticeModal } from '@/components/common/notice-modal';
 
 export default function VerifyEmailPage() {
   const router = useRouter();
@@ -15,6 +16,7 @@ export default function VerifyEmailPage() {
   const [resending, setResending] = useState(false);
   const [checkingVerification, setCheckingVerification] = useState(false);
   const [error, setError] = useState('');
+  const [noticeMessage, setNoticeMessage] = useState('');
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const checkVerificationStatus = async () => {
@@ -163,7 +165,7 @@ export default function VerifyEmailPage() {
 
       setCode(['', '', '', '', '', '']);
       inputRefs.current[0]?.focus();
-      alert('Verification code has been resent to your email');
+      setNoticeMessage('Verification code has been resent to your email.');
     } catch (err: any) {
       setError(err.message || 'Failed to resend code. Please try again.');
     } finally {
@@ -279,6 +281,12 @@ export default function VerifyEmailPage() {
           </div>
         </form>
       </div>
+      <NoticeModal
+        isOpen={Boolean(noticeMessage)}
+        title="Verification Email Sent"
+        message={noticeMessage}
+        onClose={() => setNoticeMessage('')}
+      />
     </div>
   );
 }

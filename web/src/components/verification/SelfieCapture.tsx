@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { Camera, X, RefreshCw, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 import { useDocumentUpload } from './useDocumentUpload';
 import toast from 'react-hot-toast';
+import { NoticeModal } from '@/components/common/notice-modal';
 
 interface SelfieCaptureProps {
   onCaptureComplete: (imageUrl: string) => void;
@@ -26,6 +27,7 @@ export const SelfieCapture = ({ onCaptureComplete }: SelfieCaptureProps) => {
   const [isUploading, setIsUploading] = useState(false);
   const [isCameraActive, setIsCameraActive] = useState(false);
   const [stream, setStream] = useState<MediaStream | null>(null);
+  const [notice, setNotice] = useState<{ title: string; message: string } | null>(null);
 
   // Liveness state
   const [livenessSupported, setLivenessSupported] = useState<boolean | null>(null);
@@ -39,6 +41,10 @@ export const SelfieCapture = ({ onCaptureComplete }: SelfieCaptureProps) => {
   const faceStableSinceRef = useRef<number | null>(null);
 
   const { uploadFile } = useDocumentUpload();
+
+  const showCameraNotice = (title: string, message: string) => {
+    setNotice({ title, message });
+  };
 
   // Check FaceDetector support once on mount
   useEffect(() => {
@@ -82,13 +88,13 @@ export const SelfieCapture = ({ onCaptureComplete }: SelfieCaptureProps) => {
   const startCamera = async () => {
     // Check if we're in a secure context (HTTPS or localhost) — required for getUserMedia
     if (typeof window !== 'undefined' && !window.isSecureContext) {
-      alert('Camera access requires a secure connection (HTTPS). Please access this site over HTTPS or upload a photo instead.');
+      showCameraNotice('Secure Connection Required', 'Camera access requires a secure connection (HTTPS). Please access this site over HTTPS or upload a photo instead.');
       return;
     }
 
     // Check if getUserMedia is available
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      alert('Camera is not supported in this browser. Please upload a photo instead.');
+      showCameraNotice('Camera Unsupported', 'Camera is not supported in this browser. Please upload a photo instead.');
       return;
     }
 
@@ -116,13 +122,13 @@ export const SelfieCapture = ({ onCaptureComplete }: SelfieCaptureProps) => {
       if (error instanceof DOMException) {
         switch (error.name) {
           case 'NotAllowedError':
-            alert('Camera permission was denied. Please allow camera access in your browser settings (click the lock/camera icon in the address bar) and try again, or upload a photo instead.');
+            showCameraNotice('Camera Permission Denied', 'Camera permission was denied. Please allow camera access in your browser settings and try again, or upload a photo instead.');
             break;
           case 'NotFoundError':
-            alert('No camera found on this device. Please upload a photo instead.');
+            showCameraNotice('No Camera Found', 'No camera was found on this device. Please upload a photo instead.');
             break;
           case 'NotReadableError':
-            alert('Camera is in use by another application. Please close other apps using the camera and try again.');
+            showCameraNotice('Camera Busy', 'Camera is in use by another application. Please close other apps using the camera and try again.');
             break;
           case 'OverconstrainedError':
             // Retry without constraints
@@ -141,14 +147,14 @@ export const SelfieCapture = ({ onCaptureComplete }: SelfieCaptureProps) => {
               }
               return;
             } catch {
-              alert('Unable to access camera. Please upload a photo instead.');
+              showCameraNotice('Camera Unavailable', 'Unable to access camera. Please upload a photo instead.');
             }
             break;
           default:
-            alert('Unable to access camera. Please check permissions or upload a photo instead.');
+            showCameraNotice('Camera Unavailable', 'Unable to access camera. Please check permissions or upload a photo instead.');
         }
       } else {
-        alert('Unable to access camera. Please check permissions or upload a photo instead.');
+        showCameraNotice('Camera Unavailable', 'Unable to access camera. Please check permissions or upload a photo instead.');
       }
     }
   };
@@ -396,6 +402,12 @@ export const SelfieCapture = ({ onCaptureComplete }: SelfieCaptureProps) => {
         accept="image/*"
         onChange={handleFileSelect}
         className="hidden"
+      />
+      <NoticeModal
+        isOpen={Boolean(notice)}
+        title={notice?.title || 'Notice'}
+        message={notice?.message || ''}
+        onClose={() => setNotice(null)}
       />
     </div>
   );

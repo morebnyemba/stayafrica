@@ -5,6 +5,7 @@ import { adminApi } from '@/lib/admin-api';
 import { Amenity } from '@/types';
 import toast from 'react-hot-toast';
 import { Plus, Edit2, Trash2, X, Save, Search } from 'lucide-react';
+import { ConfirmActionModal } from '@/components/common/confirm-action-modal';
 
 export default function AmenitiesManagement() {
     const [amenities, setAmenities] = useState<Amenity[]>([]);
@@ -16,6 +17,7 @@ export default function AmenitiesManagement() {
     const [editingAmenity, setEditingAmenity] = useState<Amenity | null>(null);
     const [formData, setFormData] = useState({ name: '', icon: '' });
     const [saving, setSaving] = useState(false);
+    const [pendingDeleteAmenity, setPendingDeleteAmenity] = useState<{ id: string; name: string } | null>(null);
 
     useEffect(() => {
         loadAmenities();
@@ -77,10 +79,15 @@ export default function AmenitiesManagement() {
     };
 
     const handleDelete = async (id: string, name: string) => {
-        if (!window.confirm(`Are you sure you want to delete the amenity "${name}"?`)) return;
+        setPendingDeleteAmenity({ id, name });
+    };
+
+    const confirmDelete = async () => {
+        if (!pendingDeleteAmenity) return;
         try {
-            await adminApi.deleteAmenity(id);
+            await adminApi.deleteAmenity(pendingDeleteAmenity.id);
             toast.success('Amenity deleted successfully');
+            setPendingDeleteAmenity(null);
             loadAmenities();
         } catch (err: any) {
             toast.error('Failed to delete amenity');
@@ -227,6 +234,15 @@ export default function AmenitiesManagement() {
                     </div>
                 </div>
             )}
+            <ConfirmActionModal
+                isOpen={Boolean(pendingDeleteAmenity)}
+                title="Delete Amenity"
+                message={pendingDeleteAmenity ? `Are you sure you want to delete the amenity "${pendingDeleteAmenity.name}"?` : ''}
+                confirmText="Delete"
+                variant="danger"
+                onCancel={() => setPendingDeleteAmenity(null)}
+                onConfirm={confirmDelete}
+            />
         </div>
     );
 }

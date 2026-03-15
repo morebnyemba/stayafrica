@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import { Button } from '@/components/ui';
 import { MapPin, Loader, Crosshair } from 'lucide-react';
+import { NoticeModal } from '@/components/common/notice-modal';
 
 interface MapboxLocationPickerProps {
   onLocationSelect: (data: { lat: number; lng: number; address?: string }) => void;
@@ -27,6 +28,7 @@ export function MapboxLocationPicker({
   const [gettingLocation, setGettingLocation] = useState(false);
   const [pinned, setPinned] = useState(false);
   const [mapStyle, setMapStyle] = useState<'streets' | 'satellite' | 'outdoors'>('satellite');
+  const [noticeMessage, setNoticeMessage] = useState('');
   const [coordinates, setCoordinates] = useState<{ lat: number; lng: number }>({
     lat: initialLat,
     lng: initialLng,
@@ -134,7 +136,7 @@ export function MapboxLocationPicker({
 
   const handleGetCurrentLocation = () => {
     if (!navigator.geolocation) {
-      alert('Geolocation is not supported by your browser');
+      setNoticeMessage('Geolocation is not supported by your browser.');
       return;
     }
 
@@ -165,7 +167,7 @@ export function MapboxLocationPicker({
       },
       (error) => {
         console.error('Geolocation error:', error);
-        alert('Unable to get your location. Please enable location services.');
+        setNoticeMessage('Unable to get your location. Please enable location services.');
         setGettingLocation(false);
       },
       { enableHighAccuracy: true, timeout: 10000 }
@@ -254,6 +256,12 @@ export function MapboxLocationPicker({
           {pinned ? '✓ Location Pinned' : 'Confirm Location'}
         </Button>
       </div>
+      <NoticeModal
+        isOpen={Boolean(noticeMessage)}
+        title="Location Unavailable"
+        message={noticeMessage}
+        onClose={() => setNoticeMessage('')}
+      />
     </div>
   );
 }

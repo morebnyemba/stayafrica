@@ -1,18 +1,30 @@
-import { View, Text, ScrollView, TouchableOpacity, Switch, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Switch, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNotificationPreferences, useUpdateNotificationPreferences } from '@/hooks/api-hooks';
+import { useState } from 'react';
+import { AppDialog, AppDialogAction } from '@/components/common/AppDialog';
 
 export default function NotificationsScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { data: prefs, isLoading } = useNotificationPreferences();
   const { mutate: updatePrefs, isPending: saving } = useUpdateNotificationPreferences();
+  const [dialog, setDialog] = useState<{ visible: boolean; title: string; message: string; primaryAction: AppDialogAction }>({
+    visible: false,
+    title: '',
+    message: '',
+    primaryAction: { label: 'OK' },
+  });
+
+  const openDialog = (title: string, message: string) => {
+    setDialog({ visible: true, title, message, primaryAction: { label: 'OK' } });
+  };
 
   const handleToggle = (key: string, value: boolean) => {
     updatePrefs({ [key]: value } as any, {
-      onError: () => Alert.alert('Error', 'Failed to update notification settings.'),
+      onError: () => openDialog('Error', 'Failed to update notification settings.'),
     });
   };
 
@@ -81,6 +93,13 @@ export default function NotificationsScreen() {
           </View>
         ))}
       </ScrollView>
+      <AppDialog
+        visible={dialog.visible}
+        title={dialog.title}
+        message={dialog.message}
+        primaryAction={dialog.primaryAction}
+        onRequestClose={() => setDialog((prev) => ({ ...prev, visible: false }))}
+      />
     </View>
   );
 }

@@ -8,6 +8,7 @@ import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { ArrowLeft, Plus, Trash2, Power } from 'lucide-react';
 import PricingCalendar from '@/components/pricing/PricingCalendar';
+import { ConfirmActionModal } from '@/components/common/confirm-action-modal';
 import type { PricingRule } from '@/types/pricing-types';
 
 const RULE_TYPE_META: Record<string, { label: string; color: string }> = {
@@ -22,6 +23,7 @@ export default function PropertyPricingPage() {
   const params = useParams();
   const propertyId = params?.id as string;
   const queryClient = useQueryClient();
+  const [pendingDeleteRuleId, setPendingDeleteRuleId] = useState<number | null>(null);
 
   const { data: property, isLoading } = useQuery({
     queryKey: ['property', propertyId],
@@ -120,7 +122,7 @@ export default function PropertyPricingPage() {
                       <button onClick={() => toggleMutation.mutate({ id: rule.id, is_active: !rule.is_active })} className={`p-1.5 rounded-lg transition ${rule.is_active ? 'text-green-600 hover:bg-green-50' : 'text-primary-400 hover:bg-primary-100'}`}>
                         <Power className="w-4 h-4" />
                       </button>
-                      <button onClick={() => { if (confirm('Delete this rule?')) deleteMutation.mutate(rule.id); }} className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition">
+                      <button onClick={() => setPendingDeleteRuleId(rule.id)} className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition">
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
@@ -157,6 +159,20 @@ export default function PropertyPricingPage() {
             </div>
           </div>
         </div>
+        <ConfirmActionModal
+          isOpen={Boolean(pendingDeleteRuleId)}
+          title="Delete Pricing Rule"
+          message="Delete this rule?"
+          confirmText="Delete Rule"
+          variant="danger"
+          isLoading={deleteMutation.isPending}
+          onCancel={() => setPendingDeleteRuleId(null)}
+          onConfirm={() => {
+            if (!pendingDeleteRuleId) return;
+            deleteMutation.mutate(pendingDeleteRuleId);
+            setPendingDeleteRuleId(null);
+          }}
+        />
       </div>
     </div>
   );

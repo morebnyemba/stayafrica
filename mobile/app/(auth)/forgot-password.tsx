@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   View,
   Text,
@@ -8,28 +8,45 @@ import {
   ScrollView,
   Platform,
   ActivityIndicator,
-  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { apiClient } from '@/services/api-client';
+import { AppDialog, AppDialogAction } from '@/components/common/AppDialog';
+
+type DialogState = {
+  visible: boolean;
+  title: string;
+  message: string;
+  primaryAction: AppDialogAction;
+};
 
 export default function ForgotPasswordScreen() {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [dialog, setDialog] = useState<DialogState>({
+    visible: false,
+    title: '',
+    message: '',
+    primaryAction: { label: 'OK' },
+  });
+
+  const openDialog = (title: string, message: string) => {
+    setDialog({ visible: true, title, message, primaryAction: { label: 'OK' } });
+  };
 
   const handleResetPassword = async () => {
     if (!email.trim()) {
-      Alert.alert('Error', 'Please enter your email address');
+      openDialog('Error', 'Please enter your email address');
       return;
     }
 
     // Basic email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      Alert.alert('Error', 'Please enter a valid email address');
+      openDialog('Error', 'Please enter a valid email address');
       return;
     }
 
@@ -39,11 +56,11 @@ export default function ForgotPasswordScreen() {
       setSubmitted(true);
     } catch (error: any) {
       console.error('Password reset error:', error);
-      Alert.alert(
+      openDialog(
         'Error',
-        error.response?.data?.detail || 
-        error.response?.data?.email?.[0] || 
-        'Failed to send reset email. Please try again.'
+        error.response?.data?.detail ||
+          error.response?.data?.email?.[0] ||
+          'Failed to send reset email. Please try again.'
       );
     } finally {
       setLoading(false);
@@ -179,6 +196,13 @@ export default function ForgotPasswordScreen() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+      <AppDialog
+        visible={dialog.visible}
+        title={dialog.title}
+        message={dialog.message}
+        primaryAction={dialog.primaryAction}
+        onRequestClose={() => setDialog((prev) => ({ ...prev, visible: false }))}
+      />
     </SafeAreaView>
   );
 }

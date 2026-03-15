@@ -5,12 +5,14 @@ import { adminApi } from '@/lib/admin-api';
 import { PropertyImage } from '@/types';
 import toast from 'react-hot-toast';
 import { Trash2, ExternalLink, Image as ImageIcon, RefreshCcw } from 'lucide-react';
+import { ConfirmActionModal } from '@/components/common/confirm-action-modal';
 
 export default function PropertyImagesManagement() {
     const [images, setImages] = useState<PropertyImage[]>([]);
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
     const [totalCount, setTotalCount] = useState(0);
+    const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
     const ITEMS_PER_PAGE = 24;
 
     useEffect(() => {
@@ -35,11 +37,15 @@ export default function PropertyImagesManagement() {
     };
 
     const handleDelete = async (id: string) => {
-        if (!window.confirm('Are you sure you want to delete this property image? This cannot be undone.')) return;
+        setPendingDeleteId(id);
+    };
 
+    const confirmDelete = async () => {
+        if (!pendingDeleteId) return;
         try {
-            await adminApi.deletePropertyImage(id);
+            await adminApi.deletePropertyImage(pendingDeleteId);
             toast.success('Image deleted from platform safely');
+            setPendingDeleteId(null);
             loadImages();
         } catch (err: any) {
             toast.error('Failed to delete property image');
@@ -145,6 +151,15 @@ export default function PropertyImagesManagement() {
                     </div>
                 )}
             </div>
+            <ConfirmActionModal
+                isOpen={Boolean(pendingDeleteId)}
+                title="Delete Property Image"
+                message="Are you sure you want to delete this property image? This cannot be undone."
+                confirmText="Delete Image"
+                variant="danger"
+                onCancel={() => setPendingDeleteId(null)}
+                onConfirm={confirmDelete}
+            />
         </div>
     );
 }

@@ -17,6 +17,7 @@ import {
   User,
 } from 'lucide-react';
 import { Button } from '@/components/ui';
+import { ConfirmActionModal } from '@/components/common/confirm-action-modal';
 import { toast } from 'react-hot-toast';
 import type { ExperienceBooking, ExperienceBookingStatus } from '@/types';
 
@@ -40,6 +41,7 @@ export function HostExperienceBookingsContent() {
   const queryClient = useQueryClient();
   const [statusFilter, setStatusFilter] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [pendingCancelBookingId, setPendingCancelBookingId] = useState<number | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ['host-experience-bookings', statusFilter, searchTerm],
@@ -282,11 +284,7 @@ export function HostExperienceBookingsContent() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => {
-                              if (confirm('Are you sure you want to cancel this booking?')) {
-                                cancelMutation.mutate(booking.id);
-                              }
-                            }}
+                            onClick={() => setPendingCancelBookingId(booking.id)}
                             disabled={cancelMutation.isPending}
                           >
                             <XCircle className="w-4 h-4 mr-1.5" />
@@ -308,11 +306,7 @@ export function HostExperienceBookingsContent() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => {
-                              if (confirm('Are you sure you want to cancel this booking?')) {
-                                cancelMutation.mutate(booking.id);
-                              }
-                            }}
+                            onClick={() => setPendingCancelBookingId(booking.id)}
                             disabled={cancelMutation.isPending}
                           >
                             <XCircle className="w-4 h-4 mr-1.5" />
@@ -328,6 +322,20 @@ export function HostExperienceBookingsContent() {
           </div>
         )}
       </div>
+      <ConfirmActionModal
+        isOpen={Boolean(pendingCancelBookingId)}
+        title="Cancel Booking"
+        message="Are you sure you want to cancel this booking?"
+        confirmText="Cancel Booking"
+        variant="danger"
+        isLoading={cancelMutation.isPending}
+        onCancel={() => setPendingCancelBookingId(null)}
+        onConfirm={() => {
+          if (!pendingCancelBookingId) return;
+          cancelMutation.mutate(pendingCancelBookingId);
+          setPendingCancelBookingId(null);
+        }}
+      />
     </div>
   );
 }

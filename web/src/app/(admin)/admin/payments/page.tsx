@@ -5,6 +5,9 @@ import { adminApi } from '@/lib/admin-api';
 import { Payment } from '@/types';
 import { Eye, RotateCcw, Check, X } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { ConfirmActionModal } from '@/components/common/confirm-action-modal';
+
+type PaymentAction = 'success' | 'failed';
 
 export default function PaymentsManagement() {
   const [payments, setPayments] = useState<Payment[]>([]);
@@ -15,6 +18,7 @@ export default function PaymentsManagement() {
   const [showRefundDialog, setShowRefundDialog] = useState(false);
   const [refundPaymentId, setRefundPaymentId] = useState<string | null>(null);
   const [refundAmount, setRefundAmount] = useState('');
+  const [pendingAction, setPendingAction] = useState<{ id: string; action: PaymentAction } | null>(null);
   const ITEMS_PER_PAGE = 20;
 
   useEffect(() => {
@@ -82,24 +86,110 @@ export default function PaymentsManagement() {
   };
 
   const handleMarkSuccess = async (id: string) => {
-    if (!window.confirm('Manually mark this payment as successful?')) return;
-    try {
-      await adminApi.markPaymentSuccess(id);
-      toast.success('Payment marked as successful');
-      loadPayments();
-    } catch (err: any) {
-      toast.error(err?.response?.data?.detail || 'Failed to mark success');
-    }
+    setPendingAction({ id, action: 'success' });
   };
 
   const handleMarkFailed = async (id: string) => {
-    if (!window.confirm('Manually mark this payment as failed?')) return;
+    setPendingAction({ id, action: 'failed' });
+  };
+
+  const confirmPaymentAction = async () => {
+    if (!pendingAction) return;
     try {
-      await adminApi.markPaymentFailed(id);
-      toast.success('Payment marked as failed');
+      if (pendingAction.action === 'success') {
+        await adminApi.markPaymentSuccess(pendingAction.id);
+        toast.success('Payment marked as successful');
+      } else {
+        await adminApi.markPaymentFailed(pendingAction.id);
+        toast.success('Payment marked as failed');
+      }
+      setPendingAction(null);
       loadPayments();
     } catch (err: any) {
-      toast.error(err?.response?.data?.detail || 'Failed to mark failed');
+      toast.error(
+        err?.response?.data?.detail
+          || (pendingAction.action === 'success' ? 'Failed to mark success' : 'Failed to mark failed')
+      );
+    }
+  };
+
+  const paymentActionConfig = pendingAction?.action === 'success'
+    ? {
+        title: 'Mark Payment Successful',
+        message: 'Manually mark this payment as successful?',
+        confirmText: 'Mark Successful',
+        variant: 'primary' as const,
+      }
+    : {
+        title: 'Mark Payment Failed',
+        message: 'Manually mark this payment as failed?',
+        confirmText: 'Mark Failed',
+        variant: 'danger' as const,
+      };
+
+  const isPaymentActionLoading = false;
+
+  const closePendingAction = () => {
+    setPendingAction(null);
+  };
+
+  const handleRefundDialogClose = () => {
+    setShowRefundDialog(false);
+    setRefundPaymentId(null);
+  };
+
+  const confirmRefundAndClose = async () => {
+    await confirmRefund();
+  };
+
+  const renderPaymentActionModal = pendingAction ? (
+    <ConfirmActionModal
+      isOpen={Boolean(pendingAction)}
+      title={paymentActionConfig.title}
+      message={paymentActionConfig.message}
+      confirmText={paymentActionConfig.confirmText}
+      variant={paymentActionConfig.variant}
+      isLoading={isPaymentActionLoading}
+      onCancel={closePendingAction}
+      onConfirm={confirmPaymentAction}
+    />
+  ) : null;
+
+  const renderRefundDialog = showRefundDialog ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+            <h3 className="text-lg font-semibold text-[#122F26] mb-4">Process Refund</h3>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-primary-700 mb-2">
+                Refund Amount ($)
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                min="0.01"
+                value={refundAmount}
+                onChange={(e) => setRefundAmount(e.target.value)}
+                className="w-full px-4 py-2 border border-[#3A5C50] rounded-lg focus:ring-2 focus:ring-[#D9B168] focus:border-transparent"
+              />
+              <p className="text-xs text-primary-400 mt-1">Enter partial or full amount to refund</p>
+            </div>
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={handleRefundDialogClose}
+                className="px-4 py-2 border border-primary-300 text-primary-700 rounded-lg hover:bg-sand-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmRefundAndClose}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+              >
+                Process Refund
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null;
     }
   };
 
@@ -297,41 +387,8 @@ export default function PaymentsManagement() {
       </div>
 
       {/* Refund Dialog */}
-      {showRefundDialog && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
-            <h3 className="text-lg font-semibold text-[#122F26] mb-4">Process Refund</h3>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-primary-700 mb-2">
-                Refund Amount ($)
-              </label>
-              <input
-                type="number"
-                step="0.01"
-                min="0.01"
-                value={refundAmount}
-                onChange={(e) => setRefundAmount(e.target.value)}
-                className="w-full px-4 py-2 border border-[#3A5C50] rounded-lg focus:ring-2 focus:ring-[#D9B168] focus:border-transparent"
-              />
-              <p className="text-xs text-primary-400 mt-1">Enter partial or full amount to refund</p>
-            </div>
-            <div className="flex justify-end space-x-3">
-              <button
-                onClick={() => { setShowRefundDialog(false); setRefundPaymentId(null); }}
-                className="px-4 py-2 border border-primary-300 text-primary-700 rounded-lg hover:bg-sand-50"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={confirmRefund}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
-              >
-                Process Refund
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {renderRefundDialog}
+      {renderPaymentActionModal}
     </div>
   );
 }
