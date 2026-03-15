@@ -208,6 +208,7 @@ export function Navigation() {
   const isHost = user?.role === 'host' || user?.role === 'admin';
   const activeProfile = user?.active_profile ?? 'guest';
   const dashboardHref = activeProfile === 'host' ? '/host/dashboard' : '/dashboard';
+  const shouldShowMobileSearch = !(isAuthenticated && (isHost || activeProfile === 'host'));
 
   // ── Scroll detection ────────────────────────────────────────────────────
   useEffect(() => {
@@ -282,8 +283,8 @@ export function Navigation() {
 
   return (
     <>
-      <MobileSearchBar />
-      <div className="h-[52px] md:hidden" aria-hidden="true" />
+      {shouldShowMobileSearch && <MobileSearchBar />}
+      {shouldShowMobileSearch && <div className="h-[52px] md:hidden" aria-hidden="true" />}
 
       <nav
         className={cn(

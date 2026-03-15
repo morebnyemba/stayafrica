@@ -15,6 +15,46 @@ import hashlib
 logger = logging.getLogger(__name__)
 
 
+def _is_console_email_backend(connection=None):
+    """Detect whether the effective email backend is the Django console backend."""
+    backend_path = None
+    if connection is not None:
+        backend_path = connection.__class__.__module__
+    if not backend_path:
+        backend_path = getattr(settings, 'EMAIL_BACKEND', '')
+    return 'console' in str(backend_path).lower()
+
+
+def _log_console_email_preview(subject, recipient_list, text_content=None, context=None):
+    """Print email content to app logs in console-email mode for easier local verification."""
+    try:
+        lines = [
+            '=== EMAIL PREVIEW (console backend) ===',
+            f'Subject: {subject}',
+            f'To: {", ".join(recipient_list)}',
+        ]
+
+        if isinstance(context, dict):
+            verification_url = context.get('verification_url')
+            reset_url = context.get('reset_url')
+            if verification_url:
+                lines.append(f'Verification URL: {verification_url}')
+            if reset_url:
+                lines.append(f'Password Reset URL: {reset_url}')
+
+        if text_content:
+            preview = text_content.strip()
+            if len(preview) > 1200:
+                preview = preview[:1200] + '... [truncated]'
+            lines.append('Body:')
+            lines.append(preview)
+
+        lines.append('=== END EMAIL PREVIEW ===')
+        logger.info('\n'.join(lines))
+    except Exception as e:
+        logger.warning(f'Failed to log console email preview: {e}')
+
+
 def _get_base_context():
     """Get base context for email templates"""
     return {
@@ -75,6 +115,9 @@ def send_email_async(self, subject, message, recipient_list, html_message=None):
                 send_mail(subject, message, from_email, recipient_list, connection=connection)
             else:
                 send_mail(subject, message, from_email, recipient_list)
+
+        if _is_console_email_backend(connection):
+            _log_console_email_preview(subject, recipient_list, text_content=message)
         
         logger.info(f"Email sent successfully to {recipient_list}")
         return True
@@ -105,6 +148,9 @@ def send_templated_email(self, template_name, subject, recipient_list, context):
         )
         msg.attach_alternative(html_content, 'text/html')
         msg.send()
+
+        if _is_console_email_backend(connection):
+            _log_console_email_preview(subject, recipient_list, text_content=text_content, context=full_context)
         
         logger.info(f"Templated email '{template_name}' sent to {recipient_list}")
         return True
