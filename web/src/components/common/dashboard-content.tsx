@@ -41,9 +41,7 @@ export function DashboardContent() {
     queryFn: async () => {
       const response = await apiClient.getBookings({});
       return response.data || { results: [], count: 0 };
-                    ...(!user?.is_identity_verified
-                      ? [{ title: 'Verify ID', icon: ShieldCheck, link: '/profile/verification', color: 'bg-indigo-500' }]
-                      : []),
+    },
     enabled: isAuthenticated,
   });
 
@@ -349,7 +347,9 @@ export function DashboardContent() {
                     { title: 'My Reviews', icon: Star, link: '/reviews', color: 'bg-pink-500' },
                     { title: 'Profile', icon: User, link: '/profile', color: 'bg-green-500' },
                     { title: 'Payments', icon: CreditCard, link: '/profile?tab=payments', color: 'bg-purple-500' },
-                    { title: 'Verify ID', icon: ShieldCheck, link: '/profile/verification', color: 'bg-indigo-500' },
+                    ...(!user?.is_identity_verified
+                      ? [{ title: 'Verify ID', icon: ShieldCheck, link: '/profile/verification', color: 'bg-indigo-500' }]
+                      : []),
                   ].map((item, i) => (
                     <Link
                       key={i}
