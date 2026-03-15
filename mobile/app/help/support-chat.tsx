@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, FlatList,
-  StyleSheet, KeyboardAvoidingView, Platform, ActivityIndicator, Alert
+  StyleSheet, KeyboardAvoidingView, Platform, ActivityIndicator
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { AppDialog, AppDialogAction } from '@/components/common/AppDialog';
 
 const COLORS = {
   green: '#2D5016',
@@ -52,8 +53,18 @@ export default function SupportChatScreen() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [chatInput, setChatInput] = useState('');
   const [ws, setWs] = useState<WebSocket | null>(null);
+  const [dialog, setDialog] = useState<{ visible: boolean; title: string; message: string; primaryAction: AppDialogAction }>({
+    visible: false,
+    title: '',
+    message: '',
+    primaryAction: { label: 'OK' },
+  });
 
   const listRef = useRef<FlatList>(null);
+
+  const openDialog = (title: string, message: string, primaryAction: AppDialogAction = { label: 'OK' }) => {
+    setDialog({ visible: true, title, message, primaryAction });
+  };
 
   useEffect(() => {
     return () => { ws?.close(); };
@@ -84,7 +95,7 @@ export default function SupportChatScreen() {
 
   const handleSubmitTicket = async () => {
     if (!category || !subject || !initialMessage) {
-      Alert.alert('Missing Fields', 'Please fill in all fields.');
+      openDialog('Missing Fields', 'Please fill in all fields.');
       return;
     }
     setIsSubmitting(true);
@@ -107,7 +118,7 @@ export default function SupportChatScreen() {
       await connectWebSocket(data.conversation);
       setStep('chat');
     } catch {
-      Alert.alert('Error', 'Failed to create support ticket. Please try again.');
+      openDialog('Error', 'Failed to create support ticket. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -229,6 +240,13 @@ export default function SupportChatScreen() {
           </View>
         </KeyboardAvoidingView>
       )}
+      <AppDialog
+        visible={dialog.visible}
+        title={dialog.title}
+        message={dialog.message}
+        primaryAction={dialog.primaryAction}
+        onRequestClose={() => setDialog((prev) => ({ ...prev, visible: false }))}
+      />
     </SafeAreaView>
   );
 }

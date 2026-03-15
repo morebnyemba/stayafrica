@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, ScrollView,
-  StyleSheet, Alert, ActivityIndicator, Platform
+  StyleSheet, ActivityIndicator, Platform
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
@@ -9,6 +9,7 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Device from 'expo-device';
 import Constants from 'expo-constants';
+import { AppDialog, AppDialogAction } from '@/components/common/AppDialog';
 
 const COLORS = {
   green: '#2D5016',
@@ -33,6 +34,16 @@ export default function BugReportScreen() {
   const [steps, setSteps] = useState('');
   const [severity, setSeverity] = useState('minor');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [dialog, setDialog] = useState<{ visible: boolean; title: string; message: string; primaryAction: AppDialogAction }>({
+    visible: false,
+    title: '',
+    message: '',
+    primaryAction: { label: 'OK' },
+  });
+
+  const openDialog = (title: string, message: string, primaryAction: AppDialogAction = { label: 'OK' }) => {
+    setDialog({ visible: true, title, message, primaryAction });
+  };
 
   const getDeviceInfo = () => ({
     model: Device.modelName,
@@ -43,7 +54,7 @@ export default function BugReportScreen() {
 
   const handleSubmit = async () => {
     if (!title || !description) {
-      Alert.alert('Missing Fields', 'Please provide a title and description.');
+      openDialog('Missing Fields', 'Please provide a title and description.');
       return;
     }
     setIsSubmitting(true);
@@ -63,11 +74,12 @@ export default function BugReportScreen() {
         })
       });
       if (!res.ok) throw new Error();
-      Alert.alert('Thank You!', 'Your bug report has been submitted. Our team will review it shortly.', [
-        { text: 'OK', onPress: () => router.back() }
-      ]);
+      openDialog('Thank You!', 'Your bug report has been submitted. Our team will review it shortly.', {
+        label: 'OK',
+        onPress: () => router.back(),
+      });
     } catch {
-      Alert.alert('Error', 'Failed to submit the report. Please try again.');
+      openDialog('Error', 'Failed to submit the report. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -154,6 +166,13 @@ export default function BugReportScreen() {
           }
         </TouchableOpacity>
       </ScrollView>
+      <AppDialog
+        visible={dialog.visible}
+        title={dialog.title}
+        message={dialog.message}
+        primaryAction={dialog.primaryAction}
+        onRequestClose={() => setDialog((prev) => ({ ...prev, visible: false }))}
+      />
     </SafeAreaView>
   );
 }

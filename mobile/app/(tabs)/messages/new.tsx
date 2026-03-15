@@ -1,10 +1,11 @@
-import { View, Text, TouchableOpacity, FlatList, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useBookings, useCreateConversation } from '@/hooks/api-hooks';
+import { AppDialog, AppDialogAction } from '@/components/common/AppDialog';
 
 export default function NewMessageScreen() {
   const router = useRouter();
@@ -12,6 +13,16 @@ export default function NewMessageScreen() {
   const { data: bookingsData, isLoading } = useBookings();
   const createConversation = useCreateConversation();
   const [creating, setCreating] = useState<string | null>(null);
+  const [dialog, setDialog] = useState<{ visible: boolean; title: string; message: string; primaryAction: AppDialogAction }>({
+    visible: false,
+    title: '',
+    message: '',
+    primaryAction: { label: 'OK' },
+  });
+
+  const openDialog = (title: string, message: string, primaryAction: AppDialogAction = { label: 'OK' }) => {
+    setDialog({ visible: true, title, message, primaryAction });
+  };
 
   const bookings = (bookingsData?.results || []).filter(
     (b: any) => b.status !== 'cancelled'
@@ -20,7 +31,7 @@ export default function NewMessageScreen() {
   const handleStartConversation = async (booking: any) => {
     const propertyId = booking.rental_property || booking.property;
     if (!propertyId) {
-      Alert.alert('Error', 'Property information not available');
+      openDialog('Error', 'Property information not available');
       return;
     }
     try {
@@ -32,7 +43,7 @@ export default function NewMessageScreen() {
         );
       }
     } catch (error: any) {
-      Alert.alert('Error', error?.response?.data?.error || 'Failed to start conversation');
+      openDialog('Error', error?.response?.data?.error || 'Failed to start conversation');
     } finally {
       setCreating(null);
     }
@@ -141,6 +152,13 @@ export default function NewMessageScreen() {
           )}
         />
       )}
+      <AppDialog
+        visible={dialog.visible}
+        title={dialog.title}
+        message={dialog.message}
+        primaryAction={dialog.primaryAction}
+        onRequestClose={() => setDialog((prev) => ({ ...prev, visible: false }))}
+      />
     </SafeAreaView>
   );
 }
