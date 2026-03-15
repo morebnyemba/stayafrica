@@ -10,13 +10,15 @@ interface MapboxLocationPickerProps {
   initialLat?: number;
   initialLng?: number;
   className?: string;
+  mapHeightClass?: string;
 }
 
 export function MapboxLocationPicker({
   onLocationSelect,
   initialLat = -17.8252,
   initialLng = 31.0335,
-  className = ''
+  className = '',
+  mapHeightClass = 'h-96',
 }: MapboxLocationPickerProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
@@ -194,7 +196,7 @@ export function MapboxLocationPicker({
             </div>
           </div>
         )}
-        <div ref={mapContainer} className="w-full h-96" />
+        <div ref={mapContainer} className={`w-full ${mapHeightClass}`} />
       </div>
 
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4 text-xs sm:text-sm text-blue-800">

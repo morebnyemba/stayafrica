@@ -326,26 +326,44 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
       )}
 
       {/* Step Indicator */}
-      <div className="flex flex-col sm:flex-row justify-between gap-2 sm:gap-4">
-        {STEPS.map((step, index) => (
-          <div key={step.id} className="flex-1">
-            <div className={`flex items-center gap-2 mb-1 ${index <= currentStepIndex ? 'opacity-100' : 'opacity-50'}`}>
-              <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-semibold ${index < currentStepIndex ? 'bg-green-500 text-white' :
-                index === currentStepIndex ? 'bg-primary-600 text-white' :
-                  'bg-primary-200 text-primary-900'
-                }`}>
-                {index < currentStepIndex ? '✓' : index + 1}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <p className="text-xs sm:text-sm font-medium text-primary-700">
+            Step {currentStepIndex + 1} of {STEPS.length}
+          </p>
+          <p className="text-xs text-primary-500">{STEPS[currentStepIndex].label}</p>
+        </div>
+
+        <div className="h-1.5 bg-primary-100 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-secondary-600 transition-all duration-300"
+            style={{ width: `${((currentStepIndex + 1) / STEPS.length) * 100}%` }}
+          />
+        </div>
+
+        <div className="flex gap-2 overflow-x-auto pb-1 sm:grid sm:grid-cols-4 sm:gap-3 sm:overflow-visible">
+          {STEPS.map((step, index) => {
+            const active = index === currentStepIndex;
+            const done = index < currentStepIndex;
+            return (
+              <div
+                key={step.id}
+                className={`min-w-[120px] sm:min-w-0 rounded-xl border px-3 py-2 text-xs sm:text-sm transition ${
+                  active
+                    ? 'bg-secondary-600 text-white border-secondary-600'
+                    : done
+                      ? 'bg-green-50 text-green-700 border-green-200'
+                      : 'bg-white text-primary-700 border-primary-200'
+                }`}
+              >
+                <p className="font-semibold truncate">{step.label}</p>
+                <p className={`text-[11px] ${active ? 'text-white/80' : 'text-primary-500'}`}>
+                  {done ? 'Completed' : step.description}
+                </p>
               </div>
-              <div className="hidden sm:block">
-                <p className="text-xs sm:text-sm font-medium text-primary-900">{step.label}</p>
-                <p className="text-xs text-primary-600">{step.description}</p>
-              </div>
-            </div>
-            {index < STEPS.length - 1 && (
-              <div className={`h-0.5 mx-3 sm:mx-4 mt-2 ${index < currentStepIndex ? 'bg-green-500' : 'bg-primary-200'}`} />
-            )}
-          </div>
-        ))}
+            );
+          })}
+        </div>
       </div>
 
       {/* Step Content */}
@@ -527,6 +545,7 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
                 onLocationSelect={handleMapLocationSelect}
                 initialLat={formData.latitude ? parseFloat(formData.latitude) : -17.8252}
                 initialLng={formData.longitude ? parseFloat(formData.longitude) : 31.0335}
+                mapHeightClass="h-[260px] sm:h-[340px] lg:h-[420px]"
               />
             </div>
 
@@ -736,7 +755,8 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
       )}
 
       {/* Navigation Buttons */}
-      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+      <div className="sticky bottom-0 z-20 -mx-4 sm:mx-0 mt-2 bg-white/95 backdrop-blur border-t border-primary-100 px-4 py-3 sm:static sm:bg-transparent sm:border-0 sm:p-0 sm:mt-0">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
         {currentStepIndex > 0 && (
           <Button
             type="button"
@@ -768,6 +788,7 @@ export function PropertyForm({ initialData, isEdit = false, propertyId, onSucces
             {loading ? 'Creating...' : isEdit ? 'Update Property' : 'Create Property'}
           </Button>
         )}
+        </div>
       </div>
     </form>
   );
