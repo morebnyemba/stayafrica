@@ -41,7 +41,9 @@ export function DashboardContent() {
     queryFn: async () => {
       const response = await apiClient.getBookings({});
       return response.data || { results: [], count: 0 };
-    },
+                    ...(!user?.is_identity_verified
+                      ? [{ title: 'Verify ID', icon: ShieldCheck, link: '/profile/verification', color: 'bg-indigo-500' }]
+                      : []),
     enabled: isAuthenticated,
   });
 

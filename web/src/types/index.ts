@@ -12,6 +12,7 @@ export interface User {
   country_of_residence: string;
   username?: string;
   is_verified: boolean;
+  is_identity_verified?: boolean;
   is_active?: boolean;
   is_superuser?: boolean;
   bio?: string;

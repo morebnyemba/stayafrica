@@ -155,7 +155,7 @@ export function HostDashboard() {
 
   const moreLinks = [
     { title: 'Auto-Messaging', icon: Zap, link: '/host/messaging', color: 'bg-violet-500' },
-    ...(!user?.is_verified ? [{ title: 'Verify ID', icon: ShieldCheck, link: '/host/verification', color: 'bg-indigo-500' }] : []),
+    ...(!user?.is_identity_verified ? [{ title: 'Verify ID', icon: ShieldCheck, link: '/host/verification', color: 'bg-indigo-500' }] : []),
     { title: 'Settings', icon: Settings, link: '/host/settings', color: 'bg-primary-500' },
   ];
 
@@ -202,7 +202,7 @@ export function HostDashboard() {
           {activeTab === 'overview' ? (
             <>
               {/* Verification banner */}
-              {!user?.is_verified && (
+              {!user?.is_identity_verified && (
                 <div className="mb-6">
                   <VerificationStatus />
                 </div>

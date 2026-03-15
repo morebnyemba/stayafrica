@@ -13,6 +13,7 @@ interface User {
   role: 'guest' | 'host' | 'admin';
   active_profile: 'guest' | 'host';
   is_verified: boolean;
+  is_identity_verified?: boolean;
 }
 
 interface UpdateProfileData {

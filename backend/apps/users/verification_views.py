@@ -96,7 +96,10 @@ class IdentityVerificationViewSet(viewsets.ModelViewSet):
         if not verification:
             return Response({
                 'has_verification': False,
-                'is_verified': request.user.is_verified
+                # Backward-compatible field for existing clients.
+                'is_verified': request.user.is_identity_verified,
+                'is_identity_verified': request.user.is_identity_verified,
+                'email_verified': request.user.is_verified,
             })
         
         # Check if expired
@@ -105,7 +108,10 @@ class IdentityVerificationViewSet(viewsets.ModelViewSet):
         serializer = IdentityVerificationSerializer(verification, context={'request': request})
         return Response({
             'has_verification': True,
-            'is_verified': request.user.is_verified,
+            # Backward-compatible field for existing clients.
+            'is_verified': request.user.is_identity_verified,
+            'is_identity_verified': request.user.is_identity_verified,
+            'email_verified': request.user.is_verified,
             'verification': serializer.data
         })
     

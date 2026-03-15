@@ -898,6 +898,8 @@ class APIClient {
   async getVerificationStatus(): Promise<{
     has_verification: boolean;
     is_verified: boolean;
+    is_identity_verified?: boolean;
+    email_verified?: boolean;
     status?: string;
     verification?: any;
   }> {

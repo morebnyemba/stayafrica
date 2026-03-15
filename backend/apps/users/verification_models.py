@@ -122,10 +122,6 @@ class IdentityVerification(models.Model):
         # Set expiry to 2 years from now
         self.expires_at = timezone.now() + timezone.timedelta(days=730)
         self.save()
-        
-        # Update user's verified status
-        self.user.is_verified = True
-        self.user.save(update_fields=['is_verified'])
     
     def reject(self, admin_user, reason, notes=''):
         """Reject verification"""
@@ -147,9 +143,6 @@ class IdentityVerification(models.Model):
         if self.is_expired():
             self.status = 'expired'
             self.save(update_fields=['status'])
-            # Update user's verified status
-            self.user.is_verified = False
-            self.user.save(update_fields=['is_verified'])
             return True
         return False
 

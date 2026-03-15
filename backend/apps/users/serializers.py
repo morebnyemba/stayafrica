@@ -5,7 +5,7 @@ from django.core.validators import RegexValidator
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 class UserSerializer(serializers.ModelSerializer):
-    is_identity_verified = serializers.BooleanField(source='is_identity_verified', read_only=True)
+    is_identity_verified = serializers.SerializerMethodField()
     password = serializers.CharField(
         write_only=True,
         min_length=8,
@@ -97,8 +97,11 @@ class UserSerializer(serializers.ModelSerializer):
         user.save()
         return user
 
+    def get_is_identity_verified(self, obj):
+        return obj.is_identity_verified
+
 class UserProfileSerializer(serializers.ModelSerializer):
-    is_identity_verified = serializers.BooleanField(source='is_identity_verified', read_only=True)
+    is_identity_verified = serializers.SerializerMethodField()
     phone_number = serializers.CharField(
         required=False, 
         allow_blank=True,
@@ -118,6 +121,9 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'is_online', 'last_seen'
         ]
         read_only_fields = ['id', 'email', 'username', 'role', 'active_profile', 'is_verified', 'is_staff', 'is_online', 'last_seen']
+
+    def get_is_identity_verified(self, obj):
+        return obj.is_identity_verified
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     username_field = 'email'
