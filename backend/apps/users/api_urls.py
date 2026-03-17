@@ -1,5 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
+from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.views import TokenRefreshView
 from apps.users.views import (
     UserViewSet,
@@ -27,17 +28,26 @@ urlpatterns = [
     path('auth/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path(
         'auth/password-reset/',
-        UserViewSet.as_view({'post': 'request_password_reset'}),
+        UserViewSet.as_view(
+            {'post': 'request_password_reset'},
+            permission_classes=[AllowAny],
+        ),
         name='auth_password_reset'
     ),
     path(
         'auth/password-reset/confirm/',
-        UserViewSet.as_view({'post': 'confirm_password_reset'}),
+        UserViewSet.as_view(
+            {'post': 'confirm_password_reset'},
+            permission_classes=[AllowAny],
+        ),
         name='auth_password_reset_confirm'
     ),
     path(
         'auth/verify-email/',
-        UserViewSet.as_view({'post': 'verify_email'}),
+        UserViewSet.as_view(
+            {'post': 'verify_email'},
+            permission_classes=[AllowAny],
+        ),
         name='auth_verify_email'
     ),
 ]

@@ -25,8 +25,8 @@ def _is_console_email_backend(connection=None):
     return 'console' in str(backend_path).lower()
 
 
-def _log_console_email_preview(subject, recipient_list, text_content=None, context=None):
-    """Print email content to app logs in console-email mode for easier local verification."""
+def _log_console_email_preview(subject, recipient_list, text_content=None, html_content=None, context=None):
+    """Print full email content to app logs in console-email mode for local verification."""
     try:
         lines = [
             '=== EMAIL PREVIEW (console backend) ===',
@@ -43,11 +43,12 @@ def _log_console_email_preview(subject, recipient_list, text_content=None, conte
                 lines.append(f'Password Reset URL: {reset_url}')
 
         if text_content:
-            preview = text_content.strip()
-            if len(preview) > 1200:
-                preview = preview[:1200] + '... [truncated]'
-            lines.append('Body:')
-            lines.append(preview)
+            lines.append('Text Body:')
+            lines.append(text_content.strip())
+
+        if html_content:
+            lines.append('HTML Body:')
+            lines.append(html_content.strip())
 
         lines.append('=== END EMAIL PREVIEW ===')
         logger.info('\n'.join(lines))
@@ -117,7 +118,12 @@ def send_email_async(self, subject, message, recipient_list, html_message=None):
                 send_mail(subject, message, from_email, recipient_list)
 
         if _is_console_email_backend(connection):
-            _log_console_email_preview(subject, recipient_list, text_content=message)
+            _log_console_email_preview(
+                subject,
+                recipient_list,
+                text_content=message,
+                html_content=html_message,
+            )
         
         logger.info(f"Email sent successfully to {recipient_list}")
         return True
@@ -150,7 +156,13 @@ def send_templated_email(self, template_name, subject, recipient_list, context):
         msg.send()
 
         if _is_console_email_backend(connection):
-            _log_console_email_preview(subject, recipient_list, text_content=text_content, context=full_context)
+            _log_console_email_preview(
+                subject,
+                recipient_list,
+                text_content=text_content,
+                html_content=html_content,
+                context=full_context,
+            )
         
         logger.info(f"Templated email '{template_name}' sent to {recipient_list}")
         return True
