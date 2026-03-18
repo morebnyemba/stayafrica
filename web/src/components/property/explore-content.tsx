@@ -279,6 +279,9 @@ export function ExploreContent() {
                 ))}
               </div>
             )}
+            <div className="mb-4 mt-2">
+              <h3 className="text-xl sm:text-2xl font-semibold text-primary-900">All Properties</h3>
+            </div>
             {/* Properties Grid */}
             {isLoading ? (
               <PropertyListSkeleton count={9} />
