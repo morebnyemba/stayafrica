@@ -36,8 +36,8 @@ export function SearchFilters({ onFilterChange, onSearch }: SearchFiltersProps) 
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState<FilterOptions>({
-    priceMin: 0,
-    priceMax: 1000,
+    priceMin: undefined,
+    priceMax: undefined,
     amenities: [],
     propertyType: '',
     minRating: 0,
@@ -84,8 +84,8 @@ export function SearchFilters({ onFilterChange, onSearch }: SearchFiltersProps) 
   const handleClearFilters = () => {
     setSearchQuery('');
     setFilters({
-      priceMin: 0,
-      priceMax: 1000,
+      priceMin: undefined,
+      priceMax: undefined,
       amenities: [],
       propertyType: '',
       minRating: 0,
@@ -94,8 +94,8 @@ export function SearchFilters({ onFilterChange, onSearch }: SearchFiltersProps) 
     });
     if (onFilterChange) {
       onFilterChange({
-        priceMin: 0,
-        priceMax: 1000,
+        priceMin: undefined,
+        priceMax: undefined,
         amenities: [],
         propertyType: '',
         minRating: 0,

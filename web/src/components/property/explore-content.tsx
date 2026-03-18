@@ -21,8 +21,8 @@ export function ExploreContent() {
   // Initialize filters from URL parameters
   const [filters, setFilters] = useState<FilterOptions>(() => {
     return {
-      priceMin: 0,
-      priceMax: 1000,
+      priceMin: undefined,
+      priceMax: undefined,
       amenities: [],
       propertyType: searchParams.get('type') || '',
       minRating: 0,
@@ -32,7 +32,7 @@ export function ExploreContent() {
     };
   });
   
-  const [searchQuery, setSearchQuery] = useState(searchParams.get('city') || '');
+  const [searchQuery, setSearchQuery] = useState('');
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [gettingLocation, setGettingLocation] = useState(false);
   const [isFlexible, setIsFlexible] = useState(false);
@@ -49,13 +49,24 @@ export function ExploreContent() {
   const { data: propertiesData, isLoading, error } = useQuery({
     queryKey: ['properties', filters, searchQuery, userLocation],
     queryFn: async () => {
-      const params: any = {
-        min_price: filters.priceMin,
-        max_price: filters.priceMax,
-        property_type: filters.propertyType,
-        min_rating: filters.minRating,
-        guests: filters.guests,
-      };
+      const params: any = {};
+
+      // Only apply filters when explicitly set by user.
+      if (typeof filters.priceMin === 'number' && filters.priceMin > 0) {
+        params.min_price = filters.priceMin;
+      }
+      if (typeof filters.priceMax === 'number' && filters.priceMax > 0) {
+        params.max_price = filters.priceMax;
+      }
+      if (filters.propertyType) {
+        params.property_type = filters.propertyType;
+      }
+      if (typeof filters.minRating === 'number' && filters.minRating > 0) {
+        params.min_rating = filters.minRating;
+      }
+      if (typeof filters.guests === 'number' && filters.guests > 1) {
+        params.guests = filters.guests;
+      }
 
       // Add search query
       if (searchQuery) {
