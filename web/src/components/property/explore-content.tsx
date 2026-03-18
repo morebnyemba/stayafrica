@@ -60,17 +60,6 @@ export function ExploreContent() {
     }
   }, []);
 
-  // Fetch featured properties (always shown, independent of filters)
-  const { data: featuredData } = useQuery({
-    queryKey: ['properties', 'featured'],
-    queryFn: async () => {
-      const response = await apiClient.getProperties({ featured: true });
-      return response.data;
-    },
-  });
-
-  const featuredProperties = featuredData?.results || [];
-
   // Fetch search results based on current filters
   const { data: propertiesData, isLoading, error } = useQuery({
     queryKey: ['properties', filters, searchQuery, userLocation],
@@ -115,16 +104,30 @@ export function ExploreContent() {
 
   const properties = propertiesData?.results || [];
 
-  // Always show featured section with curated featured properties (like Airbnb)
-  const featuredSections = useMemo(() => {
-    if (featuredProperties.length === 0) return [];
-    return [{
-      id: 'featured',
-      title: '✨ Featured Stays',
-      city: 'Featured',
-      data: featuredProperties.slice(0, 12),
-    }];
-  }, [featuredProperties]);
+    // Group properties by city instead of using featured
+    const featuredSections = useMemo(() => {
+      const cityGroups: Record<string, any[]> = {};
+    
+      properties.forEach((property: any) => {
+        const city = property.city?.trim();
+        if (!city) return;
+        if (!cityGroups[city]) {
+          cityGroups[city] = [];
+        }
+        cityGroups[city].push(property);
+      });
+
+      // Sort cities by number of properties (most popular first)
+      return Object.entries(cityGroups)
+        .sort((a, b) => b[1].length - a[1].length)
+        .slice(0, 5) // Top 5 cities
+        .map(([city, props]) => ({
+          id: city,
+          title: `Popular stays in ${city}`,
+          city,
+          data: props.slice(0, 10),
+        }));
+    }, [properties]);
 
   const handleUseMyLocation = () => {
     if (!navigator.geolocation) {
