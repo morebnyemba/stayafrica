@@ -307,16 +307,17 @@ def send_payment_receipt_email(payment_id):
 
 
 @shared_task
-def send_password_reset_email(user_id, reset_token):
+def send_password_reset_email(user_id, reset_token, frontend_url=None):
     """Send password reset email using HTML template"""
     from apps.users.models import User
     
     try:
         user = User.objects.get(id=user_id)
+        base_frontend_url = (frontend_url or settings.FRONTEND_URL).rstrip('/')
         
         context = {
             'user_name': user.first_name or user.email.split('@')[0],
-            'reset_url': f"{settings.FRONTEND_URL}/reset-password/{reset_token}",
+            'reset_url': f"{base_frontend_url}/reset-password/{reset_token}",
         }
 
         send_templated_email(

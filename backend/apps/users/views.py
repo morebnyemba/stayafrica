@@ -19,6 +19,7 @@ from apps.users.serializers import (
 from utils.decorators import api_ratelimit, log_action
 from utils.helpers import sanitize_input
 from services.audit_logger import AuditLoggerService
+from urllib.parse import urlparse
 import logging
 
 logger = logging.getLogger(__name__)
@@ -242,16 +243,29 @@ class UserViewSet(viewsets.ModelViewSet):
             cache_key = f'reset_token_{reset_token}'
             cache.set(cache_key, user.id, timeout=3600)
             cached_user_id = cache.get(cache_key)
+
+            # Prefer the request origin so reset links stay in the same environment
+            # (dev/staging/prod) that generated the token.
+            frontend_url = None
+            origin = request.headers.get('Origin')
+            referer = request.headers.get('Referer')
+            if origin:
+                frontend_url = origin.rstrip('/')
+            elif referer:
+                parsed = urlparse(referer)
+                if parsed.scheme and parsed.netloc:
+                    frontend_url = f"{parsed.scheme}://{parsed.netloc}"
             
             from tasks.email_tasks import send_password_reset_email
             # Send password reset inline so it works even when Celery workers are offline.
-            send_password_reset_email(user.id, reset_token)
+            send_password_reset_email(user.id, reset_token, frontend_url=frontend_url)
             
             logger.info(
-                "Password reset requested for %s; token stored=%s; cache_key=%s",
+                "Password reset requested for %s; token stored=%s; cache_key=%s; frontend_url=%s",
                 email,
                 cached_user_id == user.id,
                 cache_key,
+                frontend_url,
             )
         except User.DoesNotExist:
             # Don't reveal if email exists or not (security best practice)
