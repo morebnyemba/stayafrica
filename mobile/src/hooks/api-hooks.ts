@@ -28,6 +28,16 @@ export interface PropertyFilters {
   ordering?: string;
   page?: number;
   page_size?: number;
+  min_price?: number;
+  max_price?: number;
+  min_rating?: number;
+  guests?: number;
+  amenities?: string;
+  check_in?: string;
+  check_out?: string;
+  latitude?: number;
+  longitude?: number;
+  radius_km?: number;
 }
 
 export function useProperties(filters?: PropertyFilters) {

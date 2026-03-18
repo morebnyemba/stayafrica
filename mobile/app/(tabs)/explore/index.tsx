@@ -29,6 +29,7 @@ import { PropertyCardGridSkeletonRow } from '@/components/common/Skeletons';
 import { EmptyState } from '@/components/common/EmptyState';
 import { Sidebar } from '@/components/common/Sidebar';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { FilterSheet, type FilterSheetState } from '@/components/property/FilterSheet';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const GRID_GAP = 12;
@@ -62,6 +63,8 @@ export default function ExploreScreen() {
   const [showSortSheet, setShowSortSheet] = useState(false);
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+    const [showFilterSheet, setShowFilterSheet] = useState(false);
+    const [advancedFilters, setAdvancedFilters] = useState<FilterSheetState>({ amenities: [] });
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const flatListRef = useRef<FlatList>(null);
 
@@ -90,8 +93,26 @@ export default function ExploreScreen() {
     if (cat?.type) f.property_type = cat.type;
     const sort = SORT_OPTIONS.find((s) => s.id === selectedSort);
     if (sort?.value) f.ordering = sort.value;
+     // Add advanced filters
+     if (typeof advancedFilters.priceMin === 'number' && advancedFilters.priceMin > 0) {
+       f.min_price = advancedFilters.priceMin;
+     }
+     if (typeof advancedFilters.priceMax === 'number' && advancedFilters.priceMax > 0) {
+       f.max_price = advancedFilters.priceMax;
+     }
+     if (typeof advancedFilters.minRating === 'number' && advancedFilters.minRating > 0) {
+       f.min_rating = advancedFilters.minRating;
+     }
+     if (typeof advancedFilters.guests === 'number' && advancedFilters.guests > 0) {
+       f.guests = advancedFilters.guests;
+     }
+     if (advancedFilters.amenities && advancedFilters.amenities.length > 0) {
+       f.amenities = advancedFilters.amenities.join(',');
+     }
+     if (advancedFilters.checkIn) f.check_in = advancedFilters.checkIn;
+     if (advancedFilters.checkOut) f.check_out = advancedFilters.checkOut;
     return f;
-  }, [debouncedSearch, selectedCategory, selectedSort]);
+    }, [debouncedSearch, selectedCategory, selectedSort, advancedFilters]);
 
   const { data: propertiesData, isLoading, refetch, isRefetching } = useProperties(filters);
   const properties = propertiesData?.results || [];
@@ -114,6 +135,7 @@ export default function ExploreScreen() {
     clearSearch();
     setSelectedCategory('all');
     setSelectedSort('default');
+     setAdvancedFilters({ amenities: [] });
   }, [clearSearch]);
 
     // Group properties by city
@@ -158,7 +180,10 @@ export default function ExploreScreen() {
   };
 
   const activeSort = SORT_OPTIONS.find((s) => s.id === selectedSort);
-  const hasActiveFilters = debouncedSearch || selectedCategory !== 'all' || selectedSort !== 'default';
+    const hasAdvancedFilters = advancedFilters.priceMin || advancedFilters.priceMax || 
+      advancedFilters.minRating || advancedFilters.guests || advancedFilters.amenities.length > 0 ||
+      advancedFilters.checkIn || advancedFilters.checkOut;
+    const hasActiveFilters = debouncedSearch || selectedCategory !== 'all' || selectedSort !== 'default' || hasAdvancedFilters;
 
   return (
     <SafeAreaView className="flex-1 bg-sand-50">
@@ -212,6 +237,25 @@ export default function ExploreScreen() {
                 color={selectedSort !== 'default' ? '#D9B168' : '#fff'}
               />
             </TouchableOpacity>
+           
+              <TouchableOpacity
+                onPress={() => setShowFilterSheet(true)}
+                accessibilityRole="button"
+                accessibilityLabel="Open filters"
+                accessibilityHint="Opens advanced filter options"
+                className="w-10 h-10 rounded-xl items-center justify-center ml-2"
+                style={{
+                  backgroundColor: hasAdvancedFilters
+                    ? 'rgba(217, 177, 104, 0.25)'
+                    : 'rgba(255, 255, 255, 0.12)',
+                }}
+              >
+                <Ionicons
+                  name="funnel"
+                  size={20}
+                  color={hasAdvancedFilters ? '#D9B168' : '#fff'}
+                />
+              </TouchableOpacity>
           </View>
 
           {/* Search bar */}
@@ -524,6 +568,14 @@ export default function ExploreScreen() {
           />
         )}
       </View>
+
+        {/* ── Advanced Filters Sheet ── */}
+        <FilterSheet
+          visible={showFilterSheet}
+          onClose={() => setShowFilterSheet(false)}
+          filters={advancedFilters}
+          onFiltersChange={setAdvancedFilters}
+        />
     </SafeAreaView>
   );
 }
