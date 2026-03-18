@@ -624,10 +624,19 @@ LOGGING = {
 # Using Redis for both development and production
 REDIS_URL = os.getenv('REDIS_URL', 'redis://localhost:6379')
 
+# If REDIS_URL already includes a DB suffix (e.g. redis://host:6379/0),
+# strip it before appending cache DB indexes to avoid invalid URLs like /0/1.
+_redis_url_clean = REDIS_URL.rstrip('/')
+_redis_last_segment = _redis_url_clean.rsplit('/', 1)[-1]
+if _redis_last_segment.isdigit():
+    REDIS_CACHE_BASE_URL = _redis_url_clean.rsplit('/', 1)[0]
+else:
+    REDIS_CACHE_BASE_URL = _redis_url_clean
+
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': f'{REDIS_URL}/1',  # DB 1 for general cache
+        'LOCATION': f'{REDIS_CACHE_BASE_URL}/1',  # DB 1 for general cache
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
             'CONNECTION_POOL_KWARGS': {'max_connections': 50},
@@ -640,7 +649,7 @@ CACHES = {
     # Separate cache for sessions (faster, no compression)
     'session': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': f'{REDIS_URL}/2',  # DB 2 for sessions
+        'LOCATION': f'{REDIS_CACHE_BASE_URL}/2',  # DB 2 for sessions
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
             'CONNECTION_POOL_KWARGS': {'max_connections': 50},
@@ -651,7 +660,7 @@ CACHES = {
     # Cache for rate limiting
     'ratelimit': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': f'{REDIS_URL}/3',  # DB 3 for rate limits
+        'LOCATION': f'{REDIS_CACHE_BASE_URL}/3',  # DB 3 for rate limits
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
         },
