@@ -239,13 +239,20 @@ class UserViewSet(viewsets.ModelViewSet):
             
             # Store reset token in Redis with 1-hour expiry
             from django.core.cache import cache
-            cache.set(f'reset_token_{reset_token}', user.id, timeout=3600)
+            cache_key = f'reset_token_{reset_token}'
+            cache.set(cache_key, user.id, timeout=3600)
+            cached_user_id = cache.get(cache_key)
             
             from tasks.email_tasks import send_password_reset_email
             # Send password reset inline so it works even when Celery workers are offline.
             send_password_reset_email(user.id, reset_token)
             
-            logger.info(f"Password reset requested for {email}")
+            logger.info(
+                "Password reset requested for %s; token stored=%s; cache_key=%s",
+                email,
+                cached_user_id == user.id,
+                cache_key,
+            )
         except User.DoesNotExist:
             # Don't reveal if email exists or not (security best practice)
             logger.warning(f"Password reset requested for non-existent email: {email}")
@@ -278,7 +285,19 @@ class UserViewSet(viewsets.ModelViewSet):
         cache_key = f'reset_token_{token}'
         user_id = cache.get(cache_key)
 
+        logger.info(
+            "Password reset confirmation attempt; cache_hit=%s; cache_key=%s; token_prefix=%s",
+            bool(user_id),
+            cache_key,
+            token[:8],
+        )
+
         if not user_id:
+            logger.warning(
+                "Password reset token not found or expired; cache_key=%s; token_prefix=%s",
+                cache_key,
+                token[:8],
+            )
             return Response(
                 {'error': 'Password reset link has expired or is invalid.'},
                 status=status.HTTP_400_BAD_REQUEST
