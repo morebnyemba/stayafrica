@@ -23,7 +23,7 @@ import Animated, {
   useAnimatedStyle,
   withTiming,
 } from 'react-native-reanimated';
-import { useProperties, type PropertyFilters } from '@/hooks/api-hooks';
+import { useProperties, type PropertyFilters, useFeaturedProperties } from '@/hooks/api-hooks';
 import { PropertyCard } from '@/components/property/PropertyCard';
 import { PropertyCardGridSkeletonRow } from '@/components/common/Skeletons';
 import { EmptyState } from '@/components/common/EmptyState';
@@ -96,6 +96,10 @@ export default function ExploreScreen() {
   const { data: propertiesData, isLoading, refetch, isRefetching } = useProperties(filters);
   const properties = propertiesData?.results || [];
 
+  // Fetch featured properties separately (always visible, regardless of filters)
+  const { data: featuredData, isLoading: featuredLoading } = useFeaturedProperties();
+  const featuredProperties = featuredData?.results || [];
+
   const handleSearchChange = useCallback((text: string) => {
     setSearchInput(text);
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -116,9 +120,22 @@ export default function ExploreScreen() {
     setSelectedSort('default');
   }, [clearSearch]);
 
-  // Featured sections (top 2 cities) — only when no active filters
+  // Featured sections: always show featured properties (like Airbnb)
+  // Only hide when there's an active search (user is looking for something specific)
   const featuredSections = useMemo(() => {
-    if (debouncedSearch || selectedCategory !== 'all' || selectedSort !== 'default') return [];
+    if (debouncedSearch || selectedSort !== 'default') return [];
+    
+    // If we have featured properties, show them
+    if (featuredProperties.length > 0) {
+      return [{
+        id: 'featured-stays',
+        title: '✨ Featured Stays',
+        city: 'Featured',
+        data: featuredProperties.slice(0, 8),
+      }];
+    }
+    
+    // Fallback: show top cities from current results only when no search
     const counts = properties.reduce<Record<string, number>>((acc, property: any) => {
       const city = (property.location?.city || property.city || '').trim();
       if (!city) return acc;
@@ -128,7 +145,7 @@ export default function ExploreScreen() {
 
     return Object.entries(counts)
       .sort((a, b) => b[1] - a[1])
-      .slice(0, 2)
+      .slice(0, 1)
       .map(([city]) => ({
         id: city,
         title: `Popular in ${city}`,
@@ -137,7 +154,7 @@ export default function ExploreScreen() {
           .filter((p: any) => (p.location?.city || p.city) === city)
           .slice(0, 8),
       }));
-  }, [properties, debouncedSearch, selectedCategory, selectedSort]);
+  }, [featuredProperties, properties, debouncedSearch, selectedSort]);
 
   const featuredPropertyIds = useMemo(
     () => new Set(featuredSections.flatMap((s) => s.data.map((p: any) => p.id))),

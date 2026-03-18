@@ -41,6 +41,14 @@ export function useProperties(filters?: PropertyFilters) {
   });
 }
 
+export function useFeaturedProperties() {
+  return useQuery({
+    queryKey: ['properties', 'featured'],
+    queryFn: () => apiClient.getProperties({ ordering: '-booking_count', page_size: 12 }),
+    staleTime: 60 * 60 * 1000, // Cache for 1 hour
+  });
+}
+
 export function useNearbyProperties(latitude: number, longitude: number, radius: number) {
   return useQuery({
     queryKey: ['properties', 'nearby', latitude, longitude, radius],

@@ -60,6 +60,18 @@ export function ExploreContent() {
     }
   }, []);
 
+  // Fetch featured properties (always shown, independent of filters)
+  const { data: featuredData, isLoading: featuredLoading } = useQuery({
+    queryKey: ['properties', 'featured'],
+    queryFn: async () => {
+      const response = await apiClient.getProperties({ featured: true });
+      return response.data;
+    },
+  });
+
+  const featuredProperties = featuredData?.results || [];
+
+  // Fetch search results based on current filters
   const { data: propertiesData, isLoading, error } = useQuery({
     queryKey: ['properties', filters, searchQuery, userLocation],
     queryFn: async () => {
@@ -103,26 +115,16 @@ export function ExploreContent() {
 
   const properties = propertiesData?.results || [];
 
+  // Always show featured section with curated featured properties (like Airbnb)
   const featuredSections = useMemo(() => {
-    const counts = (properties as any[]).reduce<Record<string, number>>((acc, property: any) => {
-      const city = property.city?.trim();
-      if (!city) return acc;
-      acc[city] = (acc[city] || 0) + 1;
-      return acc;
-    }, {});
-
-    const topCities = Object.entries(counts)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 3)
-      .map(([city]) => city);
-
-    return topCities.map((city) => ({
-      id: city,
-      title: `Popular homes in ${city}`,
-      city,
-      data: properties.filter((property: any) => property.city === city).slice(0, 10),
-    }));
-  }, [properties]);
+    if (featuredProperties.length === 0) return [];
+    return [{
+      id: 'featured',
+      title: '✨ Featured Stays',
+      city: 'Featured',
+      data: featuredProperties.slice(0, 12),
+    }];
+  }, [featuredProperties]);
 
   const handleUseMyLocation = () => {
     if (!navigator.geolocation) {
