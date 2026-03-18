@@ -7,7 +7,6 @@ from apps.users.throttles import LoginRateThrottle, AnonLoginRateThrottle
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
-from django.conf import settings
 from django.db import transaction
 from apps.users.models import User, UserPreference, UserPropertyInteraction
 from apps.users.serializers import (
@@ -243,11 +242,8 @@ class UserViewSet(viewsets.ModelViewSet):
             cache.set(f'reset_token_{reset_token}', user.id, timeout=3600)
             
             from tasks.email_tasks import send_password_reset_email
-            # In console-email mode, send inline so content is visible in backend logs.
-            if 'console.EmailBackend' in getattr(settings, 'EMAIL_BACKEND', ''):
-                send_password_reset_email(user.id, reset_token)
-            else:
-                send_password_reset_email.delay(user.id, reset_token)
+            # Send password reset inline so it works even when Celery workers are offline.
+            send_password_reset_email(user.id, reset_token)
             
             logger.info(f"Password reset requested for {email}")
         except User.DoesNotExist:
