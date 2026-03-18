@@ -39,25 +39,10 @@ export function ExploreContent() {
   const [flexibilityType, setFlexibilityType] = useState<FlexibilityType>('exact');
   const [flexibleDays, setFlexibleDays] = useState<number | undefined>(3);
 
-  // Get user's current location
+  // Do not auto-apply geolocation on page load.
+  // Nearby filtering should only happen when the user explicitly taps "Use my location".
   useEffect(() => {
-    if (navigator.geolocation) {
-      setGettingLocation(true);
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setUserLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          });
-          setGettingLocation(false);
-        },
-        (error) => {
-          console.error('Geolocation error:', error);
-          setGettingLocation(false);
-        },
-        { enableHighAccuracy: false, timeout: 10000 }
-      );
-    }
+    setGettingLocation(false);
   }, []);
 
   // Fetch search results based on current filters
@@ -109,7 +94,7 @@ export function ExploreContent() {
       const cityGroups: Record<string, any[]> = {};
     
       properties.forEach((property: any) => {
-        const city = property.city?.trim();
+        const city = (property.location?.city || property.city || '').trim();
         if (!city) return;
         if (!cityGroups[city]) {
           cityGroups[city] = [];
