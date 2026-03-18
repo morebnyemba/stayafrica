@@ -7,6 +7,7 @@ from decimal import Decimal
 from django.urls import reverse
 from rest_framework.test import APIClient
 from apps.properties.models import Property, Amenity, SavedProperty
+from apps.reviews.models import Review
 
 
 @pytest.mark.django_db
@@ -142,3 +143,37 @@ class TestPropertyAPI:
             {'price_per_night_min': '40', 'price_per_night_max': '100'},
         )
         assert response.status_code == 200
+
+    def test_filter_by_min_rating(self, guest_user, property_factory, booking_factory):
+        self.client.force_authenticate(user=guest_user)
+
+        highly_rated = property_factory(title='Highly Rated Property')
+        low_rated = property_factory(title='Low Rated Property')
+
+        high_booking = booking_factory(guest=guest_user, rental_property=highly_rated, status='completed')
+        low_booking = booking_factory(guest=guest_user, rental_property=low_rated, status='completed')
+
+        Review.objects.create(
+            booking=high_booking,
+            guest=guest_user,
+            host=highly_rated.host,
+            rating=5,
+            text='Excellent stay',
+        )
+        Review.objects.create(
+            booking=low_booking,
+            guest=guest_user,
+            host=low_rated.host,
+            rating=2,
+            text='Needs improvement',
+        )
+
+        response = self.client.get(reverse('property-list'), {'min_rating': '4'})
+        assert response.status_code == 200
+
+        payload = response.data
+        results = payload.get('results', payload) if isinstance(payload, dict) else payload
+        property_ids = {item['id'] for item in results}
+
+        assert highly_rated.id in property_ids
+        assert low_rated.id not in property_ids

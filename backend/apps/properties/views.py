@@ -275,7 +275,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
         min_rating = params.get('min_rating')
         if min_rating not in (None, ''):
             try:
-                queryset = queryset.filter(reviews__rating__gte=float(min_rating)).distinct()
+                queryset = queryset.filter(bookings__review__rating__gte=float(min_rating)).distinct()
             except (TypeError, ValueError):
                 pass
 
