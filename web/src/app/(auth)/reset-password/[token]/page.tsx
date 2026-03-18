@@ -3,7 +3,15 @@
 import { useMemo, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, CheckCircle, KeyRound, Lock } from 'lucide-react';
+import { ArrowLeft, CheckCircle, KeyRound, Lock, Eye, EyeOff, X } from 'lucide-react';
+
+const PASSWORD_RULES = [
+  { id: 'length',    label: 'At least 8 characters',         test: (p: string) => p.length >= 8 },
+  { id: 'uppercase', label: 'At least one uppercase letter',  test: (p: string) => /[A-Z]/.test(p) },
+  { id: 'lowercase', label: 'At least one lowercase letter',  test: (p: string) => /[a-z]/.test(p) },
+  { id: 'number',    label: 'At least one number',            test: (p: string) => /[0-9]/.test(p) },
+  { id: 'special',   label: 'At least one special character', test: (p: string) => /[^A-Za-z0-9]/.test(p) },
+];
 
 export default function ResetPasswordPage() {
   const params = useParams<{ token?: string | string[] }>();
@@ -11,9 +19,18 @@ export default function ResetPasswordPage() {
   const token = useMemo(() => decodeURIComponent(rawToken), [rawToken]);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
+
+  const ruleResults = useMemo(
+    () => PASSWORD_RULES.map((r) => ({ ...r, passed: r.test(newPassword) })),
+    [newPassword],
+  );
+  const allRulesPassed = ruleResults.every((r) => r.passed);
+  const showRules = newPassword.length > 0;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,6 +43,11 @@ export default function ResetPasswordPage() {
 
     if (!newPassword || !confirmPassword) {
       setError('Please enter and confirm your new password.');
+      return;
+    }
+
+    if (!allRulesPassed) {
+      setError('Your password does not meet all the requirements below.');
       return;
     }
 
@@ -128,6 +150,7 @@ export default function ResetPasswordPage() {
             </div>
           )}
 
+          {/* New Password */}
           <div>
             <label htmlFor="new-password" className="block text-sm font-medium text-primary-700 mb-2">
               New Password
@@ -138,17 +161,40 @@ export default function ResetPasswordPage() {
               </div>
               <input
                 id="new-password"
-                type="password"
+                type={showNew ? 'text' : 'password'}
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                className="block w-full pl-10 pr-3 py-3 border border-primary-300 rounded-xl focus:ring-2 focus:ring-secondary-500 focus:border-transparent bg-sand-50 text-primary-900 placeholder:text-primary-400"
+                className="block w-full pl-10 pr-11 py-3 border border-primary-300 rounded-xl focus:ring-2 focus:ring-secondary-500 focus:border-transparent bg-sand-50 text-primary-900 placeholder:text-primary-400"
                 placeholder="Enter new password"
                 disabled={loading}
                 required
               />
+              <button
+                type="button"
+                onClick={() => setShowNew((v) => !v)}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-primary-400 hover:text-primary-600"
+                aria-label={showNew ? 'Hide password' : 'Show password'}
+              >
+                {showNew ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+              </button>
             </div>
+
+            {/* Requirements checklist */}
+            {showRules && (
+              <ul className="mt-3 space-y-1">
+                {ruleResults.map((r) => (
+                  <li key={r.id} className={`flex items-center gap-2 text-xs ${r.passed ? 'text-green-600' : 'text-primary-400'}`}>
+                    {r.passed
+                      ? <CheckCircle className="h-3.5 w-3.5 shrink-0" />
+                      : <X className="h-3.5 w-3.5 shrink-0" />}
+                    {r.label}
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
 
+          {/* Confirm Password */}
           <div>
             <label htmlFor="confirm-password" className="block text-sm font-medium text-primary-700 mb-2">
               Confirm New Password
@@ -159,20 +205,35 @@ export default function ResetPasswordPage() {
               </div>
               <input
                 id="confirm-password"
-                type="password"
+                type={showConfirm ? 'text' : 'password'}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="block w-full pl-10 pr-3 py-3 border border-primary-300 rounded-xl focus:ring-2 focus:ring-secondary-500 focus:border-transparent bg-sand-50 text-primary-900 placeholder:text-primary-400"
+                className={`block w-full pl-10 pr-11 py-3 border rounded-xl focus:ring-2 focus:ring-secondary-500 focus:border-transparent bg-sand-50 text-primary-900 placeholder:text-primary-400 ${
+                  confirmPassword && confirmPassword !== newPassword
+                    ? 'border-red-400'
+                    : 'border-primary-300'
+                }`}
                 placeholder="Confirm new password"
                 disabled={loading}
                 required
               />
+              <button
+                type="button"
+                onClick={() => setShowConfirm((v) => !v)}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-primary-400 hover:text-primary-600"
+                aria-label={showConfirm ? 'Hide password' : 'Show password'}
+              >
+                {showConfirm ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+              </button>
             </div>
+            {confirmPassword && confirmPassword !== newPassword && (
+              <p className="mt-1 text-xs text-red-500">Passwords do not match.</p>
+            )}
           </div>
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || !allRulesPassed || newPassword !== confirmPassword}
             className="w-full bg-secondary-600 hover:bg-secondary-700 disabled:bg-secondary-400 text-white font-semibold py-3 px-6 rounded-xl transition-colors"
           >
             {loading ? 'Resetting Password...' : 'Reset Password'}
