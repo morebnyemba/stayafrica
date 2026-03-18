@@ -318,13 +318,21 @@ def send_password_reset_email(user_id, reset_token):
             'user_name': user.first_name or user.email.split('@')[0],
             'reset_url': f"{settings.FRONTEND_URL}/reset-password/{reset_token}",
         }
-        
-        send_templated_email.delay(
-            'password_reset',
-            'Reset your StayAfrica password',
-            [user.email],
-            context
-        )
+
+        if _is_console_email_backend():
+            send_templated_email(
+                'password_reset',
+                'Reset your StayAfrica password',
+                [user.email],
+                context
+            )
+        else:
+            send_templated_email.delay(
+                'password_reset',
+                'Reset your StayAfrica password',
+                [user.email],
+                context
+            )
         
         logger.info(f"Password reset email queued for {user.email}")
     except User.DoesNotExist:

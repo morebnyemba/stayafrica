@@ -22,10 +22,13 @@ export interface FilterOptions {
 }
 
 const PROPERTY_TYPES = [
-  'Entire Place',
-  'Private Room',
-  'Shared Room',
-  'Hotel Room',
+  'lodge',
+  'cottage',
+  'room',
+  'apartment',
+  'house',
+  'villa',
+  'cosy_room',
 ];
 
 export function SearchFilters({ onFilterChange, onSearch }: SearchFiltersProps) {
@@ -192,7 +195,7 @@ export function SearchFilters({ onFilterChange, onSearch }: SearchFiltersProps) 
               <option value="">All types</option>
               {PROPERTY_TYPES.map((type) => (
                 <option key={type} value={type}>
-                  {type}
+                  {type.replace(/_/g, ' ').replace(/\b\w/g, (ch) => ch.toUpperCase())}
                 </option>
               ))}
             </select>

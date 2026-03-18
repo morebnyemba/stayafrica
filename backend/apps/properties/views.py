@@ -232,6 +232,86 @@ class PropertyViewSet(viewsets.ModelViewSet):
 
         # List and other actions: everyone sees active properties
         return Property.objects.filter(status='active')
+
+    def filter_queryset(self, queryset):
+        """
+        Apply DRF filtering first, then custom Explore filters not covered by
+        default filterset fields.
+        """
+        queryset = super().filter_queryset(queryset)
+        params = self.request.query_params
+
+        # Price range filters
+        min_price = params.get('min_price')
+        if min_price not in (None, ''):
+            try:
+                queryset = queryset.filter(price_per_night__gte=float(min_price))
+            except (TypeError, ValueError):
+                pass
+
+        max_price = params.get('max_price')
+        if max_price not in (None, ''):
+            try:
+                queryset = queryset.filter(price_per_night__lte=float(max_price))
+            except (TypeError, ValueError):
+                pass
+
+        # Capacity and bedroom filters
+        guests = params.get('guests')
+        if guests not in (None, ''):
+            try:
+                queryset = queryset.filter(max_guests__gte=int(guests))
+            except (TypeError, ValueError):
+                pass
+
+        bedrooms = params.get('bedrooms')
+        if bedrooms not in (None, ''):
+            try:
+                queryset = queryset.filter(bedrooms__gte=int(bedrooms))
+            except (TypeError, ValueError):
+                pass
+
+        # Rating filter (via related reviews)
+        min_rating = params.get('min_rating')
+        if min_rating not in (None, ''):
+            try:
+                queryset = queryset.filter(reviews__rating__gte=float(min_rating)).distinct()
+            except (TypeError, ValueError):
+                pass
+
+        # Amenities filter supports comma-separated amenity IDs and/or names
+        amenities_raw = params.get('amenities')
+        if amenities_raw:
+            amenity_tokens = [token.strip() for token in amenities_raw.split(',') if token.strip()]
+            amenity_ids = [token for token in amenity_tokens if token.isdigit()]
+            amenity_names = [token for token in amenity_tokens if not token.isdigit()]
+
+            amenity_filter = Q()
+            if amenity_ids:
+                amenity_filter |= Q(amenities__id__in=amenity_ids)
+            if amenity_names:
+                amenity_filter |= Q(amenities__name__in=amenity_names)
+
+            if amenity_filter:
+                queryset = queryset.filter(amenity_filter).distinct()
+
+        # Optional geospatial radius filter from Explore clients
+        lat = params.get('lat', params.get('latitude'))
+        lon = params.get('lon', params.get('longitude'))
+        radius_km = params.get('radius_km', params.get('radius'))
+        if lat not in (None, '') and lon not in (None, ''):
+            try:
+                lat_f = float(lat)
+                lon_f = float(lon)
+                radius_f = float(radius_km) if radius_km not in (None, '') else 10.0
+                user_point = Point(lon_f, lat_f, srid=4326)
+                queryset = queryset.annotate(distance=Distance('location', user_point)).filter(
+                    distance__lte=radius_f * 1000
+                ).order_by('distance')
+            except (TypeError, ValueError):
+                pass
+
+        return queryset
     
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
     def upload_images(self, request, pk=None):

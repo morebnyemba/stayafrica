@@ -40,7 +40,7 @@ const CATEGORIES = [
   { id: 'all', label: 'All', icon: 'apps' as const, type: undefined },
   { id: 'villa', label: 'Villas', icon: 'home' as const, type: 'villa' },
   { id: 'apartment', label: 'Apartments', icon: 'business' as const, type: 'apartment' },
-  { id: 'cabin', label: 'Cabins', icon: 'bed' as const, type: 'cabin' },
+  { id: 'cottage', label: 'Cabins', icon: 'bed' as const, type: 'cottage' },
   { id: 'house', label: 'Houses', icon: 'home-outline' as const, type: 'house' },
   { id: 'lodge', label: 'Lodges', icon: 'leaf' as const, type: 'lodge' },
 ] as const;
