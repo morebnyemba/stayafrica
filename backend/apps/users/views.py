@@ -7,6 +7,8 @@ from apps.users.throttles import LoginRateThrottle, AnonLoginRateThrottle
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
+from django.core import signing
+from django.core.signing import BadSignature, SignatureExpired
 from django.db import transaction
 from apps.users.models import User, UserPreference, UserPropertyInteraction
 from apps.users.serializers import (
@@ -244,6 +246,16 @@ class UserViewSet(viewsets.ModelViewSet):
             cache.set(cache_key, user.id, timeout=3600)
             cached_user_id = cache.get(cache_key)
 
+            # Signed token fallback: survives cross-instance cache inconsistencies.
+            signed_reset_token = signing.dumps(
+                {
+                    't': reset_token,
+                    'u': user.id,
+                    'ph': user.password,
+                },
+                salt='password-reset',
+            )
+
             # Prefer the request origin so reset links stay in the same environment
             # (dev/staging/prod) that generated the token.
             frontend_url = None
@@ -258,14 +270,15 @@ class UserViewSet(viewsets.ModelViewSet):
             
             from tasks.email_tasks import send_password_reset_email
             # Send password reset inline so it works even when Celery workers are offline.
-            send_password_reset_email(user.id, reset_token, frontend_url=frontend_url)
+            send_password_reset_email(user.id, signed_reset_token, frontend_url=frontend_url)
             
             logger.info(
-                "Password reset requested for %s; token stored=%s; cache_key=%s; frontend_url=%s",
+                "Password reset requested for %s; token stored=%s; cache_key=%s; frontend_url=%s; signed_token_issued=%s",
                 email,
                 cached_user_id == user.id,
                 cache_key,
                 frontend_url,
+                True,
             )
         except User.DoesNotExist:
             # Don't reveal if email exists or not (security best practice)
@@ -298,15 +311,55 @@ class UserViewSet(viewsets.ModelViewSet):
         from django.core.cache import cache
         cache_key = f'reset_token_{token}'
         user_id = cache.get(cache_key)
+        used_signed_fallback = False
+        signed_payload = None
+
+        # Try signed token first to recover from cross-instance cache misses.
+        try:
+            signed_payload = signing.loads(token, salt='password-reset', max_age=3600)
+            signed_raw_token = signed_payload.get('t')
+            if signed_raw_token:
+                signed_cache_key = f'reset_token_{signed_raw_token}'
+                signed_cached_user_id = cache.get(signed_cache_key)
+                if signed_cached_user_id:
+                    user_id = signed_cached_user_id
+                    cache_key = signed_cache_key
+        except (BadSignature, SignatureExpired):
+            signed_payload = None
 
         logger.info(
-            "Password reset confirmation attempt; cache_hit=%s; cache_key=%s; token_prefix=%s",
+            "Password reset confirmation attempt; cache_hit=%s; cache_key=%s; token_prefix=%s; signed_payload=%s",
             bool(user_id),
             cache_key,
             token[:8],
+            bool(signed_payload),
         )
 
-        if not user_id:
+        user = None
+        if user_id:
+            try:
+                user = User.objects.get(id=user_id)
+            except User.DoesNotExist:
+                cache.delete(cache_key)
+                return Response(
+                    {'error': 'Invalid password reset request.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        elif signed_payload:
+            # Fallback path: trust signed payload if it still matches current password hash.
+            payload_user_id = signed_payload.get('u')
+            payload_password_hash = signed_payload.get('ph')
+            if payload_user_id and payload_password_hash:
+                try:
+                    user = User.objects.get(id=payload_user_id)
+                    if user.password == payload_password_hash:
+                        used_signed_fallback = True
+                    else:
+                        user = None
+                except User.DoesNotExist:
+                    user = None
+
+        if not user:
             logger.warning(
                 "Password reset token not found or expired; cache_key=%s; token_prefix=%s",
                 cache_key,
@@ -314,15 +367,6 @@ class UserViewSet(viewsets.ModelViewSet):
             )
             return Response(
                 {'error': 'Password reset link has expired or is invalid.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        try:
-            user = User.objects.get(id=user_id)
-        except User.DoesNotExist:
-            cache.delete(cache_key)
-            return Response(
-                {'error': 'Invalid password reset request.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -349,8 +393,14 @@ class UserViewSet(viewsets.ModelViewSet):
 
         # Single-use token: remove immediately after successful reset.
         cache.delete(cache_key)
+        if signed_payload and signed_payload.get('t'):
+            cache.delete(f"reset_token_{signed_payload.get('t')}")
 
-        logger.info(f"Password reset completed for user {user.id}")
+        logger.info(
+            "Password reset completed for user %s; signed_fallback=%s",
+            user.id,
+            used_signed_fallback,
+        )
         return Response({'status': 'Password has been reset successfully'})
     
     @action(detail=False, methods=['post'], permission_classes=[AllowAny])
