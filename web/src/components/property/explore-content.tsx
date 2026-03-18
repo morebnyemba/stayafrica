@@ -61,7 +61,7 @@ export function ExploreContent() {
   }, []);
 
   // Fetch featured properties (always shown, independent of filters)
-  const { data: featuredData, isLoading: featuredLoading } = useQuery({
+  const { data: featuredData } = useQuery({
     queryKey: ['properties', 'featured'],
     queryFn: async () => {
       const response = await apiClient.getProperties({ featured: true });
