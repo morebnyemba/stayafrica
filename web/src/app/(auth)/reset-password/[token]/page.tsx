@@ -1,17 +1,14 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, CheckCircle, KeyRound, Lock } from 'lucide-react';
 
-type ResetPasswordPageProps = {
-  params: {
-    token: string;
-  };
-};
-
-export default function ResetPasswordPage({ params }: ResetPasswordPageProps) {
-  const token = useMemo(() => decodeURIComponent(params.token || ''), [params.token]);
+export default function ResetPasswordPage() {
+  const params = useParams<{ token?: string | string[] }>();
+  const rawToken = Array.isArray(params?.token) ? params.token[0] : (params?.token || '');
+  const token = useMemo(() => decodeURIComponent(rawToken), [rawToken]);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
