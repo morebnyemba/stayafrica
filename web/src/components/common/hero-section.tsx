@@ -53,7 +53,7 @@ export function HeroSection() {
     if (checkIn) params.append('check_in', checkIn);
     if (checkOut) params.append('check_out', checkOut);
     if (guests) params.append('guests', guests);
-    if (selectedType) params.append('type', selectedType);
+    if (selectedType) params.append('type', selectedType.toLowerCase());
 
     router.push(`/explore?${params.toString()}`);
   };

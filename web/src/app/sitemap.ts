@@ -18,7 +18,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Dynamic property pages
   let propertyPages: MetadataRoute.Sitemap = [];
   try {
-    const res = await fetch(`${API_BASE_URL}/api/v1/properties/?status=published&page_size=500`, {
+    const res = await fetch(`${API_BASE_URL}/api/v1/properties/?status=active&per_page=500`, {
       next: { revalidate: 3600 },
     });
     if (res.ok) {
