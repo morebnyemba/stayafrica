@@ -10,6 +10,7 @@ export enum PropertyType {
   LODGE = 'LODGE',
   VILLA = 'VILLA',
   BNB = 'BNB',
+  ROOM = 'ROOM',
   HOSTEL = 'HOSTEL',
   GUESTHOUSE = 'GUESTHOUSE',
   RESORT = 'RESORT',
@@ -76,6 +77,14 @@ export const PROPERTY_TYPES: Record<PropertyType, PropertyTypeConfig> = {
     icon: 'Wind',
     color: 'text-orange-600',
     bgColor: 'bg-orange-50',
+  },
+  [PropertyType.ROOM]: {
+    id: PropertyType.ROOM,
+    label: 'Rooms',
+    description: 'Private rooms and shared spaces',
+    icon: 'Home',
+    color: 'text-amber-600',
+    bgColor: 'bg-amber-50',
   },
   [PropertyType.HOSTEL]: {
     id: PropertyType.HOSTEL,

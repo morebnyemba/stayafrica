@@ -28,6 +28,7 @@ const HERO_BROWSE_TYPES: PropertyType[] = [
   PropertyType.LODGE,
   PropertyType.VILLA,
   PropertyType.COTTAGE,
+  PropertyType.ROOM,
 ];
 
 export function HeroSection() {
