@@ -6,6 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
 import { pricingApi } from '@/services/pricing-api';
 import { useAuth } from '@/store/auth-store';
+import { confirmSwitchToTravelMode, isHostMode, isOwnPropertyBooking } from '@/lib/booking-mode';
 import { useFeeConfiguration, useTaxEstimate, calculateBookingCost } from '@/hooks/use-fees';
 import dynamic from 'next/dynamic';
 const ProtectedRoute = dynamic(() => import('@/components/auth/protected-route').then(m => m.ProtectedRoute), { ssr: false });
@@ -20,7 +21,7 @@ import Link from 'next/link';
 export default function BookingConfirmPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user } = useAuth();
+  const { user, switchProfile } = useAuth();
 
   const propertyId = searchParams.get('propertyId');
   const checkIn = searchParams.get('checkIn');
@@ -128,6 +129,28 @@ export default function BookingConfirmPage() {
       toast.error('Please agree to the terms and conditions');
       return;
     }
+
+    const propertyHostId = property?.host?.id || property?.host_id;
+    if (isOwnPropertyBooking(user?.id, propertyHostId)) {
+      toast.error('You cannot book your own property.');
+      return;
+    }
+
+    if (isHostMode(user)) {
+      try {
+        const switched = await confirmSwitchToTravelMode({
+          switchProfile,
+          propertyTitle: property?.title,
+        });
+        if (!switched) {
+          return;
+        }
+      } catch (error: any) {
+        toast.error(error?.message || 'Failed to switch to travel mode.');
+        return;
+      }
+    }
+
     setIsCreatingBooking(true);
     try {
       const response = await apiClient.createBooking({

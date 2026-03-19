@@ -9,11 +9,12 @@ import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/services/api-client';
 import { useFeeConfiguration, calculateBookingCost } from '@/hooks/api-hooks';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { isHostMode, isOwnPropertyBooking, promptSwitchToTravelMode } from '@/utils/helpers';
 
 export default function BookingConfirmScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, switchProfile } = useAuth();
   const params = useLocalSearchParams();
 
   const propertyId = params.propertyId as string;
@@ -65,6 +66,10 @@ export default function BookingConfirmScreen() {
       Alert.alert('Error', 'Host information not available');
       return;
     }
+    if (isOwnPropertyBooking(user?.id, hostId)) {
+      Alert.alert('Unavailable', 'You cannot contact yourself as the host for your own property.');
+      return;
+    }
     setContactingHost(true);
     try {
       await apiClient.createConversation(String(property.id));
@@ -82,6 +87,30 @@ export default function BookingConfirmScreen() {
   const handleConfirmBooking = async () => {
     if (!agreedToTerms) {
       Alert.alert('Error', 'Please agree to the terms and conditions');
+      return;
+    }
+
+    const propertyHostId = property?.host?.id || property?.host_id;
+    if (isOwnPropertyBooking(user?.id, propertyHostId)) {
+      Alert.alert('Booking Unavailable', 'You cannot book your own property.');
+      return;
+    }
+
+    if (isHostMode(user)) {
+      promptSwitchToTravelMode({
+        propertyTitle: property?.title,
+        onCancel: () => router.back(),
+        onConfirm: async () => {
+          try {
+            await switchProfile('guest');
+          } catch (error: any) {
+            Alert.alert(
+              'Unable to Switch Mode',
+              error?.response?.data?.error || error?.message || 'Failed to switch to travel mode.'
+            );
+          }
+        },
+      });
       return;
     }
 

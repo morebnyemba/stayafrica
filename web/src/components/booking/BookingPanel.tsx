@@ -17,6 +17,7 @@ import { apiClient } from '@/services/api-client';
 import { pricingApi } from '@/services/pricing-api';
 import { useFeeConfiguration, useTaxEstimate, calculateBookingCost } from '@/hooks/use-fees';
 import { useAuth } from '@/store/auth-store';
+import { confirmSwitchToTravelMode, isHostMode, isOwnPropertyBooking } from '@/lib/booking-mode';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
@@ -31,6 +32,8 @@ interface BookingPanelProps {
   country?: string;
   currency?: string;
   cleaningFee?: number;
+  propertyTitle?: string;
+  hostId?: string;
   onBook?: (details: { propertyId: string; checkIn: Date; checkOut: Date }, guests: number) => void;
   isLoading?: boolean;
 }
@@ -46,11 +49,13 @@ export const BookingPanel: React.FC<BookingPanelProps> = ({
   country,
   currency = 'USD',
   cleaningFee = 0,
+  propertyTitle,
+  hostId,
   onBook,
   isLoading = false,
 }) => {
   const router = useRouter();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user, switchProfile } = useAuth();
   const [checkInDate, setCheckInDate] = useState<Date | null>(null);
   const [checkOutDate, setCheckOutDate] = useState<Date | null>(null);
   const [guestCount, setGuestCount] = useState(1);
@@ -142,7 +147,7 @@ export const BookingPanel: React.FC<BookingPanelProps> = ({
   const showMinStayError = hasSelectedDates && !meetsMinStay;
   const hasDateConflict = hasSelectedDates && hasUnavailableDatesInRange(checkInDate!, checkOutDate!);
 
-  const handleBook = () => {
+  const handleBook = async () => {
     if (checkInDate && checkOutDate && meetsMinStay && !hasDateConflict) {
       const confirmUrl = `/booking/confirm?propertyId=${propertyId}&checkIn=${checkIn}&checkOut=${checkOut}&guests=${guestCount}`;
 
@@ -150,6 +155,23 @@ export const BookingPanel: React.FC<BookingPanelProps> = ({
       if (!isAuthenticated) {
         router.push(`/login?redirect=${encodeURIComponent(confirmUrl)}`);
         return;
+      }
+
+      if (isOwnPropertyBooking(user?.id, hostId)) {
+        window.alert('You cannot book your own property.');
+        return;
+      }
+
+      if (isHostMode(user)) {
+        try {
+          const switched = await confirmSwitchToTravelMode({ switchProfile, propertyTitle });
+          if (!switched) {
+            return;
+          }
+        } catch (error: any) {
+          window.alert(error?.message || 'Failed to switch to travel mode.');
+          return;
+        }
       }
 
       if (onBook) {

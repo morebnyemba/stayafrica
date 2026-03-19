@@ -1,9 +1,51 @@
+import { Alert } from 'react-native';
+
+type ProfileModeUser = {
+  id?: string | number | null;
+  role?: string | null;
+  active_profile?: string | null;
+};
+
 // Common utility functions
 export function formatCurrency(amount: number, currency: string = 'USD'): string {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency,
   }).format(amount);
+}
+
+export function isHostMode(user?: ProfileModeUser | null): boolean {
+  return !!user && (user.role === 'host' || user.role === 'admin') && user.active_profile === 'host';
+}
+
+export function isOwnPropertyBooking(userId?: string | number | null, hostId?: string | number | null): boolean {
+  return userId != null && hostId != null && String(userId) === String(hostId);
+}
+
+export function promptSwitchToTravelMode(options: {
+  onConfirm: () => void | Promise<void>;
+  onCancel?: () => void;
+  propertyTitle?: string;
+}) {
+  const propertySuffix = options.propertyTitle ? ` for ${options.propertyTitle}` : '';
+
+  Alert.alert(
+    'Switch to Travel Mode',
+    `You are currently in Hosting mode. Switch to Traveling mode to continue booking${propertySuffix}?`,
+    [
+      {
+        text: 'Cancel',
+        style: 'cancel',
+        onPress: options.onCancel,
+      },
+      {
+        text: 'Switch Mode',
+        onPress: () => {
+          void options.onConfirm();
+        },
+      },
+    ]
+  );
 }
 
 export function formatDate(date: string | Date): string {

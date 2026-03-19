@@ -449,9 +449,16 @@ class APIClient {
   }
 
   async getTotalUnreadCount(): Promise<{ unread_count: number }> {
-    return (
-      await this.client.get('/messaging/conversations/unread_count/')
-    ).data;
+    try {
+      return (
+        await this.client.get('/messaging/conversations/unread_count/')
+      ).data;
+    } catch (error: any) {
+      if (error?.response?.status === 404) {
+        return { unread_count: 0 };
+      }
+      throw error;
+    }
   }
 
   // Reviews

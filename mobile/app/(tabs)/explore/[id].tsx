@@ -31,6 +31,7 @@ import { ContactHostModal } from '@/components/property/ContactHostModal';
 import { useAuth } from '@/context/auth-context';
 import { useState, useCallback, useMemo } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { isHostMode, isOwnPropertyBooking, promptSwitchToTravelMode } from '@/utils/helpers';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -121,7 +122,7 @@ export default function PropertyDetailsScreen() {
   const { data: property, isLoading } = usePropertyById(id as string);
   const { data: nearbyPOIs } = useNearbyPOIs(id as string);
   const { data: reviewsData } = usePropertyReviews(id as string);
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, switchProfile } = useAuth();
   const { mutate: addToWishlist, isPending: isAdding } = useAddToWishlist();
   const { mutate: removeFromWishlist, isPending: isRemoving } = useRemoveFromWishlist();
 
@@ -166,6 +167,39 @@ export default function PropertyDetailsScreen() {
   const displayedReviews = showAllReviews ? reviews : reviews.slice(0, 3);
 
   // ── Handlers ────────────────────────────────────────────
+
+  const handleBookNow = useCallback(() => {
+    const propertyHostId = property?.host?.id || (property as any)?.host_id;
+
+    if (isOwnPropertyBooking(user?.id, propertyHostId)) {
+      Alert.alert('Booking Unavailable', 'You cannot book your own property.');
+      return;
+    }
+
+    const proceedToBooking = () => {
+      router.push(`/(tabs)/bookings/create?propertyId=${property.id}`);
+    };
+
+    if (isHostMode(user)) {
+      promptSwitchToTravelMode({
+        propertyTitle: property?.title,
+        onConfirm: async () => {
+          try {
+            await switchProfile('guest');
+            proceedToBooking();
+          } catch (error: any) {
+            Alert.alert(
+              'Unable to Switch Mode',
+              error?.response?.data?.error || error?.message || 'Failed to switch to travel mode.'
+            );
+          }
+        },
+      });
+      return;
+    }
+
+    proceedToBooking();
+  }, [property, router, switchProfile, user]);
 
   const handleShare = async () => {
     try {
@@ -906,7 +940,7 @@ export default function PropertyDetailsScreen() {
           ) : null}
         </View>
         <TouchableOpacity
-          onPress={() => router.push(`/(tabs)/bookings/create?propertyId=${property.id}`)}
+          onPress={handleBookNow}
           accessibilityRole="button"
           accessibilityLabel={`Book this property for ${currSymbol}${pricePerNight} per night`}
           style={{

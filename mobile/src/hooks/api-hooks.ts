@@ -75,6 +75,14 @@ export function usePropertyById(id: string) {
   });
 }
 
+export function useHostPropertyById(id: string) {
+  return useQuery({
+    queryKey: ['host-properties', id],
+    queryFn: () => apiClient.getHostPropertyById(id),
+    enabled: !!id,
+  });
+}
+
 export function useUnavailableDates(propertyId: string, start?: string, end?: string) {
   return useQuery({
     queryKey: ['properties', propertyId, 'unavailable-dates', start, end],

@@ -7,11 +7,14 @@ import { Calendar } from 'react-native-calendars';
 import { format, parseISO, addDays } from 'date-fns';
 import { useAuth } from '@/context/auth-context';
 import { useUnavailableDates } from '@/hooks/api-hooks';
+import { isHostMode, promptSwitchToTravelMode } from '@/utils/helpers';
 
 export default function CreateBookingScreen() {
   const router = useRouter();
   const { propertyId } = useLocalSearchParams<{ propertyId: string }>();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user, switchProfile } = useAuth();
+  const today = format(new Date(), 'yyyy-MM-dd');
+  const tomorrow = format(addDays(new Date(), 1), 'yyyy-MM-dd');
   const [checkIn, setCheckIn] = useState('');
   const [checkOut, setCheckOut] = useState('');
   const [guests, setGuests] = useState('1');
@@ -27,16 +30,39 @@ export default function CreateBookingScreen() {
     const marks: Record<string, any> = {};
     for (const date of unavailableDates) {
       marks[date] = {
+        marked: true,
         disabled: true,
         disableTouchEvent: true,
         customStyles: {
-          container: { backgroundColor: '#FEE2E2', borderRadius: 16 },
-          text: { color: '#DC2626', textDecorationLine: 'line-through' },
+          container: {
+            backgroundColor: '#FEE2E2',
+            borderRadius: 16,
+            borderWidth: 1,
+            borderColor: '#FCA5A5',
+          },
+          text: { color: '#B91C1C', fontWeight: '700' },
         },
       };
     }
+
+    // Disable current date to align with web behavior (booking starts from tomorrow)
+    marks[today] = {
+      marked: true,
+      disabled: true,
+      disableTouchEvent: true,
+      customStyles: {
+        container: {
+          backgroundColor: '#F1F5F9',
+          borderRadius: 16,
+          borderWidth: 1,
+          borderColor: '#CBD5E1',
+        },
+        text: { color: '#94A3B8', fontWeight: '700' },
+      },
+    };
+
     return marks;
-  }, [unavailableDates]);
+  }, [unavailableDates, today]);
 
   const handleCreateBooking = async () => {
     if (!checkIn || !checkOut) {
@@ -55,20 +81,41 @@ export default function CreateBookingScreen() {
       return;
     }
 
-    // Navigate to confirm page with price breakdown and payment (matches web flow)
-    router.push({
-      pathname: '/booking/confirm',
-      params: {
-        propertyId,
-        checkIn,
-        checkOut,
-        guests: guestCount.toString(),
-      },
-    });
+    const continueToConfirm = () => {
+      router.push({
+        pathname: '/booking/confirm',
+        params: {
+          propertyId,
+          checkIn,
+          checkOut,
+          guests: guestCount.toString(),
+        },
+      });
+    };
+
+    if (isHostMode(user)) {
+      promptSwitchToTravelMode({
+        onCancel: () => router.back(),
+        onConfirm: async () => {
+          try {
+            await switchProfile('guest');
+            continueToConfirm();
+          } catch (error: any) {
+            Alert.alert(
+              'Unable to Switch Mode',
+              error?.response?.data?.error || error?.message || 'Failed to switch to travel mode.'
+            );
+          }
+        },
+      });
+      return;
+    }
+
+    continueToConfirm();
   };
 
   const handleCheckInDateSelect = (date: string) => {
-    if (unavailableDates.includes(date)) return; // Block unavailable dates
+    if (date <= today || unavailableDates.includes(date)) return; // Block current/past and unavailable dates
     setCheckIn(date);
     setShowCheckInCalendar(false);
     // Clear check-out if it's before or equal to the new check-in
@@ -78,14 +125,16 @@ export default function CreateBookingScreen() {
   };
 
   const handleCheckOutDateSelect = (date: string) => {
-    if (unavailableDates.includes(date)) return; // Block unavailable dates
+    if (date <= today || unavailableDates.includes(date)) return; // Block current/past and unavailable dates
+    if (!checkIn || date <= checkIn) {
+      Alert.alert('Invalid Date', 'Check-out must be after check-in.');
+      return;
+    }
     // Check if any unavailable date falls between check-in and check-out
-    if (checkIn) {
-      const hasConflict = unavailableDates.some(d => d > checkIn && d < date);
-      if (hasConflict) {
-        Alert.alert('Unavailable Dates', 'Some dates in your selected range are already booked. Please choose different dates.');
-        return;
-      }
+    const hasConflict = unavailableDates.some(d => d > checkIn && d < date);
+    if (hasConflict) {
+      Alert.alert('Unavailable Dates', 'Some dates in your selected range are already booked. Please choose different dates.');
+      return;
     }
     setCheckOut(date);
     setShowCheckOutCalendar(false);
@@ -103,13 +152,13 @@ export default function CreateBookingScreen() {
   };
 
   const getMinCheckOutDate = () => {
-    if (!checkIn) return undefined;
+    if (!checkIn) return tomorrow;
     try {
       // Use date-fns to add 1 day safely
       const minDate = addDays(parseISO(checkIn), 1);
       return format(minDate, 'yyyy-MM-dd');
     } catch (error) {
-      return undefined;
+      return tomorrow;
     }
   };
 
@@ -294,7 +343,7 @@ export default function CreateBookingScreen() {
             )}
             <Calendar
               markingType="custom"
-              minDate={new Date().toISOString().split('T')[0]}
+              minDate={tomorrow}
               onDayPress={(day) => handleCheckInDateSelect(day.dateString)}
               markedDates={{
                 ...disabledMarkedDates,

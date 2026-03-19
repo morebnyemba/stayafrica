@@ -187,17 +187,17 @@ export function HomeProperties() {
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-4">
           {[
-            { type: 'BNB', label: 'B&Bs', icon: Home },
-            { type: 'APARTMENT', label: 'Apartments', icon: Building2 },
-            { type: 'HOTEL', label: 'Hotels', icon: UtensilsCrossed },
-            { type: 'LODGE', label: 'Lodges', icon: Trees },
-            { type: 'VILLA', label: 'Villas', icon: Shield },
-            { type: 'GUESTHOUSE', label: 'Guesthouses', icon: Users },
-            { type: 'RESORT', label: 'Resorts', icon: Waves },
-            { type: 'COTTAGE', label: 'Cottages', icon: Home },
-            { type: 'HOUSE', label: 'Houses', icon: Building2 },
-            { type: 'CAMPGROUND', label: 'Campgrounds', icon: Tent },
-            { type: 'COSY_ROOM', label: 'Cosy Room', icon: Home },
+            { type: 'bnb', label: 'B&Bs', icon: Home },
+            { type: 'apartment', label: 'Apartments', icon: Building2 },
+            { type: 'hotel', label: 'Hotels', icon: UtensilsCrossed },
+            { type: 'lodge', label: 'Lodges', icon: Trees },
+            { type: 'villa', label: 'Villas', icon: Shield },
+            { type: 'guesthouse', label: 'Guesthouses', icon: Users },
+            { type: 'resort', label: 'Resorts', icon: Waves },
+            { type: 'cottage', label: 'Cottages', icon: Home },
+            { type: 'house', label: 'Houses', icon: Building2 },
+            { type: 'campground', label: 'Campgrounds', icon: Tent },
+            { type: 'cosy_room', label: 'Cosy Room', icon: Home },
           ].map((item) => {
             const IconComponent = item.icon;
             return (

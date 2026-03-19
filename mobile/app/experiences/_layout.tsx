@@ -1,15 +1,5 @@
-import { Stack } from 'expo-router';
+import { Redirect } from 'expo-router';
 
 export default function ExperiencesLayout() {
-    return (
-        <Stack
-            screenOptions={{
-                headerShown: false,
-                animation: 'slide_from_right',
-            }}
-        >
-            <Stack.Screen name="index" />
-            <Stack.Screen name="[id]" />
-        </Stack>
-    );
+    return <Redirect href="/(tabs)/explore" />;
 }

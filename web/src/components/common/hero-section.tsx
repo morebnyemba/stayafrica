@@ -5,7 +5,7 @@ import { Search, Home, Building2, Building, TreePine, Castle, Wind, Users, Palmt
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { TypeAnimation } from 'react-type-animation';
-import { FEATURED_PROPERTY_TYPES, PROPERTY_TYPES } from '@/types/property-types';
+import { PropertyType, PROPERTY_TYPES } from '@/types/property-types';
 import { Input } from '@/components/ui/Input';
 
 const iconMap: Record<string, any> = {
@@ -20,6 +20,15 @@ const iconMap: Record<string, any> = {
   Tent,
   Anchor,
 };
+
+const HERO_BROWSE_TYPES: PropertyType[] = [
+  PropertyType.BNB,
+  PropertyType.APARTMENT,
+  PropertyType.HOTEL,
+  PropertyType.LODGE,
+  PropertyType.VILLA,
+  PropertyType.COTTAGE,
+];
 
 export function HeroSection() {
   const router = useRouter();
@@ -131,7 +140,7 @@ export function HeroSection() {
         <div className="mb-6 sm:mb-8">
           <p className="text-center text-sand-100 mb-3 sm:mb-4 text-xs sm:text-sm font-medium">Browse by type:</p>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3 mb-6 sm:mb-8">
-            {FEATURED_PROPERTY_TYPES.map((typeId) => {
+            {HERO_BROWSE_TYPES.map((typeId) => {
               const typeConfig = PROPERTY_TYPES[typeId];
               const Icon = iconMap[typeConfig.icon];
               return (

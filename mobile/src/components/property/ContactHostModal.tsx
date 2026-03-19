@@ -20,6 +20,8 @@ interface ContactHostModalProps {
 
 export function ContactHostModal({ visible, onClose, host, propertyId, userId }: ContactHostModalProps) {
     const router = useRouter();
+    const today = format(new Date(), 'yyyy-MM-dd');
+    const tomorrow = format(addDays(new Date(), 1), 'yyyy-MM-dd');
     const [checkIn, setCheckIn] = useState('');
     const [checkOut, setCheckOut] = useState('');
     const [showCalendar, setShowCalendar] = useState(false);
@@ -37,11 +39,45 @@ export function ContactHostModal({ visible, onClose, host, propertyId, userId }:
         const dates: { [key: string]: any } = {};
         if (unavailableDatesData?.unavailable_dates) {
             unavailableDatesData.unavailable_dates.forEach((date: string) => {
-                dates[date] = { disabled: true, disableTouchEvent: true, color: '#fee2e2', textColor: '#dc2626' };
+                dates[date] = {
+                    disabled: true,
+                    disableTouchEvent: true,
+                    selected: true,
+                    startingDay: true,
+                    endingDay: true,
+                    color: '#fee2e2',
+                    textColor: '#b91c1c',
+                };
             });
         }
+        // Keep current day unavailable to match web behavior (booking starts from tomorrow).
+        dates[today] = {
+            disabled: true,
+            disableTouchEvent: true,
+            selected: true,
+            startingDay: true,
+            endingDay: true,
+            color: '#f1f5f9',
+            textColor: '#94a3b8',
+        };
         return dates;
-    }, [unavailableDatesData]);
+    }, [unavailableDatesData, today]);
+
+    const hasUnavailableInRange = (startDate: string, endDate: string) => {
+        const start = parseISO(startDate);
+        const end = parseISO(endDate);
+        let cursor = addDays(start, 1);
+
+        while (isBefore(cursor, end)) {
+            const dateString = format(cursor, 'yyyy-MM-dd');
+            if (unavailableDates[dateString]?.disabled) {
+                return true;
+            }
+            cursor = addDays(cursor, 1);
+        }
+
+        return false;
+    };
 
     const markedDates = useMemo(() => {
         const marks = { ...unavailableDates };
@@ -78,7 +114,7 @@ export function ContactHostModal({ visible, onClose, host, propertyId, userId }:
     }, [checkIn, checkOut, unavailableDates]);
 
     const onDayPress = (day: DateData) => {
-        if (unavailableDates[day.dateString]) return;
+        if (unavailableDates[day.dateString]?.disabled || day.dateString <= today) return;
 
         if (selecting === 'checkIn') {
             setCheckIn(day.dateString);
@@ -87,10 +123,20 @@ export function ContactHostModal({ visible, onClose, host, propertyId, userId }:
                 setCheckOut('');
             }
         } else {
+            if (!checkIn) {
+                setCheckIn(day.dateString);
+                setSelecting('checkOut');
+                return;
+            }
+
             if (day.dateString <= checkIn) {
                 setCheckIn(day.dateString);
                 setCheckOut('');
             } else {
+                if (hasUnavailableInRange(checkIn, day.dateString)) {
+                    Alert.alert('Unavailable Dates', 'Your selected date range includes already booked dates. Please choose different dates.');
+                    return;
+                }
                 setCheckOut(day.dateString);
                 setShowCalendar(false);
             }
@@ -208,7 +254,7 @@ export function ContactHostModal({ visible, onClose, host, propertyId, userId }:
                             <View className="mb-4 border border-sand-200 rounded-xl overflow-hidden">
                                 <Calendar
                                     current={checkIn || new Date().toISOString().split('T')[0]}
-                                    minDate={new Date().toISOString().split('T')[0]}
+                                    minDate={tomorrow}
                                     onDayPress={onDayPress}
                                     markedDates={markedDates}
                                     markingType={'period'}

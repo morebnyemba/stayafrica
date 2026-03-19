@@ -275,7 +275,7 @@ export default function HostScreen() {
       >
         <Text className="text-lg font-bold text-forest mb-4">Revenue Overview</Text>
         {hasData ? (
-          <View className="h-40 bg-sand-100 rounded-xl p-4 bg-white rounded-2xl justify-center">
+          <View className="h-40 bg-white rounded-2xl p-4 justify-center">
             <View className="flex-row items-baseline justify-between mb-2">
               <Text className="text-3xl font-bold text-forest">${totalEarnings.toLocaleString()}</Text>
               <Text className="text-sm text-moss">This Month</Text>
@@ -566,22 +566,6 @@ export default function HostScreen() {
               description="View property bookings and reservations"
               onPress={() => router.push('/host/bookings')}
               color="#6366F1"
-            />
-            
-            <MenuItem
-              icon="compass"
-              title="Experiences"
-              description="Manage your hosted experiences"
-              onPress={() => router.push('/host/experiences')}
-              color="#06B6D4"
-            />
-            
-            <MenuItem
-              icon="receipt"
-              title="Experience Bookings"
-              description="Manage guest experience reservations"
-              onPress={() => router.push('/host/experiences/bookings')}
-              color="#8B5CF6"
             />
             
             <MenuItem

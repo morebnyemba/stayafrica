@@ -57,6 +57,15 @@ class BookingViewSet(viewsets.ModelViewSet):
         property_obj = serializer.validated_data['rental_property']
         check_in = serializer.validated_data['check_in']
         check_out = serializer.validated_data['check_out']
+        active_profile = getattr(self.request.user, 'active_profile', getattr(self.request.user, 'role', 'guest'))
+
+        if not self.request.user.is_staff and property_obj.host_id == self.request.user.id:
+            raise drf_serializers.ValidationError({'detail': 'You cannot book your own property'})
+
+        if not self.request.user.is_staff and active_profile == 'host':
+            raise drf_serializers.ValidationError(
+                {'detail': 'Switch to travel mode before booking another host\'s property'}
+            )
         
         # Validate booking dates
         try:

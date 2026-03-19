@@ -62,6 +62,16 @@ const COUNTRIES = [
   'Malawi', 'Lesotho', 'Eswatini', 'Tanzania', 'Kenya', 'Uganda', 'Rwanda'
 ];
 
+const PROPERTY_TYPE_OPTIONS = [
+  'house',
+  'apartment',
+  'villa',
+  'lodge',
+  'cottage',
+  'room',
+  'cosy_room',
+];
+
 const LOCATION_TEXT_FIELDS = [
   { label: 'Address', field: 'address', placeholder: 'Street address', required: true },
   { label: 'Suburb', field: 'suburb', placeholder: 'Suburb (Optional)' },
@@ -247,7 +257,7 @@ export default function NewPropertyScreen() {
         }
         break;
       case 'location':
-        if (!formData.address || !formData.city || !formData.latitude || !formData.longitude) {
+        if (!formData.address || !formData.city || !formData.country || formData.latitude == null || formData.longitude == null) {
           openDialog('Error', 'Please provide complete location information');
           return false;
         }
@@ -285,7 +295,23 @@ export default function NewPropertyScreen() {
   };
 
   const handleCreate = async () => {
-    if (!formData.title || !formData.price || !formData.city) {
+    const pricePerNight = parseFloat(formData.price);
+    const bedrooms = parseInt(formData.bedrooms, 10) || 1;
+    const bathrooms = parseInt(formData.bathrooms, 10) || 1;
+    const maxGuests = parseInt(formData.maxGuests, 10) || 1;
+
+    if (
+      !formData.title.trim() ||
+      !formData.description.trim() ||
+      !formData.address.trim() ||
+      !formData.city.trim() ||
+      !formData.country.trim() ||
+      !PROPERTY_TYPE_OPTIONS.includes(formData.propertyType) ||
+      Number.isNaN(pricePerNight) ||
+      pricePerNight <= 0 ||
+      formData.latitude == null ||
+      formData.longitude == null
+    ) {
       openDialog('Error', 'Please fill in all required fields');
       return;
     }
@@ -293,22 +319,22 @@ export default function NewPropertyScreen() {
     setLoading(true);
     try {
       const propertyPayload = {
-        title: formData.title,
-        description: formData.description,
-        address: formData.address,
-        city: formData.city,
+        title: formData.title.trim(),
+        description: formData.description.trim(),
+        address: formData.address.trim(),
+        city: formData.city.trim(),
         suburb: formData.suburb,
-        country: formData.country,
-        price_per_night: parseFloat(formData.price),
-        bedrooms: parseInt(formData.bedrooms) || 1,
-        bathrooms: parseInt(formData.bathrooms) || 1,
-        max_guests: parseInt(formData.maxGuests) || 1,
+        country: formData.country.trim(),
+        price_per_night: pricePerNight,
+        bedrooms,
+        bathrooms,
+        max_guests: maxGuests,
         property_type: formData.propertyType,
         currency: formData.currency,
         amenities_ids: selectedAmenityIds,
         location: {
           type: 'Point' as const,
-          coordinates: [formData.longitude || 0, formData.latitude || 0],
+          coordinates: [formData.longitude, formData.latitude],
         },
       };
 
@@ -317,10 +343,12 @@ export default function NewPropertyScreen() {
       if (images.length > 0 && createdProperty?.id) {
         const imageFormData = new FormData();
         images.forEach((uri, index) => {
+          const extension = uri.split('.').pop()?.toLowerCase();
+          const mimeType = extension === 'png' ? 'image/png' : 'image/jpeg';
           imageFormData.append('images', {
             uri,
-            type: 'image/jpeg',
-            name: `property-${index}.jpg`,
+            type: mimeType,
+            name: `property-${index}.${extension === 'png' ? 'png' : 'jpg'}`,
           } as any);
         });
         await apiClient.uploadPropertyImages(createdProperty.id, imageFormData);
@@ -332,7 +360,13 @@ export default function NewPropertyScreen() {
       });
     } catch (error) {
       console.error('Create error:', error);
-      openDialog('Error', 'Failed to create property');
+      const apiError = (error as any)?.response?.data;
+      const message =
+        apiError?.error ||
+        apiError?.detail ||
+        (typeof apiError === 'string' ? apiError : null) ||
+        'Failed to create property';
+      openDialog('Error', message);
     } finally {
       setLoading(false);
     }
@@ -459,12 +493,12 @@ export default function NewPropertyScreen() {
               <Text className="text-base font-semibold text-forest mb-2">
                 Property Type <Text className="text-red-500">*</Text>
               </Text>
-              <View className="flex-row gap-2 mb-3">
-                {['house', 'apartment', 'villa', 'guesthouse'].map((type) => (
+              <View className="flex-row flex-wrap gap-2 mb-3">
+                {PROPERTY_TYPE_OPTIONS.map((type) => (
                   <TouchableOpacity
                     key={type}
                     onPress={() => handleChange('propertyType', type)}
-                    className={`flex-1 py-3 rounded-xl ${
+                    className={`min-w-[31%] py-3 rounded-xl ${
                       formData.propertyType === type ? 'bg-gold' : 'bg-white'
                     }`}
                     style={{
@@ -480,7 +514,10 @@ export default function NewPropertyScreen() {
                         formData.propertyType === type ? 'text-forest' : 'text-moss'
                       }`}
                     >
-                      {type.charAt(0).toUpperCase() + type.slice(1)}
+                      {type
+                        .split('_')
+                        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+                        .join(' ')}
                     </Text>
                   </TouchableOpacity>
                 ))}

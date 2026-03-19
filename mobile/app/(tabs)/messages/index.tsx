@@ -25,7 +25,9 @@ function timeAgo(dateStr?: string): string {
   if (!dateStr) return '';
   const now = new Date();
   const date = new Date(dateStr);
+  if (Number.isNaN(date.getTime())) return '';
   const diffMs = now.getTime() - date.getTime();
+  if (Number.isNaN(diffMs) || diffMs < 0) return '';
   const diffMins = Math.floor(diffMs / 60000);
   if (diffMins < 1) return 'Now';
   if (diffMins < 60) return `${diffMins}m`;
@@ -35,7 +37,10 @@ function timeAgo(dateStr?: string): string {
   if (diffDays < 7) return `${diffDays}d`;
   const diffWeeks = Math.floor(diffDays / 7);
   if (diffWeeks < 4) return `${diffWeeks}w`;
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  // Keep formatting locale-agnostic to avoid Intl/locale runtime issues on some Android builds.
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  return `${month}/${day}`;
 }
 
 export default function MessagesScreen() {
@@ -44,12 +49,20 @@ export default function MessagesScreen() {
   const { user, isAuthenticated } = useAuth();
   const { data: conversationsData, isLoading, refetch } = useConversations();
   const { data: unreadData } = useUnreadCount();
-  const conversations: Conversation[] = conversationsData?.results || [];
+  const conversations: Conversation[] = useMemo(() => {
+    const payload = Array.isArray((conversationsData as any)?.results)
+      ? (conversationsData as any).results
+      : Array.isArray(conversationsData)
+        ? conversationsData
+        : [];
+
+    return payload.filter((item: any) => item && typeof item === 'object');
+  }, [conversationsData]);
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [refreshing, setRefreshing] = useState(false);
 
-  const totalUnread = (unreadData as { unread_count?: number } | undefined)?.unread_count ?? 0;
+  const totalUnread = Number((unreadData as { unread_count?: number } | undefined)?.unread_count ?? 0);
 
   const handleAvatarPress = useCallback(() => {
     router.push(isAuthenticated ? '/(tabs)/profile' : '/(auth)/login');
@@ -65,8 +78,9 @@ export default function MessagesScreen() {
     conversations.filter((conv) => {
       if (!searchQuery) return true;
       const q = searchQuery.toLowerCase();
-      return (conv.participant_name?.toLowerCase() || '').includes(q) ||
-             (conv.last_message?.toLowerCase() || '').includes(q);
+      const participantName = String((conv as any)?.participant_name ?? '').toLowerCase();
+      const lastMessage = String((conv as any)?.last_message ?? '').toLowerCase();
+      return participantName.includes(q) || lastMessage.includes(q);
     }),
     [conversations, searchQuery]
   );
@@ -115,9 +129,10 @@ export default function MessagesScreen() {
   }
 
   const ConversationCard = ({ conversation, index }: { conversation: Conversation; index: number }) => {
-    const displayName = conversation.participant_name?.trim() || 'Guest';
+    const displayName = String((conversation as any)?.participant_name ?? '').trim() || 'Guest';
     const initial = displayName.charAt(0).toUpperCase();
-    const isUnread = conversation.unread_count > 0;
+    const unreadCount = Number((conversation as any)?.unread_count ?? 0);
+    const isUnread = unreadCount > 0;
     const relativeTime = timeAgo(conversation.last_message_time);
 
     return (
@@ -125,11 +140,11 @@ export default function MessagesScreen() {
         <TouchableOpacity
           className="mx-4 mb-2.5 rounded-2xl overflow-hidden bg-white"
           onPress={() =>
-            router.push(`/(tabs)/messages/${conversation.id}?participantId=${conversation.participant_id}`)
+            router.push(`/(tabs)/messages/${String((conversation as any)?.id ?? '')}?participantId=${String((conversation as any)?.participant_id ?? '')}`)
           }
           activeOpacity={0.7}
           accessibilityRole="button"
-          accessibilityLabel={`Conversation with ${displayName}${isUnread ? `, ${conversation.unread_count} unread` : ''}`}
+          accessibilityLabel={`Conversation with ${displayName}${isUnread ? `, ${unreadCount} unread` : ''}`}
           style={{ shadowColor: '#122F26', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 6, elevation: 3 }}
         >
           <View className="px-4 py-3.5 flex-row items-center">
@@ -167,7 +182,7 @@ export default function MessagesScreen() {
                 </Text>
                 {isUnread && (
                   <View className="bg-gold rounded-full min-w-[20px] h-5 items-center justify-center ml-2 px-1.5">
-                    <Text className="text-forest text-[10px] font-bold">{conversation.unread_count}</Text>
+                    <Text className="text-forest text-[10px] font-bold">{unreadCount}</Text>
                   </View>
                 )}
               </View>
@@ -288,7 +303,7 @@ export default function MessagesScreen() {
           <FlatList
             data={filteredConversations}
             renderItem={({ item, index }) => <ConversationCard conversation={item} index={index} />}
-            keyExtractor={(item) => item.id}
+            keyExtractor={(item, index) => String((item as any)?.id ?? `conversation-${index}`)}
             contentContainerStyle={{ paddingTop: 8, paddingBottom: 40 }}
             refreshControl={
               <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#D9B168" colors={['#D9B168']} />

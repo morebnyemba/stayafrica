@@ -488,6 +488,8 @@ export function PropertyDetailsContent({ propertyId: propId }: PropertyDetailsCo
               {property && (
                 <BookingPanel
                   propertyId={property.id}
+                  propertyTitle={property.title}
+                  hostId={property.host?.id || property.host_id}
                   pricePerNight={property.price_per_night}
                   maxGuests={property.max_guests}
                   minStay={property.min_stay_nights || 1}

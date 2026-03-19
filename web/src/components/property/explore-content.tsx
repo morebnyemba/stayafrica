@@ -207,6 +207,7 @@ export function ExploreContent() {
           <SearchFilters
             onFilterChange={setFilters}
             onSearch={handleSearch}
+            initialFilters={filters}
           />
         </div>
 

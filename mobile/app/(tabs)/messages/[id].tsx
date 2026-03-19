@@ -40,16 +40,25 @@ export default function ConversationDetailScreen() {
   const { mutate: archiveConversation } = useArchiveConversation();
   const { mutate: preApprove, isPending: isPreApproving } = usePreApproveConversation();
 
-  const messages = (messagesData as any)?.results ?? [];
+  const messages = Array.isArray((messagesData as any)?.results)
+    ? (messagesData as any).results
+    : Array.isArray(messagesData)
+      ? (messagesData as any)
+      : [];
 
   const { data: conversationsData } = useConversations();
-  const conversation = conversationsData?.results?.find((c: any) => String(c.id) === String(conversationId));
+  const conversationList = Array.isArray((conversationsData as any)?.results)
+    ? (conversationsData as any).results
+    : Array.isArray(conversationsData)
+      ? (conversationsData as any)
+      : [];
+  const conversation = conversationList.find((c: any) => String(c?.id) === String(conversationId));
   
   const inquiryMessage = messages.find((m: any) => m.metadata?.check_in);
   const inquiryData = inquiryMessage?.metadata;
   const isGuest = inquiryMessage?.is_own_message;
   
-  const canRequestBooking = conversation?.property && !conversation?.booking_id && inquiryData;
+  const canRequestBooking = !!conversation?.property && !conversation?.booking_id && !!inquiryData;
 
   // Mark conversation as read when entering
   useEffect(() => {
@@ -234,7 +243,14 @@ export default function ConversationDetailScreen() {
               {canRequestBooking && (
                 isGuest ? (
                   <TouchableOpacity
-                    onPress={() => router.push(`/booking/confirm?propertyId=${conversation.property}&checkIn=${inquiryData.check_in}&checkOut=${inquiryData.check_out}&guests=${inquiryData.guests}`)}
+                    onPress={() => {
+                      if (!inquiryData?.check_in || !inquiryData?.check_out) return;
+                      const propertyId = String(conversation?.property ?? '');
+                      const checkIn = encodeURIComponent(String(inquiryData.check_in));
+                      const checkOut = encodeURIComponent(String(inquiryData.check_out));
+                      const guests = encodeURIComponent(String(inquiryData.guests ?? 1));
+                      router.push(`/booking/confirm?propertyId=${propertyId}&checkIn=${checkIn}&checkOut=${checkOut}&guests=${guests}`);
+                    }}
                     className="mr-3 px-3 h-10 rounded-xl items-center justify-center bg-gold"
                     style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.2, shadowRadius: 3, elevation: 3 }}
                   >
@@ -301,7 +317,7 @@ export default function ConversationDetailScreen() {
         <FlatList
           ref={flatListRef}
           data={messages as ConversationMessage[]}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item, index) => String((item as any)?.id ?? `message-${index}`)}
           contentContainerStyle={{ padding: 16, paddingBottom: 120 }}
           keyboardShouldPersistTaps="handled"
           renderItem={({ item, index }) => {
@@ -311,9 +327,11 @@ export default function ConversationDetailScreen() {
 
             // Check if we should show a date separator
             const messageTime = item.created_at ? new Date(item.created_at) : new Date();
+            const safeMessageTime = Number.isNaN(messageTime.getTime()) ? new Date() : messageTime;
             const prevMessage = index > 0 ? messages[index - 1] : null;
-            const prevTime = prevMessage?.created_at ? new Date(prevMessage.created_at) : null;
-            const isNewDay = !prevTime || messageTime.toDateString() !== prevTime.toDateString();
+            const prevTimeRaw = prevMessage?.created_at ? new Date(prevMessage.created_at) : null;
+            const prevTime = prevTimeRaw && !Number.isNaN(prevTimeRaw.getTime()) ? prevTimeRaw : null;
+            const isNewDay = !prevTime || safeMessageTime.toDateString() !== prevTime.toDateString();
 
             return (
               <View>
@@ -322,11 +340,7 @@ export default function ConversationDetailScreen() {
                   <View className="flex-row justify-center my-3">
                     <View className="bg-gray-200 px-3 py-1 rounded-full">
                       <Text className="text-xs text-gray-600">
-                        {messageTime.toLocaleDateString([], {
-                          weekday: 'short',
-                          month: 'short',
-                          day: 'numeric'
-                        })}
+                        {`${safeMessageTime.getDate()}/${safeMessageTime.getMonth() + 1}/${safeMessageTime.getFullYear()}`}
                       </Text>
                     </View>
                   </View>

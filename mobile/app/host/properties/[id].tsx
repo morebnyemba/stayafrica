@@ -3,7 +3,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '@/context/auth-context';
-import { usePropertyById, useInstantBookingInfo, useToggleInstantBooking } from '@/hooks/api-hooks';
+import { useHostPropertyById, useInstantBookingInfo, useToggleInstantBooking } from '@/hooks/api-hooks';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function PropertyDetailScreen() {
@@ -12,7 +12,7 @@ export default function PropertyDetailScreen() {
   const { isAuthenticated } = useAuth();
   const insets = useSafeAreaInsets();
 
-  const { data: property, isLoading: loading } = usePropertyById(id as string);
+  const { data: property, isLoading: loading } = useHostPropertyById(id as string);
   const { data: ibInfo } = useInstantBookingInfo(id as string);
   const { mutate: toggleIB, isPending: togglingIB } = useToggleInstantBooking();
 
@@ -121,7 +121,7 @@ export default function PropertyDetailScreen() {
                 <View className="flex-row justify-between">
                   <Text className="text-moss">Capacity</Text>
                   <Text className="text-forest">
-                    {property.max_guests} guests • {property.bedrooms} beds
+                    {property.max_guests} guests • {property.number_of_beds} beds
                   </Text>
                 </View>
               </View>
@@ -163,7 +163,7 @@ export default function PropertyDetailScreen() {
                     </Text>
                   </View>
                   <Switch
-                    value={ibInfo?.instant_booking_enabled ?? property?.instant_booking_enabled ?? false}
+                    value={ibInfo?.instant_booking_enabled ?? ((property as any)?.instant_booking_enabled ?? false)}
                     onValueChange={(enabled) => toggleIB({ propertyId: id as string, data: { enabled } })}
                     disabled={togglingIB}
                     trackColor={{ false: '#d1d5db', true: '#D9B168' }}

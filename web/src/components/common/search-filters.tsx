@@ -8,6 +8,7 @@ import { apiClient } from '@/services/api-client';
 interface SearchFiltersProps {
   onFilterChange?: (filters: FilterOptions) => void;
   onSearch?: (query: string) => void;
+  initialFilters?: Partial<FilterOptions>;
 }
 
 export interface FilterOptions {
@@ -23,11 +24,16 @@ export interface FilterOptions {
 }
 
 const PROPERTY_TYPES = [
-  'lodge',
-  'cottage',
-  'room',
   'apartment',
+  'bnb',
+  'campground',
+  'cottage',
+  'guesthouse',
+  'hotel',
   'house',
+  'lodge',
+  'resort',
+  'room',
   'villa',
   'cosy_room',
 ];
@@ -43,6 +49,7 @@ export function SearchFilters({ onFilterChange, onSearch }: SearchFiltersProps) 
     minRating: 0,
     guests: 1,
     nearMe: false,
+    ...initialFilters,
   });
 
   // Fetch amenities from API
