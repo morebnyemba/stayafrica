@@ -38,7 +38,7 @@ const PROPERTY_TYPES = [
   'cosy_room',
 ];
 
-export function SearchFilters({ onFilterChange, onSearch }: SearchFiltersProps) {
+export function SearchFilters({ onFilterChange, onSearch, initialFilters }: SearchFiltersProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState<FilterOptions>({
