@@ -10,8 +10,11 @@ import { pricingApi } from '@/services/pricing-api';
 import { Star, AlertCircle, Calendar, TrendingDown } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { format, differenceInDays, addDays } from 'date-fns';
-import DatePicker from 'react-datepicker';
+import DatePicker, { registerLocale } from 'react-datepicker';
+import { enGB } from 'date-fns/locale';
 import 'react-datepicker/dist/react-datepicker.css';
+
+registerLocale('en-GB', enGB);
 
 interface BookingCardProps {
   property?: {
@@ -194,7 +197,8 @@ export function BookingCard({ property }: BookingCardProps) {
               minDate={new Date()}
               excludeDates={excludedDates}
               dayClassName={getDayClassName}
-              dateFormat="MMM dd, yyyy"
+              locale="en-GB"
+              dateFormat="dd-MM-yyyy"
               placeholderText="Add date"
               className="w-full px-3 py-2 pl-10 border border-primary-200 rounded-lg bg-sand-50 text-primary-900 focus:ring-2 focus:ring-secondary-500 focus:border-transparent text-sm"
             />
@@ -210,7 +214,8 @@ export function BookingCard({ property }: BookingCardProps) {
               minDate={checkInDate ? addDays(checkInDate, 1) : new Date()}
               excludeDates={excludedDates}
               dayClassName={getDayClassName}
-              dateFormat="MMM dd, yyyy"
+              locale="en-GB"
+              dateFormat="dd-MM-yyyy"
               placeholderText="Add date"
               disabled={!checkInDate}
               className={`w-full px-3 py-2 pl-10 border border-primary-200 rounded-lg bg-sand-50 text-primary-900 focus:ring-2 focus:ring-secondary-500 focus:border-transparent text-sm ${!checkInDate ? 'opacity-50 cursor-not-allowed' : ''}`}

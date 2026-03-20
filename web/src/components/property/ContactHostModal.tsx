@@ -6,9 +6,12 @@ import { Loader2, X, Calendar, Users, MessageSquare } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { useQuery } from '@tanstack/react-query';
 import { format, addDays } from 'date-fns';
-import DatePicker from 'react-datepicker';
+import DatePicker, { registerLocale } from 'react-datepicker';
+import { enGB } from 'date-fns/locale';
 import 'react-datepicker/dist/react-datepicker.css';
 import { apiClient } from '@/services/api-client';
+
+registerLocale('en-GB', enGB);
 
 interface ContactHostModalProps {
     isOpen: boolean;
@@ -168,7 +171,8 @@ export function ContactHostModal({ isOpen, onClose, host, propertyId, userId }: 
                                         minDate={new Date()}
                                         excludeDates={excludedDates}
                                         dayClassName={getDayClassName}
-                                        dateFormat="yyyy-MM-dd"
+                                        locale="en-GB"
+                                        dateFormat="dd-MM-yyyy"
                                         placeholderText="Check-in"
                                         className="w-full pl-9 pr-3 py-2.5 bg-primary-50 border border-primary-200 rounded-lg text-sm focus:ring-2 focus:ring-secondary-500 text-primary-900"
                                         required
@@ -187,7 +191,8 @@ export function ContactHostModal({ isOpen, onClose, host, propertyId, userId }: 
                                         minDate={checkInDate ? addDays(checkInDate, 1) : new Date()}
                                         excludeDates={excludedDates}
                                         dayClassName={getDayClassName}
-                                        dateFormat="yyyy-MM-dd"
+                                        locale="en-GB"
+                                        dateFormat="dd-MM-yyyy"
                                         placeholderText="Check-out"
                                         disabled={!checkInDate}
                                         className={`w-full pl-9 pr-3 py-2.5 bg-primary-50 border border-primary-200 rounded-lg text-sm focus:ring-2 focus:ring-secondary-500 text-primary-900 ${!checkInDate ? 'opacity-50 cursor-not-allowed' : ''}`}

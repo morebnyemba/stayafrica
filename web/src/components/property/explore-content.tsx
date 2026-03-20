@@ -15,6 +15,15 @@ import FlexibleDateSearchPanel, { FlexibilityType } from '@/components/search/Fl
 import FlexibleDateResults from '@/components/search/FlexibleDateResults';
 import { useFlexibleSearch } from '@/hooks/useFlexibleSearch';
 
+function parseValidDate(value?: string): Date | null {
+  if (!value) {
+    return null;
+  }
+
+  const date = new Date(value);
+  return Number.isFinite(date.getTime()) ? date : null;
+}
+
 export function ExploreContent() {
   const searchParams = useSearchParams();
   
@@ -38,6 +47,13 @@ export function ExploreContent() {
   const [isFlexible, setIsFlexible] = useState(false);
   const [flexibilityType, setFlexibilityType] = useState<FlexibilityType>('exact');
   const [flexibleDays, setFlexibleDays] = useState<number | undefined>(3);
+
+  const validCheckInDate = useMemo(() => parseValidDate(filters.checkIn), [filters.checkIn]);
+  const validCheckOutDate = useMemo(() => parseValidDate(filters.checkOut), [filters.checkOut]);
+  const fallbackCheckIn = new Date().toISOString().split('T')[0];
+  const fallbackCheckOut = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+  const effectiveCheckIn = validCheckInDate ? filters.checkIn! : fallbackCheckIn;
+  const effectiveCheckOut = validCheckOutDate ? filters.checkOut! : fallbackCheckOut;
 
   // Do not auto-apply geolocation on page load.
   // Nearby filtering should only happen when the user explicitly taps "Use my location".
@@ -162,8 +178,8 @@ export function ExploreContent() {
   // Flexible search query
   const { data: flexibleResults, isLoading: flexibleLoading } = useFlexibleSearch({
     location: searchQuery,
-    checkIn: filters.checkIn || new Date().toISOString().split('T')[0],
-    checkOut: filters.checkOut || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    checkIn: effectiveCheckIn,
+    checkOut: effectiveCheckOut,
     flexibility: flexibilityType,
     days: flexibleDays,
     guests: filters.guests,
@@ -212,11 +228,11 @@ export function ExploreContent() {
         </div>
 
         {/* Flexible Date Search Panel */}
-        {isFlexible && filters.checkIn && filters.checkOut && (
+        {isFlexible && validCheckInDate && validCheckOutDate && (
           <div className="mb-8 max-w-2xl">
             <FlexibleDateSearchPanel
-              checkIn={new Date(filters.checkIn)}
-              checkOut={new Date(filters.checkOut)}
+              checkIn={validCheckInDate}
+              checkOut={validCheckOutDate}
               onSearch={handleFlexibleSearch}
             />
           </div>

@@ -57,11 +57,12 @@ export function SearchFilters({ onFilterChange, onSearch, initialFilters }: Sear
     queryKey: ['amenities'],
     queryFn: async () => {
       const response = await apiClient.getAmenities();
-      return response.data;
+      const payload = Array.isArray(response.data?.results) ? response.data.results : response.data;
+      return Array.isArray(payload) ? payload : [];
     },
   });
 
-  const amenities = amenitiesData || [];
+  const amenities = Array.isArray(amenitiesData) ? amenitiesData : [];
 
   const handleSearchChange = (value: string) => {
     setSearchQuery(value);

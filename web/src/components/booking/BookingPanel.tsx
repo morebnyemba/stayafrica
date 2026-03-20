@@ -18,8 +18,11 @@ import { pricingApi } from '@/services/pricing-api';
 import { useFeeConfiguration, useTaxEstimate, calculateBookingCost } from '@/hooks/use-fees';
 import { useAuth } from '@/store/auth-store';
 import { confirmSwitchToTravelMode, isHostMode, isOwnPropertyBooking } from '@/lib/booking-mode';
-import DatePicker from 'react-datepicker';
+import DatePicker, { registerLocale } from 'react-datepicker';
+import { enGB } from 'date-fns/locale';
 import 'react-datepicker/dist/react-datepicker.css';
+
+registerLocale('en-GB', enGB);
 
 interface BookingPanelProps {
   propertyId: string;
@@ -241,7 +244,8 @@ export const BookingPanel: React.FC<BookingPanelProps> = ({
               minDate={new Date()}
               excludeDates={excludedDates}
               dayClassName={getDayClassName}
-              dateFormat="MMM dd, yyyy"
+              locale="en-GB"
+              dateFormat="dd-MM-yyyy"
               placeholderText="Add date"
               className="w-full h-10 rounded-lg border-2 border-primary-300 bg-sand-50 pl-10 pr-4 py-2 text-sm text-primary-900 placeholder:text-primary-400 focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:border-transparent"
               aria-describedby={showMinStayError ? minStayErrorId : undefined}
@@ -264,7 +268,8 @@ export const BookingPanel: React.FC<BookingPanelProps> = ({
               minDate={checkInDate ? addDays(checkInDate, 1) : new Date()}
               excludeDates={excludedDates}
               dayClassName={getDayClassName}
-              dateFormat="MMM dd, yyyy"
+              locale="en-GB"
+              dateFormat="dd-MM-yyyy"
               placeholderText="Add date"
               disabled={!checkInDate}
               className={`w-full h-10 rounded-lg border-2 border-primary-300 bg-sand-50 pl-10 pr-4 py-2 text-sm text-primary-900 placeholder:text-primary-400 focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:border-transparent ${!checkInDate ? 'opacity-50 cursor-not-allowed' : ''}`}

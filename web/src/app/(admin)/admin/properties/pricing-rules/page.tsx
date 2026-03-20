@@ -295,11 +295,11 @@ export default function PricingRulesManagement() {
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-[#122F26] mb-1">Start Date</label>
-                                <input type="date" name="start_date" defaultValue={editingItem?.start_date || ''} className="w-full px-4 py-2 border rounded-lg" />
+                                <input type="date" lang="en-GB" name="start_date" defaultValue={editingItem?.start_date || ''} className="w-full px-4 py-2 border rounded-lg" />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-[#122F26] mb-1">End Date</label>
-                                <input type="date" name="end_date" defaultValue={editingItem?.end_date || ''} className="w-full px-4 py-2 border rounded-lg" />
+                                <input type="date" lang="en-GB" name="end_date" defaultValue={editingItem?.end_date || ''} className="w-full px-4 py-2 border rounded-lg" />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-[#122F26] mb-1">Is Active</label>

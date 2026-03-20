@@ -99,6 +99,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
                 </label>
                 <input
                   type="date"
+                  lang="en-GB"
                   value={localStartDate}
                   onChange={(e) => setLocalStartDate(e.target.value)}
                   max={localEndDate || undefined}
@@ -112,6 +113,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
                 </label>
                 <input
                   type="date"
+                  lang="en-GB"
                   value={localEndDate}
                   onChange={(e) => setLocalEndDate(e.target.value)}
                   min={localStartDate || undefined}

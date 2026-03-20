@@ -68,6 +68,7 @@ export const Input = React.forwardRef<HTMLInputElement | HTMLTextAreaElement | H
     const isPasswordType = type === 'password';
     const effectiveType = isPasswordType && showPassword ? 'text' : type;
     const isCheckbox = type === 'checkbox';
+    const isDateInput = type === 'date';
     const autoId = useId();
     const inputId = (props as any).id || autoId;
     const errorId = error ? `${inputId}-error` : undefined;
@@ -151,6 +152,7 @@ export const Input = React.forwardRef<HTMLInputElement | HTMLTextAreaElement | H
               ref={ref as React.Ref<HTMLInputElement>}
               id={inputId}
               type={effectiveType}
+              lang={isDateInput ? 'en-GB' : props.lang}
               aria-label={label}
               aria-describedby={errorId || helpId}
               aria-invalid={!!error}

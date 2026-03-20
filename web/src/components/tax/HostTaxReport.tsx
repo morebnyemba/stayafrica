@@ -121,6 +121,7 @@ export const HostTaxReport = () => {
             </label>
             <input
               type="date"
+              lang="en-GB"
               value={periodStart}
               onChange={(e) => setPeriodStart(e.target.value)}
               className="w-full px-4 py-2 border border-primary-300 rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent"
@@ -134,6 +135,7 @@ export const HostTaxReport = () => {
             </label>
             <input
               type="date"
+              lang="en-GB"
               value={periodEnd}
               onChange={(e) => setPeriodEnd(e.target.value)}
               className="w-full px-4 py-2 border border-primary-300 rounded-lg focus:ring-2 focus:ring-secondary-500 focus:border-transparent"

@@ -5,6 +5,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '@/services/query-client';
 import { Toaster } from 'react-hot-toast';
+import { installEuropeanDateFormatting } from '@/lib/date-format';
 
 export function Providers({
   children,
@@ -15,6 +16,10 @@ export function Providers({
   locale?: string;
   messages?: Record<string, unknown>;
 }) {
+  React.useEffect(() => {
+    installEuropeanDateFormatting();
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <NextIntlClientProvider locale={locale} messages={messages}>
