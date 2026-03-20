@@ -85,7 +85,8 @@ export function PropertyDetailsContent({ propertyId: propId }: PropertyDetailsCo
     queryFn: async () => {
       if (!propertyId) throw new Error('Property ID not found');
       const response = await apiClient.getPropertyReviews(propertyId);
-      return response.data as Review[];
+      const payload = Array.isArray(response.data?.results) ? response.data.results : response.data;
+      return Array.isArray(payload) ? payload as Review[] : [];
     },
     enabled: !!propertyId,
   });
