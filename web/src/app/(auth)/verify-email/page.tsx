@@ -19,6 +19,45 @@ export default function VerifyEmailPage() {
   const [noticeMessage, setNoticeMessage] = useState('');
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
+  const getCookieValue = (name: string) => {
+    if (typeof document === 'undefined') {
+      return null;
+    }
+
+    const cookie = document.cookie
+      .split('; ')
+      .find((entry) => entry.startsWith(`${name}=`));
+
+    return cookie ? decodeURIComponent(cookie.split('=').slice(1).join('=')) : null;
+  };
+
+  const clearClientSession = async () => {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+
+    try {
+      await fetch('/api/auth/clear-cookie', { method: 'POST' });
+    } catch {
+      document.cookie = 'access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+      document.cookie = 'access_token=; path=/; max-age=0';
+    }
+  };
+
+  const getAccessToken = () => {
+    const localToken = localStorage.getItem('access_token');
+    if (localToken) {
+      return localToken;
+    }
+
+    const cookieToken = getCookieValue('access_token');
+    if (cookieToken) {
+      localStorage.setItem('access_token', cookieToken);
+      return cookieToken;
+    }
+
+    return null;
+  };
+
   const persistSession = async (access: string, refresh: string) => {
     localStorage.setItem('access_token', access);
     localStorage.setItem('refresh_token', refresh);
@@ -56,7 +95,7 @@ export default function VerifyEmailPage() {
   };
 
   const checkVerificationStatus = async () => {
-    const accessToken = localStorage.getItem('access_token');
+    const accessToken = getAccessToken();
     if (!accessToken) {
       return;
     }
@@ -70,6 +109,10 @@ export default function VerifyEmailPage() {
       });
 
       if (!response.ok) {
+        if (response.status === 401 || response.status === 403) {
+          await clearClientSession();
+          setError('Your session expired. Please sign in again to continue verification.');
+        }
         return;
       }
 
@@ -86,12 +129,14 @@ export default function VerifyEmailPage() {
   };
 
   useEffect(() => {
+    getAccessToken();
+
     // Auto-focus first input on mount
     inputRefs.current[0]?.focus();
   }, []);
 
   useEffect(() => {
-    const accessToken = localStorage.getItem('access_token');
+    const accessToken = getAccessToken();
     if (!accessToken) {
       return;
     }
@@ -163,7 +208,7 @@ export default function VerifyEmailPage() {
         throw new Error(data.detail || data.code?.[0] || 'Invalid verification code');
       }
 
-      const accessToken = localStorage.getItem('access_token');
+      const accessToken = getAccessToken();
 
       if (accessToken) {
         await refreshVerifiedSession(accessToken);
@@ -189,7 +234,7 @@ export default function VerifyEmailPage() {
     setResending(true);
     setError('');
     try {
-      const accessToken = localStorage.getItem('access_token');
+      const accessToken = getAccessToken();
       if (!accessToken) {
         throw new Error('Please log in first to resend verification email.');
       }
