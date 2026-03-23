@@ -5,11 +5,11 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate, get_user_model
 from drf_spectacular.utils import extend_schema, OpenApiResponse
 
 from .two_factor import TwoFactorService
+from .serializers import issue_token_pair
 from .serializers_2fa import (
     TwoFactorSetupSerializer,
     TwoFactorVerifySerializer,
@@ -290,11 +290,11 @@ def login_with_2fa(request):
             )
     
     # Generate tokens
-    refresh = RefreshToken.for_user(user)
+    token_pair = issue_token_pair(user)
     
     return Response({
-        'refresh': str(refresh),
-        'access': str(refresh.access_token),
+        'refresh': token_pair['refresh'],
+        'access': token_pair['access'],
         'user': {
             'id': user.id,
             'email': user.email,

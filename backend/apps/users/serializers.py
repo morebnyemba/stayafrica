@@ -165,6 +165,14 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         return token
 
 
+def issue_token_pair(user):
+    refresh = CustomTokenObtainPairSerializer.get_token(user)
+    return {
+        'refresh': str(refresh),
+        'access': str(refresh.access_token),
+    }
+
+
 class UserPreferenceSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserPreference

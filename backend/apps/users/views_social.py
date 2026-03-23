@@ -9,11 +9,11 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import get_user_model
 from allauth.socialaccount.models import SocialApp
 from drf_spectacular.utils import extend_schema, OpenApiResponse, inline_serializer
 from rest_framework import serializers
+from apps.users.serializers import issue_token_pair
 from utils.decorators import api_ratelimit
 
 import jwt
@@ -404,11 +404,11 @@ def social_login(request, provider):
         )
 
     # ── Issue JWT ────────────────────────────────────────────────
-    refresh = RefreshToken.for_user(user)
+    token_pair = issue_token_pair(user)
 
     return Response({
-        'access': str(refresh.access_token),
-        'refresh': str(refresh),
+        'access': token_pair['access'],
+        'refresh': token_pair['refresh'],
         'user': {
             'id': user.id,
             'email': user.email,

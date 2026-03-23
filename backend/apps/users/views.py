@@ -4,7 +4,6 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from apps.users.throttles import LoginRateThrottle, AnonLoginRateThrottle
-from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.core import signing
@@ -15,6 +14,7 @@ from apps.users.serializers import (
     UserSerializer,
     UserProfileSerializer,
     CustomTokenObtainPairSerializer,
+    issue_token_pair,
     UserPreferenceSerializer,
     UserPropertyInteractionSerializer
 )
@@ -209,12 +209,11 @@ class UserViewSet(viewsets.ModelViewSet):
             logger.info(f"New user registered: {user.email}")
             
             # Generate JWT tokens for auto-login after registration
-            from rest_framework_simplejwt.tokens import RefreshToken
-            refresh = RefreshToken.for_user(user)
+            token_pair = issue_token_pair(user)
             
             response_data = serializer.data
-            response_data['access'] = str(refresh.access_token)
-            response_data['refresh'] = str(refresh)
+            response_data['access'] = token_pair['access']
+            response_data['refresh'] = token_pair['refresh']
             
             return Response(response_data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -540,15 +539,14 @@ class UserViewSet(viewsets.ModelViewSet):
         """Issue fresh tokens so middleware-visible claims match the current user record."""
         user = request.user
 
-        refresh = RefreshToken.for_user(user)
-        access = refresh.access_token
+        token_pair = issue_token_pair(user)
         profile = UserProfileSerializer(user).data
 
         return Response({
             'status': 'session_refreshed',
             'user': profile,
-            'access': str(access),
-            'refresh': str(refresh),
+            'access': token_pair['access'],
+            'refresh': token_pair['refresh'],
         }, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['get'], permission_classes=[IsAuthenticated])
@@ -587,16 +585,15 @@ class UserViewSet(viewsets.ModelViewSet):
             )
 
         # Issue fresh tokens so the new role claim is reflected immediately
-        refresh = RefreshToken.for_user(user)
-        access = refresh.access_token
+        token_pair = issue_token_pair(user)
 
         profile = UserProfileSerializer(user).data
 
         return Response({
             'status': 'upgraded',
             'user': profile,
-            'access': str(access),
-            'refresh': str(refresh),
+            'access': token_pair['access'],
+            'refresh': token_pair['refresh'],
         }, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
@@ -637,8 +634,7 @@ class UserViewSet(viewsets.ModelViewSet):
             )
 
         # Issue fresh tokens so the new active_profile claim is reflected immediately
-        refresh = RefreshToken.for_user(user)
-        access = refresh.access_token
+        token_pair = issue_token_pair(user)
 
         profile = UserProfileSerializer(user).data
 
@@ -647,8 +643,8 @@ class UserViewSet(viewsets.ModelViewSet):
             'status': 'switched',
             'active_profile': target_profile,
             'user': profile,
-            'access': str(access),
-            'refresh': str(refresh),
+            'access': token_pair['access'],
+            'refresh': token_pair['refresh'],
         }, status=status.HTTP_200_OK)
 
 

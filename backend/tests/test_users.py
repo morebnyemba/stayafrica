@@ -174,3 +174,5 @@ class TestJWTAuthentication:
 
         refreshed_payload = AccessToken(response.data['access'])
         assert refreshed_payload['is_verified'] is True
+        assert refreshed_payload['email'] == user.email
+        assert refreshed_payload['role'] == user.role
