@@ -187,14 +187,13 @@ class PropertyViewSet(viewsets.ModelViewSet):
     HOST_DETAIL_ACTIONS = {
         'upload_images', 'host_detail', 'booking_calendar',
         'toggle_instant_booking', 'discover_pois', 'approve', 'reject', 'delete_image',
-        'unavailable_dates',
     }
 
     # Detail actions visible to the public on active properties,
     # but hosts/admins may also access their own non-active ones.
     PUBLIC_DETAIL_ACTIONS = {
         'availability', 'reviews', 'pricing_calendar',
-        'instant_booking_info', 'nearby_pois',
+        'instant_booking_info', 'nearby_pois', 'unavailable_dates',
     }
 
     def get_queryset(self):
