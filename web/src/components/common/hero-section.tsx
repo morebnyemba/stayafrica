@@ -8,6 +8,20 @@ import { TypeAnimation } from 'react-type-animation';
 import { PropertyType, PROPERTY_TYPES } from '@/types/property-types';
 import { Input } from '@/components/ui/Input';
 
+const toDateOnly = (date: Date) => {
+  const year = date.getFullYear();
+  const month = `${date.getMonth() + 1}`.padStart(2, '0');
+  const day = `${date.getDate()}`.padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+const addDays = (dateOnly: string, days: number) => {
+  const [year, month, day] = dateOnly.split('-').map(Number);
+  const next = new Date(year, month - 1, day);
+  next.setDate(next.getDate() + days);
+  return toDateOnly(next);
+};
+
 const iconMap: Record<string, any> = {
   Home,
   Building2,
@@ -39,6 +53,28 @@ export function HeroSection() {
   const [guests, setGuests] = useState('2');
   const [selectedType, setSelectedType] = useState('');
   const [locationError, setLocationError] = useState(false);
+  const [dateError, setDateError] = useState('');
+
+  const today = toDateOnly(new Date());
+  const minCheckOut = checkIn ? addDays(checkIn, 1) : addDays(today, 1);
+
+  const handleCheckInChange = (value: string) => {
+    setCheckIn(value);
+    setDateError('');
+
+    if (!value) {
+      return;
+    }
+
+    if (checkOut && checkOut <= value) {
+      setCheckOut('');
+    }
+  };
+
+  const handleCheckOutChange = (value: string) => {
+    setCheckOut(value);
+    setDateError('');
+  };
 
   const handleSearch = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -46,6 +82,16 @@ export function HeroSection() {
     if (!location.trim()) {
       setLocationError(true);
       setTimeout(() => setLocationError(false), 2000);
+      return;
+    }
+
+    if (checkIn && checkIn < today) {
+      setDateError('Arrival date cannot be in the past.');
+      return;
+    }
+
+    if (checkOut && checkOut <= (checkIn || today)) {
+      setDateError('Departure date must be at least one day after arrival.');
       return;
     }
 
@@ -188,8 +234,9 @@ export function HeroSection() {
               <Input
                 type="date"
                 value={checkIn}
-                onChange={(e) => setCheckIn(e.target.value)}
+                onChange={(e) => handleCheckInChange(e.target.value)}
                 label="Arrive"
+                min={today}
               />
             </div>
 
@@ -198,8 +245,9 @@ export function HeroSection() {
               <Input
                 type="date"
                 value={checkOut}
-                onChange={(e) => setCheckOut(e.target.value)}
+                onChange={(e) => handleCheckOutChange(e.target.value)}
                 label="Leave"
+                min={minCheckOut}
               />
             </div>
 
@@ -223,6 +271,9 @@ export function HeroSection() {
               </button>
             </div>
           </div>
+          {dateError && (
+            <p className="text-red-500 text-xs mt-2 px-2 sm:px-4">{dateError}</p>
+          )}
         </form>
 
         
