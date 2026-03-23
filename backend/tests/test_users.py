@@ -6,6 +6,7 @@ role switching, and user preferences.
 import pytest
 from django.urls import reverse
 from rest_framework.test import APIClient
+from rest_framework_simplejwt.tokens import AccessToken
 from apps.users.models import User
 
 
@@ -147,3 +148,29 @@ class TestJWTAuthentication:
             self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
             response = self.client.get(reverse('user-profile'))
             assert response.status_code == 200
+
+    def test_refresh_session_reissues_current_verification_claim(self, user_factory):
+        user = user_factory(email='refresh-session@test.com', password='testpass123', is_verified=False)
+        token_response = self.client.post(
+            reverse('token_obtain_pair'),
+            {'email': 'refresh-session@test.com', 'password': 'testpass123'},
+            format='json',
+        )
+
+        assert token_response.status_code == 200
+        original_access = token_response.data['access']
+        original_payload = AccessToken(original_access)
+        assert original_payload['is_verified'] is False
+
+        user.is_verified = True
+        user.save(update_fields=['is_verified'])
+
+        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {original_access}')
+        response = self.client.post(reverse('user-refresh-session'))
+
+        assert response.status_code == 200
+        assert response.data['status'] == 'session_refreshed'
+        assert response.data['user']['is_verified'] is True
+
+        refreshed_payload = AccessToken(response.data['access'])
+        assert refreshed_payload['is_verified'] is True

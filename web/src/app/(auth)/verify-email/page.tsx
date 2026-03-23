@@ -19,6 +19,42 @@ export default function VerifyEmailPage() {
   const [noticeMessage, setNoticeMessage] = useState('');
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
+  const persistSession = async (access: string, refresh: string) => {
+    localStorage.setItem('access_token', access);
+    localStorage.setItem('refresh_token', refresh);
+
+    try {
+      await fetch('/api/auth/set-cookie', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: access, maxAge: 60 * 60 * 24 }),
+      });
+    } catch {
+      const isSecure = window.location.protocol === 'https:';
+      document.cookie = `access_token=${access}; path=/; max-age=86400; SameSite=Lax${isSecure ? '; Secure' : ''}`;
+    }
+  };
+
+  const refreshVerifiedSession = async (accessToken: string) => {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/users/refresh_session/`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to refresh verified session.');
+    }
+
+    const data = await response.json();
+    if (typeof data?.access === 'string' && typeof data?.refresh === 'string') {
+      await persistSession(data.access, data.refresh);
+    }
+
+    return data;
+  };
+
   const checkVerificationStatus = async () => {
     const accessToken = localStorage.getItem('access_token');
     if (!accessToken) {
@@ -39,6 +75,7 @@ export default function VerifyEmailPage() {
 
       const profile = await response.json();
       if (profile?.is_verified) {
+        await refreshVerifiedSession(accessToken);
         router.push('/dashboard');
       }
     } catch {
@@ -126,8 +163,14 @@ export default function VerifyEmailPage() {
         throw new Error(data.detail || data.code?.[0] || 'Invalid verification code');
       }
 
-      // Success - redirect to login
-      router.push('/login?verified=true');
+      const accessToken = localStorage.getItem('access_token');
+
+      if (accessToken) {
+        await refreshVerifiedSession(accessToken);
+        router.push('/dashboard?verified=true');
+      } else {
+        router.push('/login?verified=true');
+      }
     } catch (err: any) {
       setError(err.message || 'Invalid verification code. Please try again.');
       setCode(['', '', '', '', '', '']);

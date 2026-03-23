@@ -535,6 +535,22 @@ class UserViewSet(viewsets.ModelViewSet):
         
         return Response({'status': 'Account already verified'})
 
+    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
+    def refresh_session(self, request):
+        """Issue fresh tokens so middleware-visible claims match the current user record."""
+        user = request.user
+
+        refresh = RefreshToken.for_user(user)
+        access = refresh.access_token
+        profile = UserProfileSerializer(user).data
+
+        return Response({
+            'status': 'session_refreshed',
+            'user': profile,
+            'access': str(access),
+            'refresh': str(refresh),
+        }, status=status.HTTP_200_OK)
+
     @action(detail=True, methods=['get'], permission_classes=[IsAuthenticated])
     def preferences(self, request, pk=None):
         """Admin or Self action to get a user's preferences"""
