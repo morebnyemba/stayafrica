@@ -6,6 +6,20 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { useRouter } from 'next/navigation';
 
+const toDateOnly = (date: Date) => {
+  const year = date.getFullYear();
+  const month = `${date.getMonth() + 1}`.padStart(2, '0');
+  const day = `${date.getDate()}`.padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+const addDays = (dateOnly: string, days: number) => {
+  const [year, month, day] = dateOnly.split('-').map(Number);
+  const next = new Date(year, month - 1, day);
+  next.setDate(next.getDate() + days);
+  return toDateOnly(next);
+};
+
 export function SearchSection() {
   const router = useRouter();
   const [location, setLocation] = useState('');
@@ -13,6 +27,28 @@ export function SearchSection() {
   const [checkOut, setCheckOut] = useState('');
   const [guests, setGuests] = useState('2');
   const [locationError, setLocationError] = useState(false);
+  const [dateError, setDateError] = useState('');
+
+  const today = toDateOnly(new Date());
+  const minCheckOut = checkIn ? addDays(checkIn, 1) : addDays(today, 1);
+
+  const handleCheckInChange = (value: string) => {
+    setCheckIn(value);
+    setDateError('');
+
+    if (!value) {
+      return;
+    }
+
+    if (checkOut && checkOut <= value) {
+      setCheckOut('');
+    }
+  };
+
+  const handleCheckOutChange = (value: string) => {
+    setCheckOut(value);
+    setDateError('');
+  };
 
   const handleSearch = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -20,6 +56,16 @@ export function SearchSection() {
     if (!location.trim()) {
       setLocationError(true);
       setTimeout(() => setLocationError(false), 2000);
+      return;
+    }
+
+    if (checkIn && checkIn < today) {
+      setDateError('Arrival date cannot be in the past.');
+      return;
+    }
+
+    if (checkOut && checkOut <= (checkIn || today)) {
+      setDateError('Departure date must be at least one day after arrival.');
       return;
     }
 
@@ -61,9 +107,10 @@ export function SearchSection() {
               <Input
                 type="date"
                 value={checkIn}
-                onChange={(e) => setCheckIn(e.target.value)}
+                onChange={(e) => handleCheckInChange(e.target.value)}
                 label="Check-in"
                 icon={<Calendar className="w-4 h-4" />}
+                min={today}
               />
             </div>
 
@@ -72,9 +119,10 @@ export function SearchSection() {
               <Input
                 type="date"
                 value={checkOut}
-                onChange={(e) => setCheckOut(e.target.value)}
+                onChange={(e) => handleCheckOutChange(e.target.value)}
                 label="Check-out"
                 icon={<Calendar className="w-4 h-4" />}
+                min={minCheckOut}
               />
             </div>
 
@@ -95,6 +143,9 @@ export function SearchSection() {
           </div>
 
           {/* Submit Button */}
+          {dateError && (
+            <p className="text-red-500 text-sm mt-4">{dateError}</p>
+          )}
           <div className="mt-6 flex flex-col md:flex-row gap-4">
               <Button type="submit" variant="primary" size="lg" className="flex-1 md:flex-none md:w-auto">
                 Search
@@ -109,6 +160,7 @@ export function SearchSection() {
                   setCheckIn('');
                   setCheckOut('');
                   setGuests('2');
+                  setDateError('');
                 }}
               >
                 Clear Filters
