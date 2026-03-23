@@ -27,6 +27,44 @@ function isTokenAlive(token: string | null): boolean {
   return msUntilExpiry(token) > 0;
 }
 
+function getCookieValue(name: string): string | null {
+  if (typeof document === 'undefined') return null;
+
+  const cookie = document.cookie
+    .split('; ')
+    .find((entry) => entry.startsWith(`${name}=`));
+
+  return cookie ? decodeURIComponent(cookie.split('=').slice(1).join('=')) : null;
+}
+
+function getAccessTokenFromClient(): string | null {
+  if (typeof window === 'undefined') return null;
+
+  const localToken = localStorage.getItem('access_token');
+  if (localToken) return localToken;
+
+  const cookieToken = getCookieValue('access_token');
+  if (cookieToken) {
+    localStorage.setItem('access_token', cookieToken);
+    return cookieToken;
+  }
+
+  return null;
+}
+
+async function clearClientSessionStorage() {
+  if (typeof window === 'undefined') return;
+
+  localStorage.removeItem('access_token');
+  localStorage.removeItem('refresh_token');
+
+  fetch('/api/auth/clear-cookie', { method: 'POST' }).catch(() => { });
+  document.cookie = 'access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+  document.cookie = 'access_token=; path=/; max-age=0';
+
+  try { localStorage.removeItem('auth-storage'); } catch { }
+}
+
 // ── Auto-logout timer ─────────────────────────────────────────────────────────
 let _expiryTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -132,13 +170,12 @@ export const useAuthStore = create<AuthState>()(
             const userData = await response.json();
             set({ user: userData, isAuthenticated: true, isLoading: false });
           } else {
-            localStorage.removeItem('access_token');
-            localStorage.removeItem('refresh_token');
+            await clearClientSessionStorage();
             set({ user: null, isAuthenticated: false, isLoading: false });
           }
         } catch (error) {
           console.error('Failed to fetch user profile:', error);
-          localStorage.removeItem('access_token');
+          await clearClientSessionStorage();
           set({ user: null, isAuthenticated: false, isLoading: false });
         }
       },
@@ -146,7 +183,7 @@ export const useAuthStore = create<AuthState>()(
       initializeAuth: async () => {
         if (typeof window === 'undefined') return;
 
-        const token = localStorage.getItem('access_token');
+        const token = getAccessTokenFromClient();
         if (token && isTokenAlive(token)) {
           // Set cookie for middleware
           const isSecure = window.location.protocol === 'https:';
@@ -157,12 +194,7 @@ export const useAuthStore = create<AuthState>()(
         } else {
           // Token missing or expired – clean up
           if (token) {
-            // Token existed but was expired
-            localStorage.removeItem('access_token');
-            localStorage.removeItem('refresh_token');
-            fetch('/api/auth/clear-cookie', { method: 'POST' }).catch(() => { });
-            document.cookie = 'access_token=; path=/; max-age=0';
-            try { localStorage.removeItem('auth-storage'); } catch { }
+            await clearClientSessionStorage();
           }
           set({ user: null, isAuthenticated: false, isLoading: false });
         }
@@ -276,24 +308,14 @@ export const useAuthStore = create<AuthState>()(
         if (typeof window === 'undefined') return;
 
         clearExpiryTimer();
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
-
-        // Clear via server-side route (removes the cookie the same way it was set)
-        fetch('/api/auth/clear-cookie', { method: 'POST' }).catch(() => { });
-        // Also clear client-side as a fallback
-        document.cookie = 'access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-        document.cookie = 'access_token=; path=/; max-age=0';
-
-        // Clear persisted Zustand state so rehydration doesn't restore the user
-        try { localStorage.removeItem('auth-storage'); } catch { }
+        clearClientSessionStorage();
 
         set({ user: null, isAuthenticated: false, isLoading: false });
       },
 
       updateProfile: async (userData: Partial<User>) => {
         try {
-          const token = localStorage.getItem('access_token');
+          const token = getAccessTokenFromClient();
           const response = await fetch(`${API_BASE}/users/profile/`, {
             method: 'PUT',
             headers: {
@@ -316,7 +338,7 @@ export const useAuthStore = create<AuthState>()(
       },
 
       upgradeToHost: async () => {
-        const token = localStorage.getItem('access_token');
+        const token = getAccessTokenFromClient();
         if (!token) {
           throw new Error('Not authenticated');
         }
@@ -344,7 +366,7 @@ export const useAuthStore = create<AuthState>()(
       },
 
       switchProfile: async (mode: 'guest' | 'host') => {
-        const token = localStorage.getItem('access_token');
+        const token = getAccessTokenFromClient();
         if (!token) throw new Error('Not authenticated');
 
         const response = await fetch(`${API_BASE}/users/switch_profile/`, {
@@ -381,7 +403,7 @@ export const useAuth = () => {
   const store = useAuthStore();
 
   if (typeof window !== 'undefined' && store.isLoading) {
-    const token = localStorage.getItem('access_token');
+    const token = getAccessTokenFromClient();
 
     if (store.user && isTokenAlive(token)) {
       // Zustand rehydrated a user AND the token is still valid.
@@ -390,11 +412,7 @@ export const useAuth = () => {
       useAuthStore.setState({ isAuthenticated: true, isLoading: false });
     } else if (store.user && !isTokenAlive(token)) {
       // User was persisted but the token is gone or expired — force logout.
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('refresh_token');
-      fetch('/api/auth/clear-cookie', { method: 'POST' }).catch(() => { });
-      document.cookie = 'access_token=; path=/; max-age=0';
-      try { localStorage.removeItem('auth-storage'); } catch { }
+      clearClientSessionStorage();
       useAuthStore.setState({ user: null, isAuthenticated: false, isLoading: false });
     } else {
       // No persisted user — run full initialization (fetch profile etc.)
