@@ -17,7 +17,7 @@ echo "Step 3: Obtain SSL certificates (standalone mode)"
 echo "==================================================="
 
 # Get certificates for main domain (and www)
-docker compose -f docker-compose.prod.yml run --rm -p 80:80 -p 443:443 \
+docker compose -f docker-compose.prod.yml run --rm --entrypoint certbot -p 80:80 -p 443:443 \
     -v ./nginx/certbot/conf:/etc/letsencrypt \
     -v ./nginx/certbot/www:/var/www/certbot \
     certbot certonly \
@@ -29,7 +29,7 @@ docker compose -f docker-compose.prod.yml run --rm -p 80:80 -p 443:443 \
 	-d stayafrica.app -d www.stayafrica.app
 
 # Get certificates for API domain
-docker compose -f docker-compose.prod.yml run --rm -p 80:80 -p 443:443 \
+docker compose -f docker-compose.prod.yml run --rm --entrypoint certbot -p 80:80 -p 443:443 \
     -v ./nginx/certbot/conf:/etc/letsencrypt \
     -v ./nginx/certbot/www:/var/www/certbot \
     certbot certonly \
