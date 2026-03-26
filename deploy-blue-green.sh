@@ -58,7 +58,6 @@ deploy() {
     log "Starting ${target} backend on port ${target_port}..."
     docker compose -f ${COMPOSE_FILE} run -d \
         --name "stayafrica_backend_${target}" \
-        --network "stayafrica_network" \
         -p "${target_port}:8000" \
         -e "DEPLOYMENT_COLOR=${target}" \
         backend
