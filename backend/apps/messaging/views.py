@@ -380,9 +380,6 @@ class MessageViewSet(viewsets.ModelViewSet):
         
         return Response(self.get_serializer(message).data)
 
-class MessageTemplateViewSet(viewsets.ModelViewSet):
-    pass
-
 
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny

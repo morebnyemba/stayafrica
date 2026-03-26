@@ -776,68 +776,7 @@ class PaymentViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_502_BAD_GATEWAY
             )
 
-    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
-    def refund(self, request, pk=None):
-        """Admin action to refund a payment"""
-        if not request.user.is_staff:
-            return Response(
-                {'error': 'Only admin users can process refunds'},
-                status=status.HTTP_403_FORBIDDEN
-            )
-        
-        payment = self.get_object()
-        amount = request.data.get('amount')
-        
-        if payment.status != 'success':
-            return Response(
-                {'error': 'Only successful payments can be refunded'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        # Process refund through payment provider
-        refund_amount = amount or payment.amount
-        if payment.provider == 'stripe':
-            try:
-                import stripe
-                from apps.admin_dashboard.models import SystemConfiguration
-                config = SystemConfiguration.get_config()
-                stripe.api_key = config.stripe_secret_key
-                # gateway_ref stores the checkout session ID; retrieve payment_intent from it
-                session = stripe.checkout.Session.retrieve(payment.gateway_ref)
-                stripe_refund = stripe.Refund.create(
-                    payment_intent=session.payment_intent,
-                    amount=int(Decimal(str(refund_amount)) * 100),  # Convert to cents
-                )
-                logger.info(f'Stripe refund created: {stripe_refund.id} for payment {payment.gateway_ref}')
-            except Exception as e:
-                logger.error(f'Stripe refund failed for {payment.gateway_ref}: {str(e)}')
-                return Response(
-                    {'error': f'Refund failed: {str(e)}'},
-                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
-                )
-        
-        payment.status = 'refunded'
-        payment.save()
-        
-        # Log the action
-        from django.contrib.contenttypes.models import ContentType
-        from services.audit_logger import AuditLoggerService
-        content_type = ContentType.objects.get_for_model(Payment)
-        AuditLoggerService.log_action(
-            user=request.user,
-            action='refund',
-            content_type=content_type,
-            object_id=payment.id,
-            changes={
-                'status': 'refunded',
-                'refund_amount': str(refund_amount),
-                'refunded_by': request.user.id
-            }
-        )
-        
-        serializer = self.get_serializer(payment)
-        return Response(serializer.data)
-        
+
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
     def mark_success(self, request, pk=None):
         """Admin action to manually mark payment as success"""

@@ -1,7 +1,7 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from apps.users.throttles import LoginRateThrottle, AnonLoginRateThrottle
 from django.contrib.auth.password_validation import validate_password
@@ -647,6 +647,48 @@ class UserViewSet(viewsets.ModelViewSet):
             'refresh': token_pair['refresh'],
         }, status=status.HTTP_200_OK)
 
+    @action(detail=True, methods=['post'], permission_classes=[IsAdminUser])
+    def verify(self, request, pk=None):
+        """Admin action to verify a user's identity/email."""
+        user = self.get_object()
+        user.is_verified = True
+        user.save()
+        
+        # Log the action
+        from services.audit_logger import AuditLoggerService
+        AuditLoggerService.log_action(
+            user=request.user,
+            action='verify_user',
+            model=User,
+            object_id=user.id,
+            changes={'is_verified': True}
+        )
+        
+        serializer = self.get_serializer(user)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['post'], permission_classes=[IsAdminUser])
+    def suspend(self, request, pk=None):
+        """Admin action to suspend a user."""
+        user = self.get_object()
+        reason = request.data.get('reason', 'No reason provided')
+        
+        user.is_active = False
+        user.save()
+        
+        # Log the action
+        from services.audit_logger import AuditLoggerService
+        AuditLoggerService.log_action(
+            user=request.user,
+            action='suspend_user',
+            model=User,
+            object_id=user.id,
+            changes={'is_active': False, 'reason': reason}
+        )
+        
+        serializer = self.get_serializer(user)
+        return Response(serializer.data)
+
 
 class UserPreferenceViewSet(viewsets.ModelViewSet):
     """Manage user preferences for personalized recommendations"""
@@ -697,7 +739,6 @@ class UserPreferenceViewSet(viewsets.ModelViewSet):
         
         return Response({'status': 'location updated'})
 
-
 class UserPropertyInteractionViewSet(viewsets.ModelViewSet):
     """Track user interactions with properties"""
     serializer_class = UserPropertyInteractionSerializer
@@ -731,60 +772,4 @@ class UserPropertyInteractionViewSet(viewsets.ModelViewSet):
         
         serializer = self.get_serializer(interaction)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-    
-    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
-    def verify(self, request, pk=None):
-        """Admin action to verify a user"""
-        if not request.user.is_staff:
-            return Response(
-                {'error': 'Only admin users can verify accounts'},
-                status=status.HTTP_403_FORBIDDEN
-            )
-        
-        user = self.get_object()
-        user.is_verified = True
-        user.save()
-        
-        # Log the action
-        from django.contrib.contenttypes.models import ContentType
-        content_type = ContentType.objects.get_for_model(User)
-        AuditLoggerService.log_action(
-            user=request.user,
-            action='verify',
-            content_type=content_type,
-            object_id=user.id,
-            changes={'verified': True, 'verified_by': request.user.id}
-        )
-        
-        serializer = self.get_serializer(user)
-        return Response(serializer.data)
-    
-    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
-    def suspend(self, request, pk=None):
-        """Admin action to suspend a user"""
-        if not request.user.is_staff:
-            return Response(
-                {'error': 'Only admin users can suspend accounts'},
-                status=status.HTTP_403_FORBIDDEN
-            )
-        
-        user = self.get_object()
-        reason = request.data.get('reason', 'Suspended by admin')
-        
-        user.is_active = False
-        user.save()
-        
-        # Log the action
-        from django.contrib.contenttypes.models import ContentType
-        content_type = ContentType.objects.get_for_model(User)
-        AuditLoggerService.log_action(
-            user=request.user,
-            action='suspend',
-            content_type=content_type,
-            object_id=user.id,
-            changes={'suspended': True, 'reason': reason, 'suspended_by': request.user.id}
-        )
-        
-        serializer = self.get_serializer(user)
-        return Response(serializer.data)
 

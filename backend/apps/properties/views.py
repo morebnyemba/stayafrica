@@ -171,14 +171,14 @@ class PropertyViewSet(viewsets.ModelViewSet):
             raise
     
     def perform_update(self, serializer):
-        """Ensure only the host can update their own property"""
-        if serializer.instance.host != self.request.user:
+        """Ensure only the host or admin can update the property"""
+        if serializer.instance.host != self.request.user and not getattr(self.request.user, 'is_staff', False):
             raise PermissionError('You can only update your own properties')
         serializer.save()
     
     def perform_destroy(self, instance):
-        """Ensure only the host can delete their own property"""
-        if instance.host != self.request.user:
+        """Ensure only the host or admin can delete the property"""
+        if instance.host != self.request.user and not getattr(self.request.user, 'is_staff', False):
             raise PermissionError('You can only delete your own properties')
         instance.delete()
     
@@ -225,7 +225,9 @@ class PropertyViewSet(viewsets.ModelViewSet):
             return qs.filter(status='active')
 
         if action in ('update', 'partial_update', 'destroy'):
-            # Hosts manage only their own properties
+            # Admin sees all, hosts manage only their own
+            if is_admin:
+                return Property.objects.all()
             if is_host:
                 return Property.objects.filter(host=user)
             return Property.objects.none()

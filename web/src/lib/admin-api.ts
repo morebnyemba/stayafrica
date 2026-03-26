@@ -42,8 +42,7 @@ export const adminApi = {
   },
 
   async verifyUser(id: string): Promise<User> {
-    // Verify user by updating the is_verified field
-    const response = await apiClient.patch(`/users/${id}/`, { is_verified: true });
+    const response = await apiClient.post(`/users/${id}/verify/`);
     return response.data;
   },
 
@@ -417,6 +416,11 @@ export const adminApi = {
     return response.data;
   },
 
+  async getMessagingStats(): Promise<any> {
+    const response = await apiClient.get('/messaging/analytics/summary/');
+    return response.data;
+  },
+
   async getMessageTemplates(params?: {
     search?: string;
     page?: number;
@@ -787,15 +791,16 @@ export const adminApi = {
   // Review Votes
   async getReviewVotes(params?: {
     search?: string;
+    review_id?: string;
     page?: number;
     per_page?: number;
   }): Promise<{ results: any[]; count: number }> {
-    const response = await apiClient.get('/reviews/review-votes/', { params });
+    const response = await apiClient.get('/review-votes/', { params });
     return response.data;
   },
 
   async deleteReviewVote(id: string): Promise<void> {
-    await apiClient.delete(`/reviews/review-votes/${id}/`);
+    await apiClient.delete(`/review-votes/${id}/`);
   },
 
   // Messaging Automation
