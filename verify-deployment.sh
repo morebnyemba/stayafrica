@@ -59,28 +59,28 @@ echo ""
 # 2. Frontend Tests
 echo -e "${BLUE}2. Testing Frontend${NC}"
 echo "----------------------------------------"
-test_endpoint "Frontend Homepage" "https://zimlegend.online" "200"
+test_endpoint "Frontend Homepage" "https://stayafrica.app" "200"
 echo ""
 
 # 3. Backend API Tests
 echo -e "${BLUE}3. Testing Backend API${NC}"
 echo "----------------------------------------"
-test_endpoint "API Health Check" "https://api.zimlegend.online/api/v1/health/" "200"
-test_endpoint "API Properties List" "https://api.zimlegend.online/api/v1/properties/" "200"
-test_endpoint "API Auth Endpoints" "https://api.zimlegend.online/api/v1/auth/login/" "405"  # POST only
+test_endpoint "API Health Check" "https://api.stayafrica.app/api/v1/health/" "200"
+test_endpoint "API Properties List" "https://api.stayafrica.app/api/v1/properties/" "200"
+test_endpoint "API Auth Endpoints" "https://api.stayafrica.app/api/v1/auth/login/" "405"  # POST only
 echo ""
 
 # 4. Static Files Test
 echo -e "${BLUE}4. Testing Static Files${NC}"
 echo "----------------------------------------"
-test_endpoint "Static Files" "https://api.zimlegend.online/static/" "403"  # Directory listing disabled
+test_endpoint "Static Files" "https://api.stayafrica.app/static/" "403"  # Directory listing disabled
 echo ""
 
 # 5. Media Files Test
 echo -e "${BLUE}5. Testing Media Files${NC}"
 echo "----------------------------------------"
 # Test if media directory is accessible (403 expected for directory listing)
-test_endpoint "Media Directory" "https://api.zimlegend.online/media/" "403"
+test_endpoint "Media Directory" "https://api.stayafrica.app/media/" "403"
 
 # Check if any media files exist in container
 echo -n "Checking media files in container... "
@@ -97,7 +97,7 @@ echo ""
 echo -e "${BLUE}6. Testing Geocoding Endpoint${NC}"
 echo "----------------------------------------"
 # Test requires authentication, so we expect 401/403
-test_endpoint "Geocoding Endpoint" "https://api.zimlegend.online/api/v1/properties/geocode/" "401" "POST"
+test_endpoint "Geocoding Endpoint" "https://api.stayafrica.app/api/v1/properties/geocode/" "401" "POST"
 echo ""
 
 # 7. Database Connection Test
@@ -151,8 +151,8 @@ echo ""
 # 10. SSL Certificate Test
 echo -e "${BLUE}10. Testing SSL Certificates${NC}"
 echo "----------------------------------------"
-echo -n "Checking SSL certificate for api.zimlegend.online... "
-if echo | openssl s_client -connect api.zimlegend.online:443 -servername api.zimlegend.online 2>/dev/null | grep -q "Verify return code: 0"; then
+echo -n "Checking SSL certificate for api.stayafrica.app... "
+if echo | openssl s_client -connect api.stayafrica.app:443 -servername api.stayafrica.app 2>/dev/null | grep -q "Verify return code: 0"; then
     echo -e "${GREEN}✅ Valid SSL certificate${NC}"
     ((PASSED++))
 else
@@ -174,11 +174,11 @@ if [ $FAILED -eq 0 ]; then
     echo -e "${GREEN}🎉 All critical tests passed!${NC}"
     echo ""
     echo -e "${BLUE}📝 Manual Verification Steps:${NC}"
-    echo "1. Visit https://zimlegend.online and test user registration"
-    echo "2. Login as a host and create a property with images"
-    echo "3. Verify images display correctly on property detail page"
-    echo "4. Test geocoding by entering an address in property form"
-    echo "5. Test booking flow from guest perspective"
+    echo "1. Visit https://stayafrica.app and test user registration"
+    echo "2. Login as a admin and access /admin/"
+    echo "3. Create a property with images"
+    echo "4. Verify images display correctly on property detail page"
+    echo "5. Test geocoding by entering an address in property form"
     exit 0
 else
     echo -e "${RED}⚠️  Some tests failed. Review the output above.${NC}"

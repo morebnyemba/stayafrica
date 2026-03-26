@@ -10,7 +10,7 @@ COMPOSE_FILE="docker-compose.prod.yml"
 DEPLOY_DIR="/opt/stayafrica"
 BLUE_PORT=8001
 GREEN_PORT=8002
-NGINX_CONF="/etc/nginx/conf.d/stayafrica-upstream.conf"
+NGINX_CONF="./nginx/upstreams.conf"
 
 log() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
@@ -58,6 +58,7 @@ deploy() {
     log "Starting ${target} backend on port ${target_port}..."
     docker compose -f ${COMPOSE_FILE} run -d \
         --name "stayafrica_backend_${target}" \
+        --network "stayafrica_network" \
         -p "${target_port}:8000" \
         -e "DEPLOYMENT_COLOR=${target}" \
         backend
@@ -87,20 +88,18 @@ deploy() {
 
     # Switch nginx upstream
     log "Switching traffic to ${target}..."
-    sudo tee "${NGINX_CONF}" > /dev/null <<EOF
-upstream stayafrica_backend {
-    server 127.0.0.1:${target_port};
+    cat > "${NGINX_CONF}" <<EOF
+upstream backend {
+    server stayafrica_backend_${target}:8000;
 }
 EOF
-    # Reload nginx - try multiple methods
-    if docker exec stayafrica_nginx nginx -s reload 2>/dev/null; then
-        log "Nginx reloaded via Docker"
-    elif sudo systemctl reload nginx 2>/dev/null; then
-        log "Nginx reloaded via systemctl"
-    elif sudo nginx -t && sudo nginx -s reload 2>/dev/null; then
-        log "Nginx reloaded via direct command"
+    # Reload nginx in container
+    log "Reloading Nginx container..."
+    if docker exec stayafrica_nginx nginx -s reload; then
+        log "Nginx reloaded successfully"
     else
-        log "WARNING: Could not reload nginx. Restart it manually: sudo systemctl restart nginx"
+        log "ERROR: Could not reload nginx. Check logs: docker logs stayafrica_nginx"
+        exit 1
     fi
 
     # Verify traffic is flowing to new version
@@ -143,15 +142,12 @@ rollback() {
     fi
 
     # Switch nginx
-    sudo tee "${NGINX_CONF}" > /dev/null <<EOF
-upstream stayafrica_backend {
-    server 127.0.0.1:${target_port};
+    cat > "${NGINX_CONF}" <<EOF
+upstream backend {
+    server stayafrica_backend_${target}:8000;
 }
 EOF
-    docker exec stayafrica_nginx nginx -s reload 2>/dev/null \
-        || sudo systemctl reload nginx 2>/dev/null \
-        || sudo nginx -s reload 2>/dev/null \
-        || log "WARNING: Manual nginx reload needed"
+    docker exec stayafrica_nginx nginx -s reload || log "WARNING: Manual nginx reload needed"
 
     log "Rolled back to ${target}. Current active: ${target}"
 }
