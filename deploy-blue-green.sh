@@ -14,8 +14,31 @@ BLUE_FE_PORT=3001
 GREEN_FE_PORT=3002
 NGINX_CONF="./nginx/upstreams.conf"
 
-log() {
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
+LOCK_FILE="/tmp/stayafrica_deploy.lock"
+
+log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] [INFO] $1"; }
+warn() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] [WARN] $1" >&2; }
+error() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] [ERROR] $1" >&2; }
+
+check_dependencies() {
+    local deps=("docker" "curl" "git")
+    for dep in "${deps[@]}"; do
+        if ! command -v "$dep" >/dev/null 2>&1; then
+            error "Dependency missing: $dep. Please install it first."
+            exit 1
+        fi
+    done
+}
+
+validate_env() {
+    if [ ! -f "${COMPOSE_FILE}" ]; then
+        error "${COMPOSE_FILE} not found in current directory."
+        exit 1
+    fi
+    if [ ! -f ".env" ] && [ ! -f ".env.prod" ]; then
+        error "No environment file (.env or .env.prod) found."
+        exit 1
+    fi
 }
 
 get_active_color() {
@@ -38,6 +61,17 @@ get_inactive_color() {
 }
 
 deploy() {
+    check_dependencies
+    validate_env
+
+    # Concurrency Lock
+    if [ -f "${LOCK_FILE}" ]; then
+        error "Deployment already in progress (lock file exists: ${LOCK_FILE})."
+        exit 1
+    fi
+    touch "${LOCK_FILE}"
+    trap 'rm -f "${LOCK_FILE}"' EXIT
+
     local active=$(get_active_color)
     local target=$(get_inactive_color)
     local target_port=$([[ "${target}" == "blue" ]] && echo ${BLUE_PORT} || echo ${GREEN_PORT})
@@ -111,11 +145,18 @@ upstream frontend {
 }
 EOF
     # Reload nginx in container
+    log "Verifying Nginx configuration..."
+    if ! docker exec stayafrica_nginx nginx -t > /dev/null 2>&1; then
+        error "Nginx configuration test failed! Reverting upstreams.conf..."
+        rollback
+        exit 1
+    fi
+
     log "Reloading Nginx container..."
     if docker exec stayafrica_nginx nginx -s reload; then
         log "Nginx reloaded successfully"
     else
-        log "ERROR: Could not reload nginx. Check logs: docker logs stayafrica_nginx"
+        error "Could not reload nginx. Check logs: docker logs stayafrica_nginx"
         exit 1
     fi
 
@@ -136,9 +177,16 @@ EOF
     # Keep old container for quick rollback (don't remove)
     log "Deployment complete! Active: ${target}"
     log "Old ${active} containers kept for rollback. Run 'docker rm stayafrica_backend_${active} stayafrica_frontend_${active}' to clean up."
+    
+    # Cleanup dangling images to save space
+    log "Pruning old Docker images..."
+    docker image prune -f || warn "Image prune failed (non-critical)"
 }
 
 rollback() {
+    check_dependencies
+    validate_env
+    
     local active=$(get_active_color)
     local target=$(get_inactive_color)
     local target_port=$([[ "${target}" == "blue" ]] && echo ${BLUE_PORT} || echo ${GREEN_PORT})
@@ -147,14 +195,14 @@ rollback() {
 
     # Start old containers if stopped
     docker start "stayafrica_backend_${target}" "stayafrica_frontend_${target}" 2>/dev/null || {
-        log "ERROR: Cannot start ${target} stack for rollback"
+        error "Cannot start ${target} stack for rollback"
         exit 1
     }
 
     # Wait for health
     sleep 5
     if ! curl -sf "http://localhost:${target_port}/api/health/" > /dev/null 2>&1; then
-        log "ERROR: ${target} is not healthy for rollback!"
+        error "${target} is not healthy for rollback!"
         exit 1
     fi
 
@@ -167,12 +215,14 @@ upstream frontend {
     server stayafrica_frontend_${target}:3000;
 }
 EOF
-    docker exec stayafrica_nginx nginx -s reload || log "WARNING: Manual nginx reload needed"
+    docker exec stayafrica_nginx nginx -s reload || warn "Manual nginx reload needed"
 
     log "Rolled back to ${target}. Current active: ${target}"
 }
 
 show_status() {
+    check_dependencies
+    
     local active=$(get_active_color)
     log "=== Deployment Status ==="
     log "Active color: ${active}"
