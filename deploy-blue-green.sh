@@ -10,6 +10,8 @@ COMPOSE_FILE="docker-compose.prod.yml"
 DEPLOY_DIR="/opt/stayafrica"
 BLUE_PORT=8001
 GREEN_PORT=8002
+BLUE_FE_PORT=3001
+GREEN_FE_PORT=3002
 NGINX_CONF="./nginx/upstreams.conf"
 
 log() {
@@ -39,8 +41,9 @@ deploy() {
     local active=$(get_active_color)
     local target=$(get_inactive_color)
     local target_port=$([[ "${target}" == "blue" ]] && echo ${BLUE_PORT} || echo ${GREEN_PORT})
+    local target_fe_port=$([[ "${target}" == "blue" ]] && echo ${BLUE_FE_PORT} || echo ${GREEN_FE_PORT})
 
-    log "Active: ${active}, Deploying to: ${target} (port ${target_port})"
+    log "Active: ${active}, Deploying to: ${target} (Backend: ${target_port}, Frontend: ${target_fe_port})"
 
     # Pre-deploy backup
     log "Creating pre-deploy backup..."
@@ -62,12 +65,24 @@ deploy() {
         -e "DEPLOYMENT_COLOR=${target}" \
         backend
 
+    log "Starting ${target} frontend on port ${target_fe_port}..."
+    docker compose -f ${COMPOSE_FILE} run -d \
+        --name "stayafrica_frontend_${target}" \
+        -p "${target_fe_port}:3000" \
+        frontend
+
     # Wait for health check
     log "Waiting for ${target} to become healthy..."
     local attempts=0
     while [ $attempts -lt 60 ]; do
-        if curl -sf "http://localhost:${target_port}/api/health/" > /dev/null 2>&1; then
-            log "${target} is healthy!"
+        local be_ok=0
+        local fe_ok=0
+        
+        if curl -sf "http://localhost:${target_port}/api/health/" > /dev/null 2>&1; then be_ok=1; fi
+        if curl -sf "http://localhost:${target_fe_port}/" > /dev/null 2>&1; then fe_ok=1; fi
+
+        if [ $be_ok -eq 1 ] && [ $fe_ok -eq 1 ]; then
+            log "${target} stack is healthy!"
             break
         fi
         sleep 2
@@ -76,8 +91,8 @@ deploy() {
 
     if [ $attempts -ge 60 ]; then
         log "ERROR: ${target} failed health check! Aborting."
-        docker stop "stayafrica_backend_${target}" 2>/dev/null || true
-        docker rm "stayafrica_backend_${target}" 2>/dev/null || true
+        docker stop "stayafrica_backend_${target}" "stayafrica_frontend_${target}" 2>/dev/null || true
+        docker rm "stayafrica_backend_${target}" "stayafrica_frontend_${target}" 2>/dev/null || true
         exit 1
     fi
 
@@ -90,6 +105,9 @@ deploy() {
     cat > "${NGINX_CONF}" <<EOF
 upstream backend {
     server stayafrica_backend_${target}:8000;
+}
+upstream frontend {
+    server stayafrica_frontend_${target}:3000;
 }
 EOF
     # Reload nginx in container
@@ -112,12 +130,12 @@ EOF
     fi
 
     # Graceful shutdown of old version
-    log "Gracefully stopping ${active}..."
-    docker stop "stayafrica_backend_${active}" 2>/dev/null || true
+    log "Gracefully stopping ${active} stack..."
+    docker stop "stayafrica_backend_${active}" "stayafrica_frontend_${active}" 2>/dev/null || true
 
     # Keep old container for quick rollback (don't remove)
     log "Deployment complete! Active: ${target}"
-    log "Old ${active} container kept for rollback. Run 'docker rm stayafrica_backend_${active}' to clean up."
+    log "Old ${active} containers kept for rollback. Run 'docker rm stayafrica_backend_${active} stayafrica_frontend_${active}' to clean up."
 }
 
 rollback() {
@@ -127,9 +145,9 @@ rollback() {
 
     log "Rolling back from ${active} to ${target}..."
 
-    # Start old container if stopped
-    docker start "stayafrica_backend_${target}" 2>/dev/null || {
-        log "ERROR: Cannot start ${target} container for rollback"
+    # Start old containers if stopped
+    docker start "stayafrica_backend_${target}" "stayafrica_frontend_${target}" 2>/dev/null || {
+        log "ERROR: Cannot start ${target} stack for rollback"
         exit 1
     }
 
@@ -145,6 +163,9 @@ rollback() {
 upstream backend {
     server stayafrica_backend_${target}:8000;
 }
+upstream frontend {
+    server stayafrica_frontend_${target}:3000;
+}
 EOF
     docker exec stayafrica_nginx nginx -s reload || log "WARNING: Manual nginx reload needed"
 
@@ -156,10 +177,12 @@ show_status() {
     log "=== Deployment Status ==="
     log "Active color: ${active}"
     log ""
-    log "Blue container:"
-    docker ps -a --filter "name=stayafrica_backend_blue" --format "  Status: {{.Status}}" 2>/dev/null || echo "  Not found"
-    log "Green container:"
-    docker ps -a --filter "name=stayafrica_backend_green" --format "  Status: {{.Status}}" 2>/dev/null || echo "  Not found"
+    log "Blue containers:"
+    docker ps -a --filter "name=stayafrica_backend_blue" --format "  Backend:  {{.Status}}" 2>/dev/null || echo "  Backend:  Not found"
+    docker ps -a --filter "name=stayafrica_frontend_blue" --format "  Frontend: {{.Status}}" 2>/dev/null || echo "  Frontend: Not found"
+    log "Green containers:"
+    docker ps -a --filter "name=stayafrica_backend_green" --format "  Backend:  {{.Status}}" 2>/dev/null || echo "  Backend:  Not found"
+    docker ps -a --filter "name=stayafrica_frontend_green" --format "  Frontend: {{.Status}}" 2>/dev/null || echo "  Frontend: Not found"
     log ""
     log "Health check:"
     curl -sf "http://localhost/api/health/" 2>/dev/null && log "  API: UP" || log "  API: DOWN"
