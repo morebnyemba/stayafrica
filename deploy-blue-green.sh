@@ -10,8 +10,10 @@ COMPOSE_FILE="docker-compose.prod.yml"
 DEPLOY_DIR="/opt/stayafrica"
 BLUE_PORT=8001
 GREEN_PORT=8002
-BLUE_FE_PORT=3001
-GREEN_FE_PORT=3002
+# Note: 3001 is reserved for Grafana (see docker-compose.prod.yml), so the
+# blue/green frontend ports must avoid it.
+BLUE_FE_PORT=3011
+GREEN_FE_PORT=3012
 NGINX_CONF="./nginx/upstreams.conf"
 
 LOCK_FILE="/tmp/stayafrica_deploy.lock"
